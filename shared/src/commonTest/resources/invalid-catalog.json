@@ -1,0 +1,8 @@
+{
+  "metadata": {
+    "title": "Invalid OPDS Catalog"
+  },
+  "links": [
+    {"rel": "alternate", "href": "http://example.com/opds", "type": "application/opds+json"}
+  ]
+}

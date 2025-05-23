@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "title": "A Sample Book",
+    "identifier": "urn:isbn:1234567890"
+  },
+  "links": [
+    {
+      "href": "https://example.org/book.epub",
+      "type": "application/epub+zip",
+      "rel": "http://opds-spec.org/acquisition"
+    }
+  ],
+  "images": [
+    {
+      "href": "https://example.org/cover.jpg",
+      "type": "image/jpeg"
+    }
+  ]
+}

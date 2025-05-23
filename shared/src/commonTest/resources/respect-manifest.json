@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "title": "Example for groups"
+  },
+
+  "links": [
+    {"rel": "self", "href": "http://example.com/grouped", "type": "application/opds+json"}
+  ],
+
+  "groups": [
+    {
+      "metadata": {"title": "Main Menu"},
+      "navigation": [
+        {"href": "/new", "title": "New Publications", "type": "application/opds+json", "rel": "http://opds-spec.org/sort/new"},
+        {"href": "/popular", "title": "Popular Publications", "type": "application/opds+json", "rel": "http://opds-spec.org/sort/popular"}
+      ]
+    },
+    {
+      "metadata": {"title": "Formats"},
+      "navigation": [
+        {"href": "/ebooks", "title": "EBooks", "type": "application/opds+json", "rel": "subsection"},
+        {"href": "/audiobooks", "title": "Audiobooks", "type": "application/opds+json", "rel": "subsection"}
+      ]
+    }
+  ]
+}

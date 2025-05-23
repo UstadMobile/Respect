@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "title": "Example OPDS Catalog"
+  },
+  "links": [
+    {"rel": "self", "href": "http://example.com/opds", "type": "application/opds+json"}
+  ],
+  "navigation": [
+    {
+      "href": "/new",
+      "title": "New Learning Units",
+      "type": "application/opds+json",
+      "rel": "current"
+    },
+    {
+      "href": "/popular",
+      "title": "Popular Learning Units",
+      "type": "application/opds+json",
+      "rel": "http://opds-spec.org/sort/popular"
+    }
+  ]
+}

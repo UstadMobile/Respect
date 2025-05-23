@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "title": "My Sample Catalog"
+  },
+  "links": [
+    {
+      "href": "https://example.org/catalog.json",
+      "type": "application/opds+json",
+      "rel": "self"
+    }
+  ],
+  "navigation": [
+    {
+      "title": "All Books",
+      "href": "https://example.org/catalog/all.json",
+      "type": "application/opds+json",
+      "rel": "subsection"
+    }
+  ],
+  "publications": [
+    {
+      "metadata": {
+        "title": "A Sample Book",
+        "identifier": "urn:isbn:1234567890"
+      },
+      "links": [
+        {
+          "href": "https://example.org/book.epub",
+          "type": "application/epub+zip",
+          "rel": "http://opds-spec.org/acquisition"
+        }
+      ]
+    }
+  ]
+}

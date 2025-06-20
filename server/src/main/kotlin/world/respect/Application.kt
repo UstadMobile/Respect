@@ -5,6 +5,10 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.kodein.di.DI
+import world.respect.di.JvmCoreDiMOdule
+
+lateinit var di: DI // make globally accessible only if really needed
 
 fun main() {
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
@@ -12,6 +16,7 @@ fun main() {
 }
 
 fun Application.module() {
+
     routing {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")

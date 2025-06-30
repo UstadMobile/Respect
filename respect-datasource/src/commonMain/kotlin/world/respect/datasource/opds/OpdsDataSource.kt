@@ -2,7 +2,7 @@ package world.respect.datasource.opds
 
 import kotlinx.coroutines.flow.Flow
 import world.respect.datasource.DataLoadParams
-import world.respect.datasource.DataResult
+import world.respect.datasource.DataLoadState
 import world.respect.datasource.opds.model.OpdsFeed
 import world.respect.datasource.opds.model.OpdsPublication
 
@@ -14,7 +14,7 @@ interface OpdsDataSource {
     fun loadOpdsFeed(
         url: String,
         params: DataLoadParams
-    ):  Flow<DataResult<OpdsFeed>>
+    ):  Flow<DataLoadState<OpdsFeed>>
 
     /**
      *
@@ -32,6 +32,6 @@ interface OpdsDataSource {
         params: DataLoadParams,
         referrerUrl: String?,
         expectedPublicationId: String?,
-    ): Flow<DataResult<OpdsPublication>>
+    ): Flow<DataLoadState<OpdsPublication>>
 
 }

@@ -1,0 +1,23 @@
+CREATE TABLE CompatibleAppEntity (
+    caeUid INTEGER PRIMARY KEY NOT NULL,
+    caeUrl TEXT NOT NULL,
+    caeLastModified INTEGER NOT NULL,
+    caeEtag TEXT,
+    caeLicense TEXT NOT NULL,
+    caeWebsite TEXT NOT NULL,
+    caeLearningUnits TEXT NOT NULL,
+    caeDefaultLaunchUri TEXT NOT NULL,
+    caeAndroidPackageId TEXT,
+    caeAndroidStoreList TEXT,
+    caeAndroidSourceCode TEXT
+);
+
+upsert:
+  INSERT OR REPLACE INTO CompatibleAppEntity
+  VALUES ?;
+
+selectAll:
+  SELECT * FROM CompatibleAppEntity;
+
+
+

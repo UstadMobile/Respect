@@ -25,6 +25,8 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+
     }
 }
 
@@ -33,3 +35,8 @@ include(":server")
 include(":shared")
 include(":respect-cli")
 include(":respect-datasource")
+include(":respect-datasource-http")
+include(":respect-datasource-repository")
+include(":respect-datasource-db")
+include(":respect-lib-util")
+include(":respect-lib-xxhash")

@@ -1,0 +1,160 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "10f6119403b0c062cec7a3c2fa488a48",
+    "entities": [
+      {
+        "tableName": "CompatibleAppEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caeUid` INTEGER NOT NULL, `caeUrl` TEXT NOT NULL, `caeLastModified` INTEGER NOT NULL, `caeEtag` TEXT, `caeLicense` TEXT NOT NULL, `caeWebsite` TEXT NOT NULL, `caeLearningUnits` TEXT NOT NULL, `caeDefaultLaunchUri` TEXT NOT NULL, `caeAndroidPackageId` TEXT, `caeAndroidStoreList` TEXT, `caeAndroidSourceCode` TEXT, PRIMARY KEY(`caeUid`))",
+        "fields": [
+          {
+            "fieldPath": "caeUid",
+            "columnName": "caeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeUrl",
+            "columnName": "caeUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeLastModified",
+            "columnName": "caeLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeEtag",
+            "columnName": "caeEtag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeLicense",
+            "columnName": "caeLicense",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeWebsite",
+            "columnName": "caeWebsite",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeLearningUnits",
+            "columnName": "caeLearningUnits",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeDefaultLaunchUri",
+            "columnName": "caeDefaultLaunchUri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeAndroidPackageId",
+            "columnName": "caeAndroidPackageId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeAndroidStoreList",
+            "columnName": "caeAndroidStoreList",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeAndroidSourceCode",
+            "columnName": "caeAndroidSourceCode",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "caeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "LangMapEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lmeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lmeTableId` INTEGER NOT NULL, `lmeEntityUid1` INTEGER NOT NULL, `lmeEntityUid2` INTEGER NOT NULL, `lmePropId` INTEGER NOT NULL, `lmeLang` TEXT NOT NULL, `lmeRegion` TEXT, `lmeValue` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "lmeId",
+            "columnName": "lmeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeTableId",
+            "columnName": "lmeTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeEntityUid1",
+            "columnName": "lmeEntityUid1",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeEntityUid2",
+            "columnName": "lmeEntityUid2",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmePropId",
+            "columnName": "lmePropId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeLang",
+            "columnName": "lmeLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeRegion",
+            "columnName": "lmeRegion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lmeValue",
+            "columnName": "lmeValue",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "lmeId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_LangMapEntity_lmeTableId_lmeEntityUid1_lmeEntityUid2_lmePropId",
+            "unique": false,
+            "columnNames": [
+              "lmeTableId",
+              "lmeEntityUid1",
+              "lmeEntityUid2",
+              "lmePropId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LangMapEntity_lmeTableId_lmeEntityUid1_lmeEntityUid2_lmePropId` ON `${TABLE_NAME}` (`lmeTableId`, `lmeEntityUid1`, `lmeEntityUid2`, `lmePropId`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '10f6119403b0c062cec7a3c2fa488a48')"
+    ]
+  }
+}

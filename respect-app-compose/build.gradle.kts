@@ -76,6 +76,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.date.time)
+            implementation(libs.koalaplot)
         }
 
         desktopMain.dependencies {

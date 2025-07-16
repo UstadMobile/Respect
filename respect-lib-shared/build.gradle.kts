@@ -27,6 +27,9 @@ kotlin {
         commonMain.dependencies {
             api(projects.respectDatalayer)
             api(projects.respectLibUtil)
+            api(projects.respectDatalayerDb)
+            api(projects.respectDatalayerHttp)
+
 
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel.savedstate)

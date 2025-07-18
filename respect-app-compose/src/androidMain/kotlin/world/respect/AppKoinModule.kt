@@ -34,7 +34,17 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
-
+import world.respect.app.viewmodel.CurriculumListViewModel
+import world.respect.app.viewmodel.CurriculumDetailViewModel
+import world.respect.app.viewmodel.CurriculumEditViewModel
+import world.respect.app.viewmodel.StrandEditViewModel
+import world.respect.app.domain.usecase.curriculum.GetCurriculaUseCase
+import world.respect.app.domain.usecase.curriculum.GetCurriculumByIdUseCase
+import world.respect.app.domain.usecase.curriculum.SaveCurriculumUseCase
+import world.respect.app.domain.usecase.curriculum.DeleteCurriculumUseCase
+import world.respect.app.domain.usecase.strand.GetStrandsByCurriculumIdUseCase
+import world.respect.app.domain.usecase.strand.GetStrandByIdUseCase
+import world.respect.app.domain.usecase.strand.SaveStrandUseCase
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -77,6 +87,13 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
+    factory { world.respect.app.domain.usecase.curriculum.GetCurriculaUseCase() }
+    factory { world.respect.app.domain.usecase.curriculum.GetCurriculumByIdUseCase() }
+    factory { world.respect.app.domain.usecase.curriculum.SaveCurriculumUseCase() }
+    factory { world.respect.app.domain.usecase.curriculum.DeleteCurriculumUseCase() }
+    factory { world.respect.app.domain.usecase.strand.GetStrandsByCurriculumIdUseCase() }
+    factory { world.respect.app.domain.usecase.strand.GetStrandByIdUseCase() }
+    factory { world.respect.app.domain.usecase.strand.SaveStrandUseCase() }
 
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -87,6 +104,10 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
+    viewModelOf(::CurriculumListViewModel)
+    viewModelOf(::CurriculumDetailViewModel)
+    viewModelOf(::CurriculumEditViewModel)
+    viewModelOf(::StrandEditViewModel)
 
 
     single<RespectAppDataSourceProvider> {

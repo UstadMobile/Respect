@@ -36,6 +36,26 @@ object RespectAppList : RespectAppRoute
 @Serializable
 object EnterLink : RespectAppRoute
 
+@Serializable
+object CurriculumList : RespectAppRoute
+
+@Serializable
+data class CurriculumEdit(
+    val curriculumId: String? = null
+) : RespectAppRoute
+
+@Serializable
+data class CurriculumDetail(
+    val curriculumId: String,
+    val curriculumName: String
+) : RespectAppRoute
+
+@Serializable
+data class EditStrand(
+    val curriculumId: String,
+    val strandId: String? = null
+) : RespectAppRoute
+
 
 /**
  * @property manifestUrl the URL to the RespectAppManifest for the given Respect compatible app

@@ -14,4 +14,3 @@ sealed class NavCommand(
     ): NavCommand(timestamp)
 
 }
-

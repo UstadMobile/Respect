@@ -36,6 +36,20 @@ import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.Report
 import world.respect.shared.navigation.RespectComposeNavController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.toRoute
+import world.respect.app.view.curriculum.curriculumDetailScreen.CurriculumDetailScreenWrapper
+import world.respect.app.view.curriculum.editScreen.CurriculumEditScreenWrapper
+import world.respect.app.view.curriculum.editStrand.EditStrandScreenWrapper
+import world.respect.app.viewmodel.CurriculumEditViewModel
+import world.respect.app.viewmodel.CurriculumListViewModel
+import world.respect.app.viewmodel.CurriculumDetailViewModel
+import world.respect.app.viewmodel.StrandEditViewModel
+import world.respect.app.view.curriculum.AppByCurriculum.AppsByCurriculumScreen
+import world.respect.shared.navigation.CurriculumList
+import world.respect.shared.navigation.CurriculumEdit
+import world.respect.shared.navigation.CurriculumDetail
+import world.respect.shared.navigation.EditStrand
 
 
 @Composable
@@ -61,7 +75,10 @@ fun AppNavHost(
             )
 
             AppLauncherScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                onNavigateToCurriculum = {
+                    navController.navigate(CurriculumList)
+                }
             )
         }
 
@@ -133,9 +150,72 @@ fun AppNavHost(
             )
             LearningUnitDetailScreen(viewModel = viewModel)
         }
+
+        composable<CurriculumList> {
+            val viewModel: CurriculumListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController,
+            )
+
+            AppsByCurriculumScreen(
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+
+        composable<CurriculumEdit> { backStackEntry ->
+            val args = backStackEntry.toRoute<CurriculumEdit>()
+
+            val viewModel: CurriculumEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            LaunchedEffect(args) {
+                if (args.curriculumId != null) {
+                    // viewModel.setCurriculumId(args.curriculumId)
+                }
+            }
+
+            CurriculumEditScreenWrapper(
+                viewModel = viewModel
+            )
+        }
+
+        composable<CurriculumDetail> { backStackEntry ->
+            val args = backStackEntry.toRoute<CurriculumDetail>()
+
+            val viewModel: CurriculumDetailViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController,
+            )
+
+            LaunchedEffect(args) {
+                viewModel.setCurriculumData(args.curriculumId, args.curriculumName)
+            }
+
+            CurriculumDetailScreenWrapper(
+                viewModel = viewModel
+            )
+        }
+
+        composable<EditStrand> { backStackEntry ->
+            val args = backStackEntry.toRoute<EditStrand>()
+
+            val viewModel: StrandEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            LaunchedEffect(args) {
+                viewModel.setStrandData(args.curriculumId, args.strandId)
+            }
+
+            EditStrandScreenWrapper(
+                viewModel = viewModel
+            )
+        }
     }
-
 }
-
 
 

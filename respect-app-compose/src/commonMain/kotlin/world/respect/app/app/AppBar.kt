@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -134,12 +135,23 @@ fun RespectAppBar(
                     }
                 }
             }
-            IconButton(
-                onClick = onProfileClick,
-                modifier = Modifier.testTag("profile_icon")
-            ) {
-                Icon(Icons.Default.Person,
-                    contentDescription =null)
+            if(appUiState.actionBarButtonState.visible) {
+                Button(
+                    onClick = appUiState.actionBarButtonState.onClick,
+                    enabled = appUiState.actionBarButtonState.enabled,
+                    modifier = Modifier.testTag("action_bar_button"),
+                ) {
+                    Text(appUiState.actionBarButtonState.text ?: "")
+                }
+            }
+            if(appUiState.userAccountIconVisible) {
+                IconButton(
+                    onClick = onProfileClick,
+                    modifier = Modifier.testTag("profile_icon")
+                ) {
+                    Icon(Icons.Default.Person,
+                        contentDescription =null)
+                }
             }
         },
         colors = if(appUiState.appBarColors == AppBarColors.STANDARD) {

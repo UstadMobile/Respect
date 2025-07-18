@@ -29,9 +29,21 @@ import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectDatabase
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
+import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
+import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
+import world.respect.shared.viewmodel.manageuser.profile.ProfileViewModel
+import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
+import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
+import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
+import world.respect.shared.viewmodel.manageuser.signup.SignupViewModel
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
+import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 
@@ -87,8 +99,28 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
+    viewModelOf(::AcknowledgementViewModel)
+    viewModelOf(::JoinClazzWithCodeViewModel)
+    viewModelOf(::LoginViewModel)
+    viewModelOf(::ConfirmationViewModel)
+    viewModelOf(::ProfileViewModel)
+    viewModelOf(::TermsAndConditionViewModel)
+    viewModelOf(::WaitingForApprovalViewModel)
+    viewModelOf(::SignupViewModel)
 
+    // Uncomment this to switch to using fake data source provider for development purposes
+//     single<RespectAppDataSourceProvider> {
+//         FakeRespectAppDataSourceProvider()
+//    }
+     //*/
 
+    //Uncomment to switch to using real datasource
+    single<GetInviteInfoUseCase> {
+        MockGetInviteInfoUseCase()
+    }
+    single<SubmitRedeemInviteRequestUseCase> {
+        MockSubmitRedeemInviteRequestUseCase()
+    }
     single<RespectAppDataSourceProvider> {
         val appContext = androidContext().applicationContext
         SingleDataSourceProvider(

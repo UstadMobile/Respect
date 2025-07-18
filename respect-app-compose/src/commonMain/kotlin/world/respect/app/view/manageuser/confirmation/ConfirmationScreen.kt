@@ -1,0 +1,112 @@
+package world.respect.app.view.manageuser.confirmation
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.defaultScreenPadding
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.i_am_parent
+import world.respect.shared.generated.resources.i_am_student
+import world.respect.shared.generated.resources.invitation_for
+import world.respect.shared.generated.resources.next
+import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationUiState
+import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+
+@Composable
+fun ConfirmationScreen(
+    viewModel: ConfirmationViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    ConfirmationScreen(
+        uiState = uiState,
+        onClickStudent = viewModel::onClickStudent,
+        onClickParent = viewModel::onClickParent,
+        onClickNext = viewModel::onClickNext
+    )
+}
+
+@Composable
+fun ConfirmationScreen(
+    uiState: ConfirmationUiState,
+    onClickStudent: () -> Unit,
+    onClickParent: () -> Unit,
+    onClickNext: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .defaultScreenPadding()
+    ) {
+        item {
+            Text(
+                text = stringResource(Res.string.invitation_for),
+                Modifier.defaultItemPadding()
+            )
+        }
+        item {
+            ListItem(
+                headlineContent = {
+                    Text(text = uiState.inviteInfo?.schoolName ?: "")
+                },
+                supportingContent = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(text = uiState.inviteInfo?.className ?: "")
+
+                        Text(text = uiState.inviteInfo?.classGUIDRef?.sourcedId ?: "")
+
+                    }
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+        }
+        if (!uiState.isTeacherInvite) {
+            item {
+                OutlinedButton(
+                    onClick = onClickStudent,
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding()
+
+                ) {
+                    Text(stringResource(Res.string.i_am_student))
+                }
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = onClickParent,
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding()
+
+                ) {
+                    Text(stringResource(Res.string.i_am_parent))
+                }
+            }
+        }
+        if (uiState.isTeacherInvite) {
+            item {
+                OutlinedButton(
+                    onClick = onClickNext,
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding()
+                ) {
+                    Text(stringResource(Res.string.next))
+                }
+            }
+        }
+
+    }
+}

@@ -9,6 +9,7 @@ import world.respect.datalayer.respect.model.RespectRealm
  * @property realm The realm that the user is invited to
  * @property classGUIDRef The class to which the user is being invited
  * @property className The name of the class to which the user is being invited
+ * @property schoolName The name of the school to which the user is being invited
  * @property userInviteType type of invite as per the enum
  */
 @Serializable
@@ -17,6 +18,7 @@ class RespectInviteInfo(
     val realm: RespectRealm,
     val classGUIDRef: OneRosterClassGUIDRef?,
     val className: String?,
+    val schoolName: String?,
     val userInviteType: UserInviteType,
 ) {
 

@@ -6,6 +6,7 @@ package world.respect.shared.navigation
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -15,8 +16,18 @@ import kotlinx.serialization.Transient
  * If using a non-primitive type (e.g. Url) then use a private constructor property with a primitive
  * type and then add a transient property
  */
+
 @Serializable
 sealed interface RespectAppRoute
+
+@Serializable
+object Acknowledgement : RespectAppRoute
+
+@Serializable
+object JoinClazzWithCode : RespectAppRoute
+
+@Serializable
+object LoginScreen : RespectAppRoute
 
 @Serializable
 object RespectAppLauncher : RespectAppRoute
@@ -36,6 +47,8 @@ object RespectAppList : RespectAppRoute
 @Serializable
 object EnterLink : RespectAppRoute
 
+@Serializable
+object WaitingForApproval : RespectAppRoute
 
 /**
  * @property manifestUrl the URL to the RespectAppManifest for the given Respect compatible app
@@ -89,7 +102,56 @@ class LearningUnitList(
 
 }
 
+@Serializable
+class ConfirmationScreen(
+    private val inviteCode: String
+) : RespectAppRoute {
 
+    @Transient
+    val code = inviteCode
+
+    companion object {
+        fun create(inviteCode: String) = ConfirmationScreen(inviteCode)
+    }
+}
+
+@Serializable
+class ProfileScreen(
+    private val profileType: ProfileType
+) : RespectAppRoute {
+
+    @Transient
+    val type = profileType
+
+    companion object {
+        fun create(profileType: ProfileType) = ProfileScreen(profileType)
+    }
+}
+
+@Serializable
+class TermsAndCondition(
+    private val profileType: ProfileType
+) : RespectAppRoute {
+
+    @Transient
+    val type = profileType
+
+    companion object {
+        fun create(profileType: ProfileType) = TermsAndCondition(profileType)
+    }
+}
+@Serializable
+class SignupScreen(
+    private val profileType: ProfileType
+) : RespectAppRoute {
+
+    @Transient
+    val type = profileType
+
+    companion object {
+        fun create(profileType: ProfileType) = SignupScreen(profileType)
+    }
+}
 /**
  * @property learningUnitManifestUrl the URL of the OPDS Publication (Readium Manifest) for the
  *           learning unit as per RESPECT integration guide:

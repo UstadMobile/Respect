@@ -54,7 +54,7 @@ fun AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
-        onSnackBarShown = { viewModel.clearSnackBar() }
+        onClearSnackBar = { viewModel.onClearSnackBar() }
     )
 }
 
@@ -64,13 +64,13 @@ fun AppLauncherScreen(
     uiState: AppLauncherUiState,
     onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
     onClickRemove: (RespectAppManifest) -> Unit,
-    onSnackBarShown: () -> Unit
+    onClearSnackBar: () -> Unit
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
-    uiState.snackbarMessage?.let { message ->
+    uiState.snackBarMessage?.let { message ->
         LaunchedEffect(message) {
             snackBarHostState.showSnackbar(message)
-            onSnackBarShown()
+            onClearSnackBar()
         }
     }
     Scaffold(

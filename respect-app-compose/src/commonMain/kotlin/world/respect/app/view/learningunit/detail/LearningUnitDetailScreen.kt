@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +48,11 @@ import world.respect.shared.generated.resources.open
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.layout.ContentScale
 import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
@@ -61,6 +67,7 @@ fun LearningUnitDetailScreen(
     LearningUnitDetailScreen(
         uiState = uiState,
         onClickOpen = viewModel::onClickOpen,
+        onClearSnackBar = viewModel::onClearSnackBar
     )
 }
 
@@ -68,118 +75,147 @@ fun LearningUnitDetailScreen(
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
+    onClearSnackBar: () -> Unit
 ) {
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
 
-        item {
-            ListItem(
-                leadingContent = {
-                    val iconUrl = uiState.lessonDetail?.images?.find {
-                        it.type?.contains(IMAGE) == true
-                    }?.href
+    uiState.snackBarMessage?.let { message ->
+        LaunchedEffect(message) {
+            snackBarHostState.showSnackbar(message)
+            onClearSnackBar()
+        }
+    }
 
-                    iconUrl.also { icon ->
-                        RespectAsyncImage(
-                            uri = icon,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(120.dp)
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackBarHostState)
+        }
+    ) { padding ->
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp) ,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 
-                        )
-                    }
-                },
-                headlineContent = {
-                    Text(
-                        text = uiState.lessonDetail?.metadata?.title?.getTitle().orEmpty(),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                supportingContent = {
-                    Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(white)
-                                    .border(1.dp, black, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Android,
-                                    modifier = Modifier.padding(6.dp),
-                                    contentDescription = null
+                item {
+                    ListItem(
+                        leadingContent = {
+                            val iconUrl = uiState.lessonDetail?.images?.find {
+                                it.type?.contains(IMAGE) == true
+                            }?.href
+
+                            iconUrl.also { icon ->
+                                RespectAsyncImage(
+                                    uri = icon,
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(120.dp)
+
                                 )
                             }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
+                        },
+                        headlineContent = {
                             Text(
-                                text = stringResource(Res.string.app_name),
+                                text = uiState.lessonDetail?.metadata?.title?.getTitle().orEmpty(),
+                                fontWeight = FontWeight.Bold
                             )
+                        },
+                        supportingContent = {
+                            Column(
+                                verticalArrangement =
+                                    Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(white)
+                                            .border(1.dp, black, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Android,
+                                            modifier = Modifier.padding(6.dp),
+                                            contentDescription = null
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Text(
+                                        text = stringResource(Res.string.app_name),
+                                    )
+                                }
+
+                                Text(
+                                    text = uiState.lessonDetail?.metadata?.subtitle
+                                        ?.getTitle().orEmpty()
+                                )
+
+                                Text(
+                                    text = stringResource(Res.string.score_or_progress),
+                                )
+
+                                LinearProgressIndicator(
+                                    progress = { 0f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(4.dp)
+                                )
+                            }
                         }
+                    )
+                }
 
-                        Text(
-                            text = uiState.lessonDetail?.metadata?.subtitle
-                                ?.getTitle().orEmpty()
+                item {
+                    Button(
+                        onClick = {
+                            onClickOpen()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(Res.string.open))
+                    }
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconLabel(
+                            Icons.Filled.ArrowCircleDown,
+                            stringResource(Res.string.download)
                         )
-
-                        Text(
-                            text = stringResource(Res.string.score_or_progress),
+                        IconLabel(
+                            Icons.Filled.Share,
+                            stringResource(Res.string.share)
                         )
-
-                        LinearProgressIndicator(
-                            progress = { 0f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
+                        IconLabel(
+                            Icons.Filled.NearMe,
+                            stringResource(Res.string.assign)
                         )
                     }
                 }
-            )
-        }
-
-        item {
-            Button(
-                onClick = {
-                    onClickOpen()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(Res.string.open))
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconLabel(
-                    Icons.Filled.ArrowCircleDown,
-                    stringResource(Res.string.download)
-                )
-                IconLabel(
-                    Icons.Filled.Share,
-                    stringResource(Res.string.share)
-                )
-                IconLabel(
-                    Icons.Filled.NearMe,
-                    stringResource(Res.string.assign)
-                )
             }
         }
     }

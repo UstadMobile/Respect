@@ -2,6 +2,7 @@ package world.respect.app.view.apps.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,13 +22,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,7 +75,8 @@ fun AppsDetailScreen(
         onClickPublication = { viewModel.onClickPublication(it) },
         onClickNavigation = { viewModel.onClickNavigation(it) },
         onClickTry = { viewModel.onClickTry() },
-        onClickAdd = { viewModel.onClickAdd() }
+        onClickAdd = { viewModel.onClickAdd() },
+        onClearSnackBar = { viewModel.onClearSnackBar() }
     )
 }
 
@@ -79,204 +87,232 @@ fun AppsDetailScreen(
     onClickPublication: (OpdsPublication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit,
     onClickTry: () -> Unit,
-    onClickAdd: () -> Unit
+    onClickAdd: () -> Unit,
+    onClearSnackBar: () -> Unit
 ) {
+
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
+
+    uiState.snackBarMessage?.let { message ->
+        LaunchedEffect(message) {
+            snackBarHostState.showSnackbar(message)
+            onClearSnackBar()
+        }
+    }
 
     val appDetail = (uiState.appDetail as? DataReadyState)?.data
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item(
-            key = APP_DETAIL
-        ) {
-            ListItem(
-                leadingContent = {
-                    uiState.appIcon.also { icon ->
-                        RespectAsyncImage(
-                            uri = icon,
-                            contentDescription = "",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(80.dp)
-
-                        )
-                    }
-                },
-                headlineContent = {
-                    Text(
-                        text = appDetail?.name?.getTitle().toString()
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = appDetail?.description?.getTitle().toString(),
-                        maxLines = 1
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackBarHostState)
         }
-
-        item(
-            key = BUTTONS_ROW
-        ) {
-            Row(
-                horizontalArrangement =
-                    Arrangement.spacedBy(12.dp)
+    ) { padding ->
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
             ) {
-                Button(
-                    onClick = {
-                        onClickTry()
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = stringResource(Res.string.try_it))
-                }
-                OutlinedButton(
-                    onClick = {
-                        onClickAdd()
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = null
-                    )
-                    Spacer(
-                        Modifier.width(4.dp)
-                    )
-                    Text(
-                        text = stringResource(Res.string.add_app)
-                    )
-                }
+                CircularProgressIndicator()
             }
-        }
-
-        item(
-            key = SCREENSHOT
-        ) {
-            val screenshots = appDetail?.screenshots.orEmpty()
-
-            if (screenshots.isNotEmpty()) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item(
+                    key = APP_DETAIL
                 ) {
-                    items(
-                        count = screenshots.size,
-                        key = { index -> screenshots[index].url.toString() }
-                    ) { index ->
-                        val screenshot = screenshots[index]
+                    ListItem(
+                        leadingContent = {
+                            uiState.appIcon.also { icon ->
+                                RespectAsyncImage(
+                                    uri = icon,
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .size(80.dp)
 
-                        screenshot.url.also { screenshotUrl ->
-                            RespectAsyncImage(
-                                uri = screenshotUrl.toString(),
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .width(200.dp)
-                                    .aspectRatio(16f / 9f)
-                                    .clip(
-                                        RoundedCornerShape(12.dp)
-                                    )
+                                )
+                            }
+                        },
+                        headlineContent = {
+                            Text(
+                                text = appDetail?.name?.getTitle().toString()
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = appDetail?.description?.getTitle().toString(),
+                                maxLines = 1
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                item(
+                    key = BUTTONS_ROW
+                ) {
+                    Row(
+                        horizontalArrangement =
+                            Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                onClickTry()
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = stringResource(Res.string.try_it))
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                onClickAdd()
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Add,
+                                contentDescription = null
+                            )
+                            Spacer(
+                                Modifier.width(4.dp)
+                            )
+                            Text(
+                                text = stringResource(Res.string.add_app)
                             )
                         }
                     }
                 }
-            }
-        }
 
-        item(
-            key = LESSON_HEADER
-        ) {
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(Res.string.lessons),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                trailingContent = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onClickLessonList() }
-            )
-        }
-        item(key = LEARNING_UNIT_LIST) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                itemsIndexed(
-                    items = uiState.navigation,
-                    key = { index, navigation ->
-                        navigation.href
-                    }
-                ) { index, navigation ->
-                    NavigationList(
-                        navigation,
-                        onClickNavigation = {
-                            onClickNavigation(navigation)
+                item(
+                    key = SCREENSHOT
+                ) {
+                    val screenshots = appDetail?.screenshots.orEmpty()
+
+                    if (screenshots.isNotEmpty()) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
+                        ) {
+                            items(
+                                count = screenshots.size,
+                                key = { index -> screenshots[index].url.toString() }
+                            ) { index ->
+                                val screenshot = screenshots[index]
+
+                                screenshot.url.also { screenshotUrl ->
+                                    RespectAsyncImage(
+                                        uri = screenshotUrl.toString(),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .width(200.dp)
+                                            .aspectRatio(16f / 9f)
+                                            .clip(
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                    )
+                                }
+                            }
                         }
-                    )
+                    }
                 }
 
-                itemsIndexed(
-                    items = uiState.publications,
-                    key = { index, publication ->
-                        publication.metadata.identifier.toString()
-                    }
-                ) { index, publication ->
-                    PublicationList(
-                        publication,
-                        onClickPublication = {
-                            onClickPublication(publication)
-                        }
+                item(
+                    key = LESSON_HEADER
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(Res.string.lessons),
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onClickLessonList() }
                     )
                 }
-
-                uiState.group.forEach { group ->
-                    itemsIndexed(
-                        items = uiState.navigation,
-                        key = { index, navigation ->
-                            navigation.href
-                        }
-                    ) { index, navigation ->
-                        NavigationList(
-                            navigation,
-                            onClickNavigation = {
-                                onClickNavigation(navigation)
+                item(key = LEARNING_UNIT_LIST) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        itemsIndexed(
+                            items = uiState.navigation,
+                            key = { index, navigation ->
+                                navigation.href
                             }
-                        )
-                    }
-
-                    itemsIndexed(
-                        items = uiState.publications,
-                        key = { index, publication ->
-                            publication.metadata.identifier.toString()
+                        ) { index, navigation ->
+                            NavigationList(
+                                navigation,
+                                onClickNavigation = {
+                                    onClickNavigation(navigation)
+                                }
+                            )
                         }
-                    ) { index, publication ->
-                        PublicationList(
-                            publication,
-                            onClickPublication = {
-                                onClickPublication(publication)
+
+                        itemsIndexed(
+                            items = uiState.publications,
+                            key = { index, publication ->
+                                publication.metadata.identifier.toString()
                             }
-                        )
+                        ) { index, publication ->
+                            PublicationList(
+                                publication,
+                                onClickPublication = {
+                                    onClickPublication(publication)
+                                }
+                            )
+                        }
+
+                        uiState.group.forEach { group ->
+                            itemsIndexed(
+                                items = uiState.navigation,
+                                key = { index, navigation ->
+                                    navigation.href
+                                }
+                            ) { index, navigation ->
+                                NavigationList(
+                                    navigation,
+                                    onClickNavigation = {
+                                        onClickNavigation(navigation)
+                                    }
+                                )
+                            }
+
+                            itemsIndexed(
+                                items = uiState.publications,
+                                key = { index, publication ->
+                                    publication.metadata.identifier.toString()
+                                }
+                            ) { index, publication ->
+                                PublicationList(
+                                    publication,
+                                    onClickPublication = {
+                                        onClickPublication(publication)
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 fun NavigationList(
     navigation: ReadiumLink,

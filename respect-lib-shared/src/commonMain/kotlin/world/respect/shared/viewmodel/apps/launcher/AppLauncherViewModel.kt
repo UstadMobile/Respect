@@ -24,7 +24,7 @@ import world.respect.shared.navigation.NavCommand
 
 data class AppLauncherUiState(
     val appList: List<DataLoadState<RespectAppManifest>> = emptyList(),
-    val snackbarMessage: String? = null,
+    val snackBarMessage: String? = null,
 )
 
 class AppLauncherViewModel(
@@ -101,9 +101,11 @@ class AppLauncherViewModel(
         }
     }
 
-    fun clearSnackBar() {
+    fun onClearSnackBar() {
         _uiState.update {
-            it.copy(snackbarMessage = null)
+            it.copy(
+                snackBarMessage = null
+            )
         }
     }
 }

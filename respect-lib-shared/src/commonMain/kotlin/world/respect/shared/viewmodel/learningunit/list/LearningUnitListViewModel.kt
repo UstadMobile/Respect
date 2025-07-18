@@ -8,18 +8,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import world.respect.datalayer.DataErrorResult
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.datasource.RespectAppDataSourceProvider
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.opds.model.OpdsFacet
 import world.respect.datalayer.opds.model.OpdsGroup
 import world.respect.datalayer.opds.model.OpdsPublication
 import world.respect.datalayer.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.NavCommand
 
 data class LearningUnitListUiState(
@@ -28,6 +33,8 @@ data class LearningUnitListUiState(
     val group: List<OpdsGroup> = emptyList(),
     val lessonFilter: List<OpdsFacet> = emptyList(),
     val selectedFilterTitle: String? = null,
+    val isLoading: Boolean = true,
+    val snackBarMessage: String? = null
 )
 
 class LearningUnitListViewModel(
@@ -42,6 +49,7 @@ class LearningUnitListViewModel(
     private val dataSource = dataSourceProvider.getDataSource(activeAccount)
 
     private val route: LearningUnitList = savedStateHandle.toRoute()
+
 
     init {
         viewModelScope.launch {
@@ -58,6 +66,14 @@ class LearningUnitListViewModel(
                 params = DataLoadParams()
             ).collect { result ->
                 when (result) {
+                    is DataLoadingState -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+
                     is DataReadyState -> {
 
                         val appBarTitle = result.data.metadata.title
@@ -75,11 +91,27 @@ class LearningUnitListViewModel(
                                 publications = result.data.publications ?: emptyList(),
                                 group = result.data.groups ?: emptyList(),
                                 lessonFilter = result.data.facets ?: emptyList(),
+                                isLoading = false
                             )
                         }
                     }
 
-                    else -> {}
+                    is DataErrorResult -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                snackBarMessage = getString(resource = Res.string.something_went_wrong)
+                            )
+                        }
+                    }
+
+                    else -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -127,6 +159,14 @@ class LearningUnitListViewModel(
                 )
             )
         )
+    }
+
+    fun onClearSnackBar() {
+        _uiState.update {
+            it.copy(
+                snackBarMessage = null
+            )
+        }
     }
 
     companion object {

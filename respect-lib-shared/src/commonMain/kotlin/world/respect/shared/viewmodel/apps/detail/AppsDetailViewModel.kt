@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import world.respect.datalayer.DataErrorResult
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.navigation.AppsDetail
@@ -19,7 +20,9 @@ import world.respect.shared.datasource.RespectAppDataSourceProvider
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.opds.model.OpdsGroup
 import world.respect.datalayer.opds.model.OpdsPublication
@@ -33,7 +36,9 @@ data class AppsDetailUiState(
     val publications: List<OpdsPublication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
-    val appIcon: String? = null
+    val appIcon: String? = null,
+    val isLoading: Boolean = true,
+    val snackBarMessage: String? = null
 )
 
 class AppsDetailViewModel(
@@ -62,18 +67,44 @@ class AppsDetailViewModel(
                 manifestUrl = route.manifestUrl,
                 loadParams = DataLoadParams()
             ).collectLatest { result ->
-                if (result is DataReadyState) {
-                    _uiState.update {
-                        it.copy(
-                            appDetail = result,
-                            appIcon = route.manifestUrl.resolve(
-                                result.data.icon.toString()
-                            ).toString()
-                        )
+                when (result) {
+                    is DataLoadingState -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
 
+                    is DataReadyState -> {
+                        _uiState.update {
+                            it.copy(
+                                appDetail = result,
+                                appIcon = route.manifestUrl.resolve(
+                                    result.data.icon.toString()
+                                ).toString(),
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is DataErrorResult -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                snackBarMessage = getString(resource = Res.string.something_went_wrong)
+                            )
+                        }
+                    }
+
+                    else -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false
+                            )
+                        }
                     }
                 }
-
                 result.dataOrNull()?.learningUnits?.also { learningUnitsUri ->
                     dataSource.opdsDataSource.loadOpdsFeed(
                         url = route.manifestUrl.resolve(
@@ -82,17 +113,41 @@ class AppsDetailViewModel(
                         params = DataLoadParams()
                     ).collect { result ->
                         when (result) {
+                            is DataLoadingState -> {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = true
+                                    )
+                                }
+                            }
+
                             is DataReadyState -> {
                                 _uiState.update {
                                     it.copy(
                                         publications = result.data.publications ?: emptyList(),
                                         navigation = result.data.navigation ?: emptyList(),
-                                        group = result.data.groups ?: emptyList()
+                                        group = result.data.groups ?: emptyList(),
+                                        isLoading = false
                                     )
                                 }
                             }
 
-                            else -> {}
+                            is DataErrorResult -> {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        snackBarMessage = result.error.message
+                                    )
+                                }
+                            }
+
+                            else -> {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = false
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -159,6 +214,13 @@ class AppsDetailViewModel(
 
     }
 
+    fun onClearSnackBar() {
+        _uiState.update {
+            it.copy(
+                snackBarMessage = null
+            )
+        }
+    }
     companion object {
         const val BUTTONS_ROW = "buttons_row"
         const val LESSON_HEADER = "lesson_header"

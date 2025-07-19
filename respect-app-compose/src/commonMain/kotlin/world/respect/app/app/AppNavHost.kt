@@ -10,7 +10,7 @@ import world.respect.app.view.apps.launcher.AppLauncherScreen
 import world.respect.app.view.apps.list.AppListScreen
 import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.assignments.AssignmentScreen
-import world.respect.app.view.clazz.ClazzScreen
+import world.respect.app.view.classes.ClassesScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
 import world.respect.app.view.report.ReportScreen
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -91,7 +91,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ClazzScreen(navController = navController, viewModel = viewModel)
+            ClassesScreen(navController = navController, viewModel = viewModel)
         }
 
         composable<Report> {

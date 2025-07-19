@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import world.respect.shared.viewmodel.RespectViewModel
 import org.jetbrains.compose.resources.getString
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.classes
 
 class ClazzViewModel(
     savedStateHandle: SavedStateHandle
@@ -16,7 +16,7 @@ class ClazzViewModel(
         viewModelScope.launch {
             _appUiState.update {
                 it.copy(
-                    title = getString(resource = Res.string.clazz),
+                    title = getString(resource = Res.string.classes),
                     showBackButton = false,
                 )
             }

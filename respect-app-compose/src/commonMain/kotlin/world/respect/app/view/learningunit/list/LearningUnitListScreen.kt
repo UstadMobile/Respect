@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.ustadmobile.libuicompose.theme.black
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.duration
 import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -259,7 +259,7 @@ fun NavigationListItem(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = stringResource(Res.string.clazz),
+                    text = stringResource(Res.string.classes),
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -340,7 +340,7 @@ fun PublicationListItem(
                     Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = stringResource(Res.string.clazz),
+                    text = stringResource(Res.string.classes),
                 )
                 Row(
                     horizontalArrangement =

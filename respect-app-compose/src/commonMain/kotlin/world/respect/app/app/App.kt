@@ -36,7 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.report
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.Assignment
@@ -66,7 +66,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = Clazz,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = Res.string.clazz
+        label = Res.string.classes
     ),
     TopNavigationItem(
         destRoute = Report,

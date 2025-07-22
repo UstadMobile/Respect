@@ -12,10 +12,12 @@ import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.assignments.AssignmentScreen
 import world.respect.app.view.clazz.ClazzScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
-import world.respect.app.view.report.ReportScreen
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
+import world.respect.app.view.report.detail.ReportDetailScreen
+import world.respect.app.view.report.edit.ReportEditScreen
+import world.respect.app.view.report.list.ReportListScreen
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
@@ -24,7 +26,6 @@ import world.respect.shared.viewmodel.assignments.AssignmentViewModel
 import world.respect.shared.viewmodel.clazz.ClazzViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
@@ -35,7 +36,12 @@ import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.Report
+import world.respect.shared.navigation.ReportDetail
+import world.respect.shared.navigation.ReportEdit
 import world.respect.shared.navigation.RespectComposeNavController
+import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
+import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
+import world.respect.shared.viewmodel.report.list.ReportListViewModel
 
 
 @Composable
@@ -94,12 +100,26 @@ fun AppNavHost(
             ClazzScreen(navController = navController, viewModel = viewModel)
         }
 
-        composable<Report> {
-            val viewModel: ReportViewModel = respectViewModel(
+        composable<ReportDetail> {
+            val viewModel: ReportDetailViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ReportScreen(navController = navController, viewModel = viewModel)
+            ReportDetailScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<ReportEdit> {
+            val viewModel: ReportEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportEditScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<Report> {
+            val viewModel: ReportListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportListScreen(navController = navController, viewModel = viewModel)
         }
 
         composable<RespectAppList> {

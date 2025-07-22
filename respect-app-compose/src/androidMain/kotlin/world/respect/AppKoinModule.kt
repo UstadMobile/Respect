@@ -52,6 +52,14 @@ import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroi
 import world.respect.shared.domain.storage.GetOfflineStorageSettingUseCase
 import java.io.File
 import kotlinx.io.files.Path
+import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
+import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.report.query.RunReportUseCaseClientImpl
+import world.respect.shared.domain.report.query.RunReportUseCaseDatabaseImpl
+import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
+import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
+import world.respect.shared.viewmodel.report.list.ReportListViewModel
+
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -117,6 +125,9 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
+    viewModelOf(::ReportDetailViewModel)
+    viewModelOf(::ReportEditViewModel)
+    viewModelOf(::ReportListViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -199,5 +210,11 @@ val appKoinModule = module {
                 )
             )
         )
+    }
+    single<RunReportUseCase> {
+        RunReportUseCaseDatabaseImpl()
+    }
+    single<CreateGraphFormatterUseCase> {
+        CreateGraphFormatterUseCase()
     }
 }

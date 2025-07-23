@@ -22,15 +22,15 @@ abstract class RespectViewModel(
 
     protected val _appUiState = MutableStateFlow(AppUiState())
 
-    val appUiState: Flow<AppUiState> = _appUiState.asStateFlow()
+    open val appUiState: Flow<AppUiState> = _appUiState.asStateFlow()
 
-    protected val _navCommandFlow = MutableSharedFlow<NavCommand>(
+    protected open val _navCommandFlow = MutableSharedFlow<NavCommand>(
         replay = 1,
         extraBufferCapacity = 0,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    val navCommandFlow: Flow<NavCommand> = _navCommandFlow.asSharedFlow()
+    open val navCommandFlow: Flow<NavCommand> = _navCommandFlow.asSharedFlow()
 
     //Placeholder: will be provided via an AccountManager that will use multiplatform settings.
     protected val activeAccount = RespectAccount(

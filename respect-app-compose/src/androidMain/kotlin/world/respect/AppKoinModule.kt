@@ -13,8 +13,6 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.logging.NapierLoggingAdapter
-import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -58,6 +56,12 @@ import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
 import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.viewmodel.curriculum.list.CurriculumListViewModel
+import world.respect.shared.viewmodel.curriculum.detail.CurriculumDetailViewModel
+import world.respect.shared.viewmodel.curriculum.edit.CurriculumEditViewModel
+import world.respect.shared.viewmodel.strand.edit.StrandEditViewModel
+import world.respect.shared.domain.curriculum.*
+import world.respect.shared.domain.strand.*
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
@@ -69,6 +73,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
+
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings"
 const val TAG_TMP_DIR = "tmpDir"
@@ -86,24 +91,13 @@ val appKoinModule = module {
     }
 
     single<OkHttpClient> {
-        val cachePathProvider: CachePathsProvider = get()
-
         OkHttpClient.Builder()
             .dispatcher(
                 Dispatcher().also {
                     it.maxRequests = 30
                     it.maxRequestsPerHost = 10
                 }
-            )
-            .addInterceptor(
-                UstadCacheInterceptor(
-                    cache = get(),
-                    tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
-                    logger = NapierLoggingAdapter(),
-                    json = get(),
-                )
-            )
-            .build()
+            ).build()
     }
 
     single<HttpClient> {
@@ -122,6 +116,14 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
+    single<GetCurriculaUseCase> { GetCurriculaUseCaseMock() }
+    single<GetCurriculumByIdUseCase> { GetCurriculumByIdUseCaseMock() }
+    single<SaveCurriculumUseCase> { SaveCurriculumUseCaseMock() }
+    single<DeleteCurriculumUseCase> { DeleteCurriculumUseCaseMock() }
+    single<GetStrandsByCurriculumIdUseCase> { GetStrandsByCurriculumIdUseCaseMock() }
+    single<GetStrandByIdUseCase> { GetStrandByIdUseCaseMock() }
+    single<SaveStrandUseCase> { SaveStrandUseCaseMock() }
+
 
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -132,6 +134,12 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
+
+    viewModelOf(::CurriculumListViewModel)
+    viewModelOf(::CurriculumDetailViewModel)
+    viewModelOf(::CurriculumEditViewModel)
+    viewModelOf(::StrandEditViewModel)
+
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::JoinClazzWithCodeViewModel)
     viewModelOf(::LoginViewModel)
@@ -141,11 +149,7 @@ val appKoinModule = module {
     viewModelOf(::WaitingForApprovalViewModel)
     viewModelOf(::CreateAccountViewModel)
 
-    single<GetOfflineStorageOptionsUseCase> {
-        GetOfflineStorageOptionsUseCaseAndroid(
-            getAndroidSdCardDirUseCase = get()
-        )
-    }
+
 
     single<GetAndroidSdCardDirUseCase> {
         GetAndroidSdCardDirUseCase(
@@ -159,15 +163,13 @@ val appKoinModule = module {
             settings = get(),
         )
     }
-
-    single<CachePathsProvider> {
+    single<CachePathsProviderAndroid> {
         CachePathsProviderAndroid(
             appContext = androidContext().applicationContext,
             getAndroidSdCardPathUseCase = get(),
             getOfflineStorageSettingUseCase = get(),
         )
     }
-
     single<Settings> {
         SharedPreferencesSettings(
             delegate = androidContext().getSharedPreferences(
@@ -193,7 +195,7 @@ val appKoinModule = module {
                 File(androidContext().filesDir, "httpfiles").absolutePath
             ),
             sizeLimit = { 100_000_000L },
-            db = get(),
+            db = get()
         ).build()
     }
 
@@ -213,7 +215,7 @@ val appKoinModule = module {
         )
     }
 
-    //Uncomment to switch to using real datasource
+
     single<GetInviteInfoUseCase> {
         MockGetInviteInfoUseCase()
     }
@@ -229,7 +231,8 @@ val appKoinModule = module {
                     respectDatabase = Room.databaseBuilder<RespectDatabase>(
                         appContext, appContext.getDatabasePath("respect.db").absolutePath
                     ).setDriver(BundledSQLiteDriver())
-                    .build(),
+                        .fallbackToDestructiveMigration()
+                        .build(),
                     json = get(),
                     xxStringHasher = get(),
                     primaryKeyGenerator = PrimaryKeyGenerator(RespectDatabase.TABLE_IDS),
@@ -242,3 +245,5 @@ val appKoinModule = module {
         )
     }
 }
+
+

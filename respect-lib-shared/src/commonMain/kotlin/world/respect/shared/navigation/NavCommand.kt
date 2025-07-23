@@ -14,4 +14,3 @@ sealed class NavCommand(
         timestamp: Long = Clock.System.now().toEpochMilliseconds(),
     ) : NavCommand(timestamp)
 }
-

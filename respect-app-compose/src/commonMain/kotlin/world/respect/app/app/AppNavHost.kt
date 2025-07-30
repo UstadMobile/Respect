@@ -15,34 +15,44 @@ import world.respect.app.view.assignments.AssignmentScreen
 import world.respect.app.view.clazz.ClazzScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
-import world.respect.app.view.manageuser.signup.SignupScreen
 import world.respect.app.view.manageuser.confirmation.ConfirmationScreen
+import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
 import world.respect.app.view.manageuser.joinclazzwithcode.JoinClazzWithCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
-import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
-import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
+import world.respect.app.view.manageuser.signup.SignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
-import world.respect.app.view.report.ReportScreen
-import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
+import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
+import world.respect.app.view.report.detail.ReportDetailScreen
+import world.respect.app.view.report.edit.ReportEditScreen
+import world.respect.app.view.report.filteredit.ReportFilterEditScreen
+import world.respect.app.view.report.indictor.IndictorEditScreen
+import world.respect.app.view.report.list.ReportListScreen
+import world.respect.app.view.report.list.ReportTemplateListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.Acknowledgement
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.Assignment
 import world.respect.shared.navigation.Clazz
 import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.JoinClazzWithCode
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
-import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.Report
+import world.respect.shared.navigation.ReportDetail
+import world.respect.shared.navigation.ReportEdit
+import world.respect.shared.navigation.ReportEditFilter
+import world.respect.shared.navigation.ReportIndictorEdit
+import world.respect.shared.navigation.ReportTemplateList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.RespectComposeNavController
-import world.respect.shared.navigation.CreateAccount
+import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
+import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
@@ -56,10 +66,15 @@ import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewMo
 import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
+import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
-import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
+import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
+import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
+import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
+import world.respect.shared.viewmodel.report.indictor.IndictorEditViewmodel
+import world.respect.shared.viewmodel.report.list.ReportListViewModel
+import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 
 
 @Composable
@@ -139,12 +154,47 @@ fun AppNavHost(
             ClazzScreen(navController = navController, viewModel = viewModel)
         }
 
-        composable<Report> {
-            val viewModel: ReportViewModel = respectViewModel(
+        composable<ReportDetail> {
+            val viewModel: ReportDetailViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ReportScreen(navController = navController, viewModel = viewModel)
+            ReportDetailScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<ReportEdit> {
+            val viewModel: ReportEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportEditScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<Report> {
+            val viewModel: ReportListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportListScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<ReportTemplateList> {
+            val viewModel: ReportTemplateListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportTemplateListScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<ReportIndictorEdit> {
+            val viewModel: IndictorEditViewmodel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            IndictorEditScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<ReportEditFilter> {
+            val viewModel: ReportFilterEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportFilterEditScreen(navController = navController, viewModel = viewModel)
         }
 
         composable<RespectAppList> {

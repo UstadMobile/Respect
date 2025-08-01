@@ -6,7 +6,7 @@ import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.*
 
-val OneRosterGenderEnum.stringResource: StringResource
+val OneRosterGenderEnum.toGenderLabel: StringResource
     get() = when (this) {
         OneRosterGenderEnum.FEMALE -> Res.string.female
         OneRosterGenderEnum.MALE ->Res.string.male

@@ -42,8 +42,8 @@
     <string name="supported_by">Supported by:</string>
     <string name="network_powered_by">Network powered by:</string>
     <string name="enter_invite_code_message">Enter the code provided by your teacher or school admin</string>
-    <string name="invite_code_label">Invite Code</string>
-    <string name="enter_code_label">Enter invite Code</string>
+    <string name="invite_code_label">Invite code</string>
+    <string name="enter_code_label">Enter invite code</string>
     <string name="invalid_invite_code">Please enter a valid code</string>
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
@@ -80,6 +80,7 @@
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="username_required">Username is required</string>
+    <string name="required">Required*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
@@ -105,4 +106,12 @@
     <string name="remove_picture">Remove picture</string>
 
     <string name="select_date">Select date</string>
+
+    <string name="lets_get_started">Let's get started</string>
+    <string name="enter_school_name">School name</string>
+    <string name="school_name_placeholder">Type school name here...</string>
+    <string name="i_have_an_invite_code">I have an invite code</string>
+    <string name="invalid_school_name">Invalid school name</string>
+
+
 </resources>

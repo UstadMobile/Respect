@@ -43,10 +43,14 @@ import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
+import androidx.compose.material3.OutlinedButton
+import world.respect.shared.generated.resources.manage_curriculum
+
 
 @Composable
 fun AppLauncherScreen(
     viewModel: AppLauncherViewModel,
+    onNavigateToCurriculum: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -54,7 +58,8 @@ fun AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
-        onSnackBarShown = { viewModel.clearSnackBar() }
+        onSnackBarShown = { viewModel.clearSnackBar() },
+        onNavigateToCurriculum = onNavigateToCurriculum
     )
 }
 
@@ -64,7 +69,8 @@ fun AppLauncherScreen(
     uiState: AppLauncherUiState,
     onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
     onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
-    onSnackBarShown: () -> Unit
+    onSnackBarShown: () -> Unit,
+    onNavigateToCurriculum: () -> Unit = {}
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     uiState.snackbarMessage?.let { message ->
@@ -109,6 +115,12 @@ fun AppLauncherScreen(
                         text = stringResource(resource = Res.string.empty_list_description),
                         textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedButton(
+                        onClick = onNavigateToCurriculum
+                    ) {
+                        Text(stringResource(Res.string.manage_curriculum))
+                    }
                 }
             } else {
                 LazyVerticalGrid(
@@ -128,10 +140,10 @@ fun AppLauncherScreen(
                         AppGridItem(
                             app = app,
                             onClickApp = {
-                                onClickApp(app)
+                                app.dataOrNull()?.also { onClickApp(app) }
                             },
                             onClickRemove = {
-                                onClickRemove(app)
+                                app.dataOrNull()?.also { onClickRemove(app) }
                             }
                         )
                     }

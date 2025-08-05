@@ -40,6 +40,20 @@ import world.respect.shared.navigation.Report
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.RespectComposeNavController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.toRoute
+import world.respect.app.view.curriculum.curriculumdetailScreen.CurriculumDetailScreenWrapper
+import world.respect.app.view.curriculum.editscreen.CurriculumEditScreenWrapper
+import world.respect.app.view.curriculum.editstrand.EditStrandScreenWrapper
+import world.respect.app.view.curriculum.appbycurriculum.AppsByCurriculumScreen
+import world.respect.shared.navigation.CurriculumList
+import world.respect.shared.navigation.CurriculumEdit
+import world.respect.shared.navigation.CurriculumDetail
+import world.respect.shared.navigation.EditStrand
+import world.respect.shared.viewmodel.curriculum.list.CurriculumListViewModel
+import world.respect.shared.viewmodel.curriculum.detail.CurriculumDetailViewModel
+import world.respect.shared.viewmodel.curriculum.edit.CurriculumEditViewModel
+import world.respect.shared.viewmodel.strand.edit.StrandEditViewModel
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -60,6 +74,7 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
+
 
 
 @Composable
@@ -106,7 +121,10 @@ fun AppNavHost(
             )
 
             AppLauncherScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                onNavigateToCurriculum = {
+                    navController.navigate(CurriculumList)
+                }
             )
         }
 
@@ -180,6 +198,7 @@ fun AppNavHost(
         }
 
 
+
         composable<SignupScreen> {
             val viewModel: SignupViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -221,9 +240,72 @@ fun AppNavHost(
             WaitingForApprovalScreen(
                 viewModel = viewModel)
         }
+
+        composable<CurriculumList> {
+            val viewModel: CurriculumListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController,
+            )
+
+            AppsByCurriculumScreen(
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+
+        composable<CurriculumEdit> { backStackEntry ->
+            val args = backStackEntry.toRoute<CurriculumEdit>()
+
+            val viewModel: CurriculumEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            LaunchedEffect(args) {
+                if (args.curriculumId != null) {
+                    // viewModel.setCurriculumId(args.curriculumId)
+                }
+            }
+
+            CurriculumEditScreenWrapper(
+                viewModel = viewModel
+            )
+        }
+
+        composable<CurriculumDetail> { backStackEntry ->
+            val args = backStackEntry.toRoute<CurriculumDetail>()
+
+            val viewModel: CurriculumDetailViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController,
+            )
+
+            LaunchedEffect(args) {
+                viewModel.setCurriculumData(args.curriculumId, args.curriculumName)
+            }
+
+            CurriculumDetailScreenWrapper(
+                viewModel = viewModel
+            )
+        }
+
+        composable<EditStrand> { backStackEntry ->
+            val args = backStackEntry.toRoute<EditStrand>()
+
+            val viewModel: StrandEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            LaunchedEffect(args) {
+                viewModel.setStrandData(args.curriculumId, args.strandId)
+            }
+
+            EditStrandScreenWrapper(
+                viewModel = viewModel
+            )
+        }
     }
-
 }
-
 
 

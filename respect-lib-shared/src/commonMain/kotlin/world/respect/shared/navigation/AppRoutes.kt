@@ -4,10 +4,13 @@
 package world.respect.shared.navigation
 
 import io.ktor.http.Url
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.shared.domain.report.model.Indicator
+import world.respect.shared.domain.report.model.ReportFilter
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 /**
@@ -42,6 +45,129 @@ object Clazz : RespectAppRoute
 
 @Serializable
 object Report : RespectAppRoute
+
+@Serializable
+object ReportTemplateList : RespectAppRoute
+
+@Serializable
+class ReportIndictorEdit private constructor(
+    private val reportUidStr: String,
+    private val seriesIdStr: String,
+    private val indicatorJson: String? = null
+) : RespectAppRoute {
+
+    @Transient
+    val reportUid = reportUidStr.toLong()
+
+    @Transient
+    val seriesId = seriesIdStr.toInt()
+
+    @Transient
+    val indicatorData: Indicator? = indicatorJson?.let {
+        Json.decodeFromString(it)
+    }
+
+    companion object {
+        @OptIn(ExperimentalSerializationApi::class)
+        fun create(
+            reportUid: Long,
+            seriesId: Int,
+            indicator: Indicator? = null
+        ): ReportIndictorEdit {
+            val json = Json { allowTrailingComma = true }
+            return ReportIndictorEdit(
+                reportUidStr = reportUid.toString(),
+                seriesIdStr = seriesId.toString(),
+                indicatorJson = indicator?.let { json.encodeToString(Indicator.serializer(), it) }
+            )
+        }
+    }
+}
+
+@Serializable
+class ReportEditFilter private constructor(
+    private val reportUidStr: String,
+    private val seriesIdStr: String,
+    private val filterJson: String? = null
+) : RespectAppRoute {
+
+    @Transient
+    val reportUid = reportUidStr.toLong()
+
+    @Transient
+    val seriesId = seriesIdStr.toInt()
+
+    @Transient
+    val filter: ReportFilter? = filterJson?.let { Json.decodeFromString(it) }
+
+    companion object {
+        fun create(reportUid: Long, seriesId: Int): ReportEditFilter {
+            return ReportEditFilter(
+                reportUidStr = reportUid.toString(),
+                seriesIdStr = seriesId.toString()
+            )
+        }
+
+        fun create(reportUid: Long, seriesId: Int, filter: ReportFilter): ReportEditFilter {
+            return ReportEditFilter(
+                reportUidStr = reportUid.toString(),
+                seriesIdStr = seriesId.toString(),
+                filterJson = Json.encodeToString(filter)
+            )
+        }
+    }
+}
+
+@Serializable
+class ReportEdit private constructor(
+    private val reportUidStr: String,
+    private val filterJson: String? = null,
+    private val indicatorJson: String? = null,
+) : RespectAppRoute {
+
+    @Transient
+    val reportUid = reportUidStr.toLong()
+
+    @Transient
+    val filter: ReportFilter? = filterJson?.let { Json.decodeFromString(it) }
+
+    @Transient
+    val indicator: Indicator? = indicatorJson?.let { Json.decodeFromString(Indicator.serializer(), it) }
+
+    companion object {
+        fun create(reportUid: Long): ReportEdit {
+            return ReportEdit(reportUid.toString())
+        }
+
+        fun create(reportUid: Long, filter: ReportFilter): ReportEdit {
+            return ReportEdit(
+                reportUid.toString(),
+                Json.encodeToString(filter)
+            )
+        }
+
+        fun create(reportUid: Long, indicator: Indicator): ReportEdit {
+            return ReportEdit(
+                reportUid.toString(),
+                indicatorJson = Json.encodeToString(Indicator.serializer(), indicator)
+            )
+        }
+    }
+}
+@Serializable
+class ReportDetail private constructor(
+    private val reportUidStr: String
+) : RespectAppRoute {
+
+    @Transient
+    val reportUid = reportUidStr.toLong()
+
+    companion object {
+        fun create(reportUid: Long): ReportDetail {
+            return ReportDetail(reportUid.toString())
+        }
+    }
+}
 
 @Serializable
 object RespectAppList : RespectAppRoute

@@ -37,7 +37,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.clazz
-import world.respect.shared.generated.resources.report
+import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.Assignment
 import world.respect.shared.navigation.Clazz
@@ -71,7 +71,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = Report,
         icon = Icons.Filled.BarChart,
-        label = Res.string.report
+        label = Res.string.reports
     )
 )
 

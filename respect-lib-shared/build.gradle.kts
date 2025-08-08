@@ -27,6 +27,9 @@ kotlin {
         commonMain.dependencies {
             api(projects.respectDatalayer)
             api(projects.respectLibUtil)
+            api(projects.respectDatalayerDb)
+            api(projects.respectDatalayerHttp)
+
             implementation(projects.respectLibCache)
 
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -44,6 +47,10 @@ kotlin {
 
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+
+            api(libs.paging.multiplatform.compose)
+            api(libs.paging.multiplatform.common)
+
             implementation(libs.multiplatformsettings)
         }
 

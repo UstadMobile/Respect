@@ -1,0 +1,43 @@
+appId: world.respect.app
+tags:
+    - respect
+---
+- clearState:  world.respect.app
+- launchApp
+- tapOn: "I already have an account"
+- tapOn: "UserId"
+- inputText: "admin"
+- tapOn: "Password"
+- inputText: "testpass"
+- tapOn:
+    text: "Login"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Reports"
+- assertVisible:
+    id: "app_title"
+    text: "Reports"
+- tapOn:
+    id: "floating_action_button"
+- assertVisible:
+    id: "app_title"
+    text: "Select template"
+- tapOn: "Blank Report"
+- assertVisible:
+    id: "app_title"
+    text: "Add a new report"
+- tapOn: "Title*"
+- inputText: "Test Report"
+- hideKeyboard
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Test Report"
+- tapOn: "Reports"
+#- scrollUntilVisible:
+#    element:
+#       text: "Test Report"
+#    direction: DOWN
+#    timeout: 50000

@@ -37,9 +37,7 @@ fun JoinClazzWithCodeScreen(
     JoinClazzWithCodeScreen(
         uiState = uiState,
         onCodeChanged = viewModel::onCodeChanged,
-        onClickNext = viewModel::onClickNext,
-        onClickAlreadyHaveAccount = viewModel::onClickAlreadyHaveAccount,
-        onClickAddMySchool = viewModel::onClickAddMySchool
+        onClickNext = viewModel::onClickNext
     )
 }
 
@@ -47,9 +45,7 @@ fun JoinClazzWithCodeScreen(
 fun JoinClazzWithCodeScreen(
     uiState: JoinClazzWithCodeUiState,
     onCodeChanged: (String) -> Unit,
-    onClickNext: () -> Unit,
-    onClickAlreadyHaveAccount: () -> Unit,
-    onClickAddMySchool: () -> Unit,
+    onClickNext: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -90,28 +86,6 @@ fun JoinClazzWithCodeScreen(
         ) {
             Text(
                 text = stringResource(Res.string.next),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedButton(
-            onClick = onClickAlreadyHaveAccount,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(Res.string.already_have_account),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedButton(
-            onClick = onClickAddMySchool,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(Res.string.add_my_school),
             )
         }
     }

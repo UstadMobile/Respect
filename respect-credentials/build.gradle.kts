@@ -29,8 +29,15 @@ kotlin {
         }
 
         jvmTest.dependencies {
-
+            implementation(kotlin("test"))
+            implementation(projects.respectAppCompose)
         }
+
+    }
+    sourceSets.androidInstrumentedTest.dependencies {
+        implementation(kotlin("test"))
+        implementation(projects.respectAppCompose)
+
     }
 }
 

@@ -11,3 +11,9 @@ fun String.firstNonWhiteSpaceChar(): Char? {
 fun String.initial(): String {
     return firstNonWhiteSpaceChar()?.uppercase() ?: ""
 }
+
+/**
+ * To ensure consistency between JVM and Android, Base64 encoding
+ * **must** be done with NO_WRAP
+ */
+expect fun String.base64StringToByteArray(): ByteArray

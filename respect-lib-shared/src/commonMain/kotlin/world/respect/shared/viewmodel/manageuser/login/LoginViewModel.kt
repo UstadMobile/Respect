@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.*
 import world.respect.shared.navigation.NavCommand
@@ -17,12 +18,14 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class LoginUiState(
     val userId: String = "",
     val password: String = "",
+    val errorText: String ? = null,
     val userIdError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
 )
 
 class LoginViewModel(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    getCredentialUseCase: GetCredentialUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -36,6 +39,43 @@ class LoginViewModel(
                     hideBottomNavigation = true,
                     userAccountIconVisible = false
                 )
+            }
+        }
+        viewModelScope.launch {
+
+            viewModelScope.launch {
+                try {
+                    when (val credentialResult = getCredentialUseCase()) {
+                        is GetCredentialUseCase.PasskeyCredentialResult -> {
+                            viewModelScope.launch {
+                                _navCommandFlow.tryEmit(
+                                    NavCommand.Navigate(RespectAppLauncher)
+                                )
+                            }
+                        }
+
+                        is GetCredentialUseCase.PasswordCredentialResult -> {
+
+                        }
+
+                        is GetCredentialUseCase.Error -> {
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    errorText = (credentialResult.message),
+                                )
+                            }
+                            println ( "Error occurred: ${credentialResult.message}")
+                        }
+
+                        is GetCredentialUseCase.NoCredentialAvailableResult,
+                        is GetCredentialUseCase.UserCanceledResult-> {
+                            //do nothing
+                        }
+
+                    }
+                } catch (e: Exception) {
+                   println( "Error occurred: ${e.message}")
+                }
             }
         }
     }

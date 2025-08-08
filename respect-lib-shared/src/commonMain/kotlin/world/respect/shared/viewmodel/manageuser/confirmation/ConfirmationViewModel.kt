@@ -16,6 +16,7 @@ import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -62,14 +63,14 @@ class ConfirmationViewModel(
     }
 
     fun onClickStudent() {
-        navigateToTermsAndCondition(ProfileType.STUDENT)
+        navigateToAppropriateScreen(ProfileType.STUDENT)
     }
 
     fun onClickParent() {
-        navigateToTermsAndCondition(ProfileType.PARENT)
+        navigateToAppropriateScreen(ProfileType.PARENT)
     }
 
-    private fun navigateToTermsAndCondition(profileType: ProfileType){
+    private fun navigateToAppropriateScreen(profileType: ProfileType){
         viewModelScope.launch {
             val inviteInfo= uiState.value.inviteInfo
             if (inviteInfo==null) {
@@ -78,9 +79,16 @@ class ConfirmationViewModel(
                 }
                 return@launch
             }
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(TermsAndCondition.create(profileType,inviteInfo))
-            )
+            if (profileType==ProfileType.STUDENT) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(SignupScreen.create(profileType,inviteInfo))
+                )
+            }
+            else if (profileType==ProfileType.PARENT) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(TermsAndCondition.create(profileType,inviteInfo))
+                )
+            }
         }
     }
 

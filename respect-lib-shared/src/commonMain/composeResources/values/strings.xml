@@ -42,9 +42,9 @@
     <string name="supported_by">Supported by:</string>
     <string name="network_powered_by">Network powered by:</string>
     <string name="enter_invite_code_message">Enter the code provided by your teacher or school admin</string>
-    <string name="invite_code_label">Invite Code</string>
-    <string name="enter_code_label">Enter invite Code</string>
-    <string name="invalid_invite_code">Please enter a valid code</string>
+    <string name="invite_code_label">Invite code</string>
+    <string name="enter_code_label">Enter invite code</string>
+    <string name="invalid_invite_code">Invalid code, try again</string>
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
     <string name="userid_required">UserId required</string>
@@ -80,6 +80,7 @@
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="username_required">Username is required</string>
+    <string name="required">Required*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
@@ -94,6 +95,7 @@
     <string name="female">Female</string>
     <string name="other">Other</string>
     <string name="gender">Gender</string>
+    <string name="unspecified">Unspecified</string>
 
 
     <string name="phone_memory">Phone memory</string>
@@ -105,4 +107,36 @@
     <string name="remove_picture">Remove picture</string>
 
     <string name="select_date">Select date</string>
+
+    <string name="lets_get_started">Let's get started</string>
+    <string name="enter_school_name">School name</string>
+    <string name="school_name_placeholder">Type school name here...</string>
+    <string name="i_have_an_invite_code">I have an invite code</string>
+    <string name="invalid_school_name">Invalid school name</string>
+    <string name="school_not_exist_error">This school does not exists</string>
+
+    <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
+    <string name="paste_link_here">Paste the link here</string>
+    <string name="invalid_code">Invalid link, try again</string>
+    <string name="passkey_title">Passwordless sign-in with passkeys</string>
+    <string name="how_passkey_works">How passkeys work?</string>
+
+    <string name="passkey_q1">What are passkeys?</string>
+    <string name="passkey_a1">Passkeys are encrypted digital keys you create using your fingerprint, face or other screen-lock method.</string>
+
+    <string name="passkey_q2">Where are passkeys saved?</string>
+    <string name="passkey_a2">They are saved to your password manager, so you can sign in on other devices.</string>
+
+    <string name="passkey_q3">Are they better than passwords?</string>
+    <string name="passkey_a3">Passkeys protect you from phishing attacks. Passkeys work only on your registered apps and websites, and your password manager protects passkeys from unauthorized access and use.</string>
+    <string name="signing_in">Signing in</string>
+    <string name="passkey_description">A passkey is a faster and safe way to sign in than a password.Your account is created with one unless you choose another option.</string>
+    <string name="sign_up">Sign-up</string>
+    <string name="other_way_to_sign_in">Other way to sign-in</string>
+
+    <string name="sign_up_with_password">Sign up with a password</string>
+    <string name="sign_in_faster">Sign in faster next time</string>
+    <string name="sign_in_faster_description">You can sign in securely with your passkey using your fingerprints, face or other screen-lock method.</string>
+    <string name="sign_up_with_passkey">Sign up with a passkey</string>
+
 </resources>

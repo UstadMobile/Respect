@@ -74,16 +74,4 @@ class JoinClazzWithCodeViewModel(
             }
         }
     }
-
-    fun onClickAlreadyHaveAccount() {
-        viewModelScope.launch {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(LoginScreen)
-            )
-        }
-    }
-
-    fun onClickAddMySchool() {
-
-    }
 }

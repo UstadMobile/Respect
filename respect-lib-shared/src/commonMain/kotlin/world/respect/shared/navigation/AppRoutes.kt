@@ -41,6 +41,12 @@ object Assignment : RespectAppRoute
 object Clazz : RespectAppRoute
 
 @Serializable
+object AddClazz : RespectAppRoute
+
+@Serializable
+object ClazzDetail : RespectAppRoute
+
+@Serializable
 object Report : RespectAppRoute
 
 @Serializable
@@ -48,6 +54,9 @@ object RespectAppList : RespectAppRoute
 
 @Serializable
 object EnterLink : RespectAppRoute
+
+@Serializable
+object AddPersonToClazz : RespectAppRoute
 
 /**
  * @property manifestUrl the URL to the RespectAppManifest for the given Respect compatible app
@@ -260,4 +269,8 @@ class LearningUnitViewer(
     }
 
 }
+
+
+
+
 

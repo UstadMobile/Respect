@@ -12,7 +12,11 @@ import world.respect.app.view.apps.enterlink.EnterLinkScreen
 import world.respect.app.view.apps.launcher.AppLauncherScreen
 import world.respect.app.view.apps.list.AppListScreen
 import world.respect.app.view.assignments.AssignmentScreen
-import world.respect.app.view.clazz.ClazzScreen
+import world.respect.app.view.clazz.list.ClazzListScreen
+import world.respect.app.view.clazz.addclazz.AddClazzScreen
+import world.respect.app.view.clazz.detail.ClazzDetailScreen
+import world.respect.app.view.clazz.addperson.AddPersonToClazzScreen
+import world.respect.app.view.report.ReportScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
 import world.respect.app.view.manageuser.signup.SignupScreen
@@ -22,13 +26,25 @@ import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
-import world.respect.app.view.report.ReportScreen
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
+import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
+import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
+import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
+import world.respect.shared.viewmodel.apps.list.AppListViewModel
+import world.respect.shared.viewmodel.assignments.AssignmentViewModel
+import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
+import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.Acknowledgement
+import world.respect.shared.navigation.AddClazz
+import world.respect.shared.navigation.AddPersonToClazz
+import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.Assignment
 import world.respect.shared.navigation.Clazz
+import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.JoinClazzWithCode
@@ -37,28 +53,21 @@ import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.Report
-import world.respect.shared.navigation.RespectAppLauncher
-import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.RespectComposeNavController
+import world.respect.shared.viewmodel.clazz.addclazz.AddClazzViewModel
+import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
+import world.respect.shared.viewmodel.clazz.student.AddPersonToClazzViewModel
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.app.appstate.AppUiState
-import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
-import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
-import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
-import world.respect.shared.viewmodel.apps.list.AppListViewModel
-import world.respect.shared.viewmodel.assignments.AssignmentViewModel
-import world.respect.shared.viewmodel.clazz.ClazzViewModel
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
 import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 
 
@@ -77,6 +86,7 @@ fun AppNavHost(
         startDestination = Acknowledgement,
         modifier = modifier,
     ) {
+
         composable<Acknowledgement> {
             val viewModel: AcknowledgementViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -84,6 +94,7 @@ fun AppNavHost(
             )
             AcknowledgementScreen(viewModel)
         }
+
         composable<LoginScreen> {
             val viewModel: LoginViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -99,12 +110,12 @@ fun AppNavHost(
             )
             JoinClazzWithCodeScreen(viewModel)
         }
+
         composable<RespectAppLauncher> {
             val viewModel: AppLauncherViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController,
             )
-
             AppLauncherScreen(
                 viewModel = viewModel
             )
@@ -132,11 +143,33 @@ fun AppNavHost(
         }
 
         composable<Clazz> {
-            val viewModel: ClazzViewModel = respectViewModel(
+            val viewModel: ClazzListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ClazzScreen(navController = navController, viewModel = viewModel)
+            ClazzListScreen(
+                viewModel = viewModel
+            )
+        }
+
+        composable<AddClazz> {
+            val viewModel: AddClazzViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            AddClazzScreen(
+                viewModel = viewModel
+            )
+        }
+
+        composable<ClazzDetail> {
+            val viewModel: ClazzDetailViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ClazzDetailScreen(
+                viewModel = viewModel
+            )
         }
 
         composable<Report> {
@@ -152,7 +185,9 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            AppListScreen(viewModel = viewModel)
+            AppListScreen(
+                viewModel = viewModel
+            )
         }
 
         composable<EnterLink> {
@@ -160,7 +195,9 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            EnterLinkScreen(viewModel = viewModel)
+            EnterLinkScreen(
+                viewModel = viewModel
+            )
         }
 
         composable<LearningUnitList> {
@@ -168,7 +205,9 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            LearningUnitListScreen( viewModel = viewModel)
+            LearningUnitListScreen(
+                viewModel = viewModel
+            )
         }
 
         composable<LearningUnitDetail> {
@@ -176,9 +215,20 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            LearningUnitDetailScreen(viewModel = viewModel)
+            LearningUnitDetailScreen(
+                viewModel = viewModel
+            )
         }
 
+        composable<AddPersonToClazz> {
+            val viewModel: AddPersonToClazzViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            AddPersonToClazzScreen(
+                viewModel = viewModel
+            )
+        }
 
         composable<SignupScreen> {
             val viewModel: SignupViewModel = respectViewModel(
@@ -186,43 +236,50 @@ fun AppNavHost(
                 navController = respectNavController
             )
             SignupScreen(
-                viewModel = viewModel)
+                viewModel = viewModel
+            )
         }
+
         composable<ConfirmationScreen> {
             val viewModel: ConfirmationViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
             ConfirmationScreen(
-
-                viewModel = viewModel)
+                viewModel = viewModel
+            )
         }
+
         composable<TermsAndCondition> {
             val viewModel: TermsAndConditionViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
             TermsAndConditionScreen(
-                viewModel = viewModel)
+                viewModel = viewModel
+            )
         }
+
         composable<CreateAccount> {
             val viewModel: CreateAccountViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
             CreateAccountScreen(
-                viewModel = viewModel)
+                viewModel = viewModel
+            )
         }
+
         composable<WaitingForApproval> {
             val viewModel: WaitingForApprovalViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
             WaitingForApprovalScreen(
-                viewModel = viewModel)
+                viewModel = viewModel
+            )
         }
     }
-
 }
 
 

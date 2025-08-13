@@ -38,7 +38,36 @@ object RespectAppLauncher : RespectAppRoute
 object Assignment : RespectAppRoute
 
 @Serializable
-object Clazz : RespectAppRoute
+object ClazzList : RespectAppRoute
+
+@Serializable
+class ClazzDetail(
+    val sourcedId: String,
+) : RespectAppRoute {
+
+    companion object {
+        fun create(
+            sourcedId: String
+        ) = ClazzDetail(
+            sourcedId = sourcedId
+        )
+    }
+}
+
+
+@Serializable
+class ClazzEdit(
+    val sourcedId: String?,
+) : RespectAppRoute {
+
+    companion object {
+        fun create(
+            sourcedId: String?
+        ) = ClazzEdit(
+            sourcedId = sourcedId
+        )
+    }
+}
 
 @Serializable
 object Report : RespectAppRoute
@@ -48,6 +77,9 @@ object RespectAppList : RespectAppRoute
 
 @Serializable
 object EnterLink : RespectAppRoute
+
+@Serializable
+object AddPersonToClazz : RespectAppRoute
 
 /**
  * @property manifestUrl the URL to the RespectAppManifest for the given Respect compatible app
@@ -260,4 +292,8 @@ class LearningUnitViewer(
     }
 
 }
+
+
+
+
 

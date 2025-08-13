@@ -33,7 +33,6 @@ import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignments.AssignmentViewModel
-import world.respect.shared.viewmodel.clazz.ClazzViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
@@ -58,12 +57,16 @@ import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
 import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
+import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
 import world.respect.shared.domain.storage.GetOfflineStorageSettingUseCase
 import java.io.File
 import kotlinx.io.files.Path
+import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import org.koin.core.qualifier.named
 import world.respect.shared.domain.account.RespectAccountManager
 
@@ -128,10 +131,13 @@ val appKoinModule = module {
     viewModelOf(::EnterLinkViewModel)
     viewModelOf(::AppListViewModel)
     viewModelOf(::AssignmentViewModel)
-    viewModelOf(::ClazzViewModel)
+    viewModelOf(::ClazzListViewModel)
+    viewModelOf(::ClazzEditViewModel)
+    viewModelOf(::ClazzDetailViewModel)
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
+    viewModelOf(::AddPersonToClazzViewModel)
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::JoinClazzWithCodeViewModel)
     viewModelOf(::LoginViewModel)
@@ -229,7 +235,7 @@ val appKoinModule = module {
                     respectDatabase = Room.databaseBuilder<RespectDatabase>(
                         appContext, appContext.getDatabasePath("respect.db").absolutePath
                     ).setDriver(BundledSQLiteDriver())
-                    .build(),
+                        .build(),
                     json = get(),
                     xxStringHasher = get(),
                     primaryKeyGenerator = PrimaryKeyGenerator(RespectDatabase.TABLE_IDS),

@@ -16,7 +16,7 @@ import world.respect.shared.util.initial
 @Composable
 fun RespectPersonAvatar(
     name: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.defaultAvatarSize(),
     fontScale: Float = 1.0f,
 ) {
     Box(

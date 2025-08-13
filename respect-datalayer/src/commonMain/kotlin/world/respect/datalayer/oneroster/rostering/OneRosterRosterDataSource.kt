@@ -11,6 +11,7 @@ interface OneRosterRosterDataSource {
     suspend fun putUser(user: OneRosterUser)
 
     suspend fun getAllClasses(): List<OneRosterClass>
+    suspend fun getClassBySourcedId(sourcedId: String): OneRosterClass
 
     suspend fun putClass(clazz: OneRosterClass)
 

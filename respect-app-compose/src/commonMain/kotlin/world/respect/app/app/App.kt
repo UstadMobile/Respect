@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.material3.Icon
@@ -36,11 +37,11 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.report
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.Assignment
-import world.respect.shared.navigation.Clazz
+import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.Report
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -64,9 +65,9 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         label = Res.string.assignments
     ),
     TopNavigationItem(
-        destRoute = Clazz,
+        destRoute = ClazzList,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = Res.string.clazz
+        label = Res.string.classes
     ),
     TopNavigationItem(
         destRoute = Report,
@@ -152,6 +153,7 @@ fun App(
                         icon = {
                             val imageVector = when (appUiStateVal.fabState.icon) {
                                 FabUiState.FabIcon.ADD -> Icons.Default.Add
+                                FabUiState.FabIcon.EDIT -> Icons.Default.Edit
                                 else -> null
                             }
                             if (imageVector != null) {

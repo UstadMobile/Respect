@@ -26,6 +26,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.respectDatalayer)
+            api(projects.respectCredentials)
             api(projects.respectLibUtil)
             implementation(projects.respectLibCache)
 

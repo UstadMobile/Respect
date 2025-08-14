@@ -2,7 +2,9 @@ appId: world.respect.app
 ---
 - clearState:  world.respect.app
 - launchApp
-- tapOn: "I already have an account"
+- tapOn: "School name"
+- inputText: "respect"
+- tapOn: "respect school"   #choose from school list
 - tapOn: "UserId"
 - inputText: "admin"
 - tapOn: "Password"

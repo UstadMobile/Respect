@@ -14,12 +14,14 @@ import world.respect.datalayer.db.opds.daos.OpdsFeedEntityDao
 import world.respect.datalayer.db.opds.daos.OpdsFeedMetadataEntityDao
 import world.respect.datalayer.db.opds.daos.OpdsGroupEntityDao
 import world.respect.datalayer.db.opds.daos.OpdsPublicationEntityDao
+import world.respect.datalayer.db.opds.daos.PersonPasskeyEntityDao
 import world.respect.datalayer.db.opds.daos.ReadiumLinkEntityDao
 import world.respect.datalayer.db.opds.entities.OpdsFacetEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
 import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
 import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
+import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.shared.SharedConverters
@@ -38,6 +40,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
         OpdsFeedEntity::class,
         OpdsFeedMetadataEntity::class,
         CompatibleAppAddJoin::class,
+        PersonPasskeyEntity::class,
     ],
     version = 1,
 )
@@ -61,6 +64,8 @@ abstract class RespectDatabase: RoomDatabase() {
 
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
+    abstract fun getPersonPasskeyDao(): PersonPasskeyEntityDao
+
     companion object {
 
         val TABLE_IDS = listOf(
@@ -69,6 +74,7 @@ abstract class RespectDatabase: RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
+            PersonPasskeyEntity.TABLE_ID,
         )
 
     }

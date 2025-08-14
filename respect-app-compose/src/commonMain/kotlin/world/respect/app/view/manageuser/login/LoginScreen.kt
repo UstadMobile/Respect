@@ -53,6 +53,9 @@ fun LoginScreen(
             .fillMaxSize()
             .defaultScreenPadding()
     ) {
+        uiState.errorText?.let {
+            Text(it)
+        }
         OutlinedTextField(
             value = uiState.userId,
             onValueChange = onUserIdChanged,

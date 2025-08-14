@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.navigation.JoinClazzWithCode
+import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -31,7 +31,7 @@ class AcknowledgementViewModel(
             }
             delay(2000)
             _navCommandFlow.tryEmit(
-                NavCommand.Navigate(JoinClazzWithCode,clearBackStack = true)
+                NavCommand.Navigate(GetStartedScreen,clearBackStack = true)
             )
         }
     }

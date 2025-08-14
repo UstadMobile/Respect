@@ -21,6 +21,11 @@ import world.respect.app.view.manageuser.joinclazzwithcode.JoinClazzWithCodeScre
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
+import world.respect.app.view.manageuser.enterpasswordsignup.EnterPasswordSignupScreen
+import world.respect.app.view.manageuser.getstarted.GetStartedScreen
+import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
+import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
+import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.report.ReportScreen
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -41,6 +46,11 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.navigation.CreateAccount
+import world.respect.shared.navigation.EnterPasswordSignup
+import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.HowPasskeyWorks
+import world.respect.shared.navigation.OtherOption
+import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -53,8 +63,13 @@ import world.respect.shared.viewmodel.clazz.ClazzViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
+import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
+import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
+import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
+import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
@@ -147,6 +162,13 @@ fun AppNavHost(
             ReportScreen(navController = navController, viewModel = viewModel)
         }
 
+        composable<HowPasskeyWorks> {
+            val viewModel: HowPasskeyWorksViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            HowPasskeyWorksScreen(viewModel = viewModel)
+        }
         composable<RespectAppList> {
             val viewModel: AppListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -154,7 +176,6 @@ fun AppNavHost(
             )
             AppListScreen(viewModel = viewModel)
         }
-
         composable<EnterLink> {
             val viewModel: EnterLinkViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -163,12 +184,44 @@ fun AppNavHost(
             EnterLinkScreen(viewModel = viewModel)
         }
 
+        composable<GetStartedScreen> {
+            val viewModel: GetStartedViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            GetStartedScreen(viewModel = viewModel)
+        }
+
+        composable<OtherOption> {
+            val viewModel: OtherOptionsViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            OtherOptionsScreen(viewModel = viewModel)
+        }
+
         composable<LearningUnitList> {
             val viewModel: LearningUnitListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
             LearningUnitListScreen( viewModel = viewModel)
+        }
+
+        composable<OtherOptionsSignup> {
+            val viewModel: OtherOptionsSignupViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            OtherOptionsSignupScreen( viewModel = viewModel)
+        }
+
+        composable<EnterPasswordSignup> {
+            val viewModel: EnterPasswordSignupViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            EnterPasswordSignupScreen( viewModel = viewModel)
         }
 
         composable<LearningUnitDetail> {

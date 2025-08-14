@@ -15,6 +15,7 @@ import world.respect.shared.generated.resources.*
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.CreateAccount
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -148,19 +149,14 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.PARENT, ProfileType.STUDENT -> {
-                        viewModelScope.launch {
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(CreateAccount.create(route.type,route.inviteInfo))
                             )
-                        }
                     }
                     ProfileType.CHILD ->{
-                        // not cleared where to navigate
-//                        viewModelScope.launch {
-//                            _navCommandFlow.tryEmit(
-//                                NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,))
-//                            )
-//                        }
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,route.uid?:""))
+                            )
                     }
                 }
             }

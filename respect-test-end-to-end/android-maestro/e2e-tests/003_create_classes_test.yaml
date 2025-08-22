@@ -1,0 +1,73 @@
+appId: world.respect.app
+---
+- clearState:  world.respect.app
+- launchApp
+- tapOn: "Other options"
+- tapOn: "Enter invite link"
+- inputText: "http://192.168.0.168:8087"
+- tapOn: "Next"
+- tapOn: "UserId"
+- inputText: "admin"
+- tapOn: "Password"
+- inputText: "testpass"
+- tapOn:
+    text: "Login"
+    index: 1
+- assertVisible:
+      id: "app_title"
+      text: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn:
+    id: "floating_action_button"   #  +Class button
+- assertVisible:
+    id: "app_title"
+    text: "Add class"
+- tapOn: "Class name"
+- inputText: "New Class"
+- tapOn: "Description"
+- inputText: "New Course Description"
+- tapOn: "Start date"
+- inputText: "12/01/2023"
+- tapOn: "End date"
+- inputText: "12/02/2025"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "New Class"
+- tapOn: "New Class"
+- assertVisible:
+    id: "app_title"
+    text: "New Class"
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit class"
+- tapOn: "New Class"
+- eraseText
+- inputText: "New Class Edited"
+- tapOn: "Save"
+- assertVisible:
+      id: "app_title"
+      text: "Classes"
+- assertVisible: "New Class Edited"
+- tapOn: "New Class Edited"
+- assertVisible: "Description"
+- assertVisible: "New Course Description"
+- assertVisible: "Start date"
+- assertVisible: "12/01/2023"
+- assertVisible: "End date"
+- assertVisible: "12/02/2025"
+- assertVisible: "Teachers"
+- assertVisible: "+ Add teacher"
+- assertVisible: "Students"
+- assertVisible: "+ Add student"
+
+
+
+
+

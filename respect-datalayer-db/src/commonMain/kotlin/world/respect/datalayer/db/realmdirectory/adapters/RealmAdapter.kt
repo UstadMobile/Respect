@@ -27,6 +27,7 @@ fun DataReadyState<RespectRealm>.toEntities(
             reLastMod = metaInfo.lastModified,
             reEtag = metaInfo.etag,
             reRespectExt = data.respectExt,
+            reRpId = data.rpId
         ),
         langMapEntities = data.name.asEntities(
             lmeTopParentType = LangMapEntity.TopParentType.RESPECT_REALM,
@@ -45,6 +46,7 @@ fun RespectRealmEntities.toModel() : DataReadyState<RespectRealm> {
             oneRoster = realm.reOneRoster,
             respectExt = realm.reRespectExt,
             name = langMapEntities.toModel(),
+            rpId = realm.reRpId,
         ),
         metaInfo = DataLoadMetaInfo(
             lastModified = realm.reLastMod,

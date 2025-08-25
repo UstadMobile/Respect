@@ -84,18 +84,14 @@ class EnterPasswordSignupViewModel(
             val result = submitRedeemInviteRequestUseCase(redeemRequest)
             when (route.type) {
                 ProfileType.CHILD , ProfileType.STUDENT->{
-                    viewModelScope.launch {
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,result.uid))
                         )
-                    }
                 }
                 ProfileType.PARENT ->{
-                    viewModelScope.launch {
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.inviteInfo))
                         )
-                    }
                 }
             }
 

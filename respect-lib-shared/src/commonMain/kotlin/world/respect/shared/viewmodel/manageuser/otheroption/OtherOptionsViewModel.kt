@@ -59,7 +59,7 @@ class OtherOptionsViewModel(
          try {
              _navCommandFlow.tryEmit(
                  NavCommand.Navigate(
-                     LoginScreen.create(Url(link))
+                     LoginScreen.create(Url(link),null)
                  )
              )
          }catch(e: Throwable){

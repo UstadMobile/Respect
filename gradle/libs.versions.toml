@@ -112,8 +112,8 @@ napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver"}
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin"}
 androidx-lifecycle-common-java8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "androidx-lifecycle"}
-credentials-androidx = { module = "androidx.credentials:credentials", version.ref = "androidx-credentials" }
-credentialsplay = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidx-credentials" }
+androidx-credentials-play-service-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

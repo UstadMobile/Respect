@@ -53,15 +53,14 @@ class LoginViewModel(
         }
         viewModelScope.launch {
 
-            viewModelScope.launch {
-                try {
-                    when (val credentialResult = getCredentialUseCase()) {
+            try {
+                val rpId =route.rpId
+                if (rpId!=null){
+                    when (val credentialResult = getCredentialUseCase(rpId)) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
-                            viewModelScope.launch {
-                                _navCommandFlow.tryEmit(
-                                    NavCommand.Navigate(RespectAppLauncher)
-                                )
-                            }
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(RespectAppLauncher)
+                            )
                         }
 
                         is GetCredentialUseCase.PasswordCredentialResult -> {
@@ -77,14 +76,15 @@ class LoginViewModel(
                         }
 
                         is GetCredentialUseCase.NoCredentialAvailableResult,
-                        is GetCredentialUseCase.UserCanceledResult-> {
+                        is GetCredentialUseCase.UserCanceledResult -> {
                             //do nothing
                         }
 
                     }
-                } catch (e: Exception) {
-                   println( "Error occurred: ${e.message}")
+
                 }
+            } catch (e: Exception) {
+                println("Error occurred: ${e.message}")
             }
         }
     }

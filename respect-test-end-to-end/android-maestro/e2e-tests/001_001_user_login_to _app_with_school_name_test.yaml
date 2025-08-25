@@ -1,0 +1,25 @@
+appId: world.respect.app
+---
+- clearState:  world.respect.app
+- launchApp
+- assertVisible:
+    id: "app_title"
+    text: "Let's get started"
+- tapOn: "School name"
+- inputText: "https://testschool.com/"
+- tapOn: "https://testschool.com/"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "UserId"
+- inputText: "admin"
+- tapOn: "Password"
+- inputText: "secret"
+- tapOn:
+      text: "Login"
+      index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+
+

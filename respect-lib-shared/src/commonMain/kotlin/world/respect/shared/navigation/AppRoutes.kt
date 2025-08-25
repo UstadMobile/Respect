@@ -31,13 +31,17 @@ object JoinClazzWithCode : RespectAppRoute
 @Serializable
 data class LoginScreen (
     val realmUrlStr: String,
+    val realmRpId: String?
 ) : RespectAppRoute {
 
     @Transient
     val realmUrl = Url(realmUrlStr)
 
+    @Transient
+    val rpId = realmRpId
+
     companion object {
-        fun create(realmUrl: Url) = LoginScreen(realmUrl.toString())
+        fun create(realmUrl: Url,realmRpId: String?) = LoginScreen(realmUrl.toString(),realmRpId)
     }
 
 }

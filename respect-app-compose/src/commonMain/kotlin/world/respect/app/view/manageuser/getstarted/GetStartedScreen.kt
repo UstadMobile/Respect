@@ -96,7 +96,7 @@ fun GetStartedScreen(
                     },
                     supportingContent = {
                         Text(
-                            text = school.url,
+                            text = school.realm.self.toString(),
                             maxLines = 1
                         )
                     },

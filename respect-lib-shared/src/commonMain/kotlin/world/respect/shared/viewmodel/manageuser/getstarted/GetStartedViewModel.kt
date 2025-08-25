@@ -1,12 +1,12 @@
 package world.respect.shared.viewmodel.manageuser.getstarted
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import world.respect.datalayer.opds.model.LangMapStringValue
+import world.respect.datalayer.respect.model.RespectRealm
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
 import world.respect.shared.generated.resources.school_not_exist_error
@@ -25,13 +25,13 @@ class GetStartedViewModel(
 
     private val _uiState = MutableStateFlow(GetStartedUiState())
     val uiState = _uiState.asStateFlow()
-
     private val schoolList = listOf(
-        School("respect school", "https://testproxy.devserver3.ustadmobile.com/"),
-        School("respect 2 school", "https://respect2.com"),
-        School("spix school", "https://spix.com"),
-        School("ustad school", "https://ustad.com"),
+        buildSchool("respect school", "ustadtesting.ustadmobile.com"),
+        buildSchool("respect 2 school", "respect2.com"),
+        buildSchool("spix school", "spix.com"),
+        buildSchool("ustad school", "ustad.com")
     )
+
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -62,31 +62,40 @@ class GetStartedViewModel(
     }
 
     fun onClickIHaveCode() {
-        viewModelScope.launch {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(JoinClazzWithCode)
-            )
-        }
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(JoinClazzWithCode)
+        )
     }
 
     fun onSchoolSelected(school: School) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                LoginScreen.create(Url(school.url))
+                LoginScreen.create(school.realm.self,school.realm.rpId)
             )
         )
     }
 
     fun onClickOtherOptions() {
-        viewModelScope.launch {
-            _navCommandFlow.tryEmit(NavCommand.Navigate(OtherOption))
-        }
+        _navCommandFlow.tryEmit(NavCommand.Navigate(OtherOption))
     }
 
 }
+private fun buildSchool(name: String, domain: String): School {
+    return School(
+        name = name,
+        realm = RespectRealm(
+            name = LangMapStringValue("Respect Demo School"),
+            self = Url("https://$domain"),
+            xapi = Url("https://$domain/xapi"),
+            oneRoster = Url("https://$domain/oneroster"),
+            respectExt = Url("https://$domain/respect"),
+            rpId = domain
+        )
+    )
+}
 data class School(
     val name: String,
-    val url: String
+    val realm: RespectRealm
 )
 data class GetStartedUiState(
     val schoolName: String = "",

@@ -2,16 +2,20 @@ appId: world.respect.app
 ---
 - clearState:  world.respect.app
 - launchApp
-- tapOn: "School name"
-- inputText: "respect"
-- tapOn: "respect school"   #choose from school list
+- tapOn: "Other options"
+- tapOn: "Paste the link here"
+- inputText: "http://192.168.0.168:8087/"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
 - tapOn: "UserId"
 - inputText: "admin"
 - tapOn: "Password"
-- inputText: "testpass"
+- inputText: "secret"
 - tapOn:
-      text: "Login"
-      index: 1
+    text: "Login"
+    index: 1
 - assertVisible:
     id: "app_title"
     text: "Apps"

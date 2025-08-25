@@ -16,6 +16,8 @@ import world.respect.datalayer.opds.model.LangMap
  * @property oneRoster URL to OneRoster endpoint e.g. https://school.example.org/api/oneroster/
  * @property respectExt URL to Respect extensions endpoint (if available). Required for invites etc
  *           e.g. https://school.example.org/api/respect/.
+ * @property rpId the domain for signup and login with passkey
+ *
  */
 @Serializable
 data class RespectRealm(
@@ -24,4 +26,5 @@ data class RespectRealm(
     val xapi: Url,
     val oneRoster: Url,
     val respectExt: Url?,
+    val rpId: String?,
 )

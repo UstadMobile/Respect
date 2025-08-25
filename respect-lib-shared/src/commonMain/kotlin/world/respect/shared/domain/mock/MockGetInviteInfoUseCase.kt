@@ -18,6 +18,7 @@ class MockGetInviteInfoUseCase : GetInviteInfoUseCase {
                 xapi = Url("https://example.org/xapi"),
                 oneRoster = Url("https://example.org/oneroster"),
                 respectExt = Url("https://example.org/respect-ext"),
+                rpId = null,
             ),
             classGUIDRef = OneRosterClassGUIDRef(
                 href = Uri.parse("https://mockserver.respect.world/class/123"),

@@ -150,18 +150,14 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.PARENT, ProfileType.STUDENT -> {
-                        viewModelScope.launch {
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(CreateAccount.create(route.type,route.inviteInfo))
                             )
-                        }
                     }
                     ProfileType.CHILD ->{
-                        viewModelScope.launch {
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,route.uid?:""))
                             )
-                        }
                     }
                 }
             }

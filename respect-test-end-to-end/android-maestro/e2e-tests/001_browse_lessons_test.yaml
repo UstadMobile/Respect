@@ -6,9 +6,9 @@ appId: world.respect.app
 - inputText: "respect"
 - tapOn: "respect school"   #choose from school list
 - tapOn: "UserId"
-- inputText: "admin"
+- inputText: ${SCHOOL_ADMIN_USER}
 - tapOn: "Password"
-- inputText: "testpass"
+- inputText: ${SCHOOL_ADMIN_PASS}
 - tapOn:
       text: "Login"
       index: 1

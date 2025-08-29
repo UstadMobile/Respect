@@ -21,6 +21,8 @@ kotlin {
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
+            api(libs.paging.multiplatform.common)
+
         }
 
         jvmMain.dependencies {

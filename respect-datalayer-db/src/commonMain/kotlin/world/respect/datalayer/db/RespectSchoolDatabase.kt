@@ -5,6 +5,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import world.respect.datalayer.db.oneroaster.dao.OneRoasterEntityDao
+import world.respect.datalayer.db.oneroaster.entities.OneRosterUserEntity
+import world.respect.datalayer.db.oneroster.entities.OneRosterClassEntity
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao
 import world.respect.datalayer.db.school.daos.PersonEntityDao
@@ -25,6 +28,8 @@ import world.respect.datalayer.db.shared.SharedConverters
         PersonRoleEntity::class,
         PersonPasswordEntity::class,
         AuthTokenEntity::class,
+        OneRosterClassEntity::class,
+        OneRosterUserEntity::class,
     ],
     version = 1,
 
@@ -41,10 +46,13 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getPersonRoleEntityDao(): PersonRoleEntityDao
 
+    abstract fun getOneRoasterEntityDao(): OneRoasterEntityDao
+
 }
 
 // The Room compiler generates the `actual` implementations.
-@Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
+@Suppress(
+    "NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
     "KotlinNoActualForExpect"
 )
 expect object RespectSchoolDatabaseConstructor : RoomDatabaseConstructor<RespectSchoolDatabase> {

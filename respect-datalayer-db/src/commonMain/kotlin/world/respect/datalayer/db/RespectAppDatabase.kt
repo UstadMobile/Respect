@@ -59,7 +59,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 )
 @TypeConverters(SharedConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)
-abstract class RespectAppDatabase: RoomDatabase() {
+abstract class RespectAppDatabase : RoomDatabase() {
 
     abstract fun getCompatibleAppEntityDao(): CompatibleAppEntityDao
 
@@ -83,6 +83,8 @@ abstract class RespectAppDatabase: RoomDatabase() {
 
     abstract fun getSchoolDirectoryEntityDao(): SchoolDirectoryEntityDao
 
+
+
     companion object {
 
         val TABLE_IDS = listOf(
@@ -97,7 +99,8 @@ abstract class RespectAppDatabase: RoomDatabase() {
 }
 
 // The Room compiler generates the `actual` implementations.
-@Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
+@Suppress(
+    "NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
     "KotlinNoActualForExpect"
 )
 expect object RespectAppDatabaseConstructor : RoomDatabaseConstructor<RespectAppDatabase> {

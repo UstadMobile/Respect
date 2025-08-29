@@ -1,23 +1,38 @@
 package world.respect.datalayer.oneroster
 
-import world.respect.datalayer.oneroster.rostering.OneRosterRosterDataSource
+import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.oneroster.model.OneRosterClass
+import world.respect.datalayer.oneroster.model.OneRosterEnrollment
+import world.respect.datalayer.oneroster.model.OneRosterUser
+import world.respect.datalayer.oneroster.composites.ClazzListDetails
 
-/**
- * As per the spec (section 2):
- * https://www.imsglobal.org/spec/oneroster/v1p2
- *
- * There are three services: Rostering Service, Gradebook Service, and Resource Service.
- *
- * The Rostering Service is read-only: RESPECT users can either:
- *  a) Use the respect-server app API such that authorized users can write data (e.g. use the app to
- *     invite students to a class)
- *  or
- *  b) Use a different upstream rostering service (any server that implements OneRoster 1.2 rostering
- *     service), in which case the rostering information editing (eg. enrolments, adding users, etc)
- *     must be performed using the upstream service.
- */
 interface OneRosterDataSource {
 
-    val rosterService: OneRosterRosterDataSource
+    suspend fun getAllUsers(): List<OneRosterUser>
+
+    suspend fun putUser(user: OneRosterUser)
+
+    suspend fun getAllClasses(): List<OneRosterClass>
+    suspend fun getClassBySourcedId(sourcedId: String): OneRosterClass
+
+    suspend fun findClassBySourcedId(
+        loadParams: DataLoadParams,
+        sourcedId: String
+    ): DataLoadState<OneRosterClass>
+
+    suspend fun findClassBySourcedIdAsFlow(guid: String): Flow<DataLoadState<OneRosterClass>>
+
+    suspend fun putClass(clazz: OneRosterClass)
+
+    suspend fun getEnrolmentsByClass(classSourcedId: String)
+
+    suspend fun putEnrollment(enrollment: OneRosterEnrollment)
+
+    suspend fun findAll(
+        loadParams: DataLoadParams,
+        searchQuery: String? = null,
+    ): Flow<DataLoadState<List<ClazzListDetails>>>
 
 }

@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.oneroster.OneRosterDataSource
 import world.respect.datalayer.school.PersonDataSource
 
 /**
@@ -12,4 +13,5 @@ interface SchoolDataSource {
 
     val personDataSource: PersonDataSource
 
+    val onRoasterDataSource: OneRosterDataSource
 }

@@ -1,7 +1,7 @@
 package world.respect.shared.domain.account.createinviteredeemrequest
 
 import kotlinx.datetime.LocalDate
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
+import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
 

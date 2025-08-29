@@ -1,7 +1,7 @@
 package world.respect.datalayer.respect.model.invite
 
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.oneroster.rostering.model.OneRosterClassGUIDRef
+import world.respect.datalayer.oneroster.model.OneRosterClassGUIDRef
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 
 /**

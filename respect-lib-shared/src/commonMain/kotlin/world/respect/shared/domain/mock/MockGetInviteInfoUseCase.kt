@@ -1,12 +1,12 @@
 package world.respect.shared.domain.mock
 
-import world.respect.datalayer.oneroster.rostering.model.OneRosterClassGUIDRef
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.oneroster.model.OneRosterClassGUIDRef
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
 import world.respect.datalayer.opds.model.LangMapStringValue
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 
 class MockGetInviteInfoUseCase : GetInviteInfoUseCase {
     override suspend fun invoke(code: String): RespectInviteInfo {

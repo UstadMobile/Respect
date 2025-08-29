@@ -7,6 +7,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
@@ -49,7 +50,40 @@ object RespectAppLauncher : RespectAppRoute
 object Assignment : RespectAppRoute
 
 @Serializable
-object Clazz : RespectAppRoute
+object ClazzList : RespectAppRoute
+
+@Serializable
+class ClazzDetail(
+    val sourcedId: String,
+) : RespectAppRoute {
+
+    companion object {
+        fun create(
+            sourcedId: String
+        ) = ClazzDetail(
+            sourcedId = sourcedId
+        )
+    }
+}
+
+@Serializable
+class AddPersonToClazz(
+    val roleType: OneRosterRoleEnum
+) : RespectAppRoute {
+    companion object {
+        fun create(
+            roleType: OneRosterRoleEnum
+        ) = AddPersonToClazz(
+            roleType = roleType
+        )
+    }
+}
+
+
+@Serializable
+data class ClazzEdit(
+    val sourcedId: String?
+) : RespectAppRoute
 
 @Serializable
 object Report : RespectAppRoute
@@ -120,6 +154,7 @@ class LearningUnitList(
     }
 
 }
+
 @Serializable
 class EnterPasswordSignup private constructor(
     private val usernameStr: String,
@@ -135,11 +170,16 @@ class EnterPasswordSignup private constructor(
 
     @Transient
     val inviteInfo: RespectInviteInfo = Json.decodeFromString(inviteInfoJson)
+
     companion object {
 
-        fun create(username: String,profileType: ProfileType, inviteInfo: RespectInviteInfo): EnterPasswordSignup {
+        fun create(
+            username: String,
+            profileType: ProfileType,
+            inviteInfo: RespectInviteInfo
+        ): EnterPasswordSignup {
             val inviteJson = Json.encodeToString(inviteInfo)
-            return EnterPasswordSignup(username,profileType, inviteJson)
+            return EnterPasswordSignup(username, profileType, inviteJson)
         }
 
     }
@@ -160,11 +200,16 @@ class OtherOptionsSignup private constructor(
 
     @Transient
     val inviteInfo: RespectInviteInfo = Json.decodeFromString(inviteInfoJson)
+
     companion object {
 
-        fun create(username: String,profileType: ProfileType, inviteInfo: RespectInviteInfo): OtherOptionsSignup {
+        fun create(
+            username: String,
+            profileType: ProfileType,
+            inviteInfo: RespectInviteInfo
+        ): OtherOptionsSignup {
             val inviteJson = Json.encodeToString(inviteInfo)
-            return OtherOptionsSignup(username,profileType, inviteJson)
+            return OtherOptionsSignup(username, profileType, inviteJson)
         }
 
     }
@@ -193,15 +238,21 @@ class WaitingForApproval(
 
     @Transient
     val type = profileType
+
     @Transient
     val uid = pendingInviteStateUid
+
     @Transient
     val inviteInfo: RespectInviteInfo = Json.decodeFromString(inviteInfoJson)
 
     companion object {
-        fun create(profileType: ProfileType, inviteInfo: RespectInviteInfo,pendingInviteStateUid:String): WaitingForApproval {
+        fun create(
+            profileType: ProfileType,
+            inviteInfo: RespectInviteInfo,
+            pendingInviteStateUid: String
+        ): WaitingForApproval {
             val inviteJson = Json.encodeToString(inviteInfo)
-            return WaitingForApproval(profileType, inviteJson,pendingInviteStateUid)
+            return WaitingForApproval(profileType, inviteJson, pendingInviteStateUid)
         }
     }
 }
@@ -216,15 +267,21 @@ class SignupScreen(
 
     @Transient
     val type = profileType
+
     @Transient
     val uid = pendingInviteStateUid
+
     @Transient
     val inviteInfo: RespectInviteInfo = Json.decodeFromString(inviteInfoJson)
 
     companion object {
-        fun create(profileType: ProfileType, inviteInfo: RespectInviteInfo,pendingInviteStateUid:String?=null): SignupScreen {
+        fun create(
+            profileType: ProfileType,
+            inviteInfo: RespectInviteInfo,
+            pendingInviteStateUid: String? = null
+        ): SignupScreen {
             val inviteJson = Json.encodeToString(inviteInfo)
-            return SignupScreen(profileType, inviteJson,pendingInviteStateUid)
+            return SignupScreen(profileType, inviteJson, pendingInviteStateUid)
         }
     }
 }
@@ -318,7 +375,7 @@ class LearningUnitDetail(
 @Serializable
 class LearningUnitViewer(
     private val learningUnitIdStr: String,
-): RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val learningUnitId = Url(learningUnitIdStr)
@@ -334,17 +391,18 @@ class LearningUnitViewer(
 }
 
 @Serializable
-object AccountList: RespectAppRoute
+object AccountList : RespectAppRoute
+
 
 @Serializable
-object PersonList: RespectAppRoute
+object PersonList : RespectAppRoute
 
 @Serializable
 data class PersonDetail(
     val guid: String,
-): RespectAppRoute
+) : RespectAppRoute
 
 @Serializable
 data class PersonEdit(
     val guid: String?,
-): RespectAppRoute
+) : RespectAppRoute

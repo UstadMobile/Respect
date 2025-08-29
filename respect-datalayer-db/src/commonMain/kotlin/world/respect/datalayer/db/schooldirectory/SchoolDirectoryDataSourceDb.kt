@@ -1,12 +1,16 @@
 package world.respect.datalayer.db.schooldirectory
 
 import androidx.room.Transactor
+import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.schooldirectory.adapters.SchoolDirectoryEntryEntities
@@ -107,8 +111,37 @@ class SchoolDirectoryDataSourceDb(
         TODO("Not yet implemented")
     }
 
-    override suspend fun searchSchools(text: String): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
-        TODO("Add a query to the DAO @Nikunj")
+    override suspend fun searchSchools(text: String): Flow<DataLoadState<List<SchoolDirectoryEntry>>> = flow {
+        emit(DataLoadingState())
+
+        try {
+            val result = respectAppDb.useReaderConnection { con ->
+                con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                    val langMapList = respectAppDb.getLangMapEntityDao().searchByLmeValue(
+                        value = text,
+                        topParentType = LangMapEntity.TopParentType.RESPECT_SCHOOL_DIRECTORY_ENTRY.id,
+                        propType = LangMapEntity.PropType.RESPECT_SCHOOL_DIRECTORY_ENTRY_NAME.id
+
+                    )
+                    langMapList.mapNotNull { langMapEntity ->
+                        val schoolDirectoryEntryEntity = respectAppDb.getSchoolEntityDao().findByUid(
+                            langMapEntity.lmeTopParentUid1
+                        )
+                        if (schoolDirectoryEntryEntity != null) {
+                            SchoolDirectoryEntryEntities(
+                                school = schoolDirectoryEntryEntity,
+                                langMapEntities = langMapList
+                            ).toModel().data
+                        } else {
+                            null
+                        }
+                    }
+                }
+            }
+            emit(DataReadyState(result))
+        } catch (e: Throwable) {
+            emit(DataErrorResult(e))
+        }
     }
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {

@@ -20,6 +20,7 @@ import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.domain.school.add.AddSchoolDirectoryCallback
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
@@ -42,6 +43,7 @@ fun serverKoinModule(
         Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
+            .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .build()
     }
 

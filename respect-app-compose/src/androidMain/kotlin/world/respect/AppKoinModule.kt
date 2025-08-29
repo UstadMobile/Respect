@@ -57,6 +57,8 @@ import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
 import world.respect.shared.domain.storage.GetOfflineStorageSettingUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
@@ -275,17 +277,16 @@ val appKoinModule = module {
 
     single {
         CreatePublicKeyCredentialCreationOptionsJsonUseCase(
-            rpId = Url("https://testproxy.devserver3.ustadmobile.com/"),
-            encodeUserHandleUseCase = get()
-        )
+            encodeUserHandleUseCase = get(),
+            appName = Res.string.app_name,
+            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
+            )
     }
     single {
         RespectRedeemInviteRequestUseCase()
     }
     single {
-        CreatePublicKeyCredentialRequestOptionsJsonUseCase(
-            url = Url("https://testproxy.devserver3.ustadmobile.com/")
-        )
+        CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }
 
     single<CreatePasskeyUseCase> {
@@ -314,19 +315,20 @@ val appKoinModule = module {
 
     single<RespectAppDataSource> {
         val appContext = androidContext().applicationContext
-
+        val respectAppDataSourceDb =  RespectAppDataSourceDb(
+            respectAppDatabase = Room.databaseBuilder<RespectAppDatabase>(
+                appContext, appContext.getDatabasePath("respect.db").absolutePath
+            ).setDriver(BundledSQLiteDriver())
+                .build(),
+            json = get(),
+            xxStringHasher = get(),
+            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
+        )
         RespectAppDataSourceRepository(
-            local = RespectAppDataSourceDb(
-                respectAppDatabase = Room.databaseBuilder<RespectAppDatabase>(
-                    appContext, appContext.getDatabasePath("respect.db").absolutePath
-                ).setDriver(BundledSQLiteDriver())
-                    .build(),
-                json = get(),
-                xxStringHasher = get(),
-                primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
-            ),
+            local = respectAppDataSourceDb ,
             remote = RespectAppDataSourceHttp(
                 httpClient = get(),
+                local = respectAppDataSourceDb,
                 defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
             )
         )

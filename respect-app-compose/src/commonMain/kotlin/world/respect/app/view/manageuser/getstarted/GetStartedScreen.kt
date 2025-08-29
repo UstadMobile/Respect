@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_school_name
 import world.respect.shared.generated.resources.i_have_an_invite_code
@@ -28,7 +29,6 @@ import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.school_name_placeholder
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedUiState
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
-import world.respect.shared.viewmodel.manageuser.getstarted.School
 
 @Composable
 fun GetStartedScreen(
@@ -49,7 +49,7 @@ fun GetStartedScreen(
 fun GetStartedScreen(
     uiState: GetStartedUiState,
     onSchoolNameChanged: (String) -> Unit,
-    onSchoolSelected: (School) -> Unit,
+    onSchoolSelected: (SchoolDirectoryEntry) -> Unit,
     onClickInviteCode: () -> Unit,
     onClickOtherOptions: () -> Unit
 ) {
@@ -91,12 +91,12 @@ fun GetStartedScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = school.name
+                            text = school.name.toString()
                         )
                     },
                     supportingContent = {
                         Text(
-                            text = school.url,
+                            text = school.self.toString(),
                             maxLines = 1
                         )
                     },

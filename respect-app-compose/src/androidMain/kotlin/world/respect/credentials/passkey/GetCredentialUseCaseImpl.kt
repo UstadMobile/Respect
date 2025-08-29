@@ -21,12 +21,12 @@ class GetCredentialUseCaseImpl(
     private val json: Json,
 ) : GetCredentialUseCase {
 
-    override suspend fun invoke(): GetCredentialUseCase.CredentialResult {
+    override suspend fun invoke(rpId: String): GetCredentialUseCase.CredentialResult {
         val credentialManager = CredentialManager.create(context)
 
         val getPasswordOption = GetPasswordOption()
         val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-            requestJson = json.encodeToString(createPublicKeyCredentialRequestOptionsJsonUseCase())
+            requestJson = json.encodeToString(createPublicKeyCredentialRequestOptionsJsonUseCase(rpId=rpId))
         )
 
         //As per https://developer.android.com/identity/sign-in/credential-manager#sign-in when

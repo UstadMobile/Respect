@@ -1,0 +1,38 @@
+appId: world.respect.app
+---
+- clearState: world.respect.app
+- launchApp
+- tapOn: "I have an invite code"
+- tapOn: "Enter the invite code here"
+- inputText: "respect"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "School Name"
+- tapOn: "I'm a student"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name"
+- inputText: "Child user"
+- tapOn: "Gender"
+- tapOn: "Female"
+- tapOn: "Your date of birth"
+- inputText: "12/10/2000"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: "childuser"  #username
+- tapOn: "Other ways to sign in"
+- tapOn: "Sign in with a password"
+- tapOn: "Password"
+- inputText: "testchild"
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+- assertVisible: "Waiting for an approval to join ClassA"
+

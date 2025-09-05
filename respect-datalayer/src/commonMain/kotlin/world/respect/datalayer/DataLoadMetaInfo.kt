@@ -3,6 +3,7 @@ package world.respect.datalayer
 import io.ktor.http.HttpMessage
 import io.ktor.http.Url
 import io.ktor.http.etag
+import kotlinx.serialization.Serializable
 import world.respect.datalayer.ext.lastModifiedAsLong
 
 /**
@@ -23,6 +24,7 @@ import world.respect.datalayer.ext.lastModifiedAsLong
  *
  * @param url the URL
  */
+@Serializable
 data class DataLoadMetaInfo(
 
     val lastModified: Long = -1,

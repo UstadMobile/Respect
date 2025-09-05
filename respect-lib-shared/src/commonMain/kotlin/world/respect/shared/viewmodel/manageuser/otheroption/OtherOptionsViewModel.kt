@@ -20,7 +20,6 @@ import world.respect.shared.viewmodel.RespectViewModel
 
 class OtherOptionsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getInviteInfoUseCase: GetInviteInfoUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OtherOptionsUiState())

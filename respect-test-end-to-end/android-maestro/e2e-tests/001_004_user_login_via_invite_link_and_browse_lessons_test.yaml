@@ -1,20 +1,6 @@
 appId: world.respect.app
 ---
-- clearState:  world.respect.app
-- launchApp
-- tapOn: "School name"
-- inputText: "respect"
-- tapOn: "respect school"   #choose from school list
-- tapOn: "UserId"
-- inputText: "admin"
-- tapOn: "Password"
-- inputText: "testpass"
-- tapOn:
-      text: "Login"
-      index: 1
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
+- runFlow: "common/school_admin_login_flow.yaml"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"

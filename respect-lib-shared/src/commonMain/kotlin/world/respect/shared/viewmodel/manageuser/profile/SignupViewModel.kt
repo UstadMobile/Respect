@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.getString
 import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.generated.resources.*
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -150,18 +150,14 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.PARENT, ProfileType.STUDENT -> {
-                        viewModelScope.launch {
                             _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(CreateAccount.create(route.type,route.inviteInfo))
+                                NavCommand.Navigate(CreateAccount.create(route.type,route.code,personInfo))
                             )
-                        }
                     }
                     ProfileType.CHILD ->{
-                        viewModelScope.launch {
                             _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,route.uid?:""))
+                                NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,route.uid?:""))
                             )
-                        }
                     }
                 }
             }

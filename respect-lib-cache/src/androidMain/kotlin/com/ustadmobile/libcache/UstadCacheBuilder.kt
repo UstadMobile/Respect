@@ -37,6 +37,7 @@ class UstadCacheBuilder(
             xxStringHasher = xxStringHasher,
             db = db ?: Room.databaseBuilder<UstadCacheDb>(appContext, dbName)
                 .addCallback(AddNewEntryTriggerCallback())
+                .addCallback(AddNewEntryTriggerCallback())
                 .build()
         )
     }

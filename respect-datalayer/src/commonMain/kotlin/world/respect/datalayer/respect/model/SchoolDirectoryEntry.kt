@@ -24,4 +24,5 @@ data class SchoolDirectoryEntry(
     val xapi: Url,
     val oneRoster: Url,
     val respectExt: Url?,
+    val rpId : String?
 )

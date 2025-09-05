@@ -1,0 +1,19 @@
+appId: world.respect.app
+---
+- clearState:  world.respect.app
+- launchApp
+- tapOn: "Other options"
+- assertVisible: "Enter the link provided by your teacher or school admin"
+- tapOn: "paste the link here"
+- inputText: ${SCHOOL_URL}
+- tapOn: "Next"
+- tapOn: "UserId"
+- inputText: ${SCHOOL_ADMIN_USER}
+- tapOn: "Password"
+- inputText: ${SCHOOL_ADMIN_PASS}
+- tapOn:
+    text: "Login"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Apps"

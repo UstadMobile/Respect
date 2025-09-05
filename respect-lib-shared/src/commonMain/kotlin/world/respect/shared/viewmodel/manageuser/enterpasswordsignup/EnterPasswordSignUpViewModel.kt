@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupCredential
 import world.respect.shared.domain.account.signup.SignupUseCase
@@ -33,7 +35,8 @@ class EnterPasswordSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
-    private val signupUseCase: SignupUseCase
+    private val signupUseCase: SignupUseCase,
+    private val inviteInfoUseCase: GetInviteInfoUseCase
 ) : RespectViewModel(savedStateHandle) {
     private val route: EnterPasswordSignup = savedStateHandle.toRoute()
 
@@ -79,23 +82,28 @@ class EnterPasswordSignupViewModel(
                 password = password
             )
             signupUseCase(signupCredential)
-            val redeemRequest = respectRedeemInviteRequestUseCase(route.inviteInfo,route.username)
-
+            val inviteInfo = inviteInfoUseCase(route.code)
+            val redeemRequest = respectRedeemInviteRequestUseCase(
+                inviteInfo = inviteInfo,
+                username = route.username,
+                type = route.type,
+                personInfo = route.personInfo,
+                credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
+                    password
+                )
+            )
+            //need to be implement
             val result = submitRedeemInviteRequestUseCase(redeemRequest)
             when (route.type) {
                 ProfileType.CHILD , ProfileType.STUDENT->{
-                    viewModelScope.launch {
                         _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,result.guid))
+                            NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,result.guid))
                         )
-                    }
                 }
                 ProfileType.PARENT ->{
-                    viewModelScope.launch {
                         _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.inviteInfo))
+                            NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.code))
                         )
-                    }
                 }
             }
 

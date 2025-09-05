@@ -81,12 +81,12 @@ class ConfirmationViewModel(
             }
             if (profileType==ProfileType.STUDENT) {
                 _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(SignupScreen.create(profileType,inviteInfo))
+                    NavCommand.Navigate(SignupScreen.create(profileType,route.code))
                 )
             }
             else if (profileType==ProfileType.PARENT) {
                 _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(TermsAndCondition.create(profileType,inviteInfo))
+                    NavCommand.Navigate(TermsAndCondition.create(profileType,route.code))
                 )
             }
         }

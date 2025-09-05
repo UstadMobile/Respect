@@ -14,12 +14,14 @@ import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.domain.school.add.AddSchoolDirectoryCallback
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
@@ -42,6 +44,7 @@ fun serverKoinModule(
         Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
+            .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .build()
     }
 
@@ -58,7 +61,13 @@ fun serverKoinModule(
     single<PrimaryKeyGenerator> {
         PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
     }
-
+    single<SchoolDirectoryDataSourceLocal> {
+        SchoolDirectoryDataSourceDb(
+            respectAppDb = get(),
+            json = get(),
+            xxStringHasher = get()
+        )
+    }
     single<RespectAppDataSource> {
         RespectAppDataSourceDb(
             respectAppDatabase = get(),

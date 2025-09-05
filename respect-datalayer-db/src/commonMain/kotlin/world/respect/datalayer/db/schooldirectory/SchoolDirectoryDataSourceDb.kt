@@ -4,7 +4,9 @@ import androidx.room.Transactor
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
@@ -14,10 +16,10 @@ import world.respect.datalayer.db.schooldirectory.adapters.toEntities
 import world.respect.datalayer.db.schooldirectory.adapters.toModel
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.libxxhash.XXStringHasher
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -30,7 +32,12 @@ class SchoolDirectoryDataSourceDb(
 ): SchoolDirectoryDataSourceLocal {
 
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
-        TODO("Not yet implemented")
+        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectories().also { println("allDirectories"+it) }.map { schoolDirectory ->
+            RespectSchoolDirectory(
+                invitePrefix = schoolDirectory.rdInvitePrefix,
+                baseUrl = schoolDirectory.rdUrl
+            )
+        }
     }
 
     override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
@@ -107,8 +114,33 @@ class SchoolDirectoryDataSourceDb(
         TODO("Not yet implemented")
     }
 
-    override suspend fun searchSchools(text: String): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
-        TODO("Add a query to the DAO @Nikunj")
+    override suspend fun searchSchools(
+        text: String
+    ): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
+        return respectAppDb.getSchoolEntityDao()
+            .searchSchoolsByName(
+                query =  "%$text%"
+            )
+            .map { schoolEntities ->
+                try {
+                    val result = schoolEntities.map { schoolEntity ->
+                        val langMaps = respectAppDb.getLangMapEntityDao()
+                            .selectAllByTableAndEntityId(
+                                lmeTopParentType = LangMapEntity.TopParentType.RESPECT_SCHOOL_DIRECTORY_ENTRY.id,
+                                lmeEntityUid1 = schoolEntity.reUid,
+                                lmeEntityUid2 = 0L
+                            )
+
+                        SchoolDirectoryEntryEntities(
+                            school = schoolEntity,
+                            langMapEntities = langMaps
+                        ).toModel().data
+                    }
+                    DataReadyState(result)
+                } catch (e: Throwable) {
+                    DataErrorResult(e)
+                }
+            }
     }
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {

@@ -38,6 +38,4 @@ class DistinctCategorySchema() {
         result = 31 * result + (schemaName?.hashCode() ?: 0)
         return result
     }
-
-
 }

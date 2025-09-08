@@ -23,10 +23,6 @@ open class CourseTerminology {
     var ctLct: Long = 0
 
     companion object {
-
         const val TABLE_ID = 450
-
-
     }
-
 }

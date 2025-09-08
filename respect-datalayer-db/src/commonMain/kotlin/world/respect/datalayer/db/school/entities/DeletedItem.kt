@@ -18,11 +18,9 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity(
-    indices = arrayOf(
-        Index(
-            "delItemStatus", "delItemTimeDeleted", name = "delitem_idx_status_time"
-        )
-    )
+    indices = [Index(
+        "delItemStatus", "delItemTimeDeleted", name = "delitem_idx_status_time"
+    )]
 )
 @Serializable
 data class DeletedItem(
@@ -48,7 +46,6 @@ data class DeletedItem(
     @ColumnInfo(defaultValue = "0")
     var delItemIsFolder: Boolean = false,
 ) {
-
     companion object {
 
         const val TABLE_ID = 999
@@ -58,7 +55,5 @@ data class DeletedItem(
         const val STATUS_RESTORED = 2
 
         const val STATUS_DELETED_PERMANENTLY = 3
-
     }
-
 }

@@ -6,10 +6,11 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Entity(
-    indices = arrayOf(
-        Index("erClazzUid", "erStatus", name = "idx_enrolmentrequest_by_clazz"),
-        Index("erPersonUid", "erStatus", name = "idx_enrolmentrequest_by_person"),
-    )
+    indices = [Index(
+        "erClazzUid",
+        "erStatus",
+        name = "idx_enrolmentrequest_by_clazz"
+    ), Index("erPersonUid", "erStatus", name = "idx_enrolmentrequest_by_person")]
 )
 @Serializable
 data class EnrolmentRequest(
@@ -18,7 +19,7 @@ data class EnrolmentRequest(
     var erClazzUid: Long = 0,
     var erClazzName: String? = null,
     var erPersonUid: Long = 0,
-    var erPersonFullname:  String? = null,
+    var erPersonFullname: String? = null,
     var erPersonPictureUri: String? = null,
     var erPersonUsername: String? = null,
     var erRole: Int = 0,
@@ -29,7 +30,6 @@ data class EnrolmentRequest(
     var erStatusSetAuth: String? = null,
     var erLastModified: Long = 0,
 ) {
-
     companion object {
 
         const val STATUS_PENDING = 1
@@ -43,5 +43,4 @@ data class EnrolmentRequest(
         const val TABLE_ID = 10070
 
     }
-
 }

@@ -18,10 +18,8 @@ data class CoursePicture(
 
     var coursePictureActive: Boolean = true
 ) {
-
     companion object {
 
         const val TABLE_ID = 125
     }
-
 }

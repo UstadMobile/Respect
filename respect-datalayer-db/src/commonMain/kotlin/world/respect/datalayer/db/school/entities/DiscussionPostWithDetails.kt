@@ -20,5 +20,4 @@ class DiscussionPostWithDetails : DiscussionPost() {
 
     var postLatestMessageTimestamp: Long = 0
 
-
 }

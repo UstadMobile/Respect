@@ -8,6 +8,4 @@ import world.respect.datalayer.school.model.Person
 class DiscussionPostWithPerson: DiscussionPost() {
     @Embedded
     var replyPerson: Person? = null
-
-
 }

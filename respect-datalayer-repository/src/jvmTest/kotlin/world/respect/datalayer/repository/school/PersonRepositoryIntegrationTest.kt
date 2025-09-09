@@ -19,6 +19,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.repository.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.paging.CacheableHttpPagingSource
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -65,10 +66,10 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .findAll(DataLoadParams(), null)
+                    .list(DataLoadParams(), null)
 
                 val validatedData = clients.first().schoolDataSource.personDataSource
-                    .findAll(DataLoadParams(), null)
+                    .list(DataLoadParams(), null)
 
                 assertEquals(
                     defaultTestPerson.guid,
@@ -105,7 +106,7 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .findAll(DataLoadParams(), null)
+                    .list(DataLoadParams(), null)
 
                 val updatedName = "updated"
                 //DataSource will need to reject same-second changes and respond with a wait message.
@@ -121,7 +122,7 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val newData = clients.first().schoolDataSource.personDataSource
-                    .findAll(DataLoadParams(), null)
+                    .list(DataLoadParams(), null)
 
                 assertEquals(
                     defaultTestPerson.guid,
@@ -160,13 +161,13 @@ class PersonRepositoryIntegrationTest {
 
                 val startTime = systemTimeInMillis()
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .findAll(DataLoadParams(), null)
+                    .list(DataLoadParams(), null)
                 println(initData)
                 val answer1ConsistentThrough = initData.remoteState?.metaInfo?.consistentThrough!!
                 assertTrue(initData.remoteState?.metaInfo?.consistentThrough!! >= startTime)
 
                 val dataSince = clients.first().schoolDataSource.personDataSource
-                    .findAll(
+                    .list(
                         loadParams = DataLoadParams(),
                         since = Instant.Companion.fromEpochMilliseconds(answer1ConsistentThrough)
                     )
@@ -199,7 +200,7 @@ class PersonRepositoryIntegrationTest {
 
                 val startTime = systemTimeInMillis()
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .findAll(DataLoadParams(), null)
+                    .list(DataLoadParams(), null)
                 println(initData)
                 val answer1ConsistentThrough = initData.remoteState?.metaInfo?.consistentThrough!!
                 assertTrue(initData.remoteState?.metaInfo?.consistentThrough!! >= startTime)
@@ -215,7 +216,7 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val dataSince = clients.first().schoolDataSource.personDataSource
-                    .findAll(
+                    .list(
                         loadParams = DataLoadParams(),
                         since = Instant.Companion.fromEpochMilliseconds(answer1ConsistentThrough)
                     )
@@ -248,15 +249,14 @@ class PersonRepositoryIntegrationTest {
                     listOf(defaultTestPerson)
                 )
 
-                val pagingSource = clients.first().schoolDataSource.personDataSource.findAllAsPagingSource(
-                    loadParams = DataLoadParams(),
-                )
+                val pagingSource = clients.first().schoolDataSource.personDataSource
+                    .listAsPagingSource(DataLoadParams(), PersonDataSource.GetListParams())
 
                 pagingSource.load(
                     PagingSource.LoadParams.Refresh(0, 50, false)
                 )
 
-                clients.first().schoolDataSource.personDataSource.findAllAsFlow(
+                clients.first().schoolDataSource.personDataSource.listAsFlow(
                     DataLoadParams()
                 ).filter { it is DataReadyState && it.data.isNotEmpty() }.test(
                     timeout = 10.seconds
@@ -291,9 +291,9 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val local = clients.first().schoolDataSourceLocal.personDataSource
-                    .findAllAsPagingSource(DataLoadParams())
+                    .listAsPagingSource(DataLoadParams(), PersonDataSource.GetListParams())
                 val remote = clients.first().schoolDataSourceRemote.personDataSource
-                    .findAllAsPagingSource(DataLoadParams())
+                    .listAsPagingSource(DataLoadParams(), PersonDataSource.GetListParams())
                 val repository = RepositoryOffsetLimitPagingSource(
                     local = local,
                     remote = remote,

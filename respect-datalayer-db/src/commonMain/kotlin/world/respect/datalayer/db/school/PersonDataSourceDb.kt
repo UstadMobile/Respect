@@ -15,6 +15,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.PersonEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
@@ -104,16 +105,7 @@ class PersonDataSourceDb(
         upsertPersons(list, forceOverwrite)
     }
 
-    override fun findAllListDetailsAsFlow(
-        loadParams: DataLoadParams,
-        searchQuery: String?
-    ): Flow<DataLoadState<List<PersonListDetails>>> {
-        return schoolDb.getPersonEntityDao().findAllListDetailsAsFlow().map {
-            DataReadyState(it)
-        }
-    }
-
-    override fun findAllAsFlow(
+    override fun listAsFlow(
         loadParams: DataLoadParams,
         searchQuery: String?
     ): Flow<DataLoadState<List<Person>>> {
@@ -126,21 +118,19 @@ class PersonDataSourceDb(
         }
     }
 
-    override fun findAllAsPagingSource(
+    override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
-        guid: String?,
+        params: PersonDataSource.GetListParams,
     ): PagingSource<Int, Person> {
         return schoolDb.getPersonEntityDao().findAllAsPagingSource(
-            since = since?.toEpochMilliseconds() ?: 0,
-            guidHash = guid?.let { xxHash.hash(it) } ?: 0,
+            since = params.common.since?.toEpochMilliseconds() ?: 0,
+            guidHash = params.common.guid?.let { xxHash.hash(it) } ?: 0,
         ).map(tag = "persondb-mapped") {
             PersonEntities(it).toModel()
         }
     }
 
-    override suspend fun findAll(
+    override suspend fun list(
         loadParams: DataLoadParams,
         searchQuery: String?,
         since: Instant?,
@@ -162,9 +152,9 @@ class PersonDataSourceDb(
         )
     }
 
-    override fun findAllListDetailsAsPagingSource(
+    override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String?,
+        listParams: PersonDataSource.GetListParams,
     ): PagingSource<Int, PersonListDetails> {
         return schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource()
     }

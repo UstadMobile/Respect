@@ -1,14 +1,32 @@
 package world.respect.datalayer.school
 
 import androidx.paging.PagingSource
+import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
 interface PersonDataSource {
+
+    data class GetListParams(
+        val common: GetListCommonParams = GetListCommonParams(),
+    ) {
+
+        companion object {
+
+            fun fromParams(stringValues: StringValues) : GetListParams {
+                return GetListParams(
+                    common = GetListCommonParams.fromParams(stringValues)
+                )
+            }
+
+        }
+
+    }
 
     suspend fun findByUsername(username: String): Person?
 
@@ -16,40 +34,32 @@ interface PersonDataSource {
 
     fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Person>>
 
-    /**
-     * Get a list of all the persons in the realm that can be accessed by the DataSource's
-     * account.
-     *
-     * @param loadParams
-     * @param searchQuery search text (if any)
-     */
-    fun findAllListDetailsAsFlow(
-        loadParams: DataLoadParams,
-        searchQuery: String? = null,
-    ): Flow<DataLoadState<List<PersonListDetails>>>
-
-    fun findAllAsFlow(
+    fun listAsFlow(
         loadParams: DataLoadParams,
         searchQuery: String? = null,
     ): Flow<DataLoadState<List<Person>>>
 
-    suspend fun findAll(
+    suspend fun list(
         loadParams: DataLoadParams,
         searchQuery: String? = null,
         since: Instant? = null,
     ): DataLoadState<List<Person>>
 
-    fun findAllAsPagingSource(
+    fun listAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String? = null,
-        since: Instant? = null,
-        guid: String? = null,
+        params: GetListParams,
     ): PagingSource<Int, Person>
 
 
-    fun findAllListDetailsAsPagingSource(
+    fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String? = null,
+        listParams: GetListParams,
     ): PagingSource<Int, PersonListDetails>
+
+    companion object {
+
+        const val ENDPOINT_NAME = "person"
+
+    }
 
 }

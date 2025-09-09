@@ -10,4 +10,6 @@ object DataLayerParams {
 
     const val GUID = "guid"
 
+    const val SEARCH_QUERY = "q"
+
 }

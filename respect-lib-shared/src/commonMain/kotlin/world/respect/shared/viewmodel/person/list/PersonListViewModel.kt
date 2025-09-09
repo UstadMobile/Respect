@@ -23,6 +23,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import io.github.aakira.napier.Napier
+import world.respect.datalayer.school.PersonDataSource
 
 
 data class PersonListUiState(
@@ -44,8 +45,8 @@ class PersonListViewModel(
 
     private val pagingSourceFactory: () -> PagingSource<Int, PersonListDetails> = {
         Napier.d("PersonListViewModel: pagingSourceFactory invoke")
-        schoolDataSource.personDataSource.findAllListDetailsAsPagingSource(
-            DataLoadParams(), null
+        schoolDataSource.personDataSource.listDetailsAsPagingSource(
+            DataLoadParams(), PersonDataSource.GetListParams()
         )
     }
 

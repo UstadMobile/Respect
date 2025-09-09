@@ -53,63 +53,47 @@ class PersonDataSourceRepository(
         return local.findByGuidAsFlow(guid).combineWithRemote(remoteFlow)
     }
 
-    override fun findAllListDetailsAsFlow(
-        loadParams: DataLoadParams,
-        searchQuery: String?
-    ): Flow<DataLoadState<List<PersonListDetails>>> {
-        val remoteFlow = remote.findAllAsFlow(loadParams, searchQuery).onEach {
-            if(it is DataReadyState) {
-                local.putPersonsLocal(it.data)
-            }
-        }
-
-        val localFlow = local.findAllListDetailsAsFlow(loadParams, searchQuery)
-        return localFlow.combineWithRemote(remoteFlow)
-    }
-
-    override fun findAllAsFlow(
+    override fun listAsFlow(
         loadParams: DataLoadParams,
         searchQuery: String?
     ): Flow<DataLoadState<List<Person>>> {
-        return local.findAllAsFlow(loadParams, searchQuery)
+        return local.listAsFlow(loadParams, searchQuery)
     }
 
-    override suspend fun findAll(
+    override suspend fun list(
         loadParams: DataLoadParams,
         searchQuery: String?,
         since: Instant?,
     ): DataLoadState<List<Person>> {
-        val remote = remote.findAll(loadParams, searchQuery, since)
+        val remote = remote.list(loadParams, searchQuery, since)
         if(remote is DataReadyState) {
             local.putPersonsLocal(remote.data)
             validationHelper.updateValidationInfo(remote.metaInfo)
         }
 
-        return local.findAll(loadParams, searchQuery, since).combineWithRemote(remote)
+        return local.list(loadParams, searchQuery, since).combineWithRemote(remote)
     }
 
-    override fun findAllAsPagingSource(
+    override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
-        guid: String?,
+        params: PersonDataSource.GetListParams,
     ): PagingSource<Int, Person> {
         return RepositoryOffsetLimitPagingSource(
-            local = local.findAllAsPagingSource(loadParams, searchQuery, since),
-            remote = remote.findAllAsPagingSource(loadParams, searchQuery, since),
+            local = local.listAsPagingSource(loadParams, params),
+            remote = remote.listAsPagingSource(loadParams, params),
             argKey = 0,
             mediatorStore = mediatorStore,
             onUpdateLocalFromRemote = local::updateLocalFromRemote,
         )
     }
 
-    override fun findAllListDetailsAsPagingSource(
+    override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        listParams: PersonDataSource.GetListParams
     ): PagingSource<Int, PersonListDetails> {
         return RepositoryOffsetLimitPagingSource(
-            local = local.findAllListDetailsAsPagingSource(loadParams, searchQuery),
-            remote = remote.findAllAsPagingSource(loadParams, searchQuery),
+            local = local.listDetailsAsPagingSource(loadParams, listParams),
+            remote = remote.listAsPagingSource(loadParams, listParams),
             argKey = 0,
             mediatorStore = mediatorStore,
             onUpdateLocalFromRemote = local::updateLocalFromRemote,

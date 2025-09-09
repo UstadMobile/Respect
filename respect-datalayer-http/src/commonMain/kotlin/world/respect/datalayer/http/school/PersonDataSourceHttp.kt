@@ -2,7 +2,6 @@ package world.respect.datalayer.http.school
 
 import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
-import io.ktor.client.request.parameter
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -16,7 +15,7 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.ext.map
+import world.respect.datalayer.http.ext.appendListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -26,6 +25,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 import world.respect.datalayer.shared.paging.map
+import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
 class PersonDataSourceHttp(
@@ -36,6 +36,12 @@ class PersonDataSourceHttp(
     private val validationHelper: ExtendedDataSourceValidationHelper,
 ) : PersonDataSource, SchoolUrlBasedDataSource {
 
+    private suspend fun PersonDataSource.GetListParams.urlWithParams(): Url {
+        return URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
+            .apply { parameters.appendListParams(common) }
+            .build()
+    }
+
     override suspend fun findByUsername(username: String): Person? {
         TODO("Not yet implemented")
     }
@@ -45,9 +51,9 @@ class PersonDataSourceHttp(
         guid: String
     ): DataLoadState<Person> {
         return httpClient.getAsDataLoadState<List<Person>>(
-            URLBuilder(respectEndpointUrl("person")).apply {
-                parameters.append(DataLayerParams.GUID, guid)
-            }.build(),
+            PersonDataSource.GetListParams(
+                GetListCommonParams(guid = guid)
+            ).urlWithParams()
         ) {
             headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
         }.firstOrNotLoaded()
@@ -55,12 +61,10 @@ class PersonDataSourceHttp(
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Person>> {
         return httpClient.getDataLoadResultAsFlow<List<Person>>(
-            urlFn = { 
-                URLBuilder(respectEndpointUrl("person"))
-                    .apply {
-                        parameters.append(DataLayerParams.GUID, guid)
-                    }
-                    .build()
+            urlFn = {
+                PersonDataSource.GetListParams(
+                    GetListCommonParams(guid = guid)
+                ).urlWithParams()
             },
             dataLoadParams = DataLoadParams()
         ) {
@@ -70,12 +74,16 @@ class PersonDataSourceHttp(
         }
     }
 
-    override fun findAllAsFlow(
+    override fun listAsFlow(
         loadParams: DataLoadParams,
         searchQuery: String?
     ): Flow<DataLoadState<List<Person>>> {
         return httpClient.getDataLoadResultAsFlow<List<Person>>(
-            urlFn = { respectEndpointUrl("person") },
+            urlFn = {
+                PersonDataSource.GetListParams(
+                    GetListCommonParams(searchQuery = searchQuery)
+                ).urlWithParams()
+            },
             dataLoadParams = loadParams,
             validationHelper = validationHelper,
         ) {
@@ -83,24 +91,13 @@ class PersonDataSourceHttp(
         }
     }
 
-    override fun findAllListDetailsAsFlow(
-        loadParams: DataLoadParams,
-        searchQuery: String?
-    ): Flow<DataLoadState<List<PersonListDetails>>> {
-        return findAllAsFlow(loadParams, searchQuery).map { dataLoadState ->
-            dataLoadState.map { list ->
-                list.map { it.asListDetails() }
-            }
-        }
-    }
-
-    override suspend fun findAll(
+    override suspend fun list(
         loadParams: DataLoadParams,
         searchQuery: String?,
         since: Instant?,
     ): DataLoadState<List<Person>> {
         return httpClient.getAsDataLoadState<List<Person>>(
-            url = URLBuilder(respectEndpointUrl("person")).apply {
+            url = URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)).apply {
                 since?.also {
                     parameters.append(DataLayerParams.SINCE, it.toString())
                 }
@@ -113,19 +110,16 @@ class PersonDataSourceHttp(
         }
     }
 
-    override fun findAllAsPagingSource(
+    override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
-        guid: String?,
+        params: PersonDataSource.GetListParams,
     ): PagingSource<Int, Person> {
         return OffsetLimitHttpPagingSource(
-            baseUrlProvider = { respectEndpointUrl("person") },
+            baseUrlProvider = { params.urlWithParams() },
             httpClient = httpClient,
             validationHelper = validationHelper,
             typeInfo = typeInfo<List<Person>>(),
             requestBuilder = {
-                since?.also { parameter(DataLayerParams.SINCE, it.toString()) }
                 headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
                 headers[HttpHeaders.CacheControl] = "no-store" //prevent 'normal' cache
             },
@@ -133,12 +127,12 @@ class PersonDataSourceHttp(
         )
     }
 
-    override fun findAllListDetailsAsPagingSource(
+    override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        listParams: PersonDataSource.GetListParams
     ): PagingSource<Int, PersonListDetails> {
         return OffsetLimitHttpPagingSource<Person>(
-            baseUrlProvider = { respectEndpointUrl("person") },
+            baseUrlProvider = { listParams.urlWithParams() },
             httpClient = httpClient,
             validationHelper = validationHelper,
             typeInfo = typeInfo<List<Person>>(),

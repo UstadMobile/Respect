@@ -105,6 +105,7 @@ fun ClazzDetailScreen(
         }
 
         item {
+
             RespectFilterChipsHeader(
                 options = uiState.chipOptions.map { it.option },
                 selectedOption = uiState.selectedChip,
@@ -134,13 +135,20 @@ fun ClazzDetailScreen(
                 trailingContent = {
                     Icon(
                         imageVector = Icons.Outlined.KeyboardArrowDown,
-                        contentDescription = if (uiState.isPendingExpanded) {
-                            stringResource(Res.string.collapse_pending_invites)
-                        } else {
-                            stringResource(Res.string.expand_pending_invites)
-                        },
+                        contentDescription =
+                            if (uiState.isPendingExpanded) {
+                                stringResource(
+                                    Res.string.collapse_pending_invites
+                                )
+                            } else {
+                                stringResource(
+                                    Res.string.expand_pending_invites
+                                )
+                            },
                         modifier = Modifier.size(24.dp)
-                            .rotate(if (uiState.isPendingExpanded) 0f else -90f),
+                            .rotate(
+                                if (uiState.isPendingExpanded) 0f else -90f
+                            ),
                     )
                 }
             )
@@ -148,10 +156,12 @@ fun ClazzDetailScreen(
 
         if (uiState.isPendingExpanded) {
             itemsIndexed(
-                uiState.listOfPending,
+                items = uiState.listOfPending,
                 key = { index, pendingUser ->
                     pendingUser.guid
-                }) { index, user ->
+                }
+            ) { index, user ->
+
                 val roleName = user.roles.firstOrNull()?.roleType?.name
                     ?.lowercase()
                     ?.replaceFirstChar { it.uppercase() } ?: ""
@@ -159,20 +169,24 @@ fun ClazzDetailScreen(
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth(),
+
                     leadingContent = {
                         RespectPersonAvatar(
                             name = user.givenName
                         )
                     },
+
                     headlineContent = {
                         Text(text = user.givenName + "(" + roleName + ")")
                     },
+
                     trailingContent = {
                         Row {
                             Icon(
-                                modifier = Modifier.size(24.dp).clickable {
-                                    onClickAcceptInvite(user)
-                                },
+                                modifier = Modifier.size(24.dp)
+                                    .clickable {
+                                        onClickAcceptInvite(user)
+                                    },
                                 imageVector = Icons.Outlined.CheckCircle,
                                 contentDescription = stringResource(resource = Res.string.accept_invite)
                             )
@@ -189,11 +203,11 @@ fun ClazzDetailScreen(
             }
         }
 
-
         item {
             ListItem(
                 modifier = Modifier
                     .clickable { onToggleTeachersSection() },
+
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
@@ -202,6 +216,7 @@ fun ClazzDetailScreen(
                         )
                     )
                 },
+
                 trailingContent = {
                     Icon(
                         imageVector = Icons.Outlined.KeyboardArrowDown,
@@ -211,9 +226,10 @@ fun ClazzDetailScreen(
                             stringResource(Res.string.expand_teachers)
                         },
                         modifier = Modifier.size(24.dp)
-                            .rotate(if (uiState.isTeachersExpanded) 0f else -90f),
-
-                        )
+                            .rotate(
+                                if (uiState.isTeachersExpanded) 0f else -90f
+                            ),
+                    )
                 }
             )
         }
@@ -240,10 +256,11 @@ fun ClazzDetailScreen(
             }
 
             itemsIndexed(
-                uiState.listOfTeachers,
+                items = uiState.listOfTeachers,
                 key = { index, teacher ->
                     teacher.guid
-                }) { index, teacher ->
+                }
+            ) { index, teacher ->
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -263,6 +280,7 @@ fun ClazzDetailScreen(
             ListItem(
                 modifier = Modifier
                     .clickable { onToggleStudentsSection() },
+
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
@@ -271,6 +289,7 @@ fun ClazzDetailScreen(
                         )
                     )
                 },
+
                 trailingContent = {
                     Icon(
                         imageVector = Icons.Outlined.KeyboardArrowDown,
@@ -280,7 +299,9 @@ fun ClazzDetailScreen(
                             stringResource(Res.string.expand_students)
                         },
                         modifier = Modifier.size(24.dp)
-                            .rotate(if (uiState.isStudentsExpanded) 0f else -90f),
+                            .rotate(
+                                if (uiState.isStudentsExpanded) 0f else -90f
+                            ),
                     )
                 }
             )
@@ -293,12 +314,14 @@ fun ClazzDetailScreen(
                     modifier = Modifier.clickable {
                         onClickAddPersonToClazz(OneRosterRoleEnum.STUDENT)
                     },
+
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = stringResource(resource = Res.string.add_student)
                         )
                     },
+
                     headlineContent = {
                         Text(
                             text =
@@ -309,19 +332,21 @@ fun ClazzDetailScreen(
             }
 
             itemsIndexed(
-                uiState.listOfStudents,
+                items = uiState.listOfStudents,
                 key = { index, student ->
                     student.guid
-                }) { index, student ->
+                }
+            ) { index, student ->
                 ListItem(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { },
+                        .fillMaxWidth(),
+
                     leadingContent = {
                         RespectPersonAvatar(
                             name = student.givenName
                         )
                     },
+
                     headlineContent = {
                         Text(
                             text = student.givenName

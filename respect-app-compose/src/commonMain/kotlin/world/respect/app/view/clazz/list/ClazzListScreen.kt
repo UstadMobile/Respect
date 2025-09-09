@@ -13,7 +13,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.SortListMode
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.defaultSortListMode
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.list.ClazzListUiState
@@ -29,7 +31,7 @@ fun ClazzListScreen(
     ClazzListScreen(
         uiState = uiState,
         onClickClazz = viewModel::onClickClazz,
-        onSortOrderChanged = viewModel::onSortOrderChanged,
+        onClickSortOption = viewModel::onSortOrderChanged,
     )
 }
 
@@ -37,7 +39,8 @@ fun ClazzListScreen(
 fun ClazzListScreen(
     uiState: ClazzListUiState,
     onClickClazz: (String) -> Unit,
-    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+    onClickSortOption: (SortOrderOption) -> Unit = { },
+    sortListMode: SortListMode = defaultSortListMode(),
 ) {
 
     LazyColumn(
@@ -50,7 +53,8 @@ fun ClazzListScreen(
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 sortOptions = uiState.sortOptions,
                 enabled = uiState.fieldsEnabled,
-                onClickSortOption = onSortOrderChanged,
+                onClickSortOption = onClickSortOption,
+                mode = sortListMode,
             )
         }
 

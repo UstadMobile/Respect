@@ -37,7 +37,7 @@ fun PersonListScreen(
 ) {
     val pager = remember(uiState.persons) {
         Pager(
-            config = PagingConfig(20, 50, false),
+            config = PagingConfig(20, maxSize = 200),
             pagingSourceFactory = uiState.persons,
         )
     }
@@ -55,10 +55,10 @@ fun PersonListScreen(
                     //onClickItem()
                 },
                 leadingContent = {
-                    RespectPersonAvatar(person?.item?.fullName() ?: "")
+                    RespectPersonAvatar(person?.fullName() ?: "")
                 },
                 headlineContent = {
-                    Text(person?.item?.fullName() ?: "")
+                    Text(person?.fullName() ?: "")
                 }
             )
         }

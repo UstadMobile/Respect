@@ -13,7 +13,6 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource
-import world.respect.datalayer.shared.paging.PagedItemHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.people
@@ -26,7 +25,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class PersonListUiState(
-    val persons: () -> PagingSource<Int, PagedItemHolder<Person>> = { EmptyPagingSource() },
+    val persons: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
 )
 
 class PersonListViewModel(
@@ -42,7 +41,7 @@ class PersonListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    private val pagingSourceFactory: () -> PagingSource<Int, PagedItemHolder<Person>> = {
+    private val pagingSourceFactory: () -> PagingSource<Int, Person> = {
         schoolDataSource.personDataSource.findAllAsPagingSource(DataLoadParams())
     }
 

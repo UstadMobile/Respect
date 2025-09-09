@@ -75,6 +75,7 @@ interface PersonEntityDao {
          FROM PersonEntity
         WHERE PersonEntity.pStored > :since 
           AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
+     ORDER BY PersonEntity.pGivenName     
     """)
     fun findAllAsPagingSource(
         since: Long = 0,

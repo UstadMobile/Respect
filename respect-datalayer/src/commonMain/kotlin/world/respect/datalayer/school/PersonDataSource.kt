@@ -6,7 +6,6 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.datalayer.shared.paging.PagedItemHolder
 import kotlin.time.Instant
 
 interface PersonDataSource {
@@ -45,7 +44,7 @@ interface PersonDataSource {
         searchQuery: String? = null,
         since: Instant? = null,
         guid: String? = null,
-    ): PagingSource<Int, PagedItemHolder<Person>>
+    ): PagingSource<Int, Person>
 
 
 }

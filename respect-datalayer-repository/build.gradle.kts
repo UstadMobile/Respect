@@ -22,6 +22,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.respectDatalayer)
+            implementation(projects.respectLibUtil)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
@@ -38,7 +39,7 @@ kotlin {
             implementation(projects.respectServer)
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
-            implementation(projects.respectLibUtil)
+
             implementation(libs.turbine)
             implementation(projects.respectDatalayerHttp)
             implementation(projects.respectDatalayerDb)

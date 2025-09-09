@@ -8,12 +8,12 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.datalayer.shared.paging.PagedItemHolder
 import kotlin.time.Instant
 
 class PersonDataSourceRepository(
@@ -21,6 +21,8 @@ class PersonDataSourceRepository(
     private val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
 ) : PersonDataSource {
+
+    private val mediatorStore = PagingSourceMediatorStore()
 
     override suspend fun findByUsername(username: String): Person? {
         return local.findByUsername(username)
@@ -91,10 +93,12 @@ class PersonDataSourceRepository(
         searchQuery: String?,
         since: Instant?,
         guid: String?,
-    ): PagingSource<Int, PagedItemHolder<Person>> {
+    ): PagingSource<Int, Person> {
         return RepositoryOffsetLimitPagingSource(
             local = local.findAllAsPagingSource(loadParams, searchQuery, since),
             remote = remote.findAllAsPagingSource(loadParams, searchQuery, since),
+            argKey = 0,
+            mediatorStore = mediatorStore,
             onUpdateLocalFromRemote = local::updateLocalFromRemote,
         )
     }

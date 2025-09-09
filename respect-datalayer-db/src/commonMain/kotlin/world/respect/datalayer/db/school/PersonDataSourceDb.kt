@@ -132,12 +132,12 @@ class PersonDataSourceDb(
         searchQuery: String?,
         since: Instant?,
         guid: String?,
-    ): PagingSource<Int, PagedItemHolder<Person>> {
+    ): PagingSource<Int, Person> {
         return schoolDb.getPersonEntityDao().findAllAsPagingSource(
             since = since?.toEpochMilliseconds() ?: 0,
             guidHash = guid?.let { xxHash.hash(it) } ?: 0,
         ).map(tag = "persondb-mapped") {
-            PagedItemHolder(PersonEntities(it).toModel())
+            PersonEntities(it).toModel()
         }
     }
 

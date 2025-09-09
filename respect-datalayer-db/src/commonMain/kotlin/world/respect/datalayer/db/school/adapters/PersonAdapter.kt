@@ -1,6 +1,7 @@
 package world.respect.datalayer.db.school.adapters
 
 import world.respect.datalayer.db.school.entities.PersonEntity
+import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.school.model.Person
 import world.respect.libxxhash.XXStringHasher
@@ -11,6 +12,11 @@ import kotlin.time.Instant
 data class PersonEntities(
     val personEntity: PersonEntity,
     val personRoleEntities: List<PersonRoleEntity> = emptyList()
+)
+
+fun PersonEntityWithRoles.toPersonEntities() = PersonEntities(
+    personEntity = person,
+    personRoleEntities = roles
 )
 
 @OptIn(ExperimentalTime::class)

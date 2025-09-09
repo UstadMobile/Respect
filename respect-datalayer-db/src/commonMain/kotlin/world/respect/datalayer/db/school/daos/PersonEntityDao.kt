@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.PersonEntity
+import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.school.model.composites.PersonListDetails
 
 @Dao
@@ -30,21 +31,21 @@ interface PersonEntityDao {
          FROM PersonEntity
         WHERE pUsername = :username
     """)
-    suspend fun findByUsername(username: String): PersonEntity?
+    suspend fun findByUsername(username: String): PersonEntityWithRoles?
 
     @Query("""
        SELECT * 
          FROM PersonEntity
         WHERE pGuidHash = :guidHash
     """)
-    suspend fun findByGuidHash(guidHash: Long): PersonEntity?
+    suspend fun findByGuidHash(guidHash: Long): PersonEntityWithRoles?
 
     @Query("""
         SELECT * 
          FROM PersonEntity
         WHERE pGuidHash = :guidHash
     """)
-    fun findByGuidHashAsFlow(guidHash: Long): Flow<PersonEntity?>
+    fun findByGuidHashAsFlow(guidHash: Long): Flow<PersonEntityWithRoles?>
 
     @Query("""
         SELECT PersonEntity.pGuid AS guid, 
@@ -59,7 +60,7 @@ interface PersonEntityDao {
         SELECT * 
          FROM PersonEntity
     """)
-    fun findAllAsFlow(): Flow<List<PersonEntity>>
+    fun findAllAsFlow(): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
         SELECT * 
@@ -80,7 +81,7 @@ interface PersonEntityDao {
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
-    ): PagingSource<Int, PersonEntity>
+    ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
         SELECT PersonEntity.pGuid AS guid, 

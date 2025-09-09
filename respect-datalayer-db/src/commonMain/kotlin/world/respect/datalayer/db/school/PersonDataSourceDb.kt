@@ -15,6 +15,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.PersonEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -66,18 +67,15 @@ class PersonDataSourceDb(
 
 
     override suspend fun findByUsername(username: String): Person? {
-        return schoolDb.getPersonEntityDao().findByUsername(username)?.let {
-            PersonEntities(it)
-        }?.toModel()
+        return schoolDb.getPersonEntityDao().findByUsername(username)?.toPersonEntities()?.toModel()
     }
 
     override suspend fun findByGuid(
         loadParams: DataLoadParams,
         guid: String
     ): DataLoadState<Person> {
-        return schoolDb.getPersonEntityDao().findByGuidHash(xxHash.hash(guid))?.let {
-            PersonEntities(it)
-        }?.toModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
+        return schoolDb.getPersonEntityDao().findByGuidHash(xxHash.hash(guid))
+            ?.toPersonEntities()?.toModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Person>> {
@@ -86,7 +84,7 @@ class PersonDataSourceDb(
         ).map { personEntity ->
             if(personEntity != null) {
                 DataReadyState(
-                    data = PersonEntities(personEntity).toModel()
+                    data = personEntity.toPersonEntities().toModel()
                 )
             } else {
                 NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND)
@@ -112,7 +110,7 @@ class PersonDataSourceDb(
         return schoolDb.getPersonEntityDao().findAllAsFlow().map { list ->
             DataReadyState(
                 data = list.map {
-                    PersonEntities(it).toModel()
+                    it.toPersonEntities().toModel()
                 }
             )
         }
@@ -126,7 +124,7 @@ class PersonDataSourceDb(
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { xxHash.hash(it) } ?: 0,
         ).map(tag = "persondb-mapped") {
-            PersonEntities(it).toModel()
+            it.toPersonEntities().toModel()
         }
     }
 

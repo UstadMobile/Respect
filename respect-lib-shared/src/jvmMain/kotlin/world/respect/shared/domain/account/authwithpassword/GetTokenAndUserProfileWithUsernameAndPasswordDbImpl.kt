@@ -2,9 +2,9 @@ package world.respect.shared.domain.account.authwithpassword
 
 import io.ktor.util.decodeBase64Bytes
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.PersonEntities
 import world.respect.datalayer.db.school.adapters.toEntity
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.libutil.ext.randomString
 import world.respect.libxxhash.XXStringHasher
 import world.respect.shared.domain.account.AuthResponse
@@ -31,7 +31,7 @@ class GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
     ): AuthResponse {
         val personEntity = schoolDb.getPersonEntityDao().findByUsername(username)
             ?: throw IllegalArgumentException()
-        val personGuidHash = xxHash.hash(personEntity.pGuid)
+        val personGuidHash = xxHash.hash(personEntity.person.pGuid)
         val personPassword = schoolDb.getPersonPasswordEntityDao().findByUid(personGuidHash)
             ?: throw ForbiddenException("Invalid username/password")
 
@@ -49,12 +49,12 @@ class GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
             )
 
             schoolDb.getAuthTokenEntityDao().insert(
-                token.toEntity(personEntity.pGuid, personGuidHash)
+                token.toEntity(personEntity.person.pGuid, personGuidHash)
             )
 
             return AuthResponse(
                 token = token,
-                person = PersonEntities(personEntity).toModel(),
+                person = personEntity.toPersonEntities().toModel(),
             )
         }else {
             throw ForbiddenException("Invalid username/password")

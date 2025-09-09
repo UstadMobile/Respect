@@ -2,6 +2,7 @@ package world.respect.datalayer.shared.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import io.github.aakira.napier.Napier
 
 /**
  * Map a PagingSource where there is a 1:1 transform between T and R (e.g. from database entities to
@@ -13,11 +14,15 @@ internal class MapPagingSource<T: Any, R: Any>(
     tag: String? = null
 ): DelegatedInvalidationPagingSource<Int, R>(src, tag) {
 
+    val logPrefix = "MapPagingSource(tag=$tag)"
+
     override fun getRefreshKey(state: PagingState<Int, R>): Int? {
         return state.getClippedRefreshKey()
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, R> {
+        Napier.d("$logPrefix: load ${params.toPrettyString()}")
+
         registerInvalidationCallbackIfNeeded()
         val srcResult = src.load(params)
 
@@ -33,10 +38,12 @@ internal class MapPagingSource<T: Any, R: Any>(
             }
 
             is LoadResult.Error -> {
+                Napier.e("$logPrefix: ERROR loading ${params.toPrettyString()}: error", throwable = srcResult.throwable)
                 LoadResult.Error(srcResult.throwable)
             }
 
             is LoadResult.Invalid -> {
+                Napier.e("$logPrefix: INVALID loading ${params.toPrettyString()}")
                 LoadResult.Invalid()
             }
         }

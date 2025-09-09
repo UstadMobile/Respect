@@ -2,6 +2,7 @@ package world.respect.datalayer.repository.shared.paging
 
 import androidx.paging.PagingSource
 import io.github.aakira.napier.Napier
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +16,7 @@ import world.respect.datalayer.shared.paging.getLimit
 import world.respect.datalayer.shared.paging.getOffset
 import world.respect.libutil.util.concurrentSafeListOf
 import world.respect.libutil.util.time.systemTimeInMillis
+import world.respect.datalayer.shared.paging.toPrettyString
 
 /**
  * A "normal" RemoteMediator doesn't work in the following situations:
@@ -61,6 +63,9 @@ import world.respect.libutil.util.time.systemTimeInMillis
  *  local paging source will return a result where nextKey = null before reaching the actual end of
  *  the list).
  *
+ *  Future improvement: this should probably move to using defined chunks using a fixed loadsize
+ *  so it works better with http validation using if-modified-since
+ *
  * @param prefetchDistance the distance by which to prefetch before and after each page load
  * @param prefetchThreshold when all the data required by a PagingSource load itself has already
  *        been loaded, however more data would need to be loaded to reach the prefetchDistance, the
@@ -74,6 +79,10 @@ class DoorOffsetLimitRemoteMediator(
 ) {
 
     private val scope = CoroutineScope(Dispatchers.Default + Job())
+
+    val mediatorId = idAtomic.getAndIncrement()
+
+    private val logPrefix = "RPaging/DoorOffsetLimitRemoteMediator(id=$mediatorId)"
 
     fun interface OnRemoteLoad {
 
@@ -113,6 +122,7 @@ class DoorOffsetLimitRemoteMediator(
      * Must be invoked when the underlying PagingSource is invoked
      */
     fun onLoad(params: PagingSource.LoadParams<Int>) {
+        Napier.d { "$logPrefix: onLoad ${params.toPrettyString()}" }
         val pagingOffset = getOffset(params, (params.key ?: 0), Int.MAX_VALUE)
         val pagingLimit: Int = getLimit(params, (params.key ?: 0))
 
@@ -136,7 +146,7 @@ class DoorOffsetLimitRemoteMediator(
         }
 
         if(loadOffset >= (rangeOffset + rangeLimit)) {
-            Napier.d { "DoorOffsetLimitRemoteMediator: already loaded everything required." }
+            Napier.d { "$logPrefix: already loaded everything required." }
             return
         }
 
@@ -176,9 +186,9 @@ class DoorOffsetLimitRemoteMediator(
 
         //Run the request if a) there is any overlap with the range requested by the PagingSource or
         // b) the number of items to prefetch exceeds the prefetch threshold
-        if(loadPagingOverlap > 0 || prefetchSize > prefetchThreshold) {
+        if(loadPagingOverlap > 0 || prefetchSize > prefetchThreshold && loadLimit > 0) {
             scope.launch {
-                Napier.d("DoorOffsetLimitRemoteMediator: remote load from offset=$loadOffset limit=$loadLimit")
+                Napier.d("$logPrefix: run remote load from offset=$loadOffset limit=$loadLimit ")
                 val range = OffsetLimitRange(loadOffset, loadLimit, systemTimeInMillis())
                 try {
                     _state.update { prev ->
@@ -190,7 +200,7 @@ class DoorOffsetLimitRemoteMediator(
                     onRemoteLoad(loadOffset, loadLimit)
                     loadedRanges.add(range.copy(time = systemTimeInMillis()))
                 }catch(e: Throwable) {
-                    Napier.w("Attempted to load from offset=$loadOffset limit=$loadLimit faled ", e)
+                    Napier.w("$logPrefix Attempted to load from offset=$loadOffset limit=$loadLimit faled ", e)
                 }finally {
                     _state.update { prev ->
                         prev.copy(
@@ -209,6 +219,12 @@ class DoorOffsetLimitRemoteMediator(
 
     fun cancel() {
         scope.cancel()
+    }
+
+    companion object {
+
+        private val idAtomic = atomic(1)
+
     }
 
 }

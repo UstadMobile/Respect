@@ -47,12 +47,14 @@ fun PersonListScreen(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(
             count = lazyPagingItems.itemCount,
+            key = { lazyPagingItems.peek(it)?.guid ?: it.toString() },
+            contentType = { "person" }
         ) { index ->
             val person = lazyPagingItems[index]
 
             ListItem(
                 modifier = Modifier.clickable {
-                    //onClickItem()
+                    person?.also(onClickItem)
                 },
                 leadingContent = {
                     RespectPersonAvatar(person?.fullName() ?: "")

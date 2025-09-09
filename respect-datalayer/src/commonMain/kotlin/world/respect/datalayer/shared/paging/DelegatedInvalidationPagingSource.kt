@@ -17,6 +17,8 @@ abstract class DelegatedInvalidationPagingSource<Key: Any, Value: Any>(
     protected val tag: String? = null,
 ): PagingSource<Key, Value>() {
 
+    private val logPrefix = "RPaging/DelegatedInvalidationPagingSource(tag=$tag)"
+
     private val srcInvalidateCallbackRegistered = atomic(false)
 
     private val invalidated = atomic(false)
@@ -34,7 +36,7 @@ abstract class DelegatedInvalidationPagingSource<Key: Any, Value: Any>(
     private fun onSrcInvalidated() {
         invalidationDelegate.unregisterInvalidatedCallback(srcInvalidatedCallback)
         if(!invalidated.getAndSet(true)) {
-            Napier.d("DPaging: $tag src invalidated")
+            Napier.d("$logPrefix src invalidated")
             invalidate()
         }
     }

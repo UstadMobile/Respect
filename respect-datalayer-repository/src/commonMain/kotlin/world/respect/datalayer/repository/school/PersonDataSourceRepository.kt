@@ -103,4 +103,17 @@ class PersonDataSourceRepository(
         )
     }
 
+    override fun findAllListDetailsAsPagingSource(
+        loadParams: DataLoadParams,
+        searchQuery: String?
+    ): PagingSource<Int, PersonListDetails> {
+        return RepositoryOffsetLimitPagingSource(
+            local = local.findAllListDetailsAsPagingSource(loadParams, searchQuery),
+            remote = remote.findAllAsPagingSource(loadParams, searchQuery),
+            argKey = 0,
+            mediatorStore = mediatorStore,
+            onUpdateLocalFromRemote = local::updateLocalFromRemote,
+        )
+    }
+
 }

@@ -75,12 +75,21 @@ interface PersonEntityDao {
          FROM PersonEntity
         WHERE PersonEntity.pStored > :since 
           AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
-     ORDER BY PersonEntity.pGivenName     
+     ORDER BY PersonEntity.pGivenName
     """)
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
     ): PagingSource<Int, PersonEntity>
 
+    @Query("""
+        SELECT PersonEntity.pGuid AS guid, 
+               PersonEntity.pGivenName AS givenName, 
+               PersonEntity.pFamilyName AS familyName, 
+               PersonEntity.pUsername AS username
+          FROM PersonEntity
+      ORDER BY PersonEntity.pGivenName    
+    """)
+    fun findAllListDetailsAsPagingSource(): PagingSource<Int, PersonListDetails>
 
 }

@@ -43,6 +43,8 @@ class OffsetLimitHttpPagingSource<T: Any>(
     private val tag: String? = null,
 ) : PagingSource<Int, T>(), CacheableHttpPagingSource<Int, T> {
 
+    private val logPrefix = "RPaging/OffsetLimitHttpPagingSource(tag = $tag)"
+
     private var lastKnownTotalCount = -1
 
     private val metadataMap = mutableMapOf<LoadResult<Int, T>, DataLoadMetaInfo>()
@@ -53,7 +55,7 @@ class OffsetLimitHttpPagingSource<T: Any>(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
         return try {
-            Napier.d("OffsetLimitHttpPagingSource: tag=$tag load key=${params.key}")
+            Napier.d("$logPrefix load key=${params.key}")
             val key = params.key ?: 0
             val limit: Int = getLimit(params, key)
 
@@ -86,7 +88,7 @@ class OffsetLimitHttpPagingSource<T: Any>(
                 parameters.append(DataLayerParams.LIMIT, limit.toString())
             }.build()
 
-            Napier.d("DPaging: tag=$tag offsetlimit loading from $url")
+            Napier.d("$logPrefix: offsetlimit loading from $url")
 
             val listLoadState: DataLoadState<List<T>> = httpClient.getAsDataLoadState(
                 url, typeInfo, validationHelper,
@@ -128,7 +130,7 @@ class OffsetLimitHttpPagingSource<T: Any>(
 
             val data: List<T> = listLoadState.data
 
-            Napier.d("DPaging: tag=$tag offsetlimit loaded ${data.size} items")
+            Napier.d("$logPrefix offsetlimit loaded ${data.size} items")
 
             //This section is largely based on RoomUtil.queryDatabase function
             val nextPosToLoad = offset + data.size

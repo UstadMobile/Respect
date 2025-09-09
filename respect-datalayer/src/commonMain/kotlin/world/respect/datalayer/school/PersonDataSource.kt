@@ -47,4 +47,9 @@ interface PersonDataSource {
     ): PagingSource<Int, Person>
 
 
+    fun findAllListDetailsAsPagingSource(
+        loadParams: DataLoadParams,
+        searchQuery: String? = null,
+    ): PagingSource<Int, PersonListDetails>
+
 }

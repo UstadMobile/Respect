@@ -20,7 +20,6 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
-import world.respect.datalayer.shared.paging.PagedItemHolder
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
@@ -163,4 +162,10 @@ class PersonDataSourceDb(
         )
     }
 
+    override fun findAllListDetailsAsPagingSource(
+        loadParams: DataLoadParams,
+        searchQuery: String?,
+    ): PagingSource<Int, PersonListDetails> {
+        return schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource()
+    }
 }

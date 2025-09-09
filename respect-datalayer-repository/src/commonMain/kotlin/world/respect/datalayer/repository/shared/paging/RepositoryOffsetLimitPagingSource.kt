@@ -16,18 +16,22 @@ import io.github.aakira.napier.Napier
  *
  * @param onUpdateLocalFromRemote function (e.g. provided by LocalModeDataSource) that will store
  *        newly received remote data in the local datasource.
+ * @param Local the local data type (may use summary or derivative data from SQL queries etc)
+ * @param Remote the remote data type (typically uses the model class that can be stored locally)
  */
-class RepositoryOffsetLimitPagingSource<T: Any>(
-    internal val local: PagingSource<Int, T>,
-    internal val remote: PagingSource<Int, T>,
-    private val onUpdateLocalFromRemote: suspend (List<T>) -> Unit,
+class RepositoryOffsetLimitPagingSource<Local: Any, Remote: Any>(
+    internal val local: PagingSource<Int, Local>,
+    internal val remote: PagingSource<Int, Remote>,
+    private val onUpdateLocalFromRemote: suspend (List<Remote>) -> Unit,
     mediatorStore: PagingSourceMediatorStore,
     argKey: Int,
     tag: String? = null,
-) : FilterPagingSource<Int, T>(
+) : FilterPagingSource<Int, Local>(
     src = local,
     tag = tag,
 ){
+
+    private val logPrefix = "RPaging/RepositoryOffsetLimitPagingSource(tag = $tag):"
 
     val scope = CoroutineScope(Dispatchers.Default + Job())
 
@@ -47,18 +51,21 @@ class RepositoryOffsetLimitPagingSource<T: Any>(
 
                 if(remoteLoadResult is LoadResult.Page || isNotModifiedResponse) {
                     @Suppress("UNCHECKED_CAST")
-                    (remote as? CacheableHttpPagingSource<Int, T>)?.onLoadResultStored(remoteLoadResult)
+                    (remote as? CacheableHttpPagingSource<Int, Remote>)?.onLoadResultStored(remoteLoadResult)
                 }
             }
         }
     }
 
     init {
-        this.registerInvalidatedCallback { scope.cancel() }
+        this.registerInvalidatedCallback {
+            Napier.d("$logPrefix : invalidated" )
+            scope.cancel()
+        }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
-        Napier.d("RepositoryOffsetLimitPagingSource: tag=$tag load key=${params.key}")
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Local> {
+        Napier.d("$logPrefix load key=${params.key}")
         val localResult = super.load(params)
         remoteMediator.onLoad(params)
         return localResult

@@ -10,7 +10,6 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -23,9 +22,11 @@ import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import io.github.aakira.napier.Napier
+
 
 data class PersonListUiState(
-    val persons: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+    val persons: () -> PagingSource<Int, PersonListDetails> = { EmptyPagingSource() },
 )
 
 class PersonListViewModel(
@@ -41,8 +42,11 @@ class PersonListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    private val pagingSourceFactory: () -> PagingSource<Int, Person> = {
-        schoolDataSource.personDataSource.findAllAsPagingSource(DataLoadParams())
+    private val pagingSourceFactory: () -> PagingSource<Int, PersonListDetails> = {
+        Napier.d("PersonListViewModel: pagingSourceFactory invoke")
+        schoolDataSource.personDataSource.findAllListDetailsAsPagingSource(
+            DataLoadParams(), null
+        )
     }
 
     init {

@@ -34,7 +34,7 @@ class PersonDataSourceRepository(
     ): DataLoadState<Person> {
         val remote = remote.findByGuid(loadParams, guid)
         if(remote is DataReadyState) {
-            local.putPersonsLocal(listOf(remote.data))
+            local.updateLocalFromRemote(listOf(remote.data))
         }
 
         return local.findByGuid(loadParams, guid)
@@ -43,11 +43,8 @@ class PersonDataSourceRepository(
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Person>> {
         val remoteFlow = remote.findByGuidAsFlow(guid).onEach {
             if(it is DataReadyState) {
-                local.putPersonsLocal(listOf(it.data))
+                local.updateLocalFromRemote(listOf(it.data))
             }
-
-            //here: update consistent-through tracker
-
         }
 
         return local.findByGuidAsFlow(guid).combineWithRemote(remoteFlow)
@@ -67,7 +64,7 @@ class PersonDataSourceRepository(
     ): DataLoadState<List<Person>> {
         val remote = remote.list(loadParams, searchQuery, since)
         if(remote is DataReadyState) {
-            local.putPersonsLocal(remote.data)
+            local.updateLocalFromRemote(remote.data)
             validationHelper.updateValidationInfo(remote.metaInfo)
         }
 
@@ -100,4 +97,7 @@ class PersonDataSourceRepository(
         )
     }
 
+    override suspend fun store(persons: List<Person>) {
+        local.store(persons)
+    }
 }

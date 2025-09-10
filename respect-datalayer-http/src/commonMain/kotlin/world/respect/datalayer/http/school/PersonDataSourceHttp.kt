@@ -140,4 +140,8 @@ class PersonDataSourceHttp(
             person.asListDetails()
         }
     }
+
+    override suspend fun store(persons: List<Person>) {
+        throw IllegalStateException("Person-store-http: Not yet supported")
+    }
 }

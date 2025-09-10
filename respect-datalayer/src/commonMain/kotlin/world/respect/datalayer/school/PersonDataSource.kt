@@ -17,13 +17,11 @@ interface PersonDataSource {
     ) {
 
         companion object {
-
             fun fromParams(stringValues: StringValues) : GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(stringValues)
                 )
             }
-
         }
 
     }
@@ -55,6 +53,11 @@ interface PersonDataSource {
         loadParams: DataLoadParams,
         listParams: GetListParams,
     ): PagingSource<Int, PersonListDetails>
+
+    suspend fun store(
+        persons: List<Person>
+    )
+
 
     companion object {
 

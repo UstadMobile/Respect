@@ -69,9 +69,9 @@ class AddSchoolUseCase(
                 )
             )
 
-            schoolDataSource.personDataSource.putPersonsLocal(listOf(adminPerson))
+            schoolDataSource.personDataSource.store(listOf(adminPerson))
 
-            schoolDataSource.personDataSource.putPersonsLocal(
+            schoolDataSource.personDataSource.store(
                 (2..300).map {
                     Person(
                         guid = "$it",

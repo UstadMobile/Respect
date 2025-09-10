@@ -66,6 +66,10 @@ class PersonDataSourceDb(
     }
 
 
+    override suspend fun store(persons: List<Person>) {
+        updateLocalFromRemote(persons)
+    }
+
     override suspend fun findByUsername(username: String): Person? {
         return schoolDb.getPersonEntityDao().findByUsername(username)?.toPersonEntities()?.toModel()
     }
@@ -90,10 +94,6 @@ class PersonDataSourceDb(
                 NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND)
             }
         }
-    }
-
-    override suspend fun putPersonsLocal(persons: List<Person>) {
-        upsertPersons(persons)
     }
 
     override suspend fun updateLocalFromRemote(

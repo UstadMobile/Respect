@@ -61,7 +61,7 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 
@@ -101,7 +101,7 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 
@@ -112,7 +112,7 @@ class PersonRepositoryIntegrationTest {
                 //DataSource will need to reject same-second changes and respond with a wait message.
                 Thread.sleep(2_000)
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(
                         defaultTestPerson.copy(
                             givenName = updatedName,
@@ -155,7 +155,7 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 
@@ -194,7 +194,7 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 
@@ -206,7 +206,7 @@ class PersonRepositoryIntegrationTest {
                 assertTrue(initData.remoteState?.metaInfo?.consistentThrough!! >= startTime)
 
                 val updatedName = "updated"
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(
                         defaultTestPerson.copy(
                             givenName = "updated",
@@ -245,7 +245,7 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 
@@ -286,7 +286,7 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.putPersonsLocal(
+                serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 

@@ -18,7 +18,6 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
-import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -136,8 +135,7 @@ class PersonEditViewModel(
 
         viewModelScope.launch {
             try {
-                (schoolDataSource.personDataSource as? PersonDataSourceLocal)?.putPersonsLocal(
-                    listOf(person))
+                schoolDataSource.personDataSource.store(listOf(person))
 
                 if(route.guid == null) {
                     _navCommandFlow.tryEmit(

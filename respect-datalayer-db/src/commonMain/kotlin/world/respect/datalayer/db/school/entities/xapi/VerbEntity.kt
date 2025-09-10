@@ -2,7 +2,9 @@ package world.respect.datalayer.db.school.entities.xapi
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity
 /**
  * Verb as per the xAPI spec. Verb only has two properties ( id and display ) as per the spec:

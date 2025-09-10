@@ -54,6 +54,11 @@ interface PersonDataSource {
         listParams: GetListParams,
     ): PagingSource<Int, PersonListDetails>
 
+    /**
+     * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on
+     * the data. It WILL NOT set the last-modified time (this should be done by the ViewModel or
+     * UseCase actually changing the data).
+     */
     suspend fun store(
         persons: List<Person>
     )

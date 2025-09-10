@@ -29,7 +29,6 @@ fun main(args: Array<String>) {
         it.addArgument("-a", "--adminusername").help("Admin username")
         it.addArgument("-p", "--adminpassword")
         it.addArgument("-r", "--rpId").help("Passkey rpId")
-            .required(true)
             .help("Admin password")
     }
 

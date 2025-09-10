@@ -61,8 +61,19 @@ class SchoolDirectoryDataSourceHttp(
             }
         }
     }
+
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
-        TODO("Not yet implemented")
+        val directories = local.schoolDirectoryDataSource.allDirectories()
+
+        for (dir in directories) {
+            val url = dir.baseUrl.resolve("api/directory/invite?code=$inviteCode")
+            try {
+                return httpClient.get(url).body()
+            } catch (e: Throwable) {
+                println("${e.message}")
+            }
+        }
+        throw IllegalStateException("Invite not found for code=$inviteCode")
     }
 
     @OptIn(ExperimentalTime::class)

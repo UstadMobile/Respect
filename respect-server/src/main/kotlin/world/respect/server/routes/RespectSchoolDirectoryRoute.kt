@@ -42,6 +42,19 @@ fun Route.RespectSchoolDirectoryRoute() {
     post("invite") {
 
     }
+    get("invite"){
+        val code = call.request.queryParameters["code"]
+
+        if (code.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Missing 'code' parameter")
+            return@get
+        }
+
+        val directoryDataSource: SchoolDirectoryDataSourceLocal by inject()
+        val inviteInfo = directoryDataSource.getInviteInfo(code)
+
+        call.respond(inviteInfo)
+    }
     get("url") {
         val directoryDataSource: SchoolDirectoryDataSourceLocal by inject()
         val url = call.request.queryParameters["url"]

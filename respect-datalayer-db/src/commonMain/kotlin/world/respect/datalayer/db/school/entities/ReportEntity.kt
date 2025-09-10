@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.realm.entities
+package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -6,10 +6,12 @@ import androidx.room.PrimaryKey
 @Entity
 data class ReportEntity (
     @PrimaryKey
-    val reportId: String,
-    val ownerGuid: String,
-    val title: String,
-    val reportOptions: String,
-    val reportIsTemplate: Boolean = false,
-    val active: Boolean = true,
+    val rGuid: String,
+    val rOwnerGuid: String,
+    val rTitle: String,
+    val rOptions: String,
+    val rIsTemplate: Boolean = false,
+    val rActive: Boolean = true,
+    val rLastModified: Long,
+    val rStored: Long,
 )

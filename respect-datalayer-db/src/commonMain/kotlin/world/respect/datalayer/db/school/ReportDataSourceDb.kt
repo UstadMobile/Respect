@@ -11,14 +11,21 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toReportEntity
 import world.respect.datalayer.db.school.adapters.toRespectReport
-import world.respect.datalayer.school.ReportDataSource
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.ReportDataSourceLocal
+import world.respect.datalayer.school.model.Report
 
 class ReportDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
-) : ReportDataSource {
+) : ReportDataSourceLocal {
 
-    override suspend fun allReportsAsFlow(template: Boolean): Flow<DataLoadState<List<RespectReport>>> {
+    override suspend fun updateLocalFromRemote(
+        list: List<Report>,
+        forceOverwrite: Boolean
+    ) {
+
+    }
+
+    override suspend fun allReportsAsFlow(template: Boolean): Flow<DataLoadState<List<Report>>> {
         return schoolDb.getReportEntityDao().getAllReportsByTemplate(template)
             .map { reportEntities ->
                 DataReadyState(reportEntities.map { it.toRespectReport() })
@@ -28,7 +35,7 @@ class ReportDataSourceDb(
     override suspend fun getReportAsync(
         loadParams: DataLoadParams,
         reportId: String
-    ): DataLoadState<RespectReport> {
+    ): DataLoadState<Report> {
         val reportEntity = schoolDb.getReportEntityDao().getReportAsync(reportId)
         return if (reportEntity != null) {
             DataReadyState(reportEntity.toRespectReport())
@@ -37,7 +44,7 @@ class ReportDataSourceDb(
         }
     }
 
-    override suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<RespectReport>> {
+    override suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<Report>> {
         return schoolDb.getReportEntityDao().getReportAsFlow(reportId).map { reportEntity ->
             if (reportEntity != null) {
                 DataReadyState(reportEntity.toRespectReport())
@@ -47,7 +54,7 @@ class ReportDataSourceDb(
         }
     }
 
-    override suspend fun putReport(report: RespectReport) {
+    override suspend fun putReport(report: Report) {
         val reportEntity = report.toReportEntity()
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
@@ -63,4 +70,6 @@ class ReportDataSourceDb(
             }
         }
     }
+
+
 }

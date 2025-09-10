@@ -20,8 +20,8 @@ import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.report.ReportSeries
 import world.respect.datalayer.school.model.report.ReportSeriesVisualType
-import world.respect.datalayer.respect.model.Indicator
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.school.model.Report
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -46,6 +46,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
+import kotlin.time.Clock
 
 data class ReportEditUiState(
     val reportOptions: ReportOptions = ReportOptions(),
@@ -70,7 +71,7 @@ class ReportEditViewModel(
     private val route: ReportEdit = savedStateHandle.toRoute()
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
     private val entityUid = route.reportUid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        RespectReport.TABLE_ID
+        Report.TABLE_ID
     ).toString()
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
@@ -126,7 +127,7 @@ class ReportEditViewModel(
             if (route.reportUid != null) {
                 loadEntity(
                     json = json,
-                    serializer = RespectReport.serializer(),
+                    serializer = Report.serializer(),
                     loadFn = { params ->
                         schoolDataSource.reportDataSource.getReportAsync(
                             loadParams = params,
@@ -195,12 +196,14 @@ class ReportEditViewModel(
             }
 
             try {
-                val report = RespectReport(
-                    reportId = entityUid,
+                val report = Report(
+                    guid = entityUid,
                     title = newState.reportOptions.title,
                     reportOptions = newState.reportOptions,
-                    ownerGuid = ""
+                    ownerGuid = "",
+                    lastModified = Clock.System.now(),
                 )
+
                 schoolDataSource.reportDataSource.putReport(report)
 
                 if (route.reportUid == null) {

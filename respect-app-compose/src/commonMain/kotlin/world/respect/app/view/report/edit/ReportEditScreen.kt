@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
@@ -49,7 +48,7 @@ import world.respect.datalayer.school.model.report.ReportSeries
 import world.respect.datalayer.school.model.report.ReportSeriesVisualType
 import world.respect.datalayer.school.model.report.ReportTimeRangeUnit
 import world.respect.datalayer.school.model.report.ReportXAxis
-import world.respect.datalayer.respect.model.Indicator
+import world.respect.datalayer.school.model.Indicator
 import world.respect.shared.ext.label
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_filter
@@ -73,7 +72,6 @@ import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 
 @Composable
 fun ReportEditScreen(
-    navController: NavHostController,
     viewModel: ReportEditViewModel
 ) {
     val uiState: ReportEditUiState by viewModel.uiState.collectAsStateWithLifecycle(

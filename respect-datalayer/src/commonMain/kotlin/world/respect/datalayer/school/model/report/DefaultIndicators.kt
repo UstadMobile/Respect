@@ -1,6 +1,6 @@
 package world.respect.datalayer.school.model.report
 
-import world.respect.datalayer.respect.model.Indicator
+import world.respect.datalayer.school.model.Indicator
 
 //TODO Need to change with string resource
 

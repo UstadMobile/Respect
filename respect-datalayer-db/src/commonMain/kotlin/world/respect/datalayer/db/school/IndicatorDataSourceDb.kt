@@ -9,7 +9,7 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toIndicator
 import world.respect.datalayer.db.school.adapters.toIndicatorEntity
-import world.respect.datalayer.respect.model.Indicator
+import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.model.report.DefaultIndicators
 

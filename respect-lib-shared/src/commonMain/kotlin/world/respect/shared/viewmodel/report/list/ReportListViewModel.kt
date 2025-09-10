@@ -15,7 +15,7 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
@@ -33,7 +33,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.time.ExperimentalTime
 
 data class ReportListUiState(
-    val reportList: DataLoadState<List<RespectReport>> = DataLoadingState(),
+    val reportList: DataLoadState<List<Report>> = DataLoadingState(),
     val activeUserPersonUid: Long = 0L,
     val xAxisFormatter: GraphFormatter<String>? = null,
     val yAxisFormatter: GraphFormatter<Double>? = null
@@ -77,9 +77,9 @@ class ReportListViewModel(
     }
 
     @OptIn(ExperimentalTime::class)
-    fun runReport(report: RespectReport): Flow<RunReportResultAndFormatters> {
+    fun runReport(report: Report): Flow<RunReportResultAndFormatters> {
         val request = RunReportUseCase.RunReportRequest(
-            reportUid = report.reportId.toLong(),
+            reportUid = report.guid.toLong(),
             reportOptions = report.reportOptions,
             accountPersonUid = 0L, // TODO: Get actual user ID
             timeZone = TimeZone.currentSystemDefault()
@@ -118,10 +118,10 @@ class ReportListViewModel(
         )
     }
 
-    fun onClickEntry(entry: RespectReport) {
+    fun onClickEntry(entry: Report) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                ReportDetail(entry.reportId)
+                ReportDetail(entry.guid)
             )
         )
     }

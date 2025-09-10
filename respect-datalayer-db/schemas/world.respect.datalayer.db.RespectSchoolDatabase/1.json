@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2a986e9170d8e2ee527fd0e53f41eed0",
+    "identityHash": "62ea9b6780c3511ccccb6c60402a5daf",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -217,41 +217,53 @@
       },
       {
         "tableName": "ReportEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportId` TEXT NOT NULL, `ownerGuid` TEXT NOT NULL, `title` TEXT NOT NULL, `reportOptions` TEXT NOT NULL, `reportIsTemplate` INTEGER NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`reportId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuid`))",
         "fields": [
           {
-            "fieldPath": "reportId",
-            "columnName": "reportId",
+            "fieldPath": "rGuid",
+            "columnName": "rGuid",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "ownerGuid",
-            "columnName": "ownerGuid",
+            "fieldPath": "rOwnerGuid",
+            "columnName": "rOwnerGuid",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "title",
-            "columnName": "title",
+            "fieldPath": "rTitle",
+            "columnName": "rTitle",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "reportOptions",
-            "columnName": "reportOptions",
+            "fieldPath": "rOptions",
+            "columnName": "rOptions",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "reportIsTemplate",
-            "columnName": "reportIsTemplate",
+            "fieldPath": "rIsTemplate",
+            "columnName": "rIsTemplate",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "active",
-            "columnName": "active",
+            "fieldPath": "rActive",
+            "columnName": "rActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rLastModified",
+            "columnName": "rLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rStored",
+            "columnName": "rStored",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -259,7 +271,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "reportId"
+            "rGuid"
           ]
         }
       },
@@ -308,7 +320,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2a986e9170d8e2ee527fd0e53f41eed0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '62ea9b6780c3511ccccb6c60402a5daf')"
     ]
   }
 }

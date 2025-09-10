@@ -4,27 +4,27 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.ReportDataSource
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.model.Report
 
 class ReportDataSourceRepository(
     private val remote: ReportDataSource,
 ) : ReportDataSource {
-    override suspend fun allReportsAsFlow(template: Boolean): Flow<DataLoadState<List<RespectReport>>> {
+    override suspend fun allReportsAsFlow(template: Boolean): Flow<DataLoadState<List<Report>>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun getReportAsync(
         loadParams: DataLoadParams,
         reportId: String
-    ): DataLoadState<RespectReport> {
+    ): DataLoadState<Report> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<RespectReport>> {
+    override suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<Report>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun putReport(report: RespectReport) {
+    override suspend fun putReport(report: Report) {
         TODO("Not yet implemented")
     }
 

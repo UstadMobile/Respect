@@ -195,28 +195,28 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ReportEditScreen(navController = navController, viewModel = viewModel)
+            ReportEditScreen(viewModel = viewModel)
         }
         composable<Report> {
             val viewModel: ReportListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ReportListScreen(navController = navController, viewModel = viewModel)
+            ReportListScreen(viewModel = viewModel)
         }
         composable<ReportTemplateList> {
             val viewModel: ReportTemplateListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ReportTemplateListScreen(navController = navController, viewModel = viewModel)
+            ReportTemplateListScreen(viewModel = viewModel)
         }
         composable<IndictorEdit> {
             val viewModel: IndicatorEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            IndictorEditScreen(navController = navController, viewModel = viewModel)
+            IndictorEditScreen(viewModel = viewModel)
         }
         composable<ReportEditFilter> {
             val viewModel: ReportFilterEditViewModel = respectViewModel(
@@ -230,7 +230,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            IndicatorListScreen(navController = navController, viewModel = viewModel)
+            IndicatorListScreen(viewModel = viewModel)
         }
         composable<IndicatorDetail> {
             val viewModel: IndicatorDetailViewModel = respectViewModel(

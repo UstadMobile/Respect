@@ -3,7 +3,7 @@ package world.respect.datalayer.school
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.model.Report
 
 interface ReportDataSource {
 
@@ -12,13 +12,13 @@ interface ReportDataSource {
      */
    suspend fun allReportsAsFlow(
         template: Boolean
-    ): Flow<DataLoadState<List<RespectReport>>>
+    ): Flow<DataLoadState<List<Report>>>
 
-    suspend fun getReportAsync(loadParams: DataLoadParams, reportId: String): DataLoadState<RespectReport>
+    suspend fun getReportAsync(loadParams: DataLoadParams, reportId: String): DataLoadState<Report>
 
-    suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<RespectReport>>
+    suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<Report>>
 
-    suspend fun putReport(report: RespectReport)
+    suspend fun putReport(report: Report)
 
     suspend fun deleteReport(reportId: String)
 

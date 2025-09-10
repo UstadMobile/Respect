@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.realm.entities.ReportEntity
+import world.respect.datalayer.db.school.entities.ReportEntity
 
 @Dao
 interface  ReportEntityDao {
@@ -13,27 +13,33 @@ interface  ReportEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putReport(reportEntity: ReportEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
         FROM ReportEntity
-        WHERE reportIsTemplate = :template
-    """)
+        WHERE rIsTemplate = :template
+    """
+    )
     fun getAllReportsByTemplate(template: Boolean): Flow<List<ReportEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
          FROM ReportEntity
-        WHERE reportId = :reportId
-    """)
+        WHERE rGuid = :reportId
+    """
+    )
     suspend fun getReportAsync(reportId: String): ReportEntity?
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
          FROM ReportEntity
-        WHERE reportId = :reportId
-    """)
+        WHERE rGuid = :reportId
+    """
+    )
     fun getReportAsFlow(reportId: String): Flow<ReportEntity?>
 
-    @Query("DELETE FROM ReportEntity WHERE reportId = :reportUid")
+    @Query("DELETE FROM ReportEntity WHERE rGuid = :reportUid")
     suspend fun deleteReportByUid(reportUid: String)
 }

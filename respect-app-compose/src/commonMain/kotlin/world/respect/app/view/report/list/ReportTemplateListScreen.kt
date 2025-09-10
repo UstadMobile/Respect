@@ -23,13 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.report.graph.CombinedGraph
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.report.ReportOptions
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.No_data_available
@@ -40,7 +39,6 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 
 @Composable
 fun ReportTemplateListScreen(
-    navController: NavHostController,
     viewModel: ReportTemplateListViewModel
 ) {
     val uiState: ReportTemplateListUiState by viewModel.uiState.collectAsState(
@@ -49,8 +47,8 @@ fun ReportTemplateListScreen(
     LazyColumn {
         item {
             ReportTemplateCard(
-                report = RespectReport(
-                    reportId = "0",
+                report = Report(
+                    guid = "0",
                     title = stringResource(Res.string.blank_template),
                     reportOptions = ReportOptions(),
                     reportIsTemplate = true,
@@ -72,11 +70,11 @@ fun ReportTemplateListScreen(
 
 @Composable
 private fun ReportTemplateCard(
-    report: RespectReport,
+    report: Report,
     viewModel: ReportTemplateListViewModel,
     activeUserPersonUid: Long
 ) {
-    val reportDataFlow = remember(report.reportId) {
+    val reportDataFlow = remember(report.guid) {
         viewModel.runReport(report)
     }
     val reportResultWithFormatters by reportDataFlow.collectAsState(
@@ -84,7 +82,7 @@ private fun ReportTemplateCard(
             reportResult = RunReportUseCase.RunReportResult(
                 timestamp = 0,
                 request = RunReportUseCase.RunReportRequest(
-                    reportUid = report.reportId.toLong(),
+                    reportUid = report.guid.toLong(),
                     reportOptions = ReportOptions(),
                     accountPersonUid = activeUserPersonUid,
                     timeZone = TimeZone.currentSystemDefault()

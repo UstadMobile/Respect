@@ -15,15 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import world.respect.app.util.ext.defaultItemPadding
-import world.respect.datalayer.respect.model.Indicator
+import world.respect.datalayer.school.model.Indicator
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListUiState
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 
 @Composable
 fun IndicatorListScreen(
-    navController: NavHostController,
     viewModel: IndicatorListViewModel
 ) {
     val uiState: IndicatorListUiState by viewModel.uiState.collectAsState()

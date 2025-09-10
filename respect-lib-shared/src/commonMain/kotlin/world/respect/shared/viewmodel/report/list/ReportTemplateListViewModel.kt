@@ -17,7 +17,7 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.report.ReportOptions
-import world.respect.datalayer.respect.model.RespectReport
+import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
@@ -32,7 +32,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 data class ReportTemplateListUiState(
-    val templates: DataLoadState<List<RespectReport>> = DataLoadingState(),
+    val templates: DataLoadState<List<Report>> = DataLoadingState(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val activeUserPersonUid: Long = 0L,
@@ -70,8 +70,8 @@ class ReportTemplateListViewModel(
     }
 
     @OptIn(ExperimentalTime::class)
-    fun runReport(report: RespectReport): Flow<RunReportResultAndFormatters> {
-        if (report.reportId == "0") {
+    fun runReport(report: Report): Flow<RunReportResultAndFormatters> {
+        if (report.guid == "0") {
             return flow {
                 emit(
                     RunReportResultAndFormatters(
@@ -92,7 +92,7 @@ class ReportTemplateListViewModel(
             }
         } else {
             val request = RunReportUseCase.RunReportRequest(
-                reportUid = report.reportId.toLong(),
+                reportUid = report.guid.toLong(),
                 reportOptions = report.reportOptions,
                 accountPersonUid = activeUserPersonUid,
                 timeZone = TimeZone.currentSystemDefault()
@@ -124,8 +124,8 @@ class ReportTemplateListViewModel(
         }
     }
 
-    fun onTemplateSelected(template: RespectReport) {
-        if (template.reportId == "0") { // blank template
+    fun onTemplateSelected(template: Report) {
+        if (template.guid == "0") { // blank template
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     ReportEdit(null)
@@ -134,7 +134,7 @@ class ReportTemplateListViewModel(
         } else {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    ReportEdit(template.reportId)
+                    ReportEdit(template.guid)
                 )
             )
         }

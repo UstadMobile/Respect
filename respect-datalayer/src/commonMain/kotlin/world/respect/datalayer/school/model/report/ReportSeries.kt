@@ -2,7 +2,7 @@ package world.respect.datalayer.school.model.report
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.respect.model.Indicator
+import world.respect.datalayer.school.model.Indicator
 
 @Serializable
 data class ReportSeries(
@@ -23,6 +23,7 @@ enum class ReportSeriesVisualType {
 }
 
 enum class ReportXAxis(
+    @Suppress("unused") //Reserved for future use
     val personJoinRequired: Boolean = false,
     val datePeriod: DatePeriod? = null,
 ) {

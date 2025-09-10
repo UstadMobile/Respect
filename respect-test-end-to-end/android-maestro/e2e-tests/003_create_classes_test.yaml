@@ -18,9 +18,13 @@ appId: world.respect.app
 - tapOn: "Description"
 - inputText: "New Course Description"
 - tapOn: "Start date"
-- inputText: "12/01/2023"
+- runScript:
+      file: "common/setDate.js"
+- inputText: ${output.yesterdayDate}
 - tapOn: "End date"
-- inputText: "12/02/2025"
+- runScript:
+      file: "common/setDate.js"
+- inputText: ${output.tomorrowDate}
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"

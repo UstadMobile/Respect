@@ -21,7 +21,6 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -49,8 +48,6 @@ import world.respect.shared.domain.account.createinviteredeemrequest.RespectRede
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
-import world.respect.shared.domain.launchapp.LaunchAppUseCase
-import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
 import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
@@ -68,7 +65,6 @@ import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignments.AssignmentViewModel
-import world.respect.shared.viewmodel.clazz.ClazzViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel

@@ -200,7 +200,7 @@ class DoorOffsetLimitRemoteMediator(
                     onRemoteLoad(loadOffset, loadLimit)
                     loadedRanges.add(range.copy(time = systemTimeInMillis()))
                 }catch(e: Throwable) {
-                    Napier.w("$logPrefix Attempted to load from offset=$loadOffset limit=$loadLimit faled ", e)
+                    Napier.w("$logPrefix Attempted to load from offset=$loadOffset limit=$loadLimit FAILED ", e)
                 }finally {
                     _state.update { prev ->
                         prev.copy(

@@ -40,7 +40,7 @@ class OffsetLimitHttpPagingSource<T: Any>(
     private val validationHelper: BaseDataSourceValidationHelper? = null,
     private val typeInfo: TypeInfo,
     private val requestBuilder: HttpRequestBuilder.() -> Unit = { },
-    private val tag: String? = null,
+    tag: String? = null,
 ) : PagingSource<Int, T>(), CacheableHttpPagingSource<Int, T> {
 
     private val logPrefix = "RPaging/OffsetLimitHttpPagingSource(tag = $tag)"
@@ -153,6 +153,7 @@ class OffsetLimitHttpPagingSource<T: Any>(
                 metadataMap[it] = listLoadState.metaInfo
             }
         }catch(e: Throwable) {
+            Napier.e("$logPrefix exception loading", throwable = e)
             LoadResult.Error(e)
         }
     }

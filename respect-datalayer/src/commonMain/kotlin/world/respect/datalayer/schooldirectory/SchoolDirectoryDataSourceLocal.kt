@@ -6,7 +6,7 @@ import world.respect.datalayer.respect.model.RespectSchoolDirectory
 
 interface SchoolDirectoryDataSourceLocal: SchoolDirectoryDataSource {
 
-    suspend fun upsertSchoolDirectoryEntry(
+    suspend fun putSchoolDirectoryEntry(
         school: DataReadyState<SchoolDirectoryEntry>,
         directory: RespectSchoolDirectory?
     )

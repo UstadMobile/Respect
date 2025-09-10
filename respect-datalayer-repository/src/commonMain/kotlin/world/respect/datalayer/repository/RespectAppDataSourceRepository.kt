@@ -8,6 +8,7 @@ import world.respect.datalayer.repository.compatibleapps.CompatibleAppDataSource
 import world.respect.datalayer.repository.opds.OpdsDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolDirectoryDataSourceRepository
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.repository.schooldirectory.SchoolDirectoryDataSourceRepository
 
 class RespectAppDataSourceRepository(
     private val local: RespectAppDataSourceLocal,

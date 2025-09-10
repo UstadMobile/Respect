@@ -4,9 +4,14 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -18,10 +23,13 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.respectDatalayer)
+            implementation(projects.respectLibUtil)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
+            implementation(libs.napier)
+            implementation(libs.atomicfu)
         }
 
         jvmMain.dependencies {
@@ -30,8 +38,10 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(kotlin("test"))
+            implementation(projects.respectServer)
+            implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
-            implementation(projects.respectLibUtil)
+
             implementation(libs.turbine)
             implementation(projects.respectDatalayerHttp)
             implementation(projects.respectDatalayerDb)
@@ -52,6 +62,11 @@ kotlin {
             implementation(libs.ktor.server.conditional.headers)
             implementation(libs.ktor.server.call.logging)
             implementation(libs.logback)
+
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+            implementation(libs.koin.ktor)
+            implementation(libs.mockito.kotlin)
         }
     }
 }

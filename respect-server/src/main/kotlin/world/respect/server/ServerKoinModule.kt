@@ -6,6 +6,7 @@ import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
@@ -24,20 +25,24 @@ import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.domain.school.add.AddSchoolDirectoryCallback
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
+import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
+import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
 
 fun serverKoinModule(
     config: ApplicationConfig,
+    dataDir: File = config.absoluteDataDir()
 ) = module {
-
-    val dataDir = config.absoluteDataDir()
 
     single<RespectAppDatabase> {
         val dbFile = File(dataDir, APP_DB_FILENAME)
@@ -84,11 +89,13 @@ fun serverKoinModule(
     }
 
     /*
-     * School scope: scope id = the full school url as per SchoolDirectoryEntry.self
+     * School scope: used as the basis for virtual hosting.
      */
     scope<SchoolDirectoryEntry> {
+        fun Scope.schoolUrl(): Url = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+
         scoped<RespectSchoolPath> {
-            val schoolDirName = Url(id).sanitizedForFilename()
+            val schoolDirName = schoolUrl().sanitizedForFilename()
             val schoolDirFile = File(dataDir, schoolDirName).also {
                 if(!it.exists())
                     it.mkdirs()
@@ -105,7 +112,7 @@ fun serverKoinModule(
             val xxHasher: XXStringHasher = get()
 
             val schoolConfig = runBlocking {
-                appDb.getSchoolConfigEntityDao().findByUid(xxHasher.hash(id))
+                appDb.getSchoolConfigEntityDao().findByUid(xxHasher.hash(schoolUrl().toString()))
             } ?: throw IllegalStateException("School config not found for $id")
 
             val schoolConfigFile = File(schoolPath.path.toString())
@@ -123,22 +130,40 @@ fun serverKoinModule(
             )
         }
 
-        scoped<SchoolDataSourceLocal> {
-            SchoolDataSourceDb(schoolDb = get(), xxStringHasher = get())
-        }
-
-        scoped<SchoolDataSource> {
-            get<SchoolDataSourceLocal>()
+        scoped<ValidateAuthorizationUseCase> {
+            ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
 
         scoped<GetTokenAndUserProfileWithUsernameAndPasswordUseCase> {
             GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
                 schoolDb = get(),
                 xxHash = get(),
-                personDataSource = get<SchoolDataSource>().personDataSource,
             )
-
         }
     }
+
+    /*
+     * AccountScope: as per the client, the Account Scope is linked to a parent School scope.
+     *
+     * All server-side dependencies in the account scope are cheap wrappers e.g. the
+     * SchoolDataSource wrapper (which is tied to a specific account guid) is kept in the AccountScope,
+     * but the RespectSchoolDatabase which has the actual DB connection is kept in the school scope.
+     *
+     * Dependencies in the account scope use factory so they are not retained in memory
+     */
+    scope<RespectAccount> {
+        factory<SchoolDataSourceLocal> {
+            SchoolDataSourceDb(
+                schoolDb = get(),
+                xxStringHasher = get(),
+                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId
+            )
+        }
+
+        factory<SchoolDataSource> {
+            get<SchoolDataSourceLocal>()
+        }
+    }
+
 
 }

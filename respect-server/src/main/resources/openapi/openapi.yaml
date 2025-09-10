@@ -135,6 +135,33 @@ paths:
           required: false
           schema:
             type: string
+        - name: since
+          in: query
+          description: Return only persons stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
       responses:
         '200':
           description: OK

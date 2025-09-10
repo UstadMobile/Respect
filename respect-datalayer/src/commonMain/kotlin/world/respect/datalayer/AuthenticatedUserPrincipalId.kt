@@ -1,4 +1,4 @@
-package world.respect.shared.domain
+package world.respect.datalayer
 
 import kotlinx.serialization.Serializable
 

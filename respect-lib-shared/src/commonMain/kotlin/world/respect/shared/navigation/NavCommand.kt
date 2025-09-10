@@ -1,6 +1,7 @@
 package world.respect.shared.navigation
 
-import world.respect.shared.util.systemTimeInMillis
+import world.respect.libutil.util.time.systemTimeInMillis
+import kotlin.reflect.KClass
 
 sealed class NavCommand(
     val timestamp: Long = systemTimeInMillis(),
@@ -9,6 +10,7 @@ sealed class NavCommand(
         val destination: RespectAppRoute,
         val clearBackStack: Boolean = false,
         val popUpTo: RespectAppRoute? = null,
+        val popUpToClass: KClass<*>? = null,
         val popUpToInclusive: Boolean = false,
         timestamp: Long = systemTimeInMillis(),
     ) : NavCommand(timestamp)

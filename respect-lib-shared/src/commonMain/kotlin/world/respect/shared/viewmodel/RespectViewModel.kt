@@ -21,7 +21,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppRoute
-import world.respect.shared.util.systemTimeInMillis
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 

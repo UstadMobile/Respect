@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e66238029669938a12ddf0a820f857d7",
+    "identityHash": "d30b2001f17778b46dae95fd5d88bb2b",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -617,66 +617,6 @@
         }
       },
       {
-        "tableName": "PersonPasskeyEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personPasskeyUid",
-            "columnName": "personPasskeyUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppPersonUid",
-            "columnName": "ppPersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppAttestationObj",
-            "columnName": "ppAttestationObj",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "ppClientDataJson",
-            "columnName": "ppClientDataJson",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "ppOriginString",
-            "columnName": "ppOriginString",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "ppId",
-            "columnName": "ppId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "ppChallengeString",
-            "columnName": "ppChallengeString",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "ppPublicKey",
-            "columnName": "ppPublicKey",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "isRevoked",
-            "columnName": "isRevoked",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "personPasskeyUid"
-          ]
-        }
-      },
-      {
         "tableName": "SchoolDirectoryEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rdUid` INTEGER NOT NULL, `rdUrl` TEXT NOT NULL, `rdInvitePrefix` TEXT NOT NULL, PRIMARY KEY(`rdUid`))",
         "fields": [
@@ -708,7 +648,7 @@
       },
       {
         "tableName": "SchoolDirectoryEntryEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reLastMod` INTEGER NOT NULL, `reEtag` TEXT, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, PRIMARY KEY(`reUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reLastMod` INTEGER NOT NULL, `reEtag` TEXT, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, PRIMARY KEY(`reUid`))",
         "fields": [
           {
             "fieldPath": "reUid",
@@ -749,11 +689,6 @@
             "fieldPath": "reRespectExt",
             "columnName": "reRespectExt",
             "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "reRpId",
-            "columnName": "reRpId",
-            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -786,11 +721,64 @@
             "rcUid"
           ]
         }
+      },
+      {
+        "tableName": "NetworkValidationInfoEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nviUrlHash` INTEGER NOT NULL, `nviKey` INTEGER NOT NULL, `nviVaryHeader` TEXT, `nviLastModified` INTEGER NOT NULL, `nviEtag` TEXT, `nviConsistentThrough` INTEGER NOT NULL, `nviLastChecked` INTEGER NOT NULL, PRIMARY KEY(`nviUrlHash`, `nviKey`))",
+        "fields": [
+          {
+            "fieldPath": "nviUrlHash",
+            "columnName": "nviUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviKey",
+            "columnName": "nviKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviVaryHeader",
+            "columnName": "nviVaryHeader",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nviLastModified",
+            "columnName": "nviLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviEtag",
+            "columnName": "nviEtag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nviConsistentThrough",
+            "columnName": "nviConsistentThrough",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviLastChecked",
+            "columnName": "nviLastChecked",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nviUrlHash",
+            "nviKey"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e66238029669938a12ddf0a820f857d7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd30b2001f17778b46dae95fd5d88bb2b')"
     ]
   }
 }

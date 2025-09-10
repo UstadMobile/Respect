@@ -3,7 +3,6 @@ package world.respect.datalayer.schooldirectory
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
@@ -21,6 +20,11 @@ interface SchoolDirectoryDataSource {
 
     suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo
 
-    suspend fun getSchoolDirectoryEntryByUrl(url: Url): DataReadyState<SchoolDirectoryEntry>?
+    /**
+     * Get the SchoolDirectoryEntry for a given url
+     *
+     * @param url The URL as per SchoolDirectoryEntry.self
+     */
+    suspend fun getSchoolDirectoryEntryByUrl(url: Url): DataLoadState<SchoolDirectoryEntry>
 
 }

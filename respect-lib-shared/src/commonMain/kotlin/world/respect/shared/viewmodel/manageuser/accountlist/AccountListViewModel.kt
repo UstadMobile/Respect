@@ -96,7 +96,7 @@ class AccountListViewModel(
                             RespectAccountAndPerson(
                                 account = it,
                                 person = Person(
-                                    guid = it.userSourcedId,
+                                    guid = it.userGuid,
                                     givenName = "",
                                     familyName = "",
                                     roles = emptyList(),
@@ -111,7 +111,7 @@ class AccountListViewModel(
                         val accountScope = respectAccountManager.getOrCreateAccountScope(account)
                         val dataSource: SchoolDataSource = accountScope.get()
                         dataSource.personDataSource.findByGuidAsFlow(
-                            account.userSourcedId
+                            account.userGuid
                         ).collect { person ->
                             _uiState.update { prev ->
                                 prev.copy(
@@ -119,7 +119,7 @@ class AccountListViewModel(
                                         RespectAccountAndPerson(
                                             account = account,
                                             person = person.dataOrNull() ?: Person(
-                                                guid = account.userSourcedId,
+                                                guid = account.userGuid,
                                                 givenName = "",
                                                 familyName = "",
                                                 roles = emptyList(),

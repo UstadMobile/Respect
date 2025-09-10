@@ -3,29 +3,35 @@ package world.respect.shared.domain.account.authwithpassword
 import io.ktor.util.decodeBase64Bytes
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
-import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.libutil.ext.randomString
 import world.respect.libxxhash.XXStringHasher
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.datalayer.school.model.AuthToken
-import world.respect.shared.domain.account.ForbiddenException
+import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
 
+/**
+ * @property schoolDb Uses the database directly because the SchoolDataSource itself requires
+ *           an authenticated user. If this use case required a SchoolDataSource for authentication,
+ *           this would create a chicken/egg scenario.
+ */
 class GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
     private val schoolDb: RespectSchoolDatabase,
     private val xxHash: XXStringHasher,
-    private val personDataSource: PersonDataSource,
 ): GetTokenAndUserProfileWithUsernameAndPasswordUseCase {
 
     override suspend fun invoke(
         username: String,
         password: String
     ): AuthResponse {
-        val person = personDataSource.findByUsername(username) ?: throw IllegalArgumentException()
-        val personGuidHash = xxHash.hash(person.guid)
+        val personEntity = schoolDb.getPersonEntityDao().findByUsername(username)
+            ?: throw IllegalArgumentException()
+        val personGuidHash = xxHash.hash(personEntity.person.pGuid)
         val personPassword = schoolDb.getPersonPasswordEntityDao().findByUid(personGuidHash)
             ?: throw ForbiddenException("Invalid username/password")
 
@@ -43,12 +49,12 @@ class GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
             )
 
             schoolDb.getAuthTokenEntityDao().insert(
-                token.toEntity(person.guid, personGuidHash)
+                token.toEntity(personEntity.person.pGuid, personGuidHash)
             )
 
             return AuthResponse(
                 token = token,
-                person = person,
+                person = personEntity.toPersonEntities().toModel(),
             )
         }else {
             throw ForbiddenException("Invalid username/password")

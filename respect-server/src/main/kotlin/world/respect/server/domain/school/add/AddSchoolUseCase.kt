@@ -3,13 +3,15 @@ package world.respect.server.domain.school.add
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.SchoolDataSourceLocal
-import world.respect.datalayer.db.schooldirectory.ext.virtualHostScopeId
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.shared.domain.AuthenticatedUserPrincipalId
+import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
+import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import kotlin.time.ExperimentalTime
 
 /**
@@ -36,9 +38,23 @@ class AddSchoolUseCase(
                 request.school,  request.dbUrl
             )
 
-            val schoolScope = getKoin().createScope<SchoolDirectoryEntry>(request.school.virtualHostScopeId)
-            val schoolDataSource: SchoolDataSourceLocal = schoolScope.get()
-            val setPasswordUseCase: SetPasswordUseCase = schoolScope.get()
+            val adminGuid = "1"
+            val schoolScope = getKoin().createScope<SchoolDirectoryEntry>(
+                SchoolDirectoryEntryScopeId(
+                    request.school.self, null
+                ).scopeId
+            )
+
+            val accountScope = getKoin().createScope<RespectAccount>(
+                RespectAccountScopeId(
+                    request.school.self, AuthenticatedUserPrincipalId(adminGuid)
+                ).scopeId
+            )
+
+            accountScope.linkTo(schoolScope)
+
+            val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
+            val setPasswordUseCase: SetPasswordUseCase = accountScope.get()
 
             val adminPerson = Person(
                 guid = "1",
@@ -53,7 +69,24 @@ class AddSchoolUseCase(
                 )
             )
 
-            schoolDataSource.personDataSource.putPerson(adminPerson)
+            schoolDataSource.personDataSource.store(listOf(adminPerson))
+
+            schoolDataSource.personDataSource.store(
+                (2..300).map {
+                    Person(
+                        guid = "$it",
+                        username = "user$it",
+                        givenName = "Person$it",
+                        familyName = "Lastname$it",
+                        roles = listOf(
+                            PersonRole(
+                                isPrimaryRole = true,
+                                roleType = PersonRole.RoleType.STUDENT,
+                            )
+                        )
+                    )
+                }
+            )
 
             setPasswordUseCase(
                 SetPasswordUseCase.SetPasswordRequest(

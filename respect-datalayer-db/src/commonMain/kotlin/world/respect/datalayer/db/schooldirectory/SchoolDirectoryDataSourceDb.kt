@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.schooldirectory.adapters.SchoolDirectoryEntryEntities
 import world.respect.datalayer.db.schooldirectory.adapters.toEntities
@@ -43,7 +44,7 @@ class SchoolDirectoryDataSourceDb(
     ) {
         respectAppDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                upsertSchoolDirectoryEntry(
+                putSchoolDirectoryEntry(
                     school = DataReadyState(
                         school,
                         DataLoadMetaInfo(
@@ -63,13 +64,15 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
-    override suspend fun getSchoolDirectoryEntryByUrl(url: Url): DataReadyState<SchoolDirectoryEntry>? {
+    override suspend fun getSchoolDirectoryEntryByUrl(
+        url: Url
+    ): DataLoadState<SchoolDirectoryEntry> {
         val schoolEntity = respectAppDb.getSchoolEntityDao().findByUid(
             xxStringHasher.hash(url.toString())
         )
 
         if(schoolEntity == null)
-            return null
+            return NoDataLoadedState.notFound()
 
         val langMapEntities = respectAppDb.getLangMapEntityDao().selectAllByTableAndEntityId(
             lmeTopParentType = LangMapEntity.TopParentType.RESPECT_SCHOOL_DIRECTORY_ENTRY.id,
@@ -83,7 +86,7 @@ class SchoolDirectoryDataSourceDb(
         ).toModel()
     }
 
-    override suspend fun upsertSchoolDirectoryEntry(
+    override suspend fun putSchoolDirectoryEntry(
         school: DataReadyState<SchoolDirectoryEntry>,
         directory: RespectSchoolDirectory?
     ) {

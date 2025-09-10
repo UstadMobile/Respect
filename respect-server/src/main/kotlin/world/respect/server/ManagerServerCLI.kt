@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
 import world.respect.datalayer.opds.model.LangMapStringValue
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.libutil.ext.resolve
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
@@ -63,7 +63,9 @@ fun managerServerMain(ns: Namespace) {
             CMD_ADD_SCHOOL -> {
                 val schoolBaseUrl = Url(ns.getString("url"))
 
-                val response = httpClient.post(serverUrl.resolve("api/directory/school")) {
+                val response = httpClient.post(
+                    serverUrl.appendEndpointSegments("api/directory/school")
+                ) {
                     header(HttpHeaders.Authorization, authHeader)
                     contentType(ContentType.Application.Json)
                     setBody(
@@ -72,9 +74,9 @@ fun managerServerMain(ns: Namespace) {
                                 school = SchoolDirectoryEntry(
                                     name = LangMapStringValue(ns.getString("name")),
                                     self = schoolBaseUrl,
-                                    xapi = schoolBaseUrl.resolve("api/xapi"),
-                                    oneRoster = schoolBaseUrl.resolve("api/oneroster"),
-                                    respectExt = schoolBaseUrl.resolve("api/respect-ext"),
+                                    xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
+                                    oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
+                                    respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
                                 ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,

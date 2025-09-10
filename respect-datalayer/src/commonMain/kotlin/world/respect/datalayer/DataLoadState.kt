@@ -9,6 +9,9 @@ package world.respect.datalayer
  *           This is set by the Repository when there is a distinct local and network result.
  * @property remoteState the state of the data as loaded from the network data source, if applicable.
  *           This is set by the Repository when there is a distinct local and network result.
+ *           It is not typed because the remote state is often a different type to what is being
+ *           displayed e.g. a list screen will show only basic details, but when the list is
+ *           loaded over the network, the full entity will be fetched.
  */
 sealed interface DataLoadState<T: Any> {
     val metaInfo: DataLoadMetaInfo

@@ -59,6 +59,7 @@ kotlin {
             api(libs.paging.multiplatform.common)
 
             implementation(libs.multiplatformsettings)
+            implementation(libs.napier)
         }
 
         jvmMain.dependencies {

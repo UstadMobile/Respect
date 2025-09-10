@@ -9,5 +9,5 @@ data class PersonListDetails(
     val guid: String,
     val givenName: String,
     val familyName: String,
-    val userName: String?
+    val username: String?
 )

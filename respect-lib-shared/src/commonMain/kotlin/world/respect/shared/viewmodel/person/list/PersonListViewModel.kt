@@ -1,19 +1,17 @@
 package world.respect.shared.viewmodel.person.list
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.people
@@ -24,9 +22,12 @@ import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import io.github.aakira.napier.Napier
+import world.respect.datalayer.school.PersonDataSource
+
 
 data class PersonListUiState(
-    val persons: DataLoadState<List<PersonListDetails>> = DataLoadingState(),
+    val persons: () -> PagingSource<Int, PersonListDetails> = { EmptyPagingSource() },
 )
 
 class PersonListViewModel(
@@ -42,6 +43,13 @@ class PersonListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    private val pagingSourceFactory: () -> PagingSource<Int, PersonListDetails> = {
+        Napier.d("PersonListViewModel: pagingSourceFactory invoke")
+        schoolDataSource.personDataSource.listDetailsAsPagingSource(
+            DataLoadParams(), PersonDataSource.GetListParams()
+        )
+    }
+
     init {
         _appUiState.update {
             it.copy(
@@ -55,12 +63,10 @@ class PersonListViewModel(
             )
         }
 
-        viewModelScope.launch {
-            schoolDataSource.personDataSource.findAll(DataLoadParams()).collect {
-                _uiState.update { state ->
-                    state.copy(persons = it)
-                }
-            }
+        _uiState.update {
+            it.copy(
+                persons = pagingSourceFactory
+            )
         }
     }
 

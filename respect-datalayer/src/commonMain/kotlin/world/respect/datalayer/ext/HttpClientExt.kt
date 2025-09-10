@@ -1,13 +1,17 @@
 package world.respect.datalayer.ext
 
+import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
+import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
-import io.ktor.http.toHttpDate
-import io.ktor.util.date.GMTDate
+import io.ktor.http.etag
+import io.ktor.util.reflect.TypeInfo
+import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import world.respect.datalayer.DataErrorResult
@@ -17,34 +21,45 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
-import kotlin.time.ExperimentalTime
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 
-@OptIn(ExperimentalTime::class)
-suspend inline fun <reified T: Any> HttpClient.getAsDataLoadState(
+suspend fun <T: Any> HttpClient.getAsDataLoadState(
     url: Url,
-    validationHelper: NetworkDataSourceValidationHelper? = null,
+    typeInfo: TypeInfo,
+    validationHelper: BaseDataSourceValidationHelper? = null,
+    block: HttpRequestBuilder.() -> Unit = { },
 ): DataLoadState<T> {
     return try {
-        //see https://github.com/Kotlin/kotlinx-datetime/issues/564
-        val validationInfo = validationHelper?.getValidationInfo(url)
         val response = this.get(url) {
-            validationInfo?.lastModified?.takeIf { it > 0 }?.also { lastMod ->
-                headers[HttpHeaders.IfModifiedSince] = GMTDate(lastMod).toHttpDate()
-            }
-
-            validationInfo?.etag?.also { etag ->
-                headers[HttpHeaders.IfNoneMatch] = etag
-            }
+            block()
+            //note the block can change the URL (eg by adding parameters), so get validationInfo
+            //after running block
+            validationHelper?.also { addCacheValidationHeaders(it) }
         }
 
         return if(response.status == HttpStatusCode.NotModified) {
             NoDataLoadedState.notModified()
         }else {
-            val data = response.body<T>()
+            val data = response.body<T>(typeInfo)
+            val extendedValidationHelper = validationHelper as? ExtendedDataSourceValidationHelper
+            val varyHeader = response.headers.getAll(HttpHeaders.Vary)
+                ?.joinToString(separator = ",")
+            val validationInfoKey = extendedValidationHelper?.validationInfoKey(
+                response.request.headers.asIHttpHeaders(),
+                response.headers.getAll(HttpHeaders.Vary)?.joinToString(separator = ",")
+            )
+
             DataReadyState(
                 data = data,
-                metaInfo = DataLoadMetaInfo.fromHttpMessage(url, response),
+                metaInfo = DataLoadMetaInfo(
+                    url = response.request.url,
+                    lastModified = response.lastModifiedAsLong(),
+                    etag = response.etag(),
+                    consistentThrough = response.consistentThroughAsLong(),
+                    validationInfoKey = validationInfoKey ?: 0,
+                    varyHeader = varyHeader,
+                )
             )
         }
     }catch(e: Throwable) {
@@ -55,15 +70,45 @@ suspend inline fun <reified T: Any> HttpClient.getAsDataLoadState(
     }
 }
 
-@Suppress("unused")//reserved for future use
+suspend inline fun <reified T: Any> HttpClient.getAsDataLoadState(
+    url: Url,
+    validationHelper: BaseDataSourceValidationHelper? = null,
+    noinline block: HttpRequestBuilder.() -> Unit = { },
+): DataLoadState<T> {
+    return getAsDataLoadState(url, typeInfo<T>(), validationHelper, block)
+}
+
 inline fun <reified T: Any> HttpClient.getDataLoadResultAsFlow(
     url: Url,
     dataLoadParams: DataLoadParams,
-    validationHelper: NetworkDataSourceValidationHelper? = null,
+    validationHelper: BaseDataSourceValidationHelper? = null,
+    noinline block: HttpRequestBuilder.() -> Unit = { },
+): Flow<DataLoadState<T>> {
+    return getDataLoadResultAsFlow(
+        urlFn = { url },
+        dataLoadParams = dataLoadParams,
+        validationHelper = validationHelper,
+        block = block,
+    )
+}
+
+/**
+ * @param urlFn Data source functions often return a flow, however sometimes figuring out the url
+ *        itself requires a suspended function (such as a database query). The function
+ *        that returns the flow is not suspended. Accepting a function parameter makes it easier to
+ *        shift the suspended operation to get the url into the flow.
+ */
+inline fun <reified T: Any> HttpClient.getDataLoadResultAsFlow(
+    noinline urlFn: suspend () -> Url,
+    @Suppress("unused") dataLoadParams: DataLoadParams,
+    validationHelper: BaseDataSourceValidationHelper? = null,
+    noinline block: HttpRequestBuilder.() -> Unit = { },
 ): Flow<DataLoadState<T>> {
     return flow {
-        emit(DataLoadingState(metaInfo = DataLoadMetaInfo(url = url)))
+        val urlVal = urlFn()
+        emit(DataLoadingState(metaInfo = DataLoadMetaInfo(url = urlVal)))
 
-        emit(getAsDataLoadState(url, validationHelper))
+        emit(getAsDataLoadState(urlVal, validationHelper, block = block))
     }
 }
+

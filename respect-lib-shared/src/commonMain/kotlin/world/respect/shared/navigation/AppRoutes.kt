@@ -9,6 +9,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 /**
@@ -87,6 +88,41 @@ data class ClazzEdit(
 
 @Serializable
 object Report : RespectAppRoute
+
+@Serializable
+class ReportEdit(val reportUid: String?) : RespectAppRoute
+
+@Serializable
+class ReportDetail(val reportUid: String) : RespectAppRoute
+
+@Serializable
+class ReportEditFilter(
+    private val reportFilterJson: String
+) : RespectAppRoute {
+
+    @Transient
+    val reportFilter: ReportFilter =
+        Json.decodeFromString(ReportFilter.serializer(), reportFilterJson)
+
+    companion object {
+        fun create(reportFilter: ReportFilter): ReportEditFilter {
+            val jsonStr = Json.encodeToString(ReportFilter.serializer(), reportFilter)
+            return ReportEditFilter(jsonStr)
+        }
+    }
+}
+
+@Serializable
+object ReportTemplateList : RespectAppRoute
+
+@Serializable
+object IndicatorList : RespectAppRoute
+
+@Serializable
+class IndicatorDetail(val indicatorUid: String) : RespectAppRoute
+
+@Serializable
+class IndictorEdit(val indicatorId: String?) : RespectAppRoute
 
 @Serializable
 object RespectAppList : RespectAppRoute

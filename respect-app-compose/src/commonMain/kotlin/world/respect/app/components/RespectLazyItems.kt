@@ -11,14 +11,14 @@ import androidx.paging.compose.LazyPagingItems
  */
 fun <T: Any> LazyListScope.respectPagingItems(
     items: LazyPagingItems<T>,
-    key: ((item: T?) -> Any)? =  null,
+    key: ((item: T?, index: Int) -> Any)?,
     contentType: (item: T?) -> Any? = { null },
     itemContent: @Composable LazyItemScope.(item: T?) -> Unit,
 ) {
     items(
         count = items.itemCount,
         key = if(key != null) {
-            { index -> key(items.peek(index)) }
+            { index -> key(items.peek(index), index) }
         }else {
             null
         },

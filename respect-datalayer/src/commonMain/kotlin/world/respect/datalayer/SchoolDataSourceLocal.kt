@@ -1,6 +1,7 @@
 package world.respect.datalayer
 
 import world.respect.datalayer.school.PersonDataSourceLocal
+import world.respect.datalayer.school.ReportDataSourceLocal
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal
@@ -10,5 +11,7 @@ import world.respect.datalayer.school.PersonDataSourceLocal
 interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val personDataSource: PersonDataSourceLocal
+
+    override val reportDataSource: ReportDataSourceLocal
 
 }

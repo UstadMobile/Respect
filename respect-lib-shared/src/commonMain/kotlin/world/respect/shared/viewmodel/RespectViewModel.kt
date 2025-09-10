@@ -78,7 +78,6 @@ abstract class RespectViewModel(
      */
     protected fun sendResultAndPop(
         destKey: String,
-        destScreen: RespectAppRoute,
         result: Any?,
     ) {
         val navResultReturner: NavResultReturner = getKoin().get()
@@ -89,8 +88,7 @@ abstract class RespectViewModel(
                 result = result,
             )
         )
-
-        _navCommandFlow.tryEmit(NavCommand.Pop(destScreen, false))
+        _navCommandFlow.tryEmit(NavCommand.PopUp())
     }
 
     /**

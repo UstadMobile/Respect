@@ -32,6 +32,9 @@ kotlin {
             api(projects.respectDatalayer)
             api(projects.respectCredentials)
             api(projects.respectLibUtil)
+            api(projects.respectDatalayerDb)
+            api(projects.respectDatalayerHttp)
+
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
             implementation(projects.respectLibPrimarykeygen)
@@ -51,6 +54,10 @@ kotlin {
 
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+
+            api(libs.paging.multiplatform.compose)
+            api(libs.paging.multiplatform.common)
+
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
         }

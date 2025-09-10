@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "a0c2fb9717e0127b52da9e2b7c24cd89",
+    "identityHash": "0b6a93342431ae0b1e32a9ac69741dd1",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -254,11 +254,59 @@
             "classSourcedId"
           ]
         }
+      },
+      {
+        "tableName": "ReportEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportId` TEXT NOT NULL, `ownerGuid` TEXT NOT NULL, `title` TEXT NOT NULL, `reportOptions` TEXT NOT NULL, `reportIsTemplate` INTEGER NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`reportId`))",
+        "fields": [
+          {
+            "fieldPath": "reportId",
+            "columnName": "reportId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerGuid",
+            "columnName": "ownerGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportOptions",
+            "columnName": "reportOptions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportIsTemplate",
+            "columnName": "reportIsTemplate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "reportId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a0c2fb9717e0127b52da9e2b7c24cd89')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b6a93342431ae0b1e32a9ac69741dd1')"
     ]
   }
 }

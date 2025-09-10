@@ -49,7 +49,7 @@ fun PersonListScreen(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         respectPagingItems(
             items = lazyPagingItems,
-            key = { it?.guid ?: it.toString() },
+            key = { item, index -> item?.guid ?: index.toString() },
             contentType = { PersonDataSource.ENDPOINT_NAME },
         ) { person ->
             ListItem(

@@ -107,6 +107,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.date.time)
+            implementation(libs.koalaplot)
             implementation(libs.kotlinx.io.core)
             implementation(libs.androidx.paging.compose)
         }

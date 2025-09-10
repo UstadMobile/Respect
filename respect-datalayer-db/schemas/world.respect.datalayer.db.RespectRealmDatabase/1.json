@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "70ce96ffc6dfd4c222315320773f3bc6",
+    "identityHash": "69f8a982d721a7067748166e45274656",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -392,11 +392,101 @@
             "userSourcedId"
           ]
         }
+      },
+      {
+        "tableName": "ReportEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportId` TEXT NOT NULL, `ownerGuid` TEXT NOT NULL, `title` TEXT NOT NULL, `reportOptions` TEXT NOT NULL, `reportIsTemplate` INTEGER NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`reportId`))",
+        "fields": [
+          {
+            "fieldPath": "reportId",
+            "columnName": "reportId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerGuid",
+            "columnName": "ownerGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportOptions",
+            "columnName": "reportOptions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportIsTemplate",
+            "columnName": "reportIsTemplate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "reportId"
+          ]
+        }
+      },
+      {
+        "tableName": "IndicatorEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`indicatorId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, `sql` TEXT NOT NULL, PRIMARY KEY(`indicatorId`))",
+        "fields": [
+          {
+            "fieldPath": "indicatorId",
+            "columnName": "indicatorId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sql",
+            "columnName": "sql",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "indicatorId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '70ce96ffc6dfd4c222315320773f3bc6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69f8a982d721a7067748166e45274656')"
     ]
   }
 }

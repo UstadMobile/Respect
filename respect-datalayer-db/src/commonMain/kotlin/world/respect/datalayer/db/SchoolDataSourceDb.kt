@@ -3,9 +3,13 @@ package world.respect.datalayer.db
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.oneroaster.OneRosterDataSourceDb
+import world.respect.datalayer.db.school.IndicatorDataSourceDb
 import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.oneroster.OneRosterDataSourceLocal
+import world.respect.datalayer.db.school.ReportDataSourceDb
+import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
+import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.libxxhash.XXStringHasher
 
 /**
@@ -28,6 +32,13 @@ class SchoolDataSourceDb(
     }
     override val onRoasterDataSource: OneRosterDataSourceLocal by lazy {
         OneRosterDataSourceDb(schoolDb, xxStringHasher)
+    }
+    override val reportDataSource: ReportDataSourceLocal by lazy {
+        ReportDataSourceDb(schoolDb)
+    }
+
+    override val indicatorDataSource: IndicatorDataSource by lazy {
+        IndicatorDataSourceDb(schoolDb)
     }
 
 }

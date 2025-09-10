@@ -24,6 +24,8 @@ kotlin {
             // put your Multiplatform dependencies here
             api(libs.uri.kmp)
             api(libs.ktor.client.core)
+            implementation(libs.kotlinx.date.time)
+
         }
 
         jvmMain.dependencies {

@@ -1,4 +1,6 @@
 appId: world.respect.app
+tags:
+  - respect
 ---
 - clearState:  world.respect.app
 - launchApp

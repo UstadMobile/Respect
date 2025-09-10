@@ -41,7 +41,7 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible: ${school_name}
+- assertVisible: ${SCHOOL_NAME}
 - tapOn: "I’m a parent"
 - assertVisible:
     id: "app_title"
@@ -51,7 +51,7 @@ appId: world.respect.app
     id: "app_title"
     text: "Your profile"
 - tapOn: "Your name*"
-- inputText: ${Parent_user_name}
+- inputText: ${PARENT_NAME}
 - tapOn: "Gender"
 - tapOn: "Female"
 - tapOn: "Your date of birth"
@@ -60,17 +60,17 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- assertVisible: ${Parent_userId}  #username
+- assertVisible: ${PARENT_USERNAME}  #username
 - tapOn: "Other ways to sign in"
 - tapOn: "Sign in with a password"
 - tapOn: "Password"
-- inputText: ${Parent_user_pass}
+- inputText: ${PARENT_PASSWORD}
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
     text: "Child Profile"
 - tapOn: "Child name"
-- inputText: ${child_user_name}
+- inputText: ${CHILD_NAME}
 - tapOn: "Gender"
 - tapOn: "Male"
 - tapOn: "Child date of birth"

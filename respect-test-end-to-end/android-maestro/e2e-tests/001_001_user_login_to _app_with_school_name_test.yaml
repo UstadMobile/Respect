@@ -12,9 +12,9 @@ appId: world.respect.app
     id: "app_title"
     text: "Login"
 - tapOn: "UserId"
-- inputText: "admin"
+- inputText: ${ADMIN_USERNAME}
 - tapOn: "Password"
-- inputText: "secret"
+- inputText: ${ADMIN_PASSWORD}
 - tapOn:
       text: "Login"
       index: 1

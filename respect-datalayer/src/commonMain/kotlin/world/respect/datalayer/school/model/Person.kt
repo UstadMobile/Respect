@@ -1,9 +1,9 @@
 package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
@@ -13,13 +13,15 @@ import kotlin.time.Instant
  *           issued student/teacher id number)
  * @property active (should be changed to status enum - which may be pending)
  */
-@OptIn(ExperimentalTime::class)
+
 @Serializable
 data class Person(
     val guid: String,
     val active: Boolean = true,
     @Serializable(with = InstantISO8601Serializer::class)
-    val lastModified: Instant = Clock.System.now(),
+    override val lastModified: Instant = Clock.System.now(),
+    @Serializable(with = InstantISO8601Serializer::class)
+    override val stored: Instant = Clock.System.now(),
     val userMasterIdentifier: String? = null,
     val username: String? = null,
     val givenName: String,
@@ -30,8 +32,10 @@ data class Person(
     val preferredLastName: String? = null,
     val pronouns: String? = null,
     val roles: List<PersonRole>,
-) {
+): ModelWithTimes {
+
     companion object {
         const val TABLE_ID = 2
     }
+
 }

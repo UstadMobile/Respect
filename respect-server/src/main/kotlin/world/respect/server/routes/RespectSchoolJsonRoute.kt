@@ -6,7 +6,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import org.koin.ktor.ext.getKoin
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.server.util.ext.respondDataReadyState
+import world.respect.server.util.ext.respondDataLoadState
 import world.respect.server.util.ext.virtualHost
 
 /**
@@ -21,7 +21,7 @@ fun Route.getRespectSchoolJson(path: String) {
         val realmServerUrl = call.virtualHost
         val realm = appDataSource.schoolDirectoryDataSource.getSchoolDirectoryEntryByUrl(realmServerUrl)
         if(realm != null) {
-            call.respondDataReadyState(realm)
+            call.respondDataLoadState(realm)
         }else {
             call.respondText(
                 text = "Not found: $realmServerUrl",

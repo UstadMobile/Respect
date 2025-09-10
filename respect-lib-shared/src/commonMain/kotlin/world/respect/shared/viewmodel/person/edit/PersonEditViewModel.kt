@@ -33,6 +33,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
+import kotlin.time.Clock
 
 data class PersonEditUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
@@ -128,10 +129,13 @@ class PersonEditViewModel(
     }
 
     fun onClickSave() {
-        val person = _uiState.value.person.dataOrNull() ?: return
+        val person = _uiState.value.person.dataOrNull()?.copy(
+            lastModified = Clock.System.now(),
+        ) ?: return
+
         viewModelScope.launch {
             try {
-                schoolDataSource.personDataSource.putPerson(person)
+                schoolDataSource.personDataSource.store(listOf(person))
 
                 if(route.guid == null) {
                     _navCommandFlow.tryEmit(

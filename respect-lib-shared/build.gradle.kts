@@ -52,6 +52,7 @@ kotlin {
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
             implementation(libs.multiplatformsettings)
+            implementation(libs.napier)
         }
 
         jvmMain.dependencies {

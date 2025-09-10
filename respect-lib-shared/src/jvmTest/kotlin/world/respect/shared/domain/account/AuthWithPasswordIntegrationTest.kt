@@ -6,12 +6,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.model.Person
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import world.respect.shared.domain.AuthenticatedUserPrincipalId
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
@@ -58,7 +57,7 @@ class AuthWithPasswordIntegrationTest {
         xxHash = XXStringHasherCommonJvm()
         setPasswordUseCase = SetPasswordUseDbImpl(schoolDb, xxHash)
         getTokenUseCase = GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
-            schoolDb, xxHash, PersonDataSourceDb(schoolDb, xxHash)
+            schoolDb, xxHash,
         )
 
         validateAuthUseCase = ValidateAuthorizationUseCaseDbImpl(schoolDb)
@@ -93,7 +92,7 @@ class AuthWithPasswordIntegrationTest {
             )
 
             assertEquals(authResponse.person.guid, personGuid)
-            assertEquals(defaultTestPerson.guid, userIdPrincipal.guid)
+            assertEquals(defaultTestPerson.guid, userIdPrincipal!!.guid)
         }
     }
 

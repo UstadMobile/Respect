@@ -13,6 +13,7 @@ data class PersonEntity(
     val pGuidHash: Long,
     val pActive: Boolean,
     val pLastModified: Long,
+    val pStored: Long,
     val pUsername: String? = null,
     val pGivenName: String,
     val pFamilyName: String,

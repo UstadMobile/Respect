@@ -1,6 +1,6 @@
 package world.respect.datalayer.db.shared
 
-data class ValidationInfo(
+data class LastModifiedAndETagDb(
     val lastModified: Long,
     val etag: String?,
 )

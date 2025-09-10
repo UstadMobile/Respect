@@ -18,9 +18,9 @@ fun Route.AuthRoute() {
         val username = call.request.queryParameters[PARAM_NAME_USERNAME]
             ?: throw IllegalArgumentException()
         val password = call.receiveText().trim()
-        val realmScope = call.getSchoolKoinScope()
+        val schoolScope = call.getSchoolKoinScope()
 
-        val getTokenUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase = realmScope.get()
+        val getTokenUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase = schoolScope.get()
         val authResponse = getTokenUseCase(username, password)
 
         call.respond(authResponse)

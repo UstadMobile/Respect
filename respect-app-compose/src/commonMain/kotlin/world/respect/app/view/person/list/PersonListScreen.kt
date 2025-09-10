@@ -14,6 +14,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.respectPagingItems
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.person.list.PersonListUiState
@@ -45,13 +47,11 @@ fun PersonListScreen(
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(
-            count = lazyPagingItems.itemCount,
-            key = { lazyPagingItems.peek(it)?.guid ?: it.toString() },
-            contentType = { "person" }
-        ) { index ->
-            val person = lazyPagingItems[index]
-
+        respectPagingItems(
+            items = lazyPagingItems,
+            key = { it?.guid ?: it.toString() },
+            contentType = { PersonDataSource.ENDPOINT_NAME },
+        ) { person ->
             ListItem(
                 modifier = Modifier.clickable {
                     person?.also(onClickItem)

@@ -135,6 +135,33 @@ paths:
           required: false
           schema:
             type: string
+        - name: since
+          in: query
+          description: Return only persons stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
       responses:
         '200':
           description: OK
@@ -178,6 +205,468 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Person"
+  /api/school/respect/class:
+    get:
+      tags:
+        - school
+      summary:
+        Get a list of classes in the school.
+      description: |-
+        Get a list of classes in the school. The list will include only those that the authenticated
+        user has permission to view.
+      security:
+        - school_auth:
+            - read
+      parameters:
+        - name: guid
+          in: query
+          description: Specific class GUID to find
+          required: false
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: Return only classes stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Class"
+    post:
+      tags:
+        - school
+      summary: Add or update a list of classes in the school.
+      description: |-
+        Add or update a list of classes in the school.
+      security:
+        - school_auth:
+            - write
+      requestBody:
+        description: Classes to add or update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Class"
+      responses:
+        '204':
+          description: No content - the request was accepted
+        '403':
+          description: |-
+            Forbidden - the values sent have been rejected. The server will send a list of the values
+            for each guid for which changes were rejected (provided that the authorized user has 
+            permission to see those values). The client should revert those changes accordingly and
+            then delete any other local changes. This can happen if the authorized user does not
+            have permission to add/update the given records.
+
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Person"
+
+  /api/school/respect/enrolment:
+    get:
+      tags:
+        - school
+      summary:
+        Get a list of enrolments in the school.
+      description: |-
+        Get a list of enrolments in the school. The list will include only those that the authenticated
+        user has permission to view.
+      security:
+        - school_auth:
+            - read
+      parameters:
+        - name: guid
+          in: query
+          description: Specific enrolment GUID to find
+          required: false
+          schema:
+            type: string
+        - name: classguid
+          in: query
+          description: Include enrolments only in the given class guid
+          required: false
+          schema:
+            type: string
+        - name: personguid
+          in: query
+          description: Include enrolments only for the given person guid
+          required: false
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: Return only enrolments stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrolment"
+    post:
+      tags:
+        - school
+      summary: Add or update a list of enrolments in the school.
+      description: |-
+        Add or update a list of enrolments in the school.
+      security:
+        - school_auth:
+            - write
+      requestBody:
+        description: Enrolments to add or update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Enrolment"
+      responses:
+        '204':
+          description: No content - the request was accepted
+        '403':
+          description: |-
+            Forbidden - the values sent have been rejected. The server will send a list of the values
+            for each guid for which changes were rejected (provided that the authorized user has 
+            permission to see those values). The client should revert those changes accordingly and
+            then delete any other local changes. This can happen if the authorized user does not
+            have permission to add/update the given records.
+
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrolment"
+
+  /api/school/respect/report:
+    get:
+      tags:
+        - school
+      summary:
+        Get a list of reports in the school.
+      description: |-
+        Get a list of reports in the school. The list will include only those that the authenticated
+        user has permission to view.
+      security:
+        - school_auth:
+            - read
+      parameters:
+        - name: guid
+          in: query
+          description: Specific report GUID to find
+          required: false
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: Return only reports stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+    post:
+      tags:
+        - school
+      summary: Add or update a list of reports in the school.
+      description: |-
+        Add or update a list of reports in the school.
+      security:
+        - school_auth:
+            - write
+      requestBody:
+        description: Enrolments to add or update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Report"
+      responses:
+        '204':
+          description: No content - the request was accepted
+        '403':
+          description: |-
+            Forbidden - the values sent have been rejected. The server will send a list of the values
+            for each guid for which changes were rejected (provided that the authorized user has 
+            permission to see those values). The client should revert those changes accordingly and
+            then delete any other local changes. This can happen if the authorized user does not
+            have permission to add/update the given records.
+
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+
+  /api/school/respect/assignment:
+    get:
+      tags:
+        - school
+      summary:
+        Get a list of assignments in the school.
+      description: |-
+        Get a list of assignments in the school. The list will include only those that the authenticated
+        user has permission to view.
+      security:
+        - school_auth:
+            - read
+      parameters:
+        - name: guid
+          in: query
+          description: Specific report GUID to find
+          required: false
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: Return only reports stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+    post:
+      tags:
+        - school
+      summary: Add or update a list of assignments in the school.
+      description: |-
+        Add or update a list of assignments in the school.
+      security:
+        - school_auth:
+            - write
+      requestBody:
+        description: Assignments to add or update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Assignment"
+      responses:
+        '204':
+          description: No content - the request was accepted
+        '403':
+          description: |-
+            Forbidden - the values sent have been rejected. The server will send a list of the values
+            for each guid for which changes were rejected (provided that the authorized user has 
+            permission to see those values). The client should revert those changes accordingly and
+            then delete any other local changes. This can happen if the authorized user does not
+            have permission to add/update the given records.
+
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+
+  /api/school/respect/availableapp:
+    get:
+      tags:
+        - school
+      summary:
+        Get a list of available RESPECT Compatible apps for the school.
+      description: |-
+        Get a list of RESPECT Compatible apps for the school. The list will include only those that the authenticated
+        user has permission to view.
+      security:
+        - school_auth:
+            - read
+      parameters:
+        - name: guid
+          in: query
+          description: Specific available app GUID to find
+          required: false
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: Return only data stored since this time.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: search query
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: limit
+          required: false
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableApp"
+    post:
+      tags:
+        - school
+      summary: Add or update a list of available apps in the school.
+      description: |-
+        Add or update a list of available apps in the school.
+      security:
+        - school_auth:
+            - write
+      requestBody:
+        description: Assignments to add or update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/AvailableApp"
+      responses:
+        '204':
+          description: No content - the request was accepted
+        '403':
+          description: |-
+            Forbidden - the values sent have been rejected. The server will send a list of the values
+            for each guid for which changes were rejected (provided that the authorized user has 
+            permission to see those values). The client should revert those changes accordingly and
+            then delete any other local changes. This can happen if the authorized user does not
+            have permission to add/update the given records.
+
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableApp"
+
 
 components:
   schemas:
@@ -312,9 +801,24 @@ components:
           type: string
           format: date
 
-
     Person:
       type: object
+
+    Class:
+      type: object
+
+    Enrolment:
+      type: object
+
+    Report:
+      type: object
+
+    Assignment:
+      type: object
+
+    AvailableApp:
+      type: object
+
 
   securitySchemes:
     directory_auth:

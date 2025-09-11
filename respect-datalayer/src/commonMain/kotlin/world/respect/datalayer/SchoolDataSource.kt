@@ -1,6 +1,9 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.ReportDataSource
+import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
+
 
 /**
  * DataSource for data which is specific to a given Realm (eg school - see ARCHITECTURE.md for
@@ -11,5 +14,9 @@ import world.respect.datalayer.school.PersonDataSource
 interface SchoolDataSource {
 
     val personDataSource: PersonDataSource
+
+    val reportDataSource: ReportDataSource
+
+    val indicatorDataSource: IndicatorDataSource
 
 }

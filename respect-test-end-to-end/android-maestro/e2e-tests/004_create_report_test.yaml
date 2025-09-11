@@ -1,0 +1,88 @@
+appId: world.respect.app
+---
+- clearState:  world.respect.app
+- launchApp
+- tapOn: "Other options"
+- assertVisible: "Enter the link provided by your teacher or school admin"
+- tapOn: "paste the link here"
+- inputText: ${SCHOOL_URL}
+- tapOn: "Next"
+- tapOn: "UserId"
+- inputText: ${SCHOOL_ADMIN_USER}
+- tapOn: "Password"
+- inputText: ${SCHOOL_ADMIN_PASS}
+- tapOn:
+    text: "Login"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Reports"
+- assertVisible:
+    id: "app_title"
+    text: "Reports"
+- tapOn:
+    id: "floating_action_button"
+- assertVisible:
+    id: "app_title"
+    text: "Select template"
+- tapOn: "Blank Report"
+- assertVisible:
+    id: "app_title"
+    text: "Add report"
+- tapOn: "Title*"
+- inputText: "Test Report"
+- hideKeyboard
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Test Report"
+- tapOn: "Reports"
+- scrollUntilVisible:
+    element:
+       text: "Test Report"
+- tapOn: "Test Report"
+- assertVisible:
+    id: "app_title"
+    text: "Test Report"
+- tapOn:
+      id: "floating_action_button"  #Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit Report"
+- tapOn: "Time range"
+- tapOn: "Custom date range"
+- tapOn: "From"
+- inputText: "Yesterday"
+- tapOn: "To"
+- inputText: "Today"
+- tapOn: "X-axis"
+- tapOn: "Weekly"
+- tapOn: "Y-axis"
+- tapOn: "Manage Indicators"
+- tapOn: "Total content usage duration"
+- assertVisible:
+      id: "app_title"
+      text: "Indicator detail"
+- tapOn:
+      id: "floating_action_button"  #Edit button
+- assertVisible:
+      id: "app_title"
+      text: "Edit indicator"
+- tapOn: "Description*"
+- inputText: "Edit description"
+- tapOn: "Save"
+- tapOn:
+      id: "floating_action_button"  # +Indicator button
+- assertVisible:
+      id: "app_title"
+      text: "Add indicator"
+- tapOn: "Indicator name"
+- inputText: "Assignment completion %"
+- tapOn: "Description*"
+- inputText: "Edit description"
+- tapOn: "Save"
+- back
+- tapOn: "Y axis"
+- tapOn: "Assignment completion %"
+- tapOn: "Done"

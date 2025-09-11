@@ -21,7 +21,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppRoute
-import world.respect.shared.util.systemTimeInMillis
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 
@@ -78,7 +78,6 @@ abstract class RespectViewModel(
      */
     protected fun sendResultAndPop(
         destKey: String,
-        destScreen: RespectAppRoute,
         result: Any?,
     ) {
         val navResultReturner: NavResultReturner = getKoin().get()
@@ -89,8 +88,7 @@ abstract class RespectViewModel(
                 result = result,
             )
         )
-
-        _navCommandFlow.tryEmit(NavCommand.Pop(destScreen, false))
+        _navCommandFlow.tryEmit(NavCommand.PopUp())
     }
 
     /**

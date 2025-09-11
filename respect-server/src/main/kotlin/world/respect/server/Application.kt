@@ -2,13 +2,17 @@ package world.respect.server
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.basic
+import io.ktor.server.auth.bearer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
@@ -24,6 +28,14 @@ import world.respect.server.routes.getRespectSchoolJson
 import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.util.ext.virtualHost
+import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+
+const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
 
 @Suppress("unused") // Used via application.conf
 fun Application.module() {
@@ -70,8 +82,45 @@ fun Application.module() {
                 }
             }
         }
+
+        /*
+         * School authentication
+         */
+        bearer(AUTH_CONFIG_SCHOOL) {
+            realm = "Access school"
+            authenticate { tokenCredential ->
+                val schoolScopeId = SchoolDirectoryEntryScopeId(request.virtualHost, null)
+                val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+                    schoolScopeId.scopeId
+                )
+                val validateAuthorizationUseCase: ValidateAuthorizationUseCase = schoolScope.get()
+
+                validateAuthorizationUseCase(
+                    ValidateAuthorizationUseCase.BearerTokenCredential(tokenCredential.token)
+                )?.let {
+                    UserIdPrincipal(it.guid)
+                }
+            }
+        }
     }
 
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            cause.printStackTrace()
+
+            if(cause is ExceptionWithHttpStatusCode) {
+                val responseText = cause.message
+                val httpStatus = HttpStatusCode.fromValue(cause.statusCode)
+                if(responseText != null) {
+                    call.respondText(text = responseText, status = httpStatus)
+                }else {
+                    call.respond(httpStatus)
+                }
+            }else {
+                call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+            }
+        }
+    }
 
     //As per https://ktor.io/docs/server-swagger-ui.html#configure-cors
     install(CORS) {
@@ -102,6 +151,10 @@ fun Application.module() {
                 route("respect") {
                     route("auth") {
                         AuthRoute()
+                    }
+
+                    authenticate(AUTH_CONFIG_SCHOOL) {
+                        PersonRoute()
                     }
                 }
             }

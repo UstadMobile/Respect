@@ -31,7 +31,14 @@ import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScre
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
 import world.respect.app.view.person.list.PersonListScreen
-import world.respect.app.view.report.ReportScreen
+import world.respect.app.view.report.detail.ReportDetailScreen
+import world.respect.app.view.report.edit.ReportEditScreen
+import world.respect.app.view.report.filteredit.ReportFilterEditScreen
+import world.respect.app.view.report.indicator.detail.IndicatorDetailScreen
+import world.respect.app.view.report.indicator.edit.IndictorEditScreen
+import world.respect.app.view.report.indicator.list.IndicatorListScreen
+import world.respect.app.view.report.list.ReportListScreen
+import world.respect.app.view.report.list.ReportTemplateListScreen
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
@@ -41,12 +48,19 @@ import world.respect.shared.navigation.Assignment
 import world.respect.shared.navigation.Clazz
 import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.EnterLink
+import world.respect.shared.navigation.IndicatorDetail
+import world.respect.shared.navigation.IndicatorList
+import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.JoinClazzWithCode
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.Report
+import world.respect.shared.navigation.ReportDetail
+import world.respect.shared.navigation.ReportEdit
+import world.respect.shared.navigation.ReportEditFilter
+import world.respect.shared.navigation.ReportTemplateList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.RespectComposeNavController
@@ -81,7 +95,14 @@ import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsS
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
+import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
+import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
+import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
+import world.respect.shared.viewmodel.report.indictor.detail.IndicatorDetailViewModel
+import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewModel
+import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
+import world.respect.shared.viewmodel.report.list.ReportListViewModel
+import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 
 
@@ -162,12 +183,61 @@ fun AppNavHost(
             ClazzScreen(navController = navController, viewModel = viewModel)
         }
 
-        composable<Report> {
-            val viewModel: ReportViewModel = respectViewModel(
+        composable<ReportDetail> {
+            val viewModel: ReportDetailViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ReportScreen(navController = navController, viewModel = viewModel)
+            ReportDetailScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<ReportEdit> {
+            val viewModel: ReportEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportEditScreen(viewModel = viewModel)
+        }
+        composable<Report> {
+            val viewModel: ReportListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportListScreen(viewModel = viewModel)
+        }
+        composable<ReportTemplateList> {
+            val viewModel: ReportTemplateListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportTemplateListScreen(viewModel = viewModel)
+        }
+        composable<IndictorEdit> {
+            val viewModel: IndicatorEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            IndictorEditScreen(viewModel = viewModel)
+        }
+        composable<ReportEditFilter> {
+            val viewModel: ReportFilterEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ReportFilterEditScreen(navController = navController, viewModel = viewModel)
+        }
+        composable<IndicatorList> {
+            val viewModel: IndicatorListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            IndicatorListScreen(viewModel = viewModel)
+        }
+        composable<IndicatorDetail> {
+            val viewModel: IndicatorDetailViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            IndicatorDetailScreen(navController = navController, viewModel = viewModel)
         }
 
         composable<HowPasskeyWorks> {

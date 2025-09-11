@@ -81,6 +81,7 @@ kotlin {
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibCache)
 
+            implementation(libs.napier)
             implementation(compose.material)
             implementation(compose.material3)
             implementation(compose.ui)
@@ -106,7 +107,9 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.date.time)
+            implementation(libs.koalaplot)
             implementation(libs.kotlinx.io.core)
+            implementation(libs.androidx.paging.compose)
         }
 
         desktopMain.dependencies {

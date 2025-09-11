@@ -1,6 +1,6 @@
 package world.respect.shared.domain.account.setpassword
 
-import world.respect.shared.domain.AuthenticatedUserPrincipalId
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 
 interface SetPasswordUseCase {
 

@@ -4,6 +4,7 @@ import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRole
 import world.respect.libxxhash.XXStringHasher
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -23,14 +24,22 @@ fun PersonEntityWithRoles.toPersonEntities() = PersonEntities(
 fun PersonEntities.toModel(): Person {
     return Person(
         guid = personEntity.pGuid,
-        active = personEntity.pActive,
+        status = personEntity.pStatus,
+        userActive = personEntity.pActive,
         lastModified = Instant.fromEpochMilliseconds(personEntity.pLastModified),
         stored = Instant.fromEpochMilliseconds(personEntity.pStored),
         username = personEntity.pUsername,
         givenName = personEntity.pGivenName,
         familyName = personEntity.pFamilyName,
         middleName = personEntity.pMiddleName,
-        roles = emptyList(),
+        roles = personRoleEntities.map {
+            PersonRole(
+                isPrimaryRole = it.prIsPrimaryRole,
+                roleEnum = it.prRoleEnum,
+                beginDate = it.prBeginDate,
+                endDate = it.prEndDate,
+            )
+        },
     )
 }
 
@@ -38,18 +47,29 @@ fun PersonEntities.toModel(): Person {
 fun Person.toEntities(
     xxStringHasher: XXStringHasher
 ): PersonEntities {
+    val pGuidHash = xxStringHasher.hash(guid)
     return PersonEntities(
         personEntity = PersonEntity(
             pGuid = guid,
-            pGuidHash = xxStringHasher.hash(guid),
-            pActive = active,
+            pGuidHash = pGuidHash,
+            pActive = userActive,
+            pStatus = status,
             pLastModified = lastModified.toEpochMilliseconds(),
             pStored = stored.toEpochMilliseconds(),
             pUsername = username,
             pGivenName = givenName,
             pFamilyName = familyName,
-            pMiddleName = middleName
-        )
+            pMiddleName = middleName,
+        ),
+        personRoleEntities = roles.map {
+            PersonRoleEntity(
+                prPersonGuidHash = pGuidHash,
+                prIsPrimaryRole = it.isPrimaryRole,
+                prRoleEnum = it.roleEnum,
+                prEndDate = it.endDate,
+                prBeginDate = it.beginDate,
+            )
+        }
     )
 }
 

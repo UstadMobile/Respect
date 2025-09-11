@@ -8,6 +8,7 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -64,7 +65,7 @@ class AddSchoolUseCase(
                 roles = listOf(
                     PersonRole(
                         isPrimaryRole = true,
-                        roleType = PersonRole.RoleType.SYSTEM_ADMINISTRATOR,
+                        roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                     )
                 )
             )
@@ -81,7 +82,7 @@ class AddSchoolUseCase(
                         roles = listOf(
                             PersonRole(
                                 isPrimaryRole = true,
-                                roleType = PersonRole.RoleType.STUDENT,
+                                roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                             )
                         )
                     )

@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
@@ -25,7 +26,7 @@ interface PersonEntityDao {
     suspend fun getLastModifiedByGuid(guidHash: Long): Long?
 
 
-
+    @Transaction
     @Query("""
         SELECT * 
          FROM PersonEntity
@@ -33,6 +34,7 @@ interface PersonEntityDao {
     """)
     suspend fun findByUsername(username: String): PersonEntityWithRoles?
 
+    @Transaction
     @Query("""
        SELECT * 
          FROM PersonEntity
@@ -40,6 +42,7 @@ interface PersonEntityDao {
     """)
     suspend fun findByGuidHash(guidHash: Long): PersonEntityWithRoles?
 
+    @Transaction
     @Query("""
         SELECT * 
          FROM PersonEntity
@@ -56,6 +59,7 @@ interface PersonEntityDao {
     """)
     fun findAllListDetailsAsFlow(): Flow<List<PersonListDetails>>
 
+    @Transaction
     @Query("""
         SELECT * 
          FROM PersonEntity
@@ -71,6 +75,7 @@ interface PersonEntityDao {
         since: Long = 0,
     ): List<PersonEntity>
 
+    @Transaction
     @Query("""
         SELECT * 
          FROM PersonEntity

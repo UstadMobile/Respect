@@ -729,6 +729,8 @@ components:
           type: string
         schoolName:
           type: string
+        classGuid:
+          type: string
         userInviteType:
           type: string
           enum:

@@ -20,11 +20,12 @@ class SchoolDataSourceRepository(
             local.personDataSource, remote.personDataSource, validationHelper
         )
     }
-    override val reportDataSource: ReportDataSource
-        get() = TODO("Not yet implemented")
-
-    override val indicatorDataSource: IndicatorDataSource
-        get() = TODO("Not yet implemented")
+    override val reportDataSource: ReportDataSource by lazy {
+        local.reportDataSource
+    }
+    override val indicatorDataSource: IndicatorDataSource by lazy {
+        local.indicatorDataSource
+    }
 
     override val onRoasterDataSource: OneRosterDataSource
         get() = TODO("Not yet implemented")

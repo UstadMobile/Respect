@@ -52,37 +52,50 @@ import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
+/**
+ * @property routeName this is required because it will be obfuscated in the release variant (the
+ *           path as per currentBackStack.lastOrNull()?.destination?.route is preserved, but not
+ *           the Route class name from AppRoutes)
+ */
 data class TopNavigationItem(
     val destRoute: Any,
     val icon: ImageVector,
-    val label: StringResource
+    val label: StringResource,
+    val routeName: String,
 )
+
+private val routeNamePrefix = "world.respect.shared.navigation"
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = RespectAppLauncher,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps
+        label = Res.string.apps,
+        routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
     TopNavigationItem(
         destRoute = Assignment,
         icon = Icons.Filled.ImportContacts,
-        label = Res.string.assignments
+        label = Res.string.assignments,
+        routeName = "$routeNamePrefix.Assignment"
     ),
     TopNavigationItem(
         destRoute = ClazzList,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = Res.string.classes
+        label = Res.string.classes,
+        routeName = "$routeNamePrefix.ClazzList",
     ),
     TopNavigationItem(
         destRoute = Report,
         icon = Icons.Filled.BarChart,
-        label = Res.string.reports
+        label = Res.string.reports,
+        routeName = "$routeNamePrefix.Report"
     ),
     TopNavigationItem(
         destRoute = PersonList,
         icon = Icons.Filled.Person,
         label = Res.string.people,
+        routeName = "$routeNamePrefix.PersonList",
     ),
 )
 

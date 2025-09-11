@@ -5,6 +5,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.oneroster.model.OneRosterBaseStatusEnum
@@ -14,12 +16,12 @@ import kotlin.time.Instant
 class SchoolTypeConverters {
 
     @TypeConverter
-    fun toPersonRoleType(value: Int): PersonRole.RoleType {
-        return PersonRole.RoleType.entries.first { it.flag == value }
+    fun toPersonRoleType(value: Int): PersonRoleEnum {
+        return PersonRoleEnum.fromFlag(value)
     }
 
     @TypeConverter
-    fun fromPersonRoleType(value: PersonRole.RoleType): Int {
+    fun fromPersonRoleType(value: PersonRoleEnum): Int {
         return value.flag
     }
 
@@ -41,6 +43,15 @@ class SchoolTypeConverters {
         return value?.atStartOfDayIn(TimeZone.UTC)?.toEpochMilliseconds()
     }
 
+    @TypeConverter
+    fun toStatusEnum(value: Int): StatusEnum {
+        return StatusEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromStatusEnum(value: StatusEnum): Int {
+        return value.flag
+    }
 
     // --- For OneRosterBaseStatusEnum ---
     @TypeConverter

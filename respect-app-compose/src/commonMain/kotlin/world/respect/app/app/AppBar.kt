@@ -55,9 +55,7 @@ fun RespectAppBar(
     val currentBackStack by navController.currentBackStack.collectAsState()
     val currentRoute = currentBackStack.lastOrNull()?.destination?.route
     val isRootDest = remember(currentRoute) {
-        APP_TOP_LEVEL_NAV_ITEMS.any {
-            it.destRoute::class.qualifiedName == currentRoute
-        }
+        APP_TOP_LEVEL_NAV_ITEMS.any { it.routeName == currentRoute }
     }
 
     val canGoBack = appUiState.showBackButton ?: !isRootDest && currentBackStack.size > 1

@@ -11,13 +11,14 @@ import kotlin.time.Instant
  *           information (e.g. username, name, etc). It could be a sequential key, etc.
  * @property userMasterIdentifier generally an ID assigned by the organization (e.g. government
  *           issued student/teacher id number)
- * @property active (should be changed to status enum - which may be pending)
+ * @property userActive (should be changed to status enum - which may be pending)
  */
 
 @Serializable
 data class Person(
     val guid: String,
-    val active: Boolean = true,
+    val userActive: Boolean = true,
+    val status: StatusEnum = StatusEnum.ACTIVE,
     @Serializable(with = InstantISO8601Serializer::class)
     override val lastModified: Instant = Clock.System.now(),
     @Serializable(with = InstantISO8601Serializer::class)

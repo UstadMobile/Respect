@@ -64,38 +64,31 @@ class ClazzListViewModel(
         }
 
         viewModelScope.launch {
+            schoolDataSource.onRoasterDataSource.findAll(DataLoadParams())
+                .collect { dataState ->
+                    _uiState.update { state ->
+                        val sortOptions = listOf(
+                            SortOrderOption(
+                                Res.string.first_name,
+                                flag = 1,
+                                order = true
+                            ),
+                            SortOrderOption(
+                                Res.string.last_name,
+                                flag = 2,
+                                order = true
+                            )
+                        )
 
-            schoolDataSource.onRoasterDataSource.findAll(DataLoadParams()).collect {
-                viewModelScope.launch {
-                    schoolDataSource.onRoasterDataSource.findAll(DataLoadParams())
-                        .collect { dataState ->
-                            _uiState.update { state ->
-                                val sortOptions = listOf(
-                                    SortOrderOption(
-                                        Res.string.first_name,
-                                        flag = 1,
-                                        order = true
-                                    ),
-                                    SortOrderOption(
-                                        Res.string.last_name,
-                                        flag = 2,
-                                        order = true
-                                    )
-                                )
-
-                                state.copy(
-                                    clazz = dataState,
-                                    sortOptions = sortOptions,
-                                    activeSortOrderOption = sortOptions.first()
-                                )
-                            }
-                        }
+                        state.copy(
+                            clazz = dataState,
+                            sortOptions = sortOptions,
+                            activeSortOrderOption = sortOptions.first()
+                        )
+                    }
                 }
-
-            }
-
-
         }
+
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

@@ -55,7 +55,9 @@ appId: world.respect.app
 - tapOn: "Gender"
 - tapOn: "Female"
 - tapOn: "Your date of birth"
-- inputText: "date"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.pastYearDate}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -74,7 +76,9 @@ appId: world.respect.app
 - tapOn: "Gender"
 - tapOn: "Male"
 - tapOn: "Child date of birth"
-- inputText: "date"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.pastYearDate}
 - tapOn: "Done"
 - assertVisible:
     id: "app_title"

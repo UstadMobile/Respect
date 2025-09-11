@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDateField
+import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.report.Comparisons
 import world.respect.datalayer.school.model.report.FilterType

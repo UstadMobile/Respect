@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.viewmodel.report.indictor.detail.IndicatorDetailUiState
 import world.respect.shared.viewmodel.report.indictor.detail.IndicatorDetailViewModel

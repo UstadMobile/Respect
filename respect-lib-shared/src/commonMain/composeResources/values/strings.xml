@@ -16,7 +16,8 @@
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
     <string name="clazz">Classes</string>
-    <string name="report">Reports</string>
+    <string name="report">Report</string>
+    <string name="reports">Reports</string>
     <string name="select_app">Select app</string>
     <string name="enter_link">Enter link</string>
     <string name="add">Add</string>
@@ -143,6 +144,172 @@
     <string name="add_account">Add account</string>
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
+
+
+    <!-- Edit Report -->
+    <string name="edit_report">Edit report</string>
+    <string name="add_a_new_report">Add a new report</string>
+    <string name="field">Field</string>
+    <string name="condition">Condition</string>
+    <string name="value">Value</string>
+    <string name="person_age">Person age</string>
+    <string name="person_gender">Person gender</string>
+    <string name="x_axis">X Axis</string>
+    <string name="series_title">Series Title</string>
+    <string name="series">Series</string>
+    <string name="title">Title</string>
+    <string name="y_axis">Y Axis</string>
+    <string name="subgroup_by">Subgroup by</string>
+    <string name="chart_type">Chart type</string>
+    <string name="time_range">Time range</string>
+    <string name="filters">Filters</string>
+    <string name="add_filter">Add Filter</string>
+    <string name="add_series">Add Series</string>
+    <string name="total_duration">Total Duration</string>
+    <string name="average_duration">Average Duration</string>
+    <string name="number_sessions">Number of Sessions</string>
+    <string name="interactions_recorded">Interactions Recorded</string>
+    <string name="number_active_users">Number of Active Users</string>
+    <string name="average_usage_time_per_user">Average Usage Time per User</string>
+    <string name="none">None</string>
+    <string name="quantity">Quantity</string>
+    <string name="unit">Unit</string>
+    <string name="from">From</string>
+    <string name="to_">To</string>
+    <string name="at_least_one_series_required">At least one series required</string>
+    <string name="field_required_prompt">Field required prompt</string>
+    <string name="quantity_must_be_at_least_1">Quantity must be at least 1</string>
+    <string name="untitled_report">Untitled Report</string>
+    <string name="select_template">Select template</string>
+    <string name="indicator_name">Indicator Name</string>
+    <string name="description">Description</string>
+    <string name="sql">SQL</string>
+    <string name="edit_filters">Edit Filters</string>
+    <string name="blank_template">Blank Template</string>>
+
+    <!-- Duration Metrics -->
+    <string name="total_content_usage_duration">Total Content Usage Duration</string>
+    <string name="average_content_usage_duration_per_user">Average Content Usage Duration Per User</string>
+
+    <!-- Percentage Metrics -->
+    <string name="percentage_pass">% Pass</string>
+    <string name="percentage_fail">% Fail</string>
+    <string name="attendance_percentage">Attendance %</string>
+    <string name="absence_percentage">Absence %</string>
+    <string name="completion_rate">Completion Rate</string>
+    <string name="task_completion_percentage">Completion per Assigned Task %</string>
+    <string name="retention_rate">Retention Rate</string>
+    <string name="offline_usage_percentage">Offline Usage %</string>
+
+    <!-- Score Metrics -->
+    <string name="average_score">Average Score</string>
+    <string name="total_score">Total Score</string>
+
+    <!-- Count Metrics -->
+    <string name="number_of_activities">Number of Activities</string>
+    <string name="active_days_per_user">Active Days per User</string>
+
+    <!-- Top 5 Metrics -->
+    <string name="top_5_apps">Top 5 Apps</string>
+    <string name="top_5_languages">Top 5 Languages</string>
+    <string name="top_5_lessons">Top 5 Lessons</string>
+    <string name="top_5_schools">Top 5 Schools</string>
+    <string name="top_5_students">Top 5 Students</string>
+    <string name="percentage">Percentage</string>
+    <string name="indicators">Indicators</string>
+    <string name="manage_indicators">Manage Indicators</string>
+    <string name="indicator">Indicator</string>
+    <string name="indicator_detail">Indicator detail</string>
+
+
+
+
+    <!-- Conditions -->
+    <string name="equals">= Equals</string>
+    <string name="not_equals">!= Not Equals</string>
+    <string name="greater">&gt; Greater</string>
+    <string name="lesser">&lt; Lesser</string>
+    <string name="in_list">In List</string>
+    <string name="not_in_list">Not In List</string>
+    <string name="greater_or_equal">&gt; = Greater Than or Equal</string>
+    <string name="lesser_or_equal">&lt; = Less Than or Equal</string>
+
+    <!-- Export Options -->
+    <string name="export_data">Export data</string>
+    <string name="graph_data">Graph Format</string>
+    <string name="raw_data">Raw data</string>
+
+    <!-- Misc -->
+    <string name="count">Count</string>
+    <string name="invalid_report_format">invalid report format</string>
+    <string name="invalid_report_config">invalid report config</string>
+    <string name="unknown_error">unknown error</string>
+
+    <!-- Time Units -->
+    <string name="day">Day</string>
+    <string name="months">Months</string>
+    <string name="weeks">Weeks</string>
+    <string name="years">Years</string>
+    <string name="weekly">Weekly</string>
+    <string name="daily">Every working day</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+    <string name="time_of_day">Time of Day (Morning/Evening)</string>
+    <string name="quarterly">Quarterly</string>
+
+    <!-- Educational Dimensions -->
+    <string name="subject">Subject</string>
+    <string name="school">School</string>
+    <string name="grade_level">Grade Level</string>
+    <string name="assessment_type">Assessment Type (Self/Assignment)</string>
+
+
+    <!-- Demographic Dimensions -->
+    <string name="age_group">Age Group</string>
+    <string name="region">Region</string>
+    <string name="language">Language</string>
+
+    <!-- Role-Based Dimensions -->
+    <string name="activity_verb">Activity Verb</string>
+    <string name="user_role">Role (Teacher/Student/Parent)</string>
+
+    <!-- Technical Dimensions -->
+    <string name="application">Application</string>
+    <string name="device_type">Device Type</string>
+    <string name="platform">Platform</string>
+
+    <!-- Time Ranges -->
+    <string name="custom_period">Custom period (e.g. last x days/weeks)</string>
+    <string name="custom_date_range">Custom date range</string>
+    <string name="last_30_days">Last 30 days</string>
+    <string name="last_3_months">Last 3 months</string>
+    <string name="last_week_date_range">Last week</string>
+    <string name="last_two_week_date_range">Last two weeks</string>
+    <string name="last_month_date_range">Last month</string>
+    <string name="last_three_months_date_range">Last three months</string>
+    <string name="last_week">Last week</string>
+
+    <!-- Chart Types -->
+    <string name="bar_chart">Bar Chart</string>
+    <string name="line_chart">Line Chart</string>
+
+    <!-- X Axis Options -->
+    <string name="year">Year</string>
+    <string name="class_name">Class name</string>
+    <string name="gender_literal">Gender</string>
+
+    <!-- Time Units -->
+    <string name="hour_unit">hr</string>
+    <string name="minute_unit">min</string>
+    <string name="second_unit">sec</string>
+
+    <!-- Empty States -->
+    <string name="No_data_available">No data available</string>
+    <string name="empty_data">Empty data</string>
+
+    <!-- Actions -->
+    <string name="delete">Delete</string>
+
     <string name="accounts">Accounts</string>
 
     <string name="people">People</string>

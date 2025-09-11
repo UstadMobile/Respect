@@ -1,4 +1,6 @@
 appId: world.respect.app
+tags:
+  - respect
 ---
 - runFlow: "common/school_admin_login_flow.yaml"
 - tapOn:

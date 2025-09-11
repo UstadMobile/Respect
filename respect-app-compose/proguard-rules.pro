@@ -44,3 +44,10 @@
 }
 
 # End XXHash rules
+
+
+## Napier bug as per https://github.com/AAkira/Napier/issues/132
+-keep class io.github.aakira.napier.** {
+  *;
+}
+## End Napier rule

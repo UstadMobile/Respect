@@ -15,6 +15,11 @@ import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonPasswordEntity
 import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.db.shared.SharedConverters
+import world.respect.datalayer.db.school.daos.IndicatorEntityDao
+import world.respect.datalayer.db.school.daos.ReportEntityDao
+import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.entities.ReportEntity
+
 
 /**
  * Contains realm-specific entities and DAOs
@@ -25,6 +30,8 @@ import world.respect.datalayer.db.shared.SharedConverters
         PersonRoleEntity::class,
         PersonPasswordEntity::class,
         AuthTokenEntity::class,
+        ReportEntity::class,
+        IndicatorEntity::class
     ],
     version = 1,
 
@@ -40,6 +47,10 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getAuthTokenEntityDao(): AuthTokenEntityDao
 
     abstract fun getPersonRoleEntityDao(): PersonRoleEntityDao
+
+    abstract fun getReportEntityDao(): ReportEntityDao
+
+    abstract fun getIndicatorEntityDao(): IndicatorEntityDao
 
 }
 

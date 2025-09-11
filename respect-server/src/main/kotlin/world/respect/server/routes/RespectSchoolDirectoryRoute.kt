@@ -14,6 +14,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.server.domain.school.add.AddSchoolUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 
 const val AUTH_CONFIG_DIRECTORY_ADMIN_BASIC = "auth-directory-admin-basic"
 
@@ -51,9 +52,10 @@ fun Route.RespectSchoolDirectoryRoute() {
         }
 
         val directoryDataSource: SchoolDirectoryDataSourceLocal by inject()
+        val inviteInfoUseCase : GetInviteInfoUseCase by inject ()
         val inviteInfo = directoryDataSource.getInviteInfo(code)
-
-        call.respond(inviteInfo)
+        val mockInviteInfo =  inviteInfoUseCase.invoke("")
+        call.respond(mockInviteInfo)
     }
     get("url") {
         val directoryDataSource: SchoolDirectoryDataSourceLocal by inject()

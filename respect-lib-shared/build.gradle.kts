@@ -55,9 +55,6 @@ kotlin {
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
 
-            api(libs.paging.multiplatform.compose)
-            api(libs.paging.multiplatform.common)
-
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
         }

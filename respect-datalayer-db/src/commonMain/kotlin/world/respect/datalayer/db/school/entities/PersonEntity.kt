@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import world.respect.datalayer.school.model.StatusEnum
 
 /**
  * @property pGuid the uid of the person: If following a OneRoster server, this is sourcedId
@@ -12,6 +13,7 @@ data class PersonEntity(
     @PrimaryKey
     val pGuidHash: Long,
     val pActive: Boolean,
+    val pStatus: StatusEnum,
     val pLastModified: Long,
     val pStored: Long,
     val pUsername: String? = null,

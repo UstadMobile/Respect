@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.VerifyDomainUseCase
+import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -60,7 +61,11 @@ class LoginViewModel(
         viewModelScope.launch {
             try {
                 val school = respectAppDataSource.schoolDirectoryDataSource.getSchoolDirectoryEntryByUrl(route.schoolUrl)
-                val rpId = school?.data?.rpId
+                val rpId: String? = when (school) {
+                    is DataReadyState -> school.data.rpId
+                    else -> null
+                }
+
                 val isRpIDVerified = verifyDomainUseCase(rpId?:"")
                 if (isRpIDVerified){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {

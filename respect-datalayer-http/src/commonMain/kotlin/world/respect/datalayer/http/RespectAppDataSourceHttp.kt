@@ -6,8 +6,6 @@ import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.http.compatibleapps.CompatibleAppDataSourceHttp
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
-import world.respect.datalayer.http.school.SchoolDirectoryDataSourceHttp
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
 import world.respect.datalayer.http.schooldirectory.SchoolDirectoryDataSourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.opds.OpdsDataSource

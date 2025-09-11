@@ -65,11 +65,7 @@ fun Route.RespectSchoolDirectoryRoute() {
         }
         val school = directoryDataSource.getSchoolDirectoryEntryByUrl(Url(url))
 
-        if (school != null) {
-            call.respond(school)
-        } else {
-            call.respond(HttpStatusCode.NotFound, "School not found")
-        }
+        call.respond(school)
     }
 
 }

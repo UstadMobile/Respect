@@ -33,7 +33,7 @@ class SchoolDirectoryDataSourceDb(
 ): SchoolDirectoryDataSourceLocal {
 
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
-        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectories().also { println("allDirectories"+it) }.map { schoolDirectory ->
+        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectories().map { schoolDirectory ->
             RespectSchoolDirectory(
                 invitePrefix = schoolDirectory.rdInvitePrefix,
                 baseUrl = schoolDirectory.rdUrl

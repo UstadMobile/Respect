@@ -2,8 +2,11 @@ package world.respect.datalayer.repository.schooldirectory
 
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
@@ -24,7 +27,20 @@ class SchoolDirectoryDataSourceRepository(
     }
 
     override suspend fun searchSchools(text: String): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
-        return local.searchSchools(text)
+        val remoteFlow = remote.searchSchools(text).onEach { state ->
+            if (state is DataReadyState) {
+                state.data.forEach { school ->
+                    local.putSchoolDirectoryEntry(
+                        DataReadyState(school),
+                        null
+                    )
+                }
+            }
+        }
+
+        return local.searchSchools(text).combine(remoteFlow) { localResult, remoteResult ->
+            localResult.combineWithRemote(remoteResult)
+        }
     }
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {

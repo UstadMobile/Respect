@@ -19,7 +19,6 @@ import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
@@ -28,7 +27,6 @@ import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
-import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import passkey.EncodeUserHandleUseCaseImpl
 import world.respect.callback.AddSchoolDirectoryCallback
@@ -42,20 +40,27 @@ import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreati
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import world.respect.credentials.passkey.request.EncodeUserHandleUseCase
 import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
+import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
+import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
+import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
+import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
@@ -80,6 +85,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.NavResultReturnerImpl
+import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
@@ -102,33 +109,6 @@ import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
-import java.io.File
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.shared.domain.account.RespectAccount
-import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.db.SchoolDataSourceDb
-import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
-import world.respect.datalayer.http.SchoolDataSourceHttp
-import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.SchoolDataSourceRepository
-import world.respect.libutil.ext.sanitizedForFilename
-import world.respect.libxxhash.XXHasher64Factory
-import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient
-import world.respect.shared.domain.account.RespectTokenManager
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
-import world.respect.shared.domain.school.RespectSchoolPath
-import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.NavResultReturnerImpl
-import world.respect.shared.util.di.RespectAccountScopeId
-import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
-import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
@@ -356,33 +336,12 @@ val appKoinModule = module {
             xxStringHasher = get()
         )
     }
-    single<RespectAppDataSource> {
-        val appContext = androidContext().applicationContext
-        val respectAppDataSourceDb =  RespectAppDataSourceDb(
-            respectAppDatabase = Room.databaseBuilder<RespectAppDatabase>(
-                appContext, appContext.getDatabasePath("respect.db").absolutePath
-            ).setDriver(BundledSQLiteDriver()).addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
-
-                .build(),
-            json = get(),
-            xxStringHasher = get(),
-            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
-        )
-        RespectAppDataSourceRepository(
-            local = respectAppDataSourceDb ,
-            remote = RespectAppDataSourceHttp(
-                httpClient = get(),
-                local = respectAppDataSourceDb,
-                defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
-            )
-        )
-    }
 
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
             appContext, appContext.getDatabasePath("respectapp.db").absolutePath
-        ).setDriver(BundledSQLiteDriver())
+        ).setDriver(BundledSQLiteDriver()).addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .build()
     }
 
@@ -395,6 +354,12 @@ val appKoinModule = module {
                 primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
             ),
             remote = RespectAppDataSourceHttp(
+                local = RespectAppDataSourceDb(
+                    respectAppDatabase = get(),
+                    json = get(),
+                    xxStringHasher = get(),
+                    primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
+                ),
                 httpClient = get(),
                 defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
             )

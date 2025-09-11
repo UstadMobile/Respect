@@ -31,7 +31,6 @@ kotlin {
             api(libs.androidx.paging.common)
             implementation(libs.atomicfu)
             implementation(libs.napier)
-            api(libs.paging.multiplatform.common)
 
         }
 

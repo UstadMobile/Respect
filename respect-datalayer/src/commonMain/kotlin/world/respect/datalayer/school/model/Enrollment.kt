@@ -1,5 +1,8 @@
 package world.respect.datalayer.school.model
 
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
@@ -18,4 +21,8 @@ data class Enrollment(
     val classUid: String,
     val personUid: String,
     val role: EnrollmentRoleEnum,
+    val beginDate: LocalDate? = Clock.System.now().toLocalDateTime(
+        TimeZone.currentSystemDefault()
+    ).date,
+    val endDate: LocalDate? = null,
 ): ModelWithTimes

@@ -65,7 +65,7 @@ fun ConfirmationScreen(
                 ) {
                     Text(text = uiState.inviteInfo?.className ?: "")
 
-                    Text(text = uiState.inviteInfo?.classGUIDRef?.sourcedId ?: "")
+                    Text(text = uiState.inviteInfo?.classGuid ?: "")
 
                 }
             }

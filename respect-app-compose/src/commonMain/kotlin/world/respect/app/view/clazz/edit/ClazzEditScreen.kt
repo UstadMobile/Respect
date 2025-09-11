@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
@@ -20,7 +19,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.class_name_label
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.oneroster.model.OneRosterClass
+import world.respect.datalayer.school.model.Clazz
+import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.required
 
 @Composable
@@ -38,7 +38,7 @@ fun ClazzEditScreen(
 @Composable
 fun ClazzEditScreen(
     uiState: ClazzEditUiState,
-    onEntityChanged: (OneRosterClass) -> Unit = {},
+    onEntityChanged: (Clazz) -> Unit = {},
     onClearError: () -> Unit = {},
 ) {
 
@@ -49,9 +49,8 @@ fun ClazzEditScreen(
         modifier = Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(top = 16.dp),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = clazz?.title ?: "",
             label = {
                 Text(
@@ -70,31 +69,25 @@ fun ClazzEditScreen(
             supportingText = {
                 Text(stringResource(Res.string.required))
             },
-            enabled=fieldsEnabled,
+            enabled = fieldsEnabled,
             isError = uiState.clazzNameError != null
         )
-        /**Description field needed**/
 
-        /*
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth().editScreenPadding(),
-                    value = uiState.entity?.description ?: "",
-                    label = {
-                        Text(
-                            stringResource(Res.string.description)
-                        )
-                    },
-                    singleLine = true,
-                    onValueChange =
-                        { newValue ->
-                        uiState.entity?.let { current ->
-                            onClazzChanged(
-                                current.copy(description = newValue)
-                            )
-                        }
-                    }
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            value = clazz?.description ?: "",
+            label = {
+                Text(
+                    stringResource(Res.string.description)
                 )
-        */
+            },
+            onValueChange = { newValue ->
+                clazz?.also {
+                    onEntityChanged(it.copy(description = newValue))
+                }
+            }
+        )
+
     }
 }
 

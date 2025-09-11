@@ -40,6 +40,7 @@ class PersonDataSourceDb(
         return schoolDb.getPersonEntityDao().getAllUsers(sourcedId).map {
             PersonEntities(it).toModel()
         }
+
     }
 
     private suspend fun upsertPersons(

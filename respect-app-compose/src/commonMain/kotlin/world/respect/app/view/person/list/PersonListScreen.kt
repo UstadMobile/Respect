@@ -15,6 +15,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
+import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.util.ext.fullName
@@ -37,12 +38,7 @@ fun PersonListScreen(
     uiState: PersonListUiState,
     onClickItem: (PersonListDetails) -> Unit,
 ) {
-    val pager = remember(uiState.persons) {
-        Pager(
-            config = PagingConfig(20, maxSize = 200),
-            pagingSourceFactory = uiState.persons,
-        )
-    }
+    val pager = respectRememberPager(uiState.persons)
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 

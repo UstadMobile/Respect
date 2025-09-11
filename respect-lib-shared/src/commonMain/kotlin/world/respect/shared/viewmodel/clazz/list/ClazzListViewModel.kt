@@ -1,19 +1,18 @@
 package world.respect.shared.viewmodel.clazz.list
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.oneroster.composites.ClazzListDetails
+import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.classes
@@ -30,7 +29,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 
 data class ClazzListUiState(
-    val clazz: DataLoadState<List<ClazzListDetails>> = DataLoadingState(),
+    val classes: () -> PagingSource<Int, Clazz> = { EmptyPagingSource() },
     val sortOptions: List<SortOrderOption> = emptyList(),
     val activeSortOrderOption: SortOrderOption = SortOrderOption(
         Res.string.first_name, 1, true
@@ -44,11 +43,19 @@ class ClazzListViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(ClazzListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val pagingSourceFactory: () -> PagingSource<Int, Clazz> = {
+        schoolDataSource.classDataSource.listAsPagingSource(
+            DataLoadParams(),
+            params = ClassDataSource.GetListParams()
+        )
+    }
 
     init {
         _appUiState.update {
@@ -63,30 +70,22 @@ class ClazzListViewModel(
             )
         }
 
-        viewModelScope.launch {
-            schoolDataSource.onRoasterDataSource.findAll(DataLoadParams())
-                .collect { dataState ->
-                    _uiState.update { state ->
-                        val sortOptions = listOf(
-                            SortOrderOption(
-                                Res.string.first_name,
-                                flag = 1,
-                                order = true
-                            ),
-                            SortOrderOption(
-                                Res.string.last_name,
-                                flag = 2,
-                                order = true
-                            )
-                        )
-
-                        state.copy(
-                            clazz = dataState,
-                            sortOptions = sortOptions,
-                            activeSortOrderOption = sortOptions.first()
-                        )
-                    }
-                }
+        _uiState.update { prev ->
+            prev.copy(
+                classes = pagingSourceFactory,
+                sortOptions = listOf(
+                    SortOrderOption(
+                        Res.string.first_name,
+                        flag = 1,
+                        order = true
+                    ),
+                    SortOrderOption(
+                        Res.string.last_name,
+                        flag = 2,
+                        order = true
+                    )
+                )
+            )
         }
 
     }
@@ -97,17 +96,17 @@ class ClazzListViewModel(
         }
     }
 
-    fun onClickClazz(sourcedId: String) {
+    fun onClickClazz(clazz: Clazz) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                ClazzDetail.create(sourcedId)
+                ClazzDetail(clazz.guid)
             )
         )
     }
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(ClazzEdit(sourcedId = null))
+            NavCommand.Navigate(ClazzEdit(guid = null))
         )
     }
 }

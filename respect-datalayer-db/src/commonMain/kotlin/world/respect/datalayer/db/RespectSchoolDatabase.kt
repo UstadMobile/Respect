@@ -21,6 +21,8 @@ import world.respect.datalayer.db.shared.SharedConverters
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.daos.ClazzEntityDao
+import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 
 
@@ -36,7 +38,8 @@ import world.respect.datalayer.db.school.entities.ReportEntity
         OneRosterClassEntity::class,
         OneRosterUserEntity::class,
         ReportEntity::class,
-        IndicatorEntity::class
+        IndicatorEntity::class,
+        ClassEntity::class,
     ],
     version = 1,
 
@@ -58,6 +61,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getReportEntityDao(): ReportEntityDao
 
     abstract fun getIndicatorEntityDao(): IndicatorEntityDao
+
+    abstract fun getClassEntityDao(): ClazzEntityDao
 
 }
 

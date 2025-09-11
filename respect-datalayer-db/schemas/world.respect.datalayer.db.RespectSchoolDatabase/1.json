@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b4e14da6a41a047c691e245b3a01aecf",
+    "identityHash": "50128bd59e9432a3227fd1742eed1e47",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -506,11 +506,74 @@
             "indicatorId"
           ]
         }
+      },
+      {
+        "tableName": "ClassEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteCode` TEXT, `cStudentInviteCode` TEXT, PRIMARY KEY(`cGuidHash`))",
+        "fields": [
+          {
+            "fieldPath": "cGuid",
+            "columnName": "cGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cGuidHash",
+            "columnName": "cGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cTitle",
+            "columnName": "cTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cStatus",
+            "columnName": "cStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cDescription",
+            "columnName": "cDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cLastModified",
+            "columnName": "cLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cStored",
+            "columnName": "cStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cTeacherInviteCode",
+            "columnName": "cTeacherInviteCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cStudentInviteCode",
+            "columnName": "cStudentInviteCode",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cGuidHash"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4e14da6a41a047c691e245b3a01aecf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '50128bd59e9432a3227fd1742eed1e47')"
     ]
   }
 }

@@ -1,6 +1,7 @@
 package world.respect.datalayer
 
 import world.respect.datalayer.oneroster.OneRosterDataSource
+import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
@@ -15,10 +16,13 @@ interface SchoolDataSource {
 
     val personDataSource: PersonDataSource
 
+    @Deprecated("to be removed")
     val onRoasterDataSource: OneRosterDataSource
 
     val reportDataSource: ReportDataSource
 
     val indicatorDataSource: IndicatorDataSource
+
+    val classDataSource: ClassDataSource
 
 }

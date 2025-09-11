@@ -55,17 +55,8 @@ object ClazzList : RespectAppRoute
 
 @Serializable
 class ClazzDetail(
-    val sourcedId: String,
-) : RespectAppRoute {
-
-    companion object {
-        fun create(
-            sourcedId: String
-        ) = ClazzDetail(
-            sourcedId = sourcedId
-        )
-    }
-}
+    val guid: String,
+) : RespectAppRoute
 
 @Serializable
 class AddPersonToClazz(
@@ -83,7 +74,7 @@ class AddPersonToClazz(
 
 @Serializable
 data class ClazzEdit(
-    val sourcedId: String?
+    val guid: String?
 ) : RespectAppRoute
 
 @Serializable

@@ -10,13 +10,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.paging.compose.collectAsLazyPagingItems
 import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.SortListMode
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultSortListMode
+import world.respect.app.components.respectPagingItems
+import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.list.ClazzListUiState
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -38,16 +44,18 @@ fun ClazzListScreen(
 @Composable
 fun ClazzListScreen(
     uiState: ClazzListUiState,
-    onClickClazz: (String) -> Unit,
+    onClickClazz: (Clazz) -> Unit,
     onClickSortOption: (SortOrderOption) -> Unit = { },
     sortListMode: SortListMode = defaultSortListMode(),
 ) {
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    val pager = respectRememberPager(uiState.classes)
 
-        item {
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+        item("header") {
             RespectListSortHeader(
                 modifier = Modifier.defaultItemPadding(),
                 activeSortOrderOption = uiState.activeSortOrderOption,
@@ -58,29 +66,27 @@ fun ClazzListScreen(
             )
         }
 
-        itemsIndexed(
-            items = uiState.clazz.dataOrNull() ?: emptyList(),
-            key = { index, clazz -> index }
-        ) { index, clazz ->
+        respectPagingItems(
+            items = lazyPagingItems,
+            key = { item, index -> item?.guid ?: index.toString() },
+            contentType = { ClassDataSource.ENDPOINT_NAME },
+        ) { clazz ->
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        onClickClazz(clazz.sourcedId)
+                        clazz?.also(onClickClazz)
                     },
 
                 leadingContent = {
-                    RespectPersonAvatar(
-                        name = clazz.title
-                    )
+                    RespectPersonAvatar(name = clazz?.title ?: "")
                 },
 
                 headlineContent = {
-                    Text(
-                        text = clazz.title
-                    )
+                    Text(text = clazz?.title ?: "")
                 }
             )
         }
+
     }
 }

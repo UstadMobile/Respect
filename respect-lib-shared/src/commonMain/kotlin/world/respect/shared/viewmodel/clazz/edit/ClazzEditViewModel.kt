@@ -19,6 +19,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -35,17 +36,15 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 data class ClazzEditUiState(
     val clazzNameError: String? = null,
-    val clazz: DataLoadState<OneRosterClass> = DataLoadingState(),
+    val clazz: DataLoadState<Clazz> = DataLoadingState(),
 ) {
     val fieldsEnabled: Boolean
         get() = clazz.isReadyAndSettled()
 }
 
-@OptIn(ExperimentalTime::class)
 class ClazzEditViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
@@ -59,7 +58,7 @@ class ClazzEditViewModel(
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
-    private val sourcedId = route.sourcedId ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+    private val guid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
         OneRosterClass.TABLE_ID
     ).toString()
 
@@ -72,7 +71,7 @@ class ClazzEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = if (route.sourcedId == null) {
+                title = if (route.guid == null) {
                     Res.string.add_clazz.asUiText()
                 } else {
                     Res.string.edit_clazz.asUiText()
@@ -87,13 +86,12 @@ class ClazzEditViewModel(
         }
 
         viewModelScope.launch {
-
-            if (route.sourcedId != null) {
+            if (route.guid != null) {
                 loadEntity(
                     json = json,
-                    serializer = OneRosterClass.serializer(),
+                    serializer = Clazz.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.onRoasterDataSource.findClassBySourcedId(params, sourcedId)
+                        schoolDataSource.classDataSource.findByGuid(params, guid)
                     },
                     uiUpdateFn = { clazz ->
                         _uiState.update { prev -> prev.copy(clazz = clazz) }
@@ -103,10 +101,10 @@ class ClazzEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         clazz = DataReadyState(
-                            OneRosterClass(
-                                sourcedId = sourcedId,
+                            Clazz(
+                                guid = guid,
                                 title = "",
-                                dateLastModified = Clock.System.now()
+                                description = "",
                             )
                         )
                     )
@@ -115,7 +113,7 @@ class ClazzEditViewModel(
         }
     }
 
-    fun onEntityChanged(clazz: OneRosterClass) {
+    fun onEntityChanged(clazz: Clazz) {
         val classToCommit = _uiState.updateAndGet { prev ->
             prev.copy(clazz = DataReadyState(clazz))
         }.clazz.dataOrNull() ?: return
@@ -125,12 +123,14 @@ class ClazzEditViewModel(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     fun onClickSave() {
-        val clazz = _uiState.value.clazz.dataOrNull() ?: return
+        val clazz = _uiState.value.clazz.dataOrNull()?.copy(
+            lastModified = Clock.System.now()
+        ) ?: return
+
         if (clazz.title.isBlank()) {
             _uiState.update { prev ->
-                prev.copy(clazzNameError = Res.string.required.asUiText().toString()) // or a hardcoded "Required"
+                prev.copy(clazzNameError = Res.string.required.asUiText().toString())
             }
             return
         } else {
@@ -139,11 +139,11 @@ class ClazzEditViewModel(
 
         viewModelScope.launch {
             try {
-                schoolDataSource.onRoasterDataSource.putClass(clazz)
-                if (route.sourcedId == null) {
+                schoolDataSource.classDataSource.store(listOf(clazz))
+                if (route.guid == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            ClazzDetail(sourcedId), popUpTo = route, popUpToInclusive = true
+                            ClazzDetail(guid), popUpTo = route, popUpToInclusive = true
                         )
                     )
                 } else {
@@ -155,6 +155,7 @@ class ClazzEditViewModel(
             }
         }
     }
+
     fun onClearError() {
         _uiState.update { prev -> prev.copy(clazzNameError = null) }
     }

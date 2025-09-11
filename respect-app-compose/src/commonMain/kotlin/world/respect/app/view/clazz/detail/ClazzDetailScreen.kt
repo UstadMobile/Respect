@@ -22,10 +22,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.RespectFilterChipsHeader
 import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.respectPagingItems
+import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
@@ -78,8 +80,13 @@ fun ClazzDetailScreen(
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
     onToggleStudentsSection: () -> Unit
-
 ) {
+    val teacherPager = respectRememberPager(uiState.teachers)
+    val studentPager = respectRememberPager(uiState.students)
+
+    val teacherLazyPagingItems = teacherPager.flow.collectAsLazyPagingItems()
+    val studentLazyPagingItems = studentPager.flow.collectAsLazyPagingItems()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -106,12 +113,12 @@ fun ClazzDetailScreen(
 
         item {
 
-            RespectFilterChipsHeader(
-                options = uiState.chipOptions.map { it.option },
-                selectedOption = uiState.selectedChip,
-                onOptionSelected = { onSelectChip(it) },
-                optionLabel = { it }
-            )
+//            RespectFilterChipsHeader(
+//                options = uiState.chipOptions.map { it.option },
+//                selectedOption = uiState.selectedChip,
+//                onOptionSelected = { onSelectChip(it) },
+//                optionLabel = { it }
+//            )
 
             RespectListSortHeader(
                 activeSortOrderOption = uiState.activeSortOrderOption,
@@ -161,11 +168,6 @@ fun ClazzDetailScreen(
                     pendingUser.guid
                 }
             ) { index, user ->
-
-                val roleName = user.roles.firstOrNull()?.roleType?.name
-                    ?.lowercase()
-                    ?.replaceFirstChar { it.uppercase() } ?: ""
-
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -177,7 +179,7 @@ fun ClazzDetailScreen(
                     },
 
                     headlineContent = {
-                        Text(text = user.givenName + "(" + roleName + ")")
+                        Text(text = user.givenName )
                     },
 
                     trailingContent = {
@@ -203,7 +205,7 @@ fun ClazzDetailScreen(
             }
         }
 
-        item {
+        item("teacher_header") {
             ListItem(
                 modifier = Modifier
                     .clickable { onToggleTeachersSection() },
@@ -211,9 +213,7 @@ fun ClazzDetailScreen(
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
-                        text = stringResource(
-                            resource = Res.string.teachers
-                        )
+                        text = stringResource(Res.string.teachers)
                     )
                 },
 
@@ -233,9 +233,9 @@ fun ClazzDetailScreen(
                 }
             )
         }
-        if (uiState.isTeachersExpanded) {
 
-            item {
+        if(uiState.isTeachersExpanded) {
+            item("add_teacher") {
                 ListItem(
                     modifier = Modifier.clickable {
                         onClickAddPersonToClazz(OneRosterRoleEnum.TEACHER)
@@ -255,28 +255,26 @@ fun ClazzDetailScreen(
                 )
             }
 
-            itemsIndexed(
-                items = uiState.listOfTeachers,
-                key = { index, teacher ->
-                    teacher.guid
-                }
-            ) { index, teacher ->
+            respectPagingItems(
+                items = teacherLazyPagingItems,
+                key = { person, index -> person?.guid ?: "t$index" }
+            ) { teacher ->
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = teacher.givenName
+                            name = teacher?.givenName ?: ""
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher.givenName)
+                        Text(text = teacher?.givenName ?: "")
                     }
                 )
             }
         }
 
-        item {
+        item("student_header") {
             ListItem(
                 modifier = Modifier
                     .clickable { onToggleStudentsSection() },
@@ -308,8 +306,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isStudentsExpanded) {
-
-            item {
+            item("add_student") {
                 ListItem(
                     modifier = Modifier.clickable {
                         onClickAddPersonToClazz(OneRosterRoleEnum.STUDENT)
@@ -331,25 +328,23 @@ fun ClazzDetailScreen(
                 )
             }
 
-            itemsIndexed(
-                items = uiState.listOfStudents,
-                key = { index, student ->
-                    student.guid
-                }
-            ) { index, student ->
+            respectPagingItems(
+                items = studentLazyPagingItems,
+                key = { person, index -> person?.guid ?: "s$index" }
+            ) { student ->
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth(),
 
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = student.givenName
+                            name = student?.givenName ?: ""
                         )
                     },
 
                     headlineContent = {
                         Text(
-                            text = student.givenName
+                            text = student?.givenName ?: ""
                         )
                     }
                 )

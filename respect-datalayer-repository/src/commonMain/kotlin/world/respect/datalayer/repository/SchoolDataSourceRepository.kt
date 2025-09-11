@@ -5,6 +5,7 @@ import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.oneroster.OneRosterDataSource
+import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -29,4 +30,8 @@ class SchoolDataSourceRepository(
 
     override val onRoasterDataSource: OneRosterDataSource
         get() = TODO("Not yet implemented")
+
+    override val classDataSource: ClassDataSource by lazy {
+        local.classDataSource
+    }
 }

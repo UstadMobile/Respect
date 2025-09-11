@@ -15,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import world.respect.app.util.ext.defaultItemPadding
 import world.respect.datalayer.school.model.Indicator
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListUiState
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel

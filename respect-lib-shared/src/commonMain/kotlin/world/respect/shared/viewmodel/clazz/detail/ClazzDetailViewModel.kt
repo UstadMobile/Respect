@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.clazz.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,14 +12,18 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.oneroster.model.OneRosterClass
 import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
+import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
@@ -39,8 +44,9 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companio
 import kotlin.getValue
 
 data class ClazzDetailUiState(
-    val listOfTeachers: List<Person> = emptyList(),
-    val listOfStudents: List<Person> = emptyList(),
+    val teachers: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+    val students: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
     val selectedChip: String = ALL,
@@ -70,61 +76,56 @@ class ClazzDetailViewModel(
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
-    init {
-        viewModelScope.launch {
-            _appUiState.update {
-                it.copy(
-                    showBackButton = false, fabState = FabUiState(
-                        visible = true,
-                        icon = FabUiState.FabIcon.EDIT,
-                        text = Res.string.edit.asUiText(),
-                        onClick = ::onClickEdit
-                    )
+    private fun pagingSourceByRole(role: EnrollmentRoleEnum): () -> PagingSource<Int, Person> {
+        return {
+            schoolDataSource.personDataSource.listAsPagingSource(
+                loadParams = DataLoadParams(),
+                params = PersonDataSource.GetListParams(
+                    filterByClazzUid = route.guid,
+                    filterByClazzRole = role,
                 )
-            }
+            )
+        }
+    }
 
-            val users = schoolDataSource.personDataSource.getAllUsers(route.sourcedId)
+    private val teacherPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
 
-            val teachers = users.filter { user ->
-                 user.roles.any { it.roleType == PersonRole.RoleType.TEACHER }
-            }
+    private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
-            val students = users.filter { user ->
-                user.roles.any { it.roleType == PersonRole.RoleType.STUDENT }
-            }
-            val pendingInvites = users.filter { user ->
-                user.roles.any { it.roleType == PersonRole.RoleType.PARENT }
-            }
+    init {
+        _appUiState.update {
+            it.copy(
+                showBackButton = false, fabState = FabUiState(
+                    visible = true,
+                    icon = FabUiState.FabIcon.EDIT,
+                    text = Res.string.edit.asUiText(),
+                    onClick = ::onClickEdit
+                )
+            )
+        }
 
-
-            schoolDataSource.onRoasterDataSource.findClassBySourcedIdAsFlow(
-                route.sourcedId
-            ).collect { clazz ->
-                val sortOptions = listOf(
+        _uiState.update {
+            it.copy(
+                teachers = teacherPagingSource,
+                students = studentPagingSource,
+                sortOptions = listOf(
                     SortOrderOption(
                         fieldMessageId = Res.string.first_name, flag = 1, order = true
                     ), SortOrderOption(
                         fieldMessageId = Res.string.last_name, flag = 2, order = true
                     )
-                )
-                _uiState.update {
-                    it.copy(
-                        clazz = clazz,
-                        listOfTeachers = teachers,
-                        listOfStudents = students,
-                        listOfPending = pendingInvites,
-                        sortOptions = sortOptions,
-                        activeSortOrderOption = sortOptions.first(),
-                        chipOptions = listOf(
-                            FilterChipsOption(getString(Res.string.all)),
-                            FilterChipsOption(getString(Res.string.active))
-                        ),
-                    )
-                }
-                _appUiState.update { prev ->
-                    prev.copy(
-                        title = clazz.dataOrNull()?.title?.asUiText()
-                    )
+                ),
+                chipOptions = listOf(
+                    FilterChipsOption(Res.string.all.asUiText()),
+                    FilterChipsOption(Res.string.active.asUiText())
+                ),
+            )
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.classDataSource.findByGuidAsFlow(route.guid).collect { clazz ->
+                _appUiState.update {
+                    it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
             }
         }
@@ -167,8 +168,7 @@ class ClazzDetailViewModel(
 
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(ClazzEdit(route.sourcedId)
-            )
+            NavCommand.Navigate(ClazzEdit(route.guid))
         )
     }
 

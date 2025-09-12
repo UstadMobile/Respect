@@ -3,6 +3,7 @@ package world.respect.datalayer.http.schooldirectory
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,9 +19,9 @@ import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 class SchoolDirectoryDataSourceHttp(
     private val httpClient: HttpClient,
@@ -34,7 +35,6 @@ class SchoolDirectoryDataSourceHttp(
         TODO("Not yet implemented")
     }
 
-    @OptIn(ExperimentalTime::class)
     override suspend fun searchSchools(text: String): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
         return flow {
             emit(DataLoadingState())
@@ -43,7 +43,14 @@ class SchoolDirectoryDataSourceHttp(
                 val respectSchools = mutableListOf<SchoolDirectoryEntry>()
 
                 for (dir in directories) {
-                    val url = dir.baseUrl.resolve("api/directory/school?name=$text")
+                    //baseUrl https://directory.example.org/path/ (WORKS)
+                    //baseUrl https://directory.example.org/path (WORKS)
+
+                    val url = URLBuilder(dir.baseUrl.appendEndpointSegments("api/directory/school"))
+                        .apply {
+                            parameters["name"] = text
+                        }
+                        .build()
 
                     val schools: List<SchoolDirectoryEntry> = httpClient.get(url).body()
                     respectSchools += schools

@@ -24,10 +24,10 @@ interface SchoolDirectoryEntryEntityDao {
 
     @Query(
         """
-         SELECT SchoolDirectoryEntryEntity.*
+        SELECT SchoolDirectoryEntryEntity.*
           FROM SchoolDirectoryEntryEntity
-         JOIN LangMapEntity
-         ON LangMapEntity.lmeTopParentUid1 = SchoolDirectoryEntryEntity.reUid
+               JOIN LangMapEntity
+                    ON LangMapEntity.lmeTopParentUid1 = SchoolDirectoryEntryEntity.reUid
          WHERE LangMapEntity.lmeValue LIKE :query
      """
     )

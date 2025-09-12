@@ -13,16 +13,22 @@ class AddSchoolDirectoryCallback(
     override fun onOpen(connection: SQLiteConnection) {
         val props = Properties()
 
-        val defaultStream = javaClass.classLoader
-            ?.getResourceAsStream("respect-directories/default.properties")
-            ?: throw IllegalStateException("default.properties not found in resources")
-        props.load(defaultStream)
+        //@Nikunj - needs FIXED DOES NOT WORK
+//        val defaultStream = javaClass.classLoader
+//            ?.getResourceAsStream("/directories/default.properties")
+//            ?: throw IllegalStateException("default.properties not found in resources")
+//        props.load(defaultStream)
+//
+//        val localStream = javaClass.classLoader
+//            ?.getResourceAsStream("/directories/local.properties")
+//
+//        if (localStream != null) {
+//            props.load(localStream)
+//        }
 
-        val localStream = javaClass.classLoader
-            ?.getResourceAsStream("respect-directories/local.properties")
-        if (localStream != null) {
-            props.load(localStream)
-        }
+        //ALSO SHOULD NOT BE DUPLICATED
+
+        props["123"] = "http://10.5.1.2:8098/"
 
         props.forEach { key, value ->
             val url = value.toString()

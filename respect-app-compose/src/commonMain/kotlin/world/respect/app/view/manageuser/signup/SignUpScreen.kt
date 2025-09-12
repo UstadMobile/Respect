@@ -20,7 +20,7 @@ import world.respect.app.components.RespectImageSelectButton
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
+import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.shared.util.toGenderLabel
 import world.respect.shared.viewmodel.manageuser.profile.SignupUiState
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel

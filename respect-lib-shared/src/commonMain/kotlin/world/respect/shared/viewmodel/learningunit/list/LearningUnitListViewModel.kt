@@ -20,15 +20,23 @@ import world.respect.datalayer.opds.model.OpdsGroup
 import world.respect.datalayer.opds.model.OpdsPublication
 import world.respect.datalayer.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.language
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
 
 data class LearningUnitListUiState(
     val publications: List<OpdsPublication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
-    val lessonFilter: List<OpdsFacet> = emptyList(),
+    val facetOptions: List<OpdsFacet> = emptyList(),
     val selectedFilterTitle: String? = null,
+    val sortOptions: List<SortOrderOption> = emptyList(),
+    val activeSortOrderOption: SortOrderOption = SortOrderOption(
+        Res.string.language, 1, true
+    ),
+    val fieldsEnabled: Boolean = true
 )
 
 class LearningUnitListViewModel(
@@ -60,6 +68,14 @@ class LearningUnitListViewModel(
                     is DataReadyState -> {
 
                         val appBarTitle = result.data.metadata.title
+                        val facetOptions = result.data.facets ?: emptyList()
+                        val sortOptions = facetOptions.mapIndexed { index, facet ->
+                            SortOrderOption(
+                                fieldMessageId = Res.string.language,
+                                flag = index + 1,
+                                order = true
+                            )
+                        }
 
                         _appUiState.update {
                             it.copy(
@@ -73,7 +89,8 @@ class LearningUnitListViewModel(
                                 navigation = result.data.navigation ?: emptyList(),
                                 publications = result.data.publications ?: emptyList(),
                                 group = result.data.groups ?: emptyList(),
-                                lessonFilter = result.data.facets ?: emptyList(),
+                                facetOptions = facetOptions,
+                                sortOptions = sortOptions
                             )
                         }
                     }
@@ -84,8 +101,10 @@ class LearningUnitListViewModel(
         }
     }
 
-    fun onClickFilter(title: String) {
-        _uiState.update { it.copy(selectedFilterTitle = title) }
+    fun onSortOrderChanged(sortOption: SortOrderOption) {
+        _uiState.update {
+            it.copy(activeSortOrderOption = sortOption)
+        }
     }
 
     fun onClickPublication(publication: OpdsPublication) {

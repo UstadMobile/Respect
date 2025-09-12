@@ -4,12 +4,12 @@ const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Months are 
 const year = today.getFullYear();
 const currentDate = `${day}/${month}/${year}`; // Format: DD/MM/YYYY
 const lastYear = today.getFullYear() - 1;
-const pastYear = today.getFullYear() - 15;
+const pastYear = today.getFullYear() - 2;
 
 const yesterday = (today.getDate() - 1).toString().padStart(2, '0');
 const yesterdayDate = `${yesterday}/${month}/${year}`; // Format: DD/MM/YYYY
 const lastYearDate = `${day}/${month}/${lastYear}`; // Same day and month, but last year
-const pastYearDate = `${day}/${month}/${pastYear}`; // Same day and month, but 15 years ago
+const pastYearDate = `${day}/${month}/${pastYear}`; // Same day and month, but 2 years ago
 
 const tomorrow = (today.getDate() + 1).toString().padStart(2, '0');
 const tomorrowDate = `${tomorrow}/${month}/${year}`; // Format: DD/MM/YYYY
@@ -29,4 +29,4 @@ output.currentDate = currentDate;
 output.currentTime = currentTime;
 output.testTime = testTime;
 output.lastYearDate = lastYearDate; // Last year’s date
-output.pastYearDate = pastYearDate; // 15 years ago
+output.pastYearDate = pastYearDate;

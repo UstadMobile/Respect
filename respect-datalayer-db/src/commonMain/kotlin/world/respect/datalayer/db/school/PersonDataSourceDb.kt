@@ -35,6 +35,14 @@ class PersonDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ): PersonDataSourceLocal {
 
+    override suspend fun getAllUsers(sourcedId: String): List<Person> {
+
+        return schoolDb.getPersonEntityDao().getAllUsers(sourcedId).map {
+            PersonEntities(it).toModel()
+        }
+
+    }
+
     private suspend fun upsertPersons(
         persons: List<Person>,
         forceOverwrite: Boolean = false,

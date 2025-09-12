@@ -210,6 +210,52 @@
         }
       },
       {
+        "tableName": "OneRosterClassEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`classSourcedId` TEXT NOT NULL, `classStatus` TEXT NOT NULL, `classDateLastModified` INTEGER NOT NULL, `classTitle` TEXT NOT NULL, `classLocation` TEXT, `classMetadata` TEXT, PRIMARY KEY(`classSourcedId`))",
+        "fields": [
+          {
+            "fieldPath": "classSourcedId",
+            "columnName": "classSourcedId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classStatus",
+            "columnName": "classStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classDateLastModified",
+            "columnName": "classDateLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classTitle",
+            "columnName": "classTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classLocation",
+            "columnName": "classLocation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "classMetadata",
+            "columnName": "classMetadata",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "classSourcedId"
+          ]
+        }
+      },
+      {
         "tableName": "ReportEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportId` TEXT NOT NULL, `ownerGuid` TEXT NOT NULL, `title` TEXT NOT NULL, `reportOptions` TEXT NOT NULL, `reportIsTemplate` INTEGER NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`reportId`))",
         "fields": [

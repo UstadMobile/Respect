@@ -7,6 +7,10 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.oneroster.model.OneRosterBaseStatusEnum
+import world.respect.datalayer.school.model.PersonRole
 import kotlin.time.Instant
 
 class SchoolTypeConverters {
@@ -48,5 +52,22 @@ class SchoolTypeConverters {
     fun fromStatusEnum(value: StatusEnum): Int {
         return value.flag
     }
+
+    // --- For OneRosterBaseStatusEnum ---
+    @TypeConverter
+    fun fromStatus(value: OneRosterBaseStatusEnum): String = value.name
+
+    @TypeConverter
+    fun toStatus(value: String): OneRosterBaseStatusEnum =
+        OneRosterBaseStatusEnum.valueOf(value)
+
+    // --- For JsonObject ---
+    @TypeConverter
+    fun fromJsonObject(value: JsonObject?): String? =
+        value?.let { Json.encodeToString(it) }
+
+    @TypeConverter
+    fun toJsonObject(value: String?): JsonObject? =
+        value?.let { Json.decodeFromString<JsonObject>(it) }
 
 }

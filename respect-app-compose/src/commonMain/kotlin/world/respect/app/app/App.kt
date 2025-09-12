@@ -39,13 +39,13 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.people
 import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.Assignment
-import world.respect.shared.navigation.Clazz
+import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.Report
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -80,10 +80,10 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         routeName = "$routeNamePrefix.Assignment"
     ),
     TopNavigationItem(
-        destRoute = Clazz,
+        destRoute = ClazzList,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = Res.string.clazz,
-        routeName = "$routeNamePrefix.Clazz"
+        label = Res.string.classes,
+        routeName = "$routeNamePrefix.ClazzList",
     ),
     TopNavigationItem(
         destRoute = Report,

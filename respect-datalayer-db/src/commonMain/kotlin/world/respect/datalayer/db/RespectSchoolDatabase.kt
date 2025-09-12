@@ -18,6 +18,8 @@ import world.respect.datalayer.db.shared.SharedConverters
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.daos.ClazzEntityDao
+import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 
 
@@ -31,7 +33,8 @@ import world.respect.datalayer.db.school.entities.ReportEntity
         PersonPasswordEntity::class,
         AuthTokenEntity::class,
         ReportEntity::class,
-        IndicatorEntity::class
+        IndicatorEntity::class,
+        ClassEntity::class,
     ],
     version = 1,
 
@@ -52,11 +55,13 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getIndicatorEntityDao(): IndicatorEntityDao
 
+    abstract fun getClassEntityDao(): ClazzEntityDao
+
 }
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
-    "KotlinNoActualForExpect"
+    "KotlinNoActualForExpect", "RedundantSuppression"
 )
 expect object RespectSchoolDatabaseConstructor : RoomDatabaseConstructor<RespectSchoolDatabase> {
     override fun initialize(): RespectSchoolDatabase

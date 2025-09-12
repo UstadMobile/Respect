@@ -5,6 +5,7 @@ import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -12,8 +13,12 @@ import kotlin.time.Instant
 
 interface PersonDataSource {
 
+    suspend fun getAllUsers(sourcedId: String): List<Person>
+
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
+        val filterByClazzUid: String? = null,
+        val filterByClazzRole: EnrollmentRoleEnum? = null,
     ) {
 
         companion object {

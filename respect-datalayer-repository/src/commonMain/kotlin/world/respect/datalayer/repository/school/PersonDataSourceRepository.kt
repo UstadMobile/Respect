@@ -24,6 +24,10 @@ class PersonDataSourceRepository(
 
     private val mediatorStore = PagingSourceMediatorStore()
 
+    override suspend fun getAllUsers(sourcedId: String): List<Person> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun findByUsername(username: String): Person? {
         return local.findByUsername(username)
     }

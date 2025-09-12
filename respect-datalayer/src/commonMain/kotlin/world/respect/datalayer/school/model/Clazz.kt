@@ -11,7 +11,7 @@ import kotlin.time.Instant
 data class Clazz(
     val guid: String,
     val title: String,
-    val status: StatusEnum,
+    val status: StatusEnum = StatusEnum.ACTIVE,
     val description: String? = null,
     @Serializable(with = InstantISO8601Serializer::class)
     override val lastModified: Instant = Clock.System.now(),

@@ -42,6 +42,10 @@ class PersonDataSourceHttp(
             .build()
     }
 
+    override suspend fun getAllUsers(sourcedId: String): List<Person> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun findByUsername(username: String): Person? {
         TODO("Not yet implemented")
     }

@@ -1,6 +1,7 @@
 package world.respect.shared.domain.school
 
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.oneroster.model.OneRosterClass
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.model.Report
@@ -13,7 +14,11 @@ data class SchoolPrimaryKeyGenerator(
 ) {
     companion object {
 
-        val TABLE_IDS = listOf(Person.TABLE_ID, Report.TABLE_ID, Indicator.TABLE_ID)
-
+        val TABLE_IDS = listOf(
+            Person.TABLE_ID,
+            Report.TABLE_ID,
+            Indicator.TABLE_ID,
+            OneRosterClass.TABLE_ID
+        )
     }
 }

@@ -6,8 +6,12 @@
     <string name="app_link_provided_message">Copy/paste the RESPECT app link provided by the app developer</string>
     <string name="error_link_message">"ERROR: Invalid link. Please check the URL and try again."</string>
     <string name="link_label">Link*</string>
+    <string name="class_name_label">Class Name</string>
+    <string name="start_date_label">Start date</string>
+    <string name="end_date_label">End date</string>
     <string name="example_url_placeholder">e.g. https://</string>
     <string name="next">Next</string>
+    <string name="save">Save</string>
     <string name="done">Done</string>
     <string name="try_it">Try it</string>
     <string name="add_app">Add App</string>
@@ -15,7 +19,8 @@
     <string name="apps">Apps</string>
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
-    <string name="clazz">Classes</string>
+    <string name="classes">Classes</string>
+    <string name="clazz">Class</string>
     <string name="report">Report</string>
     <string name="reports">Reports</string>
     <string name="select_app">Select app</string>
@@ -39,7 +44,8 @@
     <string name="loading">Loading</string>
     <string name="close">Close</string>
     <string name="open">Open</string>
-
+    <string name="all">All</string>
+    <string name="active">Active</string>
     <string name="supported_by">Supported by:</string>
     <string name="network_powered_by">Network powered by:</string>
     <string name="enter_invite_code_message">Enter the code provided by your teacher or school admin</string>
@@ -75,8 +81,6 @@
     <string name="full_name_required">Full name is required</string>
     <string name="gender_required">Gender is required</string>
     <string name="dob_required">Date of birth is required</string>
-
-
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="username_required">Username is required</string>
@@ -87,7 +91,6 @@
     <string name="ok">Ok</string>
     <string name="other_options">Other options</string>
     <string name="something_went_wrong">Something went wrong.</string>
-
     <string name="waiting_title">Waiting for approval</string>
     <string name="please_wait">Please wait</string>
     <string name="waiting_for_approval_to_join">Waiting for approval to join %1$s</string>
@@ -96,18 +99,34 @@
     <string name="female">Female</string>
     <string name="other">Other</string>
     <string name="gender">Gender</string>
+    <string name="teachers">Teachers</string>
+    <string name="students">Students</string>
+    <string name="add_teacher">Add Teacher</string>">
+    <string name="add_student">Add Student</string>">
+    <string name="accept_invite">Accept Invite</string>">
+    <string name="dismiss_invite">Dismiss invite</string>
+    <string name="pending_invite">Pending invites</string>">
+    <string name="copy_invite_code">Copy invite code : </string>">
+    <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
+    <string name="share_qr_code">Share QR code</string>">
+    <string name="description">Description</string>">
     <string name="unspecified">Unspecified</string>
-
-
     <string name="phone_memory">Phone memory</string>
     <string name="memory_card">Memory card</string>
-
     <string name="select_picture_from_gallery">Select picture from gallery</string>
     <string name="select_picture_from_files">Select picture from files</string>
     <string name="take_new_photo_from_camera">Take new photo from camera</string>
     <string name="remove_picture">Remove picture</string>
-
     <string name="select_date">Select date</string>
+    <string name="first_name">First name</string>"
+    <string name="last_name">Last name</string>"
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="sort_by">Sort by</string>
+    <string name="edit">Edit</string>
+    <string name="edit_clazz">Edit class</string>
+    <string name="add_clazz">Add class</string>
+    <string name="required">* Required</string>
 
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>
@@ -182,7 +201,6 @@
     <string name="untitled_report">Untitled Report</string>
     <string name="select_template">Select template</string>
     <string name="indicator_name">Indicator Name</string>
-    <string name="description">Description</string>
     <string name="sql">SQL</string>
     <string name="edit_filters">Edit Filters</string>
     <string name="blank_template">Blank Template</string>>
@@ -316,12 +334,18 @@
     <string name="person">Person</string>
     <string name="back">Back</string>
 
+    <string name="expand_pending_invites">Expand Pending invites list</string>
+    <string name="collapse_pending_invites">Collapse pending invites list</string>
+
+    <string name="expand_teachers">Expand teachers list</string>
+    <string name="collapse_teachers">Collapse teachers list</string>
+
+    <string name="expand_students">Expand students list</string>
+    <string name="collapse_students">Collapse students list</string>
+
+
     <string name="add_person">Add person</string>
     <string name="edit_person">Edit person</string>
 
     <string name="first_names">First names</string>
-    <string name="last_name">Last name</string>
-
-    <string name="save">Save</string>
-    <string name="edit">Edit</string>
 </resources>

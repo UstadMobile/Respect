@@ -67,7 +67,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 )
 @TypeConverters(SharedConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)
-abstract class RespectAppDatabase: RoomDatabase() {
+abstract class RespectAppDatabase : RoomDatabase() {
 
     abstract fun getCompatibleAppEntityDao(): CompatibleAppEntityDao
 

@@ -7,6 +7,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.model.report.ReportFilter
@@ -52,7 +53,31 @@ object RespectAppLauncher : RespectAppRoute
 object Assignment : RespectAppRoute
 
 @Serializable
-object Clazz : RespectAppRoute
+object ClazzList : RespectAppRoute
+
+@Serializable
+class ClazzDetail(
+    val guid: String,
+) : RespectAppRoute
+
+@Serializable
+class AddPersonToClazz(
+    val roleType: OneRosterRoleEnum
+) : RespectAppRoute {
+    companion object {
+        fun create(
+            roleType: OneRosterRoleEnum
+        ) = AddPersonToClazz(
+            roleType = roleType
+        )
+    }
+}
+
+
+@Serializable
+data class ClazzEdit(
+    val guid: String?
+) : RespectAppRoute
 
 @Serializable
 object Report : RespectAppRoute
@@ -158,6 +183,7 @@ class LearningUnitList(
     }
 
 }
+
 @Serializable
 class EnterPasswordSignup private constructor(
     private val usernameStr: String,
@@ -252,8 +278,10 @@ class WaitingForApproval(
 
     @Transient
     val type = profileType
+
     @Transient
     val uid = pendingInviteStateUid
+
     @Transient
     val code = inviteCode
 
@@ -274,8 +302,10 @@ class SignupScreen(
 
     @Transient
     val type = profileType
+
     @Transient
     val uid = pendingInviteStateUid
+
     @Transient
     val code = inviteCode
 
@@ -381,7 +411,7 @@ class LearningUnitDetail(
 @Serializable
 class LearningUnitViewer(
     private val learningUnitIdStr: String,
-): RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val learningUnitId = Url(learningUnitIdStr)
@@ -397,17 +427,18 @@ class LearningUnitViewer(
 }
 
 @Serializable
-object AccountList: RespectAppRoute
+object AccountList : RespectAppRoute
+
 
 @Serializable
-object PersonList: RespectAppRoute
+object PersonList : RespectAppRoute
 
 @Serializable
 data class PersonDetail(
     val guid: String,
-): RespectAppRoute
+) : RespectAppRoute
 
 @Serializable
 data class PersonEdit(
     val guid: String?,
-): RespectAppRoute
+) : RespectAppRoute

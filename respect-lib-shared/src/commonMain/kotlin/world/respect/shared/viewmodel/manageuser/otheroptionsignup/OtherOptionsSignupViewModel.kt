@@ -81,27 +81,46 @@ class OtherOptionsSignupViewModel(
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
 
-                            val redeemRequest = respectRedeemInviteRequestUseCase(
-                                inviteInfo = inviteInfo,
-                                username = route.username,
-                                type = route.type,
-                                personInfo = route.personInfo,
-                                credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                    createPasskeyResult.authenticationResponseJSON
-                                )
-                            )
-
-                            val result = submitRedeemInviteRequestUseCase(redeemRequest)
                             when (route.type) {
-                                ProfileType.CHILD, ProfileType.STUDENT -> {
+                                ProfileType.CHILD ->{
+                                    //ignore not create account for child
+                                }
+                                ProfileType.STUDENT -> {
+                                    val redeemRequest = respectRedeemInviteRequestUseCase(
+                                        inviteInfo = inviteInfo,
+                                        username = route.username,
+                                        personInfo = route.personInfo,
+                                        parentOrGuardian = null,
+                                        credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                            createPasskeyResult.authenticationResponseJSON
+                                        )
+                                    )
+                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
                                     _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,result.guid))
+                                        NavCommand.Navigate(
+                                                destination = WaitingForApproval.create(
+                                                profileType =   route.type,
+                                                inviteCode = route.code,
+                                                pendingInviteStateUid = result?.guid ?: ""
+                                            )
+                                        )
                                     )
                                 }
 
                                 ProfileType.PARENT -> {
+
                                     _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.code))
+                                        NavCommand.Navigate(
+                                            SignupScreen.create(
+                                                profileType = ProfileType.CHILD,
+                                                inviteCode = route.code,
+                                                parentPersonInfoJson = route.personInfo,
+                                                parentUsername = route.username,
+                                                parentRedeemCredential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                                    createPasskeyResult.authenticationResponseJSON
+                                                )
+                                            )
+                                        )
                                     )
                                 }
                             }

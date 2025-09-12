@@ -11,8 +11,8 @@ class RespectRedeemInviteRequestUseCase {
     operator fun invoke(
         inviteInfo: RespectInviteInfo,
         username: String,
-        type: ProfileType,
         personInfo: RespectRedeemInviteRequest.PersonInfo,
+        parentOrGuardian: RespectRedeemInviteRequest.PersonInfo?,
         credential: RespectRedeemInviteRequest.RedeemInviteCredential
     ): RespectRedeemInviteRequest {
         val account = RespectRedeemInviteRequest.Account(
@@ -20,21 +20,12 @@ class RespectRedeemInviteRequestUseCase {
             credential = credential
         )
 
-        return when (type) {
-            ProfileType.STUDENT, ProfileType.CHILD -> RespectRedeemInviteRequest(
-                inviteInfo = inviteInfo,
-                student = personInfo,
-                parentOrGuardian = null,
-                parentOrGuardianRole = null,
-                account = account
-            )
-            ProfileType.PARENT -> RespectRedeemInviteRequest(
-                inviteInfo = inviteInfo,
-                student = RespectRedeemInviteRequest.PersonInfo(),
-                parentOrGuardian = personInfo,
-                parentOrGuardianRole = personInfo.gender?.toGuardianRole(),
-                account = account
-            )
-        }
+        return RespectRedeemInviteRequest(
+            inviteInfo = inviteInfo,
+            student =personInfo,
+            parentOrGuardian = parentOrGuardian,
+            parentOrGuardianRole = parentOrGuardian?.gender?.toGuardianRole(),
+            account = account
+        )
     }
 }

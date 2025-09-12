@@ -7,9 +7,8 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
-import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
@@ -296,7 +295,9 @@ class WaitingForApproval(
 class SignupScreen(
     private val profileType: ProfileType,
       private val inviteCode: String,
-    private val pendingInviteStateUid: String?,
+    private val username: String?,
+    private val parentPersonInfoJson: String?,
+    private val parentRedeemCredential: String?,
 
     ) : RespectAppRoute {
 
@@ -304,14 +305,35 @@ class SignupScreen(
     val type = profileType
 
     @Transient
-    val uid = pendingInviteStateUid
+    val parentOrGuardianPersonInfo: RespectRedeemInviteRequest.PersonInfo? =
+        if (parentPersonInfoJson!=null)
+            Json.decodeFromString(parentPersonInfoJson)
+        else null
+
+    @Transient
+    val parentOrGuardianRedeemCredential: RespectRedeemInviteRequest.RedeemInviteCredential? =
+        if (parentRedeemCredential!=null)
+            Json.decodeFromString(parentRedeemCredential)
+        else null
+
+    @Transient
+    val parentUsername = username
 
     @Transient
     val code = inviteCode
 
     companion object {
-        fun create(profileType: ProfileType, inviteCode: String,pendingInviteStateUid:String?=null): SignupScreen {
-            return SignupScreen(profileType, inviteCode,pendingInviteStateUid)
+        fun create(
+            profileType: ProfileType,
+            inviteCode: String,
+            parentUsername: String? = null,
+            parentPersonInfoJson: RespectRedeemInviteRequest.PersonInfo?=null,
+            parentRedeemCredential: RespectRedeemInviteRequest.RedeemInviteCredential?=null
+        ): SignupScreen {
+            val personInfoJson = Json.encodeToString(parentPersonInfoJson)
+            val parentRedeemCredential = Json.encodeToString(parentRedeemCredential)
+
+            return SignupScreen(profileType, inviteCode, parentUsername,personInfoJson,parentRedeemCredential)
         }
     }
 }

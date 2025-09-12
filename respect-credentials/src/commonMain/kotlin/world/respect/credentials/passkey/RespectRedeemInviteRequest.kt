@@ -3,7 +3,7 @@ package world.respect.credentials.passkey
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
+import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 
 @Serializable

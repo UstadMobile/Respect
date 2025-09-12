@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -42,6 +43,7 @@ data class CreateAccountViewModelUiState(
 
 class CreateAccountViewModel(
     savedStateHandle: SavedStateHandle,
+    private val verifyDomainUseCase: VerifyDomainUseCase,
     private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
@@ -65,8 +67,9 @@ class CreateAccountViewModel(
             }
             _uiState.update { prev ->
                 prev.copy(
-                    inviteInfo=inviteInfo,
-                    passkeySupported = createPasskeyUseCase != null && inviteInfo.school.rpId != null,
+                    inviteInfo = inviteInfo,
+                    passkeySupported = createPasskeyUseCase != null && inviteInfo.school.rpId != null
+                            && verifyDomainUseCase(inviteInfo.school.rpId ?: ""),
                     generalError = if (!(createPasskeyUseCase != null && inviteInfo.school.rpId != null))
                         StringResourceUiText(Res.string.passkey_not_supported)
                     else null
@@ -129,27 +132,41 @@ class CreateAccountViewModel(
                                 username = username,
                                 authenticationResponseJSON = createPasskeyResult.authenticationResponseJSON
                             )
-                            val redeemRequest = respectRedeemInviteRequestUseCase(
-                                inviteInfo = inviteInfo,
-                                username = username,
-                                type = route.type,
-                                personInfo = route.personInfo,
-                                credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                    createPasskeyResult.authenticationResponseJSON
-                                )
-                            )
-                            val result = submitRedeemInviteRequestUseCase(redeemRequest)
 
                             sendSignupCredential(signupCredential)
                             when (route.type) {
-                                ProfileType.CHILD , ProfileType.STUDENT->{
+                                ProfileType.CHILD ->{
+                                    //ignore not create account for child
+                                }
+                                ProfileType.STUDENT->{
+                                    val redeemRequest = respectRedeemInviteRequestUseCase(
+                                        inviteInfo = inviteInfo,
+                                        username = username,
+                                        personInfo = route.personInfo,
+                                        parentOrGuardian = null,
+                                        credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                            createPasskeyResult.authenticationResponseJSON
+                                        )
+                                    )
+                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
+
                                     _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,result.guid))
+                                        NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,result?.guid?:""))
                                     )
                                 }
                                 ProfileType.PARENT ->{
                                     _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.code))
+                                        NavCommand.Navigate(
+                                            SignupScreen.create(
+                                                profileType = ProfileType.CHILD,
+                                                inviteCode = route.code,
+                                                parentPersonInfoJson = route.personInfo,
+                                                parentUsername = username,
+                                                parentRedeemCredential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                                    createPasskeyResult.authenticationResponseJSON
+                                                )
+                                            )
+                                        )
                                     )
                                 }
                             }

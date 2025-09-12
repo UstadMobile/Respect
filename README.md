@@ -55,7 +55,7 @@ To see all available command line options (including database options etc):
 
 Note: in order for the search by school name to work you must add your server to the app directory
 list (default or local)
-(e.g. http://10.1.2.3:8098/ as above) in [directories](respect-lib-shared/src/commonMain/resources/directories/)
+(e.g. http://10.1.2.3:8098/ as above) in [directories](respect-lib-shared/src/androidMain/resources/directories)
 
 * __Step 6: Build/run and Android app__: In Android Studio use the run/debug button to run the 
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further

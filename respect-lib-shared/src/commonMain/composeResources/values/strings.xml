@@ -126,7 +126,6 @@
     <string name="edit">Edit</string>
     <string name="edit_clazz">Edit class</string>
     <string name="add_clazz">Add class</string>
-    <string name="required">* Required</string>
 
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>

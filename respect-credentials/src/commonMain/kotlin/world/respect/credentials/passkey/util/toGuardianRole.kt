@@ -1,7 +1,7 @@
 package world.respect.credentials.passkey.util
 
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
+import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 
 fun OneRosterGenderEnum.toGuardianRole(): RespectRedeemInviteRequest.GuardianRole =
     when (this) {

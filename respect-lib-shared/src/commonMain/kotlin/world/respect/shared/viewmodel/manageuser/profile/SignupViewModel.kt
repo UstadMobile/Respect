@@ -10,9 +10,10 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.getString
 import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.generated.resources.*
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -43,6 +44,10 @@ data class SignupUiState(
 
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
+    private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
+    private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
+    private val inviteInfoUseCase: GetInviteInfoUseCase
+
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: SignupScreen = savedStateHandle.toRoute()
@@ -156,10 +161,34 @@ class SignupViewModel(
                                 NavCommand.Navigate(CreateAccount.create(route.type,route.code,personInfo))
                             )
                     }
-                    ProfileType.CHILD ->{
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,route.uid?:""))
+                    ProfileType.CHILD -> {
+                        val inviteInfo = inviteInfoUseCase(route.code)
+
+                        val parentOrGuardianRedeemCredential =
+                            route.parentOrGuardianRedeemCredential
+
+                        if (personInfo == null) return@launch
+                        if (parentOrGuardianRedeemCredential == null) return@launch
+
+                        val redeemRequest = respectRedeemInviteRequestUseCase(
+                            inviteInfo = inviteInfo,
+                            username = route.parentUsername?:"",
+                            personInfo = personInfo,
+                            parentOrGuardian = route.parentOrGuardianPersonInfo,
+                            credential = parentOrGuardianRedeemCredential
+
+                        )
+
+                        val result = submitRedeemInviteRequestUseCase(redeemRequest)
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                WaitingForApproval.create(
+                                    route.type,
+                                    route.code,
+                                    result?.guid ?: ""
+                                )
                             )
+                        )
                     }
                 }
             }

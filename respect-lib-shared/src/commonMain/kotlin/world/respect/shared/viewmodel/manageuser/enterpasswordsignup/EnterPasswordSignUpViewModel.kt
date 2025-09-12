@@ -83,27 +83,47 @@ class EnterPasswordSignupViewModel(
             )
             signupUseCase(signupCredential)
             val inviteInfo = inviteInfoUseCase(route.code)
-            val redeemRequest = respectRedeemInviteRequestUseCase(
-                inviteInfo = inviteInfo,
-                username = route.username,
-                type = route.type,
-                personInfo = route.personInfo,
-                credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
-                    password
-                )
-            )
-            //need to be implement
-            val result = submitRedeemInviteRequestUseCase(redeemRequest)
+
             when (route.type) {
-                ProfileType.CHILD , ProfileType.STUDENT->{
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,result.guid))
+                 ProfileType.CHILD ->{
+                     //ignore not create account for child
+                 }
+                 ProfileType.STUDENT -> {
+                    val redeemRequest = respectRedeemInviteRequestUseCase(
+                        inviteInfo = inviteInfo,
+                        username = route.username,
+                        personInfo = route.personInfo,
+                        parentOrGuardian = null,
+                        credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
+                            password
                         )
+                    )
+                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                             WaitingForApproval.create(
+                                profileType =   route.type,
+                                inviteCode = route.code,
+                                pendingInviteStateUid = result?.guid ?: ""
+                            )
+                        )
+                    )
                 }
-                ProfileType.PARENT ->{
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.code))
+
+                ProfileType.PARENT -> {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                               SignupScreen.create(
+                                profileType = ProfileType.CHILD,
+                                inviteCode = route.code,
+                                parentPersonInfoJson = route.personInfo,
+                                parentUsername = route.username,
+                                parentRedeemCredential =  RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
+                                    password
+                                )
+                            )
                         )
+                    )
                 }
             }
 

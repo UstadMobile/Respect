@@ -26,7 +26,9 @@ class SchoolDirectoryDataSourceRepository(
         return local.allSchoolsInDirectory()
     }
 
-    override suspend fun searchSchools(text: String): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
+    override suspend fun searchSchools(
+        text: String
+    ): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
         val remoteFlow = remote.searchSchools(text).onEach { state ->
             if (state is DataReadyState) {
                 state.data.forEach { school ->

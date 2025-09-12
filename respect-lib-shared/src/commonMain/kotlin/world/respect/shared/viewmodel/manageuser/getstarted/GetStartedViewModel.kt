@@ -13,12 +13,11 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
-import world.respect.shared.generated.resources.school_not_exist_error
+import world.respect.shared.generated.resources.school_not_found
 import world.respect.shared.navigation.JoinClazzWithCode
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
-import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.exception.getUiText
@@ -67,7 +66,7 @@ class GetStartedViewModel(
                                 it.copy(
                                     suggestions = state.data,
                                     errorMessage = if (state.data.isEmpty()) {
-                                        StringResourceUiText(Res.string.school_not_exist_error)
+                                        Res.string.school_not_found.asUiText()
                                     } else null,
                                     showButtons = state.data.isEmpty()
                                 )
@@ -86,8 +85,8 @@ class GetStartedViewModel(
                             _uiState.update {
                                 it.copy(
                                     suggestions = emptyList(),
-                                    errorMessage = StringResourceUiText(Res.string.school_not_exist_error),
-                                    showButtons = true
+                                    errorMessage = Res.string.school_not_found.asUiText(),
+                                    showButtons = true,
                                 )
                             }
                         }

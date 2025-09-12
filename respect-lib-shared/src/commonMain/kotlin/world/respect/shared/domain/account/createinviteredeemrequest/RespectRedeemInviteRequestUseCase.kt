@@ -2,32 +2,29 @@ package world.respect.shared.domain.account.createinviteredeemrequest
 
 import kotlinx.datetime.LocalDate
 import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.util.toGuardianRole
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
+import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 class RespectRedeemInviteRequestUseCase {
-
     operator fun invoke(
-         inviteInfo : RespectInviteInfo,
-         username : String
+        inviteInfo: RespectInviteInfo,
+        username: String,
+        personInfo: RespectRedeemInviteRequest.PersonInfo,
+        parentOrGuardian: RespectRedeemInviteRequest.PersonInfo?,
+        credential: RespectRedeemInviteRequest.RedeemInviteCredential
     ): RespectRedeemInviteRequest {
         val account = RespectRedeemInviteRequest.Account(
             username = username,
-            credential = "dummyCredential"
+            credential = credential
         )
+
         return RespectRedeemInviteRequest(
             inviteInfo = inviteInfo,
-            student = RespectRedeemInviteRequest.PersonInfo(
-                name = "Student Name",
-                gender = OneRosterGenderEnum.MALE,
-                dateOfBirth = LocalDate.parse("2010-01-01")
-            ),
-            parentOrGuardian = RespectRedeemInviteRequest.PersonInfo(
-                name = "Parent Name",
-                gender = OneRosterGenderEnum.FEMALE,
-                dateOfBirth = LocalDate.parse("1980-05-05")
-            ),
-            parentOrGuardianRole = RespectRedeemInviteRequest.GuardianRole.MOTHER,
+            student =personInfo,
+            parentOrGuardian = parentOrGuardian,
+            parentOrGuardianRole = parentOrGuardian?.gender?.toGuardianRole(),
             account = account
         )
     }

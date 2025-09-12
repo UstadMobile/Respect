@@ -2,11 +2,15 @@ package world.respect.credentials.passkey.request
 
 import io.ktor.http.Url
 import io.ktor.util.encodeBase64
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import world.respect.credentials.passkey.model.AuthenticatorSelectionCriteria
 import world.respect.credentials.passkey.model.PublicKeyCredentialCreationOptionsJSON
 import world.respect.credentials.passkey.model.PublicKeyCredentialParameters
 import world.respect.credentials.passkey.model.PublicKeyCredentialRpEntity
 import world.respect.credentials.passkey.model.PublicKeyCredentialUserEntityJSON
+import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.randomString
 
 /**
@@ -22,25 +26,24 @@ import world.respect.libutil.ext.randomString
  * UID and Learning Space URL - see EncodeUserHandleUseCase
  */
 class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
-    private val rpId:Url,
-    private val encodeUserHandleUseCase : EncodeUserHandleUseCase,
+    private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
+    private val appName: StringResource,
+    private val primaryKeyGenerator: PrimaryKeyGenerator
 ) {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         username: String,
-        appName: String
+        rpId: String,
     ): PublicKeyCredentialCreationOptionsJSON {
         val challenge = randomString(16) //TODO note: this should really take place on the server side
 
-        //will change this with actual uid of person who is going to
-        // signup when doing implementation with server
-        val personPasskeyUid = 2745456645645645654
+        val personPasskeyUid = primaryKeyGenerator.nextId(PersonPasskeyEntity.TABLE_ID)
         val encodeUserHandle = encodeUserHandleUseCase(personPasskeyUid)
 
         return PublicKeyCredentialCreationOptionsJSON(
             rp = PublicKeyCredentialRpEntity(
-                id = rpId.host,
-                name = appName,
+                id = rpId,
+                name = getString(appName),
                 icon = null,
             ),
             user = PublicKeyCredentialUserEntityJSON(

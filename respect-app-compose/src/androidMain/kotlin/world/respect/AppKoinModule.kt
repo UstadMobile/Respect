@@ -19,8 +19,8 @@ import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -28,45 +28,81 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import passkey.EncodeUserHandleUseCaseImpl
+import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCaseImpl
-import passkey.EncodeUserHandleUseCaseImpl
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.GetCredentialUseCaseImpl
+import world.respect.credentials.passkey.VerifyDomainUseCase
+import world.respect.credentials.passkey.VerifyDomainUseCaseImpl
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import world.respect.credentials.passkey.request.EncodeUserHandleUseCase
+import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
+import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
+import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.libutil.ext.sanitizedForFilename
+import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
+import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
-import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
-import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
-import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
-import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
-import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
+import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
+import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
+import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
+import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
 import world.respect.shared.domain.storage.GetOfflineStorageSettingUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.app_name
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.NavResultReturnerImpl
+import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignments.AssignmentViewModel
+import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
+import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
+import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -79,43 +115,10 @@ import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
-import java.io.File
-import kotlinx.io.files.Path
-import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
-import org.koin.core.scope.Scope
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.shared.domain.account.RespectAccount
-import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.db.SchoolDataSourceDb
-import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
-import world.respect.datalayer.http.SchoolDataSourceHttp
-import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.SchoolDataSourceRepository
-import world.respect.libutil.ext.sanitizedForFilename
-import world.respect.libxxhash.XXHasher64Factory
-import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient
-import world.respect.shared.domain.account.RespectTokenManager
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
-import world.respect.shared.domain.school.RespectSchoolPath
-import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.NavResultReturnerImpl
-import world.respect.shared.util.di.RespectAccountScopeId
-import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
-import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import org.koin.core.qualifier.named
-import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
-import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
@@ -124,6 +127,7 @@ import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewMode
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
+import java.io.File
 
 
 @Suppress("unused")
@@ -312,17 +316,16 @@ val appKoinModule = module {
 
     single {
         CreatePublicKeyCredentialCreationOptionsJsonUseCase(
-            rpId = Url("https://testproxy.devserver3.ustadmobile.com/"),
-            encodeUserHandleUseCase = get()
-        )
+            encodeUserHandleUseCase = get(),
+            appName = Res.string.app_name,
+            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
+            )
     }
     single {
         RespectRedeemInviteRequestUseCase()
     }
     single {
-        CreatePublicKeyCredentialRequestOptionsJsonUseCase(
-            url = Url("https://testproxy.devserver3.ustadmobile.com/")
-        )
+        CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }
 
     single<CreatePasskeyUseCase> {
@@ -340,6 +343,11 @@ val appKoinModule = module {
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )
     }
+    single<VerifyDomainUseCase> {
+        VerifyDomainUseCaseImpl(
+            context = androidContext().applicationContext
+        )
+    }
 
     //Uncomment to switch to using real datasource
     single<GetInviteInfoUseCase> {
@@ -348,12 +356,19 @@ val appKoinModule = module {
     single<SubmitRedeemInviteRequestUseCase> {
         MockSubmitRedeemInviteRequestUseCase()
     }
+    single<SchoolDirectoryDataSourceLocal> {
+        SchoolDirectoryDataSourceDb(
+            respectAppDb = get(),
+            json = get(),
+            xxStringHasher = get()
+        )
+    }
 
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
             appContext, appContext.getDatabasePath("respectapp.db").absolutePath
-        ).setDriver(BundledSQLiteDriver())
+        ).setDriver(BundledSQLiteDriver()).addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .build()
     }
 
@@ -366,6 +381,12 @@ val appKoinModule = module {
                 primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
             ),
             remote = RespectAppDataSourceHttp(
+                local = RespectAppDataSourceDb(
+                    respectAppDatabase = get(),
+                    json = get(),
+                    xxStringHasher = get(),
+                    primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
+                ),
                 httpClient = get(),
                 defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
             )

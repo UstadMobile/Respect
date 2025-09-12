@@ -8,7 +8,7 @@ import world.respect.datalayer.opds.model.LangMapStringValue
 
 class MockGetInviteInfoUseCase : GetInviteInfoUseCase {
     override suspend fun invoke(code: String): RespectInviteInfo {
-        return RespectInviteInfo(
+        return RespectInviteInfo( 
             code = code,
             school = SchoolDirectoryEntry(
                 name = LangMapStringValue("School"),
@@ -16,6 +16,7 @@ class MockGetInviteInfoUseCase : GetInviteInfoUseCase {
                 xapi = Url("https://example.org/xapi"),
                 oneRoster = Url("https://example.org/oneroster"),
                 respectExt = Url("https://example.org/respect-ext"),
+                rpId = "ustadtesting.ustadmobile.com",
             ),
             classGuid = "mock-class-123",
             className = "Grade-4",

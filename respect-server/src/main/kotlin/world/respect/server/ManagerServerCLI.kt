@@ -62,6 +62,7 @@ fun managerServerMain(ns: Namespace) {
         when(ns.getString("subparser_name")) {
             CMD_ADD_SCHOOL -> {
                 val schoolBaseUrl = Url(ns.getString("url"))
+                val rpId = ns.getString("rpId") ?: schoolBaseUrl.host
 
                 val response = httpClient.post(
                     serverUrl.appendEndpointSegments("api/directory/school")
@@ -77,7 +78,8 @@ fun managerServerMain(ns: Namespace) {
                                     xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
                                     oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
-                                ),
+                                    rpId = rpId,
+                                    ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,
                                 adminPassword = ns.getString("adminpassword"),

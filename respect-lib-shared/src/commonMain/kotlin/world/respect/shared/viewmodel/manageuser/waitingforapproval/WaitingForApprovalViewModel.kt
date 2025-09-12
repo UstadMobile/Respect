@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.waiting_title
 import world.respect.shared.navigation.WaitingForApproval
@@ -21,7 +22,8 @@ data class WaitingForApprovalUiState(
 )
 
 class WaitingForApprovalViewModel(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    inviteInfoUseCase: GetInviteInfoUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(WaitingForApprovalUiState())
@@ -30,6 +32,8 @@ class WaitingForApprovalViewModel(
 
     init {
         viewModelScope.launch {
+            val inviteInfo = inviteInfoUseCase(route.code)
+
             _appUiState.update {
                 it.copy(
                     title = Res.string.waiting_title.asUiText(),
@@ -38,7 +42,7 @@ class WaitingForApprovalViewModel(
                 )
             }
 
-            _uiState.update { it.copy(className = route.inviteInfo.className?:"") }
+            _uiState.update { it.copy(className = inviteInfo.className?:"") }
         }
     }
 

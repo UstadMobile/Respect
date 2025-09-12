@@ -2,6 +2,7 @@ package world.respect.datalayer
 
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
+import kotlinx.serialization.Serializable
 
 /**
  * Combined metadata (e.g. data about data) on loaded data. This includes the loading status and
@@ -30,6 +31,7 @@ import io.ktor.http.Url
  * @param varyHeader where this is from a remote server that provides an HTTP vary header, this is
  *        the value of the vary header (such that a varyHash can be calculated for subsequent requests).
  */
+@Serializable
 data class DataLoadMetaInfo(
 
     val lastModified: Long = -1,

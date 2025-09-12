@@ -1,5 +1,7 @@
 package world.respect.datalayer
 
+import kotlinx.serialization.Serializable
+
 /**
  * Wrapper interface for the state of data being loaded. Allows a data layer flow to contain
  * both the data and the loading state.
@@ -13,6 +15,8 @@ package world.respect.datalayer
  *           displayed e.g. a list screen will show only basic details, but when the list is
  *           loaded over the network, the full entity will be fetched.
  */
+
+@Serializable
 sealed interface DataLoadState<T: Any> {
     val metaInfo: DataLoadMetaInfo
     val localState: DataLoadState<T>?
@@ -22,6 +26,7 @@ sealed interface DataLoadState<T: Any> {
 /**
  * Data loading is in progress
  */
+@Serializable
 data class DataLoadingState<T: Any>(
     override val metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
     override val localState: DataLoadState<T>? = null,
@@ -32,6 +37,7 @@ data class DataLoadingState<T: Any>(
  * Data has not been loaded and this is not an error - e.g. when a remote datasource returns 304
  * not modified, no content, or when the local datasource is empty.
  */
+@Serializable
 data class NoDataLoadedState<T: Any>(
     val reason: Reason,
     override val metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
@@ -63,6 +69,7 @@ data class NoDataLoadedState<T: Any>(
  * Data is loaded and ready. If loaded from a repository, it may be that the local data is ready
  * for display and the remote data is still being loaded.
  */
+@Serializable
 data class DataReadyState<T: Any>(
     val data: T,
     override val metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),

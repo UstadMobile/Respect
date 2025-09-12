@@ -30,13 +30,13 @@ class CreatePasskeyUseCaseImpl(
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(username: String, appName : String): CreatePasskeyUseCase.CreatePasskeyResult {
+    override suspend fun invoke(username: String,rpId:String): CreatePasskeyUseCase.CreatePasskeyResult {
         val credentialManager = CredentialManager.create(context)
 
         return try {
             val request = CreatePublicKeyCredentialRequest(
                 requestJson = json.encodeToString(
-                    createPublicKeyJsonUseCase(username,appName)
+                    createPublicKeyJsonUseCase(username,rpId)
                 ),
                 preferImmediatelyAvailableCredentials = false,
             )

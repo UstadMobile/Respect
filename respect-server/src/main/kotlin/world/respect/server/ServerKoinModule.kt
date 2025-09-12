@@ -13,10 +13,11 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
-import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
@@ -26,10 +27,12 @@ import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -63,7 +66,13 @@ fun serverKoinModule(
     single<PrimaryKeyGenerator> {
         PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
     }
-
+    single<SchoolDirectoryDataSourceLocal> {
+        SchoolDirectoryDataSourceDb(
+            respectAppDb = get(),
+            json = get(),
+            xxStringHasher = get()
+        )
+    }
     single<RespectAppDataSource> {
         RespectAppDataSourceDb(
             respectAppDatabase = get(),
@@ -72,7 +81,10 @@ fun serverKoinModule(
             primaryKeyGenerator = get(),
         )
     }
-
+    single<GetInviteInfoUseCase> {
+        MockGetInviteInfoUseCase(
+        )
+    }
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource as SchoolDirectoryDataSourceLocal

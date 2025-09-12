@@ -25,5 +25,17 @@ fun ClassEntities.toModel(): Clazz {
 fun Clazz.toEntities(
     hasher: XXStringHasher,
 ): ClassEntities {
-    TODO()
+    return ClassEntities(
+        clazz = ClassEntity(
+            cGuid = guid,
+            cGuidHash = hasher.hash(guid),
+            cTitle = title,
+            cStatus = status,
+            cDescription = description,
+            cLastModified = lastModified,
+            cStored = stored,
+            cStudentInviteCode = studentInviteCode,
+            cTeacherInviteCode = teacherInviteCode,
+        )
+    )
 }

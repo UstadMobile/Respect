@@ -82,6 +82,7 @@ class ClazzEditViewModel(
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),
+                hideBottomNavigation = true,
             )
         }
 
@@ -151,7 +152,7 @@ class ClazzEditViewModel(
                 }
             } catch (e: Throwable) {
                 //needs to display snack bar here
-
+                e.printStackTrace()
             }
         }
     }

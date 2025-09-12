@@ -7,7 +7,6 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.http.school.PersonDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.IndicatorDataSource
-import world.respect.datalayer.oneroster.OneRosterDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -30,8 +29,6 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
-    override val onRoasterDataSource: OneRosterDataSource
-        get() = TODO("Not yet implemented")
 
     override val reportDataSource: ReportDataSource
         get() = TODO("Not yet implemented")

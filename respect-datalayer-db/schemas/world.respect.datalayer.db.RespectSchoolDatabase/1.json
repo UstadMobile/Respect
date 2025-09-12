@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "50128bd59e9432a3227fd1742eed1e47",
+    "identityHash": "f373ca458fdd6b9e0952b5370e7bca89",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -222,190 +222,6 @@
         }
       },
       {
-        "tableName": "OneRosterClassEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`classSourcedId` TEXT NOT NULL, `classStatus` TEXT NOT NULL, `classDateLastModified` INTEGER NOT NULL, `classTitle` TEXT NOT NULL, `classLocation` TEXT, `classMetadata` TEXT, PRIMARY KEY(`classSourcedId`))",
-        "fields": [
-          {
-            "fieldPath": "classSourcedId",
-            "columnName": "classSourcedId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "classStatus",
-            "columnName": "classStatus",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "classDateLastModified",
-            "columnName": "classDateLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "classTitle",
-            "columnName": "classTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "classLocation",
-            "columnName": "classLocation",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "classMetadata",
-            "columnName": "classMetadata",
-            "affinity": "TEXT"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "classSourcedId"
-          ]
-        }
-      },
-      {
-        "tableName": "OneRosterUserEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userSourcedId` TEXT NOT NULL, `userStatus` TEXT NOT NULL, `userDateLastModified` INTEGER NOT NULL, `userMetadata` TEXT, `userMasterIdentifier` TEXT, `username` TEXT, `userIds` TEXT, `enabledUser` INTEGER NOT NULL, `givenName` TEXT NOT NULL, `familyName` TEXT NOT NULL, `middleName` TEXT, `preferredFirstName` TEXT, `preferredMiddleName` TEXT, `preferredLastName` TEXT, `pronouns` TEXT, `roles` TEXT, `userProfiles` TEXT, `identifier` TEXT, `email` TEXT, `sms` TEXT, `phone` TEXT, `grades` TEXT, `password` TEXT, `resources` TEXT, PRIMARY KEY(`userSourcedId`))",
-        "fields": [
-          {
-            "fieldPath": "userSourcedId",
-            "columnName": "userSourcedId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "userStatus",
-            "columnName": "userStatus",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "userDateLastModified",
-            "columnName": "userDateLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "userMetadata",
-            "columnName": "userMetadata",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "userMasterIdentifier",
-            "columnName": "userMasterIdentifier",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "username",
-            "columnName": "username",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "userIds",
-            "columnName": "userIds",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "enabledUser",
-            "columnName": "enabledUser",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "givenName",
-            "columnName": "givenName",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "familyName",
-            "columnName": "familyName",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "middleName",
-            "columnName": "middleName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "preferredFirstName",
-            "columnName": "preferredFirstName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "preferredMiddleName",
-            "columnName": "preferredMiddleName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "preferredLastName",
-            "columnName": "preferredLastName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "pronouns",
-            "columnName": "pronouns",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "roles",
-            "columnName": "roles",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "userProfiles",
-            "columnName": "userProfiles",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "identifier",
-            "columnName": "identifier",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "email",
-            "columnName": "email",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "sms",
-            "columnName": "sms",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "phone",
-            "columnName": "phone",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "grades",
-            "columnName": "grades",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "password",
-            "columnName": "password",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "resources",
-            "columnName": "resources",
-            "affinity": "TEXT"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "userSourcedId"
-          ]
-        }
-      },
-      {
         "tableName": "ReportEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuid`))",
         "fields": [
@@ -573,7 +389,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '50128bd59e9432a3227fd1742eed1e47')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f373ca458fdd6b9e0952b5370e7bca89')"
     ]
   }
 }

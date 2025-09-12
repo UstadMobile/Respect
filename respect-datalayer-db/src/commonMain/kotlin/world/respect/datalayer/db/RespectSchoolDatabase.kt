@@ -5,9 +5,6 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
-import world.respect.datalayer.db.oneroaster.dao.OneRoasterEntityDao
-import world.respect.datalayer.db.oneroaster.entities.OneRosterUserEntity
-import world.respect.datalayer.db.oneroster.entities.OneRosterClassEntity
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao
 import world.respect.datalayer.db.school.daos.PersonEntityDao
@@ -35,8 +32,6 @@ import world.respect.datalayer.db.school.entities.ReportEntity
         PersonRoleEntity::class,
         PersonPasswordEntity::class,
         AuthTokenEntity::class,
-        OneRosterClassEntity::class,
-        OneRosterUserEntity::class,
         ReportEntity::class,
         IndicatorEntity::class,
         ClassEntity::class,
@@ -56,8 +51,6 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getPersonRoleEntityDao(): PersonRoleEntityDao
 
-    abstract fun getOneRoasterEntityDao(): OneRoasterEntityDao
-
     abstract fun getReportEntityDao(): ReportEntityDao
 
     abstract fun getIndicatorEntityDao(): IndicatorEntityDao
@@ -68,7 +61,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
-    "KotlinNoActualForExpect"
+    "KotlinNoActualForExpect", "RedundantSuppression"
 )
 expect object RespectSchoolDatabaseConstructor : RoomDatabaseConstructor<RespectSchoolDatabase> {
     override fun initialize(): RespectSchoolDatabase

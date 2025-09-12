@@ -2,11 +2,9 @@ package world.respect.datalayer.db
 
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
-import world.respect.datalayer.db.oneroaster.OneRosterDataSourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.IndicatorDataSourceDb
 import world.respect.datalayer.db.school.PersonDataSourceDb
-import world.respect.datalayer.oneroster.OneRosterDataSourceLocal
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSource
@@ -31,9 +29,6 @@ class SchoolDataSourceDb(
 
     override val personDataSource: PersonDataSourceLocal by lazy {
         PersonDataSourceDb(schoolDb, xxStringHasher, authenticatedUser)
-    }
-    override val onRoasterDataSource: OneRosterDataSourceLocal by lazy {
-        OneRosterDataSourceDb(schoolDb, xxStringHasher)
     }
     override val reportDataSource: ReportDataSourceLocal by lazy {
         ReportDataSourceDb(schoolDb)

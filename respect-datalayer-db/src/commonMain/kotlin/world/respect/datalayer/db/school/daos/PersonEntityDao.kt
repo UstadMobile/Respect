@@ -81,11 +81,13 @@ interface PersonEntityDao {
          FROM PersonEntity
         WHERE PersonEntity.pStored > :since 
           AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
+          AND (:inClazzGuidHash = 0)
      ORDER BY PersonEntity.pGivenName
     """)
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""

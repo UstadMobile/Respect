@@ -103,6 +103,12 @@ class PersonDataSourceDb(
         upsertPersons(list, forceOverwrite)
     }
 
+    override suspend fun findByUidList(uids: List<String>): List<Person> {
+        return schoolDb.getPersonEntityDao().findByUidList(
+            uids.map { uidNumberMapper(it) }
+        ).map { it.toPersonEntities().toModel() }
+    }
+
     override fun listAsFlow(
         loadParams: DataLoadParams,
         searchQuery: String?

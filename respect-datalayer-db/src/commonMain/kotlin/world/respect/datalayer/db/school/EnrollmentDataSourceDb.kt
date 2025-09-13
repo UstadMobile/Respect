@@ -97,4 +97,8 @@ class EnrollmentDataSourceDb(
     ) {
         upsertEnrollments(list, false)
     }
+
+    override suspend fun findByUidList(uids: List<String>): List<Enrollment> {
+        TODO("Not yet implemented")
+    }
 }

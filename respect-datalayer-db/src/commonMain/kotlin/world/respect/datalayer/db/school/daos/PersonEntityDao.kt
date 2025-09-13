@@ -77,6 +77,15 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
+        SELECT PersonEntity.*
+          FROM PersonEntity
+         WHERE PersonEntity.pGuidHash IN (:uidNums) 
+    """)
+    suspend fun findByUidList(uidNums: List<Long>): List<PersonEntityWithRoles>
+
+
+    @Transaction
+    @Query("""
         SELECT * 
          FROM PersonEntity
         WHERE PersonEntity.pStored > :since 

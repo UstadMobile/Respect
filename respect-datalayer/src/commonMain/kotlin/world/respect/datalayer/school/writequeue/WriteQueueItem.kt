@@ -4,13 +4,14 @@ package world.respect.datalayer.school.writequeue
  * Represents an item in the write queue. The repository adds items into the the write queue
  * which are then drained by its send job.
  *
+ * @property model the model that is to be sent.
+ * @property uid the uid of the item that needs to be written to the remote datasource.
  * @property timeWritten the time written to the remote datasource. If 0, then still pending
  */
 class WriteQueueItem(
     val queueItemId: Int = 0,
     val model: Model,
-    val modelUidNum1: Long,
-    val modelUidNum2: Long = 0,
+    val uid: String,
     val timestamp: Long = 0,
     val attemptCount: Int = 0,
     val timeWritten: Long = 0,

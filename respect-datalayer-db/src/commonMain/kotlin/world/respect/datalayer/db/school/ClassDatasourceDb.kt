@@ -90,4 +90,8 @@ class ClassDatasourceDb(
     ) {
         upsertClasses(list, false)
     }
+
+    override suspend fun findByUidList(uids: List<String>): List<Clazz> {
+        TODO("Not yet implemented")
+    }
 }

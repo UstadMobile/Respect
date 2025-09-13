@@ -7,6 +7,10 @@ package world.respect.datalayer.school.writequeue
  *
  * The write queue is drained by a job (e.g. running through WorkManager on Android) that will send
  * write items to the network datasource when a connection is available and resolves any conflicts.
+ *
+ * The RemoteWriteQueue, like the SchoolDataSource, is tied to a specific authenticated user. There
+ * is no RemoteWriteQueue for SchoolDirectoryDataSource or other app level data sources (e.g. OPDS,
+ * App Manifests, etc) because that data is read-only for the RESPECT app.
  */
 interface RemoteWriteQueue {
 

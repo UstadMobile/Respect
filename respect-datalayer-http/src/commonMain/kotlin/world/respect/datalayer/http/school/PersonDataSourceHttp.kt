@@ -2,9 +2,13 @@ package world.respect.datalayer.http.school
 
 import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,6 +19,7 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
+import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.http.ext.appendListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
@@ -142,6 +147,13 @@ class PersonDataSourceHttp(
     }
 
     override suspend fun store(persons: List<Person>) {
-        throw IllegalStateException("Person-store-http: Not yet supported")
+        httpClient.post(
+            URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
+                .build()
+        ) {
+            useTokenProvider(tokenProvider)
+            contentType(ContentType.Application.Json)
+            setBody(persons)
+        }
     }
 }

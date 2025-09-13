@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3c5085fce6ee928e0b504a2663311b0a",
+    "identityHash": "6dccfd1c4c21deb9aff467b229f1d171",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -458,7 +458,7 @@
       },
       {
         "tableName": "WriteQueueItemEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiModelUidNum1` INTEGER NOT NULL, `wqiModelUidNum2` INTEGER NOT NULL, `wqiTimestamp` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimestamp` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "wqiQueueItemId",
@@ -473,15 +473,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "wqiModelUidNum1",
-            "columnName": "wqiModelUidNum1",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "wqiModelUidNum2",
-            "columnName": "wqiModelUidNum2",
-            "affinity": "INTEGER",
+            "fieldPath": "wqiUid",
+            "columnName": "wqiUid",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -519,7 +513,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3c5085fce6ee928e0b504a2663311b0a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6dccfd1c4c21deb9aff467b229f1d171')"
     ]
   }
 }

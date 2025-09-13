@@ -6,6 +6,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.HttpHeaders
 import io.ktor.http.toHttpDate
 import io.ktor.util.date.GMTDate
+import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 
 /**
@@ -32,4 +33,10 @@ suspend fun HttpRequestBuilder.addCacheValidationHeaders(
         headers[HttpHeaders.IfNoneMatch] = etag
     }
 
+}
+
+fun HttpRequestBuilder.useTokenProvider(
+    tokenProvider: AuthTokenProvider
+) {
+    headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
 }

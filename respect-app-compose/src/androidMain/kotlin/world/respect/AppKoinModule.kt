@@ -113,6 +113,10 @@ import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import org.koin.core.qualifier.named
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
+import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -142,6 +146,10 @@ val appKoinModule = module {
 
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
+    }
+
+    single<UidNumberMapper> {
+        XXHashUidNumberMapper(xxStringHasher = get())
     }
 
     single<OkHttpClient> {
@@ -441,13 +449,23 @@ val appKoinModule = module {
             get<RespectTokenManager>().providerFor(id)
         }
 
+
+        scoped<RemoteWriteQueue> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            RemoteWriteQueueDbImpl(
+                schoolDb = get(),
+                account = AuthenticatedUserPrincipalId(accountScopeId.accountPrincipalId.guid),
+            )
+        }
+
         scoped<SchoolDataSource> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             SchoolDataSourceRepository(
                 local = SchoolDataSourceDb(
                     schoolDb = get(),
-                    xxStringHasher = get(),
+                    uidNumberMapper = get(),
                     authenticatedUser = AuthenticatedUserPrincipalId(
                         accountScopeId.accountPrincipalId.guid
                     )
@@ -460,6 +478,8 @@ val appKoinModule = module {
                     validationHelper = get(),
                 ),
                 validationHelper = get(),
+                remoteWriteQueue = get(),
+                uidNumberMapper = get(),
             )
         }
     }

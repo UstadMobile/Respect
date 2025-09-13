@@ -1,11 +1,11 @@
 package world.respect.datalayer.db.school.adapters
 
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
-import world.respect.libxxhash.XXStringHasher
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -43,11 +43,10 @@ fun PersonEntities.toModel(): Person {
     )
 }
 
-@OptIn(ExperimentalTime::class)
 fun Person.toEntities(
-    xxStringHasher: XXStringHasher
+    uidNumberMapper: UidNumberMapper
 ): PersonEntities {
-    val pGuidHash = xxStringHasher.hash(guid)
+    val pGuidHash = uidNumberMapper(guid)
     return PersonEntities(
         personEntity = PersonEntity(
             pGuid = guid,

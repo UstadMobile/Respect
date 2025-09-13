@@ -11,6 +11,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.PersonEntities
 import world.respect.datalayer.db.school.adapters.toEntities
@@ -24,24 +25,15 @@ import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
-import world.respect.libxxhash.XXStringHasher
 import kotlin.time.Clock
 import kotlin.time.Instant
 
 class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
-    private val xxHash: XXStringHasher,
+    private val uidNumberMapper: UidNumberMapper,
     @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ): PersonDataSourceLocal {
-
-    override suspend fun getAllUsers(sourcedId: String): List<Person> {
-
-        return schoolDb.getPersonEntityDao().getAllUsers(sourcedId).map {
-            PersonEntities(it).toModel()
-        }
-
-    }
 
     private suspend fun upsertPersons(
         persons: List<Person>,
@@ -54,7 +46,7 @@ class PersonDataSourceDb(
             val timeStored = Clock.System.now()
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 persons.map { it.copy(stored = timeStored) }.forEach { person ->
-                    val entities = person.toEntities(xxHash)
+                    val entities = person.toEntities(uidNumberMapper)
                     val lastModified = schoolDb.getPersonEntityDao().getLastModifiedByGuid(
                         entities.personEntity.pGuidHash
                     ) ?: -1
@@ -86,13 +78,13 @@ class PersonDataSourceDb(
         loadParams: DataLoadParams,
         guid: String
     ): DataLoadState<Person> {
-        return schoolDb.getPersonEntityDao().findByGuidHash(xxHash.hash(guid))
+        return schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(guid))
             ?.toPersonEntities()?.toModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Person>> {
         return schoolDb.getPersonEntityDao().findByGuidHashAsFlow(
-            xxHash.hash(guid)
+            uidNumberMapper(guid)
         ).map { personEntity ->
             if(personEntity != null) {
                 DataReadyState(
@@ -130,7 +122,7 @@ class PersonDataSourceDb(
     ): PagingSource<Int, Person> {
         return schoolDb.getPersonEntityDao().findAllAsPagingSource(
             since = params.common.since?.toEpochMilliseconds() ?: 0,
-            guidHash = params.common.guid?.let { xxHash.hash(it) } ?: 0,
+            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
         ).map(tag = "persondb-mapped") {
             it.toPersonEntities().toModel()
         }

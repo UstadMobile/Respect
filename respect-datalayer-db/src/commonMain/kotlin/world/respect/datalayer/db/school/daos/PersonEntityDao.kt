@@ -40,7 +40,7 @@ interface PersonEntityDao {
          FROM PersonEntity
         WHERE pGuidHash = :guidHash
     """)
-    suspend fun findByGuidHash(guidHash: Long): PersonEntityWithRoles?
+    suspend fun findByGuidNum(guidHash: Long): PersonEntityWithRoles?
 
     @Transaction
     @Query("""

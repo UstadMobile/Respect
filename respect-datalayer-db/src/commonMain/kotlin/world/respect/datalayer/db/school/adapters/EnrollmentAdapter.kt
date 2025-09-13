@@ -1,9 +1,9 @@
 package world.respect.datalayer.db.school.adapters
 
 import androidx.room.Embedded
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.libxxhash.XXStringHasher
 
 /**
  * @property classUid as per EnrollmentEntity this needs to be retrieved from ClassEntity
@@ -31,9 +31,9 @@ fun EnrollmentEntities.toModel(): Enrollment {
 }
 
 fun Enrollment.toEntities(
-    xxStringHasher: XXStringHasher
+    uidNumberMapper: UidNumberMapper,
 ): EnrollmentEntities {
-    val eUidNum = xxStringHasher.hash(uid)
+    val eUidNum = uidNumberMapper(uid)
     return EnrollmentEntities(
         enrollment = EnrollmentEntity(
             eUid = uid,
@@ -41,8 +41,8 @@ fun Enrollment.toEntities(
             eStatus = status,
             eLastModified = lastModified,
             eStored = stored,
-            eClassUidNum = xxStringHasher.hash(classUid),
-            ePersonUidNum = xxStringHasher.hash(personUid),
+            eClassUidNum = uidNumberMapper(classUid),
+            ePersonUidNum = uidNumberMapper(personUid),
             eRole = role,
             eBeginDate = beginDate,
             eEndDate = endDate,

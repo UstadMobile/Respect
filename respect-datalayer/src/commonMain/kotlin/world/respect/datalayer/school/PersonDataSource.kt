@@ -13,8 +13,6 @@ import kotlin.time.Instant
 
 interface PersonDataSource {
 
-    suspend fun getAllUsers(sourcedId: String): List<Person>
-
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val filterByClazzUid: String? = null,

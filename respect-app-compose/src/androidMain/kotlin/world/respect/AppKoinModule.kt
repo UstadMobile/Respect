@@ -83,7 +83,6 @@ import world.respect.shared.viewmodel.report.ReportViewModel
 import java.io.File
 import kotlinx.io.files.Path
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
-import org.koin.core.scope.Scope
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.AuthTokenProvider
@@ -112,11 +111,15 @@ import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewMode
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import org.koin.core.qualifier.named
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
+import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
+import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueWorker
+import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
+import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -445,22 +448,60 @@ val appKoinModule = module {
      * The RespectAccount scope will be linked to SchoolDirectoryEntry (the parent) scope.
      */
     scope<RespectAccount> {
+        /* Koin doesn't have an onScopeCreated kind of function or event listener. The
+         * RespectAccount scope is linked ot the SchoolDirectoryEntry scope when
+         * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
+         * dependency that all dependencies on RespectAccountScope require.
+         */
+        scoped<RespectAccountSchoolScopeLink> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            val schoolDirectoryScope = SchoolDirectoryEntryScopeId(
+                schoolUrl = accountScopeId.schoolUrl,
+                accountPrincipalId = null,
+            )
+
+            linkTo(
+                getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+                    schoolDirectoryScope.scopeId
+                )
+            )
+
+            RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
+        }
+
+
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
         }
 
-
         scoped<RemoteWriteQueue> {
+            get<RespectAccountSchoolScopeLink>()
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             RemoteWriteQueueDbImpl(
                 schoolDb = get(),
                 account = AuthenticatedUserPrincipalId(accountScopeId.accountPrincipalId.guid),
+                enqueueDrainRemoteWriteQueueUseCase = get(),
+            )
+        }
+
+        scoped<EnqueueDrainRemoteWriteQueueUseCase> {
+            EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
+                context = androidContext().applicationContext,
+                scopeId = id,
+            )
+        }
+
+        scoped<DrainRemoteWriteQueueUseCase> {
+            DrainRemoteWriteQueueUseCase(
+                remoteWriteQueue = get(),
+                dataSource = get(),
             )
         }
 
         scoped<SchoolDataSource> {
             val accountScopeId = RespectAccountScopeId.parse(id)
+            val schoolUrl = get<RespectAccountSchoolScopeLink>()
 
             SchoolDataSourceRepository(
                 local = SchoolDataSourceDb(
@@ -471,7 +512,7 @@ val appKoinModule = module {
                     )
                 ),
                 remote = SchoolDataSourceHttp(
-                    schoolUrl = accountScopeId.schoolUrl,
+                    schoolUrl = schoolUrl.url,
                     schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource,
                     httpClient = get(),
                     tokenProvider = get(),
@@ -479,7 +520,6 @@ val appKoinModule = module {
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
-                uidNumberMapper = get(),
             )
         }
     }

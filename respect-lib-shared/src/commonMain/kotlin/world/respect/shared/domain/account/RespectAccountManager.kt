@@ -190,14 +190,7 @@ class RespectAccountManager(
      * When the RespectAccount scope is created it MUST be linked to the parent Realm scope.
      */
     fun getOrCreateAccountScope(account: RespectAccount): Scope {
-        val schoolScopeId = SchoolDirectoryEntryScopeId(account.school.self, null)
-        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
-        val accountScope = getKoin().getScopeOrNull(account.scopeId)
-            ?: getKoin().createScope<RespectAccount>(account.scopeId).also {
-                it.linkTo(schoolScope)
-            }
-
-        return accountScope
+        return getKoin().getOrCreateScope<RespectAccount>(account.scopeId)
     }
 
     fun requireSelectedAccountScope(): Scope {

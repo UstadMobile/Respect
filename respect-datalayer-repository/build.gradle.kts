@@ -32,6 +32,10 @@ kotlin {
             implementation(libs.atomicfu)
         }
 
+        androidMain.dependencies {
+            implementation(libs.androidx.work.runtime)
+        }
+
         jvmMain.dependencies {
 
         }

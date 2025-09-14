@@ -16,7 +16,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
-import world.respect.datalayer.shared.ModelRepositoryDataSource
+import world.respect.datalayer.shared.RepositoryModelDataSource
 import kotlin.time.Instant
 import world.respect.libutil.util.time.systemTimeInMillis
 
@@ -25,7 +25,7 @@ class PersonDataSourceRepository(
     override val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-) : PersonDataSource, ModelRepositoryDataSource<Person> {
+) : PersonDataSource, RepositoryModelDataSource<Person> {
 
     private val mediatorStore = PagingSourceMediatorStore()
 

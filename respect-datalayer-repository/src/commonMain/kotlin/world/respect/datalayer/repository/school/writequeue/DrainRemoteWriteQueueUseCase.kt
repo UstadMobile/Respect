@@ -4,7 +4,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
-import world.respect.datalayer.shared.ModelRepositoryDataSource
+import world.respect.datalayer.shared.RepositoryModelDataSource
 
 
 class DrainRemoteWriteQueueUseCase(
@@ -12,7 +12,7 @@ class DrainRemoteWriteQueueUseCase(
     private val dataSource: SchoolDataSource,
 ) {
 
-    private suspend fun <T: Any> ModelRepositoryDataSource<T>.sendToRemote(
+    private suspend fun <T: Any> RepositoryModelDataSource<T>.sendToRemote(
         writeQueueItems: List<WriteQueueItem>
     ) {
         val data = local.findByUidList(writeQueueItems.map { it.uid })

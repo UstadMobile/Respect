@@ -206,7 +206,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
         val clientDataSource = SchoolDataSourceRepository(
             local = schoolDataSourceLocal,
-            remote =schoolDataSourceRemote ,
+            remote = schoolDataSourceRemote ,
             validationHelper = clientValidationHelper,
             remoteWriteQueue = remoteWriteQueue,
         )

@@ -8,10 +8,11 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
-interface PersonDataSource {
+interface PersonDataSource: WritableDataSource<Person> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
@@ -62,8 +63,8 @@ interface PersonDataSource {
      * the data. It WILL NOT set the last-modified time (this should be done by the ViewModel or
      * UseCase actually changing the data).
      */
-    suspend fun store(
-        persons: List<Person>
+    override suspend fun store(
+        list: List<Person>
     )
 
 

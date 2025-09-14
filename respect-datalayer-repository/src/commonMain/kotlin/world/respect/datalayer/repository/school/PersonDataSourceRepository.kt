@@ -16,15 +16,16 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
+import world.respect.datalayer.shared.ModelRepositoryDataSource
 import kotlin.time.Instant
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class PersonDataSourceRepository(
-    private val local: PersonDataSourceLocal,
-    private val remote: PersonDataSource,
+    override val local: PersonDataSourceLocal,
+    override val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-) : PersonDataSource {
+) : PersonDataSource, ModelRepositoryDataSource<Person> {
 
     private val mediatorStore = PagingSourceMediatorStore()
 
@@ -101,11 +102,11 @@ class PersonDataSourceRepository(
         )
     }
 
-    override suspend fun store(persons: List<Person>) {
-        local.store(persons)
+    override suspend fun store(list: List<Person>) {
+        local.store(list)
         val timeNow = systemTimeInMillis()
         remoteWriteQueue.add(
-            persons.map {
+            list.map {
                 WriteQueueItem(
                     model = WriteQueueItem.Model.PERSON,
                     uid = it.guid,

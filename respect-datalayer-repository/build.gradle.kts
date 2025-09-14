@@ -30,10 +30,13 @@ kotlin {
             api(libs.ktor.client.core)
             implementation(libs.napier)
             implementation(libs.atomicfu)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.work.runtime)
+            implementation(libs.koin.android)
         }
 
         jvmMain.dependencies {

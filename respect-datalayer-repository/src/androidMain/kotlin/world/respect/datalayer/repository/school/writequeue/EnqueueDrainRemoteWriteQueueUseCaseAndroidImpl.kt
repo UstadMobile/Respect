@@ -9,10 +9,12 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import kotlin.reflect.KClass
 
 class EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
     private val context: Context,
     private val scopeId: String,
+    private val scopeClass: KClass<*>,
 ): EnqueueDrainRemoteWriteQueueUseCase {
 
     override suspend fun invoke() {
@@ -27,7 +29,9 @@ class EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
                         .build()
                 )
                 .setInputData(Data.Builder()
-                    .putString(DATA_SCOPE_ID, scopeId)
+                    .putString(EnqueueDrainRemoteWriteQueueUseCase.DATA_SCOPE_ID, scopeId)
+                    .putString(EnqueueDrainRemoteWriteQueueUseCase.DATA_SCOPE_QUALIFIER,
+                        scopeClass.qualifiedName)
                     .build())
                 .build()
         )
@@ -36,8 +40,6 @@ class EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
     companion object {
 
         const val UNIQUE_NAME_PREFIX = "drainremotewrite"
-
-        const val DATA_SCOPE_ID = "scopeId"
 
     }
 

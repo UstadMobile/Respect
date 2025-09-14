@@ -489,6 +489,7 @@ val appKoinModule = module {
             EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
                 context = androidContext().applicationContext,
                 scopeId = id,
+                scopeClass = RespectAccount::class,
             )
         }
 

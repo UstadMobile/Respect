@@ -72,23 +72,6 @@ class AddSchoolUseCase(
 
             schoolDataSource.personDataSource.store(listOf(adminPerson))
 
-            schoolDataSource.personDataSource.store(
-                (2..300).map {
-                    Person(
-                        guid = "$it",
-                        username = "user$it",
-                        givenName = "Person$it",
-                        familyName = "Lastname$it",
-                        roles = listOf(
-                            PersonRole(
-                                isPrimaryRole = true,
-                                roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-                            )
-                        )
-                    )
-                }
-            )
-
             setPasswordUseCase(
                 SetPasswordUseCase.SetPasswordRequest(
                     authenticatedUserId = AuthenticatedUserPrincipalId.directoryAdmin,

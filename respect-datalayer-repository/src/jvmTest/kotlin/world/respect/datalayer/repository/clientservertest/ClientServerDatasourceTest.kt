@@ -140,6 +140,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
             xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
             oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
             respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+            rpId = schoolBaseUrl.host,
         )
 
         runBlocking {

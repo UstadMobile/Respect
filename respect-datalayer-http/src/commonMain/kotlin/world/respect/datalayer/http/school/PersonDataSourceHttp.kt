@@ -20,11 +20,14 @@ import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
-import world.respect.datalayer.http.ext.appendListParams
+import world.respect.datalayer.http.ext.appendIfNotNull
+import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.PersonDataSource.Companion.PARAM_FILTER_BY_CLAZZ_ROLE
+import world.respect.datalayer.school.PersonDataSource.Companion.PARAM_FILTER_BY_CLAZZ_UID
 import world.respect.datalayer.school.adapters.asListDetails
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
@@ -38,12 +41,16 @@ class PersonDataSourceHttp(
     override val schoolDirectoryDataSource: SchoolDirectoryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val validationHelper: ExtendedDataSourceValidationHelper?,
 ) : PersonDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun PersonDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
-            .apply { parameters.appendListParams(common) }
+            .apply {
+                parameters.appendCommonListParams(common)
+                parameters.appendIfNotNull(PARAM_FILTER_BY_CLAZZ_UID, filterByClazzUid)
+                parameters.appendIfNotNull(PARAM_FILTER_BY_CLAZZ_ROLE, filterByClazzRole?.value)
+            }
             .build()
     }
 
@@ -146,14 +153,14 @@ class PersonDataSourceHttp(
         }
     }
 
-    override suspend fun store(persons: List<Person>) {
+    override suspend fun store(list: List<Person>) {
         httpClient.post(
             URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
                 .build()
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
-            setBody(persons)
+            setBody(list)
         }
     }
 }

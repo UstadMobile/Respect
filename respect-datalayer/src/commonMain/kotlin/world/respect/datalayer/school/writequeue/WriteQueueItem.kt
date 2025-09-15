@@ -6,6 +6,7 @@ package world.respect.datalayer.school.writequeue
  *
  * @property model the model that is to be sent.
  * @property uid the uid of the item that needs to be written to the remote datasource.
+ * @property timestamp the time the item was queued
  * @property timeWritten the time written to the remote datasource. If 0, then still pending
  */
 class WriteQueueItem(

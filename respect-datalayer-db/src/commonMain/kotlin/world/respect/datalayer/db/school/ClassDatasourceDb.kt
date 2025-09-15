@@ -80,8 +80,8 @@ class ClassDatasourceDb(
         }
     }
 
-    override suspend fun store(classes: List<Clazz>) {
-        upsertClasses(classes, false)
+    override suspend fun store(list: List<Clazz>) {
+        upsertClasses(list, false)
     }
 
     override suspend fun updateLocalFromRemote(
@@ -92,6 +92,10 @@ class ClassDatasourceDb(
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Clazz> {
-        TODO("Not yet implemented")
+        return schoolDb.getClassEntityDao().findByUidList(
+            uids.map { uidNumberMapper(it) }
+        ).map {
+            ClassEntities(it).toModel()
+        }
     }
 }

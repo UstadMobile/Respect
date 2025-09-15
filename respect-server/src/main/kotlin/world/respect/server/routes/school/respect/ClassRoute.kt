@@ -11,39 +11,34 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.ClassDataSource
 import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondOffsetLimitPaging
 
 @Suppress("FunctionName")
-fun Route.PersonRoute(
+fun Route.ClassRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->
         call.requireAccountScope().get()
     },
 ) {
-    get(PersonDataSource.ENDPOINT_NAME) {
-        val schoolDataSource = schoolDataSource(call)
+    get(ClassDataSource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
-        val getListParams = PersonDataSource.GetListParams.fromParams(
-            call.request.queryParameters
-        )
-
-        val loadParams = call.request.queryParameters.offsetLimitPagingLoadParams()
-
         call.respondOffsetLimitPaging(
-            params = loadParams,
-            pagingSource = schoolDataSource.personDataSource.listAsPagingSource(
-                DataLoadParams(), getListParams
+            params = call.request.queryParameters.offsetLimitPagingLoadParams(),
+            pagingSource = schoolDataSource(call).classDataSource.listAsPagingSource(
+                loadParams = DataLoadParams(),
+                params = ClassDataSource.GetListParams.fromParams(
+                    call.request.queryParameters
+                )
             )
         )
     }
 
-    post(PersonDataSource.ENDPOINT_NAME) {
-        val schoolDataSource = schoolDataSource(call)
-        val persons: List<Person> = call.receive()
-        schoolDataSource.personDataSource.store(persons)
+    post(ClassDataSource.ENDPOINT_NAME) {
+        schoolDataSource(call).classDataSource.store(
+            list = call.receive()
+        )
         call.respond(HttpStatusCode.NoContent)
     }
 

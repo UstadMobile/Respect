@@ -7,6 +7,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.combineWithRemote
+import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
@@ -38,21 +39,19 @@ class PersonDataSourceRepository(
         guid: String
     ): DataLoadState<Person> {
         val remote = remote.findByGuid(loadParams, guid)
-        if(remote is DataReadyState) {
-            local.updateLocalFromRemote(listOf(remote.data))
-        }
+        local.updateFromRemoteIfNeeded(
+            remote, validationHelper
+        )
 
         return local.findByGuid(loadParams, guid)
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Person>> {
-        val remoteFlow = remote.findByGuidAsFlow(guid).onEach {
-            if(it is DataReadyState) {
-                local.updateLocalFromRemote(listOf(it.data))
+        return local.findByGuidAsFlow(guid).combineWithRemote(
+            remoteFlow = remote.findByGuidAsFlow(guid).onEach {
+                local.updateFromRemoteIfNeeded(it, validationHelper)
             }
-        }
-
-        return local.findByGuidAsFlow(guid).combineWithRemote(remoteFlow)
+        )
     }
 
     override fun listAsFlow(

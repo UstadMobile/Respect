@@ -23,7 +23,11 @@ interface PersonDataSource: WritableDataSource<Person> {
         companion object {
             fun fromParams(stringValues: StringValues) : GetListParams {
                 return GetListParams(
-                    common = GetListCommonParams.fromParams(stringValues)
+                    common = GetListCommonParams.fromParams(stringValues),
+                    filterByClazzUid = stringValues[PARAM_FILTER_BY_CLAZZ_UID],
+                    filterByClazzRole = stringValues[PARAM_FILTER_BY_CLAZZ_ROLE]?.let {
+                        EnrollmentRoleEnum.fromValue(it)
+                    }
                 )
             }
         }
@@ -71,6 +75,11 @@ interface PersonDataSource: WritableDataSource<Person> {
     companion object {
 
         const val ENDPOINT_NAME = "person"
+
+        const val PARAM_FILTER_BY_CLAZZ_UID = "filterByClazzUid"
+
+        const val PARAM_FILTER_BY_CLAZZ_ROLE = "filterByClazzRole"
+
 
     }
 

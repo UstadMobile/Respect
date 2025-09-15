@@ -20,7 +20,8 @@ as per [ARCHITECTURE.md](../ARCHITECTURE.md)) that datasource MUST be tied to an
 and enforce permissions.
 
 The ViewModel sees only the interface, and does not need to be concerned with the underlying 
-implementation.
+implementation. This ensures that the ViewModel can be used both on mobile/desktop apps which use
+an offline-first repository _and_ a browser app which uses only the network data source.
 
 This helps maximize code reusage:
  * Desktop/mobile app: uses the offline-first repository implementation as the datasource.

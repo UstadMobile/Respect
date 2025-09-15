@@ -481,6 +481,7 @@ val appKoinModule = module {
                     validationHelper = get(),
                 ),
                 validationHelper = get(),
+                enrollmentDataSource = get ()
             )
         }
     }

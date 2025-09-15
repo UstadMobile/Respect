@@ -14,7 +14,6 @@ class SchoolDataSourceRepository(
     private val local: SchoolDataSourceLocal,
     private val remote: SchoolDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
-    override val enrollmentDataSource: EnrollmentDataSource,
 ) : SchoolDataSource {
 
     override val personDataSource: PersonDataSource by lazy {
@@ -32,4 +31,8 @@ class SchoolDataSourceRepository(
     override val classDataSource: ClassDataSource by lazy {
         local.classDataSource
     }
+    override val enrollmentDataSource: EnrollmentDataSource by lazy {
+        local.enrollmentDataSource
+    }
+
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f373ca458fdd6b9e0952b5370e7bca89",
+    "identityHash": "d98c31d711a7366abfcad171ef2acbd7",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -385,11 +385,81 @@
             "cGuidHash"
           ]
         }
+      },
+      {
+        "tableName": "EnrollmentEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` TEXT NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, PRIMARY KEY(`eUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "eUid",
+            "columnName": "eUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eUidNum",
+            "columnName": "eUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eStatus",
+            "columnName": "eStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eLastModified",
+            "columnName": "eLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eStored",
+            "columnName": "eStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eClassUidNum",
+            "columnName": "eClassUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ePersonUidNum",
+            "columnName": "ePersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eRole",
+            "columnName": "eRole",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eBeginDate",
+            "columnName": "eBeginDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eEndDate",
+            "columnName": "eEndDate",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "eUidNum"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f373ca458fdd6b9e0952b5370e7bca89')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd98c31d711a7366abfcad171ef2acbd7')"
     ]
   }
 }

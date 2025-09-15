@@ -8,6 +8,7 @@ import world.respect.datalayer.http.school.PersonDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
@@ -37,5 +38,8 @@ class SchoolDataSourceHttp(
         get() = TODO("Not yet implemented")
 
     override val classDataSource: ClassDataSource
+        get() = TODO("Not yet implemented")
+
+    override val enrollmentDataSource: EnrollmentDataSource
         get() = TODO("Not yet implemented")
 }

@@ -46,7 +46,7 @@ class SchoolDirectoryDataSourceRepository(
     }
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
-        return local.getInviteInfo(inviteCode)
+        return remote.getInviteInfo(inviteCode)
     }
 
     override suspend fun getSchoolDirectoryEntryByUrl(

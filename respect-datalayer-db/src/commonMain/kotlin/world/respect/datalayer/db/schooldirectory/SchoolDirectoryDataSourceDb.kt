@@ -41,6 +41,13 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
+
+    override suspend fun getDirectoryByInviteCode(code: String): RespectSchoolDirectory? {
+        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectoryByInviteCode(code)?.let {
+            RespectSchoolDirectory(it.rdInvitePrefix, it.rdUrl)
+        }
+    }
+
     override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
         TODO()
     }
@@ -74,7 +81,7 @@ class SchoolDirectoryDataSourceDb(
     override suspend fun getSchoolDirectoryEntryByUrl(
         url: Url
     ): DataLoadState<SchoolDirectoryEntry> {
-        val schoolEntity = respectAppDb.getSchoolEntityDao().findByUid(
+        val schoolEntity = respectAppDb.getSchoolDirectoryEntryEntityDao().findByUid(
             xxStringHasher.hash(url.toString())
         )
 
@@ -107,7 +114,7 @@ class SchoolDirectoryDataSourceDb(
                 )
 
                 val schoolEntities = school.toEntities(xxStringHasher)
-                respectAppDb.getSchoolEntityDao().upsert(schoolEntities.school)
+                respectAppDb.getSchoolDirectoryEntryEntityDao().upsert(schoolEntities.school)
                 respectAppDb.getLangMapEntityDao().insertAsync(schoolEntities.langMapEntities)
             }
         }
@@ -120,7 +127,7 @@ class SchoolDirectoryDataSourceDb(
     override suspend fun searchSchools(
         text: String
     ): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
-        return respectAppDb.getSchoolEntityDao()
+        return respectAppDb.getSchoolDirectoryEntryEntityDao()
             .searchSchoolsByName(
                 query =  "%$text%"
             )

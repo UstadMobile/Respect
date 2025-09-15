@@ -13,6 +13,7 @@ import org.koin.ktor.ext.inject
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.libutil.util.throwable.withHttpStatusCode
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 
@@ -45,18 +46,11 @@ fun Route.RespectSchoolDirectoryRoute() {
     }
     get("invite"){
         val code = call.request.queryParameters["code"]
-
-        if (code.isNullOrBlank()) {
-            call.respond(HttpStatusCode.BadRequest, "Missing 'code' parameter")
-            return@get
-        }
-
-        val directoryDataSource: SchoolDirectoryDataSourceLocal by inject()
+            ?: throw IllegalArgumentException("missing code param").withHttpStatusCode(400)
         val inviteInfoUseCase : GetInviteInfoUseCase by inject ()
-        val inviteInfo = directoryDataSource.getInviteInfo(code)
-        val mockInviteInfo =  inviteInfoUseCase.invoke("")
-        call.respond(mockInviteInfo)
+        call.respond(inviteInfoUseCase(code))
     }
+
     get("url") {
         val directoryDataSource: SchoolDirectoryDataSourceLocal by inject()
         val url = call.request.queryParameters["url"]

@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 
 @Dao
 interface SchoolDirectoryEntryEntityDao {
@@ -32,6 +33,16 @@ interface SchoolDirectoryEntryEntityDao {
      """
     )
     fun searchSchoolsByName(query: String): Flow<List<SchoolDirectoryEntryEntity>>
+
+    @Query("""
+        SELECT SchoolDirectoryEntryEntity.*
+          FROM SchoolDirectoryEntryEntity
+         WHERE :code LIKE (SchoolDirectoryEntryEntity.reSchoolCode || '%')
+    """)
+    /**
+     * @param code an invite code (with the directory prefix removed)
+     */
+    fun findSchoolByInviteCode(code: String): SchoolDirectoryEntry?
 
 
 

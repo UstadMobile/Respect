@@ -87,7 +87,7 @@ abstract class RespectAppDatabase : RoomDatabase() {
 
     abstract fun getPersonPasskeyDao(): PersonPasskeyEntityDao
 
-    abstract fun getSchoolEntityDao(): SchoolDirectoryEntryEntityDao
+    abstract fun getSchoolDirectoryEntryEntityDao(): SchoolDirectoryEntryEntityDao
 
     abstract fun getSchoolConfigEntityDao(): SchoolConfigEntityDao
 

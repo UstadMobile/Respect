@@ -27,7 +27,8 @@ fun DataReadyState<SchoolDirectoryEntry>.toEntities(
             reLastMod = metaInfo.lastModified,
             reEtag = metaInfo.etag,
             reRespectExt = data.respectExt,
-            reRpId = data.rpId
+            reRpId = data.rpId,
+            reSchoolCode = data.schoolCode,
         ),
         langMapEntities = data.name.asEntities(
             lmeTopParentType = LangMapEntity.TopParentType.RESPECT_SCHOOL_DIRECTORY_ENTRY,
@@ -47,6 +48,7 @@ fun SchoolDirectoryEntryEntities.toModel() : DataReadyState<SchoolDirectoryEntry
             respectExt = school.reRespectExt,
             name = langMapEntities.toModel(),
             rpId = school.reRpId,
+            schoolCode = school.reSchoolCode,
         ),
         metaInfo = DataLoadMetaInfo(
             lastModified = school.reLastMod,

@@ -22,6 +22,7 @@ import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
@@ -81,13 +82,21 @@ fun serverKoinModule(
             primaryKeyGenerator = get(),
         )
     }
+
     single<GetInviteInfoUseCase> {
         MockGetInviteInfoUseCase(
         )
     }
+
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource as SchoolDirectoryDataSourceLocal
+        )
+    }
+
+    single<GetInviteInfoUseCase> {
+        GetInviteInfoUseCaseServer(
+            respectAppDb = get()
         )
     }
 

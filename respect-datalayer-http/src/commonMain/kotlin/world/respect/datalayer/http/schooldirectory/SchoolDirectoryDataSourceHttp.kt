@@ -19,6 +19,7 @@ import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.libutil.ext.appendEndpointPathSegments
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 import kotlin.time.Clock
@@ -70,17 +71,16 @@ class SchoolDirectoryDataSourceHttp(
     }
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
-        val directories = local.schoolDirectoryDataSource.allDirectories()
+        val directory = local.schoolDirectoryDataSource.getDirectoryByInviteCode(inviteCode)
+            ?: throw IllegalArgumentException("directory not found for invite code $inviteCode")
 
-        for (dir in directories) {
-            val url = dir.baseUrl.resolve("api/directory/invite?code=$inviteCode")
-            try {
-                return httpClient.get(url).body()
-            } catch (e: Throwable) {
-                println("${e.message}")
-            }
-        }
-        throw IllegalStateException("Invite not found for code=$inviteCode")
+        val url = URLBuilder(directory.baseUrl).appendEndpointPathSegments(
+            listOf("api/directory/invite")
+        ).also {
+            it.parameters["code"] = inviteCode
+        }.build()
+
+        return httpClient.get(url).body()
     }
 
     override suspend fun getSchoolDirectoryEntryByUrl(

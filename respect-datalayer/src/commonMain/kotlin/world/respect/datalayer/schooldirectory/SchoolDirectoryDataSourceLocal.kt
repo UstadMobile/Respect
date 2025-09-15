@@ -18,4 +18,9 @@ interface SchoolDirectoryDataSourceLocal: SchoolDirectoryDataSource {
 
     suspend fun getServerManagedDirectory(): RespectSchoolDirectory?
 
+    suspend fun getDirectoryByInviteCode(
+        code: String
+    ): RespectSchoolDirectory?
+
+
 }

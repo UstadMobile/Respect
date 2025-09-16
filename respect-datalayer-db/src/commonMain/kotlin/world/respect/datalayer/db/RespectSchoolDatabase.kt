@@ -20,9 +20,11 @@ import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
 import world.respect.datalayer.db.school.daos.ClazzEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
+import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 
@@ -34,6 +36,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
     entities = [
         PersonEntity::class,
         PersonRoleEntity::class,
+        PersonRelatedPersonEntity::class,
         PersonPasswordEntity::class,
         AuthTokenEntity::class,
         ReportEntity::class,
@@ -56,6 +59,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getAuthTokenEntityDao(): AuthTokenEntityDao
 
     abstract fun getPersonRoleEntityDao(): PersonRoleEntityDao
+
+    abstract fun getPersonRelatedPersonEntityDao(): PersonRelatedPersonEntityDao
 
     abstract fun getReportEntityDao(): ReportEntityDao
 

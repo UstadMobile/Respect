@@ -13,7 +13,6 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.PersonEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
@@ -53,11 +52,19 @@ class PersonDataSourceDb(
 
                     if(forceOverwrite || entities.personEntity.pLastModified > lastModified) {
                         schoolDb.getPersonEntityDao().insert(entities.personEntity)
+
                         schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(
                             entities.personEntity.pGuidHash
                         )
                         schoolDb.getPersonRoleEntityDao().upsertList(
                             entities.personRoleEntities
+                        )
+
+                        schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(
+                            entities.personEntity.pGuidHash
+                        )
+                        schoolDb.getPersonRelatedPersonEntityDao().upsert(
+                            entities.relatedPersonEntities
                         )
                     }
                 }
@@ -145,7 +152,7 @@ class PersonDataSourceDb(
         val data = schoolDb.getPersonEntityDao().findAll(
             since = since?.toEpochMilliseconds() ?: 0,
         ).map {
-            PersonEntities(it).toModel()
+            it.toPersonEntities().toModel()
         }
 
         return DataReadyState(

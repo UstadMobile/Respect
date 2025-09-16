@@ -74,7 +74,7 @@ interface PersonEntityDao {
     """)
     suspend fun findAll(
         since: Long = 0,
-    ): List<PersonEntity>
+    ): List<PersonEntityWithRoles>
 
     @Transaction
     @Query("""

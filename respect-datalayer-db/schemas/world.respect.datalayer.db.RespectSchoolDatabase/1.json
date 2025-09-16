@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "85f5e55aa19f0350ce12d943cec57b85",
+    "identityHash": "b033206a7e3dd30658046269893bea0d",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -122,6 +122,42 @@
           "autoGenerate": true,
           "columnNames": [
             "prUid"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonRelatedPersonEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL, PRIMARY KEY(`prpUid`))",
+        "fields": [
+          {
+            "fieldPath": "prpUid",
+            "columnName": "prpUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpPersonUidNum",
+            "columnName": "prpPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpOtherPersonUid",
+            "columnName": "prpOtherPersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpOtherPersonUidNum",
+            "columnName": "prpOtherPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "prpUid"
           ]
         }
       },
@@ -539,7 +575,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '85f5e55aa19f0350ce12d943cec57b85')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b033206a7e3dd30658046269893bea0d')"
     ]
   }
 }

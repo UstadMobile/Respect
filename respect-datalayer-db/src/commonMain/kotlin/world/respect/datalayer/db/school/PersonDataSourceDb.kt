@@ -130,7 +130,7 @@ class PersonDataSourceDb(
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
-            inClazzRoleFlag = params.filterByClazzRole?.flag ?: 0,
+            inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
         ).map(tag = "persondb-mapped") {
             it.toPersonEntities().toModel()
         }

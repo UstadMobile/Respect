@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -22,7 +21,6 @@ import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -82,7 +80,7 @@ class ClazzDetailViewModel(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
                     filterByClazzUid = route.guid,
-                    filterByClazzRole = role,
+                    filterByEnrolmentRole = role,
                 )
             )
         }

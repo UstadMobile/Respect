@@ -26,8 +26,6 @@ import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.PersonDataSource.Companion.PARAM_FILTER_BY_CLAZZ_ROLE
-import world.respect.datalayer.school.PersonDataSource.Companion.PARAM_FILTER_BY_CLAZZ_UID
 import world.respect.datalayer.school.adapters.asListDetails
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
@@ -48,8 +46,8 @@ class PersonDataSourceHttp(
         return URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                parameters.appendIfNotNull(PARAM_FILTER_BY_CLAZZ_UID, filterByClazzUid)
-                parameters.appendIfNotNull(PARAM_FILTER_BY_CLAZZ_ROLE, filterByClazzRole?.value)
+                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, filterByClazzUid)
+                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
             }
             .build()
     }
@@ -155,8 +153,7 @@ class PersonDataSourceHttp(
 
     override suspend fun store(list: List<Person>) {
         httpClient.post(
-            URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
-                .build()
+            url = respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)

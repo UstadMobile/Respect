@@ -3,6 +3,7 @@ package world.respect.datalayer.school
 import androidx.paging.PagingSource
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -17,15 +18,15 @@ interface PersonDataSource: WritableDataSource<Person> {
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val filterByClazzUid: String? = null,
-        val filterByClazzRole: EnrollmentRoleEnum? = null,
+        val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
     ) {
 
         companion object {
             fun fromParams(stringValues: StringValues) : GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(stringValues),
-                    filterByClazzUid = stringValues[PARAM_FILTER_BY_CLAZZ_UID],
-                    filterByClazzRole = stringValues[PARAM_FILTER_BY_CLAZZ_ROLE]?.let {
+                    filterByClazzUid = stringValues[DataLayerParams.FILTER_BY_CLASS_UID],
+                    filterByEnrolmentRole = stringValues[DataLayerParams.FILTER_BY_ENROLLMENT_ROLE]?.let {
                         EnrollmentRoleEnum.fromValue(it)
                     }
                 )
@@ -76,9 +77,7 @@ interface PersonDataSource: WritableDataSource<Person> {
 
         const val ENDPOINT_NAME = "person"
 
-        const val PARAM_FILTER_BY_CLAZZ_UID = "filterByClazzUid"
 
-        const val PARAM_FILTER_BY_CLAZZ_ROLE = "filterByClazzRole"
 
 
     }

@@ -37,8 +37,8 @@ class DrainRemoteWriteQueueUseCase(
                         repository.classDataSource.sendToRemote(listOf(item))
                     }
 
-                    else -> {
-                        //nothing
+                    WriteQueueItem.Model.ENROLLMENT -> {
+                        repository.enrollmentDataSource.sendToRemote(listOf(item))
                     }
                 }
 

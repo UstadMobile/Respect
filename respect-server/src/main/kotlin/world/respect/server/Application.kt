@@ -31,6 +31,7 @@ import io.ktor.server.plugins.swagger.*
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.school.respect.ClassRoute
+import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -157,6 +158,7 @@ fun Application.module() {
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         PersonRoute()
                         ClassRoute()
+                        EnrollmentRoute()
                     }
                 }
             }

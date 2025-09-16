@@ -1,4 +1,4 @@
-package world.respect.datalayer.repository.school.writequeue
+package world.respect.datalayer.repository.school
 
 import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +23,7 @@ class ClassDataSourceRepository(
     override val remote: ClassDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-) : ClassDataSource, RepositoryModelDataSource<Clazz>{
+) : ClassDataSource, RepositoryModelDataSource<Clazz> {
 
     private val mediatorStore = PagingSourceMediatorStore()
 
@@ -66,7 +66,7 @@ class ClassDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.CLASS,
                     uid = it.guid,
-                    timestamp =  timeNow,
+                    timestamp = timeNow,
                 )
             }
         )

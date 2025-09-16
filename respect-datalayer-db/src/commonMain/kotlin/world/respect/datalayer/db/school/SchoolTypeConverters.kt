@@ -9,6 +9,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import kotlin.time.Instant
 
@@ -70,6 +71,16 @@ class SchoolTypeConverters {
     @TypeConverter
     fun toWriteQueueItemModel(value: Int): WriteQueueItem.Model {
         return WriteQueueItem.Model.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromPersonStatusEnum(value: PersonStatusEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toPersonStatusEnum(value: Int): PersonStatusEnum {
+        return PersonStatusEnum.fromFlag(value)
     }
 
 }

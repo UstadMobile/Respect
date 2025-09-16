@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6dccfd1c4c21deb9aff467b229f1d171",
+    "identityHash": "85f5e55aa19f0350ce12d943cec57b85",
     "entities": [
       {
         "tableName": "PersonEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, PRIMARY KEY(`pGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, PRIMARY KEY(`pGuidHash`))",
         "fields": [
           {
             "fieldPath": "pGuid",
@@ -43,6 +43,11 @@
             "columnName": "pStored",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "pMetadata",
+            "columnName": "pMetadata",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "pUsername",
@@ -388,7 +393,7 @@
       },
       {
         "tableName": "EnrollmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` TEXT NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, PRIMARY KEY(`eUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` TEXT NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
         "fields": [
           {
             "fieldPath": "eUid",
@@ -421,6 +426,11 @@
             "notNull": true
           },
           {
+            "fieldPath": "eMetadata",
+            "columnName": "eMetadata",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "eClassUidNum",
             "columnName": "eClassUidNum",
             "affinity": "INTEGER",
@@ -447,6 +457,22 @@
             "fieldPath": "eEndDate",
             "columnName": "eEndDate",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eInviteCode",
+            "columnName": "eInviteCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eApprovedByPersonUidNum",
+            "columnName": "eApprovedByPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eApprovedByPersonUid",
+            "columnName": "eApprovedByPersonUid",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -513,7 +539,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6dccfd1c4c21deb9aff467b229f1d171')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '85f5e55aa19f0350ce12d943cec57b85')"
     ]
   }
 }

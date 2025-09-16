@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school.adapters
 
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.school.model.Clazz
-import world.respect.libxxhash.XXStringHasher
 
 data class ClassEntities(
     val clazz: ClassEntity
@@ -23,12 +23,12 @@ fun ClassEntities.toModel(): Clazz {
 
 
 fun Clazz.toEntities(
-    hasher: XXStringHasher,
+    uidNumberMapper: UidNumberMapper,
 ): ClassEntities {
     return ClassEntities(
         clazz = ClassEntity(
             cGuid = guid,
-            cGuidHash = hasher.hash(guid),
+            cGuidHash = uidNumberMapper(guid),
             cTitle = title,
             cStatus = status,
             cDescription = description,

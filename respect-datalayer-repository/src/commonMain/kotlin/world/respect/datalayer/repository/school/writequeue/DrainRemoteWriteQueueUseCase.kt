@@ -1,0 +1,49 @@
+package world.respect.datalayer.repository.school.writequeue
+
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.school.writequeue.WriteQueueItem
+import world.respect.datalayer.shared.RepositoryModelDataSource
+
+
+class DrainRemoteWriteQueueUseCase(
+    private val remoteWriteQueue: RemoteWriteQueue,
+    private val dataSource: SchoolDataSource,
+) {
+
+    private suspend fun <T: Any> RepositoryModelDataSource<T>.sendToRemote(
+        writeQueueItems: List<WriteQueueItem>
+    ) {
+        val data = local.findByUidList(writeQueueItems.map { it.uid })
+        remote.store(data)
+        remoteWriteQueue.markSent(writeQueueItems.map { it.queueItemId })
+    }
+
+    suspend operator fun invoke() {
+        val repository = dataSource as SchoolDataSourceRepository
+        do {
+            val pending = remoteWriteQueue.getPending(100)
+            if(pending.isEmpty())
+                break
+
+            pending.forEach { item ->
+                when(item.model) {
+                    WriteQueueItem.Model.PERSON -> {
+                        repository.personDataSource.sendToRemote(listOf(item))
+                    }
+
+                    WriteQueueItem.Model.CLASS -> {
+                        repository.classDataSource.sendToRemote(listOf(item))
+                    }
+
+                    else -> {
+                        //nothing
+                    }
+                }
+
+            }
+        } while(true)
+    }
+
+}

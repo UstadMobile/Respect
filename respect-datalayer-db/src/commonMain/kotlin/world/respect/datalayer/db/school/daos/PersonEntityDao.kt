@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
 interface PersonEntityDao {
@@ -40,7 +41,7 @@ interface PersonEntityDao {
          FROM PersonEntity
         WHERE pGuidHash = :guidHash
     """)
-    suspend fun findByGuidHash(guidHash: Long): PersonEntityWithRoles?
+    suspend fun findByGuidNum(guidHash: Long): PersonEntityWithRoles?
 
     @Transaction
     @Query("""
@@ -77,17 +78,39 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
+        SELECT PersonEntity.*
+          FROM PersonEntity
+         WHERE PersonEntity.pGuidHash IN (:uidNums) 
+    """)
+    suspend fun findByUidList(uidNums: List<Long>): List<PersonEntityWithRoles>
+
+
+    @Transaction
+    @Query("""
         SELECT * 
          FROM PersonEntity
         WHERE PersonEntity.pStored > :since 
           AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
-          AND (:inClazzGuidHash = 0)
+          AND (:inClazzGuidHash = 0 OR
+               EXISTS(
+                    SELECT EnrollmentEntity.eUid
+                      FROM EnrollmentEntity
+                     WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
+                       AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
+                       AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
+                       AND :timeNow BETWEEN
+                                    COALESCE(EnrollmentEntity.eBeginDate, 0) AND
+                                    COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
+               )
+              ) 
      ORDER BY PersonEntity.pGivenName
     """)
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        timeNow: Long = systemTimeInMillis(),
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
@@ -103,7 +126,8 @@ interface PersonEntityDao {
             SELECT * 
             FROM PersonEntity
             WHERE pGuid = :sourcedId
-            """)
+            """
+    )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
 
 }

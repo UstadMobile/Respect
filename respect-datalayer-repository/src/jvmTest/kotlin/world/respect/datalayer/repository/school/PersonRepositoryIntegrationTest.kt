@@ -9,19 +9,13 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.mockito.kotlin.argWhere
-import org.mockito.kotlin.timeout
-import org.mockito.kotlin.verifyBlocking
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.repository.clientservertest.clientServerDatasourceTest
-import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
-import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.shared.paging.CacheableHttpPagingSource
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.server.routes.school.respect.PersonRoute
 import kotlin.test.Test
@@ -270,12 +264,9 @@ class PersonRepositoryIntegrationTest {
         }
     }
 
-    //This test isn't the same as before since adding the mediator - the mediator will determine
-    // the range - we would need to lookup what was loaded, then load that same range again.
-    //@Test
-    fun givenRemotePagingSourceLoadedOnce_whenLoadedAgain_thenRemoteWillReturnNotModified() {
+    @Test
+    fun givenPersonWrittenLocally_whenStored_thenWillSendToRemote() {
         Napier.base(DebugAntilog())
-
         runBlocking {
             clientServerDatasourceTest(temporaryFolder.newFolder("test")) {
                 serverRouting {
@@ -286,39 +277,18 @@ class PersonRepositoryIntegrationTest {
 
                 server.start()
 
-                serverSchoolDataSource.personDataSource.store(
+                clients.first().schoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
                 )
 
-                val local = clients.first().schoolDataSourceLocal.personDataSource
-                    .listAsPagingSource(DataLoadParams(), PersonDataSource.GetListParams())
-                val remote = clients.first().schoolDataSourceRemote.personDataSource
-                    .listAsPagingSource(DataLoadParams(), PersonDataSource.GetListParams())
-                val repository = RepositoryOffsetLimitPagingSource(
-                    local = local,
-                    remote = remote,
-                    argKey = 0,
-                    mediatorStore = PagingSourceMediatorStore(),
-                    onUpdateLocalFromRemote = clients.first().schoolDataSourceLocal
-                        .personDataSource::updateLocalFromRemote,
-                )
-
-                repository.load(
-                    PagingSource.LoadParams.Refresh(0, 50, false)
-                )
-
-                verifyBlocking(clients.first().validationHelper, timeout(5_000)) {
-                    updateValidationInfo(
-                        argWhere { it.url?.segments?.contains("person") == true }
-                    )
+                serverSchoolDataSource.personDataSource.findByGuidAsFlow(
+                    defaultTestPerson.guid
+                ).filter {
+                    it is DataReadyState
+                }.test(timeout = 30.seconds) {
+                    val item = awaitItem()
+                    assertEquals(defaultTestPerson.guid, item.dataOrNull()?.guid)
                 }
-
-                val remoteResult = remote.load(
-                    PagingSource.LoadParams.Refresh(0, 50, false)
-                )
-
-                assertTrue(remoteResult is PagingSource.LoadResult.Error &&
-                    remoteResult.throwable is CacheableHttpPagingSource.NotModifiedNonException)
             }
         }
     }

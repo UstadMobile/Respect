@@ -42,4 +42,12 @@ interface ClazzEntityDao {
     ): PagingSource<Int, ClassEntity>
 
 
+
+    @Query("""
+        SELECT ClassEntity.*
+          FROM ClassEntity
+         WHERE ClassEntity.cGuidHash in (:uids) 
+    """)
+    suspend fun findByUidList(uids: List<Long>) : List<ClassEntity>
+
 }

@@ -8,12 +8,11 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
-interface PersonDataSource {
-
-    suspend fun getAllUsers(sourcedId: String): List<Person>
+interface PersonDataSource: WritableDataSource<Person> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
@@ -24,7 +23,11 @@ interface PersonDataSource {
         companion object {
             fun fromParams(stringValues: StringValues) : GetListParams {
                 return GetListParams(
-                    common = GetListCommonParams.fromParams(stringValues)
+                    common = GetListCommonParams.fromParams(stringValues),
+                    filterByClazzUid = stringValues[PARAM_FILTER_BY_CLAZZ_UID],
+                    filterByClazzRole = stringValues[PARAM_FILTER_BY_CLAZZ_ROLE]?.let {
+                        EnrollmentRoleEnum.fromValue(it)
+                    }
                 )
             }
         }
@@ -64,14 +67,19 @@ interface PersonDataSource {
      * the data. It WILL NOT set the last-modified time (this should be done by the ViewModel or
      * UseCase actually changing the data).
      */
-    suspend fun store(
-        persons: List<Person>
+    override suspend fun store(
+        list: List<Person>
     )
 
 
     companion object {
 
         const val ENDPOINT_NAME = "person"
+
+        const val PARAM_FILTER_BY_CLAZZ_UID = "filterByClazzUid"
+
+        const val PARAM_FILTER_BY_CLAZZ_ROLE = "filterByClazzRole"
+
 
     }
 

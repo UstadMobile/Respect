@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 
 @Dao
 interface SchoolDirectoryEntryEntityDao {
@@ -42,8 +41,6 @@ interface SchoolDirectoryEntryEntityDao {
     /**
      * @param code an invite code (with the directory prefix removed)
      */
-    fun findSchoolByInviteCode(code: String): SchoolDirectoryEntry?
-
-
+    suspend fun findSchoolByInviteCode(code: String): SchoolDirectoryEntryEntity?
 
 }

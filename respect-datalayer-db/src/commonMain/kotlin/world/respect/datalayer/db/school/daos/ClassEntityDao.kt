@@ -51,12 +51,4 @@ interface ClassEntityDao {
     suspend fun findByUidList(uids: List<Long>) : List<ClassEntity>
 
 
-    @Query("""
-        SELECT ClassEntity.*
-          FROM ClassEntity
-         WHERE :code LIKE ('%' || ClassEntity.cStudentInviteCode) 
-            OR :code LIKE ('%' || ClassEntity.cTeacherInviteCode)
-    """)
-    suspend fun findByInviteCode(code: String): ClassEntity?
-
 }

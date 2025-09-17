@@ -5,6 +5,8 @@ import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.credentials.passkey.util.toGuardianRole
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 class RespectRedeemInviteRequestUseCase {

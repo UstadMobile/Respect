@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupCredential
@@ -33,7 +34,7 @@ data class EnterPasswordSignupUiState(
 
 class EnterPasswordSignupViewModel(
     savedStateHandle: SavedStateHandle,
-    private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
+    private val submitRedeemInviteRequestUseCase: RedeemInviteUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
     private val signupUseCase: SignupUseCase,
     private val inviteInfoUseCase: GetInviteInfoUseCase

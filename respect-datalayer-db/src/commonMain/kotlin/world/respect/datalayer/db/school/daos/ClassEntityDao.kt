@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.ClassEntity
 
 @Dao
-interface ClazzEntityDao {
+interface ClassEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(classEntity: ClassEntity)
@@ -49,5 +49,14 @@ interface ClazzEntityDao {
          WHERE ClassEntity.cGuidHash in (:uids) 
     """)
     suspend fun findByUidList(uids: List<Long>) : List<ClassEntity>
+
+
+    @Query("""
+        SELECT ClassEntity.*
+          FROM ClassEntity
+         WHERE :code LIKE ('%' || ClassEntity.cStudentInviteCode) 
+            OR :code LIKE ('%' || ClassEntity.cTeacherInviteCode)
+    """)
+    suspend fun findByInviteCode(code: String): ClassEntity?
 
 }

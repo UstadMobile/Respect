@@ -11,7 +11,7 @@ suspend fun <T: Any> LocalModelDataSource<T>.updateFromRemoteListIfNeeded(
     validationHelper: ExtendedDataSourceValidationHelper?
 ) {
     if(remoteLoad is DataReadyState) {
-        updateLocalFromRemote(remoteLoad.data)
+        updateLocal(remoteLoad.data)
         validationHelper?.updateValidationInfo(remoteLoad.metaInfo)
     }
 }
@@ -21,7 +21,7 @@ suspend fun <T: Any> LocalModelDataSource<T>.updateFromRemoteIfNeeded(
     validationHelper: ExtendedDataSourceValidationHelper?
 ) {
     if(remoteLoad is DataReadyState) {
-        updateLocalFromRemote(listOf(remoteLoad.data))
+        updateLocal(listOf(remoteLoad.data))
         validationHelper?.updateValidationInfo(remoteLoad.metaInfo)
     }
 }

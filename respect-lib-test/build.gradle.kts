@@ -4,14 +4,9 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
-    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
-    compilerOptions {
-        optIn.add("kotlin.time.ExperimentalTime")
-    }
-
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -20,33 +15,24 @@ kotlin {
 
     jvm()
 
+    /*
+     * This module MUST NOT depend on any other module within this project to avoid circular
+     * dependencies. It provides utility functions that may be used in any other module.
+     */
     sourceSets {
         commonMain.dependencies {
-            api(projects.respectDatalayer)
             implementation(projects.respectLibUtil)
-            implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
-            api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            implementation(libs.napier)
-            implementation(libs.atomicfu)
+            implementation(libs.kotlinx.date.time)
+            implementation(libs.kotlinx.serialization.json)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
-        }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.work.runtime)
-            implementation(libs.koin.android)
-        }
-
-        jvmMain.dependencies {
-
-        }
-
-        jvmTest.dependencies {
-            implementation(projects.respectLibTest)
             implementation(kotlin("test"))
-            implementation(projects.respectServer)
+            implementation(libs.kotlin.test.junit)
+
+
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
 
@@ -64,23 +50,44 @@ kotlin {
             implementation(libs.ktor.client.json)
             implementation(libs.ktor.client.content.negotiation)
 
+
+
+            implementation(project.dependencies.platform(libs.koin.bom))
+
+            implementation(libs.mockito.kotlin)
+
+
+        }
+
+        jvmMain.dependencies {
+            implementation(projects.respectServer)
+            implementation(projects.respectLibShared)
+            implementation(projects.respectDatalayerRepository)
+            implementation(projects.respectDatalayerDb)
+            implementation(projects.respectDatalayerHttp)
+            implementation(libs.koin.ktor)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
             implementation(libs.ktor.server.content.negotiation)
             implementation(libs.ktor.server.conditional.headers)
             implementation(libs.ktor.server.call.logging)
             implementation(libs.logback)
+        }
 
-            implementation(project.dependencies.platform(libs.koin.bom))
-            implementation(libs.koin.core)
-            implementation(libs.koin.ktor)
-            implementation(libs.mockito.kotlin)
+        jvmTest.dependencies {
+
+        }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
         }
     }
 }
 
 android {
-    namespace = "world.respect.datalayer.repository"
+    namespace = "world.respect.lib.test"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

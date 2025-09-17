@@ -2,13 +2,16 @@ package world.respect.datalayer.respect.model.invite
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 
 @Serializable
 class RespectRedeemInviteRequest(
-    val inviteInfo: RespectInviteInfo,
-    val student: PersonInfo,
-    val parentOrGuardian: PersonInfo?,
+    val code: String,
+    val classUid: String?,
+    val accountPersonInfo: PersonInfo,
+    val role: PersonRoleEnum,
+    val studentPersonInfo: PersonInfo?,
     val parentOrGuardianRole: GuardianRole?,
     val account: Account,
 ) {
@@ -19,9 +22,9 @@ class RespectRedeemInviteRequest(
 
     @Serializable
    data class PersonInfo(
-        var name:  String ?=null,
-        var gender: OneRosterGenderEnum?=null,
-        var dateOfBirth: LocalDate?=null,
+        val name: String = "",
+        val gender: PersonGenderEnum = PersonGenderEnum.UNSPECIFIED,
+        val dateOfBirth: LocalDate,
     )
 
     @Serializable

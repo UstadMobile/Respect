@@ -14,6 +14,7 @@ import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.signup.SignupCredential
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.generated.resources.Res
@@ -46,6 +47,8 @@ class CreateAccountViewModel(
     private val verifyDomainUseCase: VerifyDomainUseCase,
     private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
+    private val submitRedeemInviteRequestUseCase: RedeemInviteUseCase,
+    private val createPasskeyUseCase: CreatePasskeyUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
     private val signupUseCase: SignupUseCase,
     private val inviteInfoUseCase: GetInviteInfoUseCase
@@ -53,6 +56,7 @@ class CreateAccountViewModel(
     private val route: CreateAccount = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(CreateAccountViewModelUiState())
+
     val uiState = _uiState.asStateFlow()
     init {
         viewModelScope.launch {

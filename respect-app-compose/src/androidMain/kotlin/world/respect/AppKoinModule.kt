@@ -69,7 +69,7 @@ import world.respect.shared.domain.account.createinviteredeemrequest.RespectRede
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -150,7 +150,6 @@ import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
-import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueWorker
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -397,7 +396,7 @@ val appKoinModule = module {
     single<GetInviteInfoUseCase> {
         MockGetInviteInfoUseCase()
     }
-    single<SubmitRedeemInviteRequestUseCase> {
+    single<RedeemInviteUseCase> {
         MockSubmitRedeemInviteRequestUseCase()
     }
     single<SchoolDirectoryDataSourceLocal> {

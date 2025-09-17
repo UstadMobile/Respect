@@ -12,6 +12,7 @@ import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported

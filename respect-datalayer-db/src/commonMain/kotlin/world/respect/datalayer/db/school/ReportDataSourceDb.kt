@@ -18,7 +18,7 @@ class ReportDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
 ) : ReportDataSourceLocal {
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Report>,
         forceOverwrite: Boolean
     ) {

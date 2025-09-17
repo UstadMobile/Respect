@@ -91,7 +91,7 @@ class EnrollmentDataSourceDb(
         upsertEnrollments(list, false)
     }
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Enrollment>,
         forceOverwrite: Boolean
     ) {
@@ -99,6 +99,8 @@ class EnrollmentDataSourceDb(
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Enrollment> {
-        TODO("Not yet implemented")
+        return schoolDb.getEnrollmentEntityDao().findByUidNumList(
+            uids.map { uidNumberMapper(it) }
+        ).map { it.toModel() }
     }
 }

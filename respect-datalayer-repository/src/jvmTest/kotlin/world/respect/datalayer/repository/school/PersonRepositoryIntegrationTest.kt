@@ -13,9 +13,10 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.repository.clientservertest.clientServerDatasourceTest
+import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.server.routes.school.respect.PersonRoute
 import kotlin.test.Test
@@ -41,6 +42,7 @@ class PersonRepositoryIntegrationTest {
         givenName = "test",
         familyName = "test",
         roles = emptyList(),
+        gender = PersonGenderEnum.FEMALE,
     )
 
     @Test

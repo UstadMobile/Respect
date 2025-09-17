@@ -162,6 +162,16 @@
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 
+    <string name="get_started">Get Started</string>
+    <string name="onboardingTitle1">Digital Library</string>
+    <string name="onboardingTitle2">Works Offline</string>
+    <string name="onboardingTitle3">Data Reporting</string>
+    <string name="onboardingTitle4">Assignments</string>
+    <string name="onboardingDescription1">Access learning resources anytime</string>
+    <string name="onboardingDescription2">Continue learning even without internet</string>
+    <string name="onboardingDescription3">Track progress with detailed reports</string>
+    <string name="onboardingDescription4">Assign and manage lessons easily</string>
+
 
     <!-- Edit Report -->
     <string name="edit_report">Edit report</string>
@@ -236,8 +246,6 @@
     <string name="manage_indicators">Manage Indicators</string>
     <string name="indicator">Indicator</string>
     <string name="indicator_detail">Indicator detail</string>
-
-
 
 
     <!-- Conditions -->

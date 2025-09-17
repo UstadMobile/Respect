@@ -31,6 +31,7 @@ import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
+import world.respect.app.view.onboarding.OnboardingScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
 import world.respect.app.view.person.list.PersonListScreen
@@ -85,6 +86,7 @@ import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.HowPasskeyWorks
+import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.OtherOption
 import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.navigation.PersonDetail
@@ -113,6 +115,7 @@ import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewMode
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
+import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 
 @Composable
 fun AppNavHost(
@@ -138,6 +141,14 @@ fun AppNavHost(
             AcknowledgementScreen(viewModel)
         }
 
+        composable<Onboarding>{
+            val viewModel: OnboardingViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            OnboardingScreen(viewModel)
+        }
         composable<LoginScreen> {
             val viewModel: LoginViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

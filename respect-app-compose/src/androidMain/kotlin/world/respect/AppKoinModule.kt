@@ -116,6 +116,7 @@ import org.koin.core.qualifier.named
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
@@ -181,7 +182,7 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
-
+    viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
     viewModelOf(::EnterLinkViewModel)

@@ -1,6 +1,7 @@
 package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
 import kotlin.time.Clock
@@ -12,17 +13,21 @@ import kotlin.time.Instant
  * @property userMasterIdentifier generally an ID assigned by the organization (e.g. government
  *           issued student/teacher id number)
  * @property userActive (should be changed to status enum - which may be pending)
+ * @property status PersonStatusEnum - can be pending approval.
+ * @property relatedPersonUids similar to agents on the OneRoster user class. Used to link a student
+ *           to their parent/guardian.
  */
 
 @Serializable
 data class Person(
     val guid: String,
     val userActive: Boolean = true,
-    val status: StatusEnum = StatusEnum.ACTIVE,
+    val status: PersonStatusEnum = PersonStatusEnum.ACTIVE,
     @Serializable(with = InstantISO8601Serializer::class)
     override val lastModified: Instant = Clock.System.now(),
     @Serializable(with = InstantISO8601Serializer::class)
     override val stored: Instant = Clock.System.now(),
+    val metadata: JsonObject? = null,
     val userMasterIdentifier: String? = null,
     val username: String? = null,
     val givenName: String,
@@ -33,6 +38,7 @@ data class Person(
     val preferredLastName: String? = null,
     val pronouns: String? = null,
     val roles: List<PersonRole>,
+    val relatedPersonUids: List<String> = emptyList(),
 ): ModelWithTimes {
 
     companion object {

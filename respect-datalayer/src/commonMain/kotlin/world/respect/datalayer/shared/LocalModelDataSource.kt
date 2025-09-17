@@ -23,4 +23,13 @@ interface LocalModelDataSource<T : Any> {
         forceOverwrite: Boolean = false,
     )
 
+    /**
+     * findByUidList is used by the Remote Write Queue Drainer to get the data models to be sent.
+     */
+    suspend fun findByUidList(
+        uids: List<String>,
+    ): List<T>
+
+
+
 }

@@ -1,18 +1,23 @@
 package world.respect.server.routes.school.respect
 
-import androidx.paging.PagingSource
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.receive
 import io.ktor.server.response.header
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import world.respect.datalayer.DataLayerParams
+import io.ktor.server.routing.post
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.Person
+import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondOffsetLimitPaging
 
+@Suppress("FunctionName")
 fun Route.PersonRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->
         call.requireAccountScope().get()
@@ -25,11 +30,7 @@ fun Route.PersonRoute(
             call.request.queryParameters
         )
 
-        val loadParams = PagingSource.LoadParams.Refresh(
-            key = call.request.queryParameters[DataLayerParams.OFFSET]?.toInt() ?: 0,
-            loadSize = call.request.queryParameters[DataLayerParams.LIMIT]?.toInt() ?: 1000,
-            placeholdersEnabled = false
-        )
+        val loadParams = call.request.queryParameters.offsetLimitPagingLoadParams()
 
         call.respondOffsetLimitPaging(
             params = loadParams,
@@ -37,6 +38,13 @@ fun Route.PersonRoute(
                 DataLoadParams(), getListParams
             )
         )
+    }
+
+    post(PersonDataSource.ENDPOINT_NAME) {
+        val schoolDataSource = schoolDataSource(call)
+        val persons: List<Person> = call.receive()
+        schoolDataSource.personDataSource.store(persons)
+        call.respond(HttpStatusCode.NoContent)
     }
 
 }

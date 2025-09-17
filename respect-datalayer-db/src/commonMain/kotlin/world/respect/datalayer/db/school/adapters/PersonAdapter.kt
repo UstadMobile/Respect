@@ -1,23 +1,26 @@
 package world.respect.datalayer.db.school.adapters
 
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
+import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
-import world.respect.libxxhash.XXStringHasher
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 
 data class PersonEntities(
     val personEntity: PersonEntity,
-    val personRoleEntities: List<PersonRoleEntity> = emptyList()
+    val personRoleEntities: List<PersonRoleEntity> = emptyList(),
+    val relatedPersonEntities: List<PersonRelatedPersonEntity>,
 )
 
 fun PersonEntityWithRoles.toPersonEntities() = PersonEntities(
     personEntity = person,
-    personRoleEntities = roles
+    personRoleEntities = roles,
+    relatedPersonEntities = relatedPersons,
 )
 
 @OptIn(ExperimentalTime::class)
@@ -28,6 +31,7 @@ fun PersonEntities.toModel(): Person {
         userActive = personEntity.pActive,
         lastModified = Instant.fromEpochMilliseconds(personEntity.pLastModified),
         stored = Instant.fromEpochMilliseconds(personEntity.pStored),
+        metadata = personEntity.pMetadata,
         username = personEntity.pUsername,
         givenName = personEntity.pGivenName,
         familyName = personEntity.pFamilyName,
@@ -40,14 +44,14 @@ fun PersonEntities.toModel(): Person {
                 endDate = it.prEndDate,
             )
         },
+        relatedPersonUids = relatedPersonEntities.map { it.prpOtherPersonUid },
     )
 }
 
-@OptIn(ExperimentalTime::class)
 fun Person.toEntities(
-    xxStringHasher: XXStringHasher
+    uidNumberMapper: UidNumberMapper
 ): PersonEntities {
-    val pGuidHash = xxStringHasher.hash(guid)
+    val pGuidHash = uidNumberMapper(guid)
     return PersonEntities(
         personEntity = PersonEntity(
             pGuid = guid,
@@ -56,6 +60,7 @@ fun Person.toEntities(
             pStatus = status,
             pLastModified = lastModified.toEpochMilliseconds(),
             pStored = stored.toEpochMilliseconds(),
+            pMetadata = metadata,
             pUsername = username,
             pGivenName = givenName,
             pFamilyName = familyName,
@@ -68,6 +73,13 @@ fun Person.toEntities(
                 prRoleEnum = it.roleEnum,
                 prEndDate = it.endDate,
                 prBeginDate = it.beginDate,
+            )
+        },
+        relatedPersonEntities = relatedPersonUids.map {
+            PersonRelatedPersonEntity(
+                prpPersonUidNum = pGuidHash,
+                prpOtherPersonUid = it,
+                prpOtherPersonUidNum = uidNumberMapper(it),
             )
         }
     )

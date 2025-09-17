@@ -20,9 +20,13 @@ import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
 import world.respect.datalayer.db.school.daos.ClazzEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
+import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
+import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
+import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 
 
 /**
@@ -32,12 +36,14 @@ import world.respect.datalayer.db.school.entities.ReportEntity
     entities = [
         PersonEntity::class,
         PersonRoleEntity::class,
+        PersonRelatedPersonEntity::class,
         PersonPasswordEntity::class,
         AuthTokenEntity::class,
         ReportEntity::class,
         IndicatorEntity::class,
         ClassEntity::class,
         EnrollmentEntity::class,
+        WriteQueueItemEntity::class,
     ],
     version = 1,
 
@@ -54,6 +60,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getPersonRoleEntityDao(): PersonRoleEntityDao
 
+    abstract fun getPersonRelatedPersonEntityDao(): PersonRelatedPersonEntityDao
+
     abstract fun getReportEntityDao(): ReportEntityDao
 
     abstract fun getIndicatorEntityDao(): IndicatorEntityDao
@@ -61,6 +69,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getClassEntityDao(): ClazzEntityDao
 
     abstract fun getEnrollmentEntityDao(): EnrollmentEntityDao
+
+    abstract fun getWriteQueueItemEntityDao(): WriteQueueItemEntityDao
 
 }
 

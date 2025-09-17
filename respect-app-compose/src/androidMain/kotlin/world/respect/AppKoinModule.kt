@@ -115,10 +115,50 @@ import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
+import world.respect.shared.viewmodel.report.ReportViewModel
+import java.io.File
+import kotlinx.io.files.Path
+import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.shared.domain.account.RespectAccount
+import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.libutil.ext.sanitizedForFilename
+import world.respect.libxxhash.XXHasher64Factory
+import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient
+import world.respect.shared.domain.account.RespectTokenManager
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.NavResultReturnerImpl
+import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import world.respect.shared.viewmodel.report.ReportViewModel
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
+import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
+import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueWorker
+import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
+import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
+import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
+import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
@@ -146,6 +186,10 @@ val appKoinModule = module {
 
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
+    }
+
+    single<UidNumberMapper> {
+        XXHashUidNumberMapper(xxStringHasher = get())
     }
 
     single<OkHttpClient> {
@@ -458,29 +502,79 @@ val appKoinModule = module {
      * The RespectAccount scope will be linked to SchoolDirectoryEntry (the parent) scope.
      */
     scope<RespectAccount> {
+        /* Koin doesn't have an onScopeCreated kind of function or event listener. The
+         * RespectAccount scope is linked ot the SchoolDirectoryEntry scope when
+         * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
+         * dependency that all dependencies on RespectAccountScope require.
+         */
+        scoped<RespectAccountSchoolScopeLink> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            val schoolDirectoryScope = SchoolDirectoryEntryScopeId(
+                schoolUrl = accountScopeId.schoolUrl,
+                accountPrincipalId = null,
+            )
+
+            linkTo(
+                getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+                    schoolDirectoryScope.scopeId
+                )
+            )
+
+            RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
+        }
+
+
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
         }
 
+        scoped<RemoteWriteQueue> {
+            get<RespectAccountSchoolScopeLink>()
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            RemoteWriteQueueDbImpl(
+                schoolDb = get(),
+                account = AuthenticatedUserPrincipalId(accountScopeId.accountPrincipalId.guid),
+                enqueueDrainRemoteWriteQueueUseCase = get(),
+            )
+        }
+
+        scoped<EnqueueDrainRemoteWriteQueueUseCase> {
+            EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
+                context = androidContext().applicationContext,
+                scopeId = id,
+                scopeClass = RespectAccount::class,
+            )
+        }
+
+        scoped<DrainRemoteWriteQueueUseCase> {
+            DrainRemoteWriteQueueUseCase(
+                remoteWriteQueue = get(),
+                dataSource = get(),
+            )
+        }
+
         scoped<SchoolDataSource> {
             val accountScopeId = RespectAccountScopeId.parse(id)
+            val schoolUrl = get<RespectAccountSchoolScopeLink>()
 
             SchoolDataSourceRepository(
                 local = SchoolDataSourceDb(
                     schoolDb = get(),
-                    xxStringHasher = get(),
+                    uidNumberMapper = get(),
                     authenticatedUser = AuthenticatedUserPrincipalId(
                         accountScopeId.accountPrincipalId.guid
                     )
                 ),
                 remote = SchoolDataSourceHttp(
-                    schoolUrl = accountScopeId.schoolUrl,
+                    schoolUrl = schoolUrl.url,
                     schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource,
                     httpClient = get(),
                     tokenProvider = get(),
                     validationHelper = get(),
                 ),
-                validationHelper = get()
+                validationHelper = get(),
+                remoteWriteQueue = get(),
             )
         }
     }

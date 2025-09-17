@@ -11,5 +11,11 @@ data class PersonEntityWithRoles(
         parentColumn = "pGuidHash",
         entityColumn = "prPersonGuidHash"
     )
-    val roles: List<PersonRoleEntity>
+    val roles: List<PersonRoleEntity>,
+
+    @Relation(
+        parentColumn = "pGuidHash",
+        entityColumn = "prpOtherPersonUidNum",
+    )
+    val relatedPersons: List<PersonRelatedPersonEntity>
 )

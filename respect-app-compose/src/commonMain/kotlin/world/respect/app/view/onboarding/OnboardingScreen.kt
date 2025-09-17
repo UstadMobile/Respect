@@ -56,7 +56,6 @@ fun OnboardingScreen(
         uiState = uiState,
         onClickGetStartedButton = viewModel::onClickGetStartedButton
     )
-
 }
 
 @Composable
@@ -115,9 +114,16 @@ fun OnboardingScreen(
                     modifier = Modifier.size(300.dp).padding(32.dp)
                 )
                 Spacer(Modifier.height(24.dp))
-                Text(text = item.onboardingTitle)
+                Text(
+                    text = item.onboardingTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
                 Spacer(Modifier.height(8.dp))
-                Text(text = item.onboardingDescription)
+                Text(
+                    text = item.onboardingDescription,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         }
         Row(

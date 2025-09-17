@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.Onboarding
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class AcknowledgementUiState(
@@ -37,11 +36,7 @@ class AcknowledgementViewModel(
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = if(accountManager.selectedAccount != null) {
-                        RespectAppLauncher
-                    }else {
-                        GetStartedScreen
-                    },
+                    destination = Onboarding,
                     clearBackStack = true
                 )
             )

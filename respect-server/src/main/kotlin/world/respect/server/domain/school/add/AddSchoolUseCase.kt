@@ -8,6 +8,7 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
@@ -62,6 +63,7 @@ class AddSchoolUseCase(
                 username = request.adminUsername,
                 givenName = "Admin",
                 familyName = "Admin",
+                gender = PersonGenderEnum.UNSPECIFIED,
                 roles = listOf(
                     PersonRole(
                         isPrimaryRole = true,

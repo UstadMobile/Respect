@@ -1,4 +1,4 @@
-package world.respect.datalayer.repository.clientservertest
+package world.respect.lib.test.clientservertest
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
@@ -50,6 +50,7 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import java.io.File
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
@@ -111,6 +112,10 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
     val serverSchoolDataSource = serverSchoolSourceAndDb.second
 
+    val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
+
+    val schoolUrl = Url("http://localhost:$port/")
+
     val server = embeddedServer(Netty, port = port) {
         install(ContentNegotiationServer) {
             json(
@@ -153,14 +158,12 @@ class ClientServerDataSourceTestBuilder internal constructor(
             clientDir, stringHasher, authenticatedUser
         )
 
-        val schoolBaseUrl = Url("http://localhost:$port/")
-
         val schoolDirectoryEntry = SchoolDirectoryEntry(
             name = LangMapStringValue("test school"),
-            self = schoolBaseUrl,
-            xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
-            oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
-            respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+            self = schoolUrl,
+            xapi = schoolUrl.appendEndpointSegments("api/school/xapi"),
+            oneRoster = schoolUrl.appendEndpointSegments("api/school/oneroster"),
+            respectExt = schoolUrl.appendEndpointSegments("api/school/respect"),
         )
 
         runBlocking {
@@ -183,7 +186,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
         val token = "secret"
         val schoolDataSourceRemote = SchoolDataSourceHttp(
-            schoolUrl = schoolBaseUrl,
+            schoolUrl = schoolUrl,
             schoolDirectoryDataSource = clientAppDataSource.schoolDirectoryDataSource,
             httpClient = httpClient,
             tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },

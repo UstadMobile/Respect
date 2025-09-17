@@ -68,7 +68,7 @@ class PersonDataSourceRepository(
     ): DataLoadState<List<Person>> {
         val remote = remote.list(loadParams, searchQuery, since)
         if(remote is DataReadyState) {
-            local.updateLocalFromRemote(remote.data)
+            local.updateLocal(remote.data)
             validationHelper.updateValidationInfo(remote.metaInfo)
         }
 
@@ -84,7 +84,7 @@ class PersonDataSourceRepository(
             remote = remote.listAsPagingSource(loadParams, params),
             argKey = 0,
             mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocalFromRemote,
+            onUpdateLocalFromRemote = local::updateLocal,
         )
     }
 
@@ -97,7 +97,7 @@ class PersonDataSourceRepository(
             remote = remote.listAsPagingSource(loadParams, listParams),
             argKey = 0,
             mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocalFromRemote,
+            onUpdateLocalFromRemote = local::updateLocal,
         )
     }
 

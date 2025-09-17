@@ -103,7 +103,7 @@ class PersonDataSourceDb(
         }
     }
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Person>,
         forceOverwrite: Boolean
     ) {

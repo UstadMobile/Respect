@@ -2,7 +2,9 @@ package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 
 /**
@@ -22,4 +24,6 @@ data class PersonEntity(
     val pGivenName: String,
     val pFamilyName: String,
     val pMiddleName: String? = null,
+    val pGender: PersonGenderEnum,
+    val pDateOfBirth: LocalDate? = null,
 )

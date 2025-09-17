@@ -59,7 +59,7 @@ class EnrollmentDataSourceRepository(
             remote = remote.listAsPagingSource(loadParams, listParams),
             argKey = 0,
             mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocalFromRemote,
+            onUpdateLocalFromRemote = local::updateLocal,
         )
     }
 

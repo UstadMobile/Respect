@@ -54,7 +54,7 @@ class ClassDataSourceRepository(
             remote = remote.listAsPagingSource(loadParams, params),
             argKey = 0,
             mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocalFromRemote
+            onUpdateLocalFromRemote = local::updateLocal
         )
     }
 

@@ -84,7 +84,7 @@ class ClassDatasourceDb(
         upsertClasses(list, false)
     }
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Clazz>,
         forceOverwrite: Boolean
     ) {

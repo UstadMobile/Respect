@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.generated.resources.other_options
@@ -31,7 +31,7 @@ data class OtherOptionsSignupUiState(
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val createPasskeyUseCase: CreatePasskeyUseCase,
-    private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
+    private val submitRedeemInviteRequestUseCase: RedeemInviteUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase
 ) : RespectViewModel(savedStateHandle) {
     private val route: OtherOptionsSignup = savedStateHandle.toRoute()
@@ -69,14 +69,26 @@ class OtherOptionsSignupViewModel(
                             ProfileType.CHILD , ProfileType.STUDENT->{
                                 viewModelScope.launch {
                                     _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,result.guid))
+                                        NavCommand.Navigate(
+                                            WaitingForApproval.create(
+                                                profileType =route.type,
+                                                inviteInfo = route.inviteInfo,
+                                                pendingInviteStateUid = result.person.guid
+                                            )
+                                        )
                                     )
                                 }
                             }
+
                             ProfileType.PARENT ->{
                                 viewModelScope.launch {
                                     _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.inviteInfo))
+                                        NavCommand.Navigate(
+                                            SignupScreen.create(
+                                                ProfileType.CHILD,
+                                                route.inviteInfo
+                                            )
+                                        )
                                     )
                                 }
                             }

@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.getString
-import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.generated.resources.*
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -85,7 +85,7 @@ class SignupViewModel(
     }
     fun onFullNameChanged(value: String) {
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo ?: return
             prev.copy(
                 personInfo = currentPerson.copy(name = value),
                 fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.full_name_required)
@@ -93,19 +93,23 @@ class SignupViewModel(
         }
     }
 
-    fun onGenderChanged(value: OneRosterGenderEnum) {
+    fun onGenderChanged(value: PersonGenderEnum) {
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo ?: return
+
             prev.copy(
                 personInfo = currentPerson.copy(gender = value),
-                genderError = if (value != OneRosterGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.gender_required)
+                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.gender_required)
             )
         }
     }
 
     fun onDateOfBirthChanged(value: LocalDate?) {
+        if(value == null)
+            return
+
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo ?: return
             prev.copy(
                 personInfo = currentPerson.copy(dateOfBirth = value),
                 dateOfBirthError = if (value != null)
@@ -141,7 +145,7 @@ class SignupViewModel(
 
             val hasError = listOf(
                 personInfo?.name?.isBlank(),
-                personInfo?.gender == OneRosterGenderEnum.UNSPECIFIED,
+                personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
                 personInfo?.dateOfBirth == null
             ).any { it == true }
 

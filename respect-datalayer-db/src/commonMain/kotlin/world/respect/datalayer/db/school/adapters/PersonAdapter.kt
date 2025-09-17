@@ -36,6 +36,7 @@ fun PersonEntities.toModel(): Person {
         givenName = personEntity.pGivenName,
         familyName = personEntity.pFamilyName,
         middleName = personEntity.pMiddleName,
+        gender = personEntity.pGender,
         roles = personRoleEntities.map {
             PersonRole(
                 isPrimaryRole = it.prIsPrimaryRole,
@@ -65,6 +66,7 @@ fun Person.toEntities(
             pGivenName = givenName,
             pFamilyName = familyName,
             pMiddleName = middleName,
+            pGender = gender,
         ),
         personRoleEntities = roles.map {
             PersonRoleEntity(

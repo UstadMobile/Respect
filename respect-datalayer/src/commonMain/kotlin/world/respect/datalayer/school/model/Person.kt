@@ -33,6 +33,7 @@ data class Person(
     val givenName: String,
     val familyName: String,
     val middleName: String? = null,
+    val gender: PersonGenderEnum,
     val preferredFirstName: String? = null,
     val preferredMiddleName: String? = null,
     val preferredLastName: String? = null,

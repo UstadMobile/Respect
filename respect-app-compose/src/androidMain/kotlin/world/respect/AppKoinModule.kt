@@ -46,7 +46,7 @@ import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
 import world.respect.shared.domain.mock.MockSubmitRedeemInviteRequestUseCase
@@ -114,7 +114,6 @@ import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
-import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueWorker
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -356,7 +355,7 @@ val appKoinModule = module {
     single<GetInviteInfoUseCase> {
         MockGetInviteInfoUseCase()
     }
-    single<SubmitRedeemInviteRequestUseCase> {
+    single<RedeemInviteUseCase> {
         MockSubmitRedeemInviteRequestUseCase()
     }
 

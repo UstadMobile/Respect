@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Onboarding
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class AcknowledgementUiState(
@@ -34,9 +35,16 @@ class AcknowledgementViewModel(
 
             delay(2000)
 
+
+            val hasAccount = accountManager.selectedAccount != null
+
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = Onboarding,
+                    destination = if (hasAccount) {
+                        RespectAppLauncher
+                    } else {
+                        Onboarding
+                    },
                     clearBackStack = true
                 )
             )

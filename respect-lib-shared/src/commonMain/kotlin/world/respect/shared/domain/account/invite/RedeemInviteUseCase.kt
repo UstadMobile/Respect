@@ -1,6 +1,6 @@
 package world.respect.shared.domain.account.invite
 
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.AuthResponse
 
 /**

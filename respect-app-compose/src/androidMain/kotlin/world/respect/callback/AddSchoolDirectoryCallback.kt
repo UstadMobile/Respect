@@ -16,13 +16,12 @@ class AddSchoolDirectoryCallback(
         val defaultStream = javaClass.classLoader
             ?.getResourceAsStream("directories/default.properties")
             ?: throw IllegalStateException("default.properties not found in resources")
-        props.load(defaultStream)
+        defaultStream.use { props.load(it) }
 
         val localStream = javaClass.classLoader
             ?.getResourceAsStream("directories/local.properties")
-        localStream?.use { props.load(it) }
-        if (localStream != null) {
-            props.load(localStream)
+        localStream?.use {
+            props.load(it)
         }
 
         props.forEach { key, value ->

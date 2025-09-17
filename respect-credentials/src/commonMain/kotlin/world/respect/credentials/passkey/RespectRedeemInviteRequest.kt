@@ -4,13 +4,19 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
-import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 
+/**
+ *
+ */
 @Serializable
 class RespectRedeemInviteRequest(
-    val inviteInfo: RespectInviteInfo,
-    val student: PersonInfo,
-    val parentOrGuardian: PersonInfo?,
+    val code: String,
+    val classUid: String?,
+    val role: PersonRoleEnum,
+    val accountPersonInfo: PersonInfo,
+    val studentPersonInfo: PersonInfo?,
     val parentOrGuardianRole: GuardianRole?,
     val account: Account,
 ) {
@@ -22,9 +28,9 @@ class RespectRedeemInviteRequest(
 
    @Serializable
    data class PersonInfo(
-       val name: String ?=null,
-       val gender: OneRosterGenderEnum?=null,
-       val dateOfBirth: LocalDate?=null,
+       val name: String = "",
+       val gender: PersonGenderEnum = PersonGenderEnum.UNSPECIFIED,
+       val dateOfBirth: LocalDate = LocalDate(1900, 1, 1),
     )
 
     @Serializable

@@ -2,10 +2,11 @@ package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
 import org.koin.core.component.KoinComponent
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.RespectRedeemInviteRequest.RedeemInviteCredential
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -82,19 +83,30 @@ class RedeemInviteUseCaseDb(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
         ).personDataSource.updateLocal(listOf(accountPerson))
 
-        setPasswordUseCase(
-            SetPasswordUseCase.SetPasswordRequest(
-                authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
-                userGuid = accountPerson.guid,
-                password = redeemRequest.account.credential,
-            )
-        )
+        val credential = redeemRequest.account.credential
+
+        when(credential) {
+            is RespectRedeemInviteRequest.RedeemInvitePasswordCredential ->{
+                setPasswordUseCase(
+                    SetPasswordUseCase.SetPasswordRequest(
+                        authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
+                        userGuid = accountPerson.guid,
+                        password = credential.password,
+                    )
+                )
+
+                return getTokenAndUserProfileUseCase(
+                    username = redeemRequest.account.username,
+                    password = credential.password,
+                )
+            }
+            else -> {
+                TODO("set credential passkey")
+            }
+        }
+
+
 
         //If a teacher/student, make the enrollment now
-
-        return getTokenAndUserProfileUseCase(
-            username = redeemRequest.account.username,
-            password = redeemRequest.account.credential,
-        )
     }
 }

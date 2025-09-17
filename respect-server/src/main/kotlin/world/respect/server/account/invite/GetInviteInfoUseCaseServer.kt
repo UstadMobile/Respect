@@ -19,12 +19,14 @@ class GetInviteInfoUseCaseServer(
             .findSchoolByInviteCode(codeWithoutDirectoryPrefix)
             ?: throw IllegalArgumentException("No school for code: $code").withHttpStatusCode(400)
 
-        val schoolScopeId = SchoolDirectoryEntryScopeId(schoolDirectoryEntry.self, null)
+        val schoolScopeId = SchoolDirectoryEntryScopeId(
+            schoolDirectoryEntry.reSelf, null
+        )
         val schoolScope = getKoin().getScope(schoolScopeId.scopeId)
         val schoolDb: RespectSchoolDatabase = schoolScope.get()
 
         val clazzInviteCode = codeWithoutDirectoryPrefix.substringAfter(
-            schoolDirectoryEntry.schoolCode ?: ""
+            schoolDirectoryEntry.reSchoolCode ?: ""
         )
 
 

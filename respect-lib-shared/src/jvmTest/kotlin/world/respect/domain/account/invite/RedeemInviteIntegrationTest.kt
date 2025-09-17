@@ -4,9 +4,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -74,7 +74,10 @@ class RedeemInviteIntegrationTest {
                     parentOrGuardianRole = null,
                     studentPersonInfo = null,
                     account = RespectRedeemInviteRequest.Account(
-                        "username", "secret"
+                        username = "username",
+                        credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
+                            "bart"
+                        )
                     )
                 )
 

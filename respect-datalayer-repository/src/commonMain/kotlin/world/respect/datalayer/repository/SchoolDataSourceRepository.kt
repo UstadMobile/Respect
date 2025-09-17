@@ -6,8 +6,6 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
-import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -53,8 +51,4 @@ class SchoolDataSourceRepository(
             remoteWriteQueue = remoteWriteQueue,
         )
     }
-    override val enrollmentDataSource: EnrollmentDataSource by lazy {
-        local.enrollmentDataSource
-    }
-
 }

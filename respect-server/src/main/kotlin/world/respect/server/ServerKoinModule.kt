@@ -37,7 +37,6 @@ import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
-import world.respect.shared.domain.mock.MockGetInviteInfoUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -93,7 +92,8 @@ fun serverKoinModule(
     }
 
     single<GetInviteInfoUseCase> {
-        MockGetInviteInfoUseCase(
+        GetInviteInfoUseCaseServer(
+            respectAppDb = get()
         )
     }
 

@@ -23,6 +23,7 @@ import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
 import java.io.File
 import java.util.Properties
+import kotlin.random.Random
 import kotlin.system.exitProcess
 
 fun managerServerMain(ns: Namespace) {
@@ -78,8 +79,9 @@ fun managerServerMain(ns: Namespace) {
                                     xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
                                     oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+                                    schoolCode = Random.nextInt(10_000).toString().padStart(5, '0'),
                                     rpId = rpId,
-                                    ),
+                                ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,
                                 adminPassword = ns.getString("adminpassword"),

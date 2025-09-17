@@ -59,7 +59,10 @@ class LoginViewModel(
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
                             viewModelScope.launch {
                                 _navCommandFlow.tryEmit(
-                                    NavCommand.Navigate(RespectAppLauncher)
+                                    NavCommand.Navigate(
+                                        destination = RespectAppLauncher,
+                                        clearBackStack = true
+                                    )
                                 )
                             }
                         }

@@ -108,12 +108,11 @@ fun OnboardingScreen(
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
                 Image(
                     painter = respectImagePainter(item.onboardingImage),
                     contentDescription = null,
-                    modifier = Modifier.size(250.dp)
+                    modifier = Modifier.size(300.dp).padding(32.dp)
                 )
                 Spacer(Modifier.height(24.dp))
                 Text(text = item.onboardingTitle)

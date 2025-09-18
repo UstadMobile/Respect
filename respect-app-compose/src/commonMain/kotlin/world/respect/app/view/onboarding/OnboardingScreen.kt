@@ -41,7 +41,7 @@ import world.respect.shared.generated.resources.onboardingTitle3
 import world.respect.shared.generated.resources.onboardingTitle4
 
 
-data class OnboardingPage(
+data class OnboardingItem(
     val onboardingImage: RespectImage,
     val onboardingTitle: String,
     val onboardingDescription: String
@@ -64,36 +64,35 @@ fun OnboardingScreen(
     onClickGetStartedButton: () -> Unit
 ) {
 
-    val pages = listOf(
-        OnboardingPage(
+    val onboardingItem = listOf(
+        OnboardingItem(
             onboardingImage = RespectImage.DIGITAL_LIBRARY,
             onboardingTitle = stringResource(Res.string.onboardingTitle1),
             onboardingDescription = stringResource(Res.string.onboardingDescription2)
         ),
-        OnboardingPage(
+        OnboardingItem(
             onboardingImage = RespectImage.WORKS_OFFLINE,
             onboardingTitle = stringResource(Res.string.onboardingTitle2),
             onboardingDescription = stringResource(Res.string.onboardingDescription2)
         ),
-        OnboardingPage(
+        OnboardingItem(
             onboardingImage = RespectImage.DATA_REPORTING,
             onboardingTitle = stringResource(Res.string.onboardingTitle3),
             onboardingDescription = stringResource(Res.string.onboardingDescription3)
         ),
-        OnboardingPage(
+        OnboardingItem(
             onboardingImage = RespectImage.ASSIGNMENTS,
             onboardingTitle = stringResource(Res.string.onboardingTitle4),
             onboardingDescription = stringResource(Res.string.onboardingDescription4)
         )
     )
 
-    val pagerState = rememberPagerState(pageCount = { pages.size })
+    val pagerState = rememberPagerState(pageCount = { onboardingItem.size })
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(24.dp),
+            .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -103,10 +102,13 @@ fun OnboardingScreen(
                 .weight(1f)
                 .fillMaxWidth()
         ) { page ->
-            val item = pages[page]
+            val item = onboardingItem[page]
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                ,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+
             ) {
                 Image(
                     painter = respectImagePainter(item.onboardingImage),
@@ -114,23 +116,29 @@ fun OnboardingScreen(
                     modifier = Modifier.size(300.dp).padding(32.dp)
                 )
                 Spacer(Modifier.height(24.dp))
-                Text(
-                    text = item.onboardingTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = item.onboardingDescription,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                ) {
+                    Text(
+                        text = item.onboardingTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = item.onboardingDescription,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(32.dp))
+                }
             }
         }
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            repeat(pages.size) { index ->
+            repeat(onboardingItem.size) { index ->
                 val selected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
@@ -154,14 +162,16 @@ fun OnboardingScreen(
             }
         }
         Button(
+            modifier = Modifier.padding(bottom = 32.dp),
             onClick = {
                 onClickGetStartedButton()
             }
         ) {
             Text(stringResource(Res.string.get_started))
         }
-
     }
 }
+
+
 
 

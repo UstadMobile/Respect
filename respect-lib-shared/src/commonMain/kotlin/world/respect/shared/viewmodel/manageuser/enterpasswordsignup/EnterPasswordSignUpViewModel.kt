@@ -86,13 +86,15 @@ class EnterPasswordSignupViewModel(
 
             try {
                 accountManager.register(
-                    redeemInviteRequest = redeemRequest
+                    redeemInviteRequest = redeemRequest,
+                    schoolUrl = route.schoolUrl,
                 )
 
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = if(redeemRequest.role == PersonRoleEnum.PARENT) {
                             SignupScreen.create(
+                                schoolUrl = route.schoolUrl,
                                 profileType = ProfileType.CHILD,
                                 inviteRequest = redeemRequest,
                             )

@@ -97,23 +97,10 @@ fun serverKoinModule(
         get<RespectAppDataSourceLocal>()
     }
 
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseServer(
-            respectAppDb = get(),
-            respectAppDataSource = get(),
-        )
-    }
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
             schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
-        )
-    }
-
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseServer(
-            respectAppDb = get(),
-            respectAppDataSource = get(),
         )
     }
 
@@ -173,6 +160,12 @@ fun serverKoinModule(
         scoped<SchoolPrimaryKeyGenerator> {
             SchoolPrimaryKeyGenerator(
                 PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
+            )
+        }
+
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseServer(
+                schoolDb = get(),
             )
         }
 

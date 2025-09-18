@@ -6,7 +6,7 @@ import world.respect.datalayer.db.shared.entities.ILangMapEntity
 
 @Entity
 data class SchoolDirectoryEntryLangMapEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val sdelUid: Int = 0,
     val sdelReUid: Long,
     val sdelLang: String,

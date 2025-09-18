@@ -83,6 +83,7 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import kotlinx.io.files.Path
+import org.koin.android.ext.koin.androidApplication
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.AuthTokenProvider
@@ -308,7 +309,6 @@ val appKoinModule = module {
             json = get(),
             tokenManager = get(),
             appDataSource = get(),
-            getInviteInfoUseCase = get(),
         )
     }
 
@@ -341,7 +341,7 @@ val appKoinModule = module {
 
     single<CreatePasskeyUseCase> {
         CreatePasskeyUseCaseImpl(
-            context = androidContext().applicationContext,
+            context = androidApplication(),
             json = get(),
             createPublicKeyJsonUseCase = get()
         )
@@ -349,20 +349,14 @@ val appKoinModule = module {
 
     single<GetCredentialUseCase> {
         GetCredentialUseCaseImpl(
-            context = androidContext().applicationContext,
+            context = androidApplication(),
             json = get(),
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )
     }
     single<VerifyDomainUseCase> {
         VerifyDomainUseCaseImpl(
-            context = androidContext().applicationContext
-        )
-    }
-
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseClient(
-            schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource
+            context = androidApplication()
         )
     }
 
@@ -423,7 +417,6 @@ val appKoinModule = module {
         SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
     }
 
-
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -471,6 +464,15 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
+
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+
     }
 
     /**

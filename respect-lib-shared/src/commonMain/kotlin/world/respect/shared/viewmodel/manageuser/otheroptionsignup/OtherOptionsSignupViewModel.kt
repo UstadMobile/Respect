@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -17,11 +18,9 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
-import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class OtherOptionsSignupUiState(
     val passkeyError: String? = null,
@@ -31,7 +30,7 @@ data class OtherOptionsSignupUiState(
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
-    private val inviteInfoUseCase: GetInviteInfoUseCase
+    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle) {
     private val route: OtherOptionsSignup = savedStateHandle.toRoute()
 
@@ -58,9 +57,12 @@ class OtherOptionsSignupViewModel(
 
     fun onClickSignupWithPasskey() {
         viewModelScope.launch {
-            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
             try {
-                val rpId = inviteInfo.school.rpId
+                val schoolDirEntry = respectAppDataSource.schoolDirectoryEntryDataSource
+                    .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull() ?: throw IllegalStateException()
+                val rpId = schoolDirEntry.rpId
+                val username = route.respectRedeemInviteRequest.account.username
+
                 if (createPasskeyUseCase == null || rpId==null){
                     _uiState.update {
                         it.copy(
@@ -69,7 +71,7 @@ class OtherOptionsSignupViewModel(
                     }
                 }else {
                     val createPasskeyResult = createPasskeyUseCase(
-                        username = route.username,
+                        username = username,
                         rpId = rpId
                     )
 
@@ -77,7 +79,7 @@ class OtherOptionsSignupViewModel(
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                             val redeemInviteRequest = route.respectRedeemInviteRequest
                             val account = RespectRedeemInviteRequest.Account(
-                                username = route.username,
+                                username = username,
                                 credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
                                     createPasskeyResult.authenticationResponseJSON
                                 )
@@ -91,31 +93,6 @@ class OtherOptionsSignupViewModel(
                                 parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
                                 account = account
                             )
-
-
-
-                            when (route.type) {
-                                ProfileType.CHILD ->{
-                                    //ignore not create account for child
-                                }
-                                ProfileType.TEACHER -> {
-
-                                }
-                                ProfileType.STUDENT -> {
-
-                                }
-
-                                ProfileType.PARENT -> {
-                                    _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(
-                                            SignupScreen.create(
-                                                profileType = ProfileType.CHILD,
-                                                inviteRequest = updatedRedeemInviteRequest
-                                            )
-                                        )
-                                    )
-                                }
-                            }
                         }
 
                         is CreatePasskeyUseCase.Error -> {
@@ -142,7 +119,8 @@ class OtherOptionsSignupViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 EnterPasswordSignup.create(
-                    route.respectRedeemInviteRequest
+                    schoolUrl = route.schoolUrl,
+                    inviteRequest = route.respectRedeemInviteRequest
                 )
             )
         )

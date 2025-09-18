@@ -24,7 +24,6 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_school_name
-import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.school_name_placeholder
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -40,7 +39,6 @@ fun GetStartedScreen(
     GetStartedScreen(
         uiState = uiState,
         onSchoolNameChanged = viewModel::onSchoolNameChanged,
-        onClickInviteCode = viewModel::onClickIHaveCode,
         onClickOtherOptions = viewModel::onClickOtherOptions,
         onSchoolSelected = viewModel::onSchoolSelected
     )
@@ -51,7 +49,6 @@ fun GetStartedScreen(
     uiState: GetStartedUiState,
     onSchoolNameChanged: (String) -> Unit,
     onSchoolSelected: (SchoolDirectoryEntry) -> Unit,
-    onClickInviteCode: () -> Unit,
     onClickOtherOptions: () -> Unit
 ) {
     Column(
@@ -109,14 +106,6 @@ fun GetStartedScreen(
         if (uiState.showButtons){
             Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedButton(
-                onClick = onClickInviteCode,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = stringResource(Res.string.i_have_an_invite_code))
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = onClickOtherOptions,

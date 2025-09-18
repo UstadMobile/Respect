@@ -8,9 +8,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.credentials.passkey.VerifyDomainUseCase
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.generated.resources.Res
@@ -25,6 +31,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -42,15 +49,24 @@ class CreateAccountViewModel(
     savedStateHandle: SavedStateHandle,
     private val verifyDomainUseCase: VerifyDomainUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
-    private val inviteInfoUseCase: GetInviteInfoUseCase
-) : RespectViewModel(savedStateHandle) {
+    private val respectAppDataSource: RespectAppDataSource,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val route: CreateAccount = savedStateHandle.toRoute()
+
+    override val scope: Scope
+        get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+        )
+
+    private val inviteInfoUseCase: GetInviteInfoUseCase by inject()
 
     private val _uiState = MutableStateFlow(CreateAccountViewModelUiState())
 
     val uiState = _uiState.asStateFlow()
 
     private val passkeySupported = CompletableDeferred<Boolean>()
+
+    private val schoolDirectoryEntry = CompletableDeferred<SchoolDirectoryEntry>()
 
     init {
         _appUiState.update {
@@ -63,15 +79,23 @@ class CreateAccountViewModel(
 
         viewModelScope.launch {
             val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
-            val passkeySupportedVal = createPasskeyUseCase != null && inviteInfo.school.rpId != null
-                    && verifyDomainUseCase(inviteInfo.school.rpId ?: "")
+            val schoolDirEntryVal = respectAppDataSource.schoolDirectoryEntryDataSource
+                .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {
+                    schoolDirectoryEntry.complete(it)
+                } ?: throw IllegalStateException()
+
+            val rpId = schoolDirEntryVal.rpId
+            val passkeySupportedVal = createPasskeyUseCase != null &&
+                    rpId != null &&
+                    verifyDomainUseCase(rpId)
+
             passkeySupported.complete(passkeySupportedVal)
 
             _uiState.update { prev ->
                 prev.copy(
                     inviteInfo = inviteInfo,
                     passkeySupported = passkeySupportedVal,
-                    generalError = if (!(createPasskeyUseCase != null && inviteInfo.school.rpId != null))
+                    generalError = if (!(createPasskeyUseCase != null && rpId != null))
                         StringResourceUiText(Res.string.passkey_not_supported)
                     else null
                 )
@@ -109,7 +133,7 @@ class CreateAccountViewModel(
 
             if (username.isBlank()) return@launch
 
-            val rpIdVal = inviteInfo.school.rpId
+            val rpIdVal = schoolDirectoryEntry.await().rpId
             try {
                 if (createPasskeyUseCase != null && rpIdVal != null && passkeySupported.await()) {
                     val createPasskeyResult = createPasskeyUseCase(
@@ -139,6 +163,7 @@ class CreateAccountViewModel(
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             EnterPasswordSignup.create(
+                                schoolUrl = route.schoolUrl,
                                 inviteRequest = route.respectRedeemInviteRequest.copy(
                                     account = RespectRedeemInviteRequest.Account(
                                         username = username,
@@ -180,8 +205,7 @@ class CreateAccountViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 OtherOptionsSignup.create(
-                    username = uiState.value.username,
-                    profileType = route.type,
+                    schoolUrl = route.schoolUrl,
                     inviteRequest = route.respectRedeemInviteRequest.copy(
                         account = RespectRedeemInviteRequest.Account(
                             username = username,

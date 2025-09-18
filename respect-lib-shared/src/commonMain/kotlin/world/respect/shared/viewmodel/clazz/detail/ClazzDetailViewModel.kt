@@ -14,7 +14,6 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
@@ -63,7 +62,6 @@ data class ClazzDetailUiState(
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    private val appDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -93,25 +91,6 @@ class ClazzDetailViewModel(
     private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     init {
-        viewModelScope.launch {
-            val selectedAccountUrl = accountManager.selectedAccount?.school?.self ?: return@launch
-            val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource
-                .getSchoolDirectoryEntryByUrl(
-                    selectedAccountUrl
-                ).dataOrNull() ?: return@launch
-
-            _uiState.update {
-                it.copy(
-                    inviteCodePrefix = if(schoolDirectoryEntry.schoolCode != null &&
-                            schoolDirectoryEntry.directoryCode != null) {
-                        "${schoolDirectoryEntry.directoryCode}${schoolDirectoryEntry.schoolCode}"
-                    }else {
-                        null
-                    }
-                )
-            }
-        }
-
         _appUiState.update {
             it.copy(
                 showBackButton = false, fabState = FabUiState(
@@ -160,12 +139,11 @@ class ClazzDetailViewModel(
             else -> throw IllegalStateException()
         }
 
-        val inviteCode = _uiState.value.inviteCodePrefix
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AddPersonToClazz.create(
                     roleType = roleType,
-                    inviteCode = "$inviteCode$classInviteCode",
+                    inviteCode = classInviteCode,
                 )
             )
         )

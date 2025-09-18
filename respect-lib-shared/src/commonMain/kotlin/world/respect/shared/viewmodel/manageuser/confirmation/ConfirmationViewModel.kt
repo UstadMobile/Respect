@@ -8,7 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -20,6 +23,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
@@ -32,13 +36,21 @@ data class ConfirmationUiState(
 
 class ConfirmationViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getInviteInfoUseCase: GetInviteInfoUseCase,
-) : RespectViewModel(savedStateHandle) {
-
-    private val _uiState = MutableStateFlow(ConfirmationUiState())
-    val uiState = _uiState.asStateFlow()
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: ConfirmationScreen = savedStateHandle.toRoute()
+
+    override val scope: Scope
+        get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+        )
+
+    private val getInviteInfoUseCase: GetInviteInfoUseCase = scope.get()
+
+    private val _uiState = MutableStateFlow(ConfirmationUiState())
+
+    val uiState = _uiState.asStateFlow()
+
 
     init {
         _appUiState.update {
@@ -95,13 +107,15 @@ class ConfirmationViewModel(
         if (profileType == ProfileType.STUDENT) {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    SignupScreen.create(profileType,redeemRequest)
+                    SignupScreen.create(
+                        route.schoolUrl, profileType,redeemRequest
+                    )
                 )
             )
         }else {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    TermsAndCondition.create(profileType,redeemRequest
+                    TermsAndCondition.create(route.schoolUrl, profileType,redeemRequest
                     )
                 )
             )

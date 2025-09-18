@@ -47,8 +47,14 @@ class TermsAndConditionViewModel(
     }
 
     fun onAcceptClicked() {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(SignupScreen.create(route.type,route.respectRedeemInviteRequest))
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                SignupScreen.create(
+                    route.schoolUrl,
+                    route.type,
+                    route.respectRedeemInviteRequest
+                )
             )
+        )
     }
 }

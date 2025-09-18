@@ -175,6 +175,7 @@ class SignupViewModel(
                             value = NavCommand.Navigate(
                                 destination = CreateAccount.create(
                                     profileType = route.type,
+                                    schoolUrl = route.schoolUrl,
                                     inviteRequest = route.respectRedeemInviteRequest.copy(
                                         accountPersonInfo = personInfo
                                     )

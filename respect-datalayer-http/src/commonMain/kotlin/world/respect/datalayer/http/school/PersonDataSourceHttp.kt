@@ -29,14 +29,14 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.adapters.asListDetails
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.map
 import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
 class PersonDataSourceHttp(
     override val schoolUrl: Url,
-    override val schoolDirectoryDataSource: SchoolDirectoryDataSource,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,

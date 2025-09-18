@@ -60,7 +60,8 @@ class LoginViewModel(
         }
         viewModelScope.launch {
             try {
-                val school = respectAppDataSource.schoolDirectoryDataSource.getSchoolDirectoryEntryByUrl(route.schoolUrl)
+                val school = respectAppDataSource.schoolDirectoryEntryDataSource
+                    .getSchoolDirectoryEntryByUrl(route.schoolUrl)
                 val rpId: String? = when (school) {
                     is DataReadyState -> school.data.rpId
                     else -> null

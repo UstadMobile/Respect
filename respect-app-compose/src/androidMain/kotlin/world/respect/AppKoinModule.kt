@@ -50,8 +50,6 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -98,7 +96,6 @@ import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidation
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.SchoolDataSourceRepository
-import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
@@ -533,7 +530,7 @@ val appKoinModule = module {
                 ),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
-                    schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource,
+                    schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                     httpClient = get(),
                     tokenProvider = get(),
                     validationHelper = get(),

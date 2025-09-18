@@ -28,6 +28,8 @@ import world.respect.server.routes.getRespectSchoolJson
 import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
+import org.koin.ktor.ext.inject
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.school.respect.ClassRoute
@@ -146,7 +148,8 @@ fun Application.module() {
 
         route("api") {
             route("directory") {
-                RespectSchoolDirectoryRoute()
+                val respectAppDataSource: RespectAppDataSource by inject()
+                RespectSchoolDirectoryRoute(respectAppDataSource)
             }
 
             route("school") {

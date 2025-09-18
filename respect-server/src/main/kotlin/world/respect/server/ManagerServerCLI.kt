@@ -25,6 +25,7 @@ import java.io.File
 import java.util.Properties
 import kotlin.random.Random
 import kotlin.system.exitProcess
+import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
     val json = Json { encodeDefaults = true }
@@ -81,6 +82,8 @@ fun managerServerMain(ns: Namespace) {
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
                                     schoolCode = Random.nextInt(10_000).toString().padStart(5, '0'),
                                     rpId = rpId,
+                                    lastModified = Clock.System.now(),
+                                    stored = Clock.System.now(),
                                 ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,

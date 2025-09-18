@@ -10,18 +10,18 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
-import kotlin.time.ExperimentalTime
 
 /**
  * Used by command line client, potentially web admin UI to add a realm.
  */
-@OptIn(ExperimentalTime::class)
 class AddSchoolUseCase(
-    private val directoryDataSource: SchoolDirectoryDataSourceLocal
+    private val directoryDataSource: SchoolDirectoryDataSourceLocal,
+    private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal,
 ): KoinComponent {
 
     @Serializable
@@ -36,7 +36,8 @@ class AddSchoolUseCase(
         requests: List<AddSchoolRequest>
     ) {
         requests.forEach { request ->
-            directoryDataSource.addServerManagedSchool(
+            schoolDirectoryEntryDataSource.updateLocal(listOf(request.school))
+            directoryDataSource.setServerManagedSchoolConfig(
                 request.school,  request.dbUrl
             )
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "cd26e0b107ca4707864d9a8f0b1e610c",
+    "identityHash": "758979548f81ce1c3616aa35c4ccdad1",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -708,24 +708,13 @@
       },
       {
         "tableName": "SchoolDirectoryEntryEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reLastMod` INTEGER NOT NULL, `reEtag` TEXT, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, `reSchoolCode` TEXT, PRIMARY KEY(`reUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, `reSchoolCode` TEXT, `reLastModified` INTEGER NOT NULL, `reStored` INTEGER NOT NULL, PRIMARY KEY(`reUid`))",
         "fields": [
           {
             "fieldPath": "reUid",
             "columnName": "reUid",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "reLastMod",
-            "columnName": "reLastMod",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reEtag",
-            "columnName": "reEtag",
-            "affinity": "TEXT"
           },
           {
             "fieldPath": "reSelf",
@@ -759,12 +748,71 @@
             "fieldPath": "reSchoolCode",
             "columnName": "reSchoolCode",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reLastModified",
+            "columnName": "reLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reStored",
+            "columnName": "reStored",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
             "reUid"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolDirectoryEntryLangMapEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sdelUid` INTEGER NOT NULL, `sdelReUid` INTEGER NOT NULL, `sdelLang` TEXT NOT NULL, `sdelRegion` TEXT, `sdelValue` TEXT NOT NULL, `sdelPropId` INTEGER NOT NULL, PRIMARY KEY(`sdelUid`))",
+        "fields": [
+          {
+            "fieldPath": "sdelUid",
+            "columnName": "sdelUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelReUid",
+            "columnName": "sdelReUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelLang",
+            "columnName": "sdelLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelRegion",
+            "columnName": "sdelRegion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sdelValue",
+            "columnName": "sdelValue",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelPropId",
+            "columnName": "sdelPropId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sdelUid"
           ]
         }
       },
@@ -848,7 +896,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cd26e0b107ca4707864d9a8f0b1e610c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '758979548f81ce1c3616aa35c4ccdad1')"
     ]
   }
 }

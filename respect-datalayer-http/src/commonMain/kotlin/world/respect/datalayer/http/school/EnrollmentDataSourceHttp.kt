@@ -27,12 +27,12 @@ import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class EnrollmentDataSourceHttp(
     override val schoolUrl: Url,
-    override val schoolDirectoryDataSource: SchoolDirectoryDataSource,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,

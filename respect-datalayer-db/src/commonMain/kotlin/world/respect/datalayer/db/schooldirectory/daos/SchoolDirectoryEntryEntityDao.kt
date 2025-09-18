@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.schooldirectory.adapters.SchoolDirectoryEntryEntities
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
 
 @Dao
@@ -20,7 +22,7 @@ interface SchoolDirectoryEntryEntityDao {
         WHERE reUid = :uid
     """
     )
-    suspend fun findByUid(uid: Long): SchoolDirectoryEntryEntity?
+    suspend fun findByUid(uid: Long): SchoolDirectoryEntryEntities?
 
     @Query(
         """
@@ -42,5 +44,36 @@ interface SchoolDirectoryEntryEntityDao {
      * @param code an invite code (with the directory prefix removed)
      */
     suspend fun findSchoolByInviteCode(code: String): SchoolDirectoryEntryEntity?
+
+    @Transaction
+    @Query(SELECT_LIST_SQL)
+    fun listAsFlow(
+        code: String?,
+        name: String?,
+    ): Flow<List<SchoolDirectoryEntryEntities>>
+
+
+    @Transaction
+    @Query(SELECT_LIST_SQL)
+    suspend fun list(
+        code: String?,
+        name: String?,
+    ): List<SchoolDirectoryEntryEntities>
+
+
+    companion object {
+
+        const val SELECT_LIST_SQL = """
+        SELECT SchoolDirectoryEntryEntity.*
+          FROM SchoolDirectoryEntryEntity
+         WHERE (:code IS NULL OR :code LIKE (SchoolDirectoryEntryEntity.reSchoolCode || '%'))
+           AND (:name IS NULL OR SchoolDirectoryEntryEntity.reUid IN
+                (SELECT SchoolDirectoryEntryLangMapEntity.sdelReUid
+                   FROM SchoolDirectoryEntryLangMapEntity
+                  WHERE SchoolDirectoryEntryLangMapEntity.sdelValue LIKE :name))
+        """
+
+    }
+
 
 }

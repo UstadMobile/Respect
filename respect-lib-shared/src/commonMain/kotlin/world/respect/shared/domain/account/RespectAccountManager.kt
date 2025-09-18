@@ -117,7 +117,7 @@ class RespectAccountManager(
             password = password,
         )
 
-        val schoolDirectoryEntry = appDataSource.schoolDirectoryDataSource.getSchoolDirectoryEntryByUrl(
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl
         ).dataOrNull() ?: throw IllegalStateException()
 

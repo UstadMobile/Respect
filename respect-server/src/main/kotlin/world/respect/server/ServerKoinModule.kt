@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
@@ -82,7 +83,8 @@ fun serverKoinModule(
             xxStringHasher = get()
         )
     }
-    single<RespectAppDataSource> {
+
+    single<RespectAppDataSourceLocal> {
         RespectAppDataSourceDb(
             respectAppDatabase = get(),
             json = get(),
@@ -91,21 +93,28 @@ fun serverKoinModule(
         )
     }
 
+    single<RespectAppDataSource> {
+        get<RespectAppDataSourceLocal>()
+    }
+
     single<GetInviteInfoUseCase> {
         GetInviteInfoUseCaseServer(
-            respectAppDb = get()
+            respectAppDb = get(),
+            respectAppDataSource = get(),
         )
     }
 
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
-            directoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource as SchoolDirectoryDataSourceLocal
+            directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
         )
     }
 
     single<GetInviteInfoUseCase> {
         GetInviteInfoUseCaseServer(
-            respectAppDb = get()
+            respectAppDb = get(),
+            respectAppDataSource = get(),
         )
     }
 

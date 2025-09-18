@@ -3,6 +3,7 @@ package world.respect.datalayer.db.schooldirectory.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import io.ktor.http.Url
+import kotlin.time.Instant
 
 /**
  * @property reUid the XXHash64 of the rrSelfUrl
@@ -11,12 +12,12 @@ import io.ktor.http.Url
 data class SchoolDirectoryEntryEntity(
     @PrimaryKey
     val reUid: Long,
-    val reLastMod: Long,
-    val reEtag: String?,
     val reSelf: Url,
     val reXapi: Url,
     val reOneRoster: Url,
     val reRespectExt: Url?,
     val reRpId: String?,
     val reSchoolCode: String?,
+    val reLastModified: Instant,
+    val reStored: Instant,
 )

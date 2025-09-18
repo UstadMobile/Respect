@@ -23,8 +23,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.mockito.kotlin.spy
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
@@ -52,6 +50,7 @@ import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import java.io.File
+import kotlin.time.Clock
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
@@ -116,6 +115,18 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
     val schoolUrl = Url("http://localhost:$port/")
 
+    val schoolDirectoryEntry = SchoolDirectoryEntry(
+        name = LangMapStringValue("test school"),
+        self = schoolUrl,
+        xapi = schoolUrl.appendEndpointSegments("api/school/xapi"),
+        oneRoster = schoolUrl.appendEndpointSegments("api/school/oneroster"),
+        respectExt = schoolUrl.appendEndpointSegments("api/school/respect"),
+        rpId = schoolUrl.host,
+        schoolCode = "123",
+        lastModified = Clock.System.now(),
+        stored = Clock.System.now()
+    )
+
     val server = embeddedServer(Netty, port = port) {
         install(ContentNegotiationServer) {
             json(
@@ -158,22 +169,11 @@ class ClientServerDataSourceTestBuilder internal constructor(
             clientDir, stringHasher, authenticatedUser
         )
 
-        val schoolDirectoryEntry = SchoolDirectoryEntry(
-            name = LangMapStringValue("test school"),
-            self = schoolUrl,
-            xapi = schoolUrl.appendEndpointSegments("api/school/xapi"),
-            oneRoster = schoolUrl.appendEndpointSegments("api/school/oneroster"),
-            respectExt = schoolUrl.appendEndpointSegments("api/school/respect"),
-            schoolBaseUrl.host,
-        )
+
 
         runBlocking {
-            clientAppDataSource.schoolDirectoryDataSource.putSchoolDirectoryEntry(
-                school = DataReadyState(
-                    data = schoolDirectoryEntry,
-                    metaInfo = DataLoadMetaInfo(lastModified = systemTimeInMillis())
-                ),
-                directory = null,
+            clientAppDataSource.schoolDirectoryEntryDataSource.updateLocal(
+                listOf(schoolDirectoryEntry)
             )
         }
 
@@ -188,7 +188,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         val token = "secret"
         val schoolDataSourceRemote = SchoolDataSourceHttp(
             schoolUrl = schoolUrl,
-            schoolDirectoryDataSource = clientAppDataSource.schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = clientAppDataSource.schoolDirectoryEntryDataSource,
             httpClient = httpClient,
             tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },
             validationHelper = clientValidationHelper,

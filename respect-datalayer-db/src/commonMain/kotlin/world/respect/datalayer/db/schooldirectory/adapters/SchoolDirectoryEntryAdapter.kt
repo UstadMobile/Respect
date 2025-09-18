@@ -1,58 +1,62 @@
 package world.respect.datalayer.db.schooldirectory.adapters
 
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataReadyState
+import androidx.room.Embedded
+import androidx.room.Relation
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
+import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryLangMapEntity
 import world.respect.datalayer.db.shared.adapters.asEntities
-import world.respect.datalayer.db.shared.adapters.toModel
-import world.respect.datalayer.db.shared.entities.LangMapEntity
+import world.respect.datalayer.db.shared.adapters.toIModel
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libxxhash.XXStringHasher
 
 data class SchoolDirectoryEntryEntities(
+    @Embedded
     val school: SchoolDirectoryEntryEntity,
-    val langMapEntities: List<LangMapEntity>,
+
+    @Relation(
+        parentColumn = "reUid",
+        entityColumn = "sdelReUid"
+    )
+    val langMapEntities: List<SchoolDirectoryEntryLangMapEntity>,
 )
 
-fun DataReadyState<SchoolDirectoryEntry>.toEntities(
+fun SchoolDirectoryEntry.toEntities(
     xxStringHasher: XXStringHasher,
 ): SchoolDirectoryEntryEntities {
-    val reUid = xxStringHasher.hash(data.self.toString())
+    val reUid = xxStringHasher.hash(self.toString())
     return SchoolDirectoryEntryEntities(
         school = SchoolDirectoryEntryEntity(
             reUid = reUid,
-            reSelf = data.self,
-            reXapi = data.xapi,
-            reOneRoster = data.oneRoster,
-            reLastMod = metaInfo.lastModified,
-            reEtag = metaInfo.etag,
-            reRespectExt = data.respectExt,
-            reRpId = data.rpId,
-            reSchoolCode = data.schoolCode,
+            reSelf = self,
+            reXapi = xapi,
+            reOneRoster = oneRoster,
+            reRespectExt = respectExt,
+            reRpId = rpId,
+            reSchoolCode = schoolCode,
+            reLastModified = lastModified,
+            reStored = stored,
         ),
-        langMapEntities = data.name.asEntities(
-            lmeTopParentType = LangMapEntity.TopParentType.RESPECT_SCHOOL_DIRECTORY_ENTRY,
-            lmeTopParentUid1 = reUid,
-            lmePropType = LangMapEntity.PropType.RESPECT_SCHOOL_DIRECTORY_ENTRY_NAME,
-            lmePropFk = 0,
-        )
+        langMapEntities = name.asEntities { lang, region, value ->
+            SchoolDirectoryEntryLangMapEntity(
+                sdelReUid = reUid,
+                sdelLang = lang,
+                sdelRegion = region,
+                sdelValue = value,
+            )
+        }
     )
 }
 
-fun SchoolDirectoryEntryEntities.toModel() : DataReadyState<SchoolDirectoryEntry> {
-    return DataReadyState(
-        data = SchoolDirectoryEntry(
-            self = school.reSelf,
-            xapi = school.reXapi,
-            oneRoster = school.reOneRoster,
-            respectExt = school.reRespectExt,
-            name = langMapEntities.toModel(),
-            rpId = school.reRpId,
-            schoolCode = school.reSchoolCode,
-        ),
-        metaInfo = DataLoadMetaInfo(
-            lastModified = school.reLastMod,
-            etag = school.reEtag,
-        )
+fun SchoolDirectoryEntryEntities.toModel() : SchoolDirectoryEntry {
+    return SchoolDirectoryEntry(
+        self = school.reSelf,
+        xapi = school.reXapi,
+        oneRoster = school.reOneRoster,
+        respectExt = school.reRespectExt,
+        name = langMapEntities.toIModel(),
+        rpId = school.reRpId,
+        schoolCode = school.reSchoolCode,
+        lastModified = school.reLastModified,
+        stored = school.reStored
     )
 }

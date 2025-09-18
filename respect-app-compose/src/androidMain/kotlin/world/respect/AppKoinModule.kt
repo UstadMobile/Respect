@@ -119,6 +119,10 @@ import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUse
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
+import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
+import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -356,11 +360,11 @@ val appKoinModule = module {
         )
     }
 
-//
-//    //Uncomment to switch to using real datasource
-//    single<GetInviteInfoUseCase> {
-//        MockGetInviteInfoUseCase()
-//    }
+    single<GetInviteInfoUseCase> {
+        GetInviteInfoUseCaseClient(
+            schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource
+        )
+    }
 
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
@@ -413,6 +417,10 @@ val appKoinModule = module {
             xxStringHasher = get(),
             xxHasher64Factory = get(),
         )
+    }
+
+    single<SetClipboardStringUseCase> {
+        SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
     }
 
 

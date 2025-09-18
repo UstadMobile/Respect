@@ -33,6 +33,7 @@ fun SchoolDirectoryEntry.toEntities(
             reRespectExt = respectExt,
             reRpId = rpId,
             reSchoolCode = schoolCode,
+            reDirectoryCode = directoryCode,
             reLastModified = lastModified,
             reStored = stored,
         ),
@@ -56,6 +57,7 @@ fun SchoolDirectoryEntryEntities.toModel() : SchoolDirectoryEntry {
         name = langMapEntities.toIModel(),
         rpId = school.reRpId,
         schoolCode = school.reSchoolCode,
+        directoryCode = school.reDirectoryCode,
         lastModified = school.reLastModified,
         stored = school.reStored
     )

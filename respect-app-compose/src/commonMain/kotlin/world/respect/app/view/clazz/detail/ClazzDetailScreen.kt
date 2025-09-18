@@ -28,7 +28,7 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
-import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_teacher
@@ -72,7 +72,7 @@ fun ClazzDetailScreen(
 @Composable
 fun ClazzDetailScreen(
     uiState: ClazzDetailUiState,
-    onClickAddPersonToClazz: (OneRosterRoleEnum) -> Unit,
+    onClickAddPersonToClazz: (EnrollmentRoleEnum) -> Unit,
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onSelectChip: (String) -> Unit,
     onClickAcceptInvite: (Person) -> Unit,
@@ -238,7 +238,7 @@ fun ClazzDetailScreen(
             item("add_teacher") {
                 ListItem(
                     modifier = Modifier.clickable {
-                        onClickAddPersonToClazz(OneRosterRoleEnum.TEACHER)
+                        onClickAddPersonToClazz(EnrollmentRoleEnum.TEACHER)
                     },
                     leadingContent = {
                         Icon(
@@ -309,7 +309,7 @@ fun ClazzDetailScreen(
             item("add_student") {
                 ListItem(
                     modifier = Modifier.clickable {
-                        onClickAddPersonToClazz(OneRosterRoleEnum.STUDENT)
+                        onClickAddPersonToClazz(EnrollmentRoleEnum.STUDENT)
                     },
 
                     leadingContent = {

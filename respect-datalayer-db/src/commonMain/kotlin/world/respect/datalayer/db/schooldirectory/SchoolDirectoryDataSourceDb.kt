@@ -34,7 +34,9 @@ class SchoolDirectoryDataSourceDb(
     }
 
     override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
-        TODO()
+        return respectAppDb.getSchoolDirectoryEntityDao().getServerManagerSchoolDirectory()?.let {
+            RespectSchoolDirectory(it.rdInvitePrefix, it.rdUrl)
+        }
     }
 
     override suspend fun setServerManagedSchoolConfig(

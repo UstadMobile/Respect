@@ -18,6 +18,7 @@ data class SchoolDirectoryEntryEntity(
     val reRespectExt: Url?,
     val reRpId: String?,
     val reSchoolCode: String?,
+    val reDirectoryCode: String?,
     val reLastModified: Instant,
     val reStored: Instant,
 )

@@ -1,5 +1,6 @@
 package world.respect.app.view.clazz.addperson
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -24,17 +25,22 @@ fun AddPersonToClazzScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     AddPersonToClazzScreen(
-        uiState = uiState
+        uiState = uiState,
+        onClickInviteCode = viewModel::onClickInviteCode,
     )
 }
 
 @Composable
 fun AddPersonToClazzScreen(
-    uiState: AddPersonToClazzUIState
+    uiState: AddPersonToClazzUIState,
+    onClickInviteCode: () -> Unit = { },
 ) {
 
     Column {
         ListItem(
+            modifier = Modifier.clickable {
+                onClickInviteCode()
+            },
             leadingContent = {
                 Icon(
                     imageVector = Icons.Filled.CopyAll,
@@ -43,7 +49,7 @@ fun AddPersonToClazzScreen(
                 )
             },
             headlineContent = {
-                Text(text = stringResource(Res.string.copy_invite_code))
+                Text(text = stringResource(Res.string.copy_invite_code) + uiState.inviteCode)
             },
         )
     }

@@ -81,6 +81,7 @@ fun managerServerMain(ns: Namespace) {
                                     oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
                                     schoolCode = Random.nextInt(10_000).toString().padStart(5, '0'),
+                                    directoryCode = null,//Will be set on server
                                     rpId = rpId,
                                     lastModified = Clock.System.now(),
                                     stored = Clock.System.now(),

@@ -123,6 +123,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         respectExt = schoolUrl.appendEndpointSegments("api/school/respect"),
         rpId = schoolUrl.host,
         schoolCode = "123",
+        directoryCode = "456",
         lastModified = Clock.System.now(),
         stored = Clock.System.now()
     )

@@ -13,12 +13,14 @@ interface ClassDataSource: WritableDataSource<Clazz> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
+        val inviteCode: String? = null,
     ) {
         companion object {
 
             fun fromParams(params: StringValues) : GetListParams {
                 return GetListParams(
-                    common = GetListCommonParams.fromParams(params)
+                    common = GetListCommonParams.fromParams(params),
+                    inviteCode = params[PARAM_NAME_INVITE_CODE],
                 )
             }
 
@@ -37,6 +39,11 @@ interface ClassDataSource: WritableDataSource<Clazz> {
         params: GetListParams,
     ): PagingSource<Int, Clazz>
 
+    suspend fun list(
+        loadParams: DataLoadParams,
+        params: GetListParams
+    ): DataLoadState<List<Clazz>>
+
     override suspend fun store(
         list: List<Clazz>,
     )
@@ -45,6 +52,8 @@ interface ClassDataSource: WritableDataSource<Clazz> {
     companion object {
 
         const val ENDPOINT_NAME = "class"
+
+        const val PARAM_NAME_INVITE_CODE = "inviteCode"
 
     }
 }

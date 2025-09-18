@@ -75,9 +75,25 @@ class ClassDatasourceDb(
         return schoolDb.getClassEntityDao().findAllAsPagingSource(
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            code = params.inviteCode,
         ).map {
             ClassEntities(it).toModel()
         }
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ClassDataSource.GetListParams
+    ): DataLoadState<List<Clazz>> {
+        return DataReadyState(
+            data = schoolDb.getClassEntityDao().list(
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                code = params.inviteCode,
+            ).map {
+                ClassEntities(it).toModel()
+            }
+        )
     }
 
     override suspend fun store(list: List<Clazz>) {

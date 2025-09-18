@@ -23,39 +23,41 @@ class GetInviteInfoUseCaseServer(
         val codeWithoutDirectoryPrefix = code.substringAfter(serverDir?.rdInvitePrefix ?: "")
 
         val directoryEntry = respectAppDataSource.schoolDirectoryEntryDataSource.list(
-            DataLoadParams(), SchoolDirectoryEntryDataSource.GetListParams(
+            loadParams = DataLoadParams(),
+            listParams = SchoolDirectoryEntryDataSource.GetListParams(
                 code = codeWithoutDirectoryPrefix,
             )
         ).dataOrNull()?.firstOrNull()
-            ?: throw IllegalArgumentException("No school for code: $code").withHttpStatus(400)
+            ?: throw IllegalArgumentException("No school for code: $code").withHttpStatus(404)
 
-        val schoolScopeId = SchoolDirectoryEntryScopeId(directoryEntry.self, null)
+        val schoolScopeId = SchoolDirectoryEntryScopeId(
+            directoryEntry.self, null
+        )
+
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
             schoolScopeId.scopeId
         )
 
+        //Need to use the database because we don't have an authenticated user to get account scope
         val schoolDb: RespectSchoolDatabase = schoolScope.get()
-        println(schoolDb)
-
         val classInviteCode = codeWithoutDirectoryPrefix.substringAfter(
             directoryEntry.schoolCode ?: ""
         )
 
-        TODO()
-//        val classEntity = schoolDb.getClassEntityDao().findByInviteCode(classInviteCode)
-//            ?: throw IllegalStateException("No class for code $code in school: ${schoolDirectoryEntry.reSelf}")
-//
-//        RespectInviteInfo(
-//            code = code,
-//            school = directoryEntry,
-//            classGuid = classEntity.cGuid
-//        )
+        val clazz = schoolDb.getClassEntityDao().list(
+            code = classInviteCode
+        ).firstOrNull() ?: throw IllegalArgumentException("class not found for code: $code").withHttpStatus(404)
 
-
-
-        //Verify that this server handles the code prefix
-        //Find the realm that handles the next prefix
-
-        TODO("Use the school db obtained through Koin to find the class and the return the real RespectInviteInfo")
+        return RespectInviteInfo(
+            code = code,
+            school = directoryEntry,
+            classGuid = clazz.cGuid,
+            className = clazz.cTitle,
+            userInviteType = if(classInviteCode == clazz.cTeacherInviteCode) {
+                RespectInviteInfo.UserInviteType.TEACHER
+            }else {
+                RespectInviteInfo.UserInviteType.STUDENT_OR_PARENT
+            }
+        )
     }
 }

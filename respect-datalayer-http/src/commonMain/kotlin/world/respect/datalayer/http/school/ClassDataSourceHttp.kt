@@ -20,10 +20,12 @@ import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
+import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.ClassDataSource.Companion.PARAM_NAME_INVITE_CODE
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -40,6 +42,7 @@ class ClassDataSourceHttp(
         return URLBuilder(respectEndpointUrl(ClassDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
+                parameters.appendIfNotNull(PARAM_NAME_INVITE_CODE, inviteCode)
             }
             .build()
     }
@@ -88,6 +91,18 @@ class ClassDataSourceHttp(
                 useValidationCacheControl(validationHelper)
             }
         )
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ClassDataSource.GetListParams
+    ): DataLoadState<List<Clazz>> {
+        return httpClient.getAsDataLoadState(
+            url = params.urlWithParams()
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }
     }
 
     override suspend fun store(list: List<Clazz>) {

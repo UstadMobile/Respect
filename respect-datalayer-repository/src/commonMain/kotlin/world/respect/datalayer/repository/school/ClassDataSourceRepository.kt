@@ -7,6 +7,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
+import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
@@ -56,6 +57,16 @@ class ClassDataSourceRepository(
             mediatorStore = mediatorStore,
             onUpdateLocalFromRemote = local::updateLocal
         )
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ClassDataSource.GetListParams
+    ): DataLoadState<List<Clazz>> {
+        local.updateFromRemoteListIfNeeded(
+            remote.list(loadParams, params), validationHelper
+        )
+        return local.list(loadParams, params)
     }
 
     override suspend fun store(list: List<Clazz>) {

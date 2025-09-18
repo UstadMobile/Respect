@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
@@ -81,17 +83,41 @@ class ConfirmationViewModel(
 
                 return@launch
             }
+            val redeemRequest = makeBlankRedeemInviteRequest(route.code, profileType)
             if (profileType==ProfileType.STUDENT) {
                 _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(SignupScreen.create(profileType,route.code,))
+                    NavCommand.Navigate(SignupScreen.create(profileType,redeemRequest))
                 )
             }
             else if (profileType==ProfileType.PARENT) {
                 _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(TermsAndCondition.create(profileType,route.code))
+                    NavCommand.Navigate(TermsAndCondition.create(profileType,redeemRequest))
                 )
             }
         }
+    }
+    fun makeBlankRedeemInviteRequest(inviteCode: String, profileType: ProfileType): RespectRedeemInviteRequest {
+        val role = when(profileType) {
+            ProfileType.STUDENT -> PersonRoleEnum.STUDENT
+            ProfileType.PARENT  -> PersonRoleEnum.PARENT
+            else -> PersonRoleEnum.STUDENT
+        }
+
+        val person = RespectRedeemInviteRequest.PersonInfo()
+
+        val blankAccount = RespectRedeemInviteRequest.Account(
+            username = "",
+            credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(password = "")
+        )
+
+        return RespectRedeemInviteRequest(
+            code = inviteCode,
+            classUid = null,
+            role = role,
+            accountPersonInfo = person,
+            parentOrGuardianRole = null,
+            account = blankAccount
+        )
     }
 
     fun onClickNext() {

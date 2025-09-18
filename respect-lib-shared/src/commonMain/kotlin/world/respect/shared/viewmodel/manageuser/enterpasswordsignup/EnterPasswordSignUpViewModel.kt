@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.signup.SignupCredential
 import world.respect.shared.domain.account.signup.SignupUseCase
@@ -19,7 +18,6 @@ import world.respect.shared.generated.resources.required_field
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -33,7 +31,6 @@ data class EnterPasswordSignupUiState(
 
 class EnterPasswordSignupViewModel(
     savedStateHandle: SavedStateHandle,
-    private val submitRedeemInviteRequestUseCase: RedeemInviteUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
     private val signupUseCase: SignupUseCase,
     private val inviteInfoUseCase: GetInviteInfoUseCase
@@ -82,8 +79,22 @@ class EnterPasswordSignupViewModel(
                 password = password
             )
             signupUseCase(signupCredential)
-            val inviteInfo = inviteInfoUseCase(route.code)
-
+            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
+            val redeemInviteRequest = route.respectRedeemInviteRequest
+            val account = RespectRedeemInviteRequest.Account(
+                username = route.username,
+                credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
+                    password
+                )
+            )
+            val updatedRedeemInviteRequest = RespectRedeemInviteRequest(
+                code = redeemInviteRequest.code,
+                classUid = redeemInviteRequest.classUid,
+                role = redeemInviteRequest.role,
+                accountPersonInfo = redeemInviteRequest.accountPersonInfo,
+                parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
+                account = account
+            )
             when (route.type) {
                  ProfileType.CHILD ->{
                      //ignore not create account for child
@@ -92,7 +103,7 @@ class EnterPasswordSignupViewModel(
                     val redeemRequest = respectRedeemInviteRequestUseCase(
                         inviteInfo = inviteInfo,
                         username = route.username,
-                        personInfo = route.personInfo,
+                        personInfo = route.respectRedeemInviteRequest.accountPersonInfo,
                         parentOrGuardian = null,
                         credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
                             password
@@ -116,13 +127,8 @@ class EnterPasswordSignupViewModel(
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                                SignupScreen.create(
-                                profileType = ProfileType.CHILD,
-                                inviteCode = route.code,
-                                parentPersonInfoJson = route.personInfo,
-                                parentUsername = route.username,
-                                parentRedeemCredential =  RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
-                                    password
-                                )
+                                    profileType = ProfileType.CHILD,
+                                   inviteRequest = updatedRedeemInviteRequest
                             )
                         )
                     )

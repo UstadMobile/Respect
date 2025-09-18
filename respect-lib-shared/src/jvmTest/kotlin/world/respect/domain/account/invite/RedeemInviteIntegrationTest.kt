@@ -72,7 +72,6 @@ class RedeemInviteIntegrationTest {
                     ),
                     role = PersonRoleEnum.TEACHER,
                     parentOrGuardianRole = null,
-                    studentPersonInfo = null,
                     account = RespectRedeemInviteRequest.Account(
                         username = "username",
                         credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(

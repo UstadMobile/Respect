@@ -13,20 +13,18 @@ import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.signup.SignupCredential
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.passkey_not_supported
-import world.respect.shared.generated.resources.username_required
+import world.respect.shared.generated.resources.required
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -45,7 +43,6 @@ class CreateAccountViewModel(
     savedStateHandle: SavedStateHandle,
     private val verifyDomainUseCase: VerifyDomainUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
-    private val submitRedeemInviteRequestUseCase: RedeemInviteUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
     private val signupUseCase: SignupUseCase,
     private val inviteInfoUseCase: GetInviteInfoUseCase
@@ -57,7 +54,7 @@ class CreateAccountViewModel(
     val uiState = _uiState.asStateFlow()
     init {
         viewModelScope.launch {
-            val inviteInfo = inviteInfoUseCase(route.code)
+            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
 
             _appUiState.update {
                 it.copy(
@@ -98,7 +95,7 @@ class CreateAccountViewModel(
 
             _uiState.update {
                 it.copy(
-                    usernameError = if (username.isBlank()) StringResourceUiText(Res.string.username_required) else null
+                    usernameError = if (username.isBlank()) StringResourceUiText(Res.string.required) else null
                 )
             }
 
@@ -111,12 +108,12 @@ class CreateAccountViewModel(
                     when (route.type) {
                         ProfileType.CHILD , ProfileType.STUDENT->{
                             _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(EnterPasswordSignup.create(username,route.type,route.code,route.personInfo))
+                                NavCommand.Navigate(EnterPasswordSignup.create(username,route.type,route.respectRedeemInviteRequest))
                             )
                         }
                         ProfileType.PARENT ->{
                             _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(EnterPasswordSignup.create(username,ProfileType.CHILD,route.code,route.personInfo))
+                                NavCommand.Navigate(EnterPasswordSignup.create(username,ProfileType.CHILD,route.respectRedeemInviteRequest))
                             )
                         }
                     }
@@ -128,27 +125,43 @@ class CreateAccountViewModel(
                     )
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                            //i forgot why i created this
                             val signupCredential = SignupCredential.Passkey(
                                 username = username,
                                 authenticationResponseJSON = createPasskeyResult.authenticationResponseJSON
                             )
 
                             sendSignupCredential(signupCredential)
+
+                            val redeemInviteRequest = route.respectRedeemInviteRequest
+                            val account = RespectRedeemInviteRequest.Account(
+                                username = username,
+                                credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                    createPasskeyResult.authenticationResponseJSON
+                                )
+                            )
+                            val updatedRedeemInviteRequest = RespectRedeemInviteRequest(
+                                code = redeemInviteRequest.code,
+                                classUid = redeemInviteRequest.classUid,
+                                role = redeemInviteRequest.role,
+                                accountPersonInfo = redeemInviteRequest.accountPersonInfo,
+                                parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
+                                account = account
+                            )
                             when (route.type) {
                                 ProfileType.CHILD ->{
                                     //ignore not create account for child
                                 }
                                 ProfileType.STUDENT->{
-                                    val redeemRequest = respectRedeemInviteRequestUseCase(
-                                        inviteInfo = inviteInfo,
-                                        username = username,
-                                        personInfo = route.personInfo,
-                                        parentOrGuardian = null,
-                                        credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                            createPasskeyResult.authenticationResponseJSON
-                                        )
-                                    )
+
+//                                    val redeemRequest = respectRedeemInviteRequestUseCase(
+//                                        inviteInfo = inviteInfo,
+//                                        username = username,
+//                                        personInfo = route.personInfo,
+//                                        parentOrGuardian = null,
+//                                        credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+//                                            createPasskeyResult.authenticationResponseJSON
+//                                        )
+//                                    )
 //                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
 //
 //                                    _navCommandFlow.tryEmit(
@@ -160,12 +173,7 @@ class CreateAccountViewModel(
                                         NavCommand.Navigate(
                                             SignupScreen.create(
                                                 profileType = ProfileType.CHILD,
-                                                inviteCode = route.code,
-                                                parentPersonInfoJson = route.personInfo,
-                                                parentUsername = username,
-                                                parentRedeemCredential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                                    createPasskeyResult.authenticationResponseJSON
-                                                )
+                                                inviteRequest = updatedRedeemInviteRequest
                                             )
                                         )
                                     )
@@ -214,7 +222,7 @@ class CreateAccountViewModel(
 
         _uiState.update {
             it.copy(
-                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.username_required) else null
+                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.required) else null
             )
         }
 
@@ -225,8 +233,7 @@ class CreateAccountViewModel(
                 OtherOptionsSignup.create(
                     username = uiState.value.username,
                     profileType = route.type,
-                    inviteCode = route.code,
-                    personInfo = route.personInfo
+                    inviteRequest = route.respectRedeemInviteRequest
                 )
             )
         )

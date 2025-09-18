@@ -79,6 +79,7 @@ fun managerServerMain(ns: Namespace) {
                                     oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
                                     rpId = rpId,
+                                    schoolCode = null
                                     ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,

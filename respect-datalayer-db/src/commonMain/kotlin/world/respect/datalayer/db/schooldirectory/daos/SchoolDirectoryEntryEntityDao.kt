@@ -23,6 +23,16 @@ interface SchoolDirectoryEntryEntityDao {
     )
     suspend fun findByUid(uid: Long): SchoolDirectoryEntryEntity?
 
+
+    @Query(
+        """
+         SELECT *
+           FROM SchoolDirectoryEntryEntity
+          WHERE reSchoolCode LIKE :code || '%'
+    """
+    )
+    suspend fun findSchoolByInviteCode(code: String): SchoolDirectoryEntryEntity?
+
     @Query(
         """
         SELECT SchoolDirectoryEntryEntity.*
@@ -33,17 +43,6 @@ interface SchoolDirectoryEntryEntityDao {
      """
     )
     fun searchSchoolsByName(query: String): Flow<List<SchoolDirectoryEntryEntity>>
-
-    @Query("""
-        SELECT SchoolDirectoryEntryEntity.*
-          FROM SchoolDirectoryEntryEntity
-         WHERE :code LIKE (SchoolDirectoryEntryEntity.reSchoolCode || '%')
-    """)
-    /**
-     * @param code an invite code (with the directory prefix removed)
-     */
-    fun findSchoolByInviteCode(code: String): SchoolDirectoryEntry?
-
 
 
 }

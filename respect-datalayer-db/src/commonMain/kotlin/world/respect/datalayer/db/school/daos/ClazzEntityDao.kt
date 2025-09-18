@@ -41,5 +41,20 @@ interface ClazzEntityDao {
         guidHash: Long = 0,
     ): PagingSource<Int, ClassEntity>
 
+    @Query("""
+        SELECT * 
+          FROM ClassEntity 
+        WHERE cTeacherInviteCode = :inviteCode
+    """)
+    suspend fun findByTeacherInviteCode(inviteCode: String): ClassEntity?
+
+    @Query("""
+        SELECT * 
+          FROM ClassEntity 
+        WHERE cStudentInviteCode = :inviteCode
+    """)
+    suspend fun findByStudentInviteCode(inviteCode: String): ClassEntity?
+
+
 
 }

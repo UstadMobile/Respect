@@ -87,7 +87,6 @@ fun serverKoinModule(
         MockGetInviteInfoUseCase(
         )
     }
-
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource as SchoolDirectoryDataSourceLocal

@@ -17,7 +17,6 @@ class MockGetInviteInfoUseCase : GetInviteInfoUseCase {
                 oneRoster = Url("https://example.org/oneroster"),
                 respectExt = Url("https://example.org/respect-ext"),
                 rpId = "ustadtesting.ustadmobile.com",
-                schoolCode = "123"
             ),
             classGuid = "mock-class-123",
             className = "Grade-4",

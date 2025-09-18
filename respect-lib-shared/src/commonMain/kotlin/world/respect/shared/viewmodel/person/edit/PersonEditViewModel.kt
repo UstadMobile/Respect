@@ -19,6 +19,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -104,6 +105,7 @@ class PersonEditViewModel(
                                 givenName = "",
                                 familyName = "",
                                 roles = emptyList(),
+                                gender = PersonGenderEnum.UNSPECIFIED
                             )
                         )
                     )

@@ -9,11 +9,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.getString
-import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.generated.resources.*
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -44,7 +43,6 @@ data class SignupUiState(
 
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
-    private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
     private val inviteInfoUseCase: GetInviteInfoUseCase
 
@@ -53,6 +51,7 @@ class SignupViewModel(
     private val route: SignupScreen = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(SignupUiState())
+
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -92,7 +91,7 @@ class SignupViewModel(
     }
     fun onFullNameChanged(value: String) {
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo ?: return
             prev.copy(
                 personInfo = currentPerson.copy(name = value),
                 fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.full_name_required)
@@ -100,19 +99,23 @@ class SignupViewModel(
         }
     }
 
-    fun onGenderChanged(value: OneRosterGenderEnum) {
+    fun onGenderChanged(value: PersonGenderEnum) {
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
-            prev.copy(
-                personInfo = currentPerson.copy(gender = value),
-                genderError = if (value != OneRosterGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.gender_required)
-            )
+            val currentPerson = prev.personInfo ?: return
+            TODO("on gender change")
+//            prev.copy(
+//                //personInfo = currentPerson.copy(gender = value),
+//                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.gender_required)
+//            )
         }
     }
 
     fun onDateOfBirthChanged(value: LocalDate?) {
+        if(value == null)
+            return
+
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo ?: return
             prev.copy(
                 personInfo = currentPerson.copy(dateOfBirth = value),
                 dateOfBirthError = if (value != null)
@@ -148,7 +151,7 @@ class SignupViewModel(
 
             val hasError = listOf(
                 personInfo?.name?.isBlank(),
-                personInfo?.gender == OneRosterGenderEnum.UNSPECIFIED,
+                //personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
                 personInfo?.dateOfBirth == null
             ).any { it == true }
 
@@ -179,16 +182,16 @@ class SignupViewModel(
 
                         )
 
-                        val result = submitRedeemInviteRequestUseCase(redeemRequest)
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                WaitingForApproval.create(
-                                    route.type,
-                                    route.code,
-                                    result?.guid ?: ""
-                                )
-                            )
-                        )
+//                        val result = submitRedeemInviteRequestUseCase(redeemRequest)
+//                        _navCommandFlow.tryEmit(
+//                            NavCommand.Navigate(
+//                                WaitingForApproval.create(
+//                                    route.type,
+//                                    route.code,
+//                                    result?.guid ?: ""
+//                                )
+//                            )
+//                        )
                     }
                 }
             }

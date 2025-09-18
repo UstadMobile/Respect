@@ -22,6 +22,7 @@ import world.respect.shared.generated.resources.i_am_parent
 import world.respect.shared.generated.resources.i_am_student
 import world.respect.shared.generated.resources.invitation_for
 import world.respect.shared.generated.resources.next
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationUiState
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
 
@@ -57,7 +58,7 @@ fun ConfirmationScreen(
 
         ListItem(
             headlineContent = {
-                Text(text = uiState.inviteInfo?.schoolName ?: "")
+                Text(text = uiState.inviteInfo?.school?.name?.getTitle() ?: "")
             },
             supportingContent = {
                 Column(

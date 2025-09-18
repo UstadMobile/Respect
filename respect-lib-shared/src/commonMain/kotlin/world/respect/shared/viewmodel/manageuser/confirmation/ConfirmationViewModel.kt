@@ -30,7 +30,7 @@ data class ConfirmationUiState(
 
 class ConfirmationViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getInviteInfoUseCase: GetInviteInfoUseCase
+    private val getInviteInfoUseCase: GetInviteInfoUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(ConfirmationUiState())
@@ -48,7 +48,8 @@ class ConfirmationViewModel(
         }
 
         viewModelScope.launch {
-            val inviteInfo = getInviteInfoUseCase.invoke(route.code)
+            val inviteInfo = getInviteInfoUseCase(route.code)
+
             try {
                 _uiState.update {
                     it.copy(
@@ -77,6 +78,7 @@ class ConfirmationViewModel(
                 _uiState.update {
                     it.copy(inviteInfoError = StringResourceUiText(Res.string.invalid_invite_code))
                 }
+
                 return@launch
             }
             if (profileType==ProfileType.STUDENT) {

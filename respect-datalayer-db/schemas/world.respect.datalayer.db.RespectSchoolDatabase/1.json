@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d98c31d711a7366abfcad171ef2acbd7",
+    "identityHash": "3e574893048a828458e39a827de3fcab",
     "entities": [
       {
         "tableName": "PersonEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, PRIMARY KEY(`pGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, PRIMARY KEY(`pGuidHash`))",
         "fields": [
           {
             "fieldPath": "pGuid",
@@ -45,6 +45,11 @@
             "notNull": true
           },
           {
+            "fieldPath": "pMetadata",
+            "columnName": "pMetadata",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "pUsername",
             "columnName": "pUsername",
             "affinity": "TEXT"
@@ -65,6 +70,17 @@
             "fieldPath": "pMiddleName",
             "columnName": "pMiddleName",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pGender",
+            "columnName": "pGender",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pDateOfBirth",
+            "columnName": "pDateOfBirth",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -117,6 +133,42 @@
           "autoGenerate": true,
           "columnNames": [
             "prUid"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonRelatedPersonEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL, PRIMARY KEY(`prpUid`))",
+        "fields": [
+          {
+            "fieldPath": "prpUid",
+            "columnName": "prpUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpPersonUidNum",
+            "columnName": "prpPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpOtherPersonUid",
+            "columnName": "prpOtherPersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpOtherPersonUidNum",
+            "columnName": "prpOtherPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "prpUid"
           ]
         }
       },
@@ -388,7 +440,7 @@
       },
       {
         "tableName": "EnrollmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` TEXT NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, PRIMARY KEY(`eUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` TEXT NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
         "fields": [
           {
             "fieldPath": "eUid",
@@ -421,6 +473,11 @@
             "notNull": true
           },
           {
+            "fieldPath": "eMetadata",
+            "columnName": "eMetadata",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "eClassUidNum",
             "columnName": "eClassUidNum",
             "affinity": "INTEGER",
@@ -447,6 +504,22 @@
             "fieldPath": "eEndDate",
             "columnName": "eEndDate",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eInviteCode",
+            "columnName": "eInviteCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eApprovedByPersonUidNum",
+            "columnName": "eApprovedByPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eApprovedByPersonUid",
+            "columnName": "eApprovedByPersonUid",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -455,11 +528,65 @@
             "eUidNum"
           ]
         }
+      },
+      {
+        "tableName": "WriteQueueItemEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimestamp` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "wqiQueueItemId",
+            "columnName": "wqiQueueItemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiModel",
+            "columnName": "wqiModel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiUid",
+            "columnName": "wqiUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiTimestamp",
+            "columnName": "wqiTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiAttemptCount",
+            "columnName": "wqiAttemptCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiTimeWritten",
+            "columnName": "wqiTimeWritten",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiAccountGuid",
+            "columnName": "wqiAccountGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "wqiQueueItemId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd98c31d711a7366abfcad171ef2acbd7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e574893048a828458e39a827de3fcab')"
     ]
   }
 }

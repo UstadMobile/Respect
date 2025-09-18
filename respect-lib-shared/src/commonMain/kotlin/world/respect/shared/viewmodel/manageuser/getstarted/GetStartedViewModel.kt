@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import world.respect.datalayer.DataErrorResult
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
 import world.respect.shared.generated.resources.school_not_found
@@ -54,44 +56,59 @@ class GetStartedViewModel(
         }
 
         debouncer.launch(RESPECT_REALMS) {
-            respectAppDataSource.schoolDirectoryDataSource
-                .searchSchools(name)
-                .collect { state ->
-                    when (state) {
-                        is DataLoadingState -> {
-                            _uiState.update { it.copy(errorMessage = null, suggestions = emptyList()) }
-                        }
-                        is DataReadyState -> {
-                            _uiState.update {
-                                it.copy(
-                                    suggestions = state.data,
-                                    errorMessage = if (state.data.isEmpty()) {
-                                        Res.string.school_not_found.asUiText()
-                                    } else null,
-                                    showButtons = state.data.isEmpty()
-                                )
-                            }
-                        }
-                        is DataErrorResult -> {
-                            _uiState.update {
-                                it.copy(
-                                    suggestions = emptyList(),
-                                    errorMessage = state.error.getUiText(),
-                                    showButtons = true
-                                )
-                            }
-                        }
-                        is NoDataLoadedState -> {
-                            _uiState.update {
-                                it.copy(
-                                    suggestions = emptyList(),
-                                    errorMessage = Res.string.school_not_found.asUiText(),
-                                    showButtons = true,
-                                )
-                            }
-                        }
+            respectAppDataSource.schoolDirectoryEntryDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                listParams = SchoolDirectoryEntryDataSource.GetListParams(
+                    name = name
+                )
+            ).collect { dataState ->
+                if(dataState is DataReadyState) {
+                    _uiState.update {
+                        it.copy(
+                            suggestions = dataState.data
+                        )
                     }
                 }
+            }
+
+//            respectAppDataSource.schoolDirectoryDataSource
+//                .listSchools(name)
+//                .collect { state ->
+//                    when (state) {
+//                        is DataLoadingState -> {
+//                            _uiState.update { it.copy(errorMessage = null, suggestions = emptyList()) }
+//                        }
+//                        is DataReadyState -> {
+//                            _uiState.update {
+//                                it.copy(
+//                                    suggestions = state.data,
+//                                    errorMessage = if (state.data.isEmpty()) {
+//                                        Res.string.school_not_found.asUiText()
+//                                    } else null,
+//                                    showButtons = state.data.isEmpty()
+//                                )
+//                            }
+//                        }
+//                        is DataErrorResult -> {
+//                            _uiState.update {
+//                                it.copy(
+//                                    suggestions = emptyList(),
+//                                    errorMessage = state.error.getUiText(),
+//                                    showButtons = true
+//                                )
+//                            }
+//                        }
+//                        is NoDataLoadedState -> {
+//                            _uiState.update {
+//                                it.copy(
+//                                    suggestions = emptyList(),
+//                                    errorMessage = Res.string.school_not_found.asUiText(),
+//                                    showButtons = true,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
         }
     }
 

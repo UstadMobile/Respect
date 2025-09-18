@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.ClassEntity
 
 @Dao
-interface ClazzEntityDao {
+interface ClassEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(classEntity: ClassEntity)
@@ -29,16 +29,11 @@ interface ClazzEntityDao {
     suspend fun findByGuid(guidHash: Long): ClassEntity?
 
 
-    @Query("""
-        SELECT * 
-         FROM ClassEntity
-        WHERE ClassEntity.cStored > :since 
-          AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
-     ORDER BY ClassEntity.cTitle
-    """)
+    @Query(LIST_SQL)
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
+        code: String? = null,
     ): PagingSource<Int, ClassEntity>
 
     @Query("""
@@ -57,4 +52,41 @@ interface ClazzEntityDao {
 
 
 
+    @Query(LIST_SQL)
+    suspend fun list(
+        since: Long = 0,
+        guidHash: Long = 0,
+        code: String? = null,
+    ): List<ClassEntity>
+
+    @Query("""
+        SELECT ClassEntity.*
+          FROM ClassEntity
+         WHERE ClassEntity.cGuidHash in (:uids) 
+    """)
+    suspend fun findByUidList(uids: List<Long>) : List<ClassEntity>
+
+    @Query("""
+        SELECT ClassEntity.*
+          FROM ClassEntity
+         WHERE ClassEntity.cStudentInviteCode = :code
+            OR ClassEntity.cTeacherInviteCode = :code
+    """)
+    suspend fun findByInviteCode(code: String): ClassEntity?
+
+
+    companion object {
+
+        const val LIST_SQL = """
+       SELECT ClassEntity.* 
+         FROM ClassEntity
+        WHERE ClassEntity.cStored > :since 
+          AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
+          AND (:code IS NULL 
+                OR ClassEntity.cStudentInviteCode = :code
+                OR ClassEntity.cTeacherInviteCode = :code)
+     ORDER BY ClassEntity.cTitle
+        """
+
+    }
 }

@@ -11,7 +11,7 @@ fun ParametersBuilder.appendIfNotNull(
     value?.also { append(name, it) }
 }
 
-fun ParametersBuilder.appendListParams(
+fun ParametersBuilder.appendCommonListParams(
     params: GetListCommonParams
 ) {
     appendIfNotNull(DataLayerParams.GUID, params.guid)

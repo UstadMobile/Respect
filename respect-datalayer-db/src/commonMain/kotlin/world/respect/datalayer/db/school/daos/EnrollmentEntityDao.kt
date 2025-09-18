@@ -58,15 +58,25 @@ interface EnrollmentEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(enrolments: List<EnrollmentEntity>)
 
+    @Query("""
+        SELECT EnrollmentEntity.*,
+               $SELECT_PERSON_AND_CLASS_UID
+          FROM EnrollmentEntity
+         WHERE EnrollmentEntity.eUidNum IN (:uidNums) 
+    """)
+    suspend fun findByUidNumList(
+        uidNums: List<Long>
+    ): List<EnrollmentEntities>
+
     companion object {
 
         const val SELECT_PERSON_AND_CLASS_UID  = """
             (SELECT ClassEntity.cGuid 
-                  FROM ClassEntity 
-                 WHERE ClassEntity.cGuidHash = EnrollmentEntity.eClassUidNum) AS classUid,
-               (SELECT PersonEntity.pGuid
-                  FROM PersonEntity
-                 WHERE PersonEntity.pGuidHash = EnrollmentEntity.ePersonUidNum) AS personUid
+               FROM ClassEntity 
+              WHERE ClassEntity.cGuidHash = EnrollmentEntity.eClassUidNum) AS classUid,
+           (SELECT PersonEntity.pGuid
+              FROM PersonEntity
+             WHERE PersonEntity.pGuidHash = EnrollmentEntity.ePersonUidNum) AS personUid
         """
 
     }

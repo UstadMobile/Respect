@@ -1,17 +1,11 @@
 package world.respect.datalayer.schooldirectory
 
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 
 interface SchoolDirectoryDataSourceLocal: SchoolDirectoryDataSource {
 
-    suspend fun putSchoolDirectoryEntry(
-        school: DataReadyState<SchoolDirectoryEntry>,
-        directory: RespectSchoolDirectory?
-    )
-
-    suspend fun addServerManagedSchool(
+    suspend fun setServerManagedSchoolConfig(
         school: SchoolDirectoryEntry,
         dbUrl: String,
     )
@@ -21,6 +15,5 @@ interface SchoolDirectoryDataSourceLocal: SchoolDirectoryDataSource {
     suspend fun getDirectoryByInviteCode(
         code: String
     ): RespectSchoolDirectory?
-
 
 }

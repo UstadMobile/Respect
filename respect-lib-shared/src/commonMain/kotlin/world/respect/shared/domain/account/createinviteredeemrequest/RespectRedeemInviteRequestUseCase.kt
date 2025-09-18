@@ -1,11 +1,8 @@
 package world.respect.shared.domain.account.createinviteredeemrequest
 
-import kotlinx.datetime.LocalDate
-import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.credentials.passkey.util.toGuardianRole
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 class RespectRedeemInviteRequestUseCase {
     operator fun invoke(
@@ -15,17 +12,20 @@ class RespectRedeemInviteRequestUseCase {
         parentOrGuardian: RespectRedeemInviteRequest.PersonInfo?,
         credential: RespectRedeemInviteRequest.RedeemInviteCredential
     ): RespectRedeemInviteRequest {
-        val account = RespectRedeemInviteRequest.Account(
+        /*
+        val account = RedeemInviteRequest.Account(
             username = username,
             credential = credential
         )
 
-        return RespectRedeemInviteRequest(
+        return world.respect.shared.domain.account.invite.RedeemInviteRequest(
             inviteInfo = inviteInfo,
-            student =personInfo,
+            student = personInfo,
             parentOrGuardian = parentOrGuardian,
             parentOrGuardianRole = parentOrGuardian?.gender?.toGuardianRole(),
             account = account
         )
+        */
+        TODO()
     }
 }

@@ -12,4 +12,8 @@ object DataLayerParams {
 
     const val SEARCH_QUERY = "q"
 
+    const val FILTER_BY_CLASS_UID = "filterByClassUid"
+
+    const val FILTER_BY_ENROLLMENT_ROLE = "filterByEnrollmentRole"
+
 }

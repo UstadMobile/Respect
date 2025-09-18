@@ -11,7 +11,6 @@ import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -34,7 +33,6 @@ data class OtherOptionsSignupUiState(
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
-    private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
     private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
     private val inviteInfoUseCase: GetInviteInfoUseCase
 ) : RespectViewModel(savedStateHandle) {
@@ -95,16 +93,16 @@ class OtherOptionsSignupViewModel(
                                             createPasskeyResult.authenticationResponseJSON
                                         )
                                     )
-                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
-                                    _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(
-                                                destination = WaitingForApproval.create(
-                                                profileType =   route.type,
-                                                inviteCode = route.code,
-                                                pendingInviteStateUid = result?.guid ?: ""
-                                            )
-                                        )
-                                    )
+//                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
+//                                    _navCommandFlow.tryEmit(
+//                                        NavCommand.Navigate(
+//                                                destination = WaitingForApproval.create(
+//                                                profileType =   route.type,
+//                                                inviteCode = route.code,
+//                                                pendingInviteStateUid = result?.guid ?: ""
+//                                            )
+//                                        )
+//                                    )
                                 }
 
                                 ProfileType.PARENT -> {

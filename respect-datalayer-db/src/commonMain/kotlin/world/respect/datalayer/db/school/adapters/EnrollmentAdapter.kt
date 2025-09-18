@@ -1,9 +1,9 @@
 package world.respect.datalayer.db.school.adapters
 
 import androidx.room.Embedded
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.libxxhash.XXStringHasher
 
 /**
  * @property classUid as per EnrollmentEntity this needs to be retrieved from ClassEntity
@@ -22,18 +22,21 @@ fun EnrollmentEntities.toModel(): Enrollment {
         status = enrollment.eStatus,
         lastModified = enrollment.eLastModified,
         stored = enrollment.eStored,
+        metadata = enrollment.eMetadata,
         classUid = classUid,
         personUid = personUid,
         role = enrollment.eRole,
         beginDate = enrollment.eBeginDate,
         endDate = enrollment.eEndDate,
+        inviteCode = enrollment.eInviteCode,
+        approvedByPersonUid = enrollment.eApprovedByPersonUid,
     )
 }
 
 fun Enrollment.toEntities(
-    xxStringHasher: XXStringHasher
+    uidNumberMapper: UidNumberMapper,
 ): EnrollmentEntities {
-    val eUidNum = xxStringHasher.hash(uid)
+    val eUidNum = uidNumberMapper(uid)
     return EnrollmentEntities(
         enrollment = EnrollmentEntity(
             eUid = uid,
@@ -41,11 +44,15 @@ fun Enrollment.toEntities(
             eStatus = status,
             eLastModified = lastModified,
             eStored = stored,
-            eClassUidNum = xxStringHasher.hash(classUid),
-            ePersonUidNum = xxStringHasher.hash(personUid),
+            eMetadata = metadata,
+            eClassUidNum = uidNumberMapper(classUid),
+            ePersonUidNum = uidNumberMapper(personUid),
             eRole = role,
             eBeginDate = beginDate,
             eEndDate = endDate,
+            eInviteCode = inviteCode,
+            eApprovedByPersonUidNum = approvedByPersonUid?.let { uidNumberMapper(it) } ?: 0,
+            eApprovedByPersonUid = approvedByPersonUid,
         ),
         classUid = classUid,
         personUid = personUid,

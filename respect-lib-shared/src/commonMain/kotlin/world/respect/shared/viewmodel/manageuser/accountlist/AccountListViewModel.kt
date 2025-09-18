@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
@@ -100,6 +101,7 @@ class AccountListViewModel(
                                     givenName = "",
                                     familyName = "",
                                     roles = emptyList(),
+                                    gender = PersonGenderEnum.UNSPECIFIED,
                                 )
                             )
                         }
@@ -123,6 +125,7 @@ class AccountListViewModel(
                                                 givenName = "",
                                                 familyName = "",
                                                 roles = emptyList(),
+                                                gender = PersonGenderEnum.UNSPECIFIED,
                                             )
                                         )
                                     ) {

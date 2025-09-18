@@ -49,7 +49,6 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -335,9 +334,7 @@ val appKoinModule = module {
             primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
             )
     }
-    single {
-        RespectRedeemInviteRequestUseCase()
-    }
+
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }

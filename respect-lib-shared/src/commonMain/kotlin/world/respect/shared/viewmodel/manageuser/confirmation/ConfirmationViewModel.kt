@@ -73,37 +73,51 @@ class ConfirmationViewModel(
         navigateToAppropriateScreen(ProfileType.PARENT)
     }
 
-    private fun navigateToAppropriateScreen(profileType: ProfileType){
-        viewModelScope.launch {
-            val inviteInfo= uiState.value.inviteInfo
-            if (inviteInfo==null) {
-                _uiState.update {
-                    it.copy(inviteInfoError = StringResourceUiText(Res.string.invalid_invite_code))
-                }
+    fun onClickNext() {
+        navigateToAppropriateScreen(ProfileType.TEACHER)
+    }
 
-                return@launch
+    private fun navigateToAppropriateScreen(profileType: ProfileType){
+        val inviteInfo = uiState.value.inviteInfo
+
+        if (inviteInfo==null) {
+            _uiState.update {
+                it.copy(inviteInfoError = StringResourceUiText(Res.string.invalid_invite_code))
             }
-            val redeemRequest = makeBlankRedeemInviteRequest(route.code, profileType)
-            if (profileType==ProfileType.STUDENT) {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(SignupScreen.create(profileType,redeemRequest))
+
+            return
+        }
+
+        val redeemRequest = makeBlankRedeemInviteRequest(
+            route.code, profileType, inviteInfo.classGuid
+        )
+
+        if (profileType == ProfileType.STUDENT) {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    SignupScreen.create(profileType,redeemRequest)
                 )
-            }
-            else if (profileType==ProfileType.PARENT) {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(TermsAndCondition.create(profileType,redeemRequest))
+            )
+        }else {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    TermsAndCondition.create(profileType,redeemRequest
+                    )
                 )
-            }
+            )
         }
     }
-    fun makeBlankRedeemInviteRequest(inviteCode: String, profileType: ProfileType): RespectRedeemInviteRequest {
+    fun makeBlankRedeemInviteRequest(
+        inviteCode: String,
+        profileType: ProfileType,
+        classUid: String?,
+    ): RespectRedeemInviteRequest {
         val role = when(profileType) {
             ProfileType.STUDENT -> PersonRoleEnum.STUDENT
             ProfileType.PARENT  -> PersonRoleEnum.PARENT
-            else -> PersonRoleEnum.STUDENT
+            ProfileType.TEACHER -> PersonRoleEnum.TEACHER
+            else -> throw IllegalArgumentException("Cannot use CHILD here")
         }
-
-        val person = RespectRedeemInviteRequest.PersonInfo()
 
         val blankAccount = RespectRedeemInviteRequest.Account(
             username = "",
@@ -112,14 +126,11 @@ class ConfirmationViewModel(
 
         return RespectRedeemInviteRequest(
             code = inviteCode,
-            classUid = null,
+            classUid = classUid,
             role = role,
-            accountPersonInfo = person,
+            accountPersonInfo = RespectRedeemInviteRequest.PersonInfo(),
             parentOrGuardianRole = null,
             account = blankAccount
         )
-    }
-
-    fun onClickNext() {
     }
 }

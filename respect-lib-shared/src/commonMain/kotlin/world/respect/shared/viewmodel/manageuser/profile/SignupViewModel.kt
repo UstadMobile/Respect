@@ -10,8 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.child_dob_label
 import world.respect.shared.generated.resources.child_gender_label
@@ -34,10 +32,10 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 
 data class SignupUiState(
-    val screenTitle: UiText?=null,
-    val actionBarButtonName: UiText?=null,
-    val nameLabel: UiText?=null,
-    val genderLabel: UiText?=null,
+    val screenTitle: UiText? = null,
+    val actionBarButtonName: UiText? = null,
+    val nameLabel: UiText? = null,
+    val genderLabel: UiText? = null,
     val dateOfBirthLabel: UiText?=null,
     val personPicture: String?=null,
 
@@ -51,10 +49,7 @@ data class SignupUiState(
 
 
 class SignupViewModel(
-    savedStateHandle: SavedStateHandle,
-    private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
-    private val inviteInfoUseCase: GetInviteInfoUseCase
-
+    savedStateHandle: SavedStateHandle
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: SignupScreen = savedStateHandle.toRoute()
@@ -64,25 +59,33 @@ class SignupViewModel(
     val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            _uiState.value = when (route.type) {
-                ProfileType.PARENT, ProfileType.STUDENT -> SignupUiState(
-                    screenTitle = Res.string.your_profile_title.asUiText(),
-                    actionBarButtonName = Res.string.next.asUiText(),
-                    nameLabel = Res.string.your_name_label.asUiText(),
-                    genderLabel = Res.string.your_gender_label.asUiText(),
-                    dateOfBirthLabel = Res.string.your_dob_label.asUiText(),
-                )
+        _uiState.update { prev ->
+            when(route.type) {
+                ProfileType.CHILD -> {
+                    prev.copy(
+                        screenTitle = Res.string.child_profile_title.asUiText(),
+                        actionBarButtonName = Res.string.done.asUiText(),
+                        nameLabel = Res.string.child_name_label.asUiText(),
+                        genderLabel = Res.string.child_gender_label.asUiText(),
+                        dateOfBirthLabel = Res.string.child_dob_label.asUiText(),
+                    )
+                }
 
-                ProfileType.CHILD -> SignupUiState(
-                    screenTitle = Res.string.child_profile_title.asUiText(),
-                    actionBarButtonName = Res.string.done.asUiText(),
-                    nameLabel = Res.string.child_name_label.asUiText(),
-                    genderLabel = Res.string.child_gender_label.asUiText(),
-                    dateOfBirthLabel = Res.string.child_dob_label.asUiText(),
-                )
+                else -> {
+                    prev.copy(
+                        screenTitle = Res.string.your_profile_title.asUiText(),
+                        actionBarButtonName = Res.string.next.asUiText(),
+                        nameLabel = Res.string.your_name_label.asUiText(),
+                        genderLabel = Res.string.your_gender_label.asUiText(),
+                        dateOfBirthLabel = Res.string.your_dob_label.asUiText(),
+                    )
+                }
+
+
             }
+        }
 
+        viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(
                     actionBarButtonState = ActionBarButtonUiState(
@@ -142,7 +145,6 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-
         viewModelScope.launch {
             val personInfo = _uiState.value.personInfo
             _uiState.update { prev ->
@@ -164,38 +166,22 @@ class SignupViewModel(
                 return@launch
             } else {
                 when (route.type) {
-
-                    ProfileType.PARENT, ProfileType.STUDENT -> {
-                        val redeemInviteRequest = route.respectRedeemInviteRequest
-
-                        val updatedRequest = RespectRedeemInviteRequest(
-                                code = redeemInviteRequest.code,
-                                classUid = redeemInviteRequest.classUid,
-                                role = redeemInviteRequest.role,
-                                accountPersonInfo = personInfo,
-                                parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
-                                account = redeemInviteRequest.account
-                            )
-
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(CreateAccount.create(route.type,updatedRequest))
-                            )
-                    }
                     ProfileType.CHILD -> {
-
-                        val redeemRequest = route.respectRedeemInviteRequest
-
-//                        val result = submitRedeemInviteRequestUseCase(redeemRequest)
-//                        _navCommandFlow.tryEmit(
-//                            NavCommand.Navigate(
-//                                WaitingForApproval.create(
-//                                    route.type,
-//                                    route.code,
-//                                    result?.guid ?: ""
-//                                )
-//                            )
-//                        )
+                        TODO("Add child account support")
                     }
+
+                    else -> {
+                        _navCommandFlow.tryEmit(
+                            value = NavCommand.Navigate(
+                                destination = CreateAccount.create(
+                                    profileType = route.type,
+                                    inviteRequest = route.respectRedeemInviteRequest.copy(
+                                        accountPersonInfo = personInfo
+                                    )
+                                )
+                            )
+                        )
+                     }
                 }
             }
         }

@@ -191,32 +191,20 @@ class LearningUnitList(
 }
 @Serializable
 class EnterPasswordSignup private constructor(
-    private val usernameStr: String,
-    private val profileType: ProfileType,
     private val inviteRedeemRequestStr: String,
-
-
-    ) : RespectAppRoute {
-
-    @Transient
-    val username = usernameStr
+) : RespectAppRoute {
 
     @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest =
         Json.decodeFromString(inviteRedeemRequestStr)
 
-    @Transient
-    val type = profileType
-
     companion object {
         fun create(
-            username: String,
-            profileType: ProfileType,
             inviteRequest: RespectRedeemInviteRequest,
-
-            ): EnterPasswordSignup {
-            val respectRedeemInviteRequest = Json.encodeToString(inviteRequest)
-            return EnterPasswordSignup(username,profileType,respectRedeemInviteRequest)
+        ): EnterPasswordSignup {
+            return EnterPasswordSignup(
+                Json.encodeToString(inviteRequest)
+            )
         }
 
     }
@@ -273,8 +261,7 @@ class WaitingForApproval(
     private val profileType: ProfileType,
     private val inviteCode: String,
     private val pendingInviteStateUid: String,
-
-    ) : RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val type = profileType

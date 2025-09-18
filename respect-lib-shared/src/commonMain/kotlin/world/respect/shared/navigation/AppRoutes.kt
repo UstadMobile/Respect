@@ -301,12 +301,11 @@ class WaitingForApproval(
 @Serializable
 class SignupScreen(
     private val profileType: ProfileType,
-      private val inviteCode: String,
+    private val inviteCode: String,
     private val username: String?,
     private val parentPersonInfoJson: String?,
     private val parentRedeemCredential: String?,
-
-    ) : RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val type = profileType

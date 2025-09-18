@@ -35,6 +35,8 @@ import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -156,6 +158,12 @@ fun Application.module() {
                 route("respect") {
                     route("auth") {
                         AuthRoute()
+                    }
+
+                    route("invite") {
+                        RedeemInviteRoute(
+                            redeemInviteUseCase = { it.getSchoolKoinScope().get() }
+                        )
                     }
 
                     authenticate(AUTH_CONFIG_SCHOOL) {

@@ -121,6 +121,8 @@ import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
@@ -307,6 +309,7 @@ val appKoinModule = module {
             json = get(),
             tokenManager = get(),
             appDataSource = get(),
+            getInviteInfoUseCase = get(),
         )
     }
 
@@ -462,6 +465,13 @@ val appKoinModule = module {
         scoped<SchoolPrimaryKeyGenerator> {
             SchoolPrimaryKeyGenerator(
                 primaryKeyGenerator = PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
+            )
+        }
+
+        scoped<RedeemInviteUseCase> {
+            RedeemInviteUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get(),
             )
         }
     }

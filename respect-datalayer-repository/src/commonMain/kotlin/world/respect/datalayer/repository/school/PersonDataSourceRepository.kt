@@ -9,8 +9,10 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.shared.paging.DoorOffsetLimitRemoteMediator
 import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
+import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -81,10 +83,13 @@ class PersonDataSourceRepository(
     ): PagingSource<Int, Person> {
         return RepositoryOffsetLimitPagingSource(
             local = local.listAsPagingSource(loadParams, params),
-            remote = remote.listAsPagingSource(loadParams, params),
-            argKey = 0,
-            mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocal,
+            remoteMediator = mediatorStore.getOrCreateMediator(0) {
+                DoorOffsetLimitRemoteMediator { offset, limit ->
+                    remote.listAsPagingSource(loadParams, params).loadAndUpdateLocal(
+                        offset, limit, local::updateLocal
+                    )
+                }
+            },
         )
     }
 
@@ -94,10 +99,13 @@ class PersonDataSourceRepository(
     ): PagingSource<Int, PersonListDetails> {
         return RepositoryOffsetLimitPagingSource(
             local = local.listDetailsAsPagingSource(loadParams, listParams),
-            remote = remote.listAsPagingSource(loadParams, listParams),
-            argKey = 0,
-            mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocal,
+            remoteMediator = mediatorStore.getOrCreateMediator(0) {
+                DoorOffsetLimitRemoteMediator { offset, limit ->
+                    remote.listAsPagingSource(loadParams, listParams).loadAndUpdateLocal(
+                        offset, limit, local::updateLocal
+                    )
+                }
+            },
         )
     }
 

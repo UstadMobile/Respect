@@ -8,8 +8,10 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.shared.paging.DoorOffsetLimitRemoteMediator
 import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
+import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.model.Enrollment
@@ -56,10 +58,13 @@ class EnrollmentDataSourceRepository(
     ): PagingSource<Int, Enrollment> {
         return RepositoryOffsetLimitPagingSource(
             local = local.listAsPagingSource(loadParams, listParams),
-            remote = remote.listAsPagingSource(loadParams, listParams),
-            argKey = 0,
-            mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocal,
+            remoteMediator = mediatorStore.getOrCreateMediator(0) {
+                DoorOffsetLimitRemoteMediator { offset, limit ->
+                    remote.listAsPagingSource(loadParams, listParams).loadAndUpdateLocal(
+                        offset, limit, local::updateLocal
+                    )
+                }
+            }
         )
     }
 

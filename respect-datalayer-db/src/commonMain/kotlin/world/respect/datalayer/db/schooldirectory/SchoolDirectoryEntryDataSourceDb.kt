@@ -70,7 +70,7 @@ class SchoolDirectoryEntryDataSourceDb(
         return DataReadyState(
             respectAppDb.getSchoolDirectoryEntryEntityDao().list(
                 code = listParams.code,
-                name = listParams.name
+                name = listParams.name?.let { "%$it%" }
             ).map { it.toModel() }
         )
     }

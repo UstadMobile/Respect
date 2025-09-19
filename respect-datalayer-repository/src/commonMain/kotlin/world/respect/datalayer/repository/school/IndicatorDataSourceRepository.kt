@@ -4,16 +4,24 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.combineWithRemote
+import world.respect.datalayer.ext.updateFromRemoteIfNeeded
+import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.school.writequeue.WriteQueueItem
+import world.respect.datalayer.shared.RepositoryModelDataSource
+import world.respect.libutil.util.time.systemTimeInMillis
 
 class IndicatorDataSourceRepository(
-    private val local: IndicatorDataSourceLocal,
-    private val remote: IndicatorDataSource,
-) : IndicatorDataSource {
+    override val local: IndicatorDataSourceLocal,
+    override val remote: IndicatorDataSource,
+    private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val remoteWriteQueue: RemoteWriteQueue,
+) : IndicatorDataSource, RepositoryModelDataSource<Indicator> {
+
     override fun listAsFlow(
         loadParams: DataLoadParams,
         searchQuery: String?
@@ -26,28 +34,36 @@ class IndicatorDataSourceRepository(
         guid: String
     ): DataLoadState<Indicator> {
         val remote = remote.findByGuid(params, guid)
-        if (remote is DataReadyState) {
-            local.updateLocalFromRemote(listOf(remote.data))
-        }
+        local.updateFromRemoteIfNeeded(
+            remote, validationHelper
+        )
 
         return local.findByGuid(params, guid)
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>> {
-        val remoteFlow = remote.findByGuidAsFlow(guid).onEach {
-            if (it is DataReadyState) {
-                local.updateLocalFromRemote(listOf(it.data))
+        return local.findByGuidAsFlow(guid).combineWithRemote(
+            remoteFlow = remote.findByGuidAsFlow(guid).onEach {
+                local.updateFromRemoteIfNeeded(it, validationHelper)
             }
-        }
-
-        return local.findByGuidAsFlow(guid).combineWithRemote(remoteFlow)
-    }
-
-    override suspend fun store(indicator: Indicator) {
-        local.store(indicator)
+        )
     }
 
     override suspend fun initializeDefaultIndicators(idGenerator: () -> String) {
         local.initializeDefaultIndicators(idGenerator)
+    }
+
+    override suspend fun store(list: List<Indicator>) {
+        local.store(list)
+        val timeNow = systemTimeInMillis()
+        remoteWriteQueue.add(
+            list.map {
+                WriteQueueItem(
+                    model = WriteQueueItem.Model.CLASS,
+                    uid = it.indicatorId,
+                    timestamp = timeNow,
+                )
+            }
+        )
     }
 }

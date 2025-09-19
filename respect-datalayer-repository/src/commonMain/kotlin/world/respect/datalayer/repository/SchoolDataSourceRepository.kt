@@ -30,13 +30,19 @@ class SchoolDataSourceRepository(
 
     override val reportDataSource: ReportDataSource by lazy {
         ReportDataSourceRepository(
-            local.reportDataSource, remote.reportDataSource
+            local.reportDataSource,
+            remote.reportDataSource,
+            validationHelper,
+            remoteWriteQueue,
         )
     }
 
     override val indicatorDataSource: IndicatorDataSource by lazy {
         IndicatorDataSourceRepository(
-            local.indicatorDataSource, remote.indicatorDataSource
+            local.indicatorDataSource,
+            remote.indicatorDataSource,
+            validationHelper,
+            remoteWriteQueue,
         )
     }
 

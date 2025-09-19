@@ -9,19 +9,20 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.toReportEntity
-import world.respect.datalayer.db.school.adapters.toRespectReport
+import world.respect.datalayer.db.school.adapters.ReportEntities
+import world.respect.datalayer.db.school.adapters.toEntities
+import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.model.Report
 import world.respect.datalayer.shared.paging.map
-import world.respect.libxxhash.XXStringHasher
 import kotlin.time.Clock
 
 class ReportDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
-    private val xxStringHasher: XXStringHasher,
+    private val uidNumberMapper: UidNumberMapper,
 ) : ReportDataSourceLocal {
 
     private suspend fun upsertReports(
@@ -33,19 +34,12 @@ class ReportDataSourceDb(
         schoolDb.useWriterConnection { con ->
             val timeStored = Clock.System.now()
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                reports.map { it.copy(stored = timeStored) }.forEach { clazz ->
-                    val entities = clazz.toReportEntity(xxStringHasher)
-                    schoolDb.getReportEntityDao().putReport(entities)
+                reports.map { it.copy(stored = timeStored) }.forEach { report ->
+                    val entities = report.toEntities(uidNumberMapper)
+                    schoolDb.getReportEntityDao().putReport(entities.reportEntity)
                 }
             }
         }
-    }
-
-    override suspend fun updateLocalFromRemote(
-        list: List<Report>,
-        forceOverwrite: Boolean
-    ) {
-        upsertReports(list, false)
     }
 
     override fun listAsFlow(
@@ -56,7 +50,7 @@ class ReportDataSourceDb(
         return schoolDb.getReportEntityDao().getAllReportsByTemplate(template).map { list ->
             DataReadyState(
                 data = list.map {
-                    it.toRespectReport()
+                    ReportEntities(it).toModel()
                 }
             )
         }
@@ -68,9 +62,9 @@ class ReportDataSourceDb(
     ): PagingSource<Int, Report> {
         return schoolDb.getReportEntityDao().findAllAsPagingSource(
             since = params.common.since?.toEpochMilliseconds() ?: 0,
-            guidHash = params.common.guid?.let { xxStringHasher.hash(it) } ?: 0,
+            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
         ).map {
-            it.toRespectReport()
+            ReportEntities(it).toModel()
         }
     }
 
@@ -78,17 +72,20 @@ class ReportDataSourceDb(
         params: DataLoadParams,
         guid: String
     ): DataLoadState<Report> {
-        return schoolDb.getReportEntityDao().findByGuidHash(xxStringHasher.hash(guid))
-            ?.toRespectReport()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
+        return schoolDb.getReportEntityDao().findByGuidHash(
+            uidNumberMapper(guid)
+        )?.let {
+            DataReadyState(ReportEntities(it).toModel())
+        } ?: NoDataLoadedState.notFound()
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Report>> {
         return schoolDb.getReportEntityDao().findByGuidHashAsFlow(
-            xxStringHasher.hash(guid)
+            uidNumberMapper(guid)
         ).map { reportEntity ->
             if (reportEntity != null) {
                 DataReadyState(
-                    data = reportEntity.toRespectReport()
+                    data = ReportEntities(reportEntity).toModel()
                 )
             } else {
                 NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND)
@@ -96,15 +93,24 @@ class ReportDataSourceDb(
         }
     }
 
-    override suspend fun store(report: Report) {
-        upsertReports(listOf(report), false)
-    }
-
     override suspend fun delete(guid: String) {
         return schoolDb.getReportEntityDao().deleteReportByGuidHash(
-            xxStringHasher.hash(guid)
+            uidNumberMapper(guid)
         )
     }
 
+    override suspend fun store(list: List<Report>) {
+        upsertReports(list, false)
+    }
 
+    override suspend fun updateLocal(
+        list: List<Report>,
+        forceOverwrite: Boolean
+    ) {
+        upsertReports(list, false)
+    }
+
+    override suspend fun findByUidList(uids: List<String>): List<Report> {
+        TODO("Not yet implemented")
+    }
 }

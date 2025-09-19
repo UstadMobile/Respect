@@ -12,25 +12,25 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.http.ext.appendListParams
+import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.model.Indicator
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class IndicatorDataSourceHttp(
     override val schoolUrl: Url,
-    override val schoolDirectoryDataSource: SchoolDirectoryDataSource,
     private val httpClient: HttpClient,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val tokenProvider: AuthTokenProvider,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
 ) : IndicatorDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun IndicatorDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(IndicatorDataSource.ENDPOINT_NAME))
-            .apply { parameters.appendListParams(common) }
+            .apply { parameters.appendCommonListParams(common) }
             .build()
     }
 
@@ -82,7 +82,7 @@ class IndicatorDataSourceHttp(
         }
     }
 
-    override suspend fun store(indicator: Indicator) {
+    override suspend fun store(list: List<Indicator>) {
         throw IllegalStateException("Indicator-store-http: Not yet supported")
     }
 

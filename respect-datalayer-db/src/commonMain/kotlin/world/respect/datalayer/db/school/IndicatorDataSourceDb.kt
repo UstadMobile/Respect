@@ -8,18 +8,19 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.toIndicator
-import world.respect.datalayer.db.school.adapters.toIndicatorEntity
+import world.respect.datalayer.db.school.adapters.IndicatorEntities
+import world.respect.datalayer.db.school.adapters.toEntities
+import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.model.report.DefaultIndicators
-import world.respect.libxxhash.XXStringHasher
 import kotlin.time.Clock
 
 class IndicatorDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
-    private val xxStringHasher: XXStringHasher,
+    private val uidNumberMapper: UidNumberMapper,
 ) : IndicatorDataSourceLocal {
 
     private suspend fun upsertIndicator(
@@ -31,11 +32,12 @@ class IndicatorDataSourceDb(
         schoolDb.useWriterConnection { con ->
             val timeStored = Clock.System.now()
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                indicator.map { it.copy(stored = timeStored) }.forEach { clazz ->
-                    val entities = clazz.toIndicatorEntity(xxStringHasher)
-                    schoolDb.getIndicatorEntityDao().putIndicator(entities)
+                indicator.map { it.copy(stored = timeStored) }.forEach { indicator ->
+                    val entities = indicator.toEntities(uidNumberMapper)
+                    schoolDb.getIndicatorEntityDao().putIndicator(entities.indicator)
                 }
             }
+
         }
     }
 
@@ -46,7 +48,7 @@ class IndicatorDataSourceDb(
         return schoolDb.getIndicatorEntityDao().getAllIndicator().map { list ->
             DataReadyState(
                 data = list.map {
-                    it.toIndicator()
+                    IndicatorEntities(it).toModel()
                 }
             )
         }
@@ -56,44 +58,48 @@ class IndicatorDataSourceDb(
         params: DataLoadParams,
         guid: String
     ): DataLoadState<Indicator> {
-        return schoolDb.getIndicatorEntityDao().findByGuidHash(xxStringHasher.hash(guid))
-            ?.toIndicator()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
+        return schoolDb.getIndicatorEntityDao().findByGuidHash(
+            uidNumberMapper(guid)
+        )?.let {
+            DataReadyState(IndicatorEntities(it).toModel())
+        } ?: NoDataLoadedState.notFound()
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>> {
         return schoolDb.getIndicatorEntityDao().getIndicatorAsFlow(
-            xxStringHasher.hash(guid)
-        ).map { iEntity ->
-            if (iEntity != null) {
-                DataReadyState(
-                    data = iEntity.toIndicator()
-                )
-            } else {
-                NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND)
-            }
+            uidNumberMapper(guid)
+        ).map { indicatorEntity ->
+            indicatorEntity?.let { IndicatorEntities(it) }?.toModel()?.let {
+                DataReadyState(it)
+            } ?: NoDataLoadedState.notFound()
         }
     }
 
-    override suspend fun store(indicator: Indicator) {
-        upsertIndicator(listOf(indicator), false)
+    override suspend fun store(list: List<Indicator>) {
+        upsertIndicator(list, false)
     }
 
     override suspend fun initializeDefaultIndicators(idGenerator: () -> String) {
         val existingCount = schoolDb.getIndicatorEntityDao().getIndicatorCount()
         if (existingCount == 0) {
-            DefaultIndicators.list.forEach { indicator ->
-                val indicatorWithId = indicator.copy(
+            // Collect all indicators first, then store them in a single batch
+            val indicatorsToStore = DefaultIndicators.list.map { indicator ->
+                indicator.copy(
                     indicatorId = idGenerator()
                 )
-                store(indicatorWithId)
             }
+            store(indicatorsToStore)
         }
     }
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Indicator>,
         forceOverwrite: Boolean
     ) {
         upsertIndicator(list, false)
+    }
+
+    override suspend fun findByUidList(uids: List<String>): List<Indicator> {
+        TODO("Not yet implemented")
     }
 }

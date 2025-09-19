@@ -38,7 +38,7 @@ class SchoolDataSourceHttp(
     override val reportDataSource: ReportDataSource by lazy {
         ReportDataSourceHttp(
             schoolUrl = schoolUrl,
-            schoolDirectoryDataSource = schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
@@ -49,7 +49,7 @@ class SchoolDataSourceHttp(
     override val indicatorDataSource: IndicatorDataSource by lazy {
         IndicatorDataSourceHttp(
             schoolUrl = schoolUrl,
-            schoolDirectoryDataSource = schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,

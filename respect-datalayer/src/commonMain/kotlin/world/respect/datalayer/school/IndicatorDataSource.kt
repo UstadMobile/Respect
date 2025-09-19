@@ -4,9 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-interface IndicatorDataSource {
+interface IndicatorDataSource : WritableDataSource<Indicator>{
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
     )
@@ -23,8 +24,9 @@ interface IndicatorDataSource {
 
     fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>>
 
-    suspend fun store(indicator: Indicator)
-
+    override suspend fun store(
+        list: List<Indicator>,
+    )
     suspend fun initializeDefaultIndicators(idGenerator: () -> String)
 
     companion object {

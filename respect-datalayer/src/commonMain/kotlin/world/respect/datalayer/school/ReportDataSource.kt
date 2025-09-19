@@ -5,9 +5,10 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-interface ReportDataSource {
+interface ReportDataSource : WritableDataSource<Report>  {
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
     )
@@ -34,8 +35,6 @@ interface ReportDataSource {
 
 
     fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Report>>
-
-    suspend fun store(report: Report)
 
     suspend fun delete(guid: String)
 

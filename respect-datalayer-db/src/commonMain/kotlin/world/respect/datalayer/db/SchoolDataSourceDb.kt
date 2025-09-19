@@ -33,11 +33,11 @@ class SchoolDataSourceDb(
         PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
     override val reportDataSource: ReportDataSourceLocal by lazy {
-        ReportDataSourceDb(schoolDb, xxStringHasher)
+        ReportDataSourceDb(schoolDb,uidNumberMapper)
     }
 
     override val indicatorDataSource: IndicatorDataSourceLocal by lazy {
-        IndicatorDataSourceDb(schoolDb, xxStringHasher)
+        IndicatorDataSourceDb(schoolDb, uidNumberMapper)
     }
 
     override val classDataSource: ClassDataSourceLocal by lazy {

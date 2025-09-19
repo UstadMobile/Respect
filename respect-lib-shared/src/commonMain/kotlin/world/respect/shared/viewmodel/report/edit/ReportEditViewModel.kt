@@ -205,7 +205,7 @@ class ReportEditViewModel(
                     lastModified = Clock.System.now(),
                 )
 
-                schoolDataSource.reportDataSource.store(report)
+                schoolDataSource.reportDataSource.store(listOf(report))
 
                 if (route.reportUid == null) {
                     _navCommandFlow.tryEmit(

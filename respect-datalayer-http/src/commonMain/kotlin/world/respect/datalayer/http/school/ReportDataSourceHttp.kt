@@ -14,26 +14,26 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.http.ext.appendListParams
+import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class ReportDataSourceHttp(
     override val schoolUrl: Url,
-    override val schoolDirectoryDataSource: SchoolDirectoryDataSource,
     private val httpClient: HttpClient,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val tokenProvider: AuthTokenProvider,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
 ) : ReportDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun ReportDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(ReportDataSource.ENDPOINT_NAME))
-            .apply { parameters.appendListParams(common) }
+            .apply { parameters.appendCommonListParams(common) }
             .build()
     }
 
@@ -104,11 +104,11 @@ class ReportDataSourceHttp(
         }
     }
 
-    override suspend fun store(report: Report) {
-        throw IllegalStateException("Report-store-http: Not yet supported")
-    }
-
     override suspend fun delete(guid: String) {
         throw IllegalStateException("Report-delete-http: Not yet supported")
+    }
+
+    override suspend fun store(list: List<Report>) {
+        throw IllegalStateException("Report-store-http: Not yet supported")
     }
 }

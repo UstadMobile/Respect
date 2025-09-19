@@ -14,7 +14,7 @@ import kotlin.time.Instant
 @Serializable
 data class Enrollment(
     val uid: String,
-    val status: StatusEnum,
+    val status: StatusEnum = StatusEnum.ACTIVE,
     @Serializable(with = InstantISO8601Serializer::class)
     override val lastModified: Instant = Clock.System.now(),
     @Serializable(with = InstantISO8601Serializer::class)
@@ -29,4 +29,11 @@ data class Enrollment(
     val endDate: LocalDate? = null,
     val inviteCode: String? = null,
     val approvedByPersonUid: String? = null,
-): ModelWithTimes
+): ModelWithTimes {
+
+    companion object {
+
+        const val TABLE_ID = 6
+
+    }
+}

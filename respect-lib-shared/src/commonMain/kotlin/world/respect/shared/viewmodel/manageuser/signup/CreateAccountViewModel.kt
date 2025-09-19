@@ -175,7 +175,8 @@ class CreateAccountViewModel(
                                         )
                                     }else {
                                         WaitingForApproval()
-                                    }
+                                    },
+                                    clearBackStack = true,
                                 )
                             )
                         }

@@ -6,6 +6,8 @@ import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -82,13 +84,14 @@ class RedeemInviteUseCaseDb(
             redeemRequest.role, redeemRequest.account.username
         )
 
-        schoolDataSource(
+        val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
-        ).personDataSource.updateLocal(listOf(accountPerson))
+        )
+        schoolDataSourceVal.personDataSource.updateLocal(listOf(accountPerson))
 
         val credential = redeemRequest.account.credential
 
-        when(credential) {
+        val authResponse = when(credential) {
             is RespectRedeemInviteRequest.RedeemInvitePasswordCredential ->{
                 setPasswordUseCase(
                     SetPasswordUseCase.SetPasswordRequest(
@@ -98,7 +101,7 @@ class RedeemInviteUseCaseDb(
                     )
                 )
 
-                return getTokenAndUserProfileUseCase(
+                getTokenAndUserProfileUseCase(
                     username = redeemRequest.account.username,
                     password = credential.password,
                 )
@@ -112,12 +115,29 @@ class RedeemInviteUseCaseDb(
                     )
                 )
 
-                return getTokenAndUserProfileWithPasskeyUseCase(credential.authResponseJson)
+                getTokenAndUserProfileWithPasskeyUseCase(credential.authResponseJson)
             }
         }
 
+        //If a teacher/student, make the pending enrollment now
+        schoolDataSourceVal.enrollmentDataSource.store(
+            listOf(
+                Enrollment(
+                    uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                        Enrollment.TABLE_ID
+                    ).toString(),
+                    classUid = classUid,
+                    personUid = accountPerson.guid,
+                    role = if(redeemRequest.role == PersonRoleEnum.TEACHER) {
+                        EnrollmentRoleEnum.PENDING_TEACHER
+                    }else {
+                        EnrollmentRoleEnum.PENDING_STUDENT
+                    },
+                    inviteCode = redeemRequest.code,
+                )
+            )
+        )
 
-
-        //If a teacher/student, make the enrollment now
+        return authResponse
     }
 }

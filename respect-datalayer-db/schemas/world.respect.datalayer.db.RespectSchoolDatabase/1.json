@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f1e5742cb29adbf90a0c29e04a17d048",
+    "identityHash": "d80b2daa8dd9be1097308ef8f9562d94",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -500,7 +500,7 @@
       },
       {
         "tableName": "EnrollmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` TEXT NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` INTEGER NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
         "fields": [
           {
             "fieldPath": "eUid",
@@ -552,7 +552,7 @@
           {
             "fieldPath": "eRole",
             "columnName": "eRole",
-            "affinity": "TEXT",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -646,7 +646,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f1e5742cb29adbf90a0c29e04a17d048')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd80b2daa8dd9be1097308ef8f9562d94')"
     ]
   }
 }

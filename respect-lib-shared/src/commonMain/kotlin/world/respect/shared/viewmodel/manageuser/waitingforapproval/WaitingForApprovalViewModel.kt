@@ -32,7 +32,8 @@ class WaitingForApprovalViewModel(
                 it.copy(
                     title = Res.string.waiting_title.asUiText(),
                     hideBottomNavigation = true,
-                    userAccountIconVisible = true
+                    userAccountIconVisible = true,
+                    showBackButton = false,
                 )
             }
 

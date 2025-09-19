@@ -59,6 +59,9 @@ fun Application.module() {
         serverProperties.store(serverPropWriter, null)
     }
 
+    val wellKnownDir = File(ktorAppHomeDir(), "well-known")
+    val assetLinksFile = File(wellKnownDir, "assetlinks.json")
+
     val dirAdminFile = File(environment.config.absoluteDataDir(), DIRECTORY_ADMIN_FILENAME)
     dirAdminFile.takeIf { !it.exists() }?.also {
         it.writeText(randomString(DEFAULT_DIR_ADMIN_PASS_LENGTH))
@@ -142,6 +145,10 @@ fun Application.module() {
 
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
+
+            get("assetlinks.json") {
+                call.respondFile(assetLinksFile)
+            }
         }
 
         swaggerUI(

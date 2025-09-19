@@ -133,8 +133,8 @@ class PersonDataSourceHttp(
             validationHelper = validationHelper,
             typeInfo = typeInfo<List<Person>>(),
             requestBuilder = {
-                headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
-                headers[HttpHeaders.CacheControl] = "no-store" //prevent 'normal' cache
+                useTokenProvider(tokenProvider)
+                useValidationCacheControl(validationHelper)
             },
             tag = "Person-HTTP",
         )

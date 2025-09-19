@@ -119,6 +119,7 @@ import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUse
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -554,6 +555,12 @@ val appKoinModule = module {
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
+            )
+        }
+
+        scoped<ApproveOrDeclineInviteRequestUseCase> {
+            ApproveOrDeclineInviteRequestUseCase(
+                schoolDataSource = get(),
             )
         }
     }

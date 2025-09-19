@@ -101,7 +101,7 @@
     <string name="add_student">Add Student</string>">
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
-    <string name="pending_invite">Pending invites</string>">
+    <string name="pending_requests">Pending requests</string>">
     <string name="copy_invite_code">Copy invite code : </string>">
     <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
     <string name="share_qr_code">Share QR code</string>">

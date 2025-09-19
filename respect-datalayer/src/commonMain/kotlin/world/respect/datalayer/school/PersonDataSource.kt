@@ -21,6 +21,8 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
     ) {
 
+        val argKey = this.hashCode()
+
         companion object {
             fun fromParams(stringValues: StringValues) : GetListParams {
                 return GetListParams(

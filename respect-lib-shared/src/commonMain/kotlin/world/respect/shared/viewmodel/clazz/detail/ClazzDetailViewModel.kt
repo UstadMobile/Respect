@@ -22,6 +22,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
 import world.respect.shared.generated.resources.last_name
@@ -43,6 +44,8 @@ import kotlin.getValue
 data class ClazzDetailUiState(
     val teachers: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
     val students: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+    val pendingTeachers: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+    val pendingStudents: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -68,6 +71,8 @@ class ClazzDetailViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
+
     private val _uiState = MutableStateFlow(ClazzDetailUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -90,6 +95,10 @@ class ClazzDetailViewModel(
 
     private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
+    private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
+
+    private val studentsPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_STUDENT)
+
     init {
         _appUiState.update {
             it.copy(
@@ -106,6 +115,8 @@ class ClazzDetailViewModel(
             it.copy(
                 teachers = teacherPagingSource,
                 students = studentPagingSource,
+                pendingTeachers = teachersPendingPagingSource,
+                pendingStudents = studentsPendingPagingSource,
                 sortOptions = listOf(
                     SortOrderOption(
                         fieldMessageId = Res.string.first_name, flag = 1, order = true
@@ -159,7 +170,19 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(selectedChip = chip) }
     }
 
-    fun onClickAcceptInvite(user: Person) {}
+    fun onClickAcceptInvite(user: Person) {
+        viewModelScope.launch {
+            try {
+                approveOrDeclineInviteRequestUseCase(
+                    personUid = user.guid,
+                    classUid = route.guid,
+                    approved = true,
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun onClickDismissInvite(user: Person) {}
 

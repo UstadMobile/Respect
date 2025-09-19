@@ -13,6 +13,7 @@ import world.respect.datalayer.repository.shared.paging.DoorOffsetLimitRemoteMed
 import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -28,6 +29,7 @@ class PersonDataSourceRepository(
     override val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
+    private val enrollmentDataSourceRepository: EnrollmentDataSourceRepository,
 ) : PersonDataSource, RepositoryModelDataSource<Person> {
 
     private val mediatorStore = PagingSourceMediatorStore()
@@ -83,11 +85,22 @@ class PersonDataSourceRepository(
     ): PagingSource<Int, Person> {
         return RepositoryOffsetLimitPagingSource(
             local = local.listAsPagingSource(loadParams, params),
-            remoteMediator = mediatorStore.getOrCreateMediator(0) {
+            remoteMediator = mediatorStore.getOrCreateMediator(params.argKey) {
                 DoorOffsetLimitRemoteMediator { offset, limit ->
                     remote.listAsPagingSource(loadParams, params).loadAndUpdateLocal(
                         offset, limit, local::updateLocal
                     )
+
+                    if(params.filterByClazzUid != null) {
+                        enrollmentDataSourceRepository.remote.listAsPagingSource(
+                            loadParams, EnrollmentDataSource.GetListParams(
+                                classUid = params.filterByClazzUid
+                            )
+                        ).loadAndUpdateLocal(
+                            offset, limit,
+                            enrollmentDataSourceRepository.local::updateLocal
+                        )
+                    }
                 }
             },
         )

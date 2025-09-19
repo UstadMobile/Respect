@@ -14,14 +14,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import world.respect.datalayer.db.curriculum.entities.TextbookMapping
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_book_cover
+import world.respect.shared.generated.resources.more_options
+import world.respect.shared.generated.resources.no_textbooks_available
+import world.respect.shared.generated.resources.textbooks
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListUiState
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CurriculumMappingListScreen(
@@ -36,7 +39,7 @@ fun CurriculumMappingListScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "Textbooks",
+            text = stringResource(Res.string.textbooks),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -47,7 +50,7 @@ fun CurriculumMappingListScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No textbooks available",
+                    text = stringResource(Res.string.no_textbooks_available),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
@@ -69,8 +72,6 @@ fun CurriculumMappingListScreen(
             }
         }
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,8 +108,8 @@ private fun TextbookCard(
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = "More options"
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = stringResource(Res.string.more_options)
                     )
                 }
             }
@@ -124,7 +125,7 @@ private fun TextbookCard(
                 if (textbook.coverImageUrl != null) {
                     AsyncImage(
                         model = textbook.coverImageUrl,
-                        contentDescription = "Book cover",
+                        contentDescription = stringResource(Res.string.add_book_cover),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )

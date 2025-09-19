@@ -1,25 +1,28 @@
 package world.respect.app.view.curriculum.mapping.edit
 
+import world.respect.datalayer.db.curriculum.entities.ChapterMapping
+import world.respect.datalayer.db.curriculum.entities.LessonMapping
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.clip
-import world.respect.datalayer.db.curriculum.entities.ChapterMapping
-import world.respect.datalayer.db.curriculum.entities.LessonMapping
+import org.jetbrains.compose.resources.stringResource
+import world.respect.shared.generated.resources.Res
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 
@@ -58,11 +61,11 @@ fun CurriculumMappingEditScreen(
                 ) {
                     Icon(
                         Icons.Filled.CameraAlt,
-                        contentDescription = "Add book cover",
+                        contentDescription = stringResource(Res.string.add_book_cover),
                         modifier = Modifier.size(32.dp)
                     )
                     Text(
-                        text = "Add book cover",
+                        text = stringResource(Res.string.add_book_cover),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -75,8 +78,8 @@ fun CurriculumMappingEditScreen(
         OutlinedTextField(
             value = uiState.bookTitle,
             onValueChange = onBookTitleChanged,
-            label = { Text("Book Title") },
-            placeholder = { Text("*Required") },
+            label = { Text(stringResource(Res.string.book_title)) },
+            placeholder = { Text(stringResource(Res.string.required)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("book_title_field"),
@@ -89,7 +92,8 @@ fun CurriculumMappingEditScreen(
         OutlinedTextField(
             value = uiState.bookDescription,
             onValueChange = onBookDescriptionChanged,
-            label = { Text("Book Description") },
+            label = { Text(stringResource(Res.string.book_description)) },
+            placeholder = { Text(stringResource(Res.string.book_description)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("book_description_field"),
@@ -101,7 +105,7 @@ fun CurriculumMappingEditScreen(
 
         // Mapping Section Header
         Text(
-            text = "Mapping",
+            text = stringResource(Res.string.mapping_edit),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -121,14 +125,13 @@ fun CurriculumMappingEditScreen(
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Chapter")
+            Text(stringResource(Res.string.chapter))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Chapters and Lessons List
+        // Chapters list or empty
         if (uiState.chapters.isEmpty()) {
-            // Empty state
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -141,17 +144,17 @@ fun CurriculumMappingEditScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "No Chapter is added yet.",
+                    text = stringResource(Res.string.no_chapter_added),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Please click the + button",
+                    text = stringResource(Res.string.click_plus_button),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "to add one",
+                    text = stringResource(Res.string.to_add_one),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -171,6 +174,16 @@ fun CurriculumMappingEditScreen(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Save or Submit Button
+        Button(
+            onClick = onClickSave,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(Res.string.save))
+        }
     }
 }
 
@@ -183,7 +196,6 @@ private fun ChapterItem(
     onClickRemoveLesson: (LessonMapping) -> Unit
 ) {
     Column {
-        // Chapter Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -205,7 +217,8 @@ private fun ChapterItem(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = chapter.title ?: "Chapter ${chapter.chapterNumber}",
+                    text = chapter.title
+                        ?: "${stringResource(Res.string.chapter)} ${chapter.chapterNumber}",
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -218,13 +231,12 @@ private fun ChapterItem(
             ) {
                 Icon(
                     Icons.Filled.Close,
-                    contentDescription = "Remove chapter",
+                    contentDescription = stringResource(Res.string.remove_chapter),
                     modifier = Modifier.size(16.dp)
                 )
             }
         }
 
-        // Add Lesson Button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -241,11 +253,10 @@ private fun ChapterItem(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Lesson")
+                Text(stringResource(Res.string.lesson))
             }
         }
 
-        // Lessons List
         lessons.forEach { lesson ->
             LessonItem(
                 lesson = lesson,
@@ -263,8 +274,7 @@ private fun LessonItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp)
-            .padding( vertical = 4.dp),
+            .padding(start = 20.dp).padding (vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -272,12 +282,11 @@ private fun LessonItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            // Color indicator based on lesson type
             val indicatorColor = when (lesson.lessonType) {
-                "A" -> Color(0xFFFFA726) // Orange
-                "B" -> Color(0xFFEF5350) // Red
-                "C" -> Color(0xFF66BB6A) // Green
-                "D" -> Color(0xFF9C27B0) // Purple
+                "A" -> Color(0xFFFFA726)
+                "B" -> Color(0xFFEF5350)
+                "C" -> Color(0xFF66BB6A)
+                "D" -> Color(0xFF9C27B0)
                 else -> MaterialTheme.colorScheme.primary
             }
 
@@ -301,14 +310,15 @@ private fun LessonItem(
 
             Column {
                 Text(
-                    text = lesson.title ?: "Alphabet ${lesson.lessonType}",
+                    text = lesson.title ?: stringResource(Res.string.simple_learning),
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (lesson.subtitle != null) {
+                lesson.subtitle?.let { subtitle ->
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = lesson.subtitle!!,
+                        text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -324,7 +334,7 @@ private fun LessonItem(
         ) {
             Icon(
                 Icons.Filled.Close,
-                contentDescription = "Remove lesson",
+                contentDescription = stringResource(Res.string.remove_lesson),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -335,8 +345,7 @@ private fun LessonItem(
 fun CurriculumMappingEditScreenForViewModel(
     viewModel: CurriculumMappingEditViewModel
 ) {
-    val uiState: CurriculumMappingEditUiState by viewModel.uiState.collectAsState()
-
+    val uiState = viewModel.uiState.collectAsState().value
     CurriculumMappingEditScreen(
         uiState = uiState,
         onBookTitleChanged = viewModel::onBookTitleChanged,

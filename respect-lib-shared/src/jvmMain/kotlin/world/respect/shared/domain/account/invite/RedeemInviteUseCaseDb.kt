@@ -12,6 +12,8 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
+import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -27,7 +29,9 @@ class RedeemInviteUseCaseDb(
     private val schoolUrl: Url,
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator,
     private val setPasswordUseCase: SetPasswordUseCase,
+    private val savePasskeyUseCase: SavePersonPasskeyUseCase,
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase,
+    private val getTokenAndUserProfileWithPasskeyUseCase: GetTokenAndUserProfileWithPasskeyUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
 ): RedeemInviteUseCase, KoinComponent {
 
@@ -99,8 +103,16 @@ class RedeemInviteUseCaseDb(
                     password = credential.password,
                 )
             }
-            else -> {
-                TODO("set credential passkey")
+            is RespectRedeemInviteRequest.RedeemInvitePasskeyCredential -> {
+                savePasskeyUseCase(
+                    SavePersonPasskeyUseCase.Request(
+                        authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
+                        userGuid = accountPerson.guid,
+                        passkeyWebAuthNResponse = credential.authResponseJson
+                    )
+                )
+
+                return getTokenAndUserProfileWithPasskeyUseCase(credential.authResponseJson)
             }
         }
 

@@ -276,27 +276,7 @@ class ConfirmationScreen(
 }
 
 @Serializable
-class WaitingForApproval(
-    private val profileType: ProfileType,
-    private val inviteCode: String,
-    private val pendingInviteStateUid: String,
-) : RespectAppRoute {
-
-    @Transient
-    val type = profileType
-
-    @Transient
-    val uid = pendingInviteStateUid
-
-    @Transient
-    val code = inviteCode
-
-    companion object {
-        fun create(profileType: ProfileType, inviteCode: String,pendingInviteStateUid:String): WaitingForApproval {
-            return WaitingForApproval(profileType, inviteCode,pendingInviteStateUid)
-        }
-    }
-}
+class WaitingForApproval : RespectAppRoute
 
 @Serializable
 class SignupScreen(

@@ -46,8 +46,9 @@ class CreatePasskeyUseCaseImpl(
             ) as CreatePublicKeyCredentialResponse
 
             Log.d ( "passkey response:", response.registrationResponseJson)
-            val passkeyResponse =
-                json.decodeFromString<AuthenticationResponseJSON>(response.registrationResponseJson)
+            val passkeyResponse = json.decodeFromString<AuthenticationResponseJSON>(
+                response.registrationResponseJson
+            )
 
             CreatePasskeyUseCase.PasskeyCreatedResult(passkeyResponse)
         } catch (_: CreateCredentialCancellationException) {

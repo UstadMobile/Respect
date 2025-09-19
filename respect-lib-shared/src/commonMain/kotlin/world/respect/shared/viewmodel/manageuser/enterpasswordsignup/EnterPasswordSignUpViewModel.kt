@@ -99,11 +99,7 @@ class EnterPasswordSignupViewModel(
                                 inviteRequest = redeemRequest,
                             )
                         }else {
-                            WaitingForApproval(
-                                ProfileType.STUDENT,
-                                redeemRequest.code,
-                                ""
-                            )
+                            WaitingForApproval()
                         },
                         clearBackStack = true
                     )

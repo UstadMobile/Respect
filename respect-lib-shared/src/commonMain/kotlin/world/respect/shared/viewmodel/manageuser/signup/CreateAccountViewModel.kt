@@ -18,6 +18,8 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
@@ -29,12 +31,15 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
+import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class CreateAccountViewModelUiState(
     val username: String = "",
@@ -50,6 +55,7 @@ class CreateAccountViewModel(
     private val verifyDomainUseCase: VerifyDomainUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
+    private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val route: CreateAccount = savedStateHandle.toRoute()
 
@@ -143,7 +149,35 @@ class CreateAccountViewModel(
 
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                            TODO("")
+                            val redeemRequest = route.respectRedeemInviteRequest.copy(
+                                account = RespectRedeemInviteRequest.Account(
+                                    username = username,
+                                    credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                        authResponseJson = createPasskeyResult.authenticationResponseJSON
+                                    )
+                                )
+                            )
+
+                            accountManager.register(
+                                redeemInviteRequest = redeemRequest,
+                                schoolUrl = route.schoolUrl
+                            )
+
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = if(
+                                        route.respectRedeemInviteRequest.role == PersonRoleEnum.PARENT
+                                    ) {
+                                        SignupScreen.create(
+                                            schoolUrl = route.schoolUrl,
+                                            profileType = ProfileType.CHILD,
+                                            inviteRequest = redeemRequest
+                                        )
+                                    }else {
+                                        WaitingForApproval()
+                                    }
+                                )
+                            )
                         }
 
                         is CreatePasskeyUseCase.Error -> {

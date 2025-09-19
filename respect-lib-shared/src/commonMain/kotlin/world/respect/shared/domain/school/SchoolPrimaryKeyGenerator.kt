@@ -10,7 +10,7 @@ import world.respect.datalayer.school.model.Report
  * Wrapper class used only for purposes of differentiating it for dependency injection purposes
  */
 data class SchoolPrimaryKeyGenerator(
-    val primaryKeyGenerator: PrimaryKeyGenerator
+    val primaryKeyGenerator: PrimaryKeyGenerator = PrimaryKeyGenerator(TABLE_IDS)
 ) {
     companion object {
 

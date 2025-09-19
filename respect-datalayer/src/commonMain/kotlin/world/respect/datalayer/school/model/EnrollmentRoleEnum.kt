@@ -14,7 +14,13 @@ enum class EnrollmentRoleEnum(
     val flag: Int,
 ) {
 
-    TEACHER("teacher", 1), STUDENT("student", 2);
+    TEACHER("teacher", 1),
+
+    STUDENT("student", 2),
+
+    PENDING_TEACHER("pending_teacher", 3),
+
+    PENDING_STUDENT("pending_student", 4);
 
     companion object {
 

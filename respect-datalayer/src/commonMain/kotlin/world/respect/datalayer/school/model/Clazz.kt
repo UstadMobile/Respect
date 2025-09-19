@@ -19,10 +19,10 @@ data class Clazz(
     override val stored: Instant = Clock.System.now(),
     val teacherInviteCode: String? = Random.nextInt(
         DEFAULT_INVITE_CODE_MAX
-    ).toString().padStart(DEFAULT_INVITE_CODE_LEN),
+    ).toString().padStart(DEFAULT_INVITE_CODE_LEN, '0'),
     val studentInviteCode: String? = Random.nextInt(
         DEFAULT_INVITE_CODE_MAX
-    ).toString().padStart(DEFAULT_INVITE_CODE_LEN),
+    ).toString().padStart(DEFAULT_INVITE_CODE_LEN, '0'),
 ): ModelWithTimes {
 
     companion object {

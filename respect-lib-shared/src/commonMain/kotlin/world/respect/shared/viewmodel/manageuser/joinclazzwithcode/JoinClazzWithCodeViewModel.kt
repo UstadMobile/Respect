@@ -23,7 +23,7 @@ data class JoinClazzWithCodeUiState(
 
 class JoinClazzWithCodeViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getInviteInfoUseCase: GetInviteInfoUseCase
+    private val getInviteInfoUseCase: GetInviteInfoUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(JoinClazzWithCodeUiState())

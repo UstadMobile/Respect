@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
 import kotlin.time.Clock
@@ -18,6 +19,7 @@ data class Enrollment(
     override val lastModified: Instant = Clock.System.now(),
     @Serializable(with = InstantISO8601Serializer::class)
     override val stored: Instant = Clock.System.now(),
+    val metadata: JsonObject? = null,
     val classUid: String,
     val personUid: String,
     val role: EnrollmentRoleEnum,
@@ -25,4 +27,6 @@ data class Enrollment(
         TimeZone.currentSystemDefault()
     ).date,
     val endDate: LocalDate? = null,
+    val inviteCode: String? = null,
+    val approvedByPersonUid: String? = null,
 ): ModelWithTimes

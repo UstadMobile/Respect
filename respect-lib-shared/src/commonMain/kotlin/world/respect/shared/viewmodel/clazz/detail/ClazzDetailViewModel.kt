@@ -8,21 +8,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.oneroster.model.OneRosterClass
-import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -55,15 +53,17 @@ data class ClazzDetailUiState(
         Res.string.first_name, 1, true
     ),
     val fieldsEnabled: Boolean = true,
-    val clazz: DataLoadState<OneRosterClass> = DataLoadingState(),
+    val clazz: DataLoadState<Clazz> = DataLoadingState(),
     val isPendingExpanded: Boolean = true,
     val isTeachersExpanded: Boolean = true,
-    val isStudentsExpanded: Boolean = true
+    val isStudentsExpanded: Boolean = true,
+    val inviteCodePrefix: String? = null,
 )
 
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val appDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -82,7 +82,7 @@ class ClazzDetailViewModel(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
                     filterByClazzUid = route.guid,
-                    filterByClazzRole = role,
+                    filterByEnrolmentRole = role,
                 )
             )
         }
@@ -93,6 +93,25 @@ class ClazzDetailViewModel(
     private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     init {
+        viewModelScope.launch {
+            val selectedAccountUrl = accountManager.selectedAccount?.school?.self ?: return@launch
+            val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource
+                .getSchoolDirectoryEntryByUrl(
+                    selectedAccountUrl
+                ).dataOrNull() ?: return@launch
+
+            _uiState.update {
+                it.copy(
+                    inviteCodePrefix = if(schoolDirectoryEntry.schoolCode != null &&
+                            schoolDirectoryEntry.directoryCode != null) {
+                        "${schoolDirectoryEntry.directoryCode}${schoolDirectoryEntry.schoolCode}"
+                    }else {
+                        null
+                    }
+                )
+            }
+        }
+
         _appUiState.update {
             it.copy(
                 showBackButton = false, fabState = FabUiState(
@@ -127,14 +146,27 @@ class ClazzDetailViewModel(
                 _appUiState.update {
                     it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
+                _uiState.update { it.copy(clazz = clazz) }
             }
         }
     }
 
-    fun onClickAddPersonToClazz(roleType: OneRosterRoleEnum) {
+    fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
+        val clazz = _uiState.value.clazz.dataOrNull() ?: return
+
+        val classInviteCode = when(roleType){
+            EnrollmentRoleEnum.TEACHER -> clazz.teacherInviteCode
+            EnrollmentRoleEnum.STUDENT -> clazz.studentInviteCode
+            else -> throw IllegalStateException()
+        }
+
+        val inviteCode = _uiState.value.inviteCodePrefix
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AddPersonToClazz.create(roleType)
+                AddPersonToClazz.create(
+                    roleType = roleType,
+                    inviteCode = "$inviteCode$classInviteCode",
+                )
             )
         )
     }

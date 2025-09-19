@@ -24,6 +24,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.how_passkey_works
 import world.respect.shared.generated.resources.sign_in_faster
@@ -111,6 +112,10 @@ fun OtherOptionsSignupScreenContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.sign_up_with_passkey))
+            }
+            uiState.generalError?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(uiTextStringResource(it))
             }
         }
     }

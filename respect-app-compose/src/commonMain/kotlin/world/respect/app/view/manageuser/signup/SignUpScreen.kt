@@ -20,8 +20,8 @@ import world.respect.app.components.RespectImageSelectButton
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
-import world.respect.shared.util.toGenderLabel
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.manageuser.profile.SignupUiState
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 
@@ -44,7 +44,7 @@ fun SignupScreen(
 fun SignupScreen(
     uiState: SignupUiState,
     onFullNameChanged: (String) -> Unit,
-    onGenderChanged: (OneRosterGenderEnum) -> Unit,
+    onGenderChanged: (PersonGenderEnum) -> Unit,
     onDateOfBirthChanged: (LocalDate?) -> Unit,
     onPersonPictureUriChanged: (String?) -> Unit = { },
 ) {
@@ -76,10 +76,10 @@ fun SignupScreen(
         RespectExposedDropDownMenuField(
             value = uiState.personInfo?.gender,
             label = uiState.genderLabel,
-            options = OneRosterGenderEnum.entries.filterNot { it == OneRosterGenderEnum.UNSPECIFIED },
+            options = PersonGenderEnum.entries.filterNot { it == PersonGenderEnum.UNSPECIFIED },
             onOptionSelected = { onGenderChanged(it) },
             itemText = { gender ->
-                stringResource(gender.toGenderLabel)
+                stringResource(gender.label)
             },
             isError = uiState.genderError != null,
             supportingText = {

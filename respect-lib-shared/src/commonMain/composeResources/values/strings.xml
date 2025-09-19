@@ -84,6 +84,8 @@
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="username_required">Username is required</string>
+    <string name="passkey_not_supported">Passkeys are not supported</string>
+    <string name="required">Required*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
@@ -124,14 +126,13 @@
     <string name="edit">Edit</string>
     <string name="edit_clazz">Edit class</string>
     <string name="add_clazz">Add class</string>
-    <string name="required">* Required</string>
 
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
-    <string name="school_not_exist_error">This school does not exists</string>
+    <string name="school_not_found">School not found</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>

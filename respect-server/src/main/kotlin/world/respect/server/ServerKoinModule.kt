@@ -9,28 +9,37 @@ import kotlinx.serialization.json.Json
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
-import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import java.io.File
@@ -60,11 +69,22 @@ fun serverKoinModule(
         XXStringHasherCommonJvm()
     }
 
+    single<UidNumberMapper> {
+        XXHashUidNumberMapper(xxStringHasher = get())
+    }
+
     single<PrimaryKeyGenerator> {
         PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
     }
+    single<SchoolDirectoryDataSourceLocal> {
+        SchoolDirectoryDataSourceDb(
+            respectAppDb = get(),
+            json = get(),
+            xxStringHasher = get()
+        )
+    }
 
-    single<RespectAppDataSource> {
+    single<RespectAppDataSourceLocal> {
         RespectAppDataSourceDb(
             respectAppDatabase = get(),
             json = get(),
@@ -73,9 +93,28 @@ fun serverKoinModule(
         )
     }
 
+    single<RespectAppDataSource> {
+        get<RespectAppDataSourceLocal>()
+    }
+
+    single<GetInviteInfoUseCase> {
+        GetInviteInfoUseCaseServer(
+            respectAppDb = get(),
+            respectAppDataSource = get(),
+        )
+    }
+
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
-            directoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource as SchoolDirectoryDataSourceLocal
+            directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
+        )
+    }
+
+    single<GetInviteInfoUseCase> {
+        GetInviteInfoUseCaseServer(
+            respectAppDb = get(),
+            respectAppDataSource = get(),
         )
     }
 
@@ -131,6 +170,30 @@ fun serverKoinModule(
                 xxHash = get(),
             )
         }
+
+        scoped<SchoolPrimaryKeyGenerator> {
+            SchoolPrimaryKeyGenerator(
+                PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
+            )
+        }
+
+        scoped<RedeemInviteUseCase> {
+            val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
+
+            RedeemInviteUseCaseDb(
+                schoolDb = get(),
+                schoolUrl = schoolScopeId.schoolUrl,
+                schoolPrimaryKeyGenerator = get(),
+                setPasswordUseCase = get(),
+                getTokenAndUserProfileUseCase = get(),
+                schoolDataSource = { schoolUrl, user ->
+                    getKoin().getOrCreateScope<RespectAccount>(
+                        RespectAccountScopeId(schoolUrl, user).scopeId
+                    ).get()
+                },
+                uidNumberMapper = get(),
+            )
+        }
     }
 
     /*
@@ -144,10 +207,21 @@ fun serverKoinModule(
      */
     scope<RespectAccount> {
         factory<SchoolDataSourceLocal> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            val directoryEntryScopeId = SchoolDirectoryEntryScopeId(
+                accountScopeId.schoolUrl, null
+            )
+
+            linkTo(
+                getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+                    directoryEntryScopeId.scopeId
+                )
+            )
+
             SchoolDataSourceDb(
                 schoolDb = get(),
-                xxStringHasher = get(),
-                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId
+                uidNumberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId
             )
         }
 

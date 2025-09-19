@@ -3,6 +3,9 @@ package world.respect.datalayer.respect.model
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.opds.model.LangMap
+import world.respect.datalayer.shared.ModelWithTimes
+import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
+import kotlin.time.Instant
 
 /**
  * A RESPECT school endpoint (a logical grouping of networked resources), each with its own users,
@@ -16,6 +19,10 @@ import world.respect.datalayer.opds.model.LangMap
  * @property oneRoster URL to OneRoster endpoint e.g. https://school.example.org/api/school/oneroster/
  * @property respectExt URL to Respect extensions endpoint (if available). Required for invites etc
  *           e.g. https://school.example.org/api/school/respect/.
+ * @property schoolCode the code prefix for this specific school e.g. where the directory
+ *           code prefix can be thought of as a country prefix in a phone number, this would be the
+ *           area code.
+ * @property directoryCode the directory code for the directory which contains this school.
  */
 @Serializable
 data class SchoolDirectoryEntry(
@@ -24,4 +31,11 @@ data class SchoolDirectoryEntry(
     val xapi: Url,
     val oneRoster: Url,
     val respectExt: Url?,
-)
+    val rpId : String?,
+    val schoolCode: String?,
+    val directoryCode: String?,
+    @Serializable(with = InstantISO8601Serializer::class)
+    override val lastModified: Instant,
+    @Serializable(with = InstantISO8601Serializer::class)
+    override val stored: Instant,
+): ModelWithTimes

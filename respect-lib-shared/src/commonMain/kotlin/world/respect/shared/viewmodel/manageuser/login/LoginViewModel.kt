@@ -7,10 +7,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.credentials.passkey.GetCredentialUseCase
+import world.respect.credentials.passkey.VerifyDomainUseCase
+import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.*
+import world.respect.shared.generated.resources.login
+import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
@@ -32,7 +37,9 @@ data class LoginUiState(
 class LoginViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
-    getCredentialUseCase: GetCredentialUseCase
+    getCredentialUseCase: GetCredentialUseCase,
+    respectAppDataSource: RespectAppDataSource,
+    private val verifyDomainUseCase: VerifyDomainUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -52,20 +59,27 @@ class LoginViewModel(
             }
         }
         viewModelScope.launch {
+            try {
+                val school = respectAppDataSource.schoolDirectoryEntryDataSource
+                    .getSchoolDirectoryEntryByUrl(route.schoolUrl)
+                val rpId: String? = when (school) {
+                    is DataReadyState -> school.data.rpId
+                    else -> null
+                }
 
-            viewModelScope.launch {
-                try {
-                    when (val credentialResult = getCredentialUseCase()) {
+                val isRpIDVerified = verifyDomainUseCase(rpId?:"")
+                if (isRpIDVerified){
+                    when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
-                            viewModelScope.launch {
-                                _navCommandFlow.tryEmit(
-                                    NavCommand.Navigate(RespectAppLauncher)
-                                )
-                            }
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(RespectAppLauncher)
+                            )
                         }
 
                         is GetCredentialUseCase.PasswordCredentialResult -> {
-
+                            onUsernameChanged(credentialResult.credentialUsername)
+                            onPasswordChanged(credentialResult.password)
+                            onClickLogin()
                         }
 
                         is GetCredentialUseCase.Error -> {
@@ -77,14 +91,15 @@ class LoginViewModel(
                         }
 
                         is GetCredentialUseCase.NoCredentialAvailableResult,
-                        is GetCredentialUseCase.UserCanceledResult-> {
+                        is GetCredentialUseCase.UserCanceledResult -> {
                             //do nothing
                         }
 
                     }
-                } catch (e: Exception) {
-                   println( "Error occurred: ${e.message}")
+
                 }
+            } catch (e: Exception) {
+                println("Error occurred: ${e.message}")
             }
         }
     }

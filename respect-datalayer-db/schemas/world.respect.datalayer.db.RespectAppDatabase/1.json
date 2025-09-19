@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d30b2001f17778b46dae95fd5d88bb2b",
+    "identityHash": "9a3ede8b662550ca6a5c57313c31be9f",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -617,6 +617,66 @@
         }
       },
       {
+        "tableName": "PersonPasskeyEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPasskeyUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ppPersonUid` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppId` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "personPasskeyUid",
+            "columnName": "personPasskeyUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppPersonUid",
+            "columnName": "ppPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppAttestationObj",
+            "columnName": "ppAttestationObj",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppClientDataJson",
+            "columnName": "ppClientDataJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppOriginString",
+            "columnName": "ppOriginString",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppId",
+            "columnName": "ppId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppChallengeString",
+            "columnName": "ppChallengeString",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppPublicKey",
+            "columnName": "ppPublicKey",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isRevoked",
+            "columnName": "isRevoked",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "personPasskeyUid"
+          ]
+        }
+      },
+      {
         "tableName": "SchoolDirectoryEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rdUid` INTEGER NOT NULL, `rdUrl` TEXT NOT NULL, `rdInvitePrefix` TEXT NOT NULL, PRIMARY KEY(`rdUid`))",
         "fields": [
@@ -648,24 +708,13 @@
       },
       {
         "tableName": "SchoolDirectoryEntryEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reLastMod` INTEGER NOT NULL, `reEtag` TEXT, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, PRIMARY KEY(`reUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, `reSchoolCode` TEXT, `reDirectoryCode` TEXT, `reLastModified` INTEGER NOT NULL, `reStored` INTEGER NOT NULL, PRIMARY KEY(`reUid`))",
         "fields": [
           {
             "fieldPath": "reUid",
             "columnName": "reUid",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "reLastMod",
-            "columnName": "reLastMod",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reEtag",
-            "columnName": "reEtag",
-            "affinity": "TEXT"
           },
           {
             "fieldPath": "reSelf",
@@ -689,12 +738,86 @@
             "fieldPath": "reRespectExt",
             "columnName": "reRespectExt",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reRpId",
+            "columnName": "reRpId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reSchoolCode",
+            "columnName": "reSchoolCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reDirectoryCode",
+            "columnName": "reDirectoryCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reLastModified",
+            "columnName": "reLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reStored",
+            "columnName": "reStored",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
             "reUid"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolDirectoryEntryLangMapEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sdelUid` INTEGER NOT NULL, `sdelReUid` INTEGER NOT NULL, `sdelLang` TEXT NOT NULL, `sdelRegion` TEXT, `sdelValue` TEXT NOT NULL, `sdelPropId` INTEGER NOT NULL, PRIMARY KEY(`sdelUid`))",
+        "fields": [
+          {
+            "fieldPath": "sdelUid",
+            "columnName": "sdelUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelReUid",
+            "columnName": "sdelReUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelLang",
+            "columnName": "sdelLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelRegion",
+            "columnName": "sdelRegion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sdelValue",
+            "columnName": "sdelValue",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelPropId",
+            "columnName": "sdelPropId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sdelUid"
           ]
         }
       },
@@ -778,7 +901,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd30b2001f17778b46dae95fd5d88bb2b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9a3ede8b662550ca6a5c57313c31be9f')"
     ]
   }
 }

@@ -40,8 +40,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https" />
-                <data android:host="*.devserver3.ustadmobile.com" />
+                <data android:scheme="https"/>
+                <data  android:host="*.ustadtesting.ustadmobile.com" />
+                <data  android:host="ustadtesting.ustadmobile.com" />
             </intent-filter>
         </activity>
 

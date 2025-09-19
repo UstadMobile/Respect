@@ -1,7 +1,7 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.http.Url
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 /**
  * Interface for http SchoolDataSources. This is used by various school-scope HTTP datasources.
@@ -22,6 +22,6 @@ interface SchoolUrlBasedDataSource {
     /**
      * School Directory DataSource that can be used to load the SchoolDirectoryEntry for this school
      */
-    val schoolDirectoryDataSource: SchoolDirectoryDataSource
+    val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource
 
 }

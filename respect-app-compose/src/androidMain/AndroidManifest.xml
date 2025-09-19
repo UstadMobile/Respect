@@ -46,8 +46,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https"/>
-                <data  android:host="*.ustadtesting.ustadmobile.com" />
-                <data  android:host="ustadtesting.ustadmobile.com" />
+                <data android:host="*.ustadtesting.ustadmobile.com" />
+                <data android:host="ustadtesting.ustadmobile.com" />
+
+                <data android:host="*.onrespect.app" />
+                <data android:host="onrespect.app" />
             </intent-filter>
         </activity>
 

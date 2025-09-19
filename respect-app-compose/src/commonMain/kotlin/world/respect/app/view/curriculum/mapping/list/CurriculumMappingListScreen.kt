@@ -115,7 +115,6 @@ private fun TextbookCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Book cover image placeholder
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,7 +129,6 @@ private fun TextbookCard(
                         contentScale = ContentScale.Fit
                     )
                 } else {
-                    // Placeholder for book cover
                     Card(
                         modifier = Modifier.fillMaxSize(),
                         colors = CardDefaults.cardColors(

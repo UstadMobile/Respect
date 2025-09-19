@@ -3,8 +3,11 @@ package world.respect.datalayer.repository
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.school.IndicatorDataSourceRepository
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
+import world.respect.datalayer.repository.school.ReportDataSourceRepository
 import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -21,13 +24,20 @@ class SchoolDataSourceRepository(
         )
     }
     override val reportDataSource: ReportDataSource by lazy {
-        local.reportDataSource
+        ReportDataSourceRepository(
+            local.reportDataSource, remote.reportDataSource
+        )
     }
     override val indicatorDataSource: IndicatorDataSource by lazy {
-        local.indicatorDataSource
+        IndicatorDataSourceRepository(
+            local.indicatorDataSource, remote.indicatorDataSource
+        )
     }
 
     override val classDataSource: ClassDataSource by lazy {
         local.classDataSource
+    }
+    override val enrollmentDataSource: EnrollmentDataSource by lazy {
+        local.enrollmentDataSource
     }
 }

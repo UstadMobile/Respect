@@ -64,7 +64,7 @@ class IndicatorDetailViewModel(
 
             viewModelScope.launch {
                 try {
-                    schoolDataSource.indicatorDataSource.getIndicatorAsFlow(
+                    schoolDataSource.indicatorDataSource.findByGuidAsFlow(
                         route.indicatorUid
                     ).collect { indicator ->
                         _uiState.update {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d98c31d711a7366abfcad171ef2acbd7",
+    "identityHash": "dbdb254a011f2265ecb9ce3bd8bb276a",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -223,12 +223,18 @@
       },
       {
         "tableName": "ReportEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rGuidHash` INTEGER NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuidHash`))",
         "fields": [
           {
             "fieldPath": "rGuid",
             "columnName": "rGuid",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rGuidHash",
+            "columnName": "rGuidHash",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -277,41 +283,47 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "rGuid"
+            "rGuidHash"
           ]
         }
       },
       {
         "tableName": "IndicatorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`indicatorId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, `sql` TEXT NOT NULL, PRIMARY KEY(`indicatorId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iName` TEXT NOT NULL, `iDescription` TEXT NOT NULL, `iType` TEXT NOT NULL, `iSql` TEXT NOT NULL, PRIMARY KEY(`iGuidHash`))",
         "fields": [
           {
-            "fieldPath": "indicatorId",
-            "columnName": "indicatorId",
+            "fieldPath": "iGuid",
+            "columnName": "iGuid",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "name",
-            "columnName": "name",
+            "fieldPath": "iGuidHash",
+            "columnName": "iGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iName",
+            "columnName": "iName",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "description",
-            "columnName": "description",
+            "fieldPath": "iDescription",
+            "columnName": "iDescription",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "type",
-            "columnName": "type",
+            "fieldPath": "iType",
+            "columnName": "iType",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "sql",
-            "columnName": "sql",
+            "fieldPath": "iSql",
+            "columnName": "iSql",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -319,7 +331,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "indicatorId"
+            "iGuidHash"
           ]
         }
       },
@@ -459,7 +471,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd98c31d711a7366abfcad171ef2acbd7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dbdb254a011f2265ecb9ce3bd8bb276a')"
     ]
   }
 }

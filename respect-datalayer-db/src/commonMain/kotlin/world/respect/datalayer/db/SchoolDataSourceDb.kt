@@ -9,7 +9,7 @@ import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
-import world.respect.datalayer.school.IndicatorDataSource
+import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.libxxhash.XXStringHasher
@@ -27,17 +27,17 @@ class SchoolDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val xxStringHasher: XXStringHasher,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-) : SchoolDataSourceLocal{
+) : SchoolDataSourceLocal {
 
     override val personDataSource: PersonDataSourceLocal by lazy {
         PersonDataSourceDb(schoolDb, xxStringHasher, authenticatedUser)
     }
     override val reportDataSource: ReportDataSourceLocal by lazy {
-        ReportDataSourceDb(schoolDb)
+        ReportDataSourceDb(schoolDb, xxStringHasher)
     }
 
-    override val indicatorDataSource: IndicatorDataSource by lazy {
-        IndicatorDataSourceDb(schoolDb)
+    override val indicatorDataSource: IndicatorDataSourceLocal by lazy {
+        IndicatorDataSourceDb(schoolDb, xxStringHasher)
     }
 
     override val classDataSource: ClassDataSourceLocal by lazy {

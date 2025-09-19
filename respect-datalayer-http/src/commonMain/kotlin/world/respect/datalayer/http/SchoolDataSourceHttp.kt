@@ -4,7 +4,9 @@ import io.ktor.client.HttpClient
 import io.ktor.http.Url
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.school.IndicatorDataSourceHttp
 import world.respect.datalayer.http.school.PersonDataSourceHttp
+import world.respect.datalayer.http.school.ReportDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.ClassDataSource
@@ -31,11 +33,26 @@ class SchoolDataSourceHttp(
         )
     }
 
-    override val reportDataSource: ReportDataSource
-        get() = TODO("Not yet implemented")
+    override val reportDataSource: ReportDataSource by lazy {
+        ReportDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryDataSource = schoolDirectoryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
 
-    override val indicatorDataSource: IndicatorDataSource
-        get() = TODO("Not yet implemented")
+
+    override val indicatorDataSource: IndicatorDataSource by lazy {
+        IndicatorDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryDataSource = schoolDirectoryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
 
     override val classDataSource: ClassDataSource
         get() = TODO("Not yet implemented")

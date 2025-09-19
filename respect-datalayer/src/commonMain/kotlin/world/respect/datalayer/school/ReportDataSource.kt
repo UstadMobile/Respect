@@ -1,26 +1,45 @@
 package world.respect.datalayer.school
 
+import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface ReportDataSource {
+    data class GetListParams(
+        val common: GetListCommonParams = GetListCommonParams(),
+    )
 
     /**
      * @param template if true, get list of templates. Otherwise list of reports for the active user
      */
-   suspend fun allReportsAsFlow(
-        template: Boolean
+
+    fun listAsFlow(
+        loadParams: DataLoadParams,
+        listParams: GetListParams,
+        template: Boolean = false
     ): Flow<DataLoadState<List<Report>>>
 
-    suspend fun getReportAsync(loadParams: DataLoadParams, reportId: String): DataLoadState<Report>
+    fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: ReportDataSource.GetListParams,
+    ): PagingSource<Int, Report>
 
-    suspend fun getReportAsFlow(reportId: String): Flow<DataLoadState<Report>>
+    suspend fun findByGuid(
+        params: DataLoadParams,
+        guid: String
+    ): DataLoadState<Report>
 
-    suspend fun putReport(report: Report)
 
-    suspend fun deleteReport(reportId: String)
+    fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Report>>
 
+    suspend fun store(report: Report)
 
+    suspend fun delete(guid: String)
+
+    companion object {
+        const val ENDPOINT_NAME = "report"
+    }
 }

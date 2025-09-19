@@ -13,6 +13,7 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.report.DefaultIndicators
@@ -129,9 +130,9 @@ class ReportEditViewModel(
                     json = json,
                     serializer = Report.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.reportDataSource.getReportAsync(
-                            loadParams = params,
-                            reportId = route.reportUid
+                        schoolDataSource.reportDataSource.findByGuid(
+                            params = params,
+                            guid = route.reportUid
                         )
                     },
                     uiUpdateFn = { reportOptions ->
@@ -157,7 +158,7 @@ class ReportEditViewModel(
             }
         }
         viewModelScope.launch {
-            schoolDataSource.indicatorDataSource.allIndicatorAsFlow()
+            schoolDataSource.indicatorDataSource.listAsFlow(loadParams = DataLoadParams())
                 .collect { dataLoadState ->
                     _uiState.update { state ->
                         state.copy(availableIndicators = dataLoadState.dataOrNull() ?: emptyList())
@@ -204,7 +205,7 @@ class ReportEditViewModel(
                     lastModified = Clock.System.now(),
                 )
 
-                schoolDataSource.reportDataSource.putReport(report)
+                schoolDataSource.reportDataSource.store(report)
 
                 if (route.reportUid == null) {
                     _navCommandFlow.tryEmit(

@@ -20,6 +20,7 @@ import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
+import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
@@ -65,7 +66,8 @@ class PersonDataSourceHttp(
                 GetListCommonParams(guid = guid)
             ).urlWithParams()
         ) {
-            headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.firstOrNotLoaded()
     }
 
@@ -78,7 +80,8 @@ class PersonDataSourceHttp(
             },
             dataLoadParams = DataLoadParams()
         ) {
-            headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.map {
             it.firstOrNotLoaded()
         }

@@ -145,20 +145,21 @@ class SignupViewModel(
 
         viewModelScope.launch {
             val personInfo = _uiState.value.personInfo
+
+
+            val nameError = if (personInfo.name.isBlank())
+                StringResourceUiText(Res.string.required) else null
+            val genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED)
+                StringResourceUiText(Res.string.required) else null
             _uiState.update { prev ->
-                prev.copy(
-                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required) else null,
-                    genderError = if (personInfo.gender.value.isEmpty()) StringResourceUiText(
-                        Res.string.required
-                    ) else null
-                )
+                    prev.copy(
+                        fullNameError = nameError,
+                        genderError = genderError,
+                    )
             }
 
-            val hasError = listOf(
-                personInfo.name.isBlank(),
-                //personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
-                //personInfo?.dateOfBirth == null
-            ).any { it }
+            val hasError = listOf(nameError, genderError).any { it != null }
+
 
             if (hasError) {
                 return@launch

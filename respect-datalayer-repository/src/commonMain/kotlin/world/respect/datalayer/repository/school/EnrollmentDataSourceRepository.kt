@@ -76,7 +76,7 @@ class EnrollmentDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.ENROLLMENT,
                     uid = it.uid,
-                    timestamp = timeNow,
+                    timeQueued = timeNow,
                 )
             }
         )

@@ -130,7 +130,7 @@ class PersonDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.PERSON,
                     uid = it.guid,
-                    timestamp = timeNow,
+                    timeQueued = timeNow,
                 )
             }
         )

@@ -82,7 +82,7 @@ class ClassDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.CLASS,
                     uid = it.guid,
-                    timestamp = timeNow,
+                    timeQueued = timeNow,
                 )
             }
         )

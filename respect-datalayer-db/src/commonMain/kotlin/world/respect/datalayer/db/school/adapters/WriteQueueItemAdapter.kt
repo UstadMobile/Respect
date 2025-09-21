@@ -8,7 +8,7 @@ fun WriteQueueItemEntity.asModel() : WriteQueueItem{
         queueItemId = wqiQueueItemId,
         model = wqiModel,
         uid = wqiUid,
-        timestamp = wqiTimestamp,
+        timeQueued = wqiTimeQueued,
         attemptCount = wqiAttemptCount,
         timeWritten = wqiTimeWritten,
     )
@@ -22,7 +22,7 @@ fun WriteQueueItem.asEntity(
         wqiQueueItemId = queueItemId,
         wqiModel = model,
         wqiUid = uid,
-        wqiTimestamp = timestamp,
+        wqiTimeQueued = timeQueued,
         wqiAttemptCount = attemptCount,
         wqiAccountGuid = accountGuid,
         wqiTimeWritten = timeWritten,

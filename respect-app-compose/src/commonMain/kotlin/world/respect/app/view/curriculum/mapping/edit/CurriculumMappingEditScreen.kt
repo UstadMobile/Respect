@@ -23,6 +23,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_book_cover
+import world.respect.shared.generated.resources.book_description
+import world.respect.shared.generated.resources.book_title
+import world.respect.shared.generated.resources.chapter
+import world.respect.shared.generated.resources.click_plus_button
+import world.respect.shared.generated.resources.lesson
+import world.respect.shared.generated.resources.mapping
+import world.respect.shared.generated.resources.mapping_edit
+import world.respect.shared.generated.resources.no_chapter_added
+import world.respect.shared.generated.resources.remove_chapter
+import world.respect.shared.generated.resources.remove_lesson
+import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.save
+import world.respect.shared.generated.resources.simple_learning
+import world.respect.shared.generated.resources.to_add_one
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 
@@ -43,146 +58,160 @@ fun CurriculumMappingEditScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Book Cover Section
-        Box(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
+                .weight(1f)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            IconButton(
-                onClick = onClickAddBookCover,
-                modifier = Modifier.testTag("add_book_cover_button")
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Filled.CameraAlt,
-                        contentDescription = stringResource(Res.string.add_book_cover),
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Text(
-                        text = stringResource(Res.string.add_book_cover),
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    IconButton(
+                        onClick = onClickAddBookCover,
+                        modifier = Modifier.testTag("add_book_cover_button")
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Filled.CameraAlt,
+                                contentDescription = stringResource(Res.string.add_book_cover),
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Text(
+                                text = stringResource(Res.string.add_book_cover),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Book Title Field
-        OutlinedTextField(
-            value = uiState.bookTitle,
-            onValueChange = onBookTitleChanged,
-            label = { Text(stringResource(Res.string.book_title)) },
-            placeholder = { Text(stringResource(Res.string.required)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("book_title_field"),
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Book Description Field
-        OutlinedTextField(
-            value = uiState.bookDescription,
-            onValueChange = onBookDescriptionChanged,
-            label = { Text(stringResource(Res.string.book_description)) },
-            placeholder = { Text(stringResource(Res.string.book_description)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("book_description_field"),
-            minLines = 3,
-            maxLines = 5
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Mapping Section Header
-        Text(
-            text = stringResource(Res.string.mapping_edit),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Add Chapter Button
-        OutlinedButton(
-            onClick = onClickAddChapter,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("add_chapter_button")
-        ) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(Res.string.chapter))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Chapters list or empty
-        if (uiState.chapters.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    Icons.Filled.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(Res.string.no_chapter_added),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = stringResource(Res.string.click_plus_button),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = stringResource(Res.string.to_add_one),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            item {
+                OutlinedTextField(
+                    value = uiState.bookTitle,
+                    onValueChange = onBookTitleChanged,
+                    label = { Text(stringResource(Res.string.book_title)) },
+                    placeholder = { Text(stringResource(Res.string.required)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("book_title_field"),
+                    singleLine = true,
+                    isError = !uiState.bookTitleError.isNullOrEmpty(),
+                    supportingText = if (!uiState.bookTitleError.isNullOrEmpty()) {
+                        { Text(uiState.bookTitleError!!) }
+                    } else null,
+                    enabled = uiState.fieldsEnabled
                 )
             }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+
+            item {
+                OutlinedTextField(
+                    value = uiState.bookDescription,
+                    onValueChange = onBookDescriptionChanged,
+                    label = { Text(stringResource(Res.string.book_description)) },
+                    placeholder = { Text(stringResource(Res.string.book_description)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("book_description_field"),
+                    minLines = 3,
+                    maxLines = 5,
+                    enabled = uiState.fieldsEnabled
+                )
+            }
+
+            item {
+                Text(
+                    text = stringResource(Res.string.mapping),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = onClickAddChapter,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("add_chapter_button"),
+                    enabled = uiState.fieldsEnabled
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(Res.string.chapter))
+                }
+            }
+
+            if (uiState.chapters.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(Res.string.no_chapter_added),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(Res.string.click_plus_button),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(Res.string.to_add_one),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
                 items(uiState.chapters) { chapter ->
                     ChapterItem(
                         chapter = chapter,
                         lessons = uiState.getLessonsForChapter(chapter.uid),
                         onClickRemoveChapter = onClickRemoveChapter,
                         onClickAddLesson = onClickAddLesson,
-                        onClickRemoveLesson = onClickRemoveLesson
+                        onClickRemoveLesson = onClickRemoveLesson,
+                        enabled = uiState.fieldsEnabled
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Save or Submit Button
         Button(
             onClick = onClickSave,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            enabled = uiState.fieldsEnabled
         ) {
-            Text(text = stringResource(Res.string.save))
+            if (uiState.loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(text = stringResource(Res.string.save))
+            }
         }
     }
 }
@@ -193,7 +222,8 @@ private fun ChapterItem(
     lessons: List<LessonMapping>,
     onClickRemoveChapter: (ChapterMapping) -> Unit,
     onClickAddLesson: (ChapterMapping) -> Unit,
-    onClickRemoveLesson: (LessonMapping) -> Unit
+    onClickRemoveLesson: (LessonMapping) -> Unit,
+    enabled: Boolean = true
 ) {
     Column {
         Row(
@@ -227,7 +257,8 @@ private fun ChapterItem(
 
             IconButton(
                 onClick = { onClickRemoveChapter(chapter) },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                enabled = enabled
             ) {
                 Icon(
                     Icons.Filled.Close,
@@ -245,7 +276,8 @@ private fun ChapterItem(
         ) {
             OutlinedButton(
                 onClick = { onClickAddLesson(chapter) },
-                modifier = Modifier.testTag("add_lesson_button_${chapter.uid}")
+                modifier = Modifier.testTag("add_lesson_button_${chapter.uid}"),
+                enabled = enabled
             ) {
                 Icon(
                     Icons.Filled.Add,
@@ -260,7 +292,8 @@ private fun ChapterItem(
         lessons.forEach { lesson ->
             LessonItem(
                 lesson = lesson,
-                onClickRemoveLesson = onClickRemoveLesson
+                onClickRemoveLesson = onClickRemoveLesson,
+                enabled = enabled
             )
         }
     }
@@ -269,12 +302,14 @@ private fun ChapterItem(
 @Composable
 private fun LessonItem(
     lesson: LessonMapping,
-    onClickRemoveLesson: (LessonMapping) -> Unit
+    onClickRemoveLesson: (LessonMapping) -> Unit,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp).padding (vertical = 4.dp),
+            .padding(start = 20.dp)
+            .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -330,7 +365,8 @@ private fun LessonItem(
 
         IconButton(
             onClick = { onClickRemoveLesson(lesson) },
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            enabled = enabled
         ) {
             Icon(
                 Icons.Filled.Close,

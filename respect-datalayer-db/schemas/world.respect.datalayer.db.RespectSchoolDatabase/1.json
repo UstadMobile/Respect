@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d80b2daa8dd9be1097308ef8f9562d94",
+    "identityHash": "6c75e19e67d184b0d184f0d79b436bb6",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -591,7 +591,7 @@
       },
       {
         "tableName": "WriteQueueItemEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimestamp` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimeQueued` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "wqiQueueItemId",
@@ -612,8 +612,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "wqiTimestamp",
-            "columnName": "wqiTimestamp",
+            "fieldPath": "wqiTimeQueued",
+            "columnName": "wqiTimeQueued",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -646,7 +646,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd80b2daa8dd9be1097308ef8f9562d94')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6c75e19e67d184b0d184f0d79b436bb6')"
     ]
   }
 }

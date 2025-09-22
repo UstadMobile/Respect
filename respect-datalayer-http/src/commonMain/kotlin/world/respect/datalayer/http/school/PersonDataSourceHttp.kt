@@ -1,6 +1,5 @@
 package world.respect.datalayer.http.school
 
-import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -31,6 +30,7 @@ import world.respect.datalayer.school.adapters.asListDetails
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
@@ -126,31 +126,35 @@ class PersonDataSourceHttp(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
-    ): PagingSource<Int, Person> {
-        return OffsetLimitHttpPagingSource(
-            baseUrlProvider = { params.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Person>>(),
-            requestBuilder = {
-                useTokenProvider(tokenProvider)
-                useValidationCacheControl(validationHelper)
-            },
-            tag = "Person-HTTP",
-        )
+    ): IPagingSourceFactory<Int, Person> {
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource(
+                baseUrlProvider = { params.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Person>>(),
+                requestBuilder = {
+                    useTokenProvider(tokenProvider)
+                    useValidationCacheControl(validationHelper)
+                },
+                tag = "Person-HTTP",
+            )
+        }
     }
 
     override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
         listParams: PersonDataSource.GetListParams
-    ): PagingSource<Int, PersonListDetails> {
-        return OffsetLimitHttpPagingSource<Person>(
-            baseUrlProvider = { listParams.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Person>>(),
-        ).map { person ->
-            person.asListDetails()
+    ): IPagingSourceFactory<Int, PersonListDetails> {
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource<Person>(
+                baseUrlProvider = { listParams.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Person>>(),
+            ).map { person ->
+                person.asListDetails()
+            }
         }
     }
 

@@ -1,6 +1,5 @@
 package world.respect.datalayer.http.school
 
-import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -28,6 +27,8 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.asIPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class EnrollmentDataSourceHttp(
@@ -84,8 +85,8 @@ class EnrollmentDataSourceHttp(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
-    ): PagingSource<Int, Enrollment> {
-        return OffsetLimitHttpPagingSource(
+    ): IPagingSourceFactory<Int, Enrollment> {
+        return OffsetLimitHttpPagingSource<Enrollment>(
             baseUrlProvider = { listParams.urlWithParams() },
             httpClient = httpClient,
             validationHelper = validationHelper,
@@ -94,7 +95,7 @@ class EnrollmentDataSourceHttp(
                 useTokenProvider(tokenProvider)
                 useValidationCacheControl(validationHelper)
             }
-        )
+        ).asIPagingSourceFactory()
     }
 
     override suspend fun store(list: List<Enrollment>) {

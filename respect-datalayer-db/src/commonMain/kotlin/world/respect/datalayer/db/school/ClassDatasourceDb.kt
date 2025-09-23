@@ -1,6 +1,5 @@
 package world.respect.datalayer.db.school
 
-import androidx.paging.PagingSource
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +17,8 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.asIPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
 
@@ -71,14 +72,14 @@ class ClassDatasourceDb(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: ClassDataSource.GetListParams
-    ): PagingSource<Int, Clazz> {
+    ): IPagingSourceFactory<Int, Clazz> {
         return schoolDb.getClassEntityDao().findAllAsPagingSource(
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             code = params.inviteCode,
         ).map {
             ClassEntities(it).toModel()
-        }
+        }.asIPagingSourceFactory()
     }
 
     override suspend fun list(

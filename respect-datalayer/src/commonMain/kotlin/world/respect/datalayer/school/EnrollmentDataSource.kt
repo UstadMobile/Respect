@@ -1,6 +1,5 @@
 package world.respect.datalayer.school
 
-import androidx.paging.PagingSource
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLayerParams
@@ -9,6 +8,7 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.shared.WritableDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface EnrollmentDataSource: WritableDataSource<Enrollment> {
@@ -50,7 +50,7 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
     fun listAsPagingSource(
         loadParams: DataLoadParams,
         listParams: GetListParams,
-    ): PagingSource<Int, Enrollment>
+    ): IPagingSourceFactory<Int, Enrollment>
 
     override suspend fun store(
         list: List<Enrollment>

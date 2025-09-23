@@ -3,7 +3,6 @@ package world.respect.shared.viewmodel.clazz.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,7 +19,9 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.shared.paging.EmptyPagingSource
+import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.generated.resources.Res
@@ -42,10 +43,10 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companio
 import kotlin.getValue
 
 data class ClazzDetailUiState(
-    val teachers: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
-    val students: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
-    val pendingTeachers: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
-    val pendingStudents: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val pendingTeachers:IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -79,16 +80,15 @@ class ClazzDetailViewModel(
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
-    private fun pagingSourceByRole(role: EnrollmentRoleEnum): () -> PagingSource<Int, Person> {
-        return {
-            TODO()
-//            schoolDataSource.personDataSource.listAsPagingSource(
-//                loadParams = DataLoadParams(),
-//                params = PersonDataSource.GetListParams(
-//                    filterByClazzUid = route.guid,
-//                    filterByEnrolmentRole = role,
-//                )
-//            )
+    private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
+        return PagingSourceFactoryHolder {
+            schoolDataSource.personDataSource.listAsPagingSource(
+                loadParams = DataLoadParams(),
+                params = PersonDataSource.GetListParams(
+                    filterByClazzUid = route.guid,
+                    filterByEnrolmentRole = role,
+                )
+            )
         }
     }
 

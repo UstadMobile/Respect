@@ -1,12 +1,12 @@
 package world.respect.datalayer.school
 
-import androidx.paging.PagingSource
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.shared.WritableDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface ClassDataSource: WritableDataSource<Clazz> {
@@ -37,7 +37,7 @@ interface ClassDataSource: WritableDataSource<Clazz> {
     fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: GetListParams,
-    ): PagingSource<Int, Clazz>
+    ): IPagingSourceFactory<Int, Clazz>
 
     suspend fun list(
         loadParams: DataLoadParams,

@@ -36,7 +36,7 @@ class ApproveOrDeclineInviteRequestUseCase(
                 classUid = classUid,
                 personUid = personUid,
             )
-        ).load(PagingSource.LoadParams.Refresh(0, 20, false))
+        ).invoke().load(PagingSource.LoadParams.Refresh(0, 20, false))
             as? PagingSource.LoadResult.Page
         val pendingEnrollment = enrollments?.data?.firstOrNull {
             it.role == EnrollmentRoleEnum.PENDING_TEACHER || it.role == EnrollmentRoleEnum.PENDING_STUDENT

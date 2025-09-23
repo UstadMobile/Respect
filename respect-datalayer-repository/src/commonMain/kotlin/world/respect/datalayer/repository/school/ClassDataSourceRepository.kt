@@ -1,6 +1,5 @@
 package world.respect.datalayer.repository.school
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
@@ -9,16 +8,15 @@ import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.shared.paging.DoorOffsetLimitRemoteMediator
-import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
-import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
-import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal
+import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
+import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class ClassDataSourceRepository(
@@ -27,8 +25,6 @@ class ClassDataSourceRepository(
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
 ) : ClassDataSource, RepositoryModelDataSource<Clazz> {
-
-    private val mediatorStore = PagingSourceMediatorStore()
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Clazz>> {
         return local.findByGuidAsFlow(guid).combineWithRemote(
@@ -51,16 +47,15 @@ class ClassDataSourceRepository(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: ClassDataSource.GetListParams
-    ): PagingSource<Int, Clazz> {
-        return RepositoryOffsetLimitPagingSource(
+    ): IPagingSourceFactory<Int, Clazz> {
+        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
+        return RepositoryPagingSourceFactory(
             local = local.listAsPagingSource(loadParams, params),
-            remoteMediator = mediatorStore.getOrCreateMediator(0) {
-                DoorOffsetLimitRemoteMediator { offset, limit ->
-                    remote.listAsPagingSource(loadParams, params).loadAndUpdateLocal(
-                        offset, limit, local::updateLocal
-                    )
-                }
-            },
+            onRemoteLoad = { remoteLoadParams ->
+                remoteSource.loadAndUpdateLocal2(
+                    remoteLoadParams, local::updateLocal
+                )
+            }
         )
     }
 

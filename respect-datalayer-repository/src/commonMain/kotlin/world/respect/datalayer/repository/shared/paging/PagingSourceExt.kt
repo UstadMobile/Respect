@@ -29,26 +29,3 @@ suspend fun <T: Any> PagingSource<Int, T>.loadAndUpdateLocal2(
     }
 }
 
-suspend fun <T: Any> PagingSource<Int, T>.loadAndUpdateLocal(
-    offset: Int,
-    limit: Int,
-    onUpdateLocalFromRemote: suspend (List<T>) -> Unit,
-) {
-    val remoteLoadResult = load(
-        LoadParams.Refresh(offset, limit, false)
-    )
-
-    withContext(NonCancellable) {
-        if(remoteLoadResult is LoadResult.Page) {
-            onUpdateLocalFromRemote(remoteLoadResult.data)
-        }
-
-        val isNotModifiedResponse = (remoteLoadResult as? LoadResult.Error)?.throwable is
-                CacheableHttpPagingSource.NotModifiedNonException
-
-        if(remoteLoadResult is LoadResult.Page || isNotModifiedResponse) {
-            @Suppress("UNCHECKED_CAST")
-            (this as? CacheableHttpPagingSource<Int, T>)?.onLoadResultStored(remoteLoadResult)
-        }
-    }
-}

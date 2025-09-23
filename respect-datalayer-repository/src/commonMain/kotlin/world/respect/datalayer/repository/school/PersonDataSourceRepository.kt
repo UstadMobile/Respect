@@ -8,9 +8,9 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -29,8 +29,6 @@ class PersonDataSourceRepository(
     private val remoteWriteQueue: RemoteWriteQueue,
     private val enrollmentDataSourceRepository: EnrollmentDataSourceRepository,
 ) : PersonDataSource, RepositoryModelDataSource<Person> {
-
-    private val mediatorStore = PagingSourceMediatorStore()
 
     override suspend fun findByUsername(username: String): Person? {
         return local.findByUsername(username)
@@ -81,37 +79,29 @@ class PersonDataSourceRepository(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
+        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
+        val enrollmentRemoteSource = enrollmentDataSourceRepository.remote
+            .takeIf { params.filterByClazzUid != null }
+            ?.listAsPagingSource(
+                loadParams,
+                EnrollmentDataSource.GetListParams(
+                    classUid = params.filterByClazzUid
+                )
+            )?.invoke()
+
         return RepositoryPagingSourceFactory(
             onRemoteLoad = { remoteLoadParams ->
-                remote.listAsPagingSource(loadParams, params).invoke().loadAndUpdateLocal2(
+                remoteSource.loadAndUpdateLocal2(
                     remoteLoadParams, local::updateLocal,
+                )
+
+                enrollmentRemoteSource?.loadAndUpdateLocal2(
+                    remoteLoadParams, enrollmentDataSourceRepository.local::updateLocal,
                 )
             },
             local = local.listAsPagingSource(loadParams, params),
             tag = "Repo.listAsPaging"
         )
-
-//        return RepositoryOffsetLimitPagingSource(
-//            local = local.listAsPagingSource(loadParams, params),
-//            remoteMediator = mediatorStore.getOrCreateMediator(params.argKey) {
-//                DoorOffsetLimitRemoteMediator { offset, limit ->
-//                    remote.listAsPagingSource(loadParams, params).loadAndUpdateLocal(
-//                        offset, limit, local::updateLocal
-//                    )
-//
-//                    if(params.filterByClazzUid != null) {
-//                        enrollmentDataSourceRepository.remote.listAsPagingSource(
-//                            loadParams, EnrollmentDataSource.GetListParams(
-//                                classUid = params.filterByClazzUid
-//                            )
-//                        ).loadAndUpdateLocal(
-//                            offset, limit,
-//                            enrollmentDataSourceRepository.local::updateLocal
-//                        )
-//                    }
-//                }
-//            },
-//        )
     }
 
     override fun listDetailsAsPagingSource(

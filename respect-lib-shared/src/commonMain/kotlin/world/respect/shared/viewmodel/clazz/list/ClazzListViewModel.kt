@@ -1,7 +1,6 @@
 package world.respect.shared.viewmodel.clazz.list
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,24 +11,25 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Clazz
-import world.respect.datalayer.shared.paging.EmptyPagingSource
+import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.clazz
 import world.respect.shared.generated.resources.first_name
 import world.respect.shared.generated.resources.last_name
-import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzDetail
+import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import kotlin.getValue
 
 data class ClazzListUiState(
-    val classes: () -> PagingSource<Int, Clazz> = { EmptyPagingSource() },
+    val classes: IPagingSourceFactory<Int, Clazz> = EmptyPagingSourceFactory(),
     val sortOptions: List<SortOrderOption> = emptyList(),
     val activeSortOrderOption: SortOrderOption = SortOrderOption(
         Res.string.first_name, 1, true
@@ -50,9 +50,9 @@ class ClazzListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    private val pagingSourceFactory: () -> PagingSource<Int, Clazz> = {
+    private val pagingSourceHolder = PagingSourceFactoryHolder {
         schoolDataSource.classDataSource.listAsPagingSource(
-            DataLoadParams(),
+            loadParams = DataLoadParams(),
             params = ClassDataSource.GetListParams()
         )
     }
@@ -72,7 +72,7 @@ class ClazzListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                classes = pagingSourceFactory,
+                classes = pagingSourceHolder,
                 sortOptions = listOf(
                     SortOrderOption(
                         Res.string.first_name,

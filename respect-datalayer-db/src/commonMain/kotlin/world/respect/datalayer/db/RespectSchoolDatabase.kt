@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import world.respect.datalayer.db.opds.daos.PersonPasskeyEntityDao
+import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao
 import world.respect.datalayer.db.school.daos.PersonEntityDao
@@ -38,6 +40,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         PersonRoleEntity::class,
         PersonRelatedPersonEntity::class,
         PersonPasswordEntity::class,
+        PersonPasskeyEntity::class,
         AuthTokenEntity::class,
         ReportEntity::class,
         IndicatorEntity::class,
@@ -55,6 +58,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getPersonEntityDao(): PersonEntityDao
 
     abstract fun getPersonPasswordEntityDao(): PersonPasswordEntityDao
+
+    abstract fun getPersonPasskeyEntityDao(): PersonPasskeyEntityDao
 
     abstract fun getAuthTokenEntityDao(): AuthTokenEntityDao
 

@@ -26,6 +26,9 @@ data class Clazz(
 ): ModelWithTimes {
 
     companion object {
+
+        const val TABLE_ID = 8
+
         const val DEFAULT_INVITE_CODE_MAX = 100_000
         const val DEFAULT_INVITE_CODE_LEN = 6
     }

@@ -13,7 +13,6 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.oneroster.model.OneRosterClass
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
@@ -59,7 +58,7 @@ class ClazzEditViewModel(
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
     private val guid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        OneRosterClass.TABLE_ID
+        Clazz.TABLE_ID
     ).toString()
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())

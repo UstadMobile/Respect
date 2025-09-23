@@ -31,7 +31,7 @@ fun Route.ClassRoute(
                 params = ClassDataSource.GetListParams.fromParams(
                     call.request.queryParameters
                 )
-            )
+            ).invoke()
         )
     }
 

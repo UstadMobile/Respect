@@ -9,6 +9,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.writequeue.WriteQueueItem
@@ -93,6 +94,16 @@ class SchoolTypeConverters {
     @TypeConverter
     fun toPersonGenderEnum(value: Int): PersonGenderEnum {
         return PersonGenderEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromEnrollmentRoleEnum(value: EnrollmentRoleEnum) : Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toEnrollmentRoleEnum(value: Int): EnrollmentRoleEnum {
+        return EnrollmentRoleEnum.fromFlag(value)
     }
 
 }

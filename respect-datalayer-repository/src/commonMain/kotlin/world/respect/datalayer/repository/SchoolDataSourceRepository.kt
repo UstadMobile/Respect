@@ -19,14 +19,7 @@ class SchoolDataSourceRepository(
     private val remoteWriteQueue: RemoteWriteQueue,
 ) : SchoolDataSource {
 
-    override val personDataSource: PersonDataSourceRepository by lazy {
-        PersonDataSourceRepository(
-            local.personDataSource,
-            remote.personDataSource,
-            validationHelper,
-            remoteWriteQueue,
-        )
-    }
+
 
     override val reportDataSource: ReportDataSource by lazy {
         ReportDataSourceRepository(
@@ -61,6 +54,16 @@ class SchoolDataSourceRepository(
             remote = remote.enrollmentDataSource,
             validationHelper = validationHelper,
             remoteWriteQueue = remoteWriteQueue,
+        )
+    }
+
+    override val personDataSource: PersonDataSourceRepository by lazy {
+        PersonDataSourceRepository(
+            local.personDataSource,
+            remote.personDataSource,
+            validationHelper,
+            remoteWriteQueue,
+            enrollmentDataSource
         )
     }
 }

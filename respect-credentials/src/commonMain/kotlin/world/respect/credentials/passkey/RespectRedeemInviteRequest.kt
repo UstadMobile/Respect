@@ -3,7 +3,6 @@ package world.respect.credentials.passkey
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
-import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 
@@ -11,12 +10,11 @@ import world.respect.datalayer.school.model.PersonRoleEnum
  *
  */
 @Serializable
-class RespectRedeemInviteRequest(
+data class RespectRedeemInviteRequest(
     val code: String,
     val classUid: String?,
     val role: PersonRoleEnum,
     val accountPersonInfo: PersonInfo,
-    val studentPersonInfo: PersonInfo?,
     val parentOrGuardianRole: GuardianRole?,
     val account: Account,
 ) {

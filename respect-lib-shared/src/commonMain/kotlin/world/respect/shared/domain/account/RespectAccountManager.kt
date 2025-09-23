@@ -20,7 +20,6 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -39,7 +38,6 @@ class RespectAccountManager(
     private val json: Json,
     private val tokenManager: RespectTokenManager,
     private val appDataSource: RespectAppDataSource,
-    private val getInviteInfoUseCase: GetInviteInfoUseCase,
 ): KoinComponent {
 
     private val _storedAccounts = MutableStateFlow<List<RespectAccount>>(
@@ -135,22 +133,27 @@ class RespectAccountManager(
 
     @Suppress("unused")
     suspend fun register(
-        redeemInviteRequest: RespectRedeemInviteRequest
+        redeemInviteRequest: RespectRedeemInviteRequest,
+        schoolUrl: Url,
     ) {
-        val inviteInfo = getInviteInfoUseCase(redeemInviteRequest.code)
         val schoolScopeId = SchoolDirectoryEntryScopeId(
-            inviteInfo.school.self, null,
+            schoolUrl, null,
         )
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
             schoolScopeId.scopeId
         )
+
         val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
         val authResponse = redeemInviteUseCase(redeemInviteRequest)
+
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+            schoolUrl
+        ).dataOrNull() ?: throw IllegalStateException()
 
         initSession(
             authResponse = authResponse,
             respectAccount = RespectAccount(
-                authResponse.person.guid, inviteInfo.school
+                authResponse.person.guid, schoolDirectoryEntry
             )
         )
     }

@@ -1,6 +1,5 @@
 package world.respect.datalayer.school
 
-import androidx.paging.PagingSource
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLayerParams
@@ -10,6 +9,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
@@ -55,13 +55,13 @@ interface PersonDataSource: WritableDataSource<Person> {
     fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: GetListParams,
-    ): PagingSource<Int, Person>
+    ): IPagingSourceFactory<Int, Person>
 
 
     fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
         listParams: GetListParams,
-    ): PagingSource<Int, PersonListDetails>
+    ): IPagingSourceFactory<Int, PersonListDetails>
 
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on

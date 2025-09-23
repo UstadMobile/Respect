@@ -65,7 +65,7 @@ fun CreateAccountScreen(
             .defaultItemPadding()
     ) {
         uiState.signupError?.let {
-            Text(it)
+            Text(uiTextStringResource(it))
         }
 
         OutlinedTextField(

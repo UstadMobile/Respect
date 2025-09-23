@@ -49,7 +49,6 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -84,6 +83,7 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import kotlinx.io.files.Path
+import org.koin.android.ext.koin.androidApplication
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.AuthTokenProvider
@@ -119,6 +119,7 @@ import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUse
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -309,7 +310,6 @@ val appKoinModule = module {
             json = get(),
             tokenManager = get(),
             appDataSource = get(),
-            getInviteInfoUseCase = get(),
         )
     }
 
@@ -335,16 +335,14 @@ val appKoinModule = module {
             primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
             )
     }
-    single {
-        RespectRedeemInviteRequestUseCase()
-    }
+
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }
 
     single<CreatePasskeyUseCase> {
         CreatePasskeyUseCaseImpl(
-            context = androidContext().applicationContext,
+            context = androidApplication(),
             json = get(),
             createPublicKeyJsonUseCase = get()
         )
@@ -352,20 +350,14 @@ val appKoinModule = module {
 
     single<GetCredentialUseCase> {
         GetCredentialUseCaseImpl(
-            context = androidContext().applicationContext,
+            context = androidApplication(),
             json = get(),
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )
     }
     single<VerifyDomainUseCase> {
         VerifyDomainUseCaseImpl(
-            context = androidContext().applicationContext
-        )
-    }
-
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseClient(
-            schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource
+            context = androidApplication()
         )
     }
 
@@ -426,7 +418,6 @@ val appKoinModule = module {
         SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
     }
 
-
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -474,6 +465,15 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
+
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+
     }
 
     /**
@@ -555,6 +555,12 @@ val appKoinModule = module {
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
+            )
+        }
+
+        scoped<ApproveOrDeclineInviteRequestUseCase> {
+            ApproveOrDeclineInviteRequestUseCase(
+                schoolDataSource = get(),
             )
         }
     }

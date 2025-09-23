@@ -6,13 +6,18 @@
 
     <application
         android:name="world.respect.RespectApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:usesCleartextTraffic="true">
+
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
+
         <activity
             android:name="world.respect.WebViewActivity"
             android:exported="false"
@@ -41,8 +46,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https"/>
-                <data  android:host="*.ustadtesting.ustadmobile.com" />
-                <data  android:host="ustadtesting.ustadmobile.com" />
+                <data android:host="*.ustadtesting.ustadmobile.com" />
+                <data android:host="ustadtesting.ustadmobile.com" />
+
+                <data android:host="*.onrespect.app" />
+                <data android:host="onrespect.app" />
             </intent-filter>
         </activity>
 

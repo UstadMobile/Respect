@@ -4,25 +4,25 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
- class PersonPasskeyEntity(
+class PersonPasskeyEntity(
     @PrimaryKey(autoGenerate = true)
-    var personPasskeyUid: Long = 0,
+    val personPasskeyUid: Long = 0,
 
-    var ppPersonUid: Long = 0,
+    val ppPersonUid: Long = 0,
 
-    var ppAttestationObj: String? = null,
+    val ppAttestationObj: String? = null,
 
-    var ppClientDataJson: String? = null,
+    val ppClientDataJson: String? = null,
 
-    var ppOriginString: String? = null,
+    val ppOriginString: String? = null,
 
-    var ppId: String? = null,
+    val ppId: String? = null,
 
-    var ppChallengeString: String? = null,
+    val ppChallengeString: String? = null,
 
-    var ppPublicKey: String? = null,
+    val ppPublicKey: String? = null,
 
-    var isRevoked: Int = NOT_REVOKED,
+    val isRevoked: Int = NOT_REVOKED,
 
 
 ){

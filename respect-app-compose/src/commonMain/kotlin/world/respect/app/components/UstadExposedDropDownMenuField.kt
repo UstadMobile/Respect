@@ -14,12 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import world.respect.shared.resources.UiText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> RespectExposedDropDownMenuField(
     value: T?,
-    label: String,
+    label: UiText?,
     options: List<T>,
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
@@ -51,7 +52,7 @@ fun <T> RespectExposedDropDownMenuField(
                 ""
             },
             label = {
-                Text(label)
+                label?.let { Text(uiTextStringResource(it)) }
             },
             onValueChange = { },
             trailingIcon = {

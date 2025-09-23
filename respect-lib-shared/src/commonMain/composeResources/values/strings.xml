@@ -78,12 +78,8 @@
     <string name="child_gender_label">Child's gender*</string>
     <string name="child_dob_label">Child's date of birth*</string>
     <string name="child_note">Please enter your child's details.</string>
-    <string name="full_name_required">Full name is required</string>
-    <string name="gender_required">Gender is required</string>
-    <string name="dob_required">Date of birth is required</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
-    <string name="username_required">Username is required</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
@@ -105,7 +101,7 @@
     <string name="add_student">Add Student</string>">
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
-    <string name="pending_invite">Pending invites</string>">
+    <string name="pending_requests">Pending requests</string>">
     <string name="copy_invite_code">Copy invite code : </string>">
     <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
     <string name="share_qr_code">Share QR code</string>">

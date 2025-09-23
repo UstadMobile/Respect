@@ -13,7 +13,9 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import kotlin.test.Test
@@ -50,7 +52,15 @@ class RedeemInviteIntegrationTest {
                         xxHash = xxStringHasher,
                     ),
                     schoolDataSource = { _, _ -> serverSchoolDataSource },
-                    uidNumberMapper = XXHashUidNumberMapper(xxStringHasher)
+                    uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
+                    savePasskeyUseCase = SavePersonPasskeyUseCaseDbImpl(
+                        schoolDb = serverSchoolSourceAndDb.first,
+                        uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
+                        json = json,
+                    ),
+                    getTokenAndUserProfileWithPasskeyUseCase = GetTokenAndUserProfileWithPasskeyUseCaseDbImpl(
+                        schoolDb = serverSchoolSourceAndDb.first,
+                    )
                 )
 
                 val clazz = Clazz(
@@ -72,7 +82,6 @@ class RedeemInviteIntegrationTest {
                     ),
                     role = PersonRoleEnum.TEACHER,
                     parentOrGuardianRole = null,
-                    studentPersonInfo = null,
                     account = RespectRedeemInviteRequest.Account(
                         username = "username",
                         credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(

@@ -21,6 +21,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.Settings
 import world.respect.shared.util.ext.asUiText
 
 data class AppLauncherUiState(
@@ -43,6 +44,8 @@ class AppLauncherViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.apps.asUiText(),
+                settingsIconVisible = true,
+                onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     visible = true,
                     icon = FabUiState.FabIcon.ADD,
@@ -90,6 +93,11 @@ class AppLauncherViewModel(
             NavCommand.Navigate(
                 AppsDetail.create(url)
             )
+        )
+    }
+    fun onClickSettings() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(Settings)
         )
     }
 

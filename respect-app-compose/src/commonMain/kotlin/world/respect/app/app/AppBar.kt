@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
 import world.respect.shared.generated.resources.search
+import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.app.appstate.AppBarColors
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -149,6 +151,17 @@ fun RespectAppBar(
                             stringResource(Res.string.search)
                         )
                     }
+                }
+            }
+            if (appUiState.settingsIconVisible == true) {
+                IconButton(
+                    onClick = appUiState.onClickSettings ?: {},
+                    modifier = Modifier.testTag("settings_icon_button")
+                ) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = stringResource(Res.string.settings)
+                    )
                 }
             }
             if(appUiState.actionBarButtonState.visible) {

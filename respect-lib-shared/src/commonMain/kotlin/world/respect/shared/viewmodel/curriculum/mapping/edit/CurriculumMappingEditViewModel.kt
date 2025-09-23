@@ -70,7 +70,7 @@ class CurriculumMappingEditViewModel(
                 title = Res.string.mapping_edit.asUiText(),
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = false,
+                    visible = true,
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),
@@ -181,38 +181,32 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onBookTitleChanged(title: String) {
-        val currentTextbook = _uiState.value.textbook
-        if (currentTextbook == null) return
+        val currentTextbook = _uiState.value.textbook ?: return
+        val updatedTextbook = currentTextbook.copy(title = title)
 
-        currentTextbook.title = title
-
-        val textbookToCommit = _uiState.updateAndGet { prev ->
-            prev.copy(textbook = currentTextbook)
-        }.textbook
-
-        if (textbookToCommit == null) return
+        _uiState.update { prev ->
+            prev.copy(textbook = updatedTextbook)
+        }
 
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
-            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = textbookToCommit.title
+            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = updatedTextbook.title
         }
     }
 
     fun onBookDescriptionChanged(description: String) {
-        val currentTextbook = _uiState.value.textbook
-        if (currentTextbook == null) return
+        val currentTextbook = _uiState.value.textbook ?: return
 
-        currentTextbook.description = description
+        val updatedTextbook = currentTextbook.copy(description = description)
 
-        val textbookToCommit = _uiState.updateAndGet { prev ->
-            prev.copy(textbook = currentTextbook)
-        }.textbook
-
-        if (textbookToCommit == null) return
+        _uiState.update { prev ->
+            prev.copy(textbook = updatedTextbook)
+        }
 
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
-            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = textbookToCommit.description
+            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = updatedTextbook.description
         }
     }
+
 
     fun onClickAddBookCover() {
        //TODO

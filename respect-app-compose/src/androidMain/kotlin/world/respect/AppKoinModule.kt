@@ -136,6 +136,9 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import java.io.File
+import world.respect.shared.viewmodel.settings.SettingsViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -234,6 +237,11 @@ val appKoinModule = module {
     viewModelOf(::ReportFilterEditViewModel)
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::CurriculumMappingListViewModel)
+    viewModelOf(::CurriculumMappingEditViewModel)
+
+
 
 
     single<GetOfflineStorageOptionsUseCase> {

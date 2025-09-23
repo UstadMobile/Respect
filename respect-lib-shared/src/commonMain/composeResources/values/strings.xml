@@ -347,4 +347,23 @@
     <string name="edit_person">Edit person</string>
 
     <string name="first_names">First names</string>
+    <string name="mapping">Mapping</string>
+    <string name="mapping_edit">Mapping edit</string>
+    <string name="textbooks">Textbooks</string>
+    <string name="book_title">Book Title</string>
+    <string name="book_description">Book Description</string>
+    <string name="chapter">Chapter</string>
+    <string name="lesson">Lesson</string>
+    <string name="add_book_cover">Add book cover</string>
+    <string name="no_chapter_added">No Chapter is added yet.</string>
+    <string name="click_plus_button">Please click the + button</string>
+    <string name="to_add_one">to add one</string>
+    <string name="map">Map</string>
+    <string name="simple_learning">Simple learning</string>
+    <string name="no_textbooks_available">No textbooks available</string>
+    <string name="more_options">More options</string>
+    <string name="remove_chapter">Remove chapter</string>
+    <string name="remove_lesson">Remove lesson</string>
+    <string name="settings">Settings</string>
+
 </resources>

@@ -14,17 +14,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.db.curriculum.entities.TextbookMapping
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_book_cover
-import world.respect.shared.generated.resources.more_options
-import world.respect.shared.generated.resources.no_textbooks_available
-import world.respect.shared.generated.resources.textbooks
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListUiState
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import org.jetbrains.compose.resources.stringResource
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_book_cover
+import world.respect.shared.generated.resources.textbooks
+import world.respect.shared.generated.resources.no_textbooks_available
+import world.respect.shared.generated.resources.map
+import world.respect.shared.generated.resources.more_options
 
 @Composable
 fun CurriculumMappingListScreen(
@@ -33,43 +34,58 @@ fun CurriculumMappingListScreen(
     onClickMoreOptions: (TextbookMapping) -> Unit = { },
     onClickMap: () -> Unit = { },
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = stringResource(Res.string.textbooks),
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.textbooks),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        if (uiState.textbooks.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(Res.string.no_textbooks_available),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
-            }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(uiState.textbooks) { textbook ->
-                    TextbookCard(
-                        textbook = textbook,
-                        onClickTextbook = onClickTextbook,
-                        onClickMoreOptions = onClickMoreOptions
+            if (uiState.textbooks.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(Res.string.no_textbooks_available),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
                     )
                 }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(uiState.textbooks) { textbook ->
+                        TextbookCard(
+                            textbook = textbook,
+                            onClickTextbook = onClickTextbook,
+                            onClickMoreOptions = onClickMoreOptions
+                        )
+                    }
+                }
             }
+        }
+
+        FloatingActionButton(
+            onClick = onClickMap,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .testTag("map_fab")
+        ) {
+            Text(
+                text = stringResource(Res.string.map),
+                style = MaterialTheme.typography.labelLarge
+            )
         }
     }
 }
@@ -85,10 +101,13 @@ private fun TextbookCard(
         onClick = { onClickTextbook(textbook) },
         modifier = Modifier
             .fillMaxWidth()
+            .height(200.dp)
             .testTag("textbook_card_${textbook.uid}")
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -98,7 +117,7 @@ private fun TextbookCard(
                 Text(
                     text = textbook.title ?: "",
                     style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
@@ -108,7 +127,7 @@ private fun TextbookCard(
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.MoreVert,
+                        Icons.Filled.MoreVert,
                         contentDescription = stringResource(Res.string.more_options)
                     )
                 }
@@ -119,7 +138,7 @@ private fun TextbookCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 if (textbook.coverImageUrl != null) {
@@ -130,21 +149,19 @@ private fun TextbookCard(
                         contentScale = ContentScale.Fit
                     )
                 } else {
-                    Card(
-                        modifier = Modifier.fillMaxSize(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = textbook.title?.take(2)?.uppercase() ?: "??",
-                                style = MaterialTheme.typography.headlineMedium
-                            )
-                        }
+                        Text(
+                            text = textbook.title?.split(" ")
+                                ?.mapNotNull { it.firstOrNull()?.uppercase() }
+                                ?.take(2)
+                                ?.joinToString("") ?: "??",
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

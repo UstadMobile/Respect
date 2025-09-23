@@ -6,10 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -30,12 +31,10 @@ import world.respect.shared.generated.resources.chapter
 import world.respect.shared.generated.resources.click_plus_button
 import world.respect.shared.generated.resources.lesson
 import world.respect.shared.generated.resources.mapping
-import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.no_chapter_added
 import world.respect.shared.generated.resources.remove_chapter
 import world.respect.shared.generated.resources.remove_lesson
 import world.respect.shared.generated.resources.required
-import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.simple_learning
 import world.respect.shared.generated.resources.to_add_one
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
@@ -60,7 +59,6 @@ fun CurriculumMappingEditScreen(
     ) {
         LazyColumn(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -70,7 +68,7 @@ fun CurriculumMappingEditScreen(
                         .fillMaxWidth()
                         .height(120.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .background(MaterialTheme.colorScheme.surface),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
@@ -80,14 +78,29 @@ fun CurriculumMappingEditScreen(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(
-                                Icons.Filled.CameraAlt,
-                                contentDescription = stringResource(Res.string.add_book_cover),
-                                modifier = Modifier.size(32.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(200.dp)
+                                    .background(
+                                        color = Color.Gray.copy(alpha = 0.6f),
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Filled.AddAPhoto,
+                                    contentDescription = stringResource(Res.string.add_book_cover),
+                                    modifier = Modifier.size(32.dp),
+                                    tint = Color.Gray
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
                             Text(
                                 text = stringResource(Res.string.add_book_cover),
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -99,15 +112,19 @@ fun CurriculumMappingEditScreen(
                     value = uiState.bookTitle,
                     onValueChange = onBookTitleChanged,
                     label = { Text(stringResource(Res.string.book_title)) },
-                    placeholder = { Text(stringResource(Res.string.required)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("book_title_field"),
                     singleLine = true,
                     isError = !uiState.bookTitleError.isNullOrEmpty(),
-                    supportingText = if (!uiState.bookTitleError.isNullOrEmpty()) {
-                        { Text(uiState.bookTitleError!!) }
-                    } else null,
+                    supportingText = {
+                        if (!uiState.bookTitleError.isNullOrEmpty()) {
+                            Text(uiState.bookTitleError!!)
+                        } else {
+
+                            Text(stringResource(Res.string.required))
+                        }
+                    },
                     enabled = uiState.fieldsEnabled
                 )
             }
@@ -117,12 +134,12 @@ fun CurriculumMappingEditScreen(
                     value = uiState.bookDescription,
                     onValueChange = onBookDescriptionChanged,
                     label = { Text(stringResource(Res.string.book_description)) },
-                    placeholder = { Text(stringResource(Res.string.book_description)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("book_description_field"),
-                    minLines = 3,
-                    maxLines = 5,
+                    singleLine = false,
+                    minLines = 1,
+                    maxLines = Int.MAX_VALUE,
                     enabled = uiState.fieldsEnabled
                 )
             }
@@ -143,6 +160,11 @@ fun CurriculumMappingEditScreen(
                         .testTag("add_chapter_button"),
                     enabled = uiState.fieldsEnabled
                 ) {
+                    Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ){
                     Icon(
                         Icons.Filled.Add,
                         contentDescription = null,
@@ -151,6 +173,7 @@ fun CurriculumMappingEditScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(Res.string.chapter))
                 }
+            }
             }
 
             if (uiState.chapters.isEmpty()) {
@@ -194,23 +217,6 @@ fun CurriculumMappingEditScreen(
                         enabled = uiState.fieldsEnabled
                     )
                 }
-            }
-        }
-
-        Button(
-            onClick = onClickSave,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            enabled = uiState.fieldsEnabled
-        ) {
-            if (uiState.loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text(text = stringResource(Res.string.save))
             }
         }
     }

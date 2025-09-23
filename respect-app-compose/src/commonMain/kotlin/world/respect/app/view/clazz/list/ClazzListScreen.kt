@@ -4,13 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.collectAsLazyPagingItems
 import world.respect.app.components.RespectListSortHeader
@@ -20,7 +18,6 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultSortListMode
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.util.SortOrderOption

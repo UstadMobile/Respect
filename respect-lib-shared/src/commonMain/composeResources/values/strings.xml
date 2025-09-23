@@ -78,12 +78,10 @@
     <string name="child_gender_label">Child's gender*</string>
     <string name="child_dob_label">Child's date of birth*</string>
     <string name="child_note">Please enter your child's details.</string>
-    <string name="full_name_required">Full name is required</string>
-    <string name="gender_required">Gender is required</string>
-    <string name="dob_required">Date of birth is required</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
-    <string name="username_required">Username is required</string>
+    <string name="passkey_not_supported">Passkeys are not supported</string>
+    <string name="required">Required*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
@@ -103,7 +101,7 @@
     <string name="add_student">Add Student</string>">
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
-    <string name="pending_invite">Pending invites</string>">
+    <string name="pending_requests">Pending requests</string>">
     <string name="copy_invite_code">Copy invite code : </string>">
     <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
     <string name="share_qr_code">Share QR code</string>">
@@ -124,14 +122,13 @@
     <string name="edit">Edit</string>
     <string name="edit_clazz">Edit class</string>
     <string name="add_clazz">Add class</string>
-    <string name="required">* Required</string>
 
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
-    <string name="school_not_exist_error">This school does not exists</string>
+    <string name="school_not_found">School not found</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>

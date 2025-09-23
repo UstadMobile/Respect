@@ -55,8 +55,8 @@ kotlin {
 
         androidMain.dependencies {
             api(projects.respectCredentials)
-            implementation(libs.credentials.androidx)
-            implementation(libs.credentialsplay)
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.appcompat)

@@ -2,17 +2,16 @@ package world.respect.datalayer.http.ext
 
 import io.ktor.http.Url
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
-import world.respect.libutil.ext.resolve
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.libutil.ext.appendEndpointSegments
 
-suspend fun SchoolDirectoryDataSource.resolveRespectExtUrlForSchool(
+suspend fun SchoolDirectoryEntryDataSource.resolveRespectExtUrlForSchool(
     schoolUrl: Url,
-    href: String,
+    resourcePath: String,
 ): Url {
     val schoolDirectoryData = getSchoolDirectoryEntryByUrl(schoolUrl)
     val schoolDirectory = schoolDirectoryData.dataOrNull()
-    println("school dir = $schoolDirectory")
 
-    return schoolDirectory?.respectExt?.resolve(href)
+    return schoolDirectory?.respectExt?.appendEndpointSegments(resourcePath)
         ?: throw IllegalStateException("SchoolUrl $schoolUrl has no respect extensions URL")
 }

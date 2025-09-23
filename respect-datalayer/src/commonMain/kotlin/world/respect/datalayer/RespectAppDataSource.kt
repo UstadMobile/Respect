@@ -3,6 +3,7 @@ package world.respect.datalayer
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 /**
  * DataSource that provides app (eg. system) level data that is NOT specific to a given school
@@ -23,5 +24,7 @@ interface RespectAppDataSource {
     val opdsDataSource: OpdsDataSource
 
     val schoolDirectoryDataSource: SchoolDirectoryDataSource
+
+    val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource
 
 }

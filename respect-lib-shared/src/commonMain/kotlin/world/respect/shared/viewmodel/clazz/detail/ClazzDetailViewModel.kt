@@ -3,12 +3,10 @@ package world.respect.shared.viewmodel.clazz.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -17,14 +15,15 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.oneroster.model.OneRosterClass
-import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
-import world.respect.datalayer.shared.paging.EmptyPagingSource
+import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
 import world.respect.shared.generated.resources.last_name
@@ -44,8 +43,10 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companio
 import kotlin.getValue
 
 data class ClazzDetailUiState(
-    val teachers: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
-    val students: () -> PagingSource<Int, Person> = { EmptyPagingSource() },
+    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val pendingTeachers:IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -55,10 +56,11 @@ data class ClazzDetailUiState(
         Res.string.first_name, 1, true
     ),
     val fieldsEnabled: Boolean = true,
-    val clazz: DataLoadState<OneRosterClass> = DataLoadingState(),
+    val clazz: DataLoadState<Clazz> = DataLoadingState(),
     val isPendingExpanded: Boolean = true,
     val isTeachersExpanded: Boolean = true,
-    val isStudentsExpanded: Boolean = true
+    val isStudentsExpanded: Boolean = true,
+    val inviteCodePrefix: String? = null,
 )
 
 class ClazzDetailViewModel(
@@ -70,19 +72,21 @@ class ClazzDetailViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
+
     private val _uiState = MutableStateFlow(ClazzDetailUiState())
 
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
-    private fun pagingSourceByRole(role: EnrollmentRoleEnum): () -> PagingSource<Int, Person> {
-        return {
+    private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
+        return PagingSourceFactoryHolder {
             schoolDataSource.personDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
                     filterByClazzUid = route.guid,
-                    filterByClazzRole = role,
+                    filterByEnrolmentRole = role,
                 )
             )
         }
@@ -91,6 +95,10 @@ class ClazzDetailViewModel(
     private val teacherPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
 
     private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+
+    private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
+
+    private val studentsPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_STUDENT)
 
     init {
         _appUiState.update {
@@ -108,6 +116,8 @@ class ClazzDetailViewModel(
             it.copy(
                 teachers = teacherPagingSource,
                 students = studentPagingSource,
+                pendingTeachers = teachersPendingPagingSource,
+                pendingStudents = studentsPendingPagingSource,
                 sortOptions = listOf(
                     SortOrderOption(
                         fieldMessageId = Res.string.first_name, flag = 1, order = true
@@ -127,14 +137,26 @@ class ClazzDetailViewModel(
                 _appUiState.update {
                     it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
+                _uiState.update { it.copy(clazz = clazz) }
             }
         }
     }
 
-    fun onClickAddPersonToClazz(roleType: OneRosterRoleEnum) {
+    fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
+        val clazz = _uiState.value.clazz.dataOrNull() ?: return
+
+        val classInviteCode = when(roleType){
+            EnrollmentRoleEnum.TEACHER -> clazz.teacherInviteCode
+            EnrollmentRoleEnum.STUDENT -> clazz.studentInviteCode
+            else -> throw IllegalStateException()
+        }
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AddPersonToClazz.create(roleType)
+                AddPersonToClazz.create(
+                    roleType = roleType,
+                    inviteCode = classInviteCode,
+                )
             )
         )
     }
@@ -149,7 +171,19 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(selectedChip = chip) }
     }
 
-    fun onClickAcceptInvite(user: Person) {}
+    fun onClickAcceptInvite(user: Person) {
+        viewModelScope.launch {
+            try {
+                approveOrDeclineInviteRequestUseCase(
+                    personUid = user.guid,
+                    classUid = route.guid,
+                    approved = true,
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun onClickDismissInvite(user: Person) {}
 

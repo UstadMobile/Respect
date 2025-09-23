@@ -1,0 +1,88 @@
+appId: world.respect.app
+---
+- runFlow: "common/school_admin_login_flow.yaml"
+- assertVisible:
+      id: "app_title"
+      text: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+      id: "app_title"
+      text: "Classes"
+- tapOn:
+      id: "floating_action_button"   #  +Class button
+- assertVisible:
+      id: "app_title"
+      text: "Add class"
+- tapOn: "Class name"
+- inputText: "New Class"
+- tapOn: "Description"
+- inputText: "New Course Description"
+- tapOn: "Start date"
+- inputText: "date"
+- tapOn: "Save"
+- assertVisible:
+      id: "app_title"
+      text: "Classes"
+- assertVisible: "New Class"
+- tapOn: "New Class"
+- assertVisible:
+      id: "app_title"
+      text: "New Class"
+- tapOn: "+ Student"
+- tapOn: "Copy invite code"
+
+- clearState: world.respect.app
+- launchApp
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- longPressOn: "Invite code"
+- tapOn: "Copy"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: ${SCHOOL_NAME}
+- tapOn: "I’m a parent"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: ${PARENT_NAME}
+- tapOn: "Gender"
+- tapOn: "Female"
+- tapOn: "Your date of birth"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.pastYearDate}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: ${PARENT_USERNAME}  #username
+- tapOn: "Other ways to sign in"
+- tapOn: "Sign in with a password"
+- tapOn: "Password"
+- inputText: ${PARENT_PASSWORD}
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Child Profile"
+- tapOn: "Child name"
+- inputText: ${CHILD_NAME}
+- tapOn: "Gender"
+- tapOn: "Male"
+- tapOn: "Child date of birth"
+- runScript:
+    file: "common/setDate.js"
+- inputText: ${output.pastYearDate}
+- tapOn: "Done"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+- assertVisible: "Waiting for an approval to join ClassA"
+

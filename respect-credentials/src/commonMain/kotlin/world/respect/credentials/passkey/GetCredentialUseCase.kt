@@ -65,6 +65,6 @@ interface GetCredentialUseCase {
         val message: String?
     ) : CredentialResult()
 
-    suspend operator fun invoke(): CredentialResult
+    suspend operator fun invoke(rpId: String): CredentialResult
 
 }

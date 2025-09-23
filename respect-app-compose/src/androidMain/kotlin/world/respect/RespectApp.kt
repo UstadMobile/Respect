@@ -11,9 +11,14 @@ import coil3.request.crossfade
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import okhttp3.OkHttpClient
+import org.acra.config.httpSender
+import org.acra.data.StringFormat
+import org.acra.ktx.initAcra
+import org.acra.sender.HttpSender
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import world.respect.app.BuildConfig
 
 class RespectApp : Application(), SingletonImageLoader.Factory {
 
@@ -25,6 +30,18 @@ class RespectApp : Application(), SingletonImageLoader.Factory {
         WebView.setWebContentsDebuggingEnabled(
             applicationInfo.flags.and(FLAG_DEBUGGABLE) == FLAG_DEBUGGABLE
         )
+
+        if(BuildConfig.ACRA_URI.isNotEmpty()) {
+            initAcra {
+                reportFormat = StringFormat.JSON
+                httpSender {
+                    uri = BuildConfig.ACRA_URI
+                    basicAuthLogin = BuildConfig.ACRA_BASICAUTHLOGIN.trim()
+                    basicAuthPassword = BuildConfig.ACRA_BASICAUTHPASSWORD.trim()
+                    httpMethod = HttpSender.Method.POST
+                }
+            }
+        }
 
         startKoin {
             androidContext(this@RespectApp)

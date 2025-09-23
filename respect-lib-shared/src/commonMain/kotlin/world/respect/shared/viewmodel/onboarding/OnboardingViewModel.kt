@@ -7,12 +7,13 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.viewmodel.RespectViewModel
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
-import world.respect.shared.domain.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 
 data class OnboardingUiState(
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val usageStatsOptInChecked: Boolean = true,
 )
 
 class OnboardingViewModel(
@@ -30,6 +31,14 @@ class OnboardingViewModel(
             prev.copy(
                 hideBottomNavigation = true,
                 hideAppBar = true
+            )
+        }
+    }
+
+    fun onToggleUsageStatsOptIn() {
+        _uiState.update { prev ->
+            prev.copy(
+                usageStatsOptInChecked = !prev.usageStatsOptInChecked
             )
         }
     }

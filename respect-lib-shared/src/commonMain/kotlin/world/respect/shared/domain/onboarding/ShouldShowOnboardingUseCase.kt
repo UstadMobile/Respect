@@ -1,4 +1,4 @@
-package world.respect.shared.domain
+package world.respect.shared.domain.onboarding
 
 import com.russhwolf.settings.Settings
 

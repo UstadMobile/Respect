@@ -3,6 +3,7 @@ package world.respect.app.view.onboarding
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +44,7 @@ import world.respect.shared.generated.resources.onboardingTitle1
 import world.respect.shared.generated.resources.onboardingTitle2
 import world.respect.shared.generated.resources.onboardingTitle3
 import world.respect.shared.generated.resources.onboardingTitle4
+import world.respect.shared.generated.resources.send_usage_stats_and_crash_reports
 
 
 data class OnboardingItem(
@@ -57,14 +60,16 @@ fun OnboardingScreen(
     val uiState by viewModel.uiState.collectAsState()
     OnboardingScreen(
         uiState = uiState,
-        onClickGetStartedButton = viewModel::onClickGetStartedButton
+        onClickGetStartedButton = viewModel::onClickGetStartedButton,
+        onToggleUsageStatsOptIn = viewModel::onToggleUsageStatsOptIn,
     )
 }
 
 @Composable
 fun OnboardingScreen(
     uiState: OnboardingUiState,
-    onClickGetStartedButton: () -> Unit
+    onClickGetStartedButton: () -> Unit,
+    onToggleUsageStatsOptIn: () -> Unit,
 ) {
 
     val onboardingItem = listOf(
@@ -80,13 +85,13 @@ fun OnboardingScreen(
         ),
         OnboardingItem(
             onboardingImage = RespectImage.ASSIGNMENTS,
-            onboardingTitle = stringResource(Res.string.onboardingTitle4),
-            onboardingDescription = stringResource(Res.string.onboardingDescription4)
+            onboardingTitle = stringResource(Res.string.onboardingTitle3),
+            onboardingDescription = stringResource(Res.string.onboardingDescription3)
         ),
         OnboardingItem(
             onboardingImage = RespectImage.DATA_REPORTING,
-            onboardingTitle = stringResource(Res.string.onboardingTitle3),
-            onboardingDescription = stringResource(Res.string.onboardingDescription3)
+            onboardingTitle = stringResource(Res.string.onboardingTitle4),
+            onboardingDescription = stringResource(Res.string.onboardingDescription4)
         ),
     )
 
@@ -167,13 +172,33 @@ fun OnboardingScreen(
                 }
             }
         }
+
         Button(
-            modifier = Modifier.padding(bottom = 32.dp),
+            modifier = Modifier.defaultItemPadding(),
             onClick = {
                 onClickGetStartedButton()
             }
         ) {
             Text(stringResource(Res.string.get_started))
+        }
+
+        Row(
+            modifier = Modifier
+                .defaultItemPadding()
+                .clickable {
+                    onToggleUsageStatsOptIn()
+                },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = uiState.usageStatsOptInChecked,
+                onCheckedChange = { onToggleUsageStatsOptIn() },
+            )
+
+            Text(
+                text = stringResource(Res.string.send_usage_stats_and_crash_reports),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }

@@ -165,10 +165,12 @@
     <string name="onboardingTitle3">Assignments</string>
     <string name="onboardingTitle4">Data Reporting</string>
 
-    <string name="onboardingDescription1">Discover and use great edtech apps with a single account.</string>
-    <string name="onboardingDescription2">Download lessons to use offline. RESPECT's compression can reduce data usage.</string>
-    <string name="onboardingDescription3">Teachers can easily assign lessons from any app on RESPECT as homework.</string>
+    <string name="onboardingDescription1">RESPECT™ makes it easy to discover and use great edtech apps with a single account.</string>
+    <string name="onboardingDescription2">Download lessons to use offline. RESPECT™'s compression can reduce data usage.</string>
+    <string name="onboardingDescription3">Teachers can easily assign lessons from any edtech app on RESPECT™ as homework for students to complete on their parents' phone or any other device.</string>
     <string name="onboardingDescription4">Track progress with detailed reports.</string>
+
+    <string name="send_usage_stats_and_crash_reports">Send anonymous usage data and crash reports to RESPECT™.</string>
 
     <!-- Edit Report -->
     <string name="edit_report">Edit report</string>

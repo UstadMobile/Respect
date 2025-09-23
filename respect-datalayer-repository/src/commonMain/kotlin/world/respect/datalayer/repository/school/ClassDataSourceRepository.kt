@@ -55,7 +55,8 @@ class ClassDataSourceRepository(
                 remoteSource.loadAndUpdateLocal2(
                     remoteLoadParams, local::updateLocal
                 )
-            }
+            },
+            tag = "ClassRepo.listAsPagingSource"
         )
     }
 

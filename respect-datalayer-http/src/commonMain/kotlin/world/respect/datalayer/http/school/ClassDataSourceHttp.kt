@@ -28,7 +28,6 @@ import world.respect.datalayer.school.ClassDataSource.Companion.PARAM_NAME_INVIT
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.asIPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class ClassDataSourceHttp(
@@ -82,16 +81,18 @@ class ClassDataSourceHttp(
         loadParams: DataLoadParams,
         params: ClassDataSource.GetListParams
     ): IPagingSourceFactory<Int, Clazz> {
-        return OffsetLimitHttpPagingSource<Clazz>(
-            baseUrlProvider = { params.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Clazz>>(),
-            requestBuilder = {
-                useTokenProvider(tokenProvider)
-                useValidationCacheControl(validationHelper)
-            }
-        ).asIPagingSourceFactory()
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource(
+                baseUrlProvider = { params.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Clazz>>(),
+                requestBuilder = {
+                    useTokenProvider(tokenProvider)
+                    useValidationCacheControl(validationHelper)
+                }
+            )
+        }
     }
 
     override suspend fun list(

@@ -28,7 +28,6 @@ import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.asIPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class EnrollmentDataSourceHttp(
@@ -86,16 +85,18 @@ class EnrollmentDataSourceHttp(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
     ): IPagingSourceFactory<Int, Enrollment> {
-        return OffsetLimitHttpPagingSource<Enrollment>(
-            baseUrlProvider = { listParams.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Enrollment>>(),
-            requestBuilder = {
-                useTokenProvider(tokenProvider)
-                useValidationCacheControl(validationHelper)
-            }
-        ).asIPagingSourceFactory()
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource(
+                baseUrlProvider = { listParams.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Enrollment>>(),
+                requestBuilder = {
+                    useTokenProvider(tokenProvider)
+                    useValidationCacheControl(validationHelper)
+                }
+            )
+        }
     }
 
     override suspend fun store(list: List<Enrollment>) {

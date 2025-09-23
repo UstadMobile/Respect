@@ -163,15 +163,15 @@
     <string name="profile">Profile</string>
 
     <string name="get_started">Get Started</string>
-    <string name="onboardingTitle1">Digital Library</string>
-    <string name="onboardingTitle2">Works Offline</string>
-    <string name="onboardingTitle3">Data Reporting</string>
-    <string name="onboardingTitle4">Assignments</string>
-    <string name="onboardingDescription1">Access learning resources anytime</string>
-    <string name="onboardingDescription2">Continue learning even without internet</string>
-    <string name="onboardingDescription3">Track progress with detailed reports</string>
-    <string name="onboardingDescription4">Assign and manage lessons easily</string>
+    <string name="onboardingTitle1">Digital Library of Edtech Apps</string>
+    <string name="onboardingTitle2">Works Offline and Saves Data</string>
+    <string name="onboardingTitle3">Assignments</string>
+    <string name="onboardingTitle4">Data Reporting</string>
 
+    <string name="onboardingDescription1">Discover and use great edtech apps with a single account.</string>
+    <string name="onboardingDescription2">Download lessons to use offline. RESPECT's compression can reduce data usage.</string>
+    <string name="onboardingDescription3">Teachers can easily assign lessons from any app on RESPECT as homework.</string>
+    <string name="onboardingDescription4">Track progress with detailed reports.</string>
 
     <!-- Edit Report -->
     <string name="edit_report">Edit report</string>

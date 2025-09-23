@@ -24,14 +24,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import world.respect.images.RespectImage
 import world.respect.images.respectImagePainter
 import world.respect.shared.viewmodel.onboarding.OnboardingUiState
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.get_started
+import world.respect.shared.generated.resources.onboardingDescription1
 import world.respect.shared.generated.resources.onboardingDescription2
 import world.respect.shared.generated.resources.onboardingDescription3
 import world.respect.shared.generated.resources.onboardingDescription4
@@ -68,7 +71,7 @@ fun OnboardingScreen(
         OnboardingItem(
             onboardingImage = RespectImage.DIGITAL_LIBRARY,
             onboardingTitle = stringResource(Res.string.onboardingTitle1),
-            onboardingDescription = stringResource(Res.string.onboardingDescription2)
+            onboardingDescription = stringResource(Res.string.onboardingDescription1)
         ),
         OnboardingItem(
             onboardingImage = RespectImage.WORKS_OFFLINE,
@@ -76,15 +79,15 @@ fun OnboardingScreen(
             onboardingDescription = stringResource(Res.string.onboardingDescription2)
         ),
         OnboardingItem(
+            onboardingImage = RespectImage.ASSIGNMENTS,
+            onboardingTitle = stringResource(Res.string.onboardingTitle4),
+            onboardingDescription = stringResource(Res.string.onboardingDescription4)
+        ),
+        OnboardingItem(
             onboardingImage = RespectImage.DATA_REPORTING,
             onboardingTitle = stringResource(Res.string.onboardingTitle3),
             onboardingDescription = stringResource(Res.string.onboardingDescription3)
         ),
-        OnboardingItem(
-            onboardingImage = RespectImage.ASSIGNMENTS,
-            onboardingTitle = stringResource(Res.string.onboardingTitle4),
-            onboardingDescription = stringResource(Res.string.onboardingDescription4)
-        )
     )
 
     val pagerState = rememberPagerState(pageCount = { onboardingItem.size })
@@ -123,12 +126,15 @@ fun OnboardingScreen(
                     Text(
                         text = item.onboardingTitle,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = 16.dp)
+                        modifier = Modifier.defaultItemPadding(top = 16.dp),
+                        textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = item.onboardingDescription,
                         style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.defaultItemPadding(),
+                        textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(32.dp))
                 }

@@ -5,12 +5,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.viewmodel.RespectViewModel
-import androidx.lifecycle.viewModelScope
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import world.respect.shared.domain.ShouldShowOnboardingUseCase
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 
 data class OnboardingUiState(
     val isLoading: Boolean = false
@@ -18,7 +17,8 @@ data class OnboardingUiState(
 
 class OnboardingViewModel(
     savedStateHandle: SavedStateHandle,
-    private val accountManager: RespectAccountManager
+    private val accountManager: RespectAccountManager,
+    private val settings: Settings,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -26,26 +26,23 @@ class OnboardingViewModel(
     val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            _appUiState.update { prev ->
-                prev.copy(
-                    hideBottomNavigation = true,
-                    hideAppBar = true
-                )
-            }
+        _appUiState.update { prev ->
+            prev.copy(
+                hideBottomNavigation = true,
+                hideAppBar = true
+            )
         }
     }
+
     fun onClickGetStartedButton() {
+        settings.putString(ShouldShowOnboardingUseCase.KEY_ONBOARDING_SHOWN, true.toString())
+
         val hasAccount = accountManager.selectedAccount != null
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = if (hasAccount) {
-                    RespectAppLauncher
-                } else {
-                    GetStartedScreen
-                },
-                clearBackStack = hasAccount
+                destination = GetStartedScreen,
+                clearBackStack = hasAccount,
             )
         )
     }

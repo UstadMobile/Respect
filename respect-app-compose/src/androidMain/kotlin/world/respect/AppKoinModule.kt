@@ -113,6 +113,7 @@ import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import org.koin.core.qualifier.named
+import world.respect.shared.domain.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -387,6 +388,10 @@ val appKoinModule = module {
             xxStringHasher = get(),
             xxHasher64Factory = get(),
         )
+    }
+
+    single<ShouldShowOnboardingUseCase> {
+        ShouldShowOnboardingUseCase(settings = get())
     }
 
 

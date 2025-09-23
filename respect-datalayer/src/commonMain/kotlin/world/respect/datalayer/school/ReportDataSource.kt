@@ -1,6 +1,5 @@
 package world.respect.datalayer.school
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
@@ -22,11 +21,6 @@ interface ReportDataSource : WritableDataSource<Report>  {
         listParams: GetListParams,
         template: Boolean = false
     ): Flow<DataLoadState<List<Report>>>
-
-    fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams,
-    ): PagingSource<Int, Report>
 
     suspend fun findByGuid(
         params: DataLoadParams,

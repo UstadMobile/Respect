@@ -56,18 +56,6 @@ class ReportDataSourceDb(
         }
     }
 
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams
-    ): PagingSource<Int, Report> {
-        return schoolDb.getReportEntityDao().findAllAsPagingSource(
-            since = params.common.since?.toEpochMilliseconds() ?: 0,
-            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-        ).map {
-            ReportEntities(it).toModel()
-        }
-    }
-
     override suspend fun findByGuid(
         params: DataLoadParams,
         guid: String

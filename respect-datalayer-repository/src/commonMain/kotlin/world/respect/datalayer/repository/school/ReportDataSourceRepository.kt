@@ -1,6 +1,5 @@
 package world.respect.datalayer.repository.school
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
@@ -8,8 +7,6 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
-import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.model.Report
@@ -25,27 +22,12 @@ class ReportDataSourceRepository(
     private val remoteWriteQueue: RemoteWriteQueue,
 ) : ReportDataSource, RepositoryModelDataSource<Report> {
 
-    private val mediatorStore = PagingSourceMediatorStore()
-
     override fun listAsFlow(
         loadParams: DataLoadParams,
         listParams: ReportDataSource.GetListParams,
         template: Boolean
     ): Flow<DataLoadState<List<Report>>> {
         return local.listAsFlow(loadParams, listParams, template)
-    }
-
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams
-    ): PagingSource<Int, Report> {
-        return RepositoryOffsetLimitPagingSource(
-            local = local.listAsPagingSource(loadParams, params),
-            remote = remote.listAsPagingSource(loadParams, params),
-            argKey = 0,
-            mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocal,
-        )
     }
 
     override suspend fun findByGuid(
@@ -80,7 +62,7 @@ class ReportDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.PERSON,
                     uid = it.guid,
-                    timestamp = timeNow,
+                    timeQueued = timeNow,
                 )
             }
         )

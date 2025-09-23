@@ -1,11 +1,9 @@
 package world.respect.datalayer.http.school
 
-import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
-import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
@@ -16,7 +14,6 @@ import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
-import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
@@ -54,24 +51,6 @@ class ReportDataSourceHttp(
             headers[HttpHeaders.Authorization] =
                 "Bearer ${tokenProvider.provideToken().accessToken}"
         }
-    }
-
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams
-    ): PagingSource<Int, Report> {
-        return OffsetLimitHttpPagingSource(
-            baseUrlProvider = { params.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Report>>(),
-            requestBuilder = {
-                headers[HttpHeaders.Authorization] =
-                    "Bearer ${tokenProvider.provideToken().accessToken}"
-                headers[HttpHeaders.CacheControl] = "no-store" //prevent 'normal' cache
-            },
-            tag = "Report-HTTP",
-        )
     }
 
     override suspend fun findByGuid(

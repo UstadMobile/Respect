@@ -61,7 +61,7 @@ class IndicatorDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.CLASS,
                     uid = it.indicatorId,
-                    timestamp = timeNow,
+                    timeQueued = timeNow,
                 )
             }
         )

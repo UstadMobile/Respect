@@ -41,7 +41,14 @@ class ClassDatasourceDb(
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 classes.map { it.copy(stored = timeStored) }.forEach { clazz ->
                     val entities = clazz.toEntities(uidNumberMapper)
-                    schoolDb.getClassEntityDao().upsert(entities.clazz)
+                    val lastModifiedInDb = schoolDb.getClassEntityDao().getLastModifiedByGuid(
+                        entities.clazz.cGuidHash
+                    ) ?: -1
+
+                    if(forceOverwrite ||
+                            entities.clazz.cLastModified.toEpochMilliseconds() > lastModifiedInDb) {
+                        schoolDb.getClassEntityDao().upsert(entities.clazz)
+                    }
                 }
             }
 

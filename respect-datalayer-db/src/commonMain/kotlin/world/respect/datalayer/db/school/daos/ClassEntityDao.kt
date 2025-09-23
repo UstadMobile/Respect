@@ -29,6 +29,15 @@ interface ClassEntityDao {
     suspend fun findByGuid(guidHash: Long): ClassEntity?
 
 
+    @Query("""
+        SELECT ClassEntity.cLastModified
+          FROM ClassEntity
+         WHERE ClassEntity.cGuidHash = :uidNum 
+    """)
+    suspend fun getLastModifiedByGuid(
+        uidNum: Long
+    ): Long?
+
     @Query(LIST_SQL)
     fun findAllAsPagingSource(
         since: Long = 0,

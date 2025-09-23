@@ -1,10 +1,13 @@
 package world.respect.datalayer.http.school
 
-import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,7 +18,10 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.http.ext.appendListParams
+import world.respect.datalayer.ext.useTokenProvider
+import world.respect.datalayer.ext.useValidationCacheControl
+import world.respect.datalayer.http.ext.appendIfNotNull
+import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -23,22 +29,27 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.adapters.asListDetails
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Instant
 
 class PersonDataSourceHttp(
     override val schoolUrl: Url,
-    override val schoolDirectoryDataSource: SchoolDirectoryDataSource,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val validationHelper: ExtendedDataSourceValidationHelper?,
 ) : PersonDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun PersonDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
-            .apply { parameters.appendListParams(common) }
+            .apply {
+                parameters.appendCommonListParams(common)
+                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, filterByClazzUid)
+                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
+            }
             .build()
     }
 
@@ -55,7 +66,8 @@ class PersonDataSourceHttp(
                 GetListCommonParams(guid = guid)
             ).urlWithParams()
         ) {
-            headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.firstOrNotLoaded()
     }
 
@@ -68,7 +80,8 @@ class PersonDataSourceHttp(
             },
             dataLoadParams = DataLoadParams()
         ) {
-            headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.map {
             it.firstOrNotLoaded()
         }
@@ -113,35 +126,45 @@ class PersonDataSourceHttp(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
-    ): PagingSource<Int, Person> {
-        return OffsetLimitHttpPagingSource(
-            baseUrlProvider = { params.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Person>>(),
-            requestBuilder = {
-                headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
-                headers[HttpHeaders.CacheControl] = "no-store" //prevent 'normal' cache
-            },
-            tag = "Person-HTTP",
-        )
+    ): IPagingSourceFactory<Int, Person> {
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource(
+                baseUrlProvider = { params.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Person>>(),
+                requestBuilder = {
+                    useTokenProvider(tokenProvider)
+                    useValidationCacheControl(validationHelper)
+                },
+                tag = "Person-HTTP",
+            )
+        }
     }
 
     override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
         listParams: PersonDataSource.GetListParams
-    ): PagingSource<Int, PersonListDetails> {
-        return OffsetLimitHttpPagingSource<Person>(
-            baseUrlProvider = { listParams.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Person>>(),
-        ).map { person ->
-            person.asListDetails()
+    ): IPagingSourceFactory<Int, PersonListDetails> {
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource<Person>(
+                baseUrlProvider = { listParams.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Person>>(),
+            ).map { person ->
+                person.asListDetails()
+            }
         }
     }
 
-    override suspend fun store(persons: List<Person>) {
-        throw IllegalStateException("Person-store-http: Not yet supported")
+    override suspend fun store(list: List<Person>) {
+        httpClient.post(
+            url = respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)
+        ) {
+            useTokenProvider(tokenProvider)
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }
     }
 }

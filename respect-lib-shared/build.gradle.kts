@@ -55,9 +55,6 @@ kotlin {
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
 
-            api(libs.paging.multiplatform.compose)
-            api(libs.paging.multiplatform.common)
-
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
         }
@@ -72,6 +69,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
+            implementation(projects.respectLibTest)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)

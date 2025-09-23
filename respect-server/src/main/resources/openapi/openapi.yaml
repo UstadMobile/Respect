@@ -107,11 +107,11 @@ paths:
 
       responses:
         '200':
-          description: OK ( RespectRedeemInviteState )
+          description: OK ( AuthResponse )
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RespectPendingInviteState"
+                $ref: "#/components/schemas/AuthResponse"
 
         '404':
           description: Not found (invite code not found/valid)
@@ -729,6 +729,8 @@ components:
           type: string
         schoolName:
           type: string
+        classGuid:
+          type: string
         userInviteType:
           type: string
           enum:
@@ -763,24 +765,23 @@ components:
                 - type: object
                   description: AuthenticationResponseJSON for passkey
 
-    RespectPendingInviteState:
+    AuthResponse:
       type: object
       properties:
-        guid:
-          type: string
-        userPerson:
+        token:
+          $ref: '#/components/schemas/AuthToken'
+        person:
           $ref: '#/components/schemas/Person'
-        childPerson:
-          $ref: '#/components/schemas/Person'
-        status:
+
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
           type: string
-          enum:
-            - PENDING
-            - APPROVED
-            - DECLINED
-        lastModified:
-          type: integer
-          description: time last modified (millis since epoch)
+        timeCreated:
+          type: numerical
+        val ttl:
+          type: numerical
 
     PersonInfo:
       type: object

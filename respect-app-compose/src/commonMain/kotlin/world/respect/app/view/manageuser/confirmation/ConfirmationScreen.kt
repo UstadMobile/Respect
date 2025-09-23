@@ -57,16 +57,13 @@ fun ConfirmationScreen(
 
         ListItem(
             headlineContent = {
-                Text(text = uiState.inviteInfo?.schoolName ?: "")
+                Text(text = uiState.inviteInfo?.className ?: "")
             },
             supportingContent = {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(text = uiState.inviteInfo?.className ?: "")
-
-                    Text(text = uiState.inviteInfo?.classGUIDRef?.sourcedId ?: "")
-
+                    Text(text = uiState.inviteInfo?.classGuid ?: "")
                 }
             }
         )

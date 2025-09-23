@@ -1,11 +1,38 @@
 package world.respect.datalayer.db.shared.adapters
 
+import world.respect.datalayer.db.shared.entities.ILangMapEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity.Companion.LANG_NONE
 import world.respect.datalayer.db.shared.ext.langMapKey
 import world.respect.datalayer.opds.model.LangMap
 import world.respect.datalayer.opds.model.LangMapObjectValue
 import world.respect.datalayer.opds.model.LangMapStringValue
+
+
+fun <T: ILangMapEntity> LangMap.asEntities(
+    adapter: ILangMapEntityAdapter<T>
+): List<T> {
+    return when(this) {
+        is LangMapStringValue -> {
+            listOf(
+                adapter(language = "", region = null, value = this.value)
+            )
+        }
+        is LangMapObjectValue -> {
+            this.map.map { (key, value) ->
+                val (langCode, region) = if(key.contains('-')) {
+                    key.split('-', limit = 2).let {
+                        it.first() to it.getOrNull(1)
+                    }
+                }else {
+                    key to null
+                }
+
+                adapter(language = langCode, region = region, value = value)
+            }
+        }
+    }
+}
 
 fun LangMap.asEntities(
     lmeTopParentType: LangMapEntity.TopParentType,
@@ -62,3 +89,10 @@ fun List<LangMapEntity>.toModel(): LangMap {
     }
 }
 
+fun List<ILangMapEntity>.toIModel(): LangMap {
+    return if(this.size == 1 && this.first().lang == LANG_NONE) {
+        LangMapStringValue(this.first().value)
+    }else {
+        LangMapObjectValue(this.associate { it.langMapKey to it.value })
+    }
+}

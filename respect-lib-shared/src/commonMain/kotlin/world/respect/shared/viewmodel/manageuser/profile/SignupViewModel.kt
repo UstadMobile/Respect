@@ -8,14 +8,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import org.jetbrains.compose.resources.getString
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
-import world.respect.datalayer.respect.model.invite.RespectRedeemInviteRequest
-import world.respect.shared.generated.resources.*
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.child_dob_label
+import world.respect.shared.generated.resources.child_gender_label
+import world.respect.shared.generated.resources.child_name_label
+import world.respect.shared.generated.resources.child_profile_title
+import world.respect.shared.generated.resources.done
+import world.respect.shared.generated.resources.next
+import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.your_dob_label
+import world.respect.shared.generated.resources.your_gender_label
+import world.respect.shared.generated.resources.your_name_label
+import world.respect.shared.generated.resources.your_profile_title
+import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.CreateAccount
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -23,14 +32,14 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 
 data class SignupUiState(
-    val screenTitle: String = "",
-    val actionBarButtonName: String = "",
-    val nameLabel: String = "",
-    val genderLabel: String = "",
-    val dateOfBirthLabel: String = "",
+    val screenTitle: UiText? = null,
+    val actionBarButtonName: UiText? = null,
+    val nameLabel: UiText? = null,
+    val genderLabel: UiText? = null,
+    val dateOfBirthLabel: UiText?=null,
     val personPicture: String?=null,
 
-    val personInfo: RespectRedeemInviteRequest.PersonInfo? = null,
+    val personInfo: RespectRedeemInviteRequest.PersonInfo = RespectRedeemInviteRequest.PersonInfo(),
 
 
     val fullNameError: UiText? = null,
@@ -40,42 +49,51 @@ data class SignupUiState(
 
 
 class SignupViewModel(
-    savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: SignupScreen = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(SignupUiState())
+
     val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            _uiState.value = when (route.type) {
-                ProfileType.PARENT, ProfileType.STUDENT -> SignupUiState(
-                    screenTitle = getString(Res.string.your_profile_title),
-                    actionBarButtonName = getString(Res.string.next),
-                    nameLabel = getString(Res.string.your_name_label),
-                    genderLabel = getString(Res.string.your_gender_label),
-                    dateOfBirthLabel = getString(Res.string.your_dob_label),
-                )
+        _uiState.update { prev ->
+            when(route.type) {
+                ProfileType.CHILD -> {
+                    prev.copy(
+                        screenTitle = Res.string.child_profile_title.asUiText(),
+                        actionBarButtonName = Res.string.done.asUiText(),
+                        nameLabel = Res.string.child_name_label.asUiText(),
+                        genderLabel = Res.string.child_gender_label.asUiText(),
+                        dateOfBirthLabel = Res.string.child_dob_label.asUiText(),
+                    )
+                }
 
-                ProfileType.CHILD -> SignupUiState(
-                    screenTitle = getString(Res.string.child_profile_title),
-                    actionBarButtonName = getString(Res.string.done),
-                    nameLabel = getString(Res.string.child_name_label),
-                    genderLabel = getString(Res.string.child_gender_label),
-                    dateOfBirthLabel = getString(Res.string.child_dob_label),
-                )
+                else -> {
+                    prev.copy(
+                        screenTitle = Res.string.your_profile_title.asUiText(),
+                        actionBarButtonName = Res.string.next.asUiText(),
+                        nameLabel = Res.string.your_name_label.asUiText(),
+                        genderLabel = Res.string.your_gender_label.asUiText(),
+                        dateOfBirthLabel = Res.string.your_dob_label.asUiText(),
+                    )
+                }
+
+
             }
+        }
 
+        viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(
                     actionBarButtonState = ActionBarButtonUiState(
                         visible = true,
-                        text = uiState.value.actionBarButtonName.asUiText(),
+                        text = uiState.value.actionBarButtonName,
                         onClick = { onClickSave() }
                     ),
-                    title = uiState.value.screenTitle.asUiText(),
+                    title = uiState.value.screenTitle,
                     hideBottomNavigation = true,
                     userAccountIconVisible = false
                 )
@@ -85,33 +103,34 @@ class SignupViewModel(
     }
     fun onFullNameChanged(value: String) {
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(name = value),
-                fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.full_name_required)
+                fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.required)
             )
         }
     }
 
-    fun onGenderChanged(value: OneRosterGenderEnum) {
+
+    fun onGenderChanged(value: PersonGenderEnum) {
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(gender = value),
-                genderError = if (value != OneRosterGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.gender_required)
+                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.required)
             )
         }
     }
 
     fun onDateOfBirthChanged(value: LocalDate?) {
+        if(value == null)
+            return
+
         _uiState.update { prev ->
-            val currentPerson = prev.personInfo ?: RespectRedeemInviteRequest.PersonInfo()
+            val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(dateOfBirth = value),
-                dateOfBirthError = if (value != null)
-                    null
-                else
-                    StringResourceUiText(Res.string.dob_required)
+                dateOfBirthError = null
             )
         }
     }
@@ -126,43 +145,44 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-
         viewModelScope.launch {
             val personInfo = _uiState.value.personInfo
             _uiState.update { prev ->
                 prev.copy(
-                    fullNameError = if (personInfo?.name.isNullOrEmpty()) StringResourceUiText(Res.string.full_name_required) else null,
-                    genderError = if (personInfo?.gender?.value.isNullOrEmpty()) StringResourceUiText(
-                        Res.string.gender_required
-                    ) else null,
-                    dateOfBirthError = if (personInfo?.dateOfBirth == null) StringResourceUiText(Res.string.dob_required) else null
+                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required) else null,
+                    genderError = if (personInfo.gender.value.isEmpty()) StringResourceUiText(
+                        Res.string.required
+                    ) else null
                 )
             }
 
             val hasError = listOf(
-                personInfo?.name?.isBlank(),
-                personInfo?.gender == OneRosterGenderEnum.UNSPECIFIED,
-                personInfo?.dateOfBirth == null
-            ).any { it == true }
+                personInfo.name.isBlank(),
+                //personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
+                //personInfo?.dateOfBirth == null
+            ).any { it }
 
             if (hasError) {
                 return@launch
             } else {
                 when (route.type) {
-                    ProfileType.PARENT, ProfileType.STUDENT -> {
-                        viewModelScope.launch {
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(CreateAccount.create(route.type,route.inviteInfo))
-                            )
-                        }
+                    ProfileType.CHILD -> {
+                        TODO("Add child account support")
                     }
-                    ProfileType.CHILD ->{
-                        viewModelScope.launch {
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,route.uid?:""))
+
+                    else -> {
+                        _navCommandFlow.tryEmit(
+                            value = NavCommand.Navigate(
+                                destination = CreateAccount.create(
+                                    profileType = route.type,
+                                    schoolUrl = route.schoolUrl,
+                                    inviteRequest = route.respectRedeemInviteRequest.copy(
+                                        accountPersonInfo = personInfo
+                                    )
+                                )
                             )
-                        }
-                    }
+                        )
+                     }
                 }
             }
         }

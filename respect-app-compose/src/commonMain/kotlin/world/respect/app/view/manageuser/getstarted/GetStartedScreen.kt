@@ -21,14 +21,14 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_school_name
-import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.school_name_placeholder
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedUiState
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
-import world.respect.shared.viewmodel.manageuser.getstarted.School
 
 @Composable
 fun GetStartedScreen(
@@ -39,7 +39,6 @@ fun GetStartedScreen(
     GetStartedScreen(
         uiState = uiState,
         onSchoolNameChanged = viewModel::onSchoolNameChanged,
-        onClickInviteCode = viewModel::onClickIHaveCode,
         onClickOtherOptions = viewModel::onClickOtherOptions,
         onSchoolSelected = viewModel::onSchoolSelected
     )
@@ -49,8 +48,7 @@ fun GetStartedScreen(
 fun GetStartedScreen(
     uiState: GetStartedUiState,
     onSchoolNameChanged: (String) -> Unit,
-    onSchoolSelected: (School) -> Unit,
-    onClickInviteCode: () -> Unit,
+    onSchoolSelected: (SchoolDirectoryEntry) -> Unit,
     onClickOtherOptions: () -> Unit
 ) {
     Column(
@@ -85,18 +83,18 @@ fun GetStartedScreen(
         ) {
             items(
                 count = uiState.suggestions.size,
-                key = { index -> uiState.suggestions[index].name }
+                key = { index -> uiState.suggestions[index].self.toString() }
             ) { index ->
                 val school = uiState.suggestions[index]
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = school.name
+                            text = school.name.getTitle()
                         )
                     },
                     supportingContent = {
                         Text(
-                            text = school.url,
+                            text = school.self.toString(),
                             maxLines = 1
                         )
                     },
@@ -108,14 +106,6 @@ fun GetStartedScreen(
         if (uiState.showButtons){
             Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedButton(
-                onClick = onClickInviteCode,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = stringResource(Res.string.i_have_an_invite_code))
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = onClickOtherOptions,

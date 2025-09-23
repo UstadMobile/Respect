@@ -20,8 +20,8 @@ import world.respect.app.components.RespectImageSelectButton
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
-import world.respect.shared.util.toGenderLabel
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.manageuser.profile.SignupUiState
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 
@@ -44,7 +44,7 @@ fun SignupScreen(
 fun SignupScreen(
     uiState: SignupUiState,
     onFullNameChanged: (String) -> Unit,
-    onGenderChanged: (OneRosterGenderEnum) -> Unit,
+    onGenderChanged: (PersonGenderEnum) -> Unit,
     onDateOfBirthChanged: (LocalDate?) -> Unit,
     onPersonPictureUriChanged: (String?) -> Unit = { },
 ) {
@@ -61,9 +61,9 @@ fun SignupScreen(
         )
 
         OutlinedTextField(
-            value = uiState.personInfo?.name?:"",
+            value = uiState.personInfo.name,
             onValueChange = onFullNameChanged,
-            label = { Text(uiState.nameLabel) },
+            label = { uiState.nameLabel?.let { Text(uiTextStringResource(it)) } },
             isError = uiState.fullNameError != null,
             modifier = Modifier.fillMaxWidth(),
             supportingText = {
@@ -74,12 +74,12 @@ fun SignupScreen(
         )
 
         RespectExposedDropDownMenuField(
-            value = uiState.personInfo?.gender,
+            value = uiState.personInfo.gender,
             label = uiState.genderLabel,
-            options = OneRosterGenderEnum.entries.filterNot { it == OneRosterGenderEnum.UNSPECIFIED },
+            options = PersonGenderEnum.entries.filterNot { it == PersonGenderEnum.UNSPECIFIED },
             onOptionSelected = { onGenderChanged(it) },
             itemText = { gender ->
-                stringResource(gender.toGenderLabel)
+                stringResource(gender.label)
             },
             isError = uiState.genderError != null,
             supportingText = {
@@ -91,10 +91,10 @@ fun SignupScreen(
 
         RespectLocalDateField(
             modifier = Modifier.fillMaxWidth(),
-            value = uiState.personInfo?.dateOfBirth,
+            value = uiState.personInfo.dateOfBirth,
             onValueChange = {onDateOfBirthChanged(it) },
             label = {
-                Text(uiState.dateOfBirthLabel)
+                uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it)) }
             },
             supportingText = uiState.dateOfBirthError?.let {
                 { Text(uiTextStringResource(it)) }

@@ -30,7 +30,6 @@ import world.respect.server.account.invite.username.UsernameSuggestionUseCaseSer
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.addpasskeyusecase.MockGetInviteInfoUseCase
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl

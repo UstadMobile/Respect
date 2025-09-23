@@ -15,15 +15,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import world.respect.images.RespectImage
 import world.respect.images.respectImagePainter
@@ -32,6 +40,7 @@ import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.get_started
+import world.respect.shared.generated.resources.headline_consent_content
 import world.respect.shared.generated.resources.onboardingDescription2
 import world.respect.shared.generated.resources.onboardingDescription3
 import world.respect.shared.generated.resources.onboardingDescription4
@@ -39,6 +48,7 @@ import world.respect.shared.generated.resources.onboardingTitle1
 import world.respect.shared.generated.resources.onboardingTitle2
 import world.respect.shared.generated.resources.onboardingTitle3
 import world.respect.shared.generated.resources.onboardingTitle4
+import world.respect.shared.generated.resources.supporting_consent_content
 
 
 data class OnboardingItem(
@@ -54,14 +64,16 @@ fun OnboardingScreen(
     val uiState by viewModel.uiState.collectAsState()
     OnboardingScreen(
         uiState = uiState,
-        onClickGetStartedButton = viewModel::onClickGetStartedButton
+        onClickGetStartedButton = viewModel::onClickGetStartedButton,
+        onConsentChanged = viewModel::onConsentChanged
     )
 }
 
 @Composable
 fun OnboardingScreen(
     uiState: OnboardingUiState,
-    onClickGetStartedButton: () -> Unit
+    onClickGetStartedButton: () -> Unit,
+    onConsentChanged: (Boolean) -> Unit
 ) {
 
     val onboardingItem = listOf(
@@ -88,6 +100,7 @@ fun OnboardingScreen(
     )
 
     val pagerState = rememberPagerState(pageCount = { onboardingItem.size })
+    var checked by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -104,8 +117,7 @@ fun OnboardingScreen(
         ) { page ->
             val item = onboardingItem[page]
             Column(
-                modifier = Modifier.fillMaxSize()
-                ,
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
 
@@ -130,7 +142,14 @@ fun OnboardingScreen(
                         text = item.onboardingDescription,
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    Spacer(Modifier.height(32.dp))
+                }
+                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+
+                    ConsentCheckbox(
+                        checked = uiState.consentGiven,
+                        onCheckedChange = onConsentChanged,
+                        showError = uiState.showConsentError
+                    )
                 }
             }
         }
@@ -171,6 +190,48 @@ fun OnboardingScreen(
         }
     }
 }
+
+@Composable
+fun ConsentCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    showError: Boolean = false
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.onSurfaceVariant)
+    ) {
+        ListItem(
+            leadingContent = {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+            },
+            headlineContent = {
+                Text(
+                    text =stringResource(Res.string.headline_consent_content),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+            },
+            supportingContent = {
+                 Text(
+                    text = stringResource(Res.string.supporting_consent_content),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+        )
+    }
+}
+
+
+
 
 
 

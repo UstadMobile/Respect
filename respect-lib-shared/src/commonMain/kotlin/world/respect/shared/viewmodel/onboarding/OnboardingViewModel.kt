@@ -13,7 +13,9 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
 
 data class OnboardingUiState(
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val consentGiven: Boolean = false,
+    val showConsentError: Boolean = false
 )
 
 class OnboardingViewModel(
@@ -35,7 +37,18 @@ class OnboardingViewModel(
             }
         }
     }
+
+    fun onConsentChanged(checked: Boolean) {
+        _uiState.update { it.copy(consentGiven = checked, showConsentError = false) }
+    }
     fun onClickGetStartedButton() {
+        
+        val state = _uiState.value
+        if (!state.consentGiven) {
+            _uiState.update { it.copy(showConsentError = true) }
+            return
+        }
+
         val hasAccount = accountManager.selectedAccount != null
 
         _navCommandFlow.tryEmit(
@@ -49,5 +62,4 @@ class OnboardingViewModel(
             )
         )
     }
-
 }

@@ -1,6 +1,7 @@
 package world.respect
 
 import android.app.Application
+import android.content.Context
 import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.webkit.WebView
 import coil3.ImageLoader
@@ -31,6 +32,17 @@ class RespectApp : Application(), SingletonImageLoader.Factory {
             applicationInfo.flags.and(FLAG_DEBUGGABLE) == FLAG_DEBUGGABLE
         )
 
+
+
+        startKoin {
+            androidContext(this@RespectApp)
+            modules(appKoinModule)
+        }
+    }
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+
         if(BuildConfig.ACRA_URI.isNotEmpty()) {
             initAcra {
                 reportFormat = StringFormat.JSON
@@ -41,11 +53,6 @@ class RespectApp : Application(), SingletonImageLoader.Factory {
                     httpMethod = HttpSender.Method.POST
                 }
             }
-        }
-
-        startKoin {
-            androidContext(this@RespectApp)
-            modules(appKoinModule)
         }
     }
 

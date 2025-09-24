@@ -8,6 +8,9 @@ import world.respect.shared.viewmodel.RespectViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.agree_terms_and_conditions
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
@@ -15,7 +18,8 @@ import world.respect.shared.navigation.RespectAppLauncher
 data class OnboardingUiState(
     val isLoading: Boolean = false,
     val consentGiven: Boolean = false,
-    val showConsentError: Boolean = false
+    val showConsentError: Boolean = false,
+    val snackBarMessage: String? = null
 )
 
 class OnboardingViewModel(
@@ -27,8 +31,13 @@ class OnboardingViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    var errorMessage: String = ""
+
+
     init {
         viewModelScope.launch {
+            errorMessage = getString(resource = Res.string.agree_terms_and_conditions)
+
             _appUiState.update { prev ->
                 prev.copy(
                     hideBottomNavigation = true,
@@ -42,10 +51,16 @@ class OnboardingViewModel(
         _uiState.update { it.copy(consentGiven = checked, showConsentError = false) }
     }
     fun onClickGetStartedButton() {
-        
+
         val state = _uiState.value
         if (!state.consentGiven) {
-            _uiState.update { it.copy(showConsentError = true) }
+
+            _uiState.update {
+                it.copy(
+                    showConsentError = true,
+                    snackBarMessage = errorMessage
+                )
+            }
             return
         }
 
@@ -61,5 +76,8 @@ class OnboardingViewModel(
                 clearBackStack = hasAccount
             )
         )
+    }
+    fun clearSnackBar() {
+        _uiState.update { it.copy(snackBarMessage = null) }
     }
 }

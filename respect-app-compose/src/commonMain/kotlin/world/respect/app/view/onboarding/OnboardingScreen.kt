@@ -19,25 +19,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import world.respect.images.RespectImage
 import world.respect.images.respectImagePainter
-import world.respect.shared.viewmodel.onboarding.OnboardingUiState
-import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
-import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.get_started
 import world.respect.shared.generated.resources.headline_consent_content
@@ -49,6 +50,8 @@ import world.respect.shared.generated.resources.onboardingTitle2
 import world.respect.shared.generated.resources.onboardingTitle3
 import world.respect.shared.generated.resources.onboardingTitle4
 import world.respect.shared.generated.resources.supporting_consent_content
+import world.respect.shared.viewmodel.onboarding.OnboardingUiState
+import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 
 
 data class OnboardingItem(
@@ -65,7 +68,8 @@ fun OnboardingScreen(
     OnboardingScreen(
         uiState = uiState,
         onClickGetStartedButton = viewModel::onClickGetStartedButton,
-        onConsentChanged = viewModel::onConsentChanged
+        onConsentChanged = viewModel::onConsentChanged,
+        onSnackBarShown = viewModel::clearSnackBar
     )
 }
 
@@ -73,8 +77,16 @@ fun OnboardingScreen(
 fun OnboardingScreen(
     uiState: OnboardingUiState,
     onClickGetStartedButton: () -> Unit,
-    onConsentChanged: (Boolean) -> Unit
+    onConsentChanged: (Boolean) -> Unit,
+    onSnackBarShown: () -> Unit,
 ) {
+    val snackBarHostState = remember { SnackbarHostState() }
+    uiState.snackBarMessage?.let { message ->
+        LaunchedEffect(message) {
+            snackBarHostState.showSnackbar(message)
+            onSnackBarShown()
+        }
+    }
 
     val onboardingItem = listOf(
         OnboardingItem(
@@ -100,93 +112,96 @@ fun OnboardingScreen(
     )
 
     val pagerState = rememberPagerState(pageCount = { onboardingItem.size })
-    var checked by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) { page ->
-            val item = onboardingItem[page]
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-
-            ) {
-                Image(
-                    painter = respectImagePainter(item.onboardingImage),
-                    contentDescription = null,
-                    modifier = Modifier.size(300.dp).padding(32.dp)
-                )
-                Spacer(Modifier.height(24.dp))
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(bottom = 32.dp)
-                ) {
-                    Text(
-                        text = item.onboardingTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = item.onboardingDescription,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-
-                    ConsentCheckbox(
-                        checked = uiState.consentGiven,
-                        onCheckedChange = onConsentChanged,
-                        showError = uiState.showConsentError
-                    )
-                }
-            }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState)
         }
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            repeat(onboardingItem.size) { index ->
-                val selected = pagerState.currentPage == index
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(if (selected) 12.dp else 8.dp)
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) { page ->
+                val item = onboardingItem[page]
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val dotColor = if (selected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        Color.LightGray
-                    }
-                    Canvas(
-                        modifier = Modifier.fillMaxSize()
+                    Image(
+                        painter = respectImagePainter(item.onboardingImage),
+                        contentDescription = null,
+                        modifier = Modifier.size(280.dp).padding(32.dp)
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(bottom = 32.dp)
                     ) {
-                        drawCircle(
-                            color = dotColor,
-                            radius = size.minDimension / 2f
+                        Text(
+                            text = item.onboardingTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                        Text(
+                            text = item.onboardingDescription,
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+                    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+                        ConsentCheckbox(
+                            checked = uiState.consentGiven,
+                            onCheckedChange = onConsentChanged,
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+
                 }
             }
-        }
-        Button(
-            modifier = Modifier.padding(bottom = 32.dp),
-            onClick = {
-                onClickGetStartedButton()
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                repeat(onboardingItem.size) { index ->
+                    val selected = pagerState.currentPage == index
+                    Box(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .size(if (selected) 12.dp else 8.dp)
+                    ) {
+                        val dotColor = if (selected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            Color.LightGray
+                        }
+                        Canvas(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            drawCircle(
+                                color = dotColor,
+                                radius = size.minDimension / 2f
+                            )
+                        }
+                    }
+                }
             }
-        ) {
-            Text(stringResource(Res.string.get_started))
+            Button(
+                modifier = Modifier.padding(bottom = 8.dp),
+                onClick = {
+                    onClickGetStartedButton()
+                }
+            ) {
+                Text(stringResource(Res.string.get_started))
+            }
         }
     }
 }
@@ -195,23 +210,29 @@ fun OnboardingScreen(
 fun ConsentCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    showError: Boolean = false
 ) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.onSurfaceVariant)
-    ) {
-        ListItem(
+    ListItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.LightGray.copy(alpha = 0.2f)),
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
+            ),
             leadingContent = {
-                Checkbox(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange
-                )
+                Column(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Checkbox(
+                        checked = checked,
+                        onCheckedChange = onCheckedChange
+                    )
+                }
             },
             headlineContent = {
                 Text(
-                    text =stringResource(Res.string.headline_consent_content),
+                    text = stringResource(Res.string.headline_consent_content),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -219,7 +240,7 @@ fun ConsentCheckbox(
                 )
             },
             supportingContent = {
-                 Text(
+                Text(
                     text = stringResource(Res.string.supporting_consent_content),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -228,7 +249,6 @@ fun ConsentCheckbox(
             }
         )
     }
-}
 
 
 

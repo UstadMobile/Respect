@@ -207,48 +207,64 @@ fun OnboardingScreen(
 }
 
 @Composable
+fun CheckBoxConsent(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp))
+            .background(Color.LightGray.copy(alpha = 0.2f))
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+}
+
+@Composable
 fun ConsentCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     ListItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.LightGray.copy(alpha = 0.2f)),
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent
-            ),
-            leadingContent = {
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Checkbox(
-                        checked = checked,
-                        onCheckedChange = onCheckedChange
-                    )
-                }
-            },
-            headlineContent = {
-                Text(
-                    text = stringResource(Res.string.headline_consent_content),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-            },
-            supportingContent = {
-                Text(
-                    text = stringResource(Res.string.supporting_consent_content),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.LightGray.copy(alpha = 0.2f)),
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent
+        ),
+        leadingContent = {
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
                 )
             }
-        )
-    }
+        },
+        headlineContent = {
+            Text(
+                text = stringResource(Res.string.headline_consent_content),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        },
+        supportingContent = {
+            Text(
+                text = stringResource(Res.string.supporting_consent_content),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
+    )
+}
 
 
 

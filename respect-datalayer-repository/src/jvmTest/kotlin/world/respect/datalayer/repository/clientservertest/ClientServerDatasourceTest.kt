@@ -12,6 +12,12 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -27,12 +33,16 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.opds.model.LangMapStringValue
 import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.findFreePort
@@ -49,7 +59,14 @@ data class DataSourceTestClient(
     val schoolDataSourceLocal: SchoolDataSourceLocal,
     val schoolDataSourceRemote: SchoolDataSource,
     val validationHelper: ExtendedDataSourceValidationHelper,
-)
+    val scope: CoroutineScope,
+) {
+
+    fun close() {
+        scope.cancel()
+    }
+
+}
 
 class ClientServerDataSourceTestBuilder internal constructor(
     private val baseDir: File,
@@ -59,6 +76,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
     },
     numClients: Int = 1,
     val stringHasher: XXStringHasher = XXStringHasherCommonJvm(),
+    val authenticatedUser: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("4242")
 ) {
 
     private lateinit var serverRouting: Routing.() -> Unit
@@ -66,6 +84,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
     fun newLocalSchoolDatabase(
         dir: File,
         stringHasher: XXStringHasher,
+        localAuthenticatedUser: AuthenticatedUserPrincipalId,
     ): Pair<RespectSchoolDatabase, SchoolDataSourceLocal> {
         val schoolDb = Room.databaseBuilder<RespectSchoolDatabase>(
             name = File(dir, "school.db").absolutePath
@@ -74,8 +93,8 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
         val schoolDataSource = SchoolDataSourceDb(
             schoolDb = schoolDb,
-            xxStringHasher = stringHasher,
-            authenticatedUser = AuthenticatedUserPrincipalId("admin")
+            uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+            authenticatedUser = localAuthenticatedUser,
         )
 
         return Pair(schoolDb, schoolDataSource)
@@ -86,7 +105,9 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
     private val serverDir = File(baseDir, "server").also { it.mkdirs() }
 
-    val serverSchoolSourceAndDb = newLocalSchoolDatabase(serverDir, stringHasher)
+    val serverSchoolSourceAndDb = newLocalSchoolDatabase(
+        serverDir, stringHasher, authenticatedUser
+    )
 
     val serverSchoolDataSource = serverSchoolSourceAndDb.second
 
@@ -115,7 +136,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
     }
 
     val clients = (0 until numClients).map {
-        val clientDir = File(baseDir, "client-$it").also { it.mkdirs() }
+        val clientDir = File(baseDir, "client-$it").also { file -> file.mkdirs() }
         val clientAppDb = Room.databaseBuilder<RespectAppDatabase>(
             File(clientDir, "respect-app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
@@ -128,9 +149,9 @@ class ClientServerDataSourceTestBuilder internal constructor(
             primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
         )
 
-
-
-        val (_, schoolDataSourceLocal) = newLocalSchoolDatabase(clientDir, stringHasher)
+        val (schoolDb, schoolDataSourceLocal) = newLocalSchoolDatabase(
+            clientDir, stringHasher, authenticatedUser
+        )
 
         val schoolBaseUrl = Url("http://localhost:$port/")
 
@@ -169,17 +190,45 @@ class ClientServerDataSourceTestBuilder internal constructor(
             validationHelper = clientValidationHelper,
         )
 
+        val drainQueueSignal = Channel<Boolean>(capacity = Channel.UNLIMITED)
+
+        val enqueueRemoteWorkUseCase = EnqueueDrainRemoteWriteQueueUseCase {
+            drainQueueSignal.send(true)
+        }
+
+        val remoteWriteQueue = RemoteWriteQueueDbImpl(
+            schoolDb = schoolDb,
+            account = authenticatedUser,
+            enqueueDrainRemoteWriteQueueUseCase = enqueueRemoteWorkUseCase,
+        )
+
+        val clientScope = CoroutineScope(Dispatchers.Default + Job())
+
         val clientDataSource = SchoolDataSourceRepository(
             local = schoolDataSourceLocal,
-            remote =schoolDataSourceRemote ,
+            remote = schoolDataSourceRemote ,
             validationHelper = clientValidationHelper,
+            remoteWriteQueue = remoteWriteQueue,
         )
+
+        val drainRemoteWriteQueueUseCase = DrainRemoteWriteQueueUseCase(
+            remoteWriteQueue = remoteWriteQueue,
+            dataSource = clientDataSource
+        )
+
+        clientScope.launch {
+            while(true) {
+                drainQueueSignal.receive()
+                drainRemoteWriteQueueUseCase()
+            }
+        }
 
         DataSourceTestClient(
             schoolDataSource = clientDataSource,
             schoolDataSourceLocal = schoolDataSourceLocal,
             schoolDataSourceRemote = schoolDataSourceRemote,
             validationHelper = clientValidationHelper,
+            scope = clientScope,
         )
     }
 
@@ -188,8 +237,6 @@ class ClientServerDataSourceTestBuilder internal constructor(
     ) {
         serverRouting = block
     }
-
-
 }
 
 suspend fun clientServerDatasourceTest(
@@ -204,5 +251,6 @@ suspend fun clientServerDatasourceTest(
         block(testBuilder)
     }finally {
         testBuilder.server.stop()
+        testBuilder.clients.forEach { it.close() }
     }
 }

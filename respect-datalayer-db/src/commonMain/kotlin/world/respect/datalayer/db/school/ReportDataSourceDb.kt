@@ -25,6 +25,10 @@ class ReportDataSourceDb(
 
     }
 
+    override suspend fun findByUidList(uids: List<String>): List<Report> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun allReportsAsFlow(template: Boolean): Flow<DataLoadState<List<Report>>> {
         return schoolDb.getReportEntityDao().getAllReportsByTemplate(template)
             .map { reportEntities ->

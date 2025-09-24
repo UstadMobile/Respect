@@ -29,12 +29,36 @@ interface ClassEntityDao {
     suspend fun findByGuid(guidHash: Long): ClassEntity?
 
 
+    @Query("""
+        SELECT ClassEntity.cLastModified
+          FROM ClassEntity
+         WHERE ClassEntity.cGuidHash = :uidNum 
+    """)
+    suspend fun getLastModifiedByGuid(
+        uidNum: Long
+    ): Long?
+
     @Query(LIST_SQL)
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         code: String? = null,
     ): PagingSource<Int, ClassEntity>
+
+    @Query("""
+        SELECT * 
+          FROM ClassEntity 
+        WHERE cTeacherInviteCode = :inviteCode
+    """)
+    suspend fun findByTeacherInviteCode(inviteCode: String): ClassEntity?
+
+    @Query("""
+        SELECT * 
+          FROM ClassEntity 
+        WHERE cStudentInviteCode = :inviteCode
+    """)
+    suspend fun findByStudentInviteCode(inviteCode: String): ClassEntity?
+
 
 
     @Query(LIST_SQL)

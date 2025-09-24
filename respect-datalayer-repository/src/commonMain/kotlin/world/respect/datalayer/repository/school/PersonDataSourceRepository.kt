@@ -1,6 +1,5 @@
 package world.respect.datalayer.repository.school
 
-import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
@@ -9,8 +8,9 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.shared.paging.PagingSourceMediatorStore
-import world.respect.datalayer.repository.shared.paging.RepositoryOffsetLimitPagingSource
+import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
+import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -18,6 +18,7 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import kotlin.time.Instant
 import world.respect.libutil.util.time.systemTimeInMillis
 
@@ -26,9 +27,8 @@ class PersonDataSourceRepository(
     override val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
+    private val enrollmentDataSourceRepository: EnrollmentDataSourceRepository,
 ) : PersonDataSource, RepositoryModelDataSource<Person> {
-
-    private val mediatorStore = PagingSourceMediatorStore()
 
     override suspend fun findByUsername(username: String): Person? {
         return local.findByUsername(username)
@@ -78,26 +78,44 @@ class PersonDataSourceRepository(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
-    ): PagingSource<Int, Person> {
-        return RepositoryOffsetLimitPagingSource(
+    ): IPagingSourceFactory<Int, Person> {
+        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
+        val enrollmentRemoteSource = enrollmentDataSourceRepository.remote
+            .takeIf { params.filterByClazzUid != null }
+            ?.listAsPagingSource(
+                loadParams,
+                EnrollmentDataSource.GetListParams(
+                    classUid = params.filterByClazzUid
+                )
+            )?.invoke()
+
+        return RepositoryPagingSourceFactory(
+            onRemoteLoad = { remoteLoadParams ->
+                remoteSource.loadAndUpdateLocal2(
+                    remoteLoadParams, local::updateLocal,
+                )
+
+                enrollmentRemoteSource?.loadAndUpdateLocal2(
+                    remoteLoadParams, enrollmentDataSourceRepository.local::updateLocal,
+                )
+            },
             local = local.listAsPagingSource(loadParams, params),
-            remote = remote.listAsPagingSource(loadParams, params),
-            argKey = 0,
-            mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocal,
+            tag = "Repo.listAsPaging"
         )
     }
 
     override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
         listParams: PersonDataSource.GetListParams
-    ): PagingSource<Int, PersonListDetails> {
-        return RepositoryOffsetLimitPagingSource(
+    ): IPagingSourceFactory<Int, PersonListDetails> {
+        return RepositoryPagingSourceFactory(
+            onRemoteLoad = { remoteLoadParams ->
+                remote.listAsPagingSource(loadParams, listParams).invoke().loadAndUpdateLocal2(
+                    remoteLoadParams, local::updateLocal,
+                )
+            },
             local = local.listDetailsAsPagingSource(loadParams, listParams),
-            remote = remote.listAsPagingSource(loadParams, listParams),
-            argKey = 0,
-            mediatorStore = mediatorStore,
-            onUpdateLocalFromRemote = local::updateLocal,
+            tag = "Repo.listDetailsAsPaging"
         )
     }
 
@@ -109,7 +127,7 @@ class PersonDataSourceRepository(
                 WriteQueueItem(
                     model = WriteQueueItem.Model.PERSON,
                     uid = it.guid,
-                    timestamp = timeNow,
+                    timeQueued = timeNow,
                 )
             }
         )

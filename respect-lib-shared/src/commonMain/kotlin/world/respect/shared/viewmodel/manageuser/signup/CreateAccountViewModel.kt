@@ -3,23 +3,29 @@ package world.respect.shared.viewmodel.manageuser.signup
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.credentials.passkey.VerifyDomainUseCase
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.RedeemInviteUseCase
-import world.respect.shared.domain.account.signup.SignupCredential
-import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.passkey_not_supported
-import world.respect.shared.generated.resources.username_required
+import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
@@ -28,50 +34,74 @@ import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class CreateAccountViewModelUiState(
     val username: String = "",
-    val usernameError: StringResourceUiText? = null,
-    val generalError: StringResourceUiText? = null,
-    val signupError: String? = null,
+    val usernameError: UiText? = null,
+    val generalError: UiText? = null,
+    val signupError: UiText? = null,
     val inviteInfo: RespectInviteInfo? = null,
-    val passkeySupported : Boolean =true
+    val passkeySupported : Boolean = false,
 )
 
 class CreateAccountViewModel(
     savedStateHandle: SavedStateHandle,
     private val verifyDomainUseCase: VerifyDomainUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
-    private val submitRedeemInviteRequestUseCase: RedeemInviteUseCase,
-    private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
-    private val signupUseCase: SignupUseCase,
-    private val inviteInfoUseCase: GetInviteInfoUseCase
-) : RespectViewModel(savedStateHandle) {
+    private val respectAppDataSource: RespectAppDataSource,
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val route: CreateAccount = savedStateHandle.toRoute()
+
+    override val scope: Scope
+        get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+        )
+
+    private val inviteInfoUseCase: GetInviteInfoUseCase by inject()
 
     private val _uiState = MutableStateFlow(CreateAccountViewModelUiState())
 
     val uiState = _uiState.asStateFlow()
-    init {
-        viewModelScope.launch {
-            val inviteInfo = inviteInfoUseCase(route.code)
 
-            _appUiState.update {
-                it.copy(
-                    title = Res.string.create_account.asUiText(),
-                    hideBottomNavigation = true,
-                    userAccountIconVisible = false
-                )
-            }
+    private val passkeySupported = CompletableDeferred<Boolean>()
+
+    private val schoolDirectoryEntry = CompletableDeferred<SchoolDirectoryEntry>()
+
+    init {
+        _appUiState.update {
+            it.copy(
+                title = Res.string.create_account.asUiText(),
+                hideBottomNavigation = true,
+                userAccountIconVisible = false
+            )
+        }
+
+        viewModelScope.launch {
+            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
+            val schoolDirEntryVal = respectAppDataSource.schoolDirectoryEntryDataSource
+                .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {
+                    schoolDirectoryEntry.complete(it)
+                } ?: throw IllegalStateException()
+
+            val rpId = schoolDirEntryVal.rpId
+            val passkeySupportedVal = createPasskeyUseCase != null &&
+                    rpId != null &&
+                    verifyDomainUseCase(rpId)
+
+            passkeySupported.complete(passkeySupportedVal)
+
             _uiState.update { prev ->
                 prev.copy(
                     inviteInfo = inviteInfo,
-                    passkeySupported = createPasskeyUseCase != null && inviteInfo.school.rpId != null
-                            && verifyDomainUseCase(inviteInfo.school.rpId ?: ""),
-                    generalError = if (!(createPasskeyUseCase != null && inviteInfo.school.rpId != null))
+                    passkeySupported = passkeySupportedVal,
+                    generalError = if (!(createPasskeyUseCase != null && rpId != null))
                         StringResourceUiText(Res.string.passkey_not_supported)
                     else null
                 )
@@ -90,93 +120,72 @@ class CreateAccountViewModel(
     }
 
     fun onClickSignupWithPasskey() {
-
         viewModelScope.launch {
             val inviteInfo = uiState.value.inviteInfo
-            if (inviteInfo==null) throw IllegalStateException("inviteInfo is null")
+
+            if (inviteInfo == null)
+                throw IllegalStateException("inviteInfo is null")
+
             val username = _uiState.value.username
 
             _uiState.update {
                 it.copy(
-                    usernameError = if (username.isBlank()) StringResourceUiText(Res.string.username_required) else null
+                    usernameError = if (username.isBlank())
+                        Res.string.required.asUiText()
+                    else
+                        null
                 )
             }
 
             if (username.isBlank()) return@launch
 
+            val rpIdVal = schoolDirectoryEntry.await().rpId
             try {
-
-
-                if (createPasskeyUseCase==null||inviteInfo.school.rpId==null){
-                    when (route.type) {
-                        ProfileType.CHILD , ProfileType.STUDENT->{
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(EnterPasswordSignup.create(username,route.type,route.code,route.personInfo))
-                            )
-                        }
-                        ProfileType.PARENT ->{
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(EnterPasswordSignup.create(username,ProfileType.CHILD,route.code,route.personInfo))
-                            )
-                        }
-                    }
-                }else{
-
+                if (createPasskeyUseCase != null && rpIdVal != null && passkeySupported.await()) {
                     val createPasskeyResult = createPasskeyUseCase(
                         username = username,
-                        rpId = inviteInfo.school.rpId?:""
+                        rpId = rpIdVal
                     )
+
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                            //i forgot why i created this
-                            val signupCredential = SignupCredential.Passkey(
-                                username = username,
-                                authenticationResponseJSON = createPasskeyResult.authenticationResponseJSON
+                            val redeemRequest = route.respectRedeemInviteRequest.copy(
+                                account = RespectRedeemInviteRequest.Account(
+                                    username = username,
+                                    credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                        authResponseJson = createPasskeyResult.authenticationResponseJSON
+                                    )
+                                )
                             )
 
-                            sendSignupCredential(signupCredential)
-                            when (route.type) {
-                                ProfileType.CHILD ->{
-                                    //ignore not create account for child
-                                }
-                                ProfileType.STUDENT->{
-                                    val redeemRequest = respectRedeemInviteRequestUseCase(
-                                        inviteInfo = inviteInfo,
-                                        username = username,
-                                        personInfo = route.personInfo,
-                                        parentOrGuardian = null,
-                                        credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                            createPasskeyResult.authenticationResponseJSON
+                            accountManager.register(
+                                redeemInviteRequest = redeemRequest,
+                                schoolUrl = route.schoolUrl
+                            )
+
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = if(
+                                        route.respectRedeemInviteRequest.role == PersonRoleEnum.PARENT
+                                    ) {
+                                        SignupScreen.create(
+                                            schoolUrl = route.schoolUrl,
+                                            profileType = ProfileType.CHILD,
+                                            inviteRequest = redeemRequest
                                         )
-                                    )
-//                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
-//
-//                                    _navCommandFlow.tryEmit(
-//                                        NavCommand.Navigate(WaitingForApproval.create(route.type,route.code,result?.guid?:""))
-//                                    )
-                                }
-                                ProfileType.PARENT ->{
-                                    _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(
-                                            SignupScreen.create(
-                                                profileType = ProfileType.CHILD,
-                                                inviteCode = route.code,
-                                                parentPersonInfoJson = route.personInfo,
-                                                parentUsername = username,
-                                                parentRedeemCredential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                                    createPasskeyResult.authenticationResponseJSON
-                                                )
-                                            )
-                                        )
-                                    )
-                                }
-                            }
+                                    }else {
+                                        WaitingForApproval()
+                                    },
+                                    clearBackStack = true,
+                                )
+                            )
                         }
 
                         is CreatePasskeyUseCase.Error -> {
                             _uiState.update { prev ->
                                 prev.copy(
-                                    signupError = createPasskeyResult.message,
+                                    signupError = createPasskeyResult.message?.asUiText()
+                                        ?: Res.string.something_went_wrong.asUiText(),
                                 )
                             }
                         }
@@ -185,36 +194,44 @@ class CreateAccountViewModel(
                             // do nothing
                         }
                     }
-
+                }else{
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            EnterPasswordSignup.create(
+                                schoolUrl = route.schoolUrl,
+                                inviteRequest = route.respectRedeemInviteRequest.copy(
+                                    account = RespectRedeemInviteRequest.Account(
+                                        username = username,
+                                        credential =route.respectRedeemInviteRequest.account.credential,
+                                    )
+                                )
+                            )
+                        )
+                    )
                 }
-
-            } catch (e: Exception) {
-              println(e.message.toString())
-            }
-        }
-    }
-    private fun sendSignupCredential(credential: SignupCredential) {
-        viewModelScope.launch {
-            try {
-                signupUseCase(credential)
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(signupError = "${e.message}")
+                    it.copy(
+                        signupError = e.getUiTextOrGeneric()
+                    )
                 }
+                println(e.message.toString())
             }
         }
     }
+
     fun onClickHowPasskeysWork() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(HowPasskeyWorks)
         )
     }
+
     fun onOtherOptionsClick() {
         val username = _uiState.value.username
 
         _uiState.update {
             it.copy(
-                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.username_required) else null
+                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.required) else null
             )
         }
 
@@ -223,10 +240,13 @@ class CreateAccountViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 OtherOptionsSignup.create(
-                    username = uiState.value.username,
-                    profileType = route.type,
-                    inviteCode = route.code,
-                    personInfo = route.personInfo
+                    schoolUrl = route.schoolUrl,
+                    inviteRequest = route.respectRedeemInviteRequest.copy(
+                        account = RespectRedeemInviteRequest.Account(
+                            username = username,
+                            credential =route.respectRedeemInviteRequest.account.credential,
+                        )
+                    )
                 )
             )
         )

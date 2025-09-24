@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -18,12 +18,9 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
-import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class OtherOptionsSignupUiState(
     val passkeyError: String? = null,
@@ -33,8 +30,7 @@ data class OtherOptionsSignupUiState(
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
-    private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
-    private val inviteInfoUseCase: GetInviteInfoUseCase
+    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle) {
     private val route: OtherOptionsSignup = savedStateHandle.toRoute()
 
@@ -61,11 +57,13 @@ class OtherOptionsSignupViewModel(
 
     fun onClickSignupWithPasskey() {
         viewModelScope.launch {
-            val inviteInfo = inviteInfoUseCase(route.code)
             try {
+                val schoolDirEntry = respectAppDataSource.schoolDirectoryEntryDataSource
+                    .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull() ?: throw IllegalStateException()
+                val rpId = schoolDirEntry.rpId
+                val username = route.respectRedeemInviteRequest.account.username
 
-                val rpId = inviteInfo.school.rpId
-                if (createPasskeyUseCase==null||rpId==null){
+                if (createPasskeyUseCase == null || rpId==null){
                     _uiState.update {
                         it.copy(
                             generalError = StringResourceUiText(Res.string.passkey_not_supported)
@@ -73,55 +71,28 @@ class OtherOptionsSignupViewModel(
                     }
                 }else {
                     val createPasskeyResult = createPasskeyUseCase(
-                        username = route.username,
+                        username = username,
                         rpId = rpId
                     )
+
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
+                            val redeemInviteRequest = route.respectRedeemInviteRequest
+                            val account = RespectRedeemInviteRequest.Account(
+                                username = username,
+                                credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                    createPasskeyResult.authenticationResponseJSON
+                                )
+                            )
 
-                            when (route.type) {
-                                ProfileType.CHILD ->{
-                                    //ignore not create account for child
-                                }
-                                ProfileType.STUDENT -> {
-                                    val redeemRequest = respectRedeemInviteRequestUseCase(
-                                        inviteInfo = inviteInfo,
-                                        username = route.username,
-                                        personInfo = route.personInfo,
-                                        parentOrGuardian = null,
-                                        credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                            createPasskeyResult.authenticationResponseJSON
-                                        )
-                                    )
-//                                    val result = submitRedeemInviteRequestUseCase(redeemRequest)
-//                                    _navCommandFlow.tryEmit(
-//                                        NavCommand.Navigate(
-//                                                destination = WaitingForApproval.create(
-//                                                profileType =   route.type,
-//                                                inviteCode = route.code,
-//                                                pendingInviteStateUid = result?.guid ?: ""
-//                                            )
-//                                        )
-//                                    )
-                                }
-
-                                ProfileType.PARENT -> {
-
-                                    _navCommandFlow.tryEmit(
-                                        NavCommand.Navigate(
-                                            SignupScreen.create(
-                                                profileType = ProfileType.CHILD,
-                                                inviteCode = route.code,
-                                                parentPersonInfoJson = route.personInfo,
-                                                parentUsername = route.username,
-                                                parentRedeemCredential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                                    createPasskeyResult.authenticationResponseJSON
-                                                )
-                                            )
-                                        )
-                                    )
-                                }
-                            }
+                            val updatedRedeemInviteRequest = RespectRedeemInviteRequest(
+                                code = redeemInviteRequest.code,
+                                classUid = redeemInviteRequest.classUid,
+                                role = redeemInviteRequest.role,
+                                accountPersonInfo = redeemInviteRequest.accountPersonInfo,
+                                parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
+                                account = account
+                            )
                         }
 
                         is CreatePasskeyUseCase.Error -> {
@@ -146,7 +117,12 @@ class OtherOptionsSignupViewModel(
 
     fun onClickSignupWithPassword() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(EnterPasswordSignup.create(route.username,route.type,route.code,route.personInfo))
+            NavCommand.Navigate(
+                EnterPasswordSignup.create(
+                    schoolUrl = route.schoolUrl,
+                    inviteRequest = route.respectRedeemInviteRequest
+                )
+            )
         )
     }
 

@@ -1,6 +1,5 @@
 package world.respect.datalayer.http.school
 
-import androidx.paging.PagingSource
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -28,6 +27,7 @@ import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSource.Companion.PARAM_NAME_INVITE_CODE
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class ClassDataSourceHttp(
@@ -80,17 +80,19 @@ class ClassDataSourceHttp(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: ClassDataSource.GetListParams
-    ): PagingSource<Int, Clazz> {
-        return OffsetLimitHttpPagingSource(
-            baseUrlProvider = { params.urlWithParams() },
-            httpClient = httpClient,
-            validationHelper = validationHelper,
-            typeInfo = typeInfo<List<Clazz>>(),
-            requestBuilder = {
-                useTokenProvider(tokenProvider)
-                useValidationCacheControl(validationHelper)
-            }
-        )
+    ): IPagingSourceFactory<Int, Clazz> {
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource(
+                baseUrlProvider = { params.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Clazz>>(),
+                requestBuilder = {
+                    useTokenProvider(tokenProvider)
+                    useValidationCacheControl(validationHelper)
+                }
+            )
+        }
     }
 
     override suspend fun list(

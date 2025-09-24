@@ -61,9 +61,9 @@ fun SignupScreen(
         )
 
         OutlinedTextField(
-            value = uiState.personInfo?.name?:"",
+            value = uiState.personInfo.name,
             onValueChange = onFullNameChanged,
-            label = { Text(uiState.nameLabel) },
+            label = { uiState.nameLabel?.let { Text(uiTextStringResource(it)) } },
             isError = uiState.fullNameError != null,
             modifier = Modifier.fillMaxWidth(),
             supportingText = {
@@ -74,7 +74,7 @@ fun SignupScreen(
         )
 
         RespectExposedDropDownMenuField(
-            value = uiState.personInfo?.gender,
+            value = uiState.personInfo.gender,
             label = uiState.genderLabel,
             options = PersonGenderEnum.entries.filterNot { it == PersonGenderEnum.UNSPECIFIED },
             onOptionSelected = { onGenderChanged(it) },
@@ -91,10 +91,10 @@ fun SignupScreen(
 
         RespectLocalDateField(
             modifier = Modifier.fillMaxWidth(),
-            value = uiState.personInfo?.dateOfBirth,
+            value = uiState.personInfo.dateOfBirth,
             onValueChange = {onDateOfBirthChanged(it) },
             label = {
-                Text(uiState.dateOfBirthLabel)
+                uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it)) }
             },
             supportingText = uiState.dateOfBirthError?.let {
                 { Text(uiTextStringResource(it)) }

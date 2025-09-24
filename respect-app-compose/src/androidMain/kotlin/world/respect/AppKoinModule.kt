@@ -49,7 +49,6 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
 import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -84,6 +83,7 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import kotlinx.io.files.Path
+import org.koin.android.ext.koin.androidApplication
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.AuthTokenProvider
@@ -111,6 +111,8 @@ import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewMode
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
+import org.koin.core.qualifier.named
+import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
@@ -119,13 +121,21 @@ import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUse
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
+import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
+import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
@@ -199,7 +209,7 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
-
+    viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
     viewModelOf(::EnterLinkViewModel)
@@ -340,16 +350,14 @@ val appKoinModule = module {
             primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
             )
     }
-    single {
-        RespectRedeemInviteRequestUseCase()
-    }
+
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }
 
     single<CreatePasskeyUseCase> {
         CreatePasskeyUseCaseImpl(
-            context = androidContext().applicationContext,
+            context = androidApplication(),
             json = get(),
             createPublicKeyJsonUseCase = get()
         )
@@ -357,20 +365,14 @@ val appKoinModule = module {
 
     single<GetCredentialUseCase> {
         GetCredentialUseCaseImpl(
-            context = androidContext().applicationContext,
+            context = androidApplication(),
             json = get(),
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )
     }
     single<VerifyDomainUseCase> {
         VerifyDomainUseCaseImpl(
-            context = androidContext().applicationContext
-        )
-    }
-
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseClient(
-            schoolDirectoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource
+            context = androidApplication()
         )
     }
 
@@ -430,7 +432,17 @@ val appKoinModule = module {
     single<SetClipboardStringUseCase> {
         SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
     }
+    single<ShouldShowOnboardingUseCase> {
+        ShouldShowOnboardingUseCase(settings = get())
+    }
 
+    single<GetUsageReportingEnabledUseCase> {
+        GetUsageReportingEnabledUseCaseAndroid(androidContext())
+    }
+
+    single<SetUsageReportingEnabledUseCase> {
+        SetUsageReportingEnabledUseCaseAndroid(androidContext())
+    }
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
@@ -472,6 +484,22 @@ val appKoinModule = module {
                 primaryKeyGenerator = PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
             )
         }
+
+        scoped<RedeemInviteUseCase> {
+            RedeemInviteUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+            )
+        }
+
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+
     }
 
     /**
@@ -553,6 +581,12 @@ val appKoinModule = module {
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
+            )
+        }
+
+        scoped<ApproveOrDeclineInviteRequestUseCase> {
+            ApproveOrDeclineInviteRequestUseCase(
+                schoolDataSource = get(),
             )
         }
     }

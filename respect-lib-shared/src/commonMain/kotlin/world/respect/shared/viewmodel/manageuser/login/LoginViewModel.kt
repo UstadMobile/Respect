@@ -16,6 +16,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
+import world.respect.shared.navigation.JoinClazzWithCode
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
@@ -72,7 +73,9 @@ class LoginViewModel(
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
                             _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(RespectAppLauncher)
+                                NavCommand.Navigate(
+                                    destination = RespectAppLauncher, clearBackStack = true
+                                )
                             )
                         }
 
@@ -161,10 +164,14 @@ class LoginViewModel(
                         )
                     }
                 }
-
-
-
             }
         }
     }
+
+    fun onClickInviteCode() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(JoinClazzWithCode.create(route.schoolUrl))
+        )
+    }
+
 }

@@ -248,7 +248,7 @@ class PersonRepositoryIntegrationTest {
                 val pagingSource = clients.first().schoolDataSource.personDataSource
                     .listAsPagingSource(DataLoadParams(), PersonDataSource.GetListParams())
 
-                pagingSource.load(
+                pagingSource().load(
                     PagingSource.LoadParams.Refresh(0, 50, false)
                 )
 

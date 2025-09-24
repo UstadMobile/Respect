@@ -28,7 +28,7 @@ fun Route.EnrollmentRoute(
             pagingSource = schoolDataSource(call).enrollmentDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 listParams = EnrollmentDataSource.GetListParams.fromParams(call.request.queryParameters)
-            )
+            ).invoke()
         )
     }
 

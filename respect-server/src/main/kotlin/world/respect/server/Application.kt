@@ -34,7 +34,10 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
+import world.respect.server.routes.school.respect.InviteInfoRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -55,6 +58,9 @@ fun Application.module() {
     ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }
+
+    val wellKnownDir = File(ktorAppHomeDir(), "well-known")
+    val assetLinksFile = File(wellKnownDir, "assetlinks.json")
 
     val dirAdminFile = File(environment.config.absoluteDataDir(), DIRECTORY_ADMIN_FILENAME)
     dirAdminFile.takeIf { !it.exists() }?.also {
@@ -139,6 +145,10 @@ fun Application.module() {
 
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
+
+            get("assetlinks.json") {
+                call.respondFile(assetLinksFile)
+            }
         }
 
         swaggerUI(
@@ -156,6 +166,15 @@ fun Application.module() {
                 route("respect") {
                     route("auth") {
                         AuthRoute()
+                    }
+
+                    route("invite") {
+                        RedeemInviteRoute(
+                            redeemInviteUseCase = { it.getSchoolKoinScope().get() }
+                        )
+                        InviteInfoRoute(
+                            getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
+                        )
                     }
 
                     authenticate(AUTH_CONFIG_SCHOOL) {

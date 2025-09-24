@@ -71,6 +71,18 @@ abstract class LangMapEntityDao {
         propType: Int,
     ): List<LangMapEntity>
 
+
+    @Query(
+        """
+        SELECT * 
+          FROM LangMapEntity
+         WHERE LangMapEntity.lmeTopParentUid1 = :lmeTopParentUid1
+    """
+    )
+    abstract suspend fun findByTopParentUid1(
+        lmeTopParentUid1: String,
+    ): List<LangMapEntity>
+
     @Query(
         """
         SELECT * 

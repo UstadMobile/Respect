@@ -29,7 +29,11 @@ import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
+import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
+import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -97,24 +101,10 @@ fun serverKoinModule(
         get<RespectAppDataSourceLocal>()
     }
 
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseServer(
-            respectAppDb = get(),
-            respectAppDataSource = get(),
-        )
-    }
-
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
             schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
-        )
-    }
-
-    single<GetInviteInfoUseCase> {
-        GetInviteInfoUseCaseServer(
-            respectAppDb = get(),
-            respectAppDataSource = get(),
         )
     }
 
@@ -160,6 +150,20 @@ fun serverKoinModule(
             )
         }
 
+        scoped<SavePersonPasskeyUseCase> {
+            SavePersonPasskeyUseCaseDbImpl(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                json = get(),
+            )
+        }
+
+        scoped<GetTokenAndUserProfileWithPasskeyUseCase> {
+            GetTokenAndUserProfileWithPasskeyUseCaseDbImpl(
+                schoolDb = get(),
+            )
+        }
+
         scoped<ValidateAuthorizationUseCase> {
             ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
@@ -177,6 +181,12 @@ fun serverKoinModule(
             )
         }
 
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseServer(
+                schoolDb = get(),
+            )
+        }
+
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
 
@@ -185,7 +195,9 @@ fun serverKoinModule(
                 schoolUrl = schoolScopeId.schoolUrl,
                 schoolPrimaryKeyGenerator = get(),
                 setPasswordUseCase = get(),
+                savePasskeyUseCase = get(),
                 getTokenAndUserProfileUseCase = get(),
+                getTokenAndUserProfileWithPasskeyUseCase = get(),
                 schoolDataSource = { schoolUrl, user ->
                     getKoin().getOrCreateScope<RespectAccount>(
                         RespectAccountScopeId(schoolUrl, user).scopeId

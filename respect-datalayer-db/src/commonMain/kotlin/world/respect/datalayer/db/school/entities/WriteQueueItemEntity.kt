@@ -14,7 +14,7 @@ class WriteQueueItemEntity(
     val wqiQueueItemId: Int = 0,
     val wqiModel: WriteQueueItem.Model,
     val wqiUid: String,
-    val wqiTimestamp: Long = 0,
+    val wqiTimeQueued: Long = 0,
     val wqiAttemptCount: Int = 0,
     val wqiTimeWritten: Long = 0,
     val wqiAccountGuid: String,

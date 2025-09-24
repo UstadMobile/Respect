@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9a3ede8b662550ca6a5c57313c31be9f",
+    "identityHash": "7b13c2a61c374996babfbd6518093fd7",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -776,7 +776,7 @@
       },
       {
         "tableName": "SchoolDirectoryEntryLangMapEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sdelUid` INTEGER NOT NULL, `sdelReUid` INTEGER NOT NULL, `sdelLang` TEXT NOT NULL, `sdelRegion` TEXT, `sdelValue` TEXT NOT NULL, `sdelPropId` INTEGER NOT NULL, PRIMARY KEY(`sdelUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sdelUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sdelReUid` INTEGER NOT NULL, `sdelLang` TEXT NOT NULL, `sdelRegion` TEXT, `sdelValue` TEXT NOT NULL, `sdelPropId` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "sdelUid",
@@ -815,7 +815,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "sdelUid"
           ]
@@ -901,7 +901,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9a3ede8b662550ca6a5c57313c31be9f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b13c2a61c374996babfbd6518093fd7')"
     ]
   }
 }

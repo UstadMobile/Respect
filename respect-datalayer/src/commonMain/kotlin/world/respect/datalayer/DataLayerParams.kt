@@ -16,4 +16,6 @@ object DataLayerParams {
 
     const val FILTER_BY_ENROLLMENT_ROLE = "filterByEnrollmentRole"
 
+    const val FILTER_BY_NAME = "filterByName"
+
 }

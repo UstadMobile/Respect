@@ -23,16 +23,17 @@ import world.respect.app.BuildConfig
 
 class RespectApp : Application(), SingletonImageLoader.Factory {
 
-    //See https://stackoverflow.com/questions/23844667/how-do-i-detect-if-i-am-in-release-or-debug-mode
+
     override fun onCreate() {
         super.onCreate()
         Napier.base(DebugAntilog())
 
-        WebView.setWebContentsDebuggingEnabled(
-            applicationInfo.flags.and(FLAG_DEBUGGABLE) == FLAG_DEBUGGABLE
-        )
-
-
+        //See https://stackoverflow.com/questions/23844667/how-do-i-detect-if-i-am-in-release-or-debug-mode
+        if(applicationInfo.flags.and(FLAG_DEBUGGABLE) == FLAG_DEBUGGABLE) {
+            //Debugging enabled in webview is false by default. Have seen crash reports caused by
+            // this line; which is not needed in release.
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
 
         startKoin {
             androidContext(this@RespectApp)

@@ -27,6 +27,7 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.server.account.invite.verify.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
@@ -123,8 +124,14 @@ fun serverKoinModule(
 
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseServer(
-                personDb = get(),
+                schoolDb = get(),
                 filterUsernameUseCase = get(),
+            )
+        }
+        scoped<VerifySignInWithPasskeyUseCase> {
+            VerifySignInWithPasskeyUseCase(
+                schoolDb = get(),
+                json = get()
             )
         }
         scoped<RespectSchoolPath> {

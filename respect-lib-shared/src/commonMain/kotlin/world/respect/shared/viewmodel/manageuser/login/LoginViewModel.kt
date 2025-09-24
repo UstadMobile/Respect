@@ -12,6 +12,7 @@ import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
@@ -40,7 +41,8 @@ class LoginViewModel(
     private val accountManager: RespectAccountManager,
     getCredentialUseCase: GetCredentialUseCase,
     respectAppDataSource: RespectAppDataSource,
-    private val verifyDomainUseCase: VerifyDomainUseCase
+    private val verifyDomainUseCase: VerifyDomainUseCase,
+    private val verifyPasskeyUseCase: VerifyPasskeyUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -72,9 +74,20 @@ class LoginViewModel(
                 if (isRpIDVerified){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(RespectAppLauncher)
+                           val passkeyVerifyResult = verifyPasskeyUseCase(
+                                authenticationResponseJSON = credentialResult.passkeyWebAuthNResponse,
+                                schoolUrl = route.schoolUrl,
+                                rpId=rpId
                             )
+                            if (passkeyVerifyResult.isVerified) {
+                                accountManager.loginWithPasskey(
+                                    authenticationResponseJSON = credentialResult.passkeyWebAuthNResponse,
+                                    schoolUrl = route.schoolUrl
+                                )
+                                _navCommandFlow.tryEmit(
+                                    NavCommand.Navigate(RespectAppLauncher)
+                                )
+                            }
                         }
 
                         is GetCredentialUseCase.PasswordCredentialResult -> {
@@ -101,6 +114,11 @@ class LoginViewModel(
                 }
             } catch (e: Exception) {
                 println("Error occurred: ${e.message}")
+                _uiState.update { prev ->
+                    prev.copy(
+                        errorText = e.getUiText() ?: StringResourceUiText(Res.string.something_went_wrong)
+                    )
+                }
             }
         }
     }

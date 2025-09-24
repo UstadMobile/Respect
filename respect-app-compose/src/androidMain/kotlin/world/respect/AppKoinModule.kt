@@ -125,6 +125,7 @@ import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
+import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
@@ -413,6 +414,12 @@ val appKoinModule = module {
         NavResultReturnerImpl()
     }
 
+    single<VerifyPasskeyUseCase> {
+        VerifyPasskeyUseCase(
+            httpClient = get(),
+            json = get()
+        )
+    }
     single<XXHasher64Factory> {
         XXHasher64FactoryCommonJvm()
     }

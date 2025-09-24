@@ -55,6 +55,7 @@ swagger-ui = "5.27.1"
 
 androidx-paging = "3.4.0-alpha03"
 androidx-paging-compose = "3.4.0-alpha03" # Different as per https://developer.android.com/topic/libraries/architecture/paging/v3-overview
+webauthn4j-core =  "0.25.0.RELEASE"
 
 [libraries]
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
@@ -135,6 +136,7 @@ mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "
 androidx-lifecycle-common-java8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "androidx-lifecycle"}
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidx-credentials" }
 androidx-credentials-play-service-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
+webauthn4j-core = { module="com.webauthn4j:webauthn4j-core", version.ref = "webauthn4j-core"}
 
 swagger-codegen-cli = { module = "io.swagger.codegen.v3:swagger-codegen-cli", version.ref = "swagger-codegen" }
 swagger-ui = { module = "org.webjars:swagger-ui", version.ref = "swagger-ui" }

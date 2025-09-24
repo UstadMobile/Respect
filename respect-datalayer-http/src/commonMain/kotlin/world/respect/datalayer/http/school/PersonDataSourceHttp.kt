@@ -49,6 +49,7 @@ class PersonDataSourceHttp(
                 parameters.appendCommonListParams(common)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, filterByClazzUid)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
+                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_NAME, filterByName)
             }
             .build()
     }

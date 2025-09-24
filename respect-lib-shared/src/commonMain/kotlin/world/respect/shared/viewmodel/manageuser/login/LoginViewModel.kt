@@ -73,7 +73,9 @@ class LoginViewModel(
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
                             _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(RespectAppLauncher)
+                                NavCommand.Navigate(
+                                    destination = RespectAppLauncher, clearBackStack = true
+                                )
                             )
                         }
 

@@ -59,6 +59,12 @@ kotlin {
             implementation(libs.napier)
         }
 
+        androidMain.dependencies {
+            implementation(libs.androidx.preference)
+            implementation(libs.androidx.preference.ktx)
+            implementation(libs.acra.core)
+        }
+
         jvmMain.dependencies {
             implementation(projects.respectDatalayerDb)
             implementation(libs.androidx.room.runtime)

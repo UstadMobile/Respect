@@ -19,6 +19,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val common: GetListCommonParams = GetListCommonParams(),
         val filterByClazzUid: String? = null,
         val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
+        val filterByName: String? = null,
     ) {
 
         companion object {
@@ -26,6 +27,7 @@ interface PersonDataSource: WritableDataSource<Person> {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(stringValues),
                     filterByClazzUid = stringValues[DataLayerParams.FILTER_BY_CLASS_UID],
+                    filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByEnrolmentRole = stringValues[DataLayerParams.FILTER_BY_ENROLLMENT_ROLE]?.let {
                         EnrollmentRoleEnum.fromValue(it)
                     }

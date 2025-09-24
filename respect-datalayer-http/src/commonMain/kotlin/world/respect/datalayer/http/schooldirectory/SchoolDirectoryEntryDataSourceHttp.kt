@@ -1,6 +1,7 @@
 package world.respect.datalayer.http.schooldirectory
 
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -30,7 +31,9 @@ class SchoolDirectoryEntryDataSourceHttp(
             val listEntries = directories.map { dir ->
                 httpClient.getAsDataLoadState<List<SchoolDirectoryEntry>>(
                     dir.baseUrl.appendEndpointSegments("api/directory/school")
-                )
+                ) {
+                    headers[HttpHeaders.CacheControl] = "no-store"
+                }
             }
 
             emit(DataReadyState(
@@ -49,7 +52,9 @@ class SchoolDirectoryEntryDataSourceHttp(
         val listEntries = directories.map { dir ->
             httpClient.getAsDataLoadState<List<SchoolDirectoryEntry>>(
                 dir.baseUrl.appendEndpointSegments("api/directory/school")
-            )
+            ) {
+                headers[HttpHeaders.CacheControl] = "no-store"
+            }
         }
 
         return DataReadyState(

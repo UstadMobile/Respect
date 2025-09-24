@@ -5,12 +5,12 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.ustadmobile.libcache.okhttp.headersContentLength
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.charset
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.internal.headersContentLength
 import okhttp3.internal.http.promisesBody
 import java.io.ByteArrayInputStream
 

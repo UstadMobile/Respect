@@ -27,7 +27,10 @@ fun IHttpResponse.asOkHttpResponse(): Response {
         Response.Builder()
             .headers(headers.asOkHttpHeaders())
             .request(request.asOkHttpRequest())
-            .body(responseBody)
+            .apply {
+                if(responseBody != null)
+                    body(responseBody)
+            }
             .code(responseCode)
             .protocol(Protocol.HTTP_1_1)
             .message(

@@ -111,6 +111,8 @@ import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewMode
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
+import org.koin.core.qualifier.named
+import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
@@ -129,6 +131,11 @@ import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
+import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
+import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
@@ -199,7 +206,7 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
-
+    viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
     viewModelOf(::EnterLinkViewModel)
@@ -416,6 +423,17 @@ val appKoinModule = module {
 
     single<SetClipboardStringUseCase> {
         SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
+    }
+    single<ShouldShowOnboardingUseCase> {
+        ShouldShowOnboardingUseCase(settings = get())
+    }
+
+    single<GetUsageReportingEnabledUseCase> {
+        GetUsageReportingEnabledUseCaseAndroid(androidContext())
+    }
+
+    single<SetUsageReportingEnabledUseCase> {
+        SetUsageReportingEnabledUseCaseAndroid(androidContext())
     }
 
     /**

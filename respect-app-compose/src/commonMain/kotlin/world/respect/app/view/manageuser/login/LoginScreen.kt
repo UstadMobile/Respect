@@ -23,7 +23,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.password_label
-import world.respect.shared.generated.resources.userId_label
+import world.respect.shared.generated.resources.username_label
 import world.respect.shared.viewmodel.manageuser.login.LoginUiState
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 
@@ -58,8 +58,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = uiState.username,
             onValueChange = onUsernameChanged,
-            label = { Text(stringResource(Res.string.userId_label)) },
-            placeholder = { Text(stringResource(Res.string.userId_label)) },
+            label = { Text(stringResource(Res.string.username_label)) },
             singleLine = true,
             isError = uiState.usernameError != null,
             supportingText = uiState.usernameError?.let {

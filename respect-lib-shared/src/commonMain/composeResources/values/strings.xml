@@ -56,7 +56,6 @@
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
     <string name="login">Login</string>
-    <string name="userId_label">UserId</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
     <string name="password_placeholder">Enter your password</string>

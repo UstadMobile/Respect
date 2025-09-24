@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
@@ -102,24 +104,33 @@ private fun TextbookCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .testTag("textbook_card_${textbook.uid}")
+            .testTag("textbook_card_${textbook.uid}"),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(12.dp)
-        ) {
+        )  {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(
+                    Icons.Filled.Book,
+                    contentDescription = stringResource(Res.string.textbooks),
+                    modifier = Modifier
+                        .size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = textbook.title ?: "",
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                   modifier = Modifier.weight(1f)
                 )
 
                 IconButton(
@@ -146,7 +157,7 @@ private fun TextbookCard(
                         model = textbook.coverImageUrl,
                         contentDescription = stringResource(Res.string.add_book_cover),
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Crop
                     )
                 } else {
                     Box(

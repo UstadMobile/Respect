@@ -4,10 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import world.respect.datalayer.db.curriculum.entities.TextbookMapping
+import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.map
 import world.respect.shared.generated.resources.mapping
@@ -20,11 +21,12 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 data class CurriculumMappingListUiState(
     val textbooks: List<TextbookMapping> = emptyList(),
     val loading: Boolean = false,
+    val error: String? = null,
 )
 
 class CurriculumMappingListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val json: Json,
+    private val getCurriculumMappingsUseCase: GetCurriculumMappingsUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(CurriculumMappingListUiState())
@@ -50,29 +52,26 @@ class CurriculumMappingListViewModel(
 
     private fun loadTextbooks() {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true) }
+            _uiState.update { it.copy(loading = true, error = null) }
 
-            val mockTextbooks = listOf(
-                TextbookMapping().apply {
-                    uid = 1L
-                    title = "Mathematics 5"
-                    description = "Complete mathematics curriculum for grade 5 students"
-                    coverImageUrl = null
-                },
-                TextbookMapping().apply {
-                    uid = 2L
-                    title = "English Literature"
-                    description = "Classic literature and reading comprehension"
-                    coverImageUrl = null
+            getCurriculumMappingsUseCase.getTextbooks()
+                .catch { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            loading = false,
+                            error = throwable.message ?: "Unknown error occurred"
+                        )
+                    }
                 }
-            )
-
-            _uiState.update {
-                it.copy(
-                    textbooks = mockTextbooks,
-                    loading = false
-                )
-            }
+                .collect { textbooks ->
+                    _uiState.update {
+                        it.copy(
+                            textbooks = textbooks,
+                            loading = false,
+                            error = null
+                        )
+                    }
+                }
         }
     }
 
@@ -83,12 +82,20 @@ class CurriculumMappingListViewModel(
     }
 
     fun onClickMoreOptions(textbook: TextbookMapping) {
-        // TODO
+        // TODO:
     }
 
     fun onClickMap() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(CurriculumMappingEdit(0L))
+            NavCommand.Navigate(CurriculumMappingEdit(NEW_TEXTBOOK_UID))
         )
+    }
+
+    fun onRetry() {
+        loadTextbooks()
+    }
+
+    companion object {
+        private const val NEW_TEXTBOOK_UID = 0L
     }
 }

@@ -114,6 +114,9 @@ import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import org.koin.core.qualifier.named
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.curriculum.data.ChapterRepository
+import world.respect.datalayer.db.curriculum.data.LessonRepository
+import world.respect.datalayer.db.curriculum.data.TextbookRepository
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
@@ -149,6 +152,8 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
+import world.respect.shared.domain.curriculum.mapping.MockGetCurriculumMappingsUseCaseImpl
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -341,6 +346,20 @@ val appKoinModule = module {
     single<EncodeUserHandleUseCase> {
         EncodeUserHandleUseCaseImpl()
     }
+
+    single { TextbookRepository }
+    single { ChapterRepository }
+    single { LessonRepository }
+
+    single< MockGetCurriculumMappingsUseCaseImpl> {
+        MockGetCurriculumMappingsUseCaseImpl(
+            textbookRepository = get(),
+            chapterRepository = get(),
+            lessonRepository = get()
+        )
+    }
+
+    single<GetCurriculumMappingsUseCase> { get<MockGetCurriculumMappingsUseCaseImpl>() }
 
 
     single {

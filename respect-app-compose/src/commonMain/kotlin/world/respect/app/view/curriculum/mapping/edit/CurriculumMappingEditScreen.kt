@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import world.respect.shared.generated.resources.book_description
 import world.respect.shared.generated.resources.book_title
 import world.respect.shared.generated.resources.chapter
 import world.respect.shared.generated.resources.click_plus_button
+import world.respect.shared.generated.resources.error_unknown
 import world.respect.shared.generated.resources.lesson
 import world.respect.shared.generated.resources.mapping
 import world.respect.shared.generated.resources.no_chapter_added
@@ -55,18 +57,18 @@ fun CurriculumMappingEditScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(12.dp)
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(120.dp)
+                        .wrapContentHeight()
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surface),
                     contentAlignment = Alignment.Center
@@ -80,7 +82,7 @@ fun CurriculumMappingEditScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(200.dp)
+                                    .size(150.dp)
                                     .background(
                                         color = Color.Gray.copy(alpha = 0.6f),
                                         shape = CircleShape
@@ -90,24 +92,37 @@ fun CurriculumMappingEditScreen(
                                 Icon(
                                     Icons.Filled.AddAPhoto,
                                     contentDescription = stringResource(Res.string.add_book_cover),
-                                    modifier = Modifier.size(32.dp),
+                                    modifier = Modifier.size(75.dp),
                                     tint = Color.Gray
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(4.dp))
 
-                            Text(
-                                text = stringResource(Res.string.add_book_cover),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                                Text(
+                                    text = stringResource(Res.string.add_book_cover),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }
-            }
+
 
             item {
+                Spacer(modifier = Modifier.height(2.dp))
+                uiState.error?.let {
+                    Text(
+                        text = stringResource(Res.string.error_unknown),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+
+                    )
+                }
+
                 OutlinedTextField(
                     value = uiState.bookTitle,
                     onValueChange = onBookTitleChanged,
@@ -148,7 +163,7 @@ fun CurriculumMappingEditScreen(
                 Text(
                     text = stringResource(Res.string.mapping),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -183,7 +198,7 @@ fun CurriculumMappingEditScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            Icons.Filled.Add,
+                            Icons.Filled.ContentPaste,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
@@ -323,25 +338,20 @@ private fun LessonItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            val indicatorColor = when (lesson.lessonType) {
-                "A" -> Color(0xFFFFA726)
-                "B" -> Color(0xFFEF5350)
-                "C" -> Color(0xFF66BB6A)
-                "D" -> Color(0xFF9C27B0)
-                else -> MaterialTheme.colorScheme.primary
-            }
+            val initial = lesson.title?.firstOrNull()?.uppercaseChar()?.toString() ?: ""
+            val indicatorColor = MaterialTheme.colorScheme.primary
 
             Box(
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(24.dp)
                     .background(
                         color = indicatorColor,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = lesson.lessonType ?: "?",
+                    text = initial,
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White
                 )

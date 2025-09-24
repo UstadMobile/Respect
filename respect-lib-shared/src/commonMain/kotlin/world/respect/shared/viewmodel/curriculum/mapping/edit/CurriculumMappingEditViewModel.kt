@@ -1,5 +1,3 @@
-
-
 package world.respect.shared.viewmodel.curriculum.mapping.edit
 
 import androidx.lifecycle.SavedStateHandle
@@ -8,23 +6,23 @@ import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import world.respect.datalayer.db.curriculum.entities.ChapterMapping
 import world.respect.datalayer.db.curriculum.entities.LessonMapping
 import world.respect.datalayer.db.curriculum.entities.TextbookMapping
+import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.error_unknown
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
+import world.respect.shared.generated.resources.save_failed
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-
 
 data class CurriculumMappingEditUiState(
     val textbook: TextbookMapping? = null,
@@ -33,6 +31,7 @@ data class CurriculumMappingEditUiState(
     val bookTitleError: String? = null,
     val loading: Boolean = false,
     val isNew: Boolean = true,
+    val error: String? = null,
 ) {
 
     val fieldsEnabled: Boolean
@@ -51,13 +50,15 @@ data class CurriculumMappingEditUiState(
 
 class CurriculumMappingEditViewModel(
     savedStateHandle: SavedStateHandle,
-    private val json: Json,
+    private val getCurriculumMappingsUseCase: GetCurriculumMappingsUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
     private var textbookUid = route.textbookUid
 
-    private val _uiState = MutableStateFlow(CurriculumMappingEditUiState(isNew = textbookUid == 0L))
+    private val _uiState = MutableStateFlow(
+        CurriculumMappingEditUiState(isNew = textbookUid == NEW_TEXTBOOK_UID)
+    )
     val uiState = _uiState.asStateFlow()
 
     private val debouncer = LaunchDebouncer(viewModelScope)
@@ -78,104 +79,62 @@ class CurriculumMappingEditViewModel(
             )
         }
 
-        viewModelScope.launch {
-            if (textbookUid != 0L) {
-                loadTextbookData()
-            } else {
-                val newTextbook = TextbookMapping().apply {
-                    uid = 0L
-                    title = ""
-                    description = ""
-                    coverImageUrl = null
-                }
-                _uiState.update { prev ->
-                    prev.copy(
-                        textbook = newTextbook,
-                        chapters = emptyList(),
-                        lessons = emptyList(),
-                        loading = false
-                    )
-                }
-            }
-        }
+        loadTextbookData()
     }
 
     private fun loadTextbookData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true) }
+            _uiState.update { it.copy(loading = true, error = null) }
 
-            val mockTextbook = TextbookMapping().apply {
-                uid = textbookUid
-                title = "English, Grade 1"
-                description = "English curriculum for grade 1 students"
-                coverImageUrl = null
-            }
+            try {
+                if (textbookUid != NEW_TEXTBOOK_UID) {
+                    val textbookWithDetails = getCurriculumMappingsUseCase.getTextbookWithDetails(textbookUid)
+                    if (textbookWithDetails != null) {
+                        nextChapterNumber = textbookWithDetails.chapters.size + 1
+                        nextLessonNumber = textbookWithDetails.lessons.size + 1
 
-            val mockChapters = listOf(
-                ChapterMapping().apply {
-                    uid = 1L
-                    chapterNumber = 1
-                    title = null
-                    textbookUid = this@CurriculumMappingEditViewModel.textbookUid
-                },
-                ChapterMapping().apply {
-                    uid = 2L
-                    chapterNumber = 2
-                    title = null
-                    textbookUid = this@CurriculumMappingEditViewModel.textbookUid
+                        _uiState.update { prev ->
+                            prev.copy(
+                                textbook = textbookWithDetails.textbook,
+                                chapters = textbookWithDetails.chapters,
+                                lessons = textbookWithDetails.lessons,
+                                loading = false,
+                                isNew = false,
+                                error = null
+                            )
+                        }
+                    } else {
+                        _uiState.update { prev ->
+                            prev.copy(
+                                loading = false,
+                                error = Res.string.error_unknown.asUiText().toString()
+                            )
+                        }
+                    }
+                } else {
+                    val newTextbook = TextbookMapping().apply {
+                        uid = NEW_TEXTBOOK_UID
+                        title = ""
+                        description = ""
+                        coverImageUrl = null
+                    }
+                    _uiState.update { prev ->
+                        prev.copy(
+                            textbook = newTextbook,
+                            chapters = emptyList(),
+                            lessons = emptyList(),
+                            loading = false,
+                            error = null
+                        )
+                    }
                 }
-            )
-
-            val mockLessons = listOf(
-                LessonMapping().apply {
-                    uid = 1L
-                    chapterUid = 1L
-                    lessonNumber = 1
-                    title = "Alphabet A"
-                    subtitle = "Chapter learning"
-                    lessonType = "A"
-                    textbookUid = this@CurriculumMappingEditViewModel.textbookUid
-                },
-                LessonMapping().apply {
-                    uid = 2L
-                    chapterUid = 1L
-                    lessonNumber = 2
-                    title = "Alphabet B"
-                    subtitle = "Chapter learning"
-                    lessonType = "B"
-                    textbookUid = this@CurriculumMappingEditViewModel.textbookUid
-                },
-                LessonMapping().apply {
-                    uid = 3L
-                    chapterUid = 2L
-                    lessonNumber = 1
-                    title = "Alphabet C"
-                    subtitle = "Chapter learning"
-                    lessonType = "C"
-                    textbookUid = this@CurriculumMappingEditViewModel.textbookUid
-                },
-                LessonMapping().apply {
-                    uid = 4L
-                    chapterUid = 2L
-                    lessonNumber = 2
-                    title = "Alphabet D"
-                    subtitle = "Chapter learning"
-                    lessonType = "D"
-                    textbookUid = this@CurriculumMappingEditViewModel.textbookUid
+            } catch (e: Throwable) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        loading = false,
+                        error = Res.string.error_unknown.asUiText().toString()
+                    )
                 }
-            )
-
-            nextChapterNumber = mockChapters.size + 1
-            nextLessonNumber = mockLessons.size + 1
-
-            _uiState.update { prev ->
-                prev.copy(
-                    textbook = mockTextbook,
-                    chapters = mockChapters,
-                    lessons = mockLessons,
-                    loading = false,
-                    isNew = false
-                )
             }
         }
     }
@@ -195,7 +154,6 @@ class CurriculumMappingEditViewModel(
 
     fun onBookDescriptionChanged(description: String) {
         val currentTextbook = _uiState.value.textbook ?: return
-
         val updatedTextbook = currentTextbook.copy(description = description)
 
         _uiState.update { prev ->
@@ -207,9 +165,8 @@ class CurriculumMappingEditViewModel(
         }
     }
 
-
     fun onClickAddBookCover() {
-       //TODO
+        // TODO:
     }
 
     fun onClickAddChapter() {
@@ -242,17 +199,28 @@ class CurriculumMappingEditViewModel(
         }
     }
 
+    fun onChapterMoved(fromIndex: Int, toIndex: Int) {
+        val currentChapters = _uiState.value.chapters.toMutableList()
+        val chapter = currentChapters.removeAt(fromIndex)
+        currentChapters.add(toIndex, chapter)
+        val updatedChapters = currentChapters.mapIndexed { index, chapterMapping ->
+            chapterMapping.copy(chapterNumber = index + 1)
+        }
+
+        _uiState.update { prev ->
+            prev.copy(chapters = updatedChapters)
+        }
+    }
+
     fun onClickAddLesson(chapter: ChapterMapping) {
         val currentLessons = _uiState.value.lessons
-        val lessonTypes = arrayOf("A", "B", "C", "D")
 
         val newLesson = LessonMapping().apply {
             uid = -(System.currentTimeMillis())
             chapterUid = chapter.uid
             lessonNumber = nextLessonNumber++
             title = null
-            subtitle = "Chapter learning"
-            lessonType = lessonTypes[(nextLessonNumber - 2) % lessonTypes.size]
+            lessonType = null
             textbookUid = this@CurriculumMappingEditViewModel.textbookUid
         }
 
@@ -271,17 +239,17 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onClickSave() {
-        val textbook = _uiState.value.textbook
-        if (textbook == null) return
+        val textbook = _uiState.value.textbook ?: return
 
-        textbook.title?.let {
-            if (it.isBlank()) {
-                _uiState.update { prev ->
-                    prev.copy(bookTitleError = Res.string.required.asUiText().toString())
-                }
-                return
-            } else {
-                _uiState.update { prev -> prev.copy(bookTitleError = null) }
+        val bookTitle = textbook.title
+        if (bookTitle.isNullOrBlank()) {
+            _uiState.update { prev ->
+                prev.copy(bookTitleError = Res.string.required.asUiText().toString())
+            }
+            return
+        } else {
+            _uiState.update { prev ->
+                prev.copy(bookTitleError = null)
             }
         }
 
@@ -289,23 +257,44 @@ class CurriculumMappingEditViewModel(
             try {
                 _uiState.update { it.copy(loading = true) }
 
-                kotlinx.coroutines.delay(SAVE_DELAY_MS)
+                val chapters = _uiState.value.chapters
+                val lessons = _uiState.value.lessons
+
+                getCurriculumMappingsUseCase.saveCurriculumMapping(
+                    textbook,
+                    chapters,
+                    lessons
+                )
 
                 _uiState.update { it.copy(loading = false) }
+
                 _navCommandFlow.tryEmit(NavCommand.PopUp())
 
             } catch (e: Throwable) {
-                _uiState.update { it.copy(loading = false) }
-                e.printStackTrace()
+                _uiState.update {
+                    it.copy(
+                        loading = false,
+                        error = Res.string.save_failed.asUiText().toString()
+                    )
+                }
             }
         }
     }
 
     fun onClearError() {
-        _uiState.update { prev -> prev.copy(bookTitleError = null) }
+        _uiState.update { prev ->
+            prev.copy(
+                bookTitleError = null,
+                error = null
+            )
+        }
+    }
+
+    fun onRetry() {
+        loadTextbookData()
     }
 
     companion object {
-        private const val SAVE_DELAY_MS = 500L
+        private const val NEW_TEXTBOOK_UID = 0L
     }
 }

@@ -23,7 +23,9 @@ import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
 import java.io.File
 import java.util.Properties
+import kotlin.random.Random
 import kotlin.system.exitProcess
+import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
     val json = Json { encodeDefaults = true }
@@ -62,6 +64,7 @@ fun managerServerMain(ns: Namespace) {
         when(ns.getString("subparser_name")) {
             CMD_ADD_SCHOOL -> {
                 val schoolBaseUrl = Url(ns.getString("url"))
+                val rpId = ns.getString("rpId") ?: schoolBaseUrl.host
 
                 val response = httpClient.post(
                     serverUrl.appendEndpointSegments("api/directory/school")
@@ -77,6 +80,11 @@ fun managerServerMain(ns: Namespace) {
                                     xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
                                     oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+                                    schoolCode = Random.nextInt(10_000).toString().padStart(5, '0'),
+                                    directoryCode = null,//Will be set on server
+                                    rpId = rpId,
+                                    lastModified = Clock.System.now(),
+                                    stored = Clock.System.now(),
                                 ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,

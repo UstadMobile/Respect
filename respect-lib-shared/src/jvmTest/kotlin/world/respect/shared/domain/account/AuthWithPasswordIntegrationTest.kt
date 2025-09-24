@@ -11,6 +11,9 @@ import world.respect.datalayer.school.model.Person
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
@@ -33,6 +36,8 @@ class AuthWithPasswordIntegrationTest {
 
     private lateinit var xxHash: XXStringHasher
 
+    private lateinit var uidNumberMapper: UidNumberMapper
+
     private lateinit var setPasswordUseCase: SetPasswordUseCase
 
     private lateinit var getTokenUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase
@@ -45,6 +50,7 @@ class AuthWithPasswordIntegrationTest {
         givenName = "John",
         familyName = "Doe",
         roles = emptyList(),
+        gender = PersonGenderEnum.FEMALE,
     )
 
     @BeforeTest
@@ -55,6 +61,7 @@ class AuthWithPasswordIntegrationTest {
         ).setDriver(BundledSQLiteDriver())
             .build()
         xxHash = XXStringHasherCommonJvm()
+        uidNumberMapper = XXHashUidNumberMapper(xxHash)
         setPasswordUseCase = SetPasswordUseDbImpl(schoolDb, xxHash)
         getTokenUseCase = GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
             schoolDb, xxHash,
@@ -70,7 +77,7 @@ class AuthWithPasswordIntegrationTest {
             val password = "password"
 
             schoolDb.getPersonEntityDao().insert(
-                defaultTestPerson.toEntities(xxHash).personEntity
+                defaultTestPerson.toEntities(uidNumberMapper).personEntity
             )
 
             setPasswordUseCase(
@@ -104,7 +111,7 @@ class AuthWithPasswordIntegrationTest {
                 val personGuid = "42"
                 val password = "password"
                 schoolDb.getPersonEntityDao().insert(
-                    defaultTestPerson.toEntities(xxHash).personEntity
+                    defaultTestPerson.toEntities(uidNumberMapper).personEntity
                 )
 
                 setPasswordUseCase(

@@ -59,6 +59,12 @@ kotlin {
             implementation(libs.napier)
         }
 
+        androidMain.dependencies {
+            implementation(libs.androidx.preference)
+            implementation(libs.androidx.preference.ktx)
+            implementation(libs.acra.core)
+        }
+
         jvmMain.dependencies {
             implementation(projects.respectDatalayerDb)
             implementation(libs.androidx.room.runtime)
@@ -69,6 +75,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
+            implementation(projects.respectLibTest)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)

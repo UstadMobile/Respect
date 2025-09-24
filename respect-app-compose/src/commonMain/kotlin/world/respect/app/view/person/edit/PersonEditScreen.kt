@@ -9,15 +9,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectExposedDropDownMenuField
+import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.first_names
+import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.last_name
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 
@@ -42,7 +49,8 @@ fun PersonEditScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(top = 16.dp),
+            modifier = Modifier.testTag("first_names")
+                .fillMaxWidth().defaultItemPadding(top = 16.dp),
             value = person?.givenName ?: "",
             label = { Text(stringResource(Res.string.first_names) + "*") },
             onValueChange = { value ->
@@ -55,7 +63,7 @@ fun PersonEditScreen(
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.testTag("last_name").fillMaxWidth().defaultItemPadding(),
             value = person?.familyName ?: "",
             label = { Text(stringResource(Res.string.last_name) + "*") },
             onValueChange = { value ->
@@ -64,6 +72,34 @@ fun PersonEditScreen(
                 }
             },
             singleLine = true,
+        )
+
+        RespectExposedDropDownMenuField(
+            modifier = Modifier.testTag("gender").fillMaxWidth().defaultItemPadding(),
+            value = person?.gender,
+            label = {
+                Text(stringResource(Res.string.gender))
+            },
+            options = PersonGenderEnum.entries,
+            itemText = { stringResource(it.label) },
+            onOptionSelected = { gender ->
+                person?.also {
+                    onEntityChanged(it.copy(gender = gender))
+                }
+            },
+            enabled = uiState.fieldsEnabled,
+        )
+
+        RespectLocalDateField(
+            modifier = Modifier.testTag("date_of_birth").fillMaxWidth().defaultItemPadding(),
+            value = person?.dateOfBirth,
+            label = { Text(stringResource(Res.string.date_of_birth)) },
+            onValueChange = { date ->
+                person?.also {
+                    onEntityChanged(it.copy(dateOfBirth = date))
+                }
+            },
+            enabled = uiState.fieldsEnabled,
         )
     }
 

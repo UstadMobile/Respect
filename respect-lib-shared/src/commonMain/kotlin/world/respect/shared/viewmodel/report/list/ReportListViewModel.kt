@@ -111,11 +111,11 @@ class ReportListViewModel(
     }
 
     fun onClickAdd() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                ReportTemplateList
-            )
-        )
+//        _navCommandFlow.tryEmit(
+//            NavCommand.Navigate(
+//                ReportTemplateList
+//            )
+//        )
     }
 
     fun onClickEntry(entry: Report) {

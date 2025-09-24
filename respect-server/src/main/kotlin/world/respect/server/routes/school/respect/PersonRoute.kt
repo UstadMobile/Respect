@@ -36,7 +36,7 @@ fun Route.PersonRoute(
             params = loadParams,
             pagingSource = schoolDataSource.personDataSource.listAsPagingSource(
                 DataLoadParams(), getListParams
-            )
+            ).invoke()
         )
     }
 

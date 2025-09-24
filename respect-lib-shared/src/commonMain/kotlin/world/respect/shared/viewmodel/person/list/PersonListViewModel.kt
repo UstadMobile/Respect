@@ -1,7 +1,7 @@
 package world.respect.shared.viewmodel.person.list
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.paging.PagingSource
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,12 +22,17 @@ import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import io.github.aakira.napier.Napier
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.shared.util.LaunchDebouncer
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 
 
 data class PersonListUiState(
-    val persons: () -> PagingSource<Int, PersonListDetails> = { EmptyPagingSource() },
+    val persons: IPagingSourceFactory<Int, PersonListDetails> = IPagingSourceFactory {
+        EmptyPagingSource()
+    },
 )
 
 class PersonListViewModel(
@@ -43,10 +48,14 @@ class PersonListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    private val pagingSourceFactory: () -> PagingSource<Int, PersonListDetails> = {
-        Napier.d("PersonListViewModel: pagingSourceFactory invoke")
+    private val launchDebounced = LaunchDebouncer(viewModelScope)
+
+    private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
-            DataLoadParams(), PersonDataSource.GetListParams()
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() }
+            )
         )
     }
 
@@ -59,14 +68,33 @@ class PersonListViewModel(
                     onClick = ::onClickAdd,
                     text = Res.string.person.asUiText(),
                     icon = FabUiState.FabIcon.ADD,
+                ),
+                searchState = AppBarSearchUiState(
+                    visible = true,
+                    searchText = "",
+                    onSearchTextChanged = ::onSearchTextChanged
                 )
             )
         }
 
         _uiState.update {
             it.copy(
-                persons = pagingSourceFactory
+                persons = pagingSourceFactoryHolder
             )
+        }
+    }
+
+    fun onSearchTextChanged(text: String) {
+        _appUiState.update {
+            it.copy(
+                searchState = it.searchState.copy(
+                    searchText = text
+                )
+            )
+        }
+
+        launchDebounced.launch("") {
+            pagingSourceFactoryHolder.invalidate()
         }
     }
 

@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school
 
-import androidx.paging.PagingSource
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -18,6 +18,7 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
 
@@ -30,19 +31,30 @@ class ClassDatasourceDb(
 
     private suspend fun upsertClasses(
         classes: List<Clazz>,
-        @Suppress("unused") forceOverwrite: Boolean
+        forceOverwrite: Boolean = false,
     ) {
         if(classes.isEmpty())
             return
 
         schoolDb.useWriterConnection { con ->
             val timeStored = Clock.System.now()
+
+            var numUpdated = 0
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 classes.map { it.copy(stored = timeStored) }.forEach { clazz ->
                     val entities = clazz.toEntities(uidNumberMapper)
-                    schoolDb.getClassEntityDao().upsert(entities.clazz)
+                    val lastModifiedInDb = schoolDb.getClassEntityDao().getLastModifiedByGuid(
+                        entities.clazz.cGuidHash
+                    ) ?: -1
+
+                    if(forceOverwrite ||
+                            entities.clazz.cLastModified.toEpochMilliseconds() > lastModifiedInDb) {
+                        schoolDb.getClassEntityDao().upsert(entities.clazz)
+                        numUpdated++
+                    }
                 }
             }
+            Napier.d("RPaging/ClassDataSourceDb: updated: $numUpdated/${classes.size}")
 
         }
     }
@@ -71,20 +83,38 @@ class ClassDatasourceDb(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: ClassDataSource.GetListParams
-    ): PagingSource<Int, Clazz> {
-        return schoolDb.getClassEntityDao().findAllAsPagingSource(
-            since = params.common.since?.toEpochMilliseconds() ?: 0,
-            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-        ).map {
-            ClassEntities(it).toModel()
+    ): IPagingSourceFactory<Int, Clazz> {
+        return IPagingSourceFactory {
+            schoolDb.getClassEntityDao().findAllAsPagingSource(
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                code = params.inviteCode,
+            ).map {
+                ClassEntities(it).toModel()
+            }
         }
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ClassDataSource.GetListParams
+    ): DataLoadState<List<Clazz>> {
+        return DataReadyState(
+            data = schoolDb.getClassEntityDao().list(
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                code = params.inviteCode,
+            ).map {
+                ClassEntities(it).toModel()
+            }
+        )
     }
 
     override suspend fun store(list: List<Clazz>) {
         upsertClasses(list, false)
     }
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Clazz>,
         forceOverwrite: Boolean
     ) {

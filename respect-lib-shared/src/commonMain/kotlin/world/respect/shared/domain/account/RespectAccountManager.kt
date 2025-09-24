@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.isSameAccount
@@ -117,7 +119,7 @@ class RespectAccountManager(
             password = password,
         )
 
-        val schoolDirectoryEntry = appDataSource.schoolDirectoryDataSource.getSchoolDirectoryEntryByUrl(
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl
         ).dataOrNull() ?: throw IllegalStateException()
 
@@ -127,6 +129,33 @@ class RespectAccountManager(
         )
 
         initSession(authResponse, respectAccount)
+    }
+
+    @Suppress("unused")
+    suspend fun register(
+        redeemInviteRequest: RespectRedeemInviteRequest,
+        schoolUrl: Url,
+    ) {
+        val schoolScopeId = SchoolDirectoryEntryScopeId(
+            schoolUrl, null,
+        )
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
+        )
+
+        val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
+        val authResponse = redeemInviteUseCase(redeemInviteRequest)
+
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+            schoolUrl
+        ).dataOrNull() ?: throw IllegalStateException()
+
+        initSession(
+            authResponse = authResponse,
+            respectAccount = RespectAccount(
+                authResponse.person.guid, schoolDirectoryEntry
+            )
+        )
     }
 
     private suspend fun initSession(

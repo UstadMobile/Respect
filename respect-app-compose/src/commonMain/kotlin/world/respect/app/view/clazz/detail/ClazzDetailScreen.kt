@@ -2,12 +2,13 @@ package world.respect.app.view.clazz.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -28,13 +29,13 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
-import world.respect.datalayer.oneroster.model.OneRosterRoleEnum
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.pending_invite
+import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
@@ -46,6 +47,7 @@ import world.respect.shared.generated.resources.expand_teachers
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 
@@ -72,7 +74,7 @@ fun ClazzDetailScreen(
 @Composable
 fun ClazzDetailScreen(
     uiState: ClazzDetailUiState,
-    onClickAddPersonToClazz: (OneRosterRoleEnum) -> Unit,
+    onClickAddPersonToClazz: (EnrollmentRoleEnum) -> Unit,
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onSelectChip: (String) -> Unit,
     onClickAcceptInvite: (Person) -> Unit,
@@ -84,8 +86,13 @@ fun ClazzDetailScreen(
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
 
+    val pendingTeacherPager = respectRememberPager(uiState.pendingTeachers)
+    val pendingStudentPager = respectRememberPager(uiState.pendingStudents)
+
     val teacherLazyPagingItems = teacherPager.flow.collectAsLazyPagingItems()
     val studentLazyPagingItems = studentPager.flow.collectAsLazyPagingItems()
+    val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
+    val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
     LazyColumn(
         modifier = Modifier
@@ -128,73 +135,120 @@ fun ClazzDetailScreen(
             )
         }
 
-        item {
-            ListItem(
-                modifier = Modifier
-                    .clickable { onTogglePendingSection() },
-                headlineContent = {
-                    Text(
-                        text = stringResource(
-                            resource = Res.string.pending_invite
+        if((pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0) {
+            item("pending_header") {
+                ListItem(
+                    modifier = Modifier
+                        .clickable { onTogglePendingSection() },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(
+                                resource = Res.string.pending_requests
+                            )
                         )
-                    )
-                },
-                trailingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.KeyboardArrowDown,
-                        contentDescription =
-                            if (uiState.isPendingExpanded) {
-                                stringResource(
-                                    Res.string.collapse_pending_invites
-                                )
-                            } else {
-                                stringResource(
-                                    Res.string.expand_pending_invites
-                                )
-                            },
-                        modifier = Modifier.size(24.dp)
-                            .rotate(
-                                if (uiState.isPendingExpanded) 0f else -90f
-                            ),
-                    )
-                }
-            )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.KeyboardArrowDown,
+                            contentDescription =
+                                if (uiState.isPendingExpanded) {
+                                    stringResource(
+                                        Res.string.collapse_pending_invites
+                                    )
+                                } else {
+                                    stringResource(
+                                        Res.string.expand_pending_invites
+                                    )
+                                },
+                            modifier = Modifier.size(24.dp)
+                                .rotate(
+                                    if (uiState.isPendingExpanded) 0f else -90f
+                                ),
+                        )
+                    }
+                )
+            }
         }
 
+
         if (uiState.isPendingExpanded) {
-            itemsIndexed(
-                items = uiState.listOfPending,
-                key = { index, pendingUser ->
-                    pendingUser.guid
-                }
-            ) { index, user ->
+            respectPagingItems(
+                items = pendingTeacherLazyPagingItems,
+                key = { person, index -> person?.guid ?: "tp$index" }
+            ) { person ->
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth(),
-
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = user.givenName
+                            name = person?.fullName() ?: ""
                         )
                     },
-
                     headlineContent = {
-                        Text(text = user.givenName )
+                        Text(text = person?.fullName() ?: "")
                     },
-
+                    supportingContent = {
+                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                    },
                     trailingContent = {
                         Row {
                             Icon(
                                 modifier = Modifier.size(24.dp)
                                     .clickable {
-                                        onClickAcceptInvite(user)
+                                        person?.also(onClickAcceptInvite)
                                     },
                                 imageVector = Icons.Outlined.CheckCircle,
                                 contentDescription = stringResource(resource = Res.string.accept_invite)
                             )
+
+                            Spacer(Modifier.width(16.dp))
+
                             Icon(
                                 modifier = Modifier.size(24.dp).clickable {
-                                    onClickDismissInvite(user)
+                                    person?.also(onClickDismissInvite)
+                                },
+                                imageVector = Icons.Outlined.Cancel,
+                                contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                            )
+                        }
+                    }
+                )
+            }
+
+            respectPagingItems(
+                items = pendingStudentLazyPagingItems,
+                key = { person, index -> person?.guid ?: "ps$index" }
+            ) { person ->
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    leadingContent = {
+                        RespectPersonAvatar(
+                            name = person?.fullName() ?: ""
+                        )
+                    },
+                    headlineContent = {
+                        Text(text = person?.fullName() ?: "")
+                    },
+                    supportingContent = {
+                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                    },
+                    trailingContent = {
+                        Row {
+                            Icon(
+                                modifier = Modifier.size(24.dp)
+                                    .clickable {
+                                        person?.also(onClickAcceptInvite)
+                                    },
+                                imageVector = Icons.Outlined.CheckCircle,
+                                contentDescription = stringResource(resource = Res.string.accept_invite)
+                            )
+
+                            Spacer(Modifier.width(16.dp))
+
+                            Icon(
+                                modifier = Modifier.size(24.dp).clickable {
+                                    person?.also(onClickDismissInvite)
                                 },
                                 imageVector = Icons.Outlined.Cancel,
                                 contentDescription = stringResource(resource = Res.string.dismiss_invite)
@@ -238,7 +292,7 @@ fun ClazzDetailScreen(
             item("add_teacher") {
                 ListItem(
                     modifier = Modifier.clickable {
-                        onClickAddPersonToClazz(OneRosterRoleEnum.TEACHER)
+                        onClickAddPersonToClazz(EnrollmentRoleEnum.TEACHER)
                     },
                     leadingContent = {
                         Icon(
@@ -309,7 +363,7 @@ fun ClazzDetailScreen(
             item("add_student") {
                 ListItem(
                     modifier = Modifier.clickable {
-                        onClickAddPersonToClazz(OneRosterRoleEnum.STUDENT)
+                        onClickAddPersonToClazz(EnrollmentRoleEnum.STUDENT)
                     },
 
                     leadingContent = {

@@ -30,13 +30,13 @@ class CreatePasskeyUseCaseImpl(
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
     @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(username: String, appName : String): CreatePasskeyUseCase.CreatePasskeyResult {
+    override suspend fun invoke(username: String,rpId:String): CreatePasskeyUseCase.CreatePasskeyResult {
         val credentialManager = CredentialManager.create(context)
 
         return try {
             val request = CreatePublicKeyCredentialRequest(
                 requestJson = json.encodeToString(
-                    createPublicKeyJsonUseCase(username,appName)
+                    createPublicKeyJsonUseCase(username, rpId)
                 ),
                 preferImmediatelyAvailableCredentials = false,
             )
@@ -46,16 +46,17 @@ class CreatePasskeyUseCaseImpl(
             ) as CreatePublicKeyCredentialResponse
 
             Log.d ( "passkey response:", response.registrationResponseJson)
-            val passkeyResponse =
-                json.decodeFromString<AuthenticationResponseJSON>(response.registrationResponseJson)
+            val passkeyResponse = json.decodeFromString<AuthenticationResponseJSON>(
+                response.registrationResponseJson
+            )
 
             CreatePasskeyUseCase.PasskeyCreatedResult(passkeyResponse)
-        } catch (e: CreateCredentialCancellationException) {
+        } catch (_: CreateCredentialCancellationException) {
             CreatePasskeyUseCase.UserCanceledResult()
         } catch (e: CreateCredentialException) {
             // See https://codelabs.developers.google.com/credential-manager-api-for-android#1
             Log.e(
-                 "CreatePassKeyUseCaseImpl: exception",  e.message.toString()
+                 "CreatePassKeyUseCase",  e.message, e,
             )
             CreatePasskeyUseCase.Error(e.message)
         }

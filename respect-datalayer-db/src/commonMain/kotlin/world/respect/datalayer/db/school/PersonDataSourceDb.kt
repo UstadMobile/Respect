@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school
 
-import androidx.paging.PagingSource
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -13,7 +13,6 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.PersonEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
@@ -23,6 +22,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
@@ -44,6 +44,7 @@ class PersonDataSourceDb(
 
         schoolDb.useWriterConnection { con ->
             val timeStored = Clock.System.now()
+            var numStored = 0
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 persons.map { it.copy(stored = timeStored) }.forEach { person ->
                     val entities = person.toEntities(uidNumberMapper)
@@ -53,14 +54,24 @@ class PersonDataSourceDb(
 
                     if(forceOverwrite || entities.personEntity.pLastModified > lastModified) {
                         schoolDb.getPersonEntityDao().insert(entities.personEntity)
+
                         schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(
                             entities.personEntity.pGuidHash
                         )
                         schoolDb.getPersonRoleEntityDao().upsertList(
                             entities.personRoleEntities
                         )
+
+                        schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(
+                            entities.personEntity.pGuidHash
+                        )
+                        schoolDb.getPersonRelatedPersonEntityDao().upsert(
+                            entities.relatedPersonEntities
+                        )
+                        numStored++
                     }
                 }
+                Napier.d("PersonDataSource: updated $numStored/${persons.size}")
             }
         }
     }
@@ -96,7 +107,7 @@ class PersonDataSourceDb(
         }
     }
 
-    override suspend fun updateLocalFromRemote(
+    override suspend fun updateLocal(
         list: List<Person>,
         forceOverwrite: Boolean
     ) {
@@ -125,14 +136,17 @@ class PersonDataSourceDb(
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
-    ): PagingSource<Int, Person> {
-        return schoolDb.getPersonEntityDao().findAllAsPagingSource(
-            since = params.common.since?.toEpochMilliseconds() ?: 0,
-            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-            inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
-            inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
-        ).map(tag = "persondb-mapped") {
-            it.toPersonEntities().toModel()
+    ): IPagingSourceFactory<Int, Person> {
+        return IPagingSourceFactory {
+            schoolDb.getPersonEntityDao().findAllAsPagingSource(
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+                filterByName = params.filterByName,
+            ).map(tag = "persondb-mapped") {
+                it.toPersonEntities().toModel()
+            }
         }
     }
 
@@ -145,7 +159,7 @@ class PersonDataSourceDb(
         val data = schoolDb.getPersonEntityDao().findAll(
             since = since?.toEpochMilliseconds() ?: 0,
         ).map {
-            PersonEntities(it).toModel()
+            it.toPersonEntities().toModel()
         }
 
         return DataReadyState(
@@ -161,7 +175,15 @@ class PersonDataSourceDb(
     override fun listDetailsAsPagingSource(
         loadParams: DataLoadParams,
         listParams: PersonDataSource.GetListParams,
-    ): PagingSource<Int, PersonListDetails> {
-        return schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource()
+    ): IPagingSourceFactory<Int, PersonListDetails> {
+        return IPagingSourceFactory {
+            schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource(
+                since = listParams.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzGuidHash = listParams.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzRoleFlag = listParams.filterByEnrolmentRole?.flag ?: 0,
+                filterByName = listParams.filterByName,
+            )
+        }
     }
 }

@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import world.respect.datalayer.db.opds.daos.PersonPasskeyEntityDao
+import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao
 import world.respect.datalayer.db.school.daos.PersonEntityDao
@@ -18,11 +20,13 @@ import world.respect.datalayer.db.shared.SharedConverters
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
-import world.respect.datalayer.db.school.daos.ClazzEntityDao
+import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
+import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 
@@ -34,7 +38,9 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
     entities = [
         PersonEntity::class,
         PersonRoleEntity::class,
+        PersonRelatedPersonEntity::class,
         PersonPasswordEntity::class,
+        PersonPasskeyEntity::class,
         AuthTokenEntity::class,
         ReportEntity::class,
         IndicatorEntity::class,
@@ -53,15 +59,19 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getPersonPasswordEntityDao(): PersonPasswordEntityDao
 
+    abstract fun getPersonPasskeyEntityDao(): PersonPasskeyEntityDao
+
     abstract fun getAuthTokenEntityDao(): AuthTokenEntityDao
 
     abstract fun getPersonRoleEntityDao(): PersonRoleEntityDao
+
+    abstract fun getPersonRelatedPersonEntityDao(): PersonRelatedPersonEntityDao
 
     abstract fun getReportEntityDao(): ReportEntityDao
 
     abstract fun getIndicatorEntityDao(): IndicatorEntityDao
 
-    abstract fun getClassEntityDao(): ClazzEntityDao
+    abstract fun getClassEntityDao(): ClassEntityDao
 
     abstract fun getEnrollmentEntityDao(): EnrollmentEntityDao
 

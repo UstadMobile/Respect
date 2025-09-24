@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,9 +20,10 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.password_label
-import world.respect.shared.generated.resources.userId_label
+import world.respect.shared.generated.resources.username_label
 import world.respect.shared.viewmodel.manageuser.login.LoginUiState
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 
@@ -35,7 +37,8 @@ fun LoginScreen(
         uiState = uiState,
         onUsernameChanged = viewModel::onUsernameChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
-        onClickLogin = viewModel::onClickLogin
+        onClickLogin = viewModel::onClickLogin,
+        onClickInviteCode = viewModel::onClickInviteCode,
     )
 }
 
@@ -44,7 +47,8 @@ fun LoginScreen(
     uiState: LoginUiState,
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
-    onClickLogin: () -> Unit
+    onClickLogin: () -> Unit,
+    onClickInviteCode: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -54,8 +58,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = uiState.username,
             onValueChange = onUsernameChanged,
-            label = { Text(stringResource(Res.string.userId_label)) },
-            placeholder = { Text(stringResource(Res.string.userId_label)) },
+            label = { Text(stringResource(Res.string.username_label)) },
             singleLine = true,
             isError = uiState.usernameError != null,
             supportingText = uiState.usernameError?.let {
@@ -82,10 +85,16 @@ fun LoginScreen(
 
         Button(
             onClick = onClickLogin,
-            modifier = Modifier
-                .fillMaxWidth().defaultItemPadding()
+            modifier = Modifier.fillMaxWidth().defaultItemPadding()
         ) {
             Text(text = stringResource(Res.string.login))
+        }
+
+        OutlinedButton(
+            onClick = onClickInviteCode,
+            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+        ) {
+            Text(text = stringResource(Res.string.i_have_an_invite_code))
         }
 
         uiState.errorText?.also {

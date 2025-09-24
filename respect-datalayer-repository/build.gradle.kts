@@ -44,6 +44,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
+            implementation(projects.respectLibTest)
             implementation(kotlin("test"))
             implementation(projects.respectServer)
             implementation(projects.respectLibPrimarykeygen)

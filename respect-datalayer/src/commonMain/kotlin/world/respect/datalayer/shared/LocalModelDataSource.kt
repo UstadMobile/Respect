@@ -6,8 +6,12 @@ package world.respect.datalayer.shared
 interface LocalModelDataSource<T : Any> {
 
     /**
-     * updateLocalFromRemote is used to handle when new data has been received from the remote
-     * data source. Local data will normally only be replaced when it is newer than the local data
+     * updateLocal is used to handle two scenarios:
+     *
+     * a) When new data has been received from the remote data source
+     * b) When a server is inserting data for a new account
+     *
+     * Local data will normally only be replaced when it is newer than the current local data
      * (e.g. to avoid overwriting local data that has not yet been sent).
      *
      * It is NOT subject to permission checks (this function is for data is being received from a
@@ -18,7 +22,7 @@ interface LocalModelDataSource<T : Any> {
      *        stored locally. Sometimes (e.g. during conflict resolution) local data may be
      *        overridden anyway.
      */
-    suspend fun updateLocalFromRemote(
+    suspend fun updateLocal(
         list: List<T>,
         forceOverwrite: Boolean = false,
     )

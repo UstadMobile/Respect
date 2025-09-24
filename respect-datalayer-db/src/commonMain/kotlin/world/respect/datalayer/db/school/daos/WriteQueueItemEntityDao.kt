@@ -12,14 +12,16 @@ interface WriteQueueItemEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(list: List<WriteQueueItemEntity>)
 
-    @Query("""
+    @Query(
+        """
         SELECT WriteQueueItemEntity.* 
           FROM WriteQueueItemEntity
          WHERE WriteQueueItemEntity.wqiAccountGuid = :accountGuid
            AND WriteQueueItemEntity.wqiTimeWritten = 0
-      ORDER BY WriteQueueItemEntity.wqiTimestamp ASC
+      ORDER BY WriteQueueItemEntity.wqiTimeQueued ASC
         LIMIT :limit
-    """)
+    """
+    )
     suspend fun getPending(
         accountGuid: String,
         limit: Int

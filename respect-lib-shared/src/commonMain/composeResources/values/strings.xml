@@ -365,7 +365,7 @@
     <string name="click_plus_button">Please click the + button</string>
     <string name="to_add_one">to add one</string>
     <string name="map">Map</string>
-    <string name="simple_learning">Unit</string>
+    <string name="simple_learning">learning</string>
     <string name="no_textbooks_available">No textbooks available</string>
     <string name="more_options">More options</string>
     <string name="remove_chapter">Remove chapter</string>
@@ -373,5 +373,6 @@
     <string name="settings">Settings</string>
     <string name="error_unknown">Not Found</string>
     <string name="save_failed">Failed to save</string>
+    <string name="drag">Long press to drag</string>
 
 </resources>

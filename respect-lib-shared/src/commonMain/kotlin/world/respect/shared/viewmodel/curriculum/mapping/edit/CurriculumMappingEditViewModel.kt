@@ -13,6 +13,7 @@ import world.respect.datalayer.db.curriculum.entities.TextbookMapping
 import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_unknown
+import world.respect.shared.generated.resources.lesson
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
@@ -63,7 +64,6 @@ class CurriculumMappingEditViewModel(
 
     private val debouncer = LaunchDebouncer(viewModelScope)
     private var nextChapterNumber = 1
-    private var nextLessonNumber = 1
 
     init {
         _appUiState.update { prev ->
@@ -91,7 +91,6 @@ class CurriculumMappingEditViewModel(
                     val textbookWithDetails = getCurriculumMappingsUseCase.getTextbookWithDetails(textbookUid)
                     if (textbookWithDetails != null) {
                         nextChapterNumber = textbookWithDetails.chapters.size + 1
-                        nextLessonNumber = textbookWithDetails.lessons.size + 1
 
                         _uiState.update { prev ->
                             prev.copy(
@@ -203,6 +202,7 @@ class CurriculumMappingEditViewModel(
         val currentChapters = _uiState.value.chapters.toMutableList()
         val chapter = currentChapters.removeAt(fromIndex)
         currentChapters.add(toIndex, chapter)
+
         val updatedChapters = currentChapters.mapIndexed { index, chapterMapping ->
             chapterMapping.copy(chapterNumber = index + 1)
         }
@@ -212,14 +212,19 @@ class CurriculumMappingEditViewModel(
         }
     }
 
+
+
     fun onClickAddLesson(chapter: ChapterMapping) {
         val currentLessons = _uiState.value.lessons
+        val existingLessonsInChapter = currentLessons.filter { it.chapterUid == chapter.uid }
+        val nextLessonNumberForChapter = existingLessonsInChapter.size + 1
 
         val newLesson = LessonMapping().apply {
             uid = -(System.currentTimeMillis())
             chapterUid = chapter.uid
-            lessonNumber = nextLessonNumber++
-            title = null
+            lessonNumber = nextLessonNumberForChapter
+            title = "Lesson  $nextLessonNumberForChapter"
+            subtitle = null
             lessonType = null
             textbookUid = this@CurriculumMappingEditViewModel.textbookUid
         }
@@ -232,6 +237,13 @@ class CurriculumMappingEditViewModel(
     fun onClickRemoveLesson(lesson: LessonMapping) {
         val currentLessons = _uiState.value.lessons
         val updatedLessons = currentLessons.filter { it.uid != lesson.uid }
+
+        val lessonsInChapter = updatedLessons.filter { it.chapterUid == lesson.chapterUid }
+        lessonsInChapter.forEachIndexed { index, lessonMapping ->
+            lessonMapping.lessonNumber = index + 1
+              lessonMapping.title = "Lesson ${index + 1}"
+
+        }
 
         _uiState.update { prev ->
             prev.copy(lessons = updatedLessons)

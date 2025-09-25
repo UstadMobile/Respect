@@ -14,11 +14,13 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
@@ -99,7 +101,34 @@ class RespectAccountManager(
             }
         }
     }
+    /**
+     * Login a user with passkey
+     */
+    suspend fun loginWithPasskey(
+        authenticationResponseJSON: AuthenticationResponseJSON,
+        schoolUrl: Url,
+    ) {
+        val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
+        )
 
+        val authUseCase: GetTokenAndUserProfileWithPasskeyUseCase = schoolScope.get()
+        val authResponse = authUseCase(
+            authJson = authenticationResponseJSON
+        )
+
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+            schoolUrl
+        ).dataOrNull() ?: throw IllegalStateException()
+
+        val respectAccount = RespectAccount(
+            userGuid = authResponse.person.guid,
+            school = schoolDirectoryEntry,
+        )
+
+        initSession(authResponse, respectAccount)
+    }
     /**
      * Login a user with the given credentials
      */

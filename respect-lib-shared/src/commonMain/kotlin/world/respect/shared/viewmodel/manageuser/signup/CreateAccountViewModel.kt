@@ -21,6 +21,7 @@ import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -65,6 +66,8 @@ class CreateAccountViewModel(
         )
 
     private val inviteInfoUseCase: GetInviteInfoUseCase by inject()
+    private val usernameSuggestionUseCase: UsernameSuggestionUseCase by inject()
+
 
     private val _uiState = MutableStateFlow(CreateAccountViewModelUiState())
 
@@ -84,6 +87,10 @@ class CreateAccountViewModel(
         }
 
         viewModelScope.launch {
+            val suggestion = usernameSuggestionUseCase.invoke(
+                name = route.respectRedeemInviteRequest.accountPersonInfo.name
+            )
+            onUsernameChanged(suggestion)
             val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
             val schoolDirEntryVal = respectAppDataSource.schoolDirectoryEntryDataSource
                 .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {

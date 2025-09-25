@@ -32,11 +32,13 @@ import org.koin.ktor.ext.inject
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.server.account.invite.verify.VerifySignInWithPasskeyRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -157,6 +159,12 @@ fun Application.module() {
         )
 
         route("api") {
+            route("passkey"){
+
+                VerifySignInWithPasskeyRoute(
+                    useCase =  { it.getSchoolKoinScope().get() }
+                )
+            }
             route("directory") {
                 val respectAppDataSource: RespectAppDataSource by inject()
                 RespectSchoolDirectoryRoute(respectAppDataSource)
@@ -176,7 +184,11 @@ fun Application.module() {
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
-
+                    route("username"){
+                        UsernameSuggestionRoute(
+                            usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
+                        )
+                    }
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         PersonRoute()
                         ClassRoute()

@@ -26,6 +26,8 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
+import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.server.account.invite.verify.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
@@ -40,6 +42,8 @@ import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.shared.domain.school.RespectSchoolPath
@@ -101,6 +105,10 @@ fun serverKoinModule(
         get<RespectAppDataSourceLocal>()
     }
 
+    single<FilterUsernameUseCase> {
+        FilterUsernameUseCase()
+    }
+
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
@@ -114,6 +122,18 @@ fun serverKoinModule(
     scope<SchoolDirectoryEntry> {
         fun Scope.schoolUrl(): Url = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
 
+        scoped<UsernameSuggestionUseCase> {
+            UsernameSuggestionUseCaseServer(
+                schoolDb = get(),
+                filterUsernameUseCase = get(),
+            )
+        }
+        scoped<VerifySignInWithPasskeyUseCase> {
+            VerifySignInWithPasskeyUseCase(
+                schoolDb = get(),
+                json = get()
+            )
+        }
         scoped<RespectSchoolPath> {
             val schoolDirName = schoolUrl().sanitizedForFilename()
             val schoolDirFile = File(dataDir, schoolDirName).also {

@@ -8,6 +8,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
+import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
@@ -126,6 +127,10 @@ import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
+import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
@@ -326,6 +331,13 @@ val appKoinModule = module {
             json = get(),
         )
     }
+    single<ValidateUsernameUseCase> {
+        ValidateUsernameUseCase()
+    }
+
+    single<FilterUsernameUseCase> {
+        FilterUsernameUseCase()
+    }
 
     single<SignupUseCase> {
         SignupUseCase()
@@ -409,6 +421,12 @@ val appKoinModule = module {
         NavResultReturnerImpl()
     }
 
+    single<VerifyPasskeyUseCase> {
+        VerifyPasskeyUseCase(
+            httpClient = get(),
+            json = get()
+        )
+    }
     single<XXHasher64Factory> {
         XXHasher64FactoryCommonJvm()
     }
@@ -492,6 +510,13 @@ val appKoinModule = module {
             )
         }
 
+        scoped<UsernameSuggestionUseCase> {
+            UsernameSuggestionUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
     }
 
     /**

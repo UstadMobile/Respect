@@ -99,8 +99,8 @@ fun OnboardingScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
+            .fillMaxSize().
+            background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -112,8 +112,7 @@ fun OnboardingScreen(
         ) { page ->
             val item = onboardingItem[page]
             Column(
-                modifier = Modifier.fillMaxSize()
-                ,
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
 
@@ -131,6 +130,7 @@ fun OnboardingScreen(
                     Text(
                         text = item.onboardingTitle,
                         style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.defaultItemPadding(top = 16.dp),
                         textAlign = TextAlign.Center,
                     )
@@ -138,6 +138,7 @@ fun OnboardingScreen(
                     Text(
                         text = item.onboardingDescription,
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.defaultItemPadding(),
                         textAlign = TextAlign.Center,
                     )
@@ -181,7 +182,6 @@ fun OnboardingScreen(
         ) {
             Text(stringResource(Res.string.get_started))
         }
-
         Row(
             modifier = Modifier
                 .defaultItemPadding()

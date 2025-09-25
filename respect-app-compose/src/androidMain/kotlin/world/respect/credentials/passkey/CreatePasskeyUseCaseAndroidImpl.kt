@@ -1,49 +1,61 @@
 package world.respect.credentials.passkey
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.util.Log
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
-import androidx.credentials.CredentialManager
 import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Create a passkey on Android. This will show a bottom sheet for the user to aprove creating a new
+ * Create a passkey on Android. This will show a bottom sheet for the user to approve creating a new
  * passkey.
  *
- * @param context : this must be an activity context as per the Android docs
+ * The App's DI is at the Application context level, however passkeys require an activity context.
+ * This UseCase provides a channel that must be collected by the activity (eg MainActivity) using
+ * CreatePasskeyUseCaseProcessor.
  *
  * See https://developer.android.com/identity/sign-in/credential-manager#create-passkey
  */
-class CreatePasskeyUseCaseImpl(
-    val context: Context,
+class CreatePasskeyUseCaseAndroidImpl(
     private val json: Json,
     private val createPublicKeyJsonUseCase: CreatePublicKeyCredentialCreationOptionsJsonUseCase
 ) : CreatePasskeyUseCase {
 
+    data class CreatePublicKeyCredentialRequestJob(
+        val request: CreatePublicKeyCredentialRequest,
+        val id: Int,
+        val response: CompletableDeferred<CreatePublicKeyCredentialResponse> = CompletableDeferred()
+    )
+
+    private val idCounter = AtomicInteger()
+
+    val requestChannel = Channel<CreatePublicKeyCredentialRequestJob>(capacity = Channel.UNLIMITED)
+
     /**
      * @throws CreateCredentialException if CredentialManager throws an exception
      */
-    @SuppressLint("PublicKeyCredential")
-    override suspend fun invoke(username: String,rpId:String): CreatePasskeyUseCase.CreatePasskeyResult {
-        val credentialManager = CredentialManager.create(context)
-
+    override suspend fun invoke(
+        username: String,
+        rpId: String
+    ): CreatePasskeyUseCase.CreatePasskeyResult {
         return try {
-            val request = CreatePublicKeyCredentialRequest(
-                requestJson = json.encodeToString(
-                    createPublicKeyJsonUseCase(username, rpId)
+            val job = CreatePublicKeyCredentialRequestJob(
+                request = CreatePublicKeyCredentialRequest(
+                    requestJson = json.encodeToString(
+                        createPublicKeyJsonUseCase(username, rpId)
+                    ),
+                    preferImmediatelyAvailableCredentials = false,
                 ),
-                preferImmediatelyAvailableCredentials = false,
+                id = idCounter.incrementAndGet(),
             )
-            val response = credentialManager.createCredential(
-                context,
-                request
-            ) as CreatePublicKeyCredentialResponse
+            requestChannel.trySend(job)
+            val response = job.response.await()
 
             Log.d ( "passkey response:", response.registrationResponseJson)
             val passkeyResponse = json.decodeFromString<AuthenticationResponseJSON>(

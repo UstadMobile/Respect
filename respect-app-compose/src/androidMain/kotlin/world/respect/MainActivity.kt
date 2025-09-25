@@ -3,10 +3,18 @@ package world.respect
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
 import world.respect.app.app.App
+import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidImpl
+import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
@@ -18,6 +26,18 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
         super.onCreate(savedInstanceState)
 
         checkNotNull(scope)
+
+        val createPasskeyUseCase = getKoin().get<CreatePasskeyUseCase>()
+                as CreatePasskeyUseCaseAndroidImpl
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                CreatePasskeyUseCaseProcessor(
+                    activityContext = this@MainActivity,
+                    jobChannel = createPasskeyUseCase.requestChannel,
+                ).processJobs()
+            }
+        }
     }
 }
 

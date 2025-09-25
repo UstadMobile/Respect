@@ -30,7 +30,7 @@ import org.koin.dsl.module
 import passkey.EncodeUserHandleUseCaseImpl
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.credentials.passkey.CreatePasskeyUseCaseImpl
+import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidImpl
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.GetCredentialUseCaseImpl
 import world.respect.credentials.passkey.VerifyDomainUseCase
@@ -111,7 +111,6 @@ import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewMode
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import org.koin.core.qualifier.named
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
@@ -348,8 +347,7 @@ val appKoinModule = module {
     }
 
     single<CreatePasskeyUseCase> {
-        CreatePasskeyUseCaseImpl(
-            context = androidApplication(),
+        CreatePasskeyUseCaseAndroidImpl(
             json = get(),
             createPublicKeyJsonUseCase = get()
         )

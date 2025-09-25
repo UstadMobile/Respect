@@ -32,7 +32,7 @@ import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidImpl
 import world.respect.credentials.passkey.GetCredentialUseCase
-import world.respect.credentials.passkey.GetCredentialUseCaseImpl
+import world.respect.credentials.passkey.GetCredentialUseCaseAndroidImpl
 import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.credentials.passkey.VerifyDomainUseCaseImpl
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
@@ -354,8 +354,7 @@ val appKoinModule = module {
     }
 
     single<GetCredentialUseCase> {
-        GetCredentialUseCaseImpl(
-            context = androidApplication(),
+        GetCredentialUseCaseAndroidImpl(
             json = get(),
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )

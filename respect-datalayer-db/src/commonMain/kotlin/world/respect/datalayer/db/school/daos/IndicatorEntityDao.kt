@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.daos
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -42,6 +43,20 @@ interface IndicatorEntityDao {
 
     @Update
     suspend fun updateIndicator(entity: IndicatorEntity)
+
+    @Query(
+        """
+        SELECT * 
+         FROM IndicatorEntity
+        WHERE IndicatorEntity.iStored > :since 
+          AND (:guidHash = 0 OR IndicatorEntity.iGuidHash = :guidHash)
+     ORDER BY IndicatorEntity.iName
+    """
+    )
+    fun findAllAsPagingSource(
+        since: Long = 0,
+        guidHash: Long = 0,
+    ): PagingSource<Int, IndicatorEntity>
 
     @Query("SELECT COUNT(*) FROM IndicatorEntity")
     suspend fun getIndicatorCount(): Int

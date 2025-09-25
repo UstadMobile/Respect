@@ -28,12 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.respectRememberPager
 import world.respect.app.view.report.graph.CombinedGraph
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.No_data_available
@@ -47,18 +48,22 @@ fun ReportListScreen(
     viewModel: ReportListViewModel
 ) {
     val uiState: ReportListUiState by viewModel.uiState.collectAsState(ReportListUiState())
+    val pager = respectRememberPager(uiState.reportList)
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
     LazyVerticalGrid(
         columns = GridCells.Adaptive(200.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(4.dp)
     ) {
-        items(uiState.reportList.dataOrNull() ?: emptyList<Report>()) { report ->
-            ReportGridCard(
-                report = report,
-                viewModel = viewModel,
-                activeUserPersonUid = uiState.activeUserPersonUid
-            )
+        items(lazyPagingItems.itemSnapshotList) { report ->
+            report?.let {
+                ReportGridCard(
+                    report = it,
+                    viewModel = viewModel,
+                    activeUserPersonUid = uiState.activeUserPersonUid
+                )
+            }
         }
     }
 }

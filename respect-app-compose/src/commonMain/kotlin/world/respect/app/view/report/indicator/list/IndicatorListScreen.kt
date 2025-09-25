@@ -15,7 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.model.Indicator
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListUiState
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
@@ -25,7 +27,6 @@ fun IndicatorListScreen(
     viewModel: IndicatorListViewModel
 ) {
     val uiState: IndicatorListUiState by viewModel.uiState.collectAsState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -41,7 +42,7 @@ fun IndicatorListScreen(
 
             else -> {
                 IndicatorListContent(
-                    indicators = uiState.indicators,
+                    uiState = uiState,
                     onItemClick = { indicator ->
                         viewModel.onIndicatorSelected(indicator)
                     },
@@ -54,27 +55,29 @@ fun IndicatorListScreen(
 
 @Composable
 private fun IndicatorListContent(
-    indicators: List<Indicator>,
+    uiState: IndicatorListUiState,
     onItemClick: (Indicator) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pager = respectRememberPager(uiState.indicators)
+    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
     LazyColumn(
         modifier = modifier,
     ) {
-        items(indicators, key = { it.name }) { indicator ->
+        items(lazyPagingItems.itemSnapshotList) { indicator ->
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onItemClick(indicator) }
+                    .clickable { indicator?.also({ onItemClick(indicator) }) }
                     .padding(vertical = 12.dp)
             ) {
                 Text(
-                    text = indicator.name,
+                    text = indicator?.name ?: "",
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = indicator.description,
+                    text = indicator?.description ?: "",
                     color = MaterialTheme.colorScheme.primary
                 )
             }

@@ -13,9 +13,12 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.IndicatorEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.model.report.DefaultIndicators
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
 
 class IndicatorDataSourceDb(
@@ -63,6 +66,20 @@ class IndicatorDataSourceDb(
         )?.let {
             DataReadyState(IndicatorEntities(it).toModel())
         } ?: NoDataLoadedState.notFound()
+    }
+
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: IndicatorDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Indicator> {
+        return IPagingSourceFactory {
+            schoolDb.getIndicatorEntityDao().findAllAsPagingSource(
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            ).map {
+                IndicatorEntities(it).toModel()
+            }
+        }
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>> {

@@ -57,7 +57,7 @@ interface ReportEntityDao {
 
     @Query(
         """
-        SELECT * 
+        SELECT ReportEntity.* 
          FROM ReportEntity
         WHERE ReportEntity.rStored > :since 
           AND (:guidHash = 0 OR ReportEntity.rGuidHash = :guidHash)

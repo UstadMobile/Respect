@@ -1,9 +1,14 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
+import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
@@ -12,12 +17,16 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
+import world.respect.datalayer.ext.useTokenProvider
+import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
+import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 class ReportDataSourceHttp(
@@ -67,6 +76,25 @@ class ReportDataSourceHttp(
         }.firstOrNotLoaded()
     }
 
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: ReportDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Report> {
+        return IPagingSourceFactory {
+            OffsetLimitHttpPagingSource(
+                baseUrlProvider = { params.urlWithParams() },
+                httpClient = httpClient,
+                validationHelper = validationHelper,
+                typeInfo = typeInfo<List<Report>>(),
+                requestBuilder = {
+                    useTokenProvider(tokenProvider)
+                    useValidationCacheControl(validationHelper)
+                },
+                tag = "Report-HTTP",
+            )
+        }
+    }
+
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Report>> {
         return httpClient.getDataLoadResultAsFlow<List<Report>>(
             urlFn = {
@@ -88,6 +116,12 @@ class ReportDataSourceHttp(
     }
 
     override suspend fun store(list: List<Report>) {
-        throw IllegalStateException("Report-store-http: Not yet supported")
+        httpClient.post(
+            respectEndpointUrl(ReportDataSource.ENDPOINT_NAME)
+        ) {
+            useTokenProvider(tokenProvider)
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }
     }
 }

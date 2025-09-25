@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school
 
-import androidx.paging.PagingSource
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.DataLoadParams
@@ -17,7 +17,9 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import kotlin.collections.map
 import kotlin.time.Clock
 
 class ReportDataSourceDb(
@@ -27,18 +29,31 @@ class ReportDataSourceDb(
 
     private suspend fun upsertReports(
         reports: List<Report>,
-        @Suppress("unused") forceOverwrite: Boolean
+        forceOverwrite: Boolean = false,
     ) {
-        if (reports.isEmpty()) return
+        if(reports.isEmpty())
+            return
 
         schoolDb.useWriterConnection { con ->
             val timeStored = Clock.System.now()
+
+            var numUpdated = 0
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 reports.map { it.copy(stored = timeStored) }.forEach { report ->
                     val entities = report.toEntities(uidNumberMapper)
-                    schoolDb.getReportEntityDao().putReport(entities.reportEntity)
+                    val lastModifiedInDb = schoolDb.getReportEntityDao().getLastModifiedByGuid(
+                        entities.reportEntity.rGuidHash
+                    ) ?: -1
+
+                    if(forceOverwrite ||
+                        entities.reportEntity.rLastModified > lastModifiedInDb) {
+                        schoolDb.getReportEntityDao().putReport(entities.reportEntity)
+                        numUpdated++
+                    }
                 }
             }
+            Napier.d("RPaging/ReportDataSourceDb: updated: $numUpdated/${reports.size}")
+
         }
     }
 
@@ -65,6 +80,20 @@ class ReportDataSourceDb(
         )?.let {
             DataReadyState(ReportEntities(it).toModel())
         } ?: NoDataLoadedState.notFound()
+    }
+
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: ReportDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Report> {
+        return IPagingSourceFactory {
+            schoolDb.getReportEntityDao().findAllAsPagingSource(
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            ).map {
+                ReportEntities(it).toModel()
+            }
+        }
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Report>> {

@@ -7,12 +7,15 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
+import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class IndicatorDataSourceRepository(
@@ -41,6 +44,22 @@ class IndicatorDataSourceRepository(
         return local.findByGuid(params, guid)
     }
 
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: IndicatorDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Indicator> {
+        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
+        return RepositoryPagingSourceFactory(
+            local = local.listAsPagingSource(loadParams, params),
+            onRemoteLoad = { remoteLoadParams ->
+                remoteSource.loadAndUpdateLocal2(
+                    remoteLoadParams, local::updateLocal
+                )
+            },
+            tag = "IndicatorRepo.listAsPagingSource"
+        )
+    }
+
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>> {
         return local.findByGuidAsFlow(guid).combineWithRemote(
             remoteFlow = remote.findByGuidAsFlow(guid).onEach {
@@ -59,7 +78,7 @@ class IndicatorDataSourceRepository(
         remoteWriteQueue.add(
             list.map {
                 WriteQueueItem(
-                    model = WriteQueueItem.Model.CLASS,
+                    model = WriteQueueItem.Model.INDICATOR,
                     uid = it.indicatorId,
                     timeQueued = timeNow,
                 )

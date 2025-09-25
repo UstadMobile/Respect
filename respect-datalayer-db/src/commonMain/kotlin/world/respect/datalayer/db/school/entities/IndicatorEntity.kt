@@ -12,4 +12,6 @@ data class IndicatorEntity(
     val iDescription: String = "",
     val iType: String = "",
     val iSql: String = "",
+    val iStored:Long,
+    val iLastModified: Long
 )

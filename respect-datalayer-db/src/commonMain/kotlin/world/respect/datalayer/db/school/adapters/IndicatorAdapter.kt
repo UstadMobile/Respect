@@ -1,10 +1,9 @@
 package world.respect.datalayer.db.school.adapters
 
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.IndicatorEntity
 import world.respect.datalayer.school.model.Indicator
-import world.respect.libxxhash.XXStringHasher
+import kotlin.time.Instant
 
 data class IndicatorEntities(
     val indicator: IndicatorEntity
@@ -15,8 +14,11 @@ fun IndicatorEntities.toModel(): Indicator {
         name = indicator.iName,
         description = indicator.iDescription,
         type = indicator.iType,
-        sql = indicator.iSql
-    )
+        sql = indicator.iSql,
+        stored = Instant.fromEpochMilliseconds(indicator.iStored),
+        lastModified = Instant.fromEpochMilliseconds(indicator.iLastModified),
+
+        )
 }
 
 fun Indicator.toEntities(
@@ -29,6 +31,8 @@ fun Indicator.toEntities(
         iName = name,
         iDescription = description,
         iType = type,
-        iSql = sql
+        iSql = sql,
+        iLastModified = lastModified.toEpochMilliseconds(),
+        iStored = stored.toEpochMilliseconds(),
     ))
 }

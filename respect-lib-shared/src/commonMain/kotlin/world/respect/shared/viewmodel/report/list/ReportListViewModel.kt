@@ -13,11 +13,12 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
@@ -35,7 +36,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.time.ExperimentalTime
 
 data class ReportListUiState(
-    val reportList: DataLoadState<List<Report>> = DataLoadingState(),
+    val reportList: IPagingSourceFactory<Int, Report> = EmptyPagingSourceFactory(),
     val activeUserPersonUid: Long = 0L,
     val xAxisFormatter: GraphFormatter<String>? = null,
     val yAxisFormatter: GraphFormatter<Double>? = null
@@ -53,6 +54,12 @@ class ReportListViewModel(
     val uiState: Flow<ReportListUiState> = _uiState.asStateFlow()
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val pagingSourceHolder = PagingSourceFactoryHolder {
+        schoolDataSource.reportDataSource.listAsPagingSource(
+            loadParams = DataLoadParams(),
+            params = ReportDataSource.GetListParams()
+        )
+    }
     init {
         viewModelScope.launch {
             _appUiState.update { prev ->
@@ -67,16 +74,11 @@ class ReportListViewModel(
                     )
                 )
             }
-
             viewModelScope.launch {
-                schoolDataSource.reportDataSource.listAsFlow(
-                    loadParams = DataLoadParams(),
-                    listParams = ReportDataSource.GetListParams(),
-                    template = false
-                ).collect {
-                    _uiState.update { state ->
-                        state.copy(reportList = it)
-                    }
+                _uiState.update { prev ->
+                    prev.copy(
+                        reportList = pagingSourceHolder,
+                    )
                 }
             }
         }

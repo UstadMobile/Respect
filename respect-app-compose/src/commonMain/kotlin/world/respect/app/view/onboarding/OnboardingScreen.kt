@@ -131,7 +131,7 @@ fun OnboardingScreen(
                         text = item.onboardingTitle,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.defaultItemPadding(top = 16.dp),
+                        modifier = Modifier.defaultItemPadding(bottom = 0.dp),
                         textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(8.dp))
@@ -139,7 +139,7 @@ fun OnboardingScreen(
                         text = item.onboardingDescription,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.defaultItemPadding(),
+                        modifier = Modifier.defaultItemPadding(top = 0.dp),
                         textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(32.dp))

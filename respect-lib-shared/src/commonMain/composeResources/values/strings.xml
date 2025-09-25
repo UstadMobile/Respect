@@ -65,10 +65,6 @@
     <string name="i_am_parent">I’m a Parent</string>
     <string name="accept">Accept</string>
     <string name="terms_and_conditions">Terms and conditions</string>
-    <string name="agree_terms_and_conditions">Please agree to the terms and conditions</string>
-
-    <string name="headline_consent_content">I agree to anonymous usage reporting and crash reports to help improve the app experience.</string>
-    <string name="supporting_consent_content">No personal information will be collected.</string>"
     <string name="your_profile_title">Your profile</string>
     <string name="your_name_label">Your name*</string>
     <string name="your_gender_label">Your gender*</string>

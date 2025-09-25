@@ -37,10 +37,8 @@ class OnboardingViewModel(
                 hideAppBar = true
             )
         }
-
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
     }
-
     fun onToggleUsageStatsOptIn() {
         _uiState.update { prev ->
             prev.copy(
@@ -48,8 +46,8 @@ class OnboardingViewModel(
             )
         }
     }
-
     fun onClickGetStartedButton() {
+
         settings.putString(ShouldShowOnboardingUseCase.KEY_ONBOARDING_SHOWN, true.toString())
         setUsageReportingEnabledUseCase(_uiState.value.usageStatsOptInChecked)
 

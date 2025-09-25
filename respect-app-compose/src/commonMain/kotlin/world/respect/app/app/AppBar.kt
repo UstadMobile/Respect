@@ -63,7 +63,7 @@ fun RespectAppBar(
     val showUserAccountIcon = appUiState.userAccountIconVisible ?: !appUiState.actionBarButtonState.visible
 
     val accountManager: RespectAccountManager = koinInject()
-    val activeAccount by accountManager.activeAccountAndPersonFlow.collectAsState(null)
+    val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
 
     var searchActive by remember {
         mutableStateOf(false)

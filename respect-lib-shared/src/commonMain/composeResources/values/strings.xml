@@ -56,7 +56,6 @@
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
     <string name="login">Login</string>
-    <string name="userId_label">UserId</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
     <string name="password_placeholder">Enter your password</string>
@@ -78,6 +77,7 @@
     <string name="child_gender_label">Child's gender*</string>
     <string name="child_dob_label">Child's date of birth*</string>
     <string name="child_note">Please enter your child's details.</string>
+    <string name="date_of_birth">Date of birth</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
@@ -159,6 +159,18 @@
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 
+    <string name="get_started">Get Started</string>
+    <string name="onboardingTitle1">Digital Library of Edtech Apps</string>
+    <string name="onboardingTitle2">Works Offline and Saves Data</string>
+    <string name="onboardingTitle3">Assignments</string>
+    <string name="onboardingTitle4">Data Reporting</string>
+
+    <string name="onboardingDescription1">RESPECT™ makes it easy to discover and use great edtech apps with a single account.</string>
+    <string name="onboardingDescription2">Download lessons to use offline. RESPECT™'s compression can reduce data usage.</string>
+    <string name="onboardingDescription3">Teachers can easily assign lessons from any edtech app on RESPECT™ as homework for students to complete on their parents' phone or any other device.</string>
+    <string name="onboardingDescription4">Track progress with detailed reports.</string>
+
+    <string name="send_usage_stats_and_crash_reports">Send anonymous usage data and crash reports to RESPECT™.</string>
 
     <!-- Edit Report -->
     <string name="edit_report">Edit report</string>
@@ -233,8 +245,6 @@
     <string name="manage_indicators">Manage Indicators</string>
     <string name="indicator">Indicator</string>
     <string name="indicator_detail">Indicator detail</string>
-
-
 
 
     <!-- Conditions -->

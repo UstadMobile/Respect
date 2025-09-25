@@ -103,6 +103,8 @@ interface PersonEntityDao {
                                     COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
                )
               ) 
+         AND (:filterByName IS NULL 
+              OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
      ORDER BY PersonEntity.pGivenName
     """)
     fun findAllAsPagingSource(
@@ -110,6 +112,7 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
     ): PagingSource<Int, PersonEntityWithRoles>
 
@@ -119,9 +122,32 @@ interface PersonEntityDao {
                PersonEntity.pFamilyName AS familyName, 
                PersonEntity.pUsername AS username
           FROM PersonEntity
-      ORDER BY PersonEntity.pGivenName    
+        WHERE PersonEntity.pStored > :since 
+          AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
+          AND (:inClazzGuidHash = 0 OR
+               EXISTS(
+                    SELECT EnrollmentEntity.eUid
+                      FROM EnrollmentEntity
+                     WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
+                       AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
+                       AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
+                       AND :timeNow BETWEEN
+                                    COALESCE(EnrollmentEntity.eBeginDate, 0) AND
+                                    COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
+               )
+              ) 
+         AND (:filterByName IS NULL 
+              OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
+     ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllListDetailsAsPagingSource(): PagingSource<Int, PersonListDetails>
+    fun findAllListDetailsAsPagingSource(
+        since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+    ): PagingSource<Int, PersonListDetails>
     @Query("""
             SELECT * 
             FROM PersonEntity

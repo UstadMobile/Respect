@@ -76,14 +76,14 @@ class RespectAccountManager(
             }
         }
 
-    val activeAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
+    val selectedAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
         _selectedAccountGuid
     ) { accountList, activeAccountSourcedId ->
         accountList.firstOrNull { it.userGuid == activeAccountSourcedId }
     }
 
-    val activeAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
-        activeAccountFlow.collectLatest { account ->
+    val selectedAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
+        selectedAccountFlow.collectLatest { account ->
             val person = if(account != null) {
                 val accountScope = getOrCreateAccountScope(account)
                 val schoolDataSource: SchoolDataSource = accountScope.get()

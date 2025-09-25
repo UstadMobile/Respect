@@ -74,6 +74,11 @@ class LoginViewModel(
                 if (isRpIDVerified){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = RespectAppLauncher, clearBackStack = true
+                                )
+                            )
                            val passkeyVerifyResult = verifyPasskeyUseCase(
                                 authenticationResponseJSON = credentialResult.passkeyWebAuthNResponse,
                                 schoolUrl = route.schoolUrl,
@@ -85,7 +90,9 @@ class LoginViewModel(
                                     schoolUrl = route.schoolUrl
                                 )
                                 _navCommandFlow.tryEmit(
-                                    NavCommand.Navigate(RespectAppLauncher)
+                                    NavCommand.Navigate(
+                                        destination = RespectAppLauncher, clearBackStack = true
+                                    )
                                 )
                             }
                         }

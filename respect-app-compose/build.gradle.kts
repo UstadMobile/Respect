@@ -18,6 +18,21 @@ val keystoreProperties = Properties()
 keystoreProperties.takeIf { keystorePropertiesFile.exists() }
     ?.load(FileInputStream(keystorePropertiesFile))
 
+val acraProperties = Properties()
+val acraPropertiesFile = System.getenv("ACRA")?.let {
+    File(it)
+} ?: rootProject.file("acra.properties")
+
+acraProperties.takeIf { acraPropertiesFile.exists() }
+    ?.load(FileInputStream(acraPropertiesFile))
+
+val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
+
+ACRA_PROP_NAMES.forEach { propName ->
+    System.getenv("ACRA_${propName.uppercase()}")?.also {
+        acraProperties.setProperty(propName, it)
+    }
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -70,6 +85,10 @@ kotlin {
             implementation(libs.androidx.webkit)
             implementation(libs.material)
             implementation(libs.androidx.appcompat)
+
+
+            implementation(libs.acra.http)
+            implementation(libs.acra.core)
         }
 
         commonMain.dependencies {
@@ -120,6 +139,10 @@ kotlin {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
+
     signingConfigs {
         println("Keystore exists: ${keystorePropertiesFile.exists()}")
         //See https://developer.android.com/build/building-cmdline#gradle_signing
@@ -140,8 +163,16 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 6
+        versionName = "1.0.5"
+
+        for(propName in ACRA_PROP_NAMES) {
+            buildConfigField(
+                type = "String",
+                name = "ACRA_${propName.uppercase()}",
+                value = "\"${acraProperties.getProperty(propName) ?: ""}\"   "
+            )
+        }
     }
 
     packaging {

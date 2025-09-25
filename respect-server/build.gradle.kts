@@ -72,3 +72,11 @@ dependencies {
 }
 
 tasks.named("build").dependsOn("generateSwaggerUI")
+
+tasks.withType<Tar>() {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Zip>() {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -26,6 +27,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.util.LaunchDebouncer
+import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 
 
@@ -63,8 +65,7 @@ class PersonListViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.people.asUiText(),
-                fabState = FabUiState(
-                    visible = true,
+                fabState = it.fabState.copy(
                     onClick = ::onClickAdd,
                     text = Res.string.person.asUiText(),
                     icon = FabUiState.FabIcon.ADD,
@@ -75,6 +76,18 @@ class PersonListViewModel(
                     onSearchTextChanged = ::onSearchTextChanged
                 )
             )
+        }
+
+        viewModelScope.launch {
+            accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
+                _appUiState.update { prev ->
+                    prev.copy(
+                        fabState = prev.fabState.copy(
+                            visible = selectedAcct?.person?.isAdminOrTeacher() == true
+                        )
+                    )
+                }
+            }
         }
 
         _uiState.update {

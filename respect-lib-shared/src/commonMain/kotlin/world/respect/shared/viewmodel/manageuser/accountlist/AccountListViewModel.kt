@@ -56,7 +56,7 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
-            respectAccountManager.activeAccountAndPersonFlow.collect { accountAndPerson ->
+            respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
                     prev.copy(selectedAccount = accountAndPerson)
                 }
@@ -65,7 +65,7 @@ class AccountListViewModel(
 
         viewModelScope.launch {
             respectAccountManager.accounts.combine(
-                respectAccountManager.activeAccountFlow
+                respectAccountManager.selectedAccountFlow
             ) { storedAccounts, activeAccount ->
                 Pair(storedAccounts, activeAccount)
             }.collectLatest { (storedAccounts, activeAccount) ->

@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_link_provided_message
 import world.respect.shared.generated.resources.example_url_placeholder
 import world.respect.shared.generated.resources.link_label
 import world.respect.shared.generated.resources.next

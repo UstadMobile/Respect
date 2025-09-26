@@ -1,21 +1,29 @@
 package world.respect.app.view.schooldirectory.edit
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.enter_link
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.app_link_provided_message
+import world.respect.shared.generated.resources.example_url_placeholder
+import world.respect.shared.generated.resources.link_label
+import world.respect.shared.generated.resources.next
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditUIState
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 
@@ -27,45 +35,66 @@ fun SchoolDirectoryEditScreen(
     val uiState by viewModel.uiState.collectAsState(Dispatchers.Main.immediate)
     SchoolDirectoryEditScreen(
         uiState = uiState,
-        onClearError =  viewModel::onClearError
-
-    )
+        onLinkChanged = viewModel::onLinkChanged,
+        onClickNext = viewModel::onClickNext,
+        )
 }
 
 @Composable
 fun SchoolDirectoryEditScreen(
     uiState: SchoolDirectoryEditUIState,
-    onClearError: () -> Unit = {},
+    onLinkChanged: (String) -> Unit,
+    onClickNext: () -> Unit,
     ) {
-    val schoolDirectory = uiState.schoolDirectory.dataOrNull()
-    val fieldsEnabled = uiState.fieldsEnabled
-
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
+        Text(
+            text = stringResource(Res.string.app_link_provided_message),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-            value =  "",
+            value = uiState.linkUrl,
+            onValueChange = onLinkChanged,
             label = {
                 Text(
-                    stringResource(Res.string.enter_link)
+                    text = stringResource(Res.string.link_label)
                 )
             },
-            onValueChange = { value ->
-             /*   schoolDirectory?.also {
-                    onEntityChanged(it.copy(title = value))
-                }*/
-                if (uiState.schoolDirectoryUrlError != null && value.isNotBlank()) {
-                    onClearError()
-                }
+            placeholder = {
+                Text(
+                    text = stringResource(Res.string.example_url_placeholder),
+                )
             },
             singleLine = true,
-            supportingText = {
-                Text(stringResource(Res.string.required))
-            },
-            enabled = fieldsEnabled,
-            isError = uiState.schoolDirectoryUrlError != null
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            modifier = Modifier.fillMaxWidth(),
+            isError = uiState.errorMessage != null,
+            supportingText = uiState.errorMessage?.let {
+                {
+                    Text(
+                        text = uiTextStringResource(it)
+                    )
+                }
+            }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onClickNext,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(Res.string.next),
+            )
+        }
+
+
     }
 
 }

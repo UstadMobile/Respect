@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.schooldirectory.edit
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,12 +18,14 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_directory
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.getValue
 
 data class SchoolDirectoryEditUIState(
-    val schoolDirectoryUrlError: String? = null,
+    val linkUrl: String = "",
+    val errorMessage: UiText? = null,
     val schoolDirectory: DataLoadState<SchoolDirectoryEntry> = DataLoadingState(),
 ) {
     val fieldsEnabled: Boolean
@@ -35,6 +38,7 @@ class SchoolDirectoryEditViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
     private val respectAppDataSource: RespectAppDataSource by inject()
 
     private val _uiState = MutableStateFlow(SchoolDirectoryEditUIState())
@@ -52,8 +56,22 @@ class SchoolDirectoryEditViewModel(
         }
     }
 
-    fun onClearError() {
-        _uiState.update { prev -> prev.copy(schoolDirectoryUrlError = null) }
+    fun onLinkChanged(link: String){
+        _uiState.update {
+            it.copy(
+                linkUrl = link,
+                errorMessage = null,
+            )
+        }
     }
+
+
+    fun onClickNext() {
+        viewModelScope.launch {
+            val link = uiState.value.linkUrl.trim()
+            val linkUrl = Url(link)
+        }
+    }
+
 
 }

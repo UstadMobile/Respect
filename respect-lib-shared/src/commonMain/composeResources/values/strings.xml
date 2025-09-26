@@ -121,13 +121,16 @@
     <string name="edit">Edit</string>
     <string name="edit_clazz">Edit class</string>
     <string name="add_clazz">Add class</string>
-
+    <string name="settings">Settings</string>
+    <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
     <string name="school_not_found">School not found</string>
+    <string name="add_directory">Add Directory</string>
+    <string name="edit_directory">Edit Directory</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>

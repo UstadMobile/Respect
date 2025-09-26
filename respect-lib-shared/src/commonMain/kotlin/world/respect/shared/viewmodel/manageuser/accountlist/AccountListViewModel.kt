@@ -21,6 +21,7 @@ import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.SettingScreen
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
 import world.respect.shared.viewmodel.RespectViewModel
@@ -151,6 +152,9 @@ class AccountListViewModel(
         _navCommandFlow.tryEmit(NavCommand.Navigate(GetStartedScreen))
     }
 
+    fun onClickSettings() {
+        _navCommandFlow.tryEmit(NavCommand.Navigate(SettingScreen))
+    }
 
     fun onClickLogout() {
         uiState.value.selectedAccount?.also {

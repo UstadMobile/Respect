@@ -2,8 +2,10 @@ package world.respect.datalayer.db.opds.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 @Entity
+@Serializable
 class PersonPasskeyEntity(
     @PrimaryKey(autoGenerate = true)
     val personPasskeyUid: Long = 0,

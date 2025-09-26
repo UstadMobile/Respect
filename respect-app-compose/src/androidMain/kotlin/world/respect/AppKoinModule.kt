@@ -115,6 +115,8 @@ import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.personPassword.GetPersonPassword
+import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
@@ -122,11 +124,17 @@ import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUse
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
+import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysClient
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
+import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
+import world.respect.shared.domain.account.passkey.RevokePasskeyUseCaseClient
 import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
@@ -147,6 +155,8 @@ import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewMode
 import world.respect.shared.viewmodel.report.indictor.detail.IndicatorDetailViewModel
 import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewModel
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
+import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
+import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
@@ -233,11 +243,13 @@ val appKoinModule = module {
     viewModelOf(::WaitingForApprovalViewModel)
     viewModelOf(::CreateAccountViewModel)
     viewModelOf(::GetStartedViewModel)
+    viewModelOf(::PasskeyListViewModel)
     viewModelOf(::HowPasskeyWorksViewModel)
     viewModelOf(::OtherOptionsViewModel)
     viewModelOf(::OtherOptionsSignupViewModel)
     viewModelOf(::EnterPasswordSignupViewModel)
     viewModelOf(::AccountListViewModel)
+    viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
     viewModelOf(::PersonEditViewModel)
     viewModelOf(::PersonDetailViewModel)
@@ -501,6 +513,12 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
+        scoped<SavePersonPasskeyUseCase> {
+            SavePersonPasskeyUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+            )
+        }
 
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
@@ -562,6 +580,24 @@ val appKoinModule = module {
             )
         }
 
+        scoped<GetPersonPassword> {
+            GetPersonPasswordDbImpl(
+                respectSchoolDatabase = get(),
+                xxHash = get()
+            )
+        }
+        scoped<GetActivePersonPasskeysUseCase> {
+            GetActivePersonPasskeysClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+            )
+        }
+        scoped<RevokePasskeyUseCase> {
+            RevokePasskeyUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+            )
+        }
         scoped<EnqueueDrainRemoteWriteQueueUseCase> {
             EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
                 context = androidContext().applicationContext,

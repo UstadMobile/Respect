@@ -25,6 +25,13 @@ abstract class PersonPasskeyEntityDao {
            AND ppPersonUid = :uid
     """)
     abstract fun getAllActivePasskeys(uid: Long): Flow<List<PersonPasskeyEntity>>
+    @Query("""
+        SELECT * 
+          FROM PersonPasskeyEntity
+         WHERE isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
+           AND ppPersonUid = :uid
+    """)
+    abstract suspend fun getAllActivePasskeysList(uid: Long): List<PersonPasskeyEntity>
 
     @Query("""
         SELECT *

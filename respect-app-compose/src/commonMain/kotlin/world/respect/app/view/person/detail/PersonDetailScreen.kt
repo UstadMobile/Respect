@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -11,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
+import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.viewmodel.person.detail.PersonDetailUiState
@@ -19,6 +22,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.username_label
+import world.respect.shared.generated.resources.manage_account
 import world.respect.shared.util.ext.label
 
 @Composable
@@ -26,12 +30,16 @@ fun PersonDetailScreen(
     viewModel: PersonDetailViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    PersonDetailScreen(uiState)
+    PersonDetailScreen(
+        uiState,
+        onClickManageAccount = {viewModel.navigateToManageAccount()}
+    )
 }
 
 @Composable
 fun PersonDetailScreen(
     uiState: PersonDetailUiState,
+    onClickManageAccount:()->Unit
 ) {
     val person = uiState.person.dataOrNull()
     Column(
@@ -58,6 +66,12 @@ fun PersonDetailScreen(
                 value = { Text(it.toString()) }
             )
         }
-
+        if (uiState.manageAccountVisible){
+            RespectQuickActionButton(
+                labelText = stringResource(Res.string.manage_account),
+                imageVector = Icons.Default.Key,
+                onClick = onClickManageAccount
+            )
+        }
     }
 }

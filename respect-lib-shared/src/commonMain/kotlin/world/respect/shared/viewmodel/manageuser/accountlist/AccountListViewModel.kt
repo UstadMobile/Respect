@@ -20,6 +20,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
@@ -149,6 +150,17 @@ class AccountListViewModel(
 
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(NavCommand.Navigate(GetStartedScreen))
+    }
+    fun onClickProfile() {
+        uiState.value.selectedAccount?.also {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    PersonDetail.create(
+                        guid = it.account.userGuid
+                    )
+                )
+            )
+        }
     }
 
 

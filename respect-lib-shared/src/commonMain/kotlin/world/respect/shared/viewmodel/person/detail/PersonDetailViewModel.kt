@@ -18,6 +18,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
+import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
@@ -29,7 +30,10 @@ import kotlin.getValue
 
 data class PersonDetailUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
-)
+){
+    val manageAccountVisible: Boolean
+        get() = person.dataOrNull()?.username != null
+}
 
 class PersonDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -79,5 +83,18 @@ class PersonDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(PersonEdit(route.guid))
         )
+    }
+    fun navigateToManageAccount() {
+        uiState.value.person.dataOrNull().let {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    ManageAccount.create(
+                        guid = route.guid,
+                        personName = it?.givenName ?: "",
+                        personUsername = it?.username ?: return
+                    )
+                )
+            )
+        }
     }
 }

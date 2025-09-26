@@ -37,6 +37,7 @@ fun AccountListScreen(
         onClickAccount = viewModel::onClickAccount,
         onClickAddAccount = viewModel::onClickAddAccount,
         onClickLogout = viewModel::onClickLogout,
+        onClickProfile = viewModel::onClickProfile,
     )
 }
 
@@ -46,6 +47,7 @@ fun AccountListScreen(
     onClickAccount: (RespectAccount) -> Unit,
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
+    onClickProfile: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -57,7 +59,7 @@ fun AccountListScreen(
                 extras = {
                     Row {
                         OutlinedButton(
-                            onClick =  {},
+                            onClick =  {onClickProfile()},
                         ) {
                             Text(stringResource(Res.string.profile))
                         }

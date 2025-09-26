@@ -40,6 +40,10 @@ import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfil
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysDbImpl
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
+import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
+import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
@@ -194,7 +198,18 @@ fun serverKoinModule(
                 xxHash = get(),
             )
         }
-
+        scoped<GetActivePersonPasskeysUseCase> {
+            GetActivePersonPasskeysDbImpl(
+                schoolDb = get(),
+                xxStringHasher = get(),
+            )
+        }
+        scoped<RevokePasskeyUseCase> {
+            RevokePersonPasskeyUseCaseDbImpl(
+                schoolDb = get(),
+                xxStringHasher = get(),
+            )
+        }
         scoped<SchoolPrimaryKeyGenerator> {
             SchoolPrimaryKeyGenerator(
                 PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)

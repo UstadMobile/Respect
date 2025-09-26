@@ -11,9 +11,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
-import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -53,7 +53,7 @@ data class CreateAccountViewModelUiState(
 
 class CreateAccountViewModel(
     savedStateHandle: SavedStateHandle,
-    private val verifyDomainUseCase: VerifyDomainUseCase,
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
@@ -100,7 +100,7 @@ class CreateAccountViewModel(
             val rpId = schoolDirEntryVal.rpId
             val passkeySupportedVal = createPasskeyUseCase != null &&
                     rpId != null &&
-                    verifyDomainUseCase(rpId)
+                    checkPasskeySupportUseCase(rpId)
 
             passkeySupported.complete(passkeySupportedVal)
 

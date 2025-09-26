@@ -79,6 +79,7 @@ class PersonEditViewModel(
                     onClick = ::onClickSave,
                     text = Res.string.save.asUiText(),
                     enabled = false,
+                    visible = true,
                 )
             )
         }
@@ -150,8 +151,6 @@ class PersonEditViewModel(
             }catch(e: Throwable) {
                 //needs to display snack bar here
             }
-
-
         }
     }
 

@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.GetCredentialUseCase
-import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -41,8 +41,8 @@ class LoginViewModel(
     private val accountManager: RespectAccountManager,
     getCredentialUseCase: GetCredentialUseCase,
     respectAppDataSource: RespectAppDataSource,
-    private val verifyDomainUseCase: VerifyDomainUseCase,
-    private val verifyPasskeyUseCase: VerifyPasskeyUseCase
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
+    private val verifyPasskeyUseCase: VerifyPasskeyUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -70,8 +70,8 @@ class LoginViewModel(
                     else -> null
                 }
 
-                val isRpIDVerified = verifyDomainUseCase(rpId?:"")
-                if (isRpIDVerified){
+                val isPasskeySupported = checkPasskeySupportUseCase(rpId?:"")
+                if (isPasskeySupported){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
                             _navCommandFlow.tryEmit(

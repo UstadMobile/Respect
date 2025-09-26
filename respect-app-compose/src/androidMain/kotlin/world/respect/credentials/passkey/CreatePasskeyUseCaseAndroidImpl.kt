@@ -1,5 +1,6 @@
 package world.respect.credentials.passkey
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
@@ -10,7 +11,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Create a passkey on Android. This will show a bottom sheet for the user to approve creating a new
@@ -29,17 +29,18 @@ class CreatePasskeyUseCaseAndroidImpl(
 
     data class CreatePublicKeyCredentialRequestJob(
         val request: CreatePublicKeyCredentialRequest,
-        val id: Int,
         val response: CompletableDeferred<CreatePublicKeyCredentialResponse> = CompletableDeferred()
     )
 
-    private val idCounter = AtomicInteger()
-
-    val requestChannel = Channel<CreatePublicKeyCredentialRequestJob>(capacity = Channel.UNLIMITED)
+    val requestChannel = Channel<CreatePublicKeyCredentialRequestJob>(capacity = Channel.RENDEZVOUS)
 
     /**
      * @throws CreateCredentialException if CredentialManager throws an exception
+     *
+     * SuppressLint note: This will not be invoked when CheckPasskeySupportUseCase returns false,
+     * which it will if minimum Android version requirement is not met.
      */
+    @SuppressLint("PublicKeyCredential")
     override suspend fun invoke(
         username: String,
         rpId: String
@@ -52,7 +53,6 @@ class CreatePasskeyUseCaseAndroidImpl(
                     ),
                     preferImmediatelyAvailableCredentials = false,
                 ),
-                id = idCounter.incrementAndGet(),
             )
             requestChannel.trySend(job)
             val response = job.response.await()

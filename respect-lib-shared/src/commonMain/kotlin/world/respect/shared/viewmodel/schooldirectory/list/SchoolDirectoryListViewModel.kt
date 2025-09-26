@@ -47,8 +47,9 @@ class SchoolDirectoryListViewModel(
                 hideBottomNavigation = true,
                 fabState = it.fabState.copy(
                     icon = FabUiState.FabIcon.ADD,
-                    text = Res.string.clazz.asUiText(),
-                    onClick = ::onClickAdd
+                    text = Res.string.school_directory.asUiText(),
+                    onClick = ::onClickAdd,
+                    visible = true
                 )
             )
         }

@@ -1,17 +1,16 @@
-package world.respect.server.account.invite.verify
+package world.respect.shared.domain.account.passkey
 
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.converter.exception.DataConversionException
 import com.webauthn4j.credential.CredentialRecord
 import com.webauthn4j.credential.CredentialRecordImpl
-import com.webauthn4j.data.AuthenticationData
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.AuthenticationRequest
-import com.webauthn4j.data.RegistrationData
 import com.webauthn4j.data.RegistrationRequest
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.model.ClientDataJSON
@@ -27,8 +26,6 @@ class VerifySignInWithPasskeyUseCase(
 ) {
 
     private val webAuthnManager: WebAuthnManager = WebAuthnManager.createNonStrictWebAuthnManager()
-
-    var result: AuthenticationData? = null
 
     suspend operator fun invoke(
         authenticationResponseJSON: AuthenticationResponseJSON,
@@ -57,7 +54,9 @@ class VerifySignInWithPasskeyUseCase(
         val userVerificationRequired = true
         val userPresenceRequired = true
 
-        val passkeyData = schoolDb.getPersonPasskeyEntityDao().findPersonPasskeyFromClientDataJson(authenticationResponseJSON.id)
+        val passkeyData = schoolDb.getPersonPasskeyEntityDao()
+            .findPersonPasskeyFromClientDataJson(authenticationResponseJSON.id)
+            ?: throw IllegalArgumentException().withHttpStatus(401)
 
         val credentialRecord = createCredentialRecord( passkeyData)
 
@@ -69,74 +68,63 @@ class VerifySignInWithPasskeyUseCase(
             null,
             signatureByte
         )
-        val authenticationParameters = credentialRecord?.let {
-            AuthenticationParameters(
-                serverProperty,
-                it,
-                allowCredentials,
-                userVerificationRequired,
-                userPresenceRequired
-            )
-        }
 
-        val authenticationData: AuthenticationData
-        try {
-            authenticationData = webAuthnManager.parse(authenticationRequest)
+        val authenticationParameters = AuthenticationParameters(
+            serverProperty,
+            credentialRecord,
+            allowCredentials,
+            userVerificationRequired,
+            userPresenceRequired
+        )
+
+
+        val authenticationData = try {
+            webAuthnManager.parse(authenticationRequest)
         } catch (e: DataConversionException) {
             throw e.withHttpStatus(404)
         }
 
-        try {
-            if (authenticationParameters != null) {
-                result = webAuthnManager.verify(authenticationData, authenticationParameters)
-            }
+        return try {
+            webAuthnManager.verify(authenticationData, authenticationParameters)
+            PasskeyVerifyResult(
+                isVerified =  true,
+                personUid = passkeyData.ppPersonUid
+            )
         } catch (e: Exception) {
-            throw e.withHttpStatus(404)
-        }
-        return if (result != null) {
-            PasskeyVerifyResult(isVerified = true,passkeyData?.ppPersonUid?:0L)
-        } else {
-            PasskeyVerifyResult(isVerified = false,0L)
+            Napier.w("VerifySigninWithPasskey: Failed", e)
+            PasskeyVerifyResult(isVerified = false, 0L)
         }
     }
 
     private fun createCredentialRecord(
-        passkeyData: PersonPasskeyEntity?,
-    ): CredentialRecord?{
+        passkeyEntity: PersonPasskeyEntity,
+    ): CredentialRecord {
+        val attestationObject = Base64.getUrlDecoder().decode(passkeyEntity.ppAttestationObj)
+        val clientDataJSON = Base64.getUrlDecoder().decode(passkeyEntity.ppClientDataJson)
+        val clientExtensionJSON: String? = null
+        val transports: Set<String> = setOf("internal", "hybrid")
 
-        var credentialRecord: CredentialRecord? = null
+        val registrationRequest = RegistrationRequest(
+            attestationObject,
+            clientDataJSON,
+            clientExtensionJSON,
+            transports
+        )
 
-        passkeyData?.let {
-            // Client properties
-            val attestationObject = Base64.getUrlDecoder().decode(it.ppAttestationObj)
-            val clientDataJSON = Base64.getUrlDecoder().decode(it.ppClientDataJson)
-            val clientExtensionJSON: String? = null
-            val transports: Set<String> = setOf("internal", "hybrid")
-
-            val registrationRequest = RegistrationRequest(
-                attestationObject,
-                clientDataJSON,
-                clientExtensionJSON,
-                transports
-            )
-
-            val registrationData: RegistrationData
-            try {
-                registrationData = webAuthnManager.parse(registrationRequest)
-            } catch (e: DataConversionException) {
-                throw e.withHttpStatus(404)
-            }
-
-            // Persist CredentialRecord object, which will be used in the authentication process.
-            credentialRecord = registrationData.attestationObject?.let { it1 ->
-                CredentialRecordImpl(
-                    it1,
-                    registrationData.collectedClientData,
-                    registrationData.clientExtensions,
-                    registrationData.transports
-                )
-            }
+        val registrationData =try {
+            webAuthnManager.parse(registrationRequest)
+        } catch (e: DataConversionException) {
+            throw e.withHttpStatus(404)
         }
-        return credentialRecord
+
+        // Persist CredentialRecord object, which will be used in the authentication process.
+        return registrationData.attestationObject?.let { it ->
+            CredentialRecordImpl(
+                it,
+                registrationData.collectedClientData,
+                registrationData.clientExtensions,
+                registrationData.transports
+            )
+        } ?: throw IllegalStateException("Null attestation object")
     }
 }

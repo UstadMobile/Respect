@@ -27,7 +27,7 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
-import world.respect.server.account.invite.verify.VerifySignInWithPasskeyUseCase
+import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
@@ -186,22 +186,28 @@ fun serverKoinModule(
 
         scoped<GetTokenAndUserProfileWithCredentialUseCase> {
             GetTokenAndUserProfileWithCredentialDbImpl(
+                schoolUrl = schoolUrl(),
                 schoolDb = get(),
                 xxHash = get(),
+                verifyPasskeyUseCase = get(),
+                respectAppDataSource = get(),
             )
         }
+
         scoped<GetActivePersonPasskeysUseCase> {
             GetActivePersonPasskeysDbImpl(
                 schoolDb = get(),
                 xxStringHasher = get(),
             )
         }
+
         scoped<RevokePasskeyUseCase> {
             RevokePersonPasskeyUseCaseDbImpl(
                 schoolDb = get(),
                 xxStringHasher = get(),
             )
         }
+
         scoped<SchoolPrimaryKeyGenerator> {
             SchoolPrimaryKeyGenerator(
                 PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)

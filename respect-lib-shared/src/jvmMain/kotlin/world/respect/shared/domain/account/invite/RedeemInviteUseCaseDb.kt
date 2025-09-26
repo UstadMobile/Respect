@@ -8,15 +8,19 @@ import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.toEntity
+import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -113,7 +117,21 @@ class RedeemInviteUseCaseDb(
                     )
                 )
 
-                getTokenAndUserProfileUseCase(credential)
+                val token = AuthToken(
+                    accessToken = randomString(32),
+                    timeCreated = System.currentTimeMillis(),
+                    ttl = TOKEN_DEFAULT_TTL,
+                )
+
+                val personGuidHash = uidNumberMapper(accountPerson.guid)
+                schoolDb.getAuthTokenEntityDao().insert(
+                    token.toEntity(accountPerson.guid, personGuidHash)
+                )
+
+                AuthResponse(
+                    token = token,
+                    person = accountPerson,
+                )
             }
         }
 

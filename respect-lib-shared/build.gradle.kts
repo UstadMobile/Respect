@@ -72,6 +72,7 @@ kotlin {
             implementation(libs.jsoup)
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.webauthn4j.core)
         }
 
         jvmTest.dependencies {

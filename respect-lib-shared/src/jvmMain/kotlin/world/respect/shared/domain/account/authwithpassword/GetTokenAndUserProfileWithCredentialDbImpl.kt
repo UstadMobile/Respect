@@ -1,13 +1,16 @@
 package world.respect.shared.domain.account.authwithpassword
 
+import io.ktor.http.Url
 import io.ktor.util.decodeBase64Bytes
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.libutil.ext.randomString
 import world.respect.libxxhash.XXStringHasher
 import world.respect.shared.domain.account.AuthResponse
@@ -15,6 +18,7 @@ import world.respect.datalayer.school.model.AuthToken
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import java.lang.IllegalStateException
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -26,8 +30,11 @@ import javax.crypto.spec.PBEKeySpec
  *           this would create a chicken/egg scenario.
  */
 class GetTokenAndUserProfileWithCredentialDbImpl(
+    private val schoolUrl: Url,
     private val schoolDb: RespectSchoolDatabase,
     private val xxHash: XXStringHasher,
+    private val verifyPasskeyUseCase: VerifySignInWithPasskeyUseCase?,
+    private val respectAppDataSource: RespectAppDataSource,
 ): GetTokenAndUserProfileWithCredentialUseCase {
 
     override suspend fun invoke(
@@ -60,11 +67,22 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
             }
 
             is RespectPasskeyCredential -> {
+                val rpId = respectAppDataSource.schoolDirectoryEntryDataSource
+                    .getSchoolDirectoryEntryByUrl(schoolUrl).dataOrNull()?.rpId
+                    ?: throw IllegalStateException("School $schoolUrl has no rpId")
+                        .withHttpStatus(400)
+
+                val verifyPasskeyUseCaseVal = verifyPasskeyUseCase
+                    ?: throw IllegalStateException("Verify passkey use case not provided")
+
+                verifyPasskeyUseCaseVal(
+                    credential.passkeyWebAuthNResponse,
+                    rpId = rpId
+                )
                 val passkeyId = credential.passkeyWebAuthNResponse.id
                 val personPasskey = schoolDb.getPersonPasskeyEntityDao().findPersonPasskeyFromClientDataJson(
                     passkeyId
                 ) ?: throw IllegalArgumentException().withHttpStatus(400)
-
 
                 schoolDb.getPersonEntityDao().findByGuidNum(
                     personPasskey.ppPersonUid

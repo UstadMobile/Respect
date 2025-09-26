@@ -5,9 +5,6 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import world.respect.credentials.passkey.model.AuthenticationResponseJSON
-import world.respect.libutil.util.throwable.withHttpStatus
-import world.respect.server.account.invite.verify.VerifySignInWithPasskeyUseCase
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
 
 fun Route.SavePersonPasskeyRoute(

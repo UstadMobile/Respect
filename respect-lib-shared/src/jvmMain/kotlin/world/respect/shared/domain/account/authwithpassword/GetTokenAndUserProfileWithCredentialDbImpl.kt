@@ -13,7 +13,9 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import java.lang.IllegalStateException
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -58,7 +60,15 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
             }
 
             is RespectPasskeyCredential -> {
-                TODO()
+                val passkeyId = credential.passkeyWebAuthNResponse.id
+                val personPasskey = schoolDb.getPersonPasskeyEntityDao().findPersonPasskeyFromClientDataJson(
+                    passkeyId
+                ) ?: throw IllegalArgumentException().withHttpStatus(400)
+
+
+                schoolDb.getPersonEntityDao().findByGuidNum(
+                    personPasskey.ppPersonUid
+                ) ?: throw ForbiddenException("Person not found")
             }
         }
 

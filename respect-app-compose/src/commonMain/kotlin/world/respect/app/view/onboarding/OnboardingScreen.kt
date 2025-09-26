@@ -99,8 +99,8 @@ fun OnboardingScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize().
-            background(MaterialTheme.colorScheme.background),
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {

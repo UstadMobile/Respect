@@ -2,13 +2,16 @@ package world.respect.datalayer.db.opds.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Entity
-@Serializable
 class PersonPasskeyEntity(
     @PrimaryKey(autoGenerate = true)
     val personPasskeyUid: Long = 0,
+
+    val ppLastModified: Instant,
+
+    val ppStored: Instant,
 
     val ppPersonUid: Long = 0,
 
@@ -25,8 +28,6 @@ class PersonPasskeyEntity(
     val ppPublicKey: String? = null,
 
     val isRevoked: Int = NOT_REVOKED,
-
-
 ){
     companion object {
 

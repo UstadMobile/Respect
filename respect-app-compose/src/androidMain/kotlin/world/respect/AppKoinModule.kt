@@ -115,6 +115,7 @@ import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.personPassword.GetPersonPassword
 import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
@@ -398,7 +399,9 @@ val appKoinModule = module {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
             appContext, appContext.getDatabasePath("respectapp.db").absolutePath
-        ).setDriver(BundledSQLiteDriver()).addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
+        ).setDriver(BundledSQLiteDriver())
+            .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
+            .addCommonMigrations()
             .build()
     }
 
@@ -498,7 +501,7 @@ val appKoinModule = module {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
                 SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
-            ).build()
+            ).addCommonMigrations().build()
         }
 
         scoped<SchoolPrimaryKeyGenerator> {

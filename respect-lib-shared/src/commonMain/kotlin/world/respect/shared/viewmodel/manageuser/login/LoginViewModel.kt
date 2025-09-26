@@ -3,17 +3,18 @@ package world.respect.shared.viewmodel.manageuser.login
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.GetCredentialUseCase
+import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
@@ -44,7 +45,6 @@ class LoginViewModel(
     getCredentialUseCase: GetCredentialUseCase,
     respectAppDataSource: RespectAppDataSource,
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
-    private val verifyPasskeyUseCase: VerifyPasskeyUseCase,
     private val filterUsernameUseCase: FilterUsernameUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
@@ -77,27 +77,18 @@ class LoginViewModel(
                 if (isPasskeySupported){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
+                            accountManager.login(
+                                RespectPasskeyCredential(
+                                    passkeyWebAuthNResponse = credentialResult.passkeyWebAuthNResponse
+                                ),
+                                schoolUrl = route.schoolUrl,
+                            )
+
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = RespectAppLauncher, clearBackStack = true
                                 )
                             )
-                           val passkeyVerifyResult = verifyPasskeyUseCase(
-                                authenticationResponseJSON = credentialResult.passkeyWebAuthNResponse,
-                                schoolUrl = route.schoolUrl,
-                                rpId=rpId
-                            )
-                            if (passkeyVerifyResult.isVerified) {
-                                accountManager.loginWithPasskey(
-                                    authenticationResponseJSON = credentialResult.passkeyWebAuthNResponse,
-                                    schoolUrl = route.schoolUrl
-                                )
-                                _navCommandFlow.tryEmit(
-                                    NavCommand.Navigate(
-                                        destination = RespectAppLauncher, clearBackStack = true
-                                    )
-                                )
-                            }
                         }
 
                         is GetCredentialUseCase.PasswordCredentialResult -> {
@@ -122,11 +113,11 @@ class LoginViewModel(
                     }
 
                 }
-            } catch (e: Exception) {
-                println("Error occurred: ${e.message}")
+            } catch (t: Throwable) {
+                Napier.w("LoginViewModel: Exception logging in", t)
                 _uiState.update { prev ->
                     prev.copy(
-                        errorText = e.getUiText() ?: StringResourceUiText(Res.string.something_went_wrong)
+                        errorText = t.getUiText() ?: StringResourceUiText(Res.string.something_went_wrong)
                     )
                 }
             }

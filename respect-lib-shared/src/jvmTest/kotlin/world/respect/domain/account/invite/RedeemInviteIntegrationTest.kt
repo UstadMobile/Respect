@@ -16,7 +16,6 @@ import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import kotlin.test.Test
@@ -58,9 +57,6 @@ class RedeemInviteIntegrationTest {
                         schoolDb = serverSchoolSourceAndDb.first,
                         uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
                         json = json,
-                    ),
-                    getTokenAndUserProfileWithPasskeyUseCase = GetTokenAndUserProfileWithPasskeyUseCaseDbImpl(
-                        schoolDb = serverSchoolSourceAndDb.first,
                     )
                 )
 

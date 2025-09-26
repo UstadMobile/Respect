@@ -1,9 +1,11 @@
 package world.respect.server.routes
 
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import world.respect.credentials.passkey.RespectCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
@@ -14,17 +16,19 @@ import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfil
  */
 fun Route.AuthRoute() {
 
-    //When credentials module is m
     post("auth-with-password") {
-        val username = call.request.queryParameters[PARAM_NAME_USERNAME]
-            ?: throw IllegalArgumentException()
-        val password = call.receiveText().trim()
+        val usernameParam = call.request.queryParameters[PARAM_NAME_USERNAME]
         val schoolScope = call.getSchoolKoinScope()
-
         val getTokenUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
-        val authResponse = getTokenUseCase(
-            RespectPasswordCredential(username, password)
-        )
+
+        val credential: RespectCredential = if(usernameParam != null) {
+            val password = call.receiveText().trim()
+            RespectPasswordCredential(usernameParam, password)
+        }else {
+            call.receive()
+        }
+
+        val authResponse = getTokenUseCase(credential)
 
         call.respond(authResponse)
     }

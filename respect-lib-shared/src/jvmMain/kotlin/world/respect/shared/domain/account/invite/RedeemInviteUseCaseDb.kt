@@ -17,7 +17,6 @@ import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -35,7 +34,6 @@ class RedeemInviteUseCaseDb(
     private val setPasswordUseCase: SetPasswordUseCase,
     private val savePasskeyUseCase: SavePersonPasskeyUseCase,
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
-    private val getTokenAndUserProfileWithPasskeyUseCase: GetTokenAndUserProfileWithPasskeyUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
 ): RedeemInviteUseCase, KoinComponent {
 
@@ -115,7 +113,7 @@ class RedeemInviteUseCaseDb(
                     )
                 )
 
-                getTokenAndUserProfileWithPasskeyUseCase(credential.passkeyWebAuthNResponse)
+                getTokenAndUserProfileUseCase(credential)
             }
         }
 

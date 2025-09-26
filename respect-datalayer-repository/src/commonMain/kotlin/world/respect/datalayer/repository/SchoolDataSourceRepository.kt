@@ -17,8 +17,6 @@ class SchoolDataSourceRepository(
     private val remoteWriteQueue: RemoteWriteQueue,
 ) : SchoolDataSource {
 
-
-
     override val reportDataSource: ReportDataSource by lazy {
         local.reportDataSource
     }

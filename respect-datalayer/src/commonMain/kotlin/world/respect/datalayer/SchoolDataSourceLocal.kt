@@ -2,6 +2,7 @@ package world.respect.datalayer
 
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
+import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 
@@ -15,6 +16,8 @@ interface SchoolDataSourceLocal: SchoolDataSource {
     override val personDataSource: PersonDataSourceLocal
 
     override val reportDataSource: ReportDataSourceLocal
+
+    override val indicatorDataSource: IndicatorDataSourceLocal
 
     override val classDataSource: ClassDataSourceLocal
 

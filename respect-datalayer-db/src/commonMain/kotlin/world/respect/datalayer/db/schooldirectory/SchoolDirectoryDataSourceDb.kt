@@ -58,4 +58,9 @@ class SchoolDirectoryDataSourceDb(
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
         TODO("Not yet implemented")
     }
+
+    override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
+        respectAppDb.getSchoolDirectoryEntityDao().deleteByUrl(directory.baseUrl.toString())
+    }
+
 }

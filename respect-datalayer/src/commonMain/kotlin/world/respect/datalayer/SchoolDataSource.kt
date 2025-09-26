@@ -5,6 +5,7 @@ import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -23,5 +24,6 @@ interface SchoolDataSource {
     val classDataSource: ClassDataSource
 
     val enrollmentDataSource: EnrollmentDataSource
+
 
 }

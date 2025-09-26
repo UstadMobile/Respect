@@ -131,6 +131,7 @@
     <string name="school_not_found">School not found</string>
     <string name="add_directory">Add Directory</string>
     <string name="edit_directory">Edit Directory</string>
+    <string name="delete_directory">Delete Directory</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>

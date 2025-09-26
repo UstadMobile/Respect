@@ -31,4 +31,8 @@ class SchoolDirectoryDataSourceHttp(
         return httpClient.get(url).body()
     }
 
+    override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
+        // Implement delete
+    }
+
 }

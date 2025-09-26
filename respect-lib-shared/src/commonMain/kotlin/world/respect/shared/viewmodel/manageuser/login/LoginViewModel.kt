@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.GetCredentialUseCase
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -180,7 +181,8 @@ class LoginViewModel(
             viewModelScope.launch {
                 try {
                     accountManager.login(
-                        username, password, route.schoolUrl
+                        credential = RespectPasswordCredential(username, password),
+                        schoolUrl = route.schoolUrl
                     )
 
                     _navCommandFlow.tryEmit(

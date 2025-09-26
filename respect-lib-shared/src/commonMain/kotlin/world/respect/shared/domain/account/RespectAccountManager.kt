@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.RespectCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.datalayer.DataLoadParams
@@ -21,7 +22,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -133,8 +134,7 @@ class RespectAccountManager(
      * Login a user with the given credentials
      */
     suspend fun login(
-        username: String,
-        password: String,
+        credential: RespectCredential,
         schoolUrl: Url,
     ) {
         val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
@@ -142,11 +142,8 @@ class RespectAccountManager(
             schoolScopeId.scopeId
         )
 
-        val authUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase = schoolScope.get()
-        val authResponse = authUseCase(
-            username = username,
-            password = password,
-        )
+        val authUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
+        val authResponse = authUseCase(credential)
 
         val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl

@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.ext.dataOrNull
@@ -14,7 +15,7 @@ import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseDbImpl
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
@@ -47,7 +48,7 @@ class RedeemInviteIntegrationTest {
                         schoolDb = serverSchoolSourceAndDb.first,
                         xxHash = xxStringHasher,
                     ),
-                    getTokenAndUserProfileUseCase = GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
+                    getTokenAndUserProfileUseCase = GetTokenAndUserProfileWithCredentialDbImpl(
                         schoolDb = serverSchoolSourceAndDb.first,
                         xxHash = xxStringHasher,
                     ),
@@ -84,8 +85,8 @@ class RedeemInviteIntegrationTest {
                     parentOrGuardianRole = null,
                     account = RespectRedeemInviteRequest.Account(
                         username = "username",
-                        credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
-                            "bart"
+                        credential = RespectPasswordCredential(
+                            "username", "bart"
                         )
                     )
                 )

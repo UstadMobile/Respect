@@ -9,14 +9,16 @@ import world.respect.datalayer.school.model.AuthToken
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl.Companion.TOKEN_DEFAULT_TTL
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
 import java.lang.IllegalStateException
 
 class GetTokenAndUserProfileWithPasskeyUseCaseDbImpl(
     private val schoolDb: RespectSchoolDatabase
 ) : GetTokenAndUserProfileWithPasskeyUseCase{
 
-    override suspend fun invoke(authJson: AuthenticationResponseJSON): AuthResponse {
+    override suspend fun invoke(
+        authJson: AuthenticationResponseJSON
+    ): AuthResponse {
         val passkeyId = authJson.id
         val personPasskey = schoolDb.getPersonPasskeyEntityDao().findPersonPasskeyFromClientDataJson(
             passkeyId

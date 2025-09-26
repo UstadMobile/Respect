@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
@@ -135,7 +136,7 @@ class ConfirmationViewModel(
 
         val blankAccount = RespectRedeemInviteRequest.Account(
             username = "",
-            credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(password = "")
+            credential = RespectPasswordCredential(username = "", password = "")
         )
 
         return RespectRedeemInviteRequest(

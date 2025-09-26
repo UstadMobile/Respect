@@ -10,26 +10,36 @@ import io.ktor.http.Url
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
+import world.respect.credentials.passkey.RespectCredential
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.shared.domain.account.AuthResponse
 
-class GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient(
+class GetTokenAndUserProfileWithCredentialUseCaseClient(
     private val schoolUrl: Url,
     private val httpClient: HttpClient,
-): GetTokenAndUserProfileWithUsernameAndPasswordUseCase {
+): GetTokenAndUserProfileWithCredentialUseCase {
 
     override suspend fun invoke(
-        username: String,
-        password: String
+        credential: RespectCredential
     ): AuthResponse {
         return httpClient.post {
             url {
                 takeFrom(schoolUrl)
                 appendPathSegments("api/school/respect/auth/auth-with-password")
             }
-
-            parameter(GetTokenAndUserProfileWithUsernameAndPasswordUseCase.PARAM_NAME_USERNAME, username)
-            contentType(ContentType.Text.Plain)
-            setBody(password)
+            when(credential) {
+                is RespectPasswordCredential -> {
+                    parameter(
+                        GetTokenAndUserProfileWithCredentialUseCase.PARAM_NAME_USERNAME,
+                        credential.username
+                    )
+                    contentType(ContentType.Text.Plain)
+                    setBody(credential.password)
+                }
+                else -> {
+                    TODO()
+                }
+            }
         }.body()
     }
 }

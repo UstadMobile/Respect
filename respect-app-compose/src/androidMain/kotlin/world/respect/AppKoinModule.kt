@@ -100,8 +100,8 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.school.RespectSchoolPath
@@ -464,8 +464,8 @@ val appKoinModule = module {
      * can be shared
      */
     scope<SchoolDirectoryEntry> {
-        scoped<GetTokenAndUserProfileWithUsernameAndPasswordUseCase> {
-            GetTokenAndUserProfileWithUsernameAndPasswordUseCaseClient(
+        scoped<GetTokenAndUserProfileWithCredentialUseCase> {
+            GetTokenAndUserProfileWithCredentialUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 httpClient = get(),
             )

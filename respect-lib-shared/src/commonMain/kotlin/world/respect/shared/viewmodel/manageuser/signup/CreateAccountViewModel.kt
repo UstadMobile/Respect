@@ -14,6 +14,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
@@ -174,8 +175,8 @@ class CreateAccountViewModel(
                             val redeemRequest = route.respectRedeemInviteRequest.copy(
                                 account = RespectRedeemInviteRequest.Account(
                                     username = usernameVal,
-                                    credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                        authResponseJson = createPasskeyResult.authenticationResponseJSON
+                                    credential = RespectPasskeyCredential(
+                                        passkeyWebAuthNResponse = createPasskeyResult.authenticationResponseJSON
                                     )
                                 )
                             )

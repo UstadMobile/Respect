@@ -33,10 +33,10 @@ import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseDbImpl
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCaseDbImpl
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
@@ -188,8 +188,8 @@ fun serverKoinModule(
             ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
 
-        scoped<GetTokenAndUserProfileWithUsernameAndPasswordUseCase> {
-            GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
+        scoped<GetTokenAndUserProfileWithCredentialUseCase> {
+            GetTokenAndUserProfileWithCredentialDbImpl(
                 schoolDb = get(),
                 xxHash = get(),
             )

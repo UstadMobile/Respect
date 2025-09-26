@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
@@ -78,8 +79,9 @@ class EnterPasswordSignupViewModel(
             val redeemRequest = route.respectRedeemInviteRequest.copy(
                 account = RespectRedeemInviteRequest.Account(
                     username = route.respectRedeemInviteRequest.account.username,
-                    credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(
-                        password
+                    credential = RespectPasswordCredential(
+                        username = route.respectRedeemInviteRequest.account.username,
+                        password = password
                     )
                 )
             )

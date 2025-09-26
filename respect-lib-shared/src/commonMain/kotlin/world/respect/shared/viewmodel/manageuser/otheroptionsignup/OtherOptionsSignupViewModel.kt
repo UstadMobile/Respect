@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
@@ -80,7 +81,7 @@ class OtherOptionsSignupViewModel(
                             val redeemInviteRequest = route.respectRedeemInviteRequest
                             val account = RespectRedeemInviteRequest.Account(
                                 username = username,
-                                credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
+                                credential = RespectPasskeyCredential(
                                     createPasskeyResult.authenticationResponseJSON
                                 )
                             )

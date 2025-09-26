@@ -2,6 +2,8 @@ package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
 import org.koin.core.component.KoinComponent
+import world.respect.credentials.passkey.RespectPasskeyCredential
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
@@ -16,7 +18,7 @@ import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
@@ -32,7 +34,7 @@ class RedeemInviteUseCaseDb(
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator,
     private val setPasswordUseCase: SetPasswordUseCase,
     private val savePasskeyUseCase: SavePersonPasskeyUseCase,
-    private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase,
+    private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val getTokenAndUserProfileWithPasskeyUseCase: GetTokenAndUserProfileWithPasskeyUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
 ): RedeemInviteUseCase, KoinComponent {
@@ -92,7 +94,7 @@ class RedeemInviteUseCaseDb(
         val credential = redeemRequest.account.credential
 
         val authResponse = when(credential) {
-            is RespectRedeemInviteRequest.RedeemInvitePasswordCredential ->{
+            is RespectPasswordCredential ->{
                 setPasswordUseCase(
                     SetPasswordUseCase.SetPasswordRequest(
                         authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
@@ -101,21 +103,19 @@ class RedeemInviteUseCaseDb(
                     )
                 )
 
-                getTokenAndUserProfileUseCase(
-                    username = redeemRequest.account.username,
-                    password = credential.password,
-                )
+                getTokenAndUserProfileUseCase(credential)
             }
-            is RespectRedeemInviteRequest.RedeemInvitePasskeyCredential -> {
+
+            is RespectPasskeyCredential -> {
                 savePasskeyUseCase(
                     SavePersonPasskeyUseCase.Request(
                         authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
                         userGuid = accountPerson.guid,
-                        passkeyWebAuthNResponse = credential.authResponseJson
+                        passkeyWebAuthNResponse = credential.passkeyWebAuthNResponse,
                     )
                 )
 
-                getTokenAndUserProfileWithPasskeyUseCase(credential.authResponseJson)
+                getTokenAndUserProfileWithPasskeyUseCase(credential.passkeyWebAuthNResponse)
             }
         }
 

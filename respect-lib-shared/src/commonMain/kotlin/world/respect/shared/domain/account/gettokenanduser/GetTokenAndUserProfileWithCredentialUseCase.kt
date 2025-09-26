@@ -1,5 +1,6 @@
 package world.respect.shared.domain.account.gettokenanduser
 
+import world.respect.credentials.passkey.RespectCredential
 import world.respect.shared.domain.account.AuthResponse
 
 /**
@@ -11,11 +12,10 @@ import world.respect.shared.domain.account.AuthResponse
  * Client implementation: sends username and password to server and receives the token and user
  * profile.
  */
-interface GetTokenAndUserProfileWithUsernameAndPasswordUseCase {
+interface GetTokenAndUserProfileWithCredentialUseCase {
 
     suspend operator fun invoke(
-        username: String,
-        password: String
+        credential: RespectCredential,
     ): AuthResponse
 
     companion object {

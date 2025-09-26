@@ -51,9 +51,6 @@ fun SchoolDirectoryEditScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = stringResource(Res.string.app_link_provided_message),
-        )
 
         Spacer(modifier = Modifier.height(8.dp))
 

@@ -52,7 +52,6 @@ interface SchoolDirectoryEntryEntityDao {
         name: String?,
     ): Flow<List<SchoolDirectoryEntryEntities>>
 
-
     @Transaction
     @Query(SELECT_LIST_SQL)
     suspend fun list(
@@ -75,5 +74,7 @@ interface SchoolDirectoryEntryEntityDao {
 
     }
 
+    @Query("DELETE FROM SchoolDirectoryEntryEntity WHERE reSelf = :url")
+    suspend fun deleteByUrl(url: String)
 
 }

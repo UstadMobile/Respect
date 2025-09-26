@@ -59,8 +59,6 @@ class SchoolDirectoryDataSourceDb(
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
-        respectAppDb.getSchoolDirectoryEntityDao().deleteByUrl(directory.baseUrl.toString())
-    }
+
 
 }

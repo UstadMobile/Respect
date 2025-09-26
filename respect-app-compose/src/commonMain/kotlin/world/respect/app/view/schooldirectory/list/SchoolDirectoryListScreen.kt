@@ -1,9 +1,9 @@
 package world.respect.app.view.schooldirectory.list
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -15,7 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
-import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete_directory
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListUIState
@@ -36,15 +36,13 @@ fun SchoolDirectoryListScreen(
 @Composable
 fun SchoolDirectoryListScreen(
     uiState: SchoolDirectoryListUIState,
-    onDeleteClick: (RespectSchoolDirectory) -> Unit
+    onDeleteClick: (SchoolDirectoryEntry) -> Unit
 ) {
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(uiState.schoolDirectory.size) { index ->
-            val directory = uiState.schoolDirectory[index]
+        items(uiState.schoolDirectory) { directory ->
             SchoolDirectoryListItem(
                 directory = directory,
-                onClick = { /* Handle item click */ },
                 onDeleteClick = { onDeleteClick(directory) }
             )
         }
@@ -53,17 +51,14 @@ fun SchoolDirectoryListScreen(
 
 @Composable
 fun SchoolDirectoryListItem(
-    directory: RespectSchoolDirectory,
-    onClick: () -> Unit,
+    directory: SchoolDirectoryEntry,
     onDeleteClick: () -> Unit
 ) {
     ListItem(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-
+            .fillMaxWidth(),
         headlineContent = {
-            Text(text = directory.baseUrl.toString())
+            Text(text = directory.self.toString())
         },
 
         trailingContent = {

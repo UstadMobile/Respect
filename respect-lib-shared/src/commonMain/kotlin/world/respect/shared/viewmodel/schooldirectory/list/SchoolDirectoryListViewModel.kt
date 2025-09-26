@@ -9,8 +9,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.clazz
@@ -23,16 +26,15 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 
 data class SchoolDirectoryListUIState(
-    val schoolDirectory: List<RespectSchoolDirectory> = emptyList(),
+    val schoolDirectory: List<SchoolDirectoryEntry> = emptyList(),
 )
 
 class SchoolDirectoryListViewModel(
     private val accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle) , KoinScopeComponent{
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
-
     private val respectAppDataSource: RespectAppDataSource by inject()
     private val _uiState = MutableStateFlow(SchoolDirectoryListUIState())
 
@@ -52,25 +54,32 @@ class SchoolDirectoryListViewModel(
         }
         loadSchoolDirectories()
     }
+
     private fun loadSchoolDirectories() {
         viewModelScope.launch {
-            val directories = respectAppDataSource.schoolDirectoryDataSource.allDirectories()
-            _uiState.update { prev ->
-                prev.copy(
-                    schoolDirectory = directories
-                )
+            respectAppDataSource.schoolDirectoryEntryDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                listParams = SchoolDirectoryEntryDataSource.GetListParams()
+            ).collect { dataState ->
+                if (dataState is DataReadyState) {
+                    _uiState.update { prev ->
+                        prev.copy(schoolDirectory = dataState.data)
+                    }
+                }
             }
+
         }
     }
+
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(SchoolDirectoryEdit)
         )
     }
 
-    fun onDeleteDirectory(directory: RespectSchoolDirectory) {
+    fun onDeleteDirectory(directory: SchoolDirectoryEntry) {
         viewModelScope.launch {
-            respectAppDataSource.schoolDirectoryDataSource.deleteDirectory(directory)
+            respectAppDataSource.schoolDirectoryEntryDataSource.deleteDirectory(directory)
             loadSchoolDirectories()
         }
     }

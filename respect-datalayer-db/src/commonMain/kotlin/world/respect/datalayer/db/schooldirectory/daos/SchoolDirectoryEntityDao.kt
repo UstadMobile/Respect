@@ -30,6 +30,5 @@ interface SchoolDirectoryEntityDao {
     """)
     suspend fun getServerManagerSchoolDirectory(): SchoolDirectoryEntity?
 
-    @Query("DELETE FROM SchoolDirectoryEntity WHERE rdUrl = :url")
-    suspend fun deleteByUrl(url: String)
+
 }

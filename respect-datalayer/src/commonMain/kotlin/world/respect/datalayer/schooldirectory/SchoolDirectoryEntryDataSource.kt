@@ -7,6 +7,7 @@ import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 
 interface SchoolDirectoryEntryDataSource {
 
@@ -43,6 +44,14 @@ interface SchoolDirectoryEntryDataSource {
         loadParams: DataLoadParams,
         listParams: GetListParams,
     ): DataLoadState<List<SchoolDirectoryEntry>>
+
+    fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: GetListParams,
+    ): IPagingSourceFactory<Int, SchoolDirectoryEntry>
+
+    suspend fun deleteDirectory(directory: SchoolDirectoryEntry)
+
 
     /**
      * Get the SchoolDirectoryEntry for a given url

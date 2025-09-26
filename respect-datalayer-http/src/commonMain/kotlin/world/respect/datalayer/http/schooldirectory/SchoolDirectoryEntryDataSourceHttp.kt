@@ -14,6 +14,7 @@ import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.respect.model.RESPECT_SCHOOL_JSON_PATH
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 
@@ -62,6 +63,17 @@ class SchoolDirectoryEntryDataSourceHttp(
                 it.dataOrNull() ?: emptyList()
             }
         )
+    }
+
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: SchoolDirectoryEntryDataSource.GetListParams
+    ): IPagingSourceFactory<Int, SchoolDirectoryEntry> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteDirectory(directory: SchoolDirectoryEntry) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getSchoolDirectoryEntryByUrl(

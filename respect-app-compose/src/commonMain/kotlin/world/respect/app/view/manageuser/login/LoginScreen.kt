@@ -13,13 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.login
@@ -65,7 +69,16 @@ fun LoginScreen(
             supportingText = uiState.usernameError?.let {
                 { Text(uiTextStringResource(it)) }
             },
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding()
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        !ValidateUsernameUseCase.isValidUsernameChar(
+                            keyEvent.utf16CodePoint.toChar()
+                        )
+                    } else false
+                }
         )
 
         RespectPasswordField(

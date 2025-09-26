@@ -13,6 +13,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
@@ -43,6 +44,7 @@ class LoginViewModel(
     respectAppDataSource: RespectAppDataSource,
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
     private val verifyPasskeyUseCase: VerifyPasskeyUseCase,
+    private val filterUsernameUseCase: FilterUsernameUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -131,9 +133,14 @@ class LoginViewModel(
     }
 
     fun onUsernameChanged(userId: String) {
+        val filteredValue = filterUsernameUseCase(
+            username = userId,
+            invalidCharReplacement = ""
+        )
+
         _uiState.update {
             it.copy(
-                username = userId,
+                username = filteredValue,
                 usernameError = null
             )
         }

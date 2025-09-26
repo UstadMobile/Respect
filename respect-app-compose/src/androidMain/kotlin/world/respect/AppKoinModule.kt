@@ -50,7 +50,6 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.signup.SignupUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
@@ -340,20 +339,16 @@ val appKoinModule = module {
         FilterUsernameUseCase()
     }
 
-    single<SignupUseCase> {
-        SignupUseCase()
-    }
     single<EncodeUserHandleUseCase> {
         EncodeUserHandleUseCaseImpl()
     }
-
 
     single {
         CreatePublicKeyCredentialCreationOptionsJsonUseCase(
             encodeUserHandleUseCase = get(),
             appName = Res.string.app_name,
             primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
-            )
+        )
     }
 
     single {

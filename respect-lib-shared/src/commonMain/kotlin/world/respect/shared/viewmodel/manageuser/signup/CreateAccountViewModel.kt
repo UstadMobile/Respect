@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.manageuser.signup
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,8 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
+import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -57,6 +60,8 @@ class CreateAccountViewModel(
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
+    private val filterUsernameUseCase: FilterUsernameUseCase,
+    private val validateUsernameUseCase: ValidateUsernameUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val route: CreateAccount = savedStateHandle.toRoute()
 
@@ -87,10 +92,16 @@ class CreateAccountViewModel(
         }
 
         viewModelScope.launch {
-            val suggestion = usernameSuggestionUseCase.invoke(
-                name = route.respectRedeemInviteRequest.accountPersonInfo.name
-            )
-            onUsernameChanged(suggestion)
+            try {
+                val suggestion = usernameSuggestionUseCase.invoke(
+                    name = route.respectRedeemInviteRequest.accountPersonInfo.name
+                )
+
+                onUsernameChanged(suggestion)
+            }catch(t: Throwable) {
+                Napier.w("Failed to get username suggestion", t)
+            }
+
             val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
             val schoolDirEntryVal = respectAppDataSource.schoolDirectoryEntryDataSource
                 .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {
@@ -117,9 +128,14 @@ class CreateAccountViewModel(
     }
 
     fun onUsernameChanged(newValue: String) {
+        val filteredValue = filterUsernameUseCase(
+            username = newValue,
+            invalidCharReplacement = ""
+        )
+
         _uiState.update {
             it.copy(
-                username = newValue,
+                username = filteredValue,
                 usernameError = null,
                 generalError = null
             )
@@ -133,24 +149,23 @@ class CreateAccountViewModel(
             if (inviteInfo == null)
                 throw IllegalStateException("inviteInfo is null")
 
-            val username = _uiState.value.username
-
+            val usernameVal = _uiState.value.username
+            val validationResult = validateUsernameUseCase(usernameVal)
             _uiState.update {
                 it.copy(
-                    usernameError = if (username.isBlank())
-                        Res.string.required.asUiText()
-                    else
-                        null
+                    usernameError = validationResult.errorMessage?.asUiText()
                 )
             }
 
-            if (username.isBlank()) return@launch
+            if(validationResult.errorMessage != null) {
+                return@launch
+            }
 
             val rpIdVal = schoolDirectoryEntry.await().rpId
             try {
                 if (createPasskeyUseCase != null && rpIdVal != null && passkeySupported.await()) {
                     val createPasskeyResult = createPasskeyUseCase(
-                        username = username,
+                        username = usernameVal,
                         rpId = rpIdVal
                     )
 
@@ -158,7 +173,7 @@ class CreateAccountViewModel(
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                             val redeemRequest = route.respectRedeemInviteRequest.copy(
                                 account = RespectRedeemInviteRequest.Account(
-                                    username = username,
+                                    username = usernameVal,
                                     credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
                                         authResponseJson = createPasskeyResult.authenticationResponseJSON
                                     )
@@ -208,7 +223,7 @@ class CreateAccountViewModel(
                                 schoolUrl = route.schoolUrl,
                                 inviteRequest = route.respectRedeemInviteRequest.copy(
                                     account = RespectRedeemInviteRequest.Account(
-                                        username = username,
+                                        username = usernameVal,
                                         credential =route.respectRedeemInviteRequest.account.credential,
                                     )
                                 )
@@ -216,13 +231,13 @@ class CreateAccountViewModel(
                         )
                     )
                 }
-            } catch (e: Exception) {
+            } catch (t: Throwable) {
                 _uiState.update {
                     it.copy(
-                        signupError = e.getUiTextOrGeneric()
+                        signupError = t.getUiTextOrGeneric()
                     )
                 }
-                println(e.message.toString())
+                Napier.w("Signup error", t)
             }
         }
     }

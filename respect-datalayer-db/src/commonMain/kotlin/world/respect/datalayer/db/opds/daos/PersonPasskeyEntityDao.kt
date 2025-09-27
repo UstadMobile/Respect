@@ -39,9 +39,12 @@ abstract class PersonPasskeyEntityDao {
     @Query("""
         SELECT *
           FROM PersonPasskeyEntity
-         WHERE ppId = :id
+         WHERE PersonPasskeyEntity.ppId = :id
+           AND PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
     """)
-    abstract suspend fun findPersonPasskeyFromClientDataJson(id: String): PersonPasskeyEntity?
+    abstract suspend fun findPersonPasskeyFromClientDataJson(
+        id: String,
+    ): PersonPasskeyEntity?
 
     @Query("""
         UPDATE PersonPasskeyEntity
@@ -58,15 +61,25 @@ abstract class PersonPasskeyEntityDao {
         SELECT PersonPasskeyEntity.*
           FROM PersonPasskeyEntity
          WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
+           AND (:includeRevoked = 1 
+                OR PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED})
     """)
-    abstract suspend fun findAll(personGuidNumber: Long): List<PersonPasskeyEntity>
+    abstract suspend fun findAll(
+        personGuidNumber: Long,
+        includeRevoked: Int,
+    ): List<PersonPasskeyEntity>
 
     @Query("""
         SELECT PersonPasskeyEntity.*
           FROM PersonPasskeyEntity
          WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
+           AND (:includeRevoked = 1 
+                OR PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED})
     """)
-    abstract fun findAllAsFlow(personGuidNumber: Long): Flow<List<PersonPasskeyEntity>>
+    abstract fun findAllAsFlow(
+        personGuidNumber: Long,
+        includeRevoked: Int,
+    ): Flow<List<PersonPasskeyEntity>>
 
     @Query("""
         SELECT PersonPasskeyEntity.ppLastModified

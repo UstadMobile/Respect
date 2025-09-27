@@ -16,22 +16,33 @@ class PersonPasskeyDataSourceRepository(
     private val validationHelper: ExtendedDataSourceValidationHelper,
 ): PersonPasskeyDataSource {
 
-    override suspend fun listAll(): DataLoadState<List<PersonPasskey>> {
-        val remoteResult = remote.listAll()
+    override suspend fun listAll(
+        listParams: PersonPasskeyDataSource.GetListParams
+    ): DataLoadState<List<PersonPasskey>> {
+        val remoteResult = remote.listAll(listParams.copy(includeRevoked = true))
         local.updateFromRemoteListIfNeeded(remoteResult, validationHelper)
 
-        return local.listAll()
+        return local.listAll(listParams = listParams)
     }
 
-    override fun listAllAsFlow(): Flow<DataLoadState<List<PersonPasskey>>> {
-        return local.listAllAsFlow().combineWithRemote(
-            remoteFlow = remote.listAllAsFlow().onEach {
+    override fun listAllAsFlow(
+        listParams: PersonPasskeyDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonPasskey>>> {
+        return local.listAllAsFlow(listParams = listParams).combineWithRemote(
+            remoteFlow = remote.listAllAsFlow(
+                listParams.copy(includeRevoked = true)
+            ).onEach {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
             }
         )
     }
 
+    /**
+     * Note: Passkeys are only updated online.
+     */
     override suspend fun store(list: List<PersonPasskey>) {
-        TODO("Not yet implemented")
+        remote.store(list)
+        local.store(list)
     }
+
 }

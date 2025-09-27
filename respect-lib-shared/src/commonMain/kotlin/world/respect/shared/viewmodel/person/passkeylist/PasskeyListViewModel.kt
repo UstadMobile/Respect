@@ -1,6 +1,7 @@
 package world.respect.shared.viewmodel.person.passkeylist
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,6 +20,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.passkeys
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import kotlin.time.Clock
 
 data class PasskeyListUiState(
     val passkeys: DataLoadState<List<PersonPasskey>> = DataLoadingState(),
@@ -68,13 +70,31 @@ class PasskeyListViewModel(
     fun onDismissRevokePasskeyDialog(){
        _uiState.update { prev ->
            prev.copy(
-               showRevokePasskeyDialog = false
+               showRevokePasskeyDialog = false,
+               passkeyPendingRevocation = null,
            )
        }
     }
 
 
-    fun revokePasskey() {
+    fun onConfirmRevokePasskey() {
+        val keyToRevoke = _uiState.value.passkeyPendingRevocation ?: return
+
+        viewModelScope.launch {
+            try {
+                schoolDataSource.personPasskeyDataSource.store(
+                    listOf(
+                        keyToRevoke.copy(
+                            isRevoked = true,
+                            lastModified = Clock.System.now(),
+                        )
+                    )
+                )
+                onDismissRevokePasskeyDialog()
+            }catch(e: Throwable) {
+                Napier.w("Error revoking passkey", e)
+            }
+        }
 
     }
 
@@ -86,15 +106,6 @@ class PasskeyListViewModel(
             )
         }
     }
-
-
-    companion object {
-
-        const val DEST_NAME = "PasskeyList"
-
-
-    }
-
 
 
 }

@@ -78,28 +78,26 @@ fun ManageAccountScreen(
             )
 
 
-
-
             if (uiState.showCreatePasskey) {
-                    ListItem(
-                        trailingContent = {
-                            Icon(Icons.Default.Security, contentDescription = null)
-                        },
-                        headlineContent = {
-                            Text(stringResource(Res.string.sign_in_faster))
-                        },
-                        supportingContent = {
-                            Text(stringResource(Res.string.sign_in_faster_description))
-                        }
-                    )
-
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp),
-                        onClick = onCreatePasskeyClick,
-                    ) {
-                        Text(stringResource(Res.string.create_passkey))
+                ListItem(
+                    trailingContent = {
+                        Icon(Icons.Default.Security, contentDescription = null)
+                    },
+                    headlineContent = {
+                        Text(stringResource(Res.string.sign_in_faster))
+                    },
+                    supportingContent = {
+                        Text(stringResource(Res.string.sign_in_faster_description))
                     }
+                )
+
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp),
+                    onClick = onCreatePasskeyClick,
+                ) {
+                    Text(stringResource(Res.string.create_passkey))
                 }
+            }
 
             if (!uiState.showCreatePasskey) {
                 ListItem(

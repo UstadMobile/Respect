@@ -1,7 +1,12 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.DataLoadParams
@@ -22,22 +27,38 @@ class PersonPasskeyDataSourceHttp(
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
-) : PersonPasskeyDataSource, SchoolUrlBasedDataSource{
+) : PersonPasskeyDataSource, SchoolUrlBasedDataSource {
 
-    override suspend fun listAll(): DataLoadState<List<PersonPasskey>> {
+    private suspend fun PersonPasskeyDataSource.GetListParams.urlWithParams(): Url {
+        return URLBuilder(
+            respectEndpointUrl(PersonPasskeyDataSource.ENDPOINT_NAME)
+        ).apply {
+            parameters.append(
+                PersonPasskeyDataSource.PARAM_INCLUDE_REVOKED,
+                includeRevoked.toString()
+            )
+        }.build()
+    }
+
+
+    override suspend fun listAll(
+        listParams: PersonPasskeyDataSource.GetListParams
+    ): DataLoadState<List<PersonPasskey>> {
         return httpClient.getAsDataLoadState<List<PersonPasskey>>(
-            url = respectEndpointUrl(PersonPasskeyDataSource.ENDPOINT_NAME),
+            url = listParams.urlWithParams(),
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
         }
     }
 
-    override fun listAllAsFlow(): Flow<DataLoadState<List<PersonPasskey>>> {
+    override fun listAllAsFlow(
+        listParams: PersonPasskeyDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonPasskey>>> {
         return httpClient.getDataLoadResultAsFlow<List<PersonPasskey>>(
-            urlFn = { respectEndpointUrl(PersonPasskeyDataSource.ENDPOINT_NAME) },
+            urlFn = { listParams.urlWithParams() },
             dataLoadParams = DataLoadParams(),
-            validationHelper = validationHelper
+            validationHelper = validationHelper,
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
@@ -45,6 +66,11 @@ class PersonPasskeyDataSourceHttp(
     }
 
     override suspend fun store(list: List<PersonPasskey>) {
-        TODO("Not yet implemented")
+        httpClient.post(respectEndpointUrl(PersonPasskeyDataSource.ENDPOINT_NAME)) {
+            useTokenProvider(tokenProvider)
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }
     }
+
 }

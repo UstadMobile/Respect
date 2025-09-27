@@ -7,14 +7,24 @@ import world.respect.datalayer.shared.WritableDataSource
 
 interface PersonPasskeyDataSource: WritableDataSource<PersonPasskey> {
 
-    suspend fun listAll(): DataLoadState<List<PersonPasskey>>
+    data class GetListParams(
+        val includeRevoked: Boolean = false,
+    )
 
-    fun listAllAsFlow(): Flow<DataLoadState<List<PersonPasskey>>>
+    suspend fun listAll(
+        listParams: GetListParams = GetListParams(),
+    ): DataLoadState<List<PersonPasskey>>
+
+    fun listAllAsFlow(
+        listParams: GetListParams = GetListParams(),
+    ): Flow<DataLoadState<List<PersonPasskey>>>
 
 
     companion object {
 
         const val ENDPOINT_NAME = "PersonPasskey"
+
+        const val PARAM_INCLUDE_REVOKED = "includeRevoked"
 
     }
 

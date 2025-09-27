@@ -55,8 +55,9 @@ class VerifySignInWithPasskeyUseCase(
         val userPresenceRequired = true
 
         val passkeyData = schoolDb.getPersonPasskeyEntityDao()
-            .findPersonPasskeyFromClientDataJson(authenticationResponseJSON.id)
-            ?: throw IllegalArgumentException().withHttpStatus(401)
+            .findPersonPasskeyFromClientDataJson(
+                id = authenticationResponseJSON.id
+            ) ?: throw IllegalArgumentException().withHttpStatus(401)
 
         val credentialRecord = createCredentialRecord( passkeyData)
 

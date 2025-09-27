@@ -373,4 +373,7 @@
 
     <string name="created_at">Created at</string>
     <string name="key_created_on">Key created on</string>
+
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

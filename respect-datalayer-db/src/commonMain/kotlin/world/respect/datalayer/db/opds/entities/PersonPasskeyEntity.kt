@@ -1,27 +1,26 @@
 package world.respect.datalayer.db.opds.entities
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import kotlin.time.Instant
 
-@Entity
+@Entity(
+    primaryKeys = ["ppPersonUid", "ppId"]
+)
 class PersonPasskeyEntity(
-    @PrimaryKey(autoGenerate = true)
-    val personPasskeyUid: Long = 0,
+
+    val ppPersonUid: Long = 0,
+
+    val ppId: String,
 
     val ppLastModified: Instant,
 
     val ppStored: Instant,
-
-    val ppPersonUid: Long = 0,
 
     val ppAttestationObj: String? = null,
 
     val ppClientDataJson: String? = null,
 
     val ppOriginString: String? = null,
-
-    val ppId: String? = null,
 
     val ppChallengeString: String? = null,
 

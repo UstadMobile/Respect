@@ -115,6 +115,7 @@ import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.personPassword.GetPersonPassword
 import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
@@ -501,7 +502,10 @@ val appKoinModule = module {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
                 SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
-            ).addCommonMigrations().build()
+            )
+                .addCommonMigrations()
+                .addMigrations(MIGRATION_2_3(true))
+                .build()
         }
 
         scoped<SchoolPrimaryKeyGenerator> {

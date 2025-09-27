@@ -10,7 +10,9 @@ import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 abstract class PersonPasskeyEntityDao {
 
     @Insert
-    abstract suspend fun insertAsync(personPasskey: PersonPasskeyEntity): Long
+    abstract suspend fun insertAsync(
+        personPasskey: List<PersonPasskeyEntity>
+    )
 
     @Query("""
         SELECT ppId
@@ -43,7 +45,27 @@ abstract class PersonPasskeyEntityDao {
     @Query("""
         UPDATE PersonPasskeyEntity
            SET isRevoked = ${PersonPasskeyEntity.REVOKED}
-         WHERE personPasskeyUid = :uid
+         WHERE ppPersonUid = :personUidNum
+           AND ppId = :passKeyId
     """)
-    abstract suspend fun revokePersonPasskey(uid: Long)
+    abstract suspend fun revokePersonPasskey(
+        personUidNum: Long,
+        passKeyId: String,
+    )
+
+    @Query("""
+        SELECT PersonPasskeyEntity.*
+          FROM PersonPasskeyEntity
+         WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
+    """)
+    abstract suspend fun findAll(personGuidNumber: Long): List<PersonPasskeyEntity>
+
+    @Query("""
+        SELECT PersonPasskeyEntity.*
+          FROM PersonPasskeyEntity
+         WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
+    """)
+    abstract fun findAllAsFlow(personGuidNumber: Long): Flow<List<PersonPasskeyEntity>>
+
+
 }

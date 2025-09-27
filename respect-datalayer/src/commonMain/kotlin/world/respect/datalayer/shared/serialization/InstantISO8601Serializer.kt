@@ -1,15 +1,14 @@
 package world.respect.datalayer.shared.serialization
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-@OptIn(ExperimentalTime::class)
 object InstantISO8601Serializer: KSerializer<Instant> {
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
@@ -27,3 +26,5 @@ object InstantISO8601Serializer: KSerializer<Instant> {
         return Instant.parse(decoder.decodeString())
     }
 }
+
+typealias InstantAsISO8601 = @Serializable(with = InstantISO8601Serializer::class) Instant

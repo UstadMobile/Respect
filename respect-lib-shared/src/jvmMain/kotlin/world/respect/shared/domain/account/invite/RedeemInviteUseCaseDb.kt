@@ -114,6 +114,7 @@ class RedeemInviteUseCaseDb(
                         authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
                         userGuid = accountPerson.guid,
                         passkeyWebAuthNResponse = credential.passkeyWebAuthNResponse,
+                        deviceName = redeemRequest.deviceName ?: "Unknown device",
                     )
                 )
 

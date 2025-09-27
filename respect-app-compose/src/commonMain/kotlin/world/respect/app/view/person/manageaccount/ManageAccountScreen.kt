@@ -39,7 +39,7 @@ fun ManageAccountScreen(
         onCreatePasskeyClick = viewModel::onCreatePasskeyClick,
         onClickManagePasskey = viewModel::onClickManagePasskey,
         onClickChangePassword = viewModel::navigateToEditAccount,
-        )
+    )
 
 }
 
@@ -49,13 +49,10 @@ fun ManageAccountScreen(
     onCreatePasskeyClick: () -> Unit = {},
     onClickManagePasskey: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
-
-    ) {
+) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
-
-
         uiState.errorText?.also {
             Text(
                 uiTextStringResource(it),
@@ -64,32 +61,24 @@ fun ManageAccountScreen(
             )
         }
 
-            ListItem(
-                headlineContent = {
-                    Text(text = uiState.personName)
-                },
-                supportingContent = {
-                    Text(text = stringResource(Res.string.name))
-                }
-
-            )
-
-            ListItem(
-                headlineContent = {
-                    Text(text = uiState.personUsername)
-                },
-                supportingContent = {
-                    Text(text = stringResource(Res.string.username_label))
-                }
-
-            )
+        ListItem(
+            headlineContent = {
+                Text(text = uiState.personUsername)
+            },
+            supportingContent = {
+                Text(text = stringResource(Res.string.username_label))
+            }
+        )
 
         if (uiState.passkeySupported){
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(Res.string.security))
-                    }
-                )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(Res.string.security))
+                }
+            )
+
+
+
 
             if (uiState.showCreatePasskey) {
                     ListItem(
@@ -113,45 +102,37 @@ fun ManageAccountScreen(
                 }
 
             if (!uiState.showCreatePasskey) {
-                    ListItem(
+                ListItem(
+                    leadingContent = {
+                        Icon(Icons.Default.Security, contentDescription = null)
+                    },
+                    headlineContent = {
+                        Text(
+                            text = "${uiState.passkeyCount ?: ""} ${stringResource(Res.string.passkeys)}",
+                            maxLines = 1,
+                        )
+                    },
+                    supportingContent = {
 
-                        leadingContent = {
-                            Icon(Icons.Default.Security, contentDescription = null)
-                        },
-                        headlineContent = {
-                            Text(
-                                text = "${uiState.passkeyCount} ${stringResource(Res.string.passkeys)}",
-                                maxLines = 1,
+                        Text(
+                            text = stringResource(Res.string.passkeys),
+
                             )
-                        },
-                        supportingContent = {
 
-                            Text(
-                                text = stringResource(Res.string.passkeys),
-
-                                )
-
-                        },
-                        trailingContent = {
-                            Text(
-                                modifier = Modifier.clickable { onClickManagePasskey() },
-                                text = stringResource(Res.string.manage),
-                            )
-                        }
-                    )
-                }
+                    },
+                    trailingContent = {
+                        Text(
+                            modifier = Modifier.clickable { onClickManagePasskey() },
+                            text = stringResource(Res.string.manage),
+                        )
+                    }
+                )
+            }
 
         }
 
 
-//            val lastUpdatedDate = uiState.personPasswordEntity?.pauthLct?.let {
-//                rememberFormattedDateTime(
-//                    timeInMillis = it,
-//                    timeZoneId = TimeZone.currentSystemDefault().id,
-//                )
-//            }
             ListItem(
-
                 leadingContent = {
                     Icon(Icons.Default.Password, contentDescription = null)
                 },

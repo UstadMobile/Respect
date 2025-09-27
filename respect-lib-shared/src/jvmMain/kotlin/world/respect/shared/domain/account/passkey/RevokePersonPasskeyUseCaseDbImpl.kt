@@ -1,7 +1,6 @@
 package world.respect.shared.domain.account.passkey
 
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 import world.respect.libxxhash.XXStringHasher
 
 class RevokePersonPasskeyUseCaseDbImpl(
@@ -11,7 +10,7 @@ class RevokePersonPasskeyUseCaseDbImpl(
 
     override suspend fun invoke(personGuid: String){
         val personGuidHash = xxStringHasher.hash(personGuid)
-        return schoolDb.getPersonPasskeyEntityDao().revokePersonPasskey(personGuidHash)
+        //return schoolDb.getPersonPasskeyEntityDao().revokePersonPasskey(personGuidHash)
     }
 }
 

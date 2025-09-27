@@ -36,11 +36,33 @@ fun MIGRATION_2_3(
     }
 }
 
+val MIGRATE_3_4 = object: Migration(3, 4) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            ALTER TABLE PersonPasskeyEntity 
+             ADD COLUMN ppDeviceName TEXT NOT NULL DEFAULT ''
+        """.trimIndent())
+    }
+}
+
+val MIGRATE_4_5 = object: Migration(4, 5) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            ALTER TABLE PersonPasskeyEntity 
+             ADD COLUMN ppTimeCreated INTEGER NOT NULL DEFAULT 0
+        """.trimIndent())
+        connection.execSQL("""
+            UPDATE PersonPasskeyEntity
+               SET ppTimeCreated = ppLastModified
+        """.trimIndent())
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
     return this.addMigrations(
-        MIGRATION_1_2
+        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,
     )
 }
 

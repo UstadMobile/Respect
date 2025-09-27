@@ -12,14 +12,17 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.personPassword.GetPersonPassword
 import world.respect.datalayer.db.school.entities.PersonPasswordEntity
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
-import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
+import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_person
+import world.respect.shared.generated.resources.manage_account
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PasskeyList
@@ -30,34 +33,33 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class ManageAccountUiState(
-    val passkeyCount: Int = 0,
+    val passkeyCount: Int? = null,
     val showCreatePasskey: Boolean = false,
     val passkeySupported: Boolean = true,
-    val personName: String = "",
     val personUsername: String = "",
     val personPasswordEntity: PersonPasswordEntity? = null,
     val errorText: UiText? = null,
     val selectedAccount: RespectAccountAndPerson? = null,
-
-    )
+)
 
 class ManageAccountViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
+    private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
     private val savePersonPasskeyUseCase: SavePersonPasskeyUseCase by inject()
+
     private val getPersonPassword: GetPersonPassword by inject()
-    private val getActivePersonPasskeysUseCase: GetActivePersonPasskeysUseCase by inject()
 
     private val route: ManageAccount = savedStateHandle.toRoute()
 
     private val personGuid = route.guid
-
-    private val personName = route.personName
-
-    private val personUsername = route.personUsername
 
     private val _uiState = MutableStateFlow(
         ManageAccountUiState()
@@ -67,6 +69,14 @@ class ManageAccountViewModel(
 
 
     init {
+        _appUiState.update { prev ->
+            prev.copy(
+                userAccountIconVisible = false,
+                navigationVisible = false,
+                title = Res.string.manage_account.asUiText()
+            )
+        }
+
         viewModelScope.launch {
             val personPasswordEntity = getPersonPassword.getPersonPassword(personGuid)
             _uiState.update { prev ->
@@ -75,6 +85,27 @@ class ManageAccountViewModel(
                 )
             }
         }
+
+        viewModelScope.launch {
+            launch {
+                schoolDataSource.personPasskeyDataSource.listAllAsFlow().collect {
+                    _uiState.update { prev ->
+                        prev.copy(passkeyCount = it.dataOrNull()?.size ?: 0)
+                    }
+                }
+            }
+
+            launch {
+                schoolDataSource.personDataSource.findByGuidAsFlow(
+                    route.guid
+                ).collect {
+                    _uiState.update { prev ->
+                        prev.copy(personUsername = it.dataOrNull()?.username ?: "")
+                    }
+                }
+            }
+        }
+
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
@@ -82,34 +113,12 @@ class ManageAccountViewModel(
                 }
             }
         }
-        _appUiState.update { prev ->
-            prev.copy(
-                userAccountIconVisible = false,
-                navigationVisible = false,
-                title = Res.string.add_person.asUiText()
-            )
-        }
 
         _uiState.update { prev ->
             prev.copy(
-                personUsername = personUsername,
-                personName = personName,
                 passkeySupported = (createPasskeyUseCase != null &&
                         accountManager.selectedAccount?.userGuid == personGuid),
             )
-        }
-
-        viewModelScope.launch {
-
-            val activePasskeys = getActivePersonPasskeysUseCase.getActivePeronPasskeys(
-                personGuid = accountManager.selectedAccount?.userGuid ?: return@launch
-            )
-            _uiState.update { prev ->
-                prev.copy(
-                    showCreatePasskey = activePasskeys.isEmpty(),
-                    passkeyCount = activePasskeys.size
-                )
-            }
         }
     }
 
@@ -139,14 +148,15 @@ class ManageAccountViewModel(
                 username = uiState.value.selectedAccount?.person?.username ?: return@launch,
                 rpId = uiState.value.selectedAccount?.account?.school?.rpId ?: return@launch
             )
+
             if (passkeyCreated != null) {
                 when (passkeyCreated) {
                     is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-
                         val request = SavePersonPasskeyUseCase.Request(
                             authenticatedUserId = AuthenticatedUserPrincipalId(personGuid),
                             userGuid = personGuid,
-                            passkeyWebAuthNResponse = passkeyCreated.authenticationResponseJSON
+                            passkeyWebAuthNResponse = passkeyCreated.authenticationResponseJSON,
+                            deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
                         )
                         savePersonPasskeyUseCase(request)
                     }

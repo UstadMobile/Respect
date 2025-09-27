@@ -1,0 +1,31 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.toughra.ustadmobile",
+      "sha256_cert_fingerprints": [
+        "A6:64:4D:03:C2:D8:BC:AE:06:C1:F8:48:1C:F6:86:23:B0:96:30:AB:27:DC:86:6B:90:57:A5:AC:6F:CA:D0:D2",
+        "AF:C6:57:3B:9B:E1:63:6F:2B:70:9F:09:DB:1D:5C:3D:5E:80:42:F0:69:10:3D:FD:D9:A1:3C:B6:3C:4B:FD:9B" 
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "world.respect.app",
+      "sha256_cert_fingerprints": [
+        "52:23:34:23:97:71:DC:8B:75:8F:6B:68:01:AE:12:82:7D:74:6D:29:83:B8:A3:EF:08:ED:77:60:DD:32:C0:8F",
+        "6D:0E:03:2C:BA:4C:8D:BA:E3:1E:6E:C4:5D:E9:9B:AB:48:30:63:BC:2E:B1:00:DC:9F:6D:D3:A5:00:E2:70:3A",
+        "A6:64:4D:03:C2:D8:BC:AE:06:C1:F8:48:1C:F6:86:23:B0:96:30:AB:27:DC:86:6B:90:57:A5:AC:6F:CA:D0:D2"
+      ]
+    }
+  }
+]

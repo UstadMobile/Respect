@@ -10,6 +10,7 @@ interface SavePersonPasskeyUseCase {
         val authenticatedUserId: AuthenticatedUserPrincipalId,
         val userGuid: String,
         val passkeyWebAuthNResponse: AuthenticationResponseJSON,
+        val deviceName: String,
     )
 
     suspend operator fun invoke(

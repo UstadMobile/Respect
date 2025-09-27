@@ -6,6 +6,7 @@ import world.respect.credentials.passkey.model.ClientDataJSON
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
+import kotlin.time.Clock
 
 class SavePersonPasskeyUseCaseDbImpl(
     private val schoolDb: RespectSchoolDatabase,
@@ -20,17 +21,21 @@ class SavePersonPasskeyUseCaseDbImpl(
             decodedBytes.decodeToString()
         )
 
+        val timeNow = Clock.System.now()
         val personPasskey = PersonPasskeyEntity(
             ppPersonUid = uidNumberMapper(request.authenticatedUserId.guid),
+            ppLastModified = timeNow,
+            ppStored = timeNow,
             ppAttestationObj = request.passkeyWebAuthNResponse.response.attestationObject,
             ppClientDataJson = request.passkeyWebAuthNResponse.response.clientDataJSON,
             ppOriginString = clientDataJson.origin,
             ppId = request.passkeyWebAuthNResponse.id,
             ppChallengeString = clientDataJson.challenge,
-            ppPublicKey = request.passkeyWebAuthNResponse.response.publicKey
+            ppPublicKey = request.passkeyWebAuthNResponse.response.publicKey,
+            ppDeviceName = request.deviceName,
         )
 
-        schoolDb.getPersonPasskeyEntityDao().insertAsync(personPasskey)
+        schoolDb.getPersonPasskeyEntityDao().upsertAsync(listOf(personPasskey))
     }
 
 }

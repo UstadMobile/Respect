@@ -16,6 +16,7 @@ data class RespectRedeemInviteRequest(
     val accountPersonInfo: PersonInfo,
     val parentOrGuardianRole: GuardianRole?,
     val account: Account,
+    val deviceName: String? = null,
 ) {
 
     @Serializable

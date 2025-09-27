@@ -16,6 +16,8 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
@@ -37,6 +39,7 @@ data class ConfirmationUiState(
 
 class ConfirmationViewModel(
     savedStateHandle: SavedStateHandle,
+    private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: ConfirmationScreen = savedStateHandle.toRoute()
@@ -145,7 +148,8 @@ class ConfirmationViewModel(
             role = role,
             accountPersonInfo = RespectRedeemInviteRequest.PersonInfo(),
             parentOrGuardianRole = null,
-            account = blankAccount
+            account = blankAccount,
+            deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
         )
     }
 }

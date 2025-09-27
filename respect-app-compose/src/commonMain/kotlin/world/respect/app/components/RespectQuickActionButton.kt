@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun RespectQuickActionButton(
-    iconContent: (@Composable () -> Unit)? = null,
     labelText: String,
     modifier: Modifier = Modifier,
+    iconContent: (@Composable () -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val interactionSource =  remember { MutableInteractionSource() }

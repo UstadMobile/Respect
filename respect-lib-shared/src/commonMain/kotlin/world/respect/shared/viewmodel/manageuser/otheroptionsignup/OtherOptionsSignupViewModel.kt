@@ -77,6 +77,7 @@ class OtherOptionsSignupViewModel(
                     )
 
                     when (createPasskeyResult) {
+                        //This is quite wrong...
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                             val redeemInviteRequest = route.respectRedeemInviteRequest
                             val account = RespectRedeemInviteRequest.Account(

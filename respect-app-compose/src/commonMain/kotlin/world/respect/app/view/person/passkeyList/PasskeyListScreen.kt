@@ -1,12 +1,12 @@
 package world.respect.app.view.person.passkeyList
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -24,17 +24,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.respectPagingItems
-import world.respect.app.components.respectRememberPager
-import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.model.PersonPasskey
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.created
+import world.respect.shared.generated.resources.created_at
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.delete_this_passkey
+import world.respect.shared.generated.resources.key_created_on
 import world.respect.shared.generated.resources.loss_access_passkey_dialog
+import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListUiState
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 
@@ -48,7 +49,6 @@ fun PasskeyListScreen(
         viewModel = viewModel,
         uiState = uiState,
         onClickRevokePasskey = viewModel::onClickRevokePasskey
-
     )
 }
 
@@ -56,9 +56,10 @@ fun PasskeyListScreen(
 fun PasskeyListScreen(
     viewModel: PasskeyListViewModel,
     uiState: PasskeyListUiState = PasskeyListUiState(),
-    onClickRevokePasskey: (Long) -> Unit
-
+    onClickRevokePasskey: (PersonPasskey) -> Unit
 ) {
+    val passkeyList = uiState.passkeys.dataOrNull() ?: emptyList()
+
     if (uiState.showRevokePasskeyDialog) {
         showRevokePasskeyDialog(
             onDismissRequest = viewModel::onDismissRevokePasskeyDialog
@@ -104,52 +105,46 @@ fun PasskeyListScreen(
         }
     }
 
-    val pager = respectRememberPager(uiState.passkeys)
-
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        respectPagingItems(
-            items = lazyPagingItems,
-            key = { item, index -> item?.personPasskeyUid ?: index.toString() },
-            contentType = { PersonDataSource.ENDPOINT_NAME },
+        items(
+            items = passkeyList,
+            key = { it.id }
         ) { personPasskey ->
+            val createdAtStr = rememberFormattedDateTime(
+                timeInMillis = personPasskey.timeCreated.toEpochMilliseconds(),
+                timeZoneId = TimeZone.currentSystemDefault().id,
+            )
+
             ListItem(
-                modifier =
-                    Modifier.clickable {
-                    },
                 headlineContent = {
                     Text(
-                        text = "",
+                        text = "${stringResource(Res.string.key_created_on)}: ${personPasskey.deviceName}",
+                        maxLines = 2,
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = "${stringResource(Res.string.created_at)}: $createdAtStr",
                         maxLines = 1,
                     )
                 },
                 leadingContent = {
                     Icon(
                         Icons.Default.Security,
-                        contentDescription = "delete"
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = "${stringResource(Res.string.created)}",
-                        maxLines = 1,
+                        contentDescription = null,
                     )
                 },
                 trailingContent = {
                     IconButton(
-                        onClick = { onClickRevokePasskey(personPasskey?.personPasskeyUid ?: 0) },
+                        onClick = { onClickRevokePasskey(personPasskey) },
                     ) {
                         Icon(
                             Icons.Default.Delete,
-                            contentDescription = "delete"
+                            contentDescription = stringResource(Res.string.delete),
                         )
                     }
-
                 },
             )
-
-
         }
     }
 

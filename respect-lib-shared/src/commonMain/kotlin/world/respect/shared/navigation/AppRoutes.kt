@@ -450,66 +450,18 @@ object PersonList : RespectAppRoute
 @Serializable
 data class PersonDetail(
     val guid: String,
-) : RespectAppRoute {
+) : RespectAppRoute
 
-    @Transient
-    val guId = String
-
-
-    companion object {
-        fun create(
-            guid: String
-        ) = PersonDetail(
-            guid = guid
-        )
-    }
-}
 @Serializable
 data class PasskeyList(
     val guid: String,
-) : RespectAppRoute {
-
-    @Transient
-    val guId = String
-
-
-    companion object {
-        fun create(
-            guid: String
-        ) = PersonDetail(
-            guid = guid
-        )
-    }
-}
+) : RespectAppRoute
 
 @Serializable
 data class ManageAccount(
     val guid: String,
-    val personName: String,
-    val personUsername: String,
-) : RespectAppRoute {
+) : RespectAppRoute
 
-    @Transient
-    val guId = String
-
-    @Transient
-    val personNameString = String
-
-    @Transient
-    val personUsernameString = String
-
-    companion object {
-        fun create(
-            guid: String,
-            personName: String,
-            personUsername: String,
-        ) = ManageAccount(
-            guid = guid,
-            personName = personName,
-            personUsername = personUsername,
-        )
-    }
-}
 @Serializable
 data class PersonEdit(
     val guid: String?,

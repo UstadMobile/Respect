@@ -1,15 +1,19 @@
 package world.respect.shared.viewmodel.person.passkeylist
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
-import world.respect.datalayer.shared.paging.EmptyPagingSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.model.PersonPasskey
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.passkeys
@@ -17,21 +21,21 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class PasskeyListUiState(
-    val passkeys: IPagingSourceFactory<Int, PersonPasskeyEntity> = IPagingSourceFactory {
-        EmptyPagingSource()
-    },
+    val passkeys: DataLoadState<List<PersonPasskey>> = DataLoadingState(),
     val showRevokePasskeyDialog : Boolean = false,
-    val personPasskeyUid : Long = 0
+    val passkeyPendingRevocation : PersonPasskey? = null,
 )
 
 
 class PasskeyListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val accountManager: RespectAccountManager,
+    accountManager: RespectAccountManager,
     private val json: Json,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(
         PasskeyListUiState()
@@ -46,30 +50,39 @@ class PasskeyListViewModel(
                 title = Res.string.passkeys.asUiText(),
                 userAccountIconVisible = false,
                 navigationVisible = true,
+                hideBottomNavigation = true,
             )
         }
 
-
-
-
+        viewModelScope.launch {
+            schoolDataSource.personPasskeyDataSource.listAllAsFlow().collect {
+                _uiState.update { prev ->
+                    prev.copy(
+                        passkeys = it
+                    )
+                }
+            }
+        }
     }
-   fun onDismissRevokePasskeyDialog(){
+
+    fun onDismissRevokePasskeyDialog(){
        _uiState.update { prev ->
            prev.copy(
                showRevokePasskeyDialog = false
            )
        }
-   }
+    }
 
 
     fun revokePasskey() {
 
     }
-    fun onClickRevokePasskey(personPasskeyUid: Long){
+
+    fun onClickRevokePasskey(passkey: PersonPasskey){
         _uiState.update { prev ->
             prev.copy(
                 showRevokePasskeyDialog = true,
-                personPasskeyUid = personPasskeyUid
+                passkeyPendingRevocation = passkey,
             )
         }
     }

@@ -143,6 +143,8 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseCli
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -468,6 +470,10 @@ val appKoinModule = module {
         CheckPasskeySupportUseCaseAndroidImpl(
             verifyDomainUseCase = get()
         )
+    }
+
+    single<GetDeviceInfoUseCase> {
+        GetDeviceInfoUseCaseAndroid(androidContext())
     }
 
     /**

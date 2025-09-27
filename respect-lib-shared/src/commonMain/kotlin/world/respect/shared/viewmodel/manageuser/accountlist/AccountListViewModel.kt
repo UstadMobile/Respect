@@ -155,7 +155,7 @@ class AccountListViewModel(
         uiState.value.selectedAccount?.also {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    PersonDetail.create(
+                    PersonDetail(
                         guid = it.account.userGuid
                     )
                 )

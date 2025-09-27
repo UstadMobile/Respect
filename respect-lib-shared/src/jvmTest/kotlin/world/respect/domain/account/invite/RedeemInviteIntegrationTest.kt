@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.mock
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
@@ -50,6 +51,9 @@ class RedeemInviteIntegrationTest {
                     getTokenAndUserProfileUseCase = GetTokenAndUserProfileWithCredentialDbImpl(
                         schoolDb = serverSchoolSourceAndDb.first,
                         xxHash = xxStringHasher,
+                        schoolUrl = schoolUrl,
+                        respectAppDataSource = mock {  },
+                        verifyPasskeyUseCase = mock {  },
                     ),
                     schoolDataSource = { _, _ -> serverSchoolDataSource },
                     uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -24,16 +25,17 @@ import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.fullName
+import world.respect.shared.util.ext.isAdmin
+import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 
 data class PersonDetailUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
-){
-    val manageAccountVisible: Boolean
-        get() = person.dataOrNull()?.username != null
-}
+    val manageAccountVisible: Boolean = false,
+    val createAccountVisible: Boolean = false,
+)
 
 class PersonDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -65,7 +67,13 @@ class PersonDetailViewModel(
         viewModelScope.launch {
             schoolDataSource.personDataSource.findByGuidAsFlow(
                 route.guid
-            ).collect { person ->
+            ).combine(accountManager.selectedAccountAndPersonFlow) { person, activeAccount ->
+                Pair(person, activeAccount)
+            }.collect { (person, activeAccount) ->
+                val personVal = person.dataOrNull()
+                val hasAccountPermission = activeAccount?.person?.isAdmin() == true
+                        || activeAccount?.person?.guid == person.dataOrNull()?.guid
+
                 _appUiState.update { prev ->
                     prev.copy(
                         title = person.dataOrNull()?.fullName()?.asUiText(),
@@ -73,7 +81,12 @@ class PersonDetailViewModel(
                 }
 
                 _uiState.update { prev ->
-                    prev.copy(person = person)
+                    prev.copy(
+                        person = person,
+                        manageAccountVisible = hasAccountPermission && personVal?.username != null,
+                        createAccountVisible = personVal != null && personVal.username == null &&
+                            personVal.isAdminOrTeacher()
+                    )
                 }
             }
         }
@@ -88,11 +101,7 @@ class PersonDetailViewModel(
         uiState.value.person.dataOrNull().let {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    ManageAccount.create(
-                        guid = route.guid,
-                        personName = it?.givenName ?: "",
-                        personUsername = it?.username ?: return
-                    )
+                    ManageAccount(guid = route.guid)
                 )
             )
         }

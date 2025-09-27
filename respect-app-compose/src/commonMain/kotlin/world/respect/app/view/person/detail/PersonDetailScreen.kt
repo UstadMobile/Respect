@@ -1,11 +1,14 @@
 package world.respect.app.view.person.detail
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,8 +34,8 @@ fun PersonDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     PersonDetailScreen(
-        uiState,
-        onClickManageAccount = {viewModel.navigateToManageAccount()}
+        uiState = uiState,
+        onClickManageAccount = { viewModel.navigateToManageAccount() }
     )
 }
 
@@ -45,6 +48,18 @@ fun PersonDetailScreen(
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            if (uiState.manageAccountVisible){
+                RespectQuickActionButton(
+                    labelText = stringResource(Res.string.manage_account),
+                    imageVector = Icons.Default.Key,
+                    onClick = onClickManageAccount
+                )
+            }
+        }
+
+        HorizontalDivider()
+
         person?.username?.also {
             RespectDetailField(
                 modifier = Modifier.defaultItemPadding(),
@@ -66,12 +81,6 @@ fun PersonDetailScreen(
                 value = { Text(it.toString()) }
             )
         }
-        if (uiState.manageAccountVisible){
-            RespectQuickActionButton(
-                labelText = stringResource(Res.string.manage_account),
-                imageVector = Icons.Default.Key,
-                onClick = onClickManageAccount
-            )
-        }
+
     }
 }

@@ -2,6 +2,7 @@ package world.respect.datalayer.db.opds.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
@@ -9,8 +10,8 @@ import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 @Dao
 abstract class PersonPasskeyEntityDao {
 
-    @Insert
-    abstract suspend fun insertAsync(
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun upsertAsync(
         personPasskey: List<PersonPasskeyEntity>
     )
 
@@ -66,6 +67,17 @@ abstract class PersonPasskeyEntityDao {
          WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
     """)
     abstract fun findAllAsFlow(personGuidNumber: Long): Flow<List<PersonPasskeyEntity>>
+
+    @Query("""
+        SELECT PersonPasskeyEntity.ppLastModified
+          FROM PersonPasskeyEntity
+         WHERE PersonPasskeyEntity.ppPersonUid = :personUidNum
+           AND PersonPasskeyEntity.ppId = :passKeyId
+    """)
+    abstract suspend fun getLastModifiedByPersonUidAndKeyId(
+        personUidNum: Long,
+        passKeyId: String,
+    ): Long?
 
 
 }

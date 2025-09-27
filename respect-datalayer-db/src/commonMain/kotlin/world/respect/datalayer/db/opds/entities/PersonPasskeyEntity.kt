@@ -1,6 +1,8 @@
 package world.respect.datalayer.db.opds.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Entity(
@@ -27,6 +29,12 @@ class PersonPasskeyEntity(
     val ppPublicKey: String? = null,
 
     val isRevoked: Int = NOT_REVOKED,
+
+    @ColumnInfo(defaultValue = "''")
+    val ppDeviceName: String,
+
+    @ColumnInfo(defaultValue = "0")
+    val ppTimeCreated: Instant = Clock.System.now(),
 ){
     companion object {
 

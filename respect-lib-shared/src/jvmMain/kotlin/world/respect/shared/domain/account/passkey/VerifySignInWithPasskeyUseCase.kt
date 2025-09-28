@@ -16,7 +16,7 @@ import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.model.ClientDataJSON
 import world.respect.credentials.passkey.model.PasskeyVerifyResult
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
+import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.libutil.util.throwable.withHttpStatus
 import java.util.Base64
 
@@ -31,8 +31,6 @@ class VerifySignInWithPasskeyUseCase(
         authenticationResponseJSON: AuthenticationResponseJSON,
         rpId: String,
     ): PasskeyVerifyResult {
-
-
         val clientDataJSONBase64 = authenticationResponseJSON.response.clientDataJSON
         val decodedBytes = Base64.getDecoder().decode(clientDataJSONBase64)
         val clientDataJson = json.decodeFromString<ClientDataJSON>(decodedBytes.decodeToString())

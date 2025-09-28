@@ -119,6 +119,7 @@ import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.personPassword.GetPersonPassword
 import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
+import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
@@ -126,8 +127,6 @@ import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUse
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
-import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
-import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
@@ -360,10 +359,13 @@ val appKoinModule = module {
     }
 
     single {
+        val primaryKeyGenerator = PrimaryKeyGenerator(listOf(PersonPasskeyEntity.TABLE_ID))
         CreatePublicKeyCredentialCreationOptionsJsonUseCase(
             encodeUserHandleUseCase = get(),
             appName = Res.string.app_name,
-            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
+            primaryKeyGenerator = {
+                primaryKeyGenerator.nextId(PersonPasskeyEntity.TABLE_ID)
+            }
         )
     }
 
@@ -526,12 +528,7 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-        scoped<SavePersonPasskeyUseCase> {
-            SavePersonPasskeyUseCaseClient(
-                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
-                httpClient = get(),
-            )
-        }
+
 
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(

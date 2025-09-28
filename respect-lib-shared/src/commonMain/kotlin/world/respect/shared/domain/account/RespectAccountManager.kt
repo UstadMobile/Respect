@@ -14,7 +14,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectCredential
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource

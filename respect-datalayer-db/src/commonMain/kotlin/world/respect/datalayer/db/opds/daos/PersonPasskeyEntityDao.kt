@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
+import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 
 @Dao
 abstract class PersonPasskeyEntityDao {

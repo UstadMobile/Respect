@@ -5,7 +5,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 
 fun Route.RedeemInviteRoute(

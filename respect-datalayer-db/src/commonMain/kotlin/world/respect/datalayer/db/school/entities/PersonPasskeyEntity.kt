@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.opds.entities
+package world.respect.datalayer.db.school.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

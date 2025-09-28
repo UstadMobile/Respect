@@ -155,6 +155,7 @@
     <string name="sign_in_faster_description">You can sign in securely with your passkey using your fingerprints, face or other screen-lock method.</string>
     <string name="sign_up_with_passkey">Sign up with a passkey</string>
     <string name="create_passkey">Create passkey</string>
+    <string name="passkey">Passkey</string>
 
 
     <string name="add_account">Add account</string>

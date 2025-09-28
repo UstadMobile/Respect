@@ -8,7 +8,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
+import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.libutil.ext.appendEndpointSegments
 
 class GetActivePersonPasskeysClient(

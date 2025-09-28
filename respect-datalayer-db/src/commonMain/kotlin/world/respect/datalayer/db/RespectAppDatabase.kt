@@ -22,7 +22,6 @@ import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
 import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
 import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.schooldirectory.daos.SchoolConfigEntityDao
@@ -104,7 +103,6 @@ abstract class RespectAppDatabase : RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
-            PersonPasskeyEntity.TABLE_ID,
         )
 
     }
@@ -112,7 +110,7 @@ abstract class RespectAppDatabase : RoomDatabase() {
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
-    "KotlinNoActualForExpect"
+    "KotlinNoActualForExpect", "RedundantSuppression"
 )
 expect object RespectAppDatabaseConstructor : RoomDatabaseConstructor<RespectAppDatabase> {
     override fun initialize(): RespectAppDatabase

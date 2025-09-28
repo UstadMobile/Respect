@@ -34,7 +34,6 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
-import world.respect.server.routes.passkey.SavePersonPasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
@@ -168,9 +167,7 @@ fun Application.module() {
                 VerifySignInWithPasskeyRoute(
                     useCase =  { it.getSchoolKoinScope().get() }
                 )
-                SavePersonPasskeyRoute(
-                    useCase =  { it.getSchoolKoinScope().get() }
-                )
+
                 GetAllActivePasskeysRoute(
                     useCase =  { it.getSchoolKoinScope().get() }
                 )

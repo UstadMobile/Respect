@@ -1,7 +1,7 @@
 package world.respect.datalayer.db.school.adapters
 
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
+import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.school.model.PersonPasskey
 
 fun PersonPasskey.asEntity(

@@ -1,6 +1,5 @@
 package world.respect.credentials.passkey.request
 
-import io.ktor.http.Url
 import io.ktor.util.encodeBase64
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -9,8 +8,6 @@ import world.respect.credentials.passkey.model.PublicKeyCredentialCreationOption
 import world.respect.credentials.passkey.model.PublicKeyCredentialParameters
 import world.respect.credentials.passkey.model.PublicKeyCredentialRpEntity
 import world.respect.credentials.passkey.model.PublicKeyCredentialUserEntityJSON
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.randomString
 
 /**
@@ -28,7 +25,7 @@ import world.respect.libutil.ext.randomString
 class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
     private val appName: StringResource,
-    private val primaryKeyGenerator: PrimaryKeyGenerator
+    private val primaryKeyGenerator: () -> Long,
 ) {
 
     suspend operator fun invoke(
@@ -37,7 +34,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     ): PublicKeyCredentialCreationOptionsJSON {
         val challenge = randomString(16) //TODO note: this should really take place on the server side
 
-        val personPasskeyUid = primaryKeyGenerator.nextId(PersonPasskeyEntity.TABLE_ID)
+        val personPasskeyUid = primaryKeyGenerator()
         val encodeUserHandle = encodeUserHandleUseCase(personPasskeyUid)
 
         return PublicKeyCredentialCreationOptionsJSON(

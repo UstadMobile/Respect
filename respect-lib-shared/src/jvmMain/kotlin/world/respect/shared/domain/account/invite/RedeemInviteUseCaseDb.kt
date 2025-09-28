@@ -1,14 +1,15 @@
 package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
+import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -19,7 +20,6 @@ import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
-import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
@@ -28,7 +28,7 @@ import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import java.lang.IllegalArgumentException
 
 /**
- * Server-side use case that
+ * Server-side use case that handles redeeming an invite
  */
 class RedeemInviteUseCaseDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -36,19 +36,18 @@ class RedeemInviteUseCaseDb(
     private val schoolUrl: Url,
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator,
     private val setPasswordUseCase: SetPasswordUseCase,
-    private val savePasskeyUseCase: SavePersonPasskeyUseCase,
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
+    private val json: Json,
 ): RedeemInviteUseCase, KoinComponent {
 
     fun RespectRedeemInviteRequest.PersonInfo.toPerson(
         role: PersonRoleEnum,
         username: String,
+        guid: String,
     ) : Person {
         return Person(
-            guid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                Person.TABLE_ID
-            ).toString(),
+            guid =  guid,
             status = PersonStatusEnum.PENDING_APPROVAL,
             givenName = name.substringBeforeLast(" "),
             familyName = name.substringAfterLast(" "),
@@ -85,7 +84,9 @@ class RedeemInviteUseCaseDb(
         ).toString()
 
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
-            redeemRequest.role, redeemRequest.account.username
+            role = redeemRequest.role,
+            username = redeemRequest.account.username,
+            guid = accountGuid,
         )
 
         val schoolDataSourceVal = schoolDataSource(
@@ -109,12 +110,13 @@ class RedeemInviteUseCaseDb(
             }
 
             is RespectPasskeyCredential -> {
-                savePasskeyUseCase(
-                    SavePersonPasskeyUseCase.Request(
-                        authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
-                        userGuid = accountPerson.guid,
-                        passkeyWebAuthNResponse = credential.passkeyWebAuthNResponse,
-                        deviceName = redeemRequest.deviceName ?: "Unknown device",
+                schoolDataSourceVal.personPasskeyDataSource.store(
+                    listOf(
+                        credential.passkeyWebAuthNResponse.toPersonPasskey(
+                            json = json,
+                            personGuid = accountPerson.guid,
+                            deviceName = redeemRequest.deviceName ?: "Unknown device type",
+                        )
                     )
                 )
 

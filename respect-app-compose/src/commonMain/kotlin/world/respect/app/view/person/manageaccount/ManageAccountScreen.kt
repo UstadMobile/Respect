@@ -3,8 +3,6 @@ package world.respect.app.view.person.manageaccount
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -13,14 +11,13 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectPasskeySignInFasterCard
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.*
@@ -39,6 +36,7 @@ fun ManageAccountScreen(
         onCreatePasskeyClick = viewModel::onCreatePasskeyClick,
         onClickManagePasskey = viewModel::onClickManagePasskey,
         onClickChangePassword = viewModel::navigateToEditAccount,
+        onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
     )
 
 }
@@ -47,6 +45,7 @@ fun ManageAccountScreen(
 fun ManageAccountScreen(
     uiState: ManageAccountUiState,
     onCreatePasskeyClick: () -> Unit = {},
+    onClickHowPasskeysWork: () -> Unit = {},
     onClickManagePasskey: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
 ) {
@@ -79,24 +78,10 @@ fun ManageAccountScreen(
 
 
             if (uiState.showCreatePasskey) {
-                ListItem(
-                    trailingContent = {
-                        Icon(Icons.Default.Security, contentDescription = null)
-                    },
-                    headlineContent = {
-                        Text(stringResource(Res.string.sign_in_faster))
-                    },
-                    supportingContent = {
-                        Text(stringResource(Res.string.sign_in_faster_description))
-                    }
+                RespectPasskeySignInFasterCard(
+                    onClickPasskeySignup = onCreatePasskeyClick,
+                    onClickHowPasskeysWork = onClickHowPasskeysWork,
                 )
-
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp),
-                    onClick = onCreatePasskeyClick,
-                ) {
-                    Text(stringResource(Res.string.create_passkey))
-                }
             }
 
             if (!uiState.showCreatePasskey) {
@@ -111,12 +96,7 @@ fun ManageAccountScreen(
                         )
                     },
                     supportingContent = {
-
-                        Text(
-                            text = stringResource(Res.string.passkeys),
-
-                            )
-
+                        Text(text = stringResource(Res.string.passkeys))
                     },
                     trailingContent = {
                         Text(

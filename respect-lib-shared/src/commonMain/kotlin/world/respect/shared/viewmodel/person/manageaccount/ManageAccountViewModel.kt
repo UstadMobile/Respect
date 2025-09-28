@@ -7,22 +7,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.personPassword.GetPersonPassword
 import world.respect.datalayer.db.school.entities.PersonPasswordEntity
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PasskeyList
@@ -34,7 +35,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 
 data class ManageAccountUiState(
     val passkeyCount: Int? = null,
-    val showCreatePasskey: Boolean = false,
+    val showCreatePasskey: Boolean = true,
     val passkeySupported: Boolean = true,
     val personUsername: String = "",
     val personPasswordEntity: PersonPasswordEntity? = null,
@@ -47,13 +48,12 @@ class ManageAccountViewModel(
     private val accountManager: RespectAccountManager,
     private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
+    private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-
-    private val savePersonPasskeyUseCase: SavePersonPasskeyUseCase by inject()
 
     private val getPersonPassword: GetPersonPassword by inject()
 
@@ -142,6 +142,12 @@ class ManageAccountViewModel(
         )
     }
 
+    fun onClickHowPasskeysWork() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(HowPasskeyWorks)
+        )
+    }
+
     fun onCreatePasskeyClick() {
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
@@ -152,13 +158,15 @@ class ManageAccountViewModel(
             if (passkeyCreated != null) {
                 when (passkeyCreated) {
                     is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                        val request = SavePersonPasskeyUseCase.Request(
-                            authenticatedUserId = AuthenticatedUserPrincipalId(personGuid),
-                            userGuid = personGuid,
-                            passkeyWebAuthNResponse = passkeyCreated.authenticationResponseJSON,
-                            deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
+                        schoolDataSource.personPasskeyDataSource.store(
+                            listOf(
+                                passkeyCreated.authenticationResponseJSON.toPersonPasskey(
+                                    json = json,
+                                    personGuid = personGuid,
+                                    deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
+                                )
+                            )
                         )
-                        savePersonPasskeyUseCase(request)
                     }
 
                     is CreatePasskeyUseCase.Error -> {

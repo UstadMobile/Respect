@@ -2,9 +2,11 @@ package world.respect.shared.domain.account
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.mock
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
@@ -54,6 +56,8 @@ class AuthWithPasswordIntegrationTest {
         gender = PersonGenderEnum.FEMALE,
     )
 
+    private val defaultSchoolUrl = Url("https://school.example.org/")
+
     @BeforeTest
     fun setup() {
         val dbDir = temporaryFolder.newFolder("dbdir")
@@ -65,7 +69,11 @@ class AuthWithPasswordIntegrationTest {
         uidNumberMapper = XXHashUidNumberMapper(xxHash)
         setPasswordUseCase = SetPasswordUseDbImpl(schoolDb, xxHash)
         getTokenUseCase = GetTokenAndUserProfileWithCredentialDbImpl(
-            schoolDb, xxHash,
+            schoolUrl = defaultSchoolUrl,
+            schoolDb = schoolDb,
+            xxHash = xxHash,
+            verifyPasskeyUseCase = mock { },
+            respectAppDataSource = mock { },
         )
 
         validateAuthUseCase = ValidateAuthorizationUseCaseDbImpl(schoolDb)

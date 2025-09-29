@@ -86,6 +86,8 @@ import kotlinx.io.files.Path
 import org.koin.android.ext.koin.androidApplication
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
+import world.respect.credentials.passkey.password.SavePasswordUseCase
+import world.respect.credentials.password.SavePasswordUseCaseImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.AuthTokenProvider
@@ -388,6 +390,11 @@ val appKoinModule = module {
     }
     single<VerifyDomainUseCase> {
         VerifyDomainUseCaseImpl(
+            context = androidApplication()
+        )
+    }
+    single<SavePasswordUseCase> {
+        SavePasswordUseCaseImpl(
             context = androidApplication()
         )
     }

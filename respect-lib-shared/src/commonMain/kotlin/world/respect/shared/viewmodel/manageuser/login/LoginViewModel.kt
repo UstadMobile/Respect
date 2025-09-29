@@ -12,6 +12,7 @@ import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -46,6 +47,7 @@ class LoginViewModel(
     respectAppDataSource: RespectAppDataSource,
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
     private val filterUsernameUseCase: FilterUsernameUseCase,
+    private val savePasswordUseCase: SavePasswordUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -53,6 +55,10 @@ class LoginViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: LoginScreen = savedStateHandle.toRoute()
+
+    //Short-term internal variable used so that we can avoid showing a save password prompt if/when
+    //the user just used their saved password
+    private var usingSavedPassword = false
 
     init {
         viewModelScope.launch {
@@ -94,6 +100,8 @@ class LoginViewModel(
                         is GetCredentialUseCase.PasswordCredentialResult -> {
                             onUsernameChanged(credentialResult.credentialUsername)
                             onPasswordChanged(credentialResult.password)
+
+                            usingSavedPassword = true
                             onClickLogin()
                         }
 
@@ -125,6 +133,8 @@ class LoginViewModel(
     }
 
     fun onUsernameChanged(userId: String) {
+        usingSavedPassword = false
+
         val filteredValue = filterUsernameUseCase(
             username = userId,
             invalidCharReplacement = ""
@@ -139,6 +149,7 @@ class LoginViewModel(
     }
 
     fun onPasswordChanged(password: String) {
+        usingSavedPassword = false
         _uiState.update {
             it.copy(
                 password = password,
@@ -175,6 +186,12 @@ class LoginViewModel(
                         credential = RespectPasswordCredential(username, password),
                         schoolUrl = route.schoolUrl
                     )
+                   if (!usingSavedPassword){
+                       savePasswordUseCase(
+                           username = username,
+                           password = password
+                       )
+                   }
 
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(RespectAppLauncher)

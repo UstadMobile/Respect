@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
@@ -34,6 +35,7 @@ data class EnterPasswordSignupUiState(
 class EnterPasswordSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
+    private val savePasswordUseCase: SavePasswordUseCase
 ) : RespectViewModel(savedStateHandle) {
     private val route: EnterPasswordSignup = savedStateHandle.toRoute()
 
@@ -90,6 +92,10 @@ class EnterPasswordSignupViewModel(
                 accountManager.register(
                     redeemInviteRequest = redeemRequest,
                     schoolUrl = route.schoolUrl,
+                )
+                savePasswordUseCase(
+                    username = route.respectRedeemInviteRequest.account.username,
+                    password = password
                 )
 
                 _navCommandFlow.tryEmit(

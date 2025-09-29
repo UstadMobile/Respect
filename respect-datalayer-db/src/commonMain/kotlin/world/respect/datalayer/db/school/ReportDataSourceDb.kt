@@ -19,7 +19,6 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.model.Report
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
-import kotlin.collections.map
 import kotlin.time.Clock
 
 class ReportDataSourceDb(
@@ -31,7 +30,7 @@ class ReportDataSourceDb(
         reports: List<Report>,
         forceOverwrite: Boolean = false,
     ) {
-        if(reports.isEmpty())
+        if (reports.isEmpty())
             return
 
         schoolDb.useWriterConnection { con ->
@@ -45,8 +44,9 @@ class ReportDataSourceDb(
                         entities.reportEntity.rGuidHash
                     ) ?: -1
 
-                    if(forceOverwrite ||
-                        entities.reportEntity.rLastModified > lastModifiedInDb) {
+                    if (forceOverwrite ||
+                        entities.reportEntity.rLastModified > lastModifiedInDb
+                    ) {
                         schoolDb.getReportEntityDao().putReport(entities.reportEntity)
                         numUpdated++
                     }
@@ -128,6 +128,8 @@ class ReportDataSourceDb(
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Report> {
-        TODO("Not yet implemented")
+        return schoolDb.getReportEntityDao().findByUidList(
+            uids.map { uidNumberMapper(it) }
+        ).map { ReportEntities(it).toModel() }
     }
 }

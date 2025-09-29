@@ -117,6 +117,8 @@ class IndicatorDataSourceDb(
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Indicator> {
-        TODO("Not yet implemented")
+        return schoolDb.getIndicatorEntityDao().findByUidList(
+            uids.map { uidNumberMapper(it) }
+        ).map { IndicatorEntities(it).toModel() }
     }
 }

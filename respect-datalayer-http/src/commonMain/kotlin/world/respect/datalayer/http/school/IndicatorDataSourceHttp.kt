@@ -1,9 +1,13 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -66,8 +70,8 @@ class IndicatorDataSourceHttp(
                 GetListCommonParams(guid = guid)
             ).urlWithParams()
         ) {
-            headers[HttpHeaders.Authorization] =
-                "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.firstOrNotLoaded()
     }
 
@@ -87,7 +91,8 @@ class IndicatorDataSourceHttp(
                 },
                 tag = "Indicator-HTTP",
             )
-        }    }
+        }
+    }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>> {
         return httpClient.getDataLoadResultAsFlow<List<Indicator>>(
@@ -98,15 +103,21 @@ class IndicatorDataSourceHttp(
             },
             dataLoadParams = DataLoadParams()
         ) {
-            headers[HttpHeaders.Authorization] =
-                "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.map {
             it.firstOrNotLoaded()
         }
     }
 
     override suspend fun store(list: List<Indicator>) {
-        throw IllegalStateException("Indicator-store-http: Not yet supported")
+        httpClient.post(
+            url = respectEndpointUrl(IndicatorDataSource.ENDPOINT_NAME)
+        ) {
+            useTokenProvider(tokenProvider)
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }
     }
 
     override suspend fun initializeDefaultIndicators(idGenerator: () -> String) {

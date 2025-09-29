@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.ReportEntity
 
@@ -13,6 +14,16 @@ interface ReportEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putReport(reportEntity: ReportEntity)
+
+    @Transaction
+    @Query(
+        """
+        SELECT ReportEntity.*
+          FROM ReportEntity
+         WHERE ReportEntity.rGuidHash IN (:uidNums) 
+    """
+    )
+    suspend fun findByUidList(uidNums: List<Long>): List<ReportEntity>
 
     @Query(
         """
@@ -24,7 +35,7 @@ interface ReportEntityDao {
     )
     suspend fun getLastModifiedByGuid(guidHash: Long): Long?
 
-
+    @Transaction
     @Query(
         """
         SELECT * 
@@ -43,6 +54,7 @@ interface ReportEntityDao {
     )
     suspend fun findByGuidHash(guidHash: Long): ReportEntity?
 
+    @Transaction
     @Query(
         """
         SELECT * 
@@ -52,9 +64,11 @@ interface ReportEntityDao {
     )
     fun findByGuidHashAsFlow(guidHash: Long): Flow<ReportEntity?>
 
+    @Transaction
     @Query("DELETE FROM ReportEntity WHERE rGuidHash = :guidHash")
     suspend fun deleteReportByGuidHash(guidHash: Long)
 
+    @Transaction
     @Query(
         """
         SELECT ReportEntity.* 

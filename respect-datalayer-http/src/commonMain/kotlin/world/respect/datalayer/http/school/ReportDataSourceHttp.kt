@@ -71,8 +71,8 @@ class ReportDataSourceHttp(
                 GetListCommonParams(guid = guid)
             ).urlWithParams()
         ) {
-            headers[HttpHeaders.Authorization] =
-                "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.firstOrNotLoaded()
     }
 
@@ -104,8 +104,8 @@ class ReportDataSourceHttp(
             },
             dataLoadParams = DataLoadParams()
         ) {
-            headers[HttpHeaders.Authorization] =
-                "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.map {
             it.firstOrNotLoaded()
         }

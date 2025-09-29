@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import world.respect.datalayer.db.curriculum.entities.ChapterMapping
 
-object ChapterRepository {
+class MockChapterDataSource {
     private val chapters = MutableStateFlow<List<ChapterMapping>>(emptyList())
 
     fun getChapters(): Flow<List<ChapterMapping>> = chapters
@@ -14,7 +14,7 @@ object ChapterRepository {
             .sortedBy { it.chapterNumber }
     }
 
-    suspend fun insertOrUpdate(chapter: ChapterMapping) {
+    fun insertOrUpdate(chapter: ChapterMapping) {
         val current = chapters.value.toMutableList()
 
         val index = current.indexOfFirst { it.uid == chapter.uid }

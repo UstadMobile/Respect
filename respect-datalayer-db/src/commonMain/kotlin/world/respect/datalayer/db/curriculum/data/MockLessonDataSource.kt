@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import world.respect.datalayer.db.curriculum.entities.LessonMapping
 
-object LessonRepository {
+class MockLessonDataSource {
     private val lessons = MutableStateFlow<List<LessonMapping>>(emptyList())
 
     fun getLessons(): Flow<List<LessonMapping>> = lessons
@@ -18,7 +18,7 @@ object LessonRepository {
         return lessons.value.filter { it.textbookUid == textbookUid }
     }
 
-    suspend fun insertOrUpdate(lesson: LessonMapping) {
+   fun insertOrUpdate(lesson: LessonMapping) {
         val current = lessons.value.toMutableList()
 
         val index = current.indexOfFirst { it.uid == lesson.uid }
@@ -36,13 +36,13 @@ object LessonRepository {
         lessons.value = current
     }
 
-    suspend fun delete(lessonUid: Long) {
+   fun delete(lessonUid: Long) {
         val current = lessons.value.toMutableList()
         current.removeAll { it.uid == lessonUid }
         lessons.value = current
     }
 
-    suspend fun deleteAllForChapter(chapterUid: Long) {
+    fun deleteAllForChapter(chapterUid: Long) {
         val current = lessons.value.toMutableList()
         current.removeAll { it.chapterUid == chapterUid }
         lessons.value = current

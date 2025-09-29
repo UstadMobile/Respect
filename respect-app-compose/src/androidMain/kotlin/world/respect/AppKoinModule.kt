@@ -111,12 +111,11 @@ import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewMode
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import org.koin.core.qualifier.named
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.curriculum.data.ChapterRepository
-import world.respect.datalayer.db.curriculum.data.LessonRepository
-import world.respect.datalayer.db.curriculum.data.TextbookRepository
+import world.respect.datalayer.db.curriculum.data.MockChapterDataSource
+import world.respect.datalayer.db.curriculum.data.MockLessonDataSource
+import world.respect.datalayer.db.curriculum.data.MockTextbookDataSource
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
@@ -347,15 +346,15 @@ val appKoinModule = module {
         EncodeUserHandleUseCaseImpl()
     }
 
-    single { TextbookRepository }
-    single { ChapterRepository }
-    single { LessonRepository }
+    single { MockTextbookDataSource()}
+    single { MockChapterDataSource()}
+    single { MockLessonDataSource() }
 
     single< MockGetCurriculumMappingsUseCaseImpl> {
         MockGetCurriculumMappingsUseCaseImpl(
-            textbookRepository = get(),
-            chapterRepository = get(),
-            lessonRepository = get()
+            textbookDataSource = get(),
+            chapterDataSource = get(),
+            lessonDataSource = get()
         )
     }
 

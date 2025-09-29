@@ -4,12 +4,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import world.respect.datalayer.db.curriculum.entities.TextbookMapping
 
-object TextbookRepository {
+class MockTextbookDataSource {
     private val textbooks = MutableStateFlow<List<TextbookMapping>>(emptyList())
 
     fun getTextbooks(): Flow<List<TextbookMapping>> = textbooks
 
-    suspend fun insertOrUpdate(textbook: TextbookMapping) {
+    fun insertOrUpdate(textbook: TextbookMapping) {
         val current = textbooks.value.toMutableList()
 
         val index = current.indexOfFirst { it.uid == textbook.uid }

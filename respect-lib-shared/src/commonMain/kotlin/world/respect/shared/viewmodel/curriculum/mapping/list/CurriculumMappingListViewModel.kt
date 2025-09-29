@@ -10,10 +10,12 @@ import kotlinx.coroutines.launch
 import world.respect.datalayer.db.curriculum.entities.TextbookMapping
 import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.error_unknown
 import world.respect.shared.generated.resources.map
 import world.respect.shared.generated.resources.mapping
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -21,7 +23,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 data class CurriculumMappingListUiState(
     val textbooks: List<TextbookMapping> = emptyList(),
     val loading: Boolean = false,
-    val error: String? = null,
+    val error: UiText?  = null,
 )
 
 class CurriculumMappingListViewModel(
@@ -59,7 +61,7 @@ class CurriculumMappingListViewModel(
                     _uiState.update {
                         it.copy(
                             loading = false,
-                            error = throwable.message ?: "Unknown error occurred"
+                            error = Res.string.error_unknown.asUiText()
                         )
                     }
                 }

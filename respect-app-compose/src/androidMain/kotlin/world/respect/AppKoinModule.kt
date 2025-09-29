@@ -30,9 +30,9 @@ import org.koin.dsl.module
 import passkey.EncodeUserHandleUseCaseImpl
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.credentials.passkey.CreatePasskeyUseCaseImpl
+import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidImpl
 import world.respect.credentials.passkey.GetCredentialUseCase
-import world.respect.credentials.passkey.GetCredentialUseCaseImpl
+import world.respect.credentials.passkey.GetCredentialUseCaseAndroidImpl
 import world.respect.credentials.passkey.VerifyDomainUseCase
 import world.respect.credentials.passkey.VerifyDomainUseCaseImpl
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
@@ -84,6 +84,8 @@ import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForAp
 import world.respect.shared.viewmodel.report.ReportViewModel
 import kotlinx.io.files.Path
 import org.koin.android.ext.koin.androidApplication
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
+import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.AuthTokenProvider
@@ -111,7 +113,6 @@ import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewMode
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import org.koin.core.qualifier.named
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
@@ -348,16 +349,14 @@ val appKoinModule = module {
     }
 
     single<CreatePasskeyUseCase> {
-        CreatePasskeyUseCaseImpl(
-            context = androidApplication(),
+        CreatePasskeyUseCaseAndroidImpl(
             json = get(),
             createPublicKeyJsonUseCase = get()
         )
     }
 
     single<GetCredentialUseCase> {
-        GetCredentialUseCaseImpl(
-            context = androidApplication(),
+        GetCredentialUseCaseAndroidImpl(
             json = get(),
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )
@@ -434,6 +433,12 @@ val appKoinModule = module {
 
     single<SetUsageReportingEnabledUseCase> {
         SetUsageReportingEnabledUseCaseAndroid(androidContext())
+    }
+
+    single<CheckPasskeySupportUseCase> {
+        CheckPasskeySupportUseCaseAndroidImpl(
+            verifyDomainUseCase = get()
+        )
     }
 
     /**

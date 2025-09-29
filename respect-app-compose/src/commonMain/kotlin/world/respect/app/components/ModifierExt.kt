@@ -43,5 +43,3 @@ fun Modifier.testTagIfNotNull(tag: String?): Modifier = this.let {
         it
 }
 
-fun Modifier.editScreenPadding() = padding(horizontal = 8.dp, vertical = 8.dp)
-

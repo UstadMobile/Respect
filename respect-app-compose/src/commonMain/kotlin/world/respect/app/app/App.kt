@@ -153,7 +153,7 @@ fun App(
                                     icon = {
                                         Icon(item.icon, contentDescription = null)
                                     },
-                                    label = { Text(label) },
+                                    label = { Text(label, maxLines = 1) },
                                     selected = selectedTopLevelItemIndex == index,
                                     onClick = {
                                         navController.navigate(item.destRoute)  {

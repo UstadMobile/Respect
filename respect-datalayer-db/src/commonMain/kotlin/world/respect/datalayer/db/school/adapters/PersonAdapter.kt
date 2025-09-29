@@ -69,6 +69,7 @@ fun Person.toEntities(
             pMiddleName = middleName,
             pGender = gender,
             pDateOfBirth = dateOfBirth,
+            pEmail = email,
         ),
         personRoleEntities = roles.map {
             PersonRoleEntity(

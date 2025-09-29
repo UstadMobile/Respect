@@ -21,6 +21,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
+import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.first_names
 import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.last_name
@@ -100,6 +101,20 @@ fun PersonEditScreen(
                 }
             },
             enabled = uiState.fieldsEnabled,
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.testTag("email").fillMaxWidth().defaultItemPadding(),
+            value = person?.email ?: "",
+            label = { Text(stringResource(Res.string.email)) },
+            singleLine = true,
+            onValueChange = { email ->
+                person?.also {
+                    onEntityChanged(it.copy(email = email))
+                }
+            },
+            enabled = uiState.fieldsEnabled,
+
         )
     }
 

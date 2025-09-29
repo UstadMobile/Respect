@@ -26,4 +26,5 @@ data class PersonEntity(
     val pMiddleName: String? = null,
     val pGender: PersonGenderEnum,
     val pDateOfBirth: LocalDate? = null,
+    val pEmail: String? = null
 )

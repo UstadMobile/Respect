@@ -36,12 +36,6 @@ object LessonRepository {
         lessons.value = current
     }
 
-    suspend fun insertOrUpdateAll(lessonList: List<LessonMapping>) {
-        lessonList.forEach { lesson ->
-            insertOrUpdate(lesson)
-        }
-    }
-
     suspend fun delete(lessonUid: Long) {
         val current = lessons.value.toMutableList()
         current.removeAll { it.uid == lessonUid }
@@ -54,9 +48,4 @@ object LessonRepository {
         lessons.value = current
     }
 
-    suspend fun deleteAllForTextbook(textbookUid: Long) {
-        val current = lessons.value.toMutableList()
-        current.removeAll { it.textbookUid == textbookUid }
-        lessons.value = current
-    }
 }

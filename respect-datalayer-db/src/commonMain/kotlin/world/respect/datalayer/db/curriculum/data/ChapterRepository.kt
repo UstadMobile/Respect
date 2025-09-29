@@ -32,21 +32,4 @@ object ChapterRepository {
         chapters.value = current
     }
 
-    suspend fun insertOrUpdateAll(chapterList: List<ChapterMapping>) {
-        chapterList.forEach { chapter ->
-            insertOrUpdate(chapter)
-        }
-    }
-
-    suspend fun delete(chapterUid: Long) {
-        val current = chapters.value.toMutableList()
-        current.removeAll { it.uid == chapterUid }
-        chapters.value = current
-    }
-
-    suspend fun deleteAllForTextbook(textbookUid: Long) {
-        val current = chapters.value.toMutableList()
-        current.removeAll { it.textbookUid == textbookUid }
-        chapters.value = current
-    }
 }

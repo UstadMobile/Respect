@@ -20,6 +20,7 @@ import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.save_failed
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -29,10 +30,10 @@ data class CurriculumMappingEditUiState(
     val textbook: TextbookMapping? = null,
     val chapters: List<ChapterMapping> = emptyList(),
     val lessons: List<LessonMapping> = emptyList(),
-    val bookTitleError: String? = null,
     val loading: Boolean = false,
     val isNew: Boolean = true,
-    val error: String? = null,
+    val bookTitleError: UiText? = null,
+    val error: UiText? = null,
 ) {
 
     val fieldsEnabled: Boolean
@@ -106,8 +107,7 @@ class CurriculumMappingEditViewModel(
                         _uiState.update { prev ->
                             prev.copy(
                                 loading = false,
-                                error = Res.string.error_unknown.asUiText().toString()
-                            )
+                                error = Res.string.error_unknown.asUiText())
                         }
                     }
                 } else {
@@ -131,7 +131,7 @@ class CurriculumMappingEditViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         loading = false,
-                        error = Res.string.error_unknown.asUiText().toString()
+                        error = Res.string.error_unknown.asUiText()
                     )
                 }
             }
@@ -223,7 +223,7 @@ class CurriculumMappingEditViewModel(
             uid = -(System.currentTimeMillis())
             chapterUid = chapter.uid
             lessonNumber = nextLessonNumberForChapter
-            title = "Lesson  $nextLessonNumberForChapter"
+            title = null
             subtitle = null
             lessonType = null
             textbookUid = this@CurriculumMappingEditViewModel.textbookUid
@@ -241,7 +241,7 @@ class CurriculumMappingEditViewModel(
         val lessonsInChapter = updatedLessons.filter { it.chapterUid == lesson.chapterUid }
         lessonsInChapter.forEachIndexed { index, lessonMapping ->
             lessonMapping.lessonNumber = index + 1
-              lessonMapping.title = "Lesson ${index + 1}"
+              lessonMapping.title = null
 
         }
 
@@ -256,7 +256,7 @@ class CurriculumMappingEditViewModel(
         val bookTitle = textbook.title
         if (bookTitle.isNullOrBlank()) {
             _uiState.update { prev ->
-                prev.copy(bookTitleError = Res.string.required.asUiText().toString())
+                prev.copy(bookTitleError = Res.string.required.asUiText())
             }
             return
         } else {
@@ -286,7 +286,7 @@ class CurriculumMappingEditViewModel(
                 _uiState.update {
                     it.copy(
                         loading = false,
-                        error = Res.string.save_failed.asUiText().toString()
+                        error = Res.string.save_failed.asUiText()
                     )
                 }
             }

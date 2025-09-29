@@ -21,8 +21,8 @@ class MockGetCurriculumMappingsUseCaseImpl(
     }
 
     override suspend fun getTextbookWithDetails(textbookUid: Long): TextbookMappingWithDetails? {
-        val textbook = textbookRepository.getTextbooks().first()
-            .find { it.uid == textbookUid } ?: return null
+        val textbooks = textbookRepository.getTextbooks().first()
+        val textbook= textbooks.find { it.uid == textbookUid } ?: return null
 
         val chapters = chapterRepository.getChaptersForTextbook(textbookUid)
         val lessons = lessonRepository.getLessonsForTextbook(textbookUid)
@@ -76,7 +76,6 @@ class MockGetCurriculumMappingsUseCaseImpl(
 
     override suspend fun deleteChapter(chapterUid: Long) {
         lessonRepository.deleteAllForChapter(chapterUid)
-        chapterRepository.delete(chapterUid)
     }
 
     override suspend fun deleteLesson(lessonUid: Long) {

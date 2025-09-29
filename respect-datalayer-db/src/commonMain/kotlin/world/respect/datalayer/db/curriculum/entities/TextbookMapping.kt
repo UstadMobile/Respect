@@ -1,7 +1,5 @@
 package world.respect.datalayer.db.curriculum.entities
 
-
-
 data class TextbookMapping(
     var uid: Long = 0L,
     var title: String? = null,

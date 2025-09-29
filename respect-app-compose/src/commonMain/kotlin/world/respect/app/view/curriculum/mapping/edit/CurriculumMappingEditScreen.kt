@@ -147,10 +147,10 @@ fun CurriculumMappingEditScreen(
                         .fillMaxWidth()
                         .testTag("book_title_field"),
                     singleLine = true,
-                    isError = !uiState.bookTitleError.isNullOrEmpty(),
+                    isError = uiState.bookTitleError != null ,
                     supportingText = {
-                        if (!uiState.bookTitleError.isNullOrEmpty()) {
-                            Text(uiState.bookTitleError!!)
+                        if (uiState.bookTitleError != null) {
+                            Text(stringResource(Res.string.required))
                         } else {
                             Text(stringResource(Res.string.required))
                         }
@@ -434,8 +434,8 @@ private fun LessonItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            val lessonTitle = lesson.title ?: "Lesson ${lesson.lessonNumber}"
-            val initial = lessonTitle.firstOrNull()?.uppercaseChar()?.toString() ?: "L"
+            val lessonTitle = lesson.title ?: stringResource(Res.string.lesson,lesson.lessonNumber)
+            val initial = lessonTitle.firstOrNull()?.uppercaseChar()?.toString() ?: " "
             val indicatorColor = MaterialTheme.colorScheme.primary
 
             Box(

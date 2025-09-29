@@ -61,4 +61,8 @@ class SchoolDirectoryEntryDataSourceRepository(
         return local.deleteDirectory(directory)
 
     }
+
+   override suspend fun insertDirectoryEntry(directory: SchoolDirectoryEntry) {
+        return local.insertDirectoryEntry(directory)
+    }
 }

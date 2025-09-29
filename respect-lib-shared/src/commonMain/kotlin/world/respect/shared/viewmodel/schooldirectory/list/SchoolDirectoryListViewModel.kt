@@ -81,7 +81,6 @@ class SchoolDirectoryListViewModel(
     fun onDeleteDirectory(directory: SchoolDirectoryEntry) {
         viewModelScope.launch {
             respectAppDataSource.schoolDirectoryEntryDataSource.deleteDirectory(directory)
-            loadSchoolDirectories()
         }
     }
 }

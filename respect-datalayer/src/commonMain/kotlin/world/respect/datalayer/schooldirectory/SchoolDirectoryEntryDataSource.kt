@@ -52,6 +52,8 @@ interface SchoolDirectoryEntryDataSource {
 
     suspend fun deleteDirectory(directory: SchoolDirectoryEntry)
 
+    suspend fun insertDirectoryEntry(directory: SchoolDirectoryEntry)
+
 
     /**
      * Get the SchoolDirectoryEntry for a given url

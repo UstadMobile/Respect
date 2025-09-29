@@ -14,14 +14,21 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.datalayer.opds.model.LangMapStringValue
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_directory
+import world.respect.shared.generated.resources.error_link_message
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.getValue
+import kotlin.random.Random
+import kotlin.time.Clock
 
 data class SchoolDirectoryEditUIState(
     val linkUrl: String = "",
@@ -56,7 +63,7 @@ class SchoolDirectoryEditViewModel(
         }
     }
 
-    fun onLinkChanged(link: String){
+    fun onLinkChanged(link: String) {
         _uiState.update {
             it.copy(
                 linkUrl = link,
@@ -69,9 +76,36 @@ class SchoolDirectoryEditViewModel(
     fun onClickNext() {
         viewModelScope.launch {
             val link = uiState.value.linkUrl.trim()
-            val linkUrl = Url(link)
+
+            try {
+                val schoolBaseUrl = Url(link)
+
+                val directoryEntry = SchoolDirectoryEntry(
+                    name = LangMapStringValue(""),
+                    self = schoolBaseUrl,
+                    xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
+                    oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
+                    respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+                    schoolCode = Random.nextInt(10_000).toString().padStart(5, '0'),
+                    directoryCode = null,
+                    rpId = schoolBaseUrl.host,
+                    lastModified = Clock.System.now(),
+                    stored = Clock.System.now(),
+                )
+
+                respectAppDataSource.schoolDirectoryEntryDataSource.insertDirectoryEntry(
+                    directoryEntry
+                )
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        SchoolDirectoryList
+                    )
+                )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = Res.string.error_link_message.asUiText())
+                }
+            }
         }
     }
-
-
 }

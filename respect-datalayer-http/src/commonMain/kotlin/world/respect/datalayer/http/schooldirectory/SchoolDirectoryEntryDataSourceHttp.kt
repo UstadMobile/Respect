@@ -76,6 +76,10 @@ class SchoolDirectoryEntryDataSourceHttp(
         TODO("Not yet implemented")
     }
 
+    override suspend fun insertDirectoryEntry(directory: SchoolDirectoryEntry) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getSchoolDirectoryEntryByUrl(
         url: Url
     ): DataLoadState<SchoolDirectoryEntry> {

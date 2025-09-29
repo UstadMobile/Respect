@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.schooldirectory.adapters.SchoolDirectoryEntryEntities
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
@@ -75,6 +76,6 @@ interface SchoolDirectoryEntryEntityDao {
     }
 
     @Query("DELETE FROM SchoolDirectoryEntryEntity WHERE reSelf = :url")
-    suspend fun deleteByUrl(url: String)
+    suspend fun deleteByUrl(url: Url)
 
 }

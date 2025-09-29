@@ -92,6 +92,19 @@ class SchoolDirectoryEntryDataSourceDb(
     }
 
     override suspend fun deleteDirectory(directory: SchoolDirectoryEntry) {
-        respectAppDb.getSchoolDirectoryEntryEntityDao().deleteByUrl(directory.self.toString())
+        respectAppDb.getSchoolDirectoryEntryEntityDao().deleteByUrl(directory.self)
     }
+
+    override suspend fun insertDirectoryEntry(directory: SchoolDirectoryEntry) {
+        respectAppDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val entities = directory.toEntities(xxStringHasher)
+
+                respectAppDb.getSchoolDirectoryEntryEntityDao()
+                    .upsert(entities.school)
+
+            }
+        }
+    }
+
 }

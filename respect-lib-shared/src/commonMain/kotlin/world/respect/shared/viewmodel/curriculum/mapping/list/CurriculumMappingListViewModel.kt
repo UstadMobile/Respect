@@ -84,12 +84,12 @@ class CurriculumMappingListViewModel(
     }
 
     fun onClickMoreOptions(textbook: TextbookMapping) {
-        // TODO:
+        // TODO
     }
 
     fun onClickMap() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(CurriculumMappingEdit(NEW_TEXTBOOK_UID))
+            NavCommand.Navigate(CurriculumMappingEdit(0L))
         )
     }
 
@@ -97,7 +97,4 @@ class CurriculumMappingListViewModel(
         loadTextbooks()
     }
 
-    companion object {
-        private const val NEW_TEXTBOOK_UID = 0L
-    }
 }

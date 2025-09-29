@@ -13,7 +13,6 @@ import world.respect.datalayer.db.curriculum.entities.TextbookMapping
 import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_unknown
-import world.respect.shared.generated.resources.lesson
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
@@ -59,7 +58,7 @@ class CurriculumMappingEditViewModel(
     private var textbookUid = route.textbookUid
 
     private val _uiState = MutableStateFlow(
-        CurriculumMappingEditUiState(isNew = textbookUid == NEW_TEXTBOOK_UID)
+        CurriculumMappingEditUiState(isNew = textbookUid == 0L)
     )
     val uiState = _uiState.asStateFlow()
 
@@ -88,7 +87,7 @@ class CurriculumMappingEditViewModel(
             _uiState.update { it.copy(loading = true, error = null) }
 
             try {
-                if (textbookUid != NEW_TEXTBOOK_UID) {
+                if (textbookUid != 0L) {
                     val textbookWithDetails = getCurriculumMappingsUseCase.getTextbookWithDetails(textbookUid)
                     if (textbookWithDetails != null) {
                         nextChapterNumber = textbookWithDetails.chapters.size + 1
@@ -112,7 +111,7 @@ class CurriculumMappingEditViewModel(
                     }
                 } else {
                     val newTextbook = TextbookMapping().apply {
-                        uid = NEW_TEXTBOOK_UID
+                        uid = 0L
                         title = ""
                         description = ""
                         coverImageUrl = null
@@ -304,9 +303,5 @@ class CurriculumMappingEditViewModel(
 
     fun onRetry() {
         loadTextbookData()
-    }
-
-    companion object {
-        private const val NEW_TEXTBOOK_UID = 0L
     }
 }

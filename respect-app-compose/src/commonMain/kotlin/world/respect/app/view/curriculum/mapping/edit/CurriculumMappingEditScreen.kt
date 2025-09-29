@@ -83,13 +83,11 @@ fun CurriculumMappingEditScreen(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surface),
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable(onClick = onClickAddBookCover)
+                        .padding(vertical = 20.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    IconButton(
-                        onClick = onClickAddBookCover,
-                        modifier = Modifier.testTag("add_book_cover_button")
-                    ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -112,6 +110,7 @@ fun CurriculumMappingEditScreen(
                                         modifier = Modifier.size(100.dp),
                                         tint = Color.Gray
                                     )
+                                }
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     Text(
@@ -123,8 +122,6 @@ fun CurriculumMappingEditScreen(
                             }
                         }
                     }
-                }
-            }
 
             item {
                 Spacer(modifier = Modifier.height(2.dp))

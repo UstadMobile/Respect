@@ -66,6 +66,7 @@ class SchoolDirectoryDataSourceDb(
     }
 
     override suspend fun insertDirectory(directory: RespectSchoolDirectory) {
+
         respectAppDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 val entities = directory.toEntities(xxStringHasher)

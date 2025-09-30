@@ -79,7 +79,7 @@ class SchoolDirectoryEditViewModel(
                     baseUrl = schoolBaseUrl,
 
                 )
-                respectAppDataSource.schoolDirectoryDataSource.insertDirectoryEntry(
+                respectAppDataSource.schoolDirectoryDataSource.insertDirectory(
                     directoryEntry
                 )
                 _navCommandFlow.tryEmit(

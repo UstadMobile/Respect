@@ -14,6 +14,6 @@ interface SchoolDirectoryDataSource {
 
     suspend fun deleteDirectory(directory: RespectSchoolDirectory)
 
-    suspend fun insertDirectoryEntry(directory: RespectSchoolDirectory)
+    suspend fun insertDirectory(directory: RespectSchoolDirectory)
 
 }

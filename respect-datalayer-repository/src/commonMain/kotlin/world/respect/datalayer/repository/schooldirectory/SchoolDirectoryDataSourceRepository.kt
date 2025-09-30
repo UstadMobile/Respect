@@ -22,7 +22,7 @@ class SchoolDirectoryDataSourceRepository(
         return local.deleteDirectory(directory)
     }
 
-    override suspend fun insertDirectoryEntry(directory: RespectSchoolDirectory) {
-        local.insertDirectoryEntry(directory)
+    override suspend fun insertDirectory(directory: RespectSchoolDirectory) {
+        local.insertDirectory(directory)
     }
 }

@@ -2,7 +2,6 @@ package com.ustadmobile.core.domain.phonenumber
 
 import com.google.i18n.phonenumbers.Phonenumber
 
-
 class PhoneNumberAndroid(
     internal val phoneNumber: Phonenumber.PhoneNumber
 ) : IPhoneNumber {

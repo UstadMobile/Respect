@@ -166,6 +166,7 @@ val appKoinModule = module {
     }
 
     single { PhoneNumberUtil.getInstance() }
+
     single<IPhoneNumberUtil> {
         IPhoneNumberUtilAndroid(phoneNumberUtil = get<PhoneNumberUtil>())
     }

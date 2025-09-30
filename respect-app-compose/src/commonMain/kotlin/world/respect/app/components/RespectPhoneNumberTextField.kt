@@ -54,7 +54,6 @@ fun RespectPhoneNumberTextField(
 
     val parsedValue by lazy {
         try {
-            //Because we always store the country code, the defaultRegion has no effect
             phoneUtil.parse(value, "US")
         }catch(e: Throwable) {
             null

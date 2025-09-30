@@ -7,8 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
 
-
-
 @Composable
 actual fun guessInitialPhoneCountryCode(
     phoneUtil: IPhoneNumberUtil

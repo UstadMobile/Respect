@@ -1,7 +1,5 @@
 package com.ustadmobile.core.domain.phonenumber
 
-
-
 class PhoneNumValidatorAndroid(
     private val iPhoneNumberUtil: IPhoneNumberUtil
 ): PhoneNumValidatorUseCase {
@@ -12,5 +10,4 @@ class PhoneNumValidatorAndroid(
             false
         }
     }
-
 }

@@ -12,5 +12,4 @@ data class PersonListDetails(
     val username: String?,
     val email: String?,
     val phoneNumber: String?
-
 )

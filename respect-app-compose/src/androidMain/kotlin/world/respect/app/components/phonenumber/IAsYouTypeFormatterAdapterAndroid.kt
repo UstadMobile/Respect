@@ -5,8 +5,8 @@ import com.google.i18n.phonenumbers.AsYouTypeFormatter
 class IAsYouTypeFormatterAdapterAndroid(
     private val formatter: AsYouTypeFormatter
 ): IAsYouTypeFormatter {
-    override fun clear() {
 
+    override fun clear() {
         formatter.clear()
     }
 

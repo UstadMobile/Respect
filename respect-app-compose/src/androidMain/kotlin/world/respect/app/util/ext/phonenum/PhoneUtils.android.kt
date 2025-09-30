@@ -1,6 +1,5 @@
 package com.ustadmobile.libuicompose.util.phonenum
 
-
 const val PAUSE = ','
 const val WAIT = ';'
 const val WILD = 'N'

@@ -47,9 +47,8 @@ fun PersonEditScreen(
 fun PersonEditScreen(
     uiState: PersonEditUiState,
     onEntityChanged: (Person) -> Unit,
-    onNationalNumberSetChanged: (Boolean) -> Unit = { },
-
-    ) {
+    onNationalNumberSetChanged: (Boolean) -> Unit,
+) {
     val person = uiState.person.dataOrNull()
     val fieldsEnabled = uiState.fieldsEnabled
 
@@ -110,7 +109,7 @@ fun PersonEditScreen(
 
         RespectPhoneNumberTextField(
             value = person?.phoneNumber ?: "",
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.testTag("phone_number").fillMaxWidth().defaultItemPadding(),
             label = { Text(stringResource(Res.string.phone_number)) },
             onValueChange = { phoneNumber ->
                 person?.also {
@@ -119,6 +118,7 @@ fun PersonEditScreen(
             },
             onNationalNumberSetChanged = onNationalNumberSetChanged,
         )
+
         OutlinedTextField(
             modifier = Modifier.testTag("email").fillMaxWidth().defaultItemPadding(),
             value = person?.email ?: "",
@@ -129,9 +129,8 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(email = email))
                 }
             },
-            enabled = uiState.fieldsEnabled,
-
-            )
+            enabled = uiState.fieldsEnabled
+        )
     }
 
 }

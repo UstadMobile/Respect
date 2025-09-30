@@ -5,8 +5,11 @@ package world.respect
 import android.content.Context
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
+import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtilAndroid
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
@@ -160,6 +163,11 @@ val appKoinModule = module {
             encodeDefaults = false
             ignoreUnknownKeys = true
         }
+    }
+
+    single { PhoneNumberUtil.getInstance() }
+    single<IPhoneNumberUtil> {
+        IPhoneNumberUtilAndroid(phoneNumberUtil = get<PhoneNumberUtil>())
     }
 
     single<XXStringHasher> {

@@ -61,18 +61,19 @@ fun PersonDetailScreen(
                 value = { Text(it.toString()) }
             )
         }
-
-        RespectDetailField(
-            modifier = Modifier.defaultItemPadding(),
-            label = { Text(stringResource(Res.string.phone_number)) },
-            value = { uiState.person.dataOrNull()?.phoneNumber?.let { Text(it) } }
-        )
-
-        RespectDetailField(
-            modifier = Modifier.defaultItemPadding(),
-            label = { Text(stringResource(Res.string.email)) },
-            value = { uiState.person.dataOrNull()?.email?.let { Text(it) } }
-        )
-
+        person?.phoneNumber?.also {
+            RespectDetailField(
+                modifier = Modifier.defaultItemPadding(),
+                label = { Text(stringResource(Res.string.phone_number)) },
+                value = { Text(it) }
+            )
+        }
+        person?.email?.also {
+            RespectDetailField(
+                modifier = Modifier.defaultItemPadding(),
+                label = { Text(stringResource(Res.string.email)) },
+                value = { Text(it) }
+            )
+        }
     }
 }

@@ -74,7 +74,7 @@ class ReportDetailViewModel(
             }
         }
         viewModelScope.launch {
-            schoolDataSource.reportDataSource.getReportAsFlow(
+            schoolDataSource.reportDataSource.findByGuidAsFlow(
                 route.reportUid
             ).collect { report ->
                 _appUiState.update { prev ->

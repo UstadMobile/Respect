@@ -9,9 +9,13 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.indicator
@@ -24,7 +28,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class IndicatorListUiState(
-    val indicators: List<Indicator> = emptyList(),
+    val indicators:IPagingSourceFactory<Int, Indicator> = EmptyPagingSourceFactory(),
     val errorMessage: String? = null
 )
 
@@ -38,6 +42,12 @@ class IndicatorListViewModel(
     override val scope: Scope = accountManager.requireSelectedAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val pagingSourceHolder = PagingSourceFactoryHolder {
+        schoolDataSource.indicatorDataSource.listAsPagingSource(
+            loadParams = DataLoadParams(),
+            params = IndicatorDataSource.GetListParams()
+        )
+    }
     init {
         viewModelScope.launch {
             _appUiState.update { prev ->
@@ -54,12 +64,11 @@ class IndicatorListViewModel(
             }
             viewModelScope.launch {
                 try {
-                    schoolDataSource.indicatorDataSource.allIndicatorAsFlow()
-                        .collect { dataLoadState ->
-                            _uiState.update { state ->
-                                state.copy(indicators = dataLoadState.dataOrNull() ?: emptyList())
-                            }
-                        }
+                    _uiState.update { prev ->
+                        prev.copy(
+                            indicators = pagingSourceHolder,
+                        )
+                    }
                 } catch (e: Exception) {
                     _uiState.update {
                         it.copy(

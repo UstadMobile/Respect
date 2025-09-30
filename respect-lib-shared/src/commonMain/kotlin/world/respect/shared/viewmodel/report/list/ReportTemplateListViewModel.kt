@@ -13,9 +13,11 @@ import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
@@ -61,7 +63,11 @@ class ReportTemplateListViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.reportDataSource.allReportsAsFlow(template = true).collect {
+            schoolDataSource.reportDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                listParams = ReportDataSource.GetListParams(),
+                template = true
+            ).collect {
                 _uiState.update { state ->
                     state.copy(templates = it)
                 }

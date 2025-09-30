@@ -34,9 +34,11 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
+import world.respect.server.routes.school.respect.IndicatorRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.routes.school.respect.ReportRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -181,6 +183,8 @@ fun Application.module() {
                         PersonRoute()
                         ClassRoute()
                         EnrollmentRoute()
+                        ReportRoute()
+                        IndicatorRoute()
                     }
                 }
             }

@@ -76,7 +76,7 @@ class IndicatorEditViewModel(
                     json = json,
                     serializer = Indicator.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.indicatorDataSource.getIndicatorAsync(
+                        schoolDataSource.indicatorDataSource.findByGuid(
                             params,
                             route.indicatorId
                         )
@@ -113,7 +113,7 @@ class IndicatorEditViewModel(
         val indicator = _uiState.value.indicatorData.dataOrNull() ?: return
         viewModelScope.launch {
             try {
-                schoolDataSource.indicatorDataSource.putIndicator(indicator)
+                schoolDataSource.indicatorDataSource.store(listOf(indicator))
 
                 if (route.indicatorId == null) {
                     _navCommandFlow.tryEmit(

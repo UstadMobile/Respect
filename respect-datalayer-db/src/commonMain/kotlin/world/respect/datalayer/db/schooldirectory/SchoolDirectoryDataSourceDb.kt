@@ -62,7 +62,7 @@ class SchoolDirectoryDataSourceDb(
     }
 
     override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
-        respectAppDb.getSchoolDirectoryEntityDao().deleteByUrl(directory.baseUrl)
+        respectAppDb.getSchoolDirectoryEntityDao().deleteByUrl(directory.baseUrl.toString())
     }
 
     override suspend fun insertDirectory(directory: RespectSchoolDirectory) {

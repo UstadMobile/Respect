@@ -16,6 +16,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.school_directory
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SchoolDirectoryEdit
+import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -59,19 +60,22 @@ class SchoolDirectoryListViewModel(
             _uiState.update { prev ->
                 prev.copy(schoolDirectory = data)
             }
-
         }
     }
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(SchoolDirectoryEdit)
+            NavCommand.Navigate(
+                destination = SchoolDirectoryEdit,
+                popUpTo = SchoolDirectoryList
+            )
         )
     }
 
     fun onDeleteDirectory(directory: RespectSchoolDirectory) {
         viewModelScope.launch {
             respectAppDataSource.schoolDirectoryDataSource.deleteDirectory(directory)
+            loadSchoolDirectories()
         }
     }
 }

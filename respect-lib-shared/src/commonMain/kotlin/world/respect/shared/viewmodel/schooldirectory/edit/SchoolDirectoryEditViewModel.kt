@@ -74,17 +74,18 @@ class SchoolDirectoryEditViewModel(
             try {
                 val schoolBaseUrl = Url(link)
 
-                val directoryEntry = RespectSchoolDirectory(
-                    invitePrefix = Random.nextInt(10_000).toString().padStart(5, '0'),
+                val directory = RespectSchoolDirectory(
+                    invitePrefix = "",
                     baseUrl = schoolBaseUrl,
 
-                )
-                respectAppDataSource.schoolDirectoryDataSource.insertDirectory(
-                    directoryEntry
-                )
+                    )
+                respectAppDataSource.schoolDirectoryDataSource.insertDirectory(directory)
+
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        SchoolDirectoryList
+                        destination = SchoolDirectoryList,
+                        popUpTo = SchoolDirectoryList,
+                        popUpToInclusive = true
                     )
                 )
             } catch (e: Exception) {

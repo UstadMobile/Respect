@@ -42,8 +42,18 @@ interface SchoolDirectoryEntityDao {
         DELETE FROM SchoolDirectoryEntity WHERE rdUrl = :url
         """
     )
-    suspend fun deleteByUrl(url: Url)
+    suspend fun deleteByUrl(url: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: SchoolDirectoryEntity)
+
+    @Query("""
+        SELECT SchoolDirectoryEntity.cLastModified
+          FROM SchoolDirectoryEntity
+         WHERE SchoolDirectoryEntity.rdUrl = :url  
+    """)
+    suspend fun getLastModifiedByUrl(
+        url: Url
+    ): Long?
+
 }

@@ -19,11 +19,11 @@ import world.respect.libutil.ext.appendEndpointPathSegments
 
 class SchoolDirectoryDataSourceHttp(
     private val httpClient: HttpClient,
-    private val local : RespectAppDataSourceLocal
-): SchoolDirectoryDataSource{
+    private val local: RespectAppDataSourceLocal
+) : SchoolDirectoryDataSource {
 
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
-        TODO("Not yet implemented")
+        return local.schoolDirectoryDataSource.allDirectories()
     }
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
@@ -40,7 +40,7 @@ class SchoolDirectoryDataSourceHttp(
     }
 
     override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
-        TODO("Not yet implemented")
+        local.schoolDirectoryDataSource.deleteDirectory(directory)
     }
 
     override suspend fun insertDirectory(directory: RespectSchoolDirectory) {

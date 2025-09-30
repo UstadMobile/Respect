@@ -39,7 +39,7 @@ import kotlin.math.min
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UstadPhoneNumberTextField(
+fun RespectPhoneNumberTextField(
     value: String,
     onValueChange: (String) -> Unit,
     onNationalNumberSetChanged: ((Boolean) -> Unit)? = null,
@@ -50,10 +50,6 @@ fun UstadPhoneNumberTextField(
     countryCodeTestTag: String? = null,
     numberTextFieldTestTag: String? = null,
 ) {
-
-    //As per https://developermemos.com/posts/checking-composable-render-preview
-    // DI will not be accessible on preview mode, so we want to avoid attempting to use it there.
-    val isPreview = LocalInspectionMode.current
 
     val phoneUtil = koinInject<IPhoneNumberUtil>()
 

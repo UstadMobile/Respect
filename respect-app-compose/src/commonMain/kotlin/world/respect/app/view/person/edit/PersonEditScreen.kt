@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
-import world.respect.app.components.UstadPhoneNumberTextField
+import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
@@ -108,7 +108,7 @@ fun PersonEditScreen(
             enabled = uiState.fieldsEnabled,
         )
 
-        UstadPhoneNumberTextField(
+        RespectPhoneNumberTextField(
             value = person?.phoneNumber ?: "",
             modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             label = { Text(stringResource(Res.string.phone_number)) },

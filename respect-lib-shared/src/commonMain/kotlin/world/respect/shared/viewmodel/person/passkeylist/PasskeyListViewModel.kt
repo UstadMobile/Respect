@@ -42,11 +42,14 @@ class PasskeyListViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val json: Json,
-    private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by lazy {
+        scope.getOrNull()
+    }
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -108,7 +111,7 @@ class PasskeyListViewModel(
                     is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                         schoolDataSource.personPasskeyDataSource.store(
                             listOf(
-                                passkeyResult.authenticationResponseJSON.toPersonPasskey(
+                                passkeyResult.toPersonPasskey(
                                     json = json,
                                     personGuid = accountAndPerson.person.guid,
                                     deviceName = getDeviceInfoUseCase().toUserFriendlyString(),

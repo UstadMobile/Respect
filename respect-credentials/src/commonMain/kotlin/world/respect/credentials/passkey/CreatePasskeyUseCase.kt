@@ -7,7 +7,8 @@ interface CreatePasskeyUseCase {
     sealed class CreatePasskeyResult
 
     data class PasskeyCreatedResult(
-        val authenticationResponseJSON : AuthenticationResponseJSON
+        val authenticationResponseJSON : AuthenticationResponseJSON,
+        val respectUserHandle: RespectUserHandle,
     ) : CreatePasskeyResult()
 
     class UserCanceledResult : CreatePasskeyResult(){

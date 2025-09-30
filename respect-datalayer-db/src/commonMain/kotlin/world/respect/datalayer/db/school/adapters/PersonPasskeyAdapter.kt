@@ -9,6 +9,7 @@ fun PersonPasskey.asEntity(
 ): PersonPasskeyEntity {
     return PersonPasskeyEntity(
         ppPersonUid = uidNumberMapper(personGuid),
+        personPasskeyUid = personPasskeyUid,
         ppLastModified = lastModified,
         ppStored = stored,
         ppAttestationObj = attestationObj,
@@ -28,6 +29,7 @@ fun PersonPasskeyEntity.asModel(
 ): PersonPasskey {
     return PersonPasskey(
         personGuid = personGuid,
+        personPasskeyUid = personPasskeyUid,
         lastModified = ppLastModified,
         stored = ppStored,
         attestationObj = ppAttestationObj,

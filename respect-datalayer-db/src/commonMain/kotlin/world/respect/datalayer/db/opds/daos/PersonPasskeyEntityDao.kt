@@ -47,6 +47,17 @@ abstract class PersonPasskeyEntityDao {
     ): PersonPasskeyEntity?
 
     @Query("""
+        SELECT PersonPasskeyEntity.*
+          FROM PersonPasskeyEntity
+         WHERE PersonPasskeyEntity.personPasskeyUid = :uid
+           AND PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
+    """)
+    abstract suspend fun findByPersonPasskeyUid(
+        uid: Long,
+    ): PersonPasskeyEntity?
+
+
+    @Query("""
         UPDATE PersonPasskeyEntity
            SET isRevoked = ${PersonPasskeyEntity.REVOKED}
          WHERE ppPersonUid = :personUidNum

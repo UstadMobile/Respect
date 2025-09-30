@@ -139,7 +139,8 @@ class ConfirmationViewModel(
 
         val blankAccount = RespectRedeemInviteRequest.Account(
             username = "",
-            credential = RespectPasswordCredential(username = "", password = "")
+            credential = RespectPasswordCredential(username = "", password = ""),
+            userHandleEncoded = null,
         )
 
         return RespectRedeemInviteRequest(

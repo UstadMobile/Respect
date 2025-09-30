@@ -8,6 +8,7 @@ import kotlin.time.Clock
 @Serializable
 data class PersonPasskey(
     val personGuid: String,
+    val personPasskeyUid: Long,
     override val lastModified: InstantAsISO8601,
     override val stored: InstantAsISO8601,
     val attestationObj: String?,

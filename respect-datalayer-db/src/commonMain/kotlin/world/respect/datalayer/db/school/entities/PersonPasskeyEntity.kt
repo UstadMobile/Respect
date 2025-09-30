@@ -10,7 +10,9 @@ import kotlin.time.Instant
 )
 class PersonPasskeyEntity(
 
-    val ppPersonUid: Long = 0,
+    val ppPersonUid: Long,
+
+    val personPasskeyUid: Long,
 
     val ppId: String,
 

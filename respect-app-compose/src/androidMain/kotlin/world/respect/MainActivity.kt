@@ -12,8 +12,7 @@ import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
 import world.respect.app.app.App
-import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidImpl
+import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidChannelHost
 import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.GetCredentialUseCaseAndroidImpl
@@ -30,14 +29,13 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
         checkNotNull(scope)
 
-        val createPasskeyUseCase = getKoin().get<CreatePasskeyUseCase>()
-                as CreatePasskeyUseCaseAndroidImpl
+        val createPasskeyChannelHost = getKoin().get<CreatePasskeyUseCaseAndroidChannelHost>()
         val getCredentialUseCase = getKoin().get<GetCredentialUseCase>()
                 as GetCredentialUseCaseAndroidImpl
 
         val createPasskeyProcessor = CreatePasskeyUseCaseProcessor(
             activityContext = this,
-            jobChannel = createPasskeyUseCase.requestChannel,
+            jobChannel = createPasskeyChannelHost.requestChannel,
             processOnScope = lifecycleScope
         )
 

@@ -15,14 +15,20 @@ import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.model.ClientDataJSON
 import world.respect.credentials.passkey.model.PasskeyVerifyResult
+import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.libutil.util.throwable.withHttpStatus
 import java.util.Base64
 
+/**
+ * Use case to authenticate an AuthenticationResponseJSON provided when a user is attempting to
+ * signin using a passkey: determines which user
+ */
 class VerifySignInWithPasskeyUseCase(
     private val schoolDb : RespectSchoolDatabase,
     private val json: Json,
+    private val decodeUserHandleUseCase: DecodeUserHandleUseCase,
 ) {
 
     private val webAuthnManager: WebAuthnManager = WebAuthnManager.createNonStrictWebAuthnManager()
@@ -37,6 +43,13 @@ class VerifySignInWithPasskeyUseCase(
         // Client properties
         val credentialIdByte = Base64.getUrlDecoder().decode(authenticationResponseJSON.id)
         val userHandleByte = Base64.getUrlDecoder().decode(authenticationResponseJSON.response.userHandle)
+
+        //Should use person uid AND authenticationResponseJSON.id to find the passkey record.
+        val userHandle = decodeUserHandleUseCase(
+            authenticationResponseJSON.response.userHandle
+                ?: throw IllegalArgumentException("User handle cannot be null")
+        )
+
         val authenticatorDataByte = Base64.getUrlDecoder().decode(authenticationResponseJSON.response.authenticatorData)
         val clientDataJSONByte = Base64.getUrlDecoder().decode(authenticationResponseJSON.response.clientDataJSON)
         val signatureByte = Base64.getUrlDecoder().decode(authenticationResponseJSON.response.signature)
@@ -53,8 +66,8 @@ class VerifySignInWithPasskeyUseCase(
         val userPresenceRequired = true
 
         val passkeyData = schoolDb.getPersonPasskeyEntityDao()
-            .findPersonPasskeyFromClientDataJson(
-                id = authenticationResponseJSON.id
+            .findByPersonPasskeyUid(
+                uid = userHandle.personPasskeyUid
             ) ?: throw IllegalArgumentException().withHttpStatus(401)
 
         val credentialRecord = createCredentialRecord( passkeyData)

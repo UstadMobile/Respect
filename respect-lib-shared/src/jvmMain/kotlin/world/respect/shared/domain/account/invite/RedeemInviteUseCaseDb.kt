@@ -3,8 +3,10 @@ package world.respect.shared.domain.account.invite
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
+import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -39,6 +41,7 @@ class RedeemInviteUseCaseDb(
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
     private val json: Json,
+    private val decodeUserHandle: DecodeUserHandleUseCase,
 ): RedeemInviteUseCase, KoinComponent {
 
     fun RespectRedeemInviteRequest.PersonInfo.toPerson(
@@ -110,9 +113,18 @@ class RedeemInviteUseCaseDb(
             }
 
             is RespectPasskeyCredential -> {
+                val userHandleEncoded = redeemRequest.account.userHandleEncoded
+                    ?: throw kotlin.IllegalArgumentException("Passkey redeem requires a user handle")
+                        .withHttpStatus(400)
+                val userHandle = decodeUserHandle(userHandleEncoded)
+                val passkeyCreatedResult = CreatePasskeyUseCase.PasskeyCreatedResult(
+                    respectUserHandle = userHandle,
+                    authenticationResponseJSON = credential.passkeyWebAuthNResponse,
+                )
+
                 schoolDataSourceVal.personPasskeyDataSource.store(
                     listOf(
-                        credential.passkeyWebAuthNResponse.toPersonPasskey(
+                        passkeyCreatedResult.toPersonPasskey(
                             json = json,
                             personGuid = accountPerson.guid,
                             deviceName = redeemRequest.deviceName ?: "Unknown device type",

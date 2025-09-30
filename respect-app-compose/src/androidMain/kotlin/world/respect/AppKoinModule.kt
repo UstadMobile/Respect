@@ -28,7 +28,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import passkey.EncodeUserHandleUseCaseImpl
+import world.respect.shared.domain.account.passkey.EncodeUserHandleUseCaseImpl
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidImpl
@@ -86,6 +86,7 @@ import kotlinx.io.files.Path
 import org.koin.android.ext.koin.androidApplication
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
+import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidChannelHost
 import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.credentials.password.SavePasswordUseCaseImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -361,25 +362,7 @@ val appKoinModule = module {
     }
 
     single {
-        val primaryKeyGenerator = PrimaryKeyGenerator(listOf(PersonPasskeyEntity.TABLE_ID))
-        CreatePublicKeyCredentialCreationOptionsJsonUseCase(
-            encodeUserHandleUseCase = get(),
-            appName = Res.string.app_name,
-            primaryKeyGenerator = {
-                primaryKeyGenerator.nextId(PersonPasskeyEntity.TABLE_ID)
-            }
-        )
-    }
-
-    single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
-    }
-
-    single<CreatePasskeyUseCase> {
-        CreatePasskeyUseCaseAndroidImpl(
-            json = get(),
-            createPublicKeyJsonUseCase = get()
-        )
     }
 
     single<GetCredentialUseCase> {
@@ -485,6 +468,10 @@ val appKoinModule = module {
         GetDeviceInfoUseCaseAndroid(androidContext())
     }
 
+    single<CreatePasskeyUseCaseAndroidChannelHost> {
+        CreatePasskeyUseCaseAndroidChannelHost()
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -552,6 +539,27 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
+
+        scoped<CreatePasskeyUseCase> {
+            CreatePasskeyUseCaseAndroidImpl(
+                sender = get(),
+                json = get(),
+                createPublicKeyJsonUseCase = get(),
+                primaryKeyGenerator = {
+                    get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator.nextId(PersonPasskeyEntity.TABLE_ID)
+                },
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+            )
+        }
+
+        scoped<CreatePublicKeyCredentialCreationOptionsJsonUseCase> {
+            CreatePublicKeyCredentialCreationOptionsJsonUseCase(
+                encodeUserHandleUseCase = get(),
+                appName = Res.string.app_name,
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+            )
+        }
+
     }
 
     /**

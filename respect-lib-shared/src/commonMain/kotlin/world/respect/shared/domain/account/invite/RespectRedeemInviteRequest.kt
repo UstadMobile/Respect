@@ -32,10 +32,15 @@ data class RespectRedeemInviteRequest(
        val dateOfBirth: LocalDate = LocalDate(1900, 1, 1),
     )
 
+    /**
+     * @param userHandleEncoded the base64 encoded user handle, as would be used with a passkey,
+     *        as per RespectUserHandle.
+     */
     @Serializable
     class Account(
         val username: String,
         val credential: RespectCredential,
+        val userHandleEncoded: String?,
     )
 
 }

@@ -6,8 +6,8 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialException
+import io.ktor.http.Url
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
@@ -23,8 +23,11 @@ import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreati
  * See https://developer.android.com/identity/sign-in/credential-manager#create-passkey
  */
 class CreatePasskeyUseCaseAndroidImpl(
+    private val sender: CreatePasskeyUseCaseAndroidChannelHost,
     private val json: Json,
-    private val createPublicKeyJsonUseCase: CreatePublicKeyCredentialCreationOptionsJsonUseCase
+    private val createPublicKeyJsonUseCase: CreatePublicKeyCredentialCreationOptionsJsonUseCase,
+    private val primaryKeyGenerator: () -> Long,
+    private val schoolUrl: Url,
 ) : CreatePasskeyUseCase {
 
     data class CreatePublicKeyCredentialRequestJob(
@@ -32,7 +35,6 @@ class CreatePasskeyUseCaseAndroidImpl(
         val response: CompletableDeferred<CreatePublicKeyCredentialResponse> = CompletableDeferred()
     )
 
-    val requestChannel = Channel<CreatePublicKeyCredentialRequestJob>(capacity = Channel.RENDEZVOUS)
 
     /**
      * @throws CreateCredentialException if CredentialManager throws an exception
@@ -46,15 +48,22 @@ class CreatePasskeyUseCaseAndroidImpl(
         rpId: String
     ): CreatePasskeyUseCase.CreatePasskeyResult {
         return try {
+            val personPasskeyUid = primaryKeyGenerator()
             val job = CreatePublicKeyCredentialRequestJob(
                 request = CreatePublicKeyCredentialRequest(
                     requestJson = json.encodeToString(
-                        createPublicKeyJsonUseCase(username, rpId)
+                        createPublicKeyJsonUseCase(
+                            CreatePublicKeyCredentialCreationOptionsJsonUseCase.Request(
+                                username = username,
+                                rpId = rpId,
+                                personPasskeyUid = personPasskeyUid,
+                            )
+                        )
                     ),
                     preferImmediatelyAvailableCredentials = false,
                 ),
             )
-            requestChannel.trySend(job)
+            sender.send(job)
             val response = job.response.await()
 
             Log.d ( "passkey response:", response.registrationResponseJson)
@@ -62,7 +71,13 @@ class CreatePasskeyUseCaseAndroidImpl(
                 response.registrationResponseJson
             )
 
-            CreatePasskeyUseCase.PasskeyCreatedResult(passkeyResponse)
+            CreatePasskeyUseCase.PasskeyCreatedResult(
+                passkeyResponse,
+                RespectUserHandle(
+                    personPasskeyUid = personPasskeyUid,
+                    schoolUrl = schoolUrl,
+                )
+            )
         } catch (_: CreateCredentialCancellationException) {
             CreatePasskeyUseCase.UserCanceledResult()
         } catch (e: CreateCredentialException) {

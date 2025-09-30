@@ -8,6 +8,7 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
+import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
@@ -38,6 +39,7 @@ import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfil
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
+import world.respect.shared.domain.account.passkey.DecodeUserHandleUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysDbImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
@@ -119,6 +121,10 @@ fun serverKoinModule(
         )
     }
 
+    single<DecodeUserHandleUseCase> {
+        DecodeUserHandleUseCaseImpl()
+    }
+
     /*
      * School scope: used as the basis for virtual hosting.
      */
@@ -134,7 +140,8 @@ fun serverKoinModule(
         scoped<VerifySignInWithPasskeyUseCase> {
             VerifySignInWithPasskeyUseCase(
                 schoolDb = get(),
-                json = get()
+                json = get(),
+                decodeUserHandleUseCase = get(),
             )
         }
         scoped<RespectSchoolPath> {
@@ -226,11 +233,12 @@ fun serverKoinModule(
                 getTokenAndUserProfileUseCase = get(),
                 schoolDataSource = { schoolUrl, user ->
                     getKoin().getOrCreateScope<RespectAccount>(
-                        RespectAccountScopeId(schoolUrl, user).scopeId
+                        RespectAccountScopeId(schoolUrl, user).scopeId,
                     ).get()
                 },
                 uidNumberMapper = get(),
                 json = get(),
+                decodeUserHandle = get(),
             )
         }
     }

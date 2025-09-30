@@ -7,11 +7,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
+import world.respect.credentials.passkey.request.EncodeUserHandleUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -20,6 +24,7 @@ import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -30,13 +35,23 @@ data class OtherOptionsSignupUiState(
 
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
-    private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
     private val route: OtherOptionsSignup = savedStateHandle.toRoute()
 
+    override val scope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+        SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+    )
+
     private val _uiState = MutableStateFlow(OtherOptionsSignupUiState())
+
     val uiState = _uiState.asStateFlow()
+
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by lazy {
+        scope.getOrNull()
+    }
 
     init {
         _appUiState.update {
@@ -46,6 +61,7 @@ class OtherOptionsSignupViewModel(
                 userAccountIconVisible = false
             )
         }
+
         _uiState.update { prev ->
             prev.copy(
                 generalError = if (createPasskeyUseCase == null)
@@ -57,6 +73,7 @@ class OtherOptionsSignupViewModel(
 
 
     fun onClickSignupWithPasskey() {
+        val createPasskeyUseCaseVal = createPasskeyUseCase
         viewModelScope.launch {
             try {
                 val schoolDirEntry = respectAppDataSource.schoolDirectoryEntryDataSource
@@ -64,14 +81,14 @@ class OtherOptionsSignupViewModel(
                 val rpId = schoolDirEntry.rpId
                 val username = route.respectRedeemInviteRequest.account.username
 
-                if (createPasskeyUseCase == null || rpId==null){
+                if (createPasskeyUseCaseVal == null || rpId==null){
                     _uiState.update {
                         it.copy(
                             generalError = StringResourceUiText(Res.string.passkey_not_supported)
                         )
                     }
                 }else {
-                    val createPasskeyResult = createPasskeyUseCase(
+                    val createPasskeyResult = createPasskeyUseCaseVal(
                         username = username,
                         rpId = rpId
                     )
@@ -84,7 +101,10 @@ class OtherOptionsSignupViewModel(
                                 username = username,
                                 credential = RespectPasskeyCredential(
                                     createPasskeyResult.authenticationResponseJSON
-                                )
+                                ),
+                                userHandleEncoded = encodeUserHandleUseCase(
+                                    createPasskeyResult.respectUserHandle
+                                ),
                             )
 
                             val updatedRedeemInviteRequest = RespectRedeemInviteRequest(

@@ -84,7 +84,8 @@ class EnterPasswordSignupViewModel(
                     credential = RespectPasswordCredential(
                         username = route.respectRedeemInviteRequest.account.username,
                         password = password
-                    )
+                    ),
+                    userHandleEncoded = null
                 )
             )
 

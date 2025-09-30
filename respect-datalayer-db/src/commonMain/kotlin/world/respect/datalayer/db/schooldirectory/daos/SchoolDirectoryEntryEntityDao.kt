@@ -75,7 +75,5 @@ interface SchoolDirectoryEntryEntityDao {
 
     }
 
-    @Query("DELETE FROM SchoolDirectoryEntryEntity WHERE reSelf = :url")
-    suspend fun deleteByUrl(url: Url)
 
 }

@@ -18,4 +18,11 @@ class SchoolDirectoryDataSourceRepository(
         return remote.getInviteInfo(inviteCode)
     }
 
+    override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
+        return local.deleteDirectory(directory)
+    }
+
+    override suspend fun insertDirectoryEntry(directory: RespectSchoolDirectory) {
+        local.insertDirectoryEntry(directory)
+    }
 }

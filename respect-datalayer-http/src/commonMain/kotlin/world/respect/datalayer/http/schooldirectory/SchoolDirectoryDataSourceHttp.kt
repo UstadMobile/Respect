@@ -14,6 +14,7 @@ class SchoolDirectoryDataSourceHttp(
     private val httpClient: HttpClient,
     private val local : RespectAppDataSourceLocal
 ): SchoolDirectoryDataSource{
+
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
         TODO("Not yet implemented")
     }
@@ -29,5 +30,13 @@ class SchoolDirectoryDataSourceHttp(
         }.build()
 
         return httpClient.get(url).body()
+    }
+
+    override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun insertDirectoryEntry(directory: RespectSchoolDirectory) {
+        TODO("Not yet implemented")
     }
 }

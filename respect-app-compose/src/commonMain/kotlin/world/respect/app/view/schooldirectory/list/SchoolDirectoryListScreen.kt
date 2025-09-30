@@ -15,7 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete_directory
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListUIState
@@ -36,7 +36,7 @@ fun SchoolDirectoryListScreen(
 @Composable
 fun SchoolDirectoryListScreen(
     uiState: SchoolDirectoryListUIState,
-    onDeleteClick: (SchoolDirectoryEntry) -> Unit
+    onDeleteClick: (RespectSchoolDirectory) -> Unit
 ) {
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -51,14 +51,14 @@ fun SchoolDirectoryListScreen(
 
 @Composable
 fun SchoolDirectoryListItem(
-    directory: SchoolDirectoryEntry,
+    directory: RespectSchoolDirectory,
     onDeleteClick: () -> Unit
 ) {
     ListItem(
         modifier = Modifier
             .fillMaxWidth(),
         headlineContent = {
-            Text(text = directory.self.toString())
+            Text(text = directory.baseUrl.toString())
         },
 
         trailingContent = {

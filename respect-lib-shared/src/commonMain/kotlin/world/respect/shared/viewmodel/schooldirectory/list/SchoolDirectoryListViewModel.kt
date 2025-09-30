@@ -9,14 +9,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.clazz
 import world.respect.shared.generated.resources.school_directory
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SchoolDirectoryEdit
@@ -26,7 +22,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 
 data class SchoolDirectoryListUIState(
-    val schoolDirectory: List<SchoolDirectoryEntry> = emptyList(),
+    val schoolDirectory: List<RespectSchoolDirectory> = emptyList(),
 )
 
 class SchoolDirectoryListViewModel(
@@ -58,15 +54,10 @@ class SchoolDirectoryListViewModel(
 
     private fun loadSchoolDirectories() {
         viewModelScope.launch {
-            respectAppDataSource.schoolDirectoryEntryDataSource.listAsFlow(
-                loadParams = DataLoadParams(),
-                listParams = SchoolDirectoryEntryDataSource.GetListParams()
-            ).collect { dataState ->
-                if (dataState is DataReadyState) {
-                    _uiState.update { prev ->
-                        prev.copy(schoolDirectory = dataState.data)
-                    }
-                }
+            val data = respectAppDataSource.schoolDirectoryDataSource.allDirectories()
+
+            _uiState.update { prev ->
+                prev.copy(schoolDirectory = data)
             }
 
         }
@@ -78,9 +69,9 @@ class SchoolDirectoryListViewModel(
         )
     }
 
-    fun onDeleteDirectory(directory: SchoolDirectoryEntry) {
+    fun onDeleteDirectory(directory: RespectSchoolDirectory) {
         viewModelScope.launch {
-            respectAppDataSource.schoolDirectoryEntryDataSource.deleteDirectory(directory)
+            respectAppDataSource.schoolDirectoryDataSource.deleteDirectory(directory)
         }
     }
 }

@@ -38,7 +38,8 @@ import kotlin.time.Clock
 
 data class PersonEditUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
-) {
+    val nationalPhoneNumSet: Boolean = false,
+    ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 }
@@ -129,7 +130,11 @@ class PersonEditViewModel(
             savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(personToCommit)
         }
     }
-
+    fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
+        _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
+            prev.copy(nationalPhoneNumSet = phoneNumSet)
+        }
+    }
     fun onClickSave() {
         val person = _uiState.value.person.dataOrNull()?.copy(
             lastModified = Clock.System.now(),

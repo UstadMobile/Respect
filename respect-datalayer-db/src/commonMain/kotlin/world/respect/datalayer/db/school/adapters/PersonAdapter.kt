@@ -70,6 +70,7 @@ fun Person.toEntities(
             pGender = gender,
             pDateOfBirth = dateOfBirth,
             pEmail = email,
+            pPhoneNumber = phoneNumber
         ),
         personRoleEntities = roles.map {
             PersonRoleEntity(

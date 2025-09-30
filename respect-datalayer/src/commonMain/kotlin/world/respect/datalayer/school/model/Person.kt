@@ -43,6 +43,7 @@ data class Person(
     val relatedPersonUids: List<String> = emptyList(),
     val dateOfBirth: LocalDate? = null,
     val email: String? = null,
+    val phoneNumber: String? = null,
 ) : ModelWithTimes {
 
     companion object {

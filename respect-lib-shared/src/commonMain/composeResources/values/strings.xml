@@ -78,6 +78,8 @@
     <string name="child_note">Please enter your child's details.</string>
     <string name="date_of_birth">Date of birth</string>
     <string name="email">Email</string>
+    <string name="phone_number">Phone number</string>
+
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>

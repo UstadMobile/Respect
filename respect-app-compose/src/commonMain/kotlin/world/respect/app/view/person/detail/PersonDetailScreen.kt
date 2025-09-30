@@ -17,7 +17,10 @@ import world.respect.shared.viewmodel.person.detail.PersonDetailUiState
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
+import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.gender
+import world.respect.shared.generated.resources.phone_memory
+import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.util.ext.label
 
@@ -58,6 +61,18 @@ fun PersonDetailScreen(
                 value = { Text(it.toString()) }
             )
         }
+
+        RespectDetailField(
+            modifier = Modifier.defaultItemPadding(),
+            label = { Text(stringResource(Res.string.phone_number)) },
+            value = { uiState.person.dataOrNull()?.phoneNumber?.let { Text(it) } }
+        )
+
+        RespectDetailField(
+            modifier = Modifier.defaultItemPadding(),
+            label = { Text(stringResource(Res.string.email)) },
+            value = { uiState.person.dataOrNull()?.email?.let { Text(it) } }
+        )
 
     }
 }

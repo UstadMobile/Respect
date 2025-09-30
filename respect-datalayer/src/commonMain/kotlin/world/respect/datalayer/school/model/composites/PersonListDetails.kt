@@ -10,5 +10,7 @@ data class PersonListDetails(
     val givenName: String,
     val familyName: String,
     val username: String?,
-    val email: String?
+    val email: String?,
+    val phoneNumber: String?
+
 )

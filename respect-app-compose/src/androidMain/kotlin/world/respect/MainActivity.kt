@@ -17,6 +17,9 @@ import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.GetCredentialUseCaseAndroidImpl
 import world.respect.credentials.passkey.GetCredentialUseCaseProcessor
+import world.respect.credentials.passkey.password.SavePasswordUseCase
+import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
+import world.respect.credentials.password.SavePasswordUseCaseProcessor
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
@@ -32,6 +35,8 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
         val createPasskeyChannelHost = getKoin().get<CreatePasskeyUseCaseAndroidChannelHost>()
         val getCredentialUseCase = getKoin().get<GetCredentialUseCase>()
                 as GetCredentialUseCaseAndroidImpl
+        val savePasswordUseCase = getKoin().get<SavePasswordUseCase>()
+                as SavePasswordUseCaseAndroidImpl
 
         val createPasskeyProcessor = CreatePasskeyUseCaseProcessor(
             activityContext = this,
@@ -45,6 +50,11 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             processOnScope = lifecycleScope
         )
 
+        val savePasswordProcessor = SavePasswordUseCaseProcessor(
+            activityContext = this,
+            jobChannel = savePasswordUseCase.requestChannel,
+            processOnScope = lifecycleScope
+        )
         //Launch processors for jobs that need an activity context.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -54,6 +64,9 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
                 launch {
                     getCredentialProcessor.receiveJobs()
+                }
+                launch {
+                    savePasswordProcessor.receiveJobs()
                 }
             }
         }

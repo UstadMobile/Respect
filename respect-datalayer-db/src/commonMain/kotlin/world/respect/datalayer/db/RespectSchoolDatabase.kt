@@ -48,7 +48,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         EnrollmentEntity::class,
         WriteQueueItemEntity::class,
     ],
-    version = 5,
+    version = 6,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

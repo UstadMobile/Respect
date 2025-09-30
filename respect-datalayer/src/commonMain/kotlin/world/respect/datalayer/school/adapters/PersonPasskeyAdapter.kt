@@ -13,6 +13,7 @@ fun CreatePasskeyUseCase.PasskeyCreatedResult.toPersonPasskey(
     deviceName: String,
 ): PersonPasskey{
     val clientDataJSONBase64 = this.authenticationResponseJSON.response.clientDataJSON
+    val passkeyProviderInfo = this.passkeyProviderInfo
     val decodedBytes = clientDataJSONBase64.decodeBase64Bytes()
     val clientDataJson = json.decodeFromString<ClientDataJSON>(
         decodedBytes.decodeToString()
@@ -34,5 +35,9 @@ fun CreatePasskeyUseCase.PasskeyCreatedResult.toPersonPasskey(
         publicKey = response.publicKey,
         deviceName = deviceName,
         isRevoked = false,
+        timeCreated = timeNow,
+        aaguid = passkeyProviderInfo.aaguid.toString() ,
+        providerName = passkeyProviderInfo.name
+
     )
 }

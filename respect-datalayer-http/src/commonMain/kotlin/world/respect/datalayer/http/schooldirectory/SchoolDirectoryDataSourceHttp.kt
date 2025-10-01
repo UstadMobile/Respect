@@ -2,9 +2,10 @@ package world.respect.datalayer.http.schooldirectory
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
@@ -22,7 +23,6 @@ class SchoolDirectoryDataSourceHttp(
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
         val directory = local.schoolDirectoryDataSource.allDirectories().firstOrNull()
             ?: throw IllegalStateException("No base URL available to fetch directories")
-
         val url = URLBuilder(directory.baseUrl)
             .appendEndpointPathSegments(listOf("api/directory/school"))
             .build()
@@ -45,7 +45,14 @@ class SchoolDirectoryDataSourceHttp(
     }
 
     override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {
-        local.schoolDirectoryDataSource.deleteDirectory(directory)
+        httpClient.delete(
+            url = URLBuilder(directory.baseUrl).appendEndpointPathSegments(
+                listOf("api/directory/deletedirectory")
+            ).build()
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(directory)
+        }
     }
 
     override suspend fun insertDirectory(directory: RespectSchoolDirectory) {
@@ -55,7 +62,7 @@ class SchoolDirectoryDataSourceHttp(
             ).build()
         ) {
             contentType(ContentType.Application.Json)
-            parameter("url", directory.baseUrl.toString())
+            setBody(directory)
         }
     }
 }

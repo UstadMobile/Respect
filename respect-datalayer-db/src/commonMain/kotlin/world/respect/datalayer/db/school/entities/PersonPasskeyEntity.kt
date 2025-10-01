@@ -35,6 +35,12 @@ class PersonPasskeyEntity(
 
     @ColumnInfo(defaultValue = "0")
     val ppTimeCreated: Instant = Clock.System.now(),
+
+    @ColumnInfo(defaultValue = "''")
+    val ppAaguid: String = "",
+
+    @ColumnInfo(defaultValue = "''")
+    val ppProviderName: String = ""
 ){
     companion object {
 

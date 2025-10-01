@@ -22,4 +22,6 @@ data class PersonPasskey(
     val isRevoked: Boolean,
     val deviceName: String,
     val timeCreated: InstantAsISO8601 = Clock.System.now(),
+    val aaguid: String?,
+    val providerName: String?
 ): ModelWithTimes

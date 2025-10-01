@@ -76,13 +76,6 @@ class SchoolDirectoryEntryDataSourceDb(
         )
     }
 
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: SchoolDirectoryEntryDataSource.GetListParams
-    ): IPagingSourceFactory<Int, SchoolDirectoryEntry> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getSchoolDirectoryEntryByUrl(url: Url): DataLoadState<SchoolDirectoryEntry> {
         return respectAppDb.getSchoolDirectoryEntryEntityDao().findByUid(
             xxStringHasher.hash(url.toString())

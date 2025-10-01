@@ -11,7 +11,6 @@ import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
 
 class SchoolDirectoryEntryDataSourceRepository(
     private val local: SchoolDirectoryEntryDataSourceLocal,
@@ -37,13 +36,6 @@ class SchoolDirectoryEntryDataSourceRepository(
 
         local.updateFromRemoteListIfNeeded(remote, null)
         return local.list(loadParams, listParams).combineWithRemote(remote)
-    }
-
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: SchoolDirectoryEntryDataSource.GetListParams
-    ): IPagingSourceFactory<Int, SchoolDirectoryEntry> {
-        TODO("Not yet implemented")
     }
 
     override suspend fun getSchoolDirectoryEntryByUrl(

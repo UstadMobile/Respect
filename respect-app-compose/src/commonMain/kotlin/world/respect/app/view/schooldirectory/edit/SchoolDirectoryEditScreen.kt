@@ -36,7 +36,7 @@ fun SchoolDirectoryEditScreen(
         uiState = uiState,
         onLinkChanged = viewModel::onLinkChanged,
         onClickNext = viewModel::onClickNext,
-        )
+    )
 }
 
 @Composable
@@ -44,7 +44,7 @@ fun SchoolDirectoryEditScreen(
     uiState: SchoolDirectoryEditUIState,
     onLinkChanged: (String) -> Unit,
     onClickNext: () -> Unit,
-    ) {
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +90,5 @@ fun SchoolDirectoryEditScreen(
             )
         }
 
-
     }
-
 }

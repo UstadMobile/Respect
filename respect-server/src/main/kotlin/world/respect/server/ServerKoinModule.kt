@@ -125,7 +125,7 @@ fun serverKoinModule(
         scoped<RespectSchoolPath> {
             val schoolDirName = schoolUrl().sanitizedForFilename()
             val schoolDirFile = File(dataDir, schoolDirName).also {
-                if (!it.exists())
+                if(!it.exists())
                     it.mkdirs()
             }
 

@@ -14,7 +14,6 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
  * The DataSource requires a user guid and (for a network client) an authorization token.
  */
 interface SchoolDataSource {
-
     val personDataSource: PersonDataSource
 
     val reportDataSource: ReportDataSource
@@ -24,6 +23,4 @@ interface SchoolDataSource {
     val classDataSource: ClassDataSource
 
     val enrollmentDataSource: EnrollmentDataSource
-
-
 }

@@ -14,14 +14,13 @@ import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.respect.model.RESPECT_SCHOOL_JSON_PATH
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 
 class SchoolDirectoryEntryDataSourceHttp(
     private val httpClient: HttpClient,
-    private val local : RespectAppDataSourceLocal,
-): SchoolDirectoryEntryDataSource {
+    private val local: RespectAppDataSourceLocal,
+) : SchoolDirectoryEntryDataSource {
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
@@ -37,7 +36,8 @@ class SchoolDirectoryEntryDataSourceHttp(
                 }
             }
 
-            emit(DataReadyState(
+            emit(
+                DataReadyState(
                 data = listEntries.flatMap {
                     it.dataOrNull() ?: emptyList()
                 }
@@ -63,13 +63,6 @@ class SchoolDirectoryEntryDataSourceHttp(
                 it.dataOrNull() ?: emptyList()
             }
         )
-    }
-
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: SchoolDirectoryEntryDataSource.GetListParams
-    ): IPagingSourceFactory<Int, SchoolDirectoryEntry> {
-        TODO("Not yet implemented")
     }
 
     override suspend fun getSchoolDirectoryEntryByUrl(

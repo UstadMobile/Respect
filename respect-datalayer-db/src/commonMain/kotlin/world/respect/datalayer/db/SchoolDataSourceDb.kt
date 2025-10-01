@@ -47,5 +47,4 @@ class SchoolDataSourceDb(
     override val enrollmentDataSource: EnrollmentDataSourceLocal by lazy {
         EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
-
 }

@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
-import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -79,13 +78,11 @@ class EnterPasswordSignupViewModel(
 
         viewModelScope.launch {
             val redeemRequest = route.respectRedeemInviteRequest.copy(
-                account = RespectRedeemInviteRequest.Account(
-                    username = route.respectRedeemInviteRequest.account.username,
+                account = route.respectRedeemInviteRequest.account.copy(
                     credential = RespectPasswordCredential(
                         username = route.respectRedeemInviteRequest.account.username,
-                        password = password
-                    ),
-                    userHandleEncoded = null
+                        password = password,
+                    )
                 )
             )
 

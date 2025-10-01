@@ -17,7 +17,6 @@ import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
-import world.respect.shared.domain.account.passkey.DecodeUserHandleUseCaseImpl
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -57,8 +56,7 @@ class RedeemInviteIntegrationTest {
                     ),
                     schoolDataSource = { _, _ -> serverSchoolDataSource },
                     uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
-                    json = json,
-                    decodeUserHandle = DecodeUserHandleUseCaseImpl()
+                    json = json
                 )
 
                 val clazz = Clazz(
@@ -81,11 +79,11 @@ class RedeemInviteIntegrationTest {
                     role = PersonRoleEnum.TEACHER,
                     parentOrGuardianRole = null,
                     account = RespectRedeemInviteRequest.Account(
+                        guid = "1",
                         username = "username",
                         credential = RespectPasswordCredential(
                             "username", "bart"
                         ),
-                        userHandleEncoded = null,
                     )
                 )
 

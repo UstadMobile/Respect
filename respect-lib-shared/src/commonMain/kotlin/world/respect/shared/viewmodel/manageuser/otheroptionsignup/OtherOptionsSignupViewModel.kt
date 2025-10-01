@@ -89,21 +89,21 @@ class OtherOptionsSignupViewModel(
                     }
                 }else {
                     val createPasskeyResult = createPasskeyUseCaseVal(
-                        username = username,
-                        rpId = rpId
+                        CreatePasskeyUseCase.Request(
+                            personUid = route.respectRedeemInviteRequest.account.guid,
+                            username = username,
+                            rpId = rpId
+                        )
                     )
 
                     when (createPasskeyResult) {
                         //This is quite wrong...
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                             val redeemInviteRequest = route.respectRedeemInviteRequest
-                            val account = RespectRedeemInviteRequest.Account(
+                            val account = route.respectRedeemInviteRequest.account.copy(
                                 username = username,
                                 credential = RespectPasskeyCredential(
                                     createPasskeyResult.authenticationResponseJSON
-                                ),
-                                userHandleEncoded = encodeUserHandleUseCase(
-                                    createPasskeyResult.respectUserHandle
                                 ),
                             )
 

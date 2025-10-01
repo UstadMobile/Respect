@@ -11,6 +11,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
+import world.respect.datalayer.UidNumberMapper
 
 /**
  * Create a passkey on Android. This will show a bottom sheet for the user to approve creating a new
@@ -26,8 +27,8 @@ class CreatePasskeyUseCaseAndroidImpl(
     private val sender: CreatePasskeyUseCaseAndroidChannelHost,
     private val json: Json,
     private val createPublicKeyJsonUseCase: CreatePublicKeyCredentialCreationOptionsJsonUseCase,
-    private val primaryKeyGenerator: () -> Long,
     private val schoolUrl: Url,
+    private val uidNumberMapper: UidNumberMapper,
 ) : CreatePasskeyUseCase {
 
     data class CreatePublicKeyCredentialRequestJob(
@@ -44,19 +45,18 @@ class CreatePasskeyUseCaseAndroidImpl(
      */
     @SuppressLint("PublicKeyCredential")
     override suspend fun invoke(
-        username: String,
-        rpId: String
+        request: CreatePasskeyUseCase.Request
     ): CreatePasskeyUseCase.CreatePasskeyResult {
+        val personUidNumVal = uidNumberMapper(request.personUid)
         return try {
-            val personPasskeyUid = primaryKeyGenerator()
             val job = CreatePublicKeyCredentialRequestJob(
                 request = CreatePublicKeyCredentialRequest(
                     requestJson = json.encodeToString(
                         createPublicKeyJsonUseCase(
                             CreatePublicKeyCredentialCreationOptionsJsonUseCase.Request(
-                                username = username,
-                                rpId = rpId,
-                                personPasskeyUid = personPasskeyUid,
+                                username = request.username,
+                                rpId = request.rpId,
+                                personUidNum = personUidNumVal,
                             )
                         )
                     ),
@@ -74,7 +74,7 @@ class CreatePasskeyUseCaseAndroidImpl(
             CreatePasskeyUseCase.PasskeyCreatedResult(
                 passkeyResponse,
                 RespectUserHandle(
-                    personPasskeyUid = personPasskeyUid,
+                    personUidNum = personUidNumVal,
                     schoolUrl = schoolUrl,
                 )
             )

@@ -85,7 +85,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
                 ) ?: throw IllegalArgumentException().withHttpStatus(400)
 
                 schoolDb.getPersonEntityDao().findByGuidNum(
-                    personPasskey.ppPersonUid
+                    personPasskey.ppPersonUidNum
                 ) ?: throw ForbiddenException("Person not found")
             }
         }

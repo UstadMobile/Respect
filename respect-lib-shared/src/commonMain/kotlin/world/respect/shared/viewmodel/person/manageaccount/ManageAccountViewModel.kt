@@ -154,8 +154,11 @@ class ManageAccountViewModel(
     fun onCreatePasskeyClick() {
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
-                username = uiState.value.selectedAccount?.person?.username ?: return@launch,
-                rpId = uiState.value.selectedAccount?.account?.school?.rpId ?: return@launch
+                CreatePasskeyUseCase.Request(
+                    personUid = uiState.value.selectedAccount?.person?.guid ?: return@launch,
+                    username = uiState.value.selectedAccount?.person?.username ?: return@launch,
+                    rpId = uiState.value.selectedAccount?.account?.school?.rpId ?: return@launch
+                )
             )
 
             if (passkeyCreated != null) {

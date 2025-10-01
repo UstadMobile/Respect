@@ -38,7 +38,7 @@ class PersonPasskeyDataSourceDb(
                 val toUpdate = list.filter {
                     forceOverwrite || (schoolDb.getPersonPasskeyEntityDao().getLastModifiedByPersonUidAndKeyId(
                         personUidNum = uidNumberMapper(authenticatedUser.guid),
-                        passKeyId = it.id
+                        passKeyId = it.credentialId
                     ) ?: 0) < it.lastModified.toEpochMilliseconds()
                 }.map {
                     it.copy(stored = timeNow).asEntity(uidNumberMapper)

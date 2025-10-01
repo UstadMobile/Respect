@@ -8,14 +8,13 @@ fun PersonPasskey.asEntity(
     uidNumberMapper: UidNumberMapper,
 ): PersonPasskeyEntity {
     return PersonPasskeyEntity(
-        ppPersonUid = uidNumberMapper(personGuid),
-        personPasskeyUid = personPasskeyUid,
+        ppPersonUidNum = uidNumberMapper(personGuid),
         ppLastModified = lastModified,
         ppStored = stored,
         ppAttestationObj = attestationObj,
         ppClientDataJson = clientDataJson,
         ppOriginString = originString,
-        ppId = id,
+        ppCredentialId = credentialId,
         ppChallengeString = challengeString,
         ppPublicKey = publicKey,
         ppDeviceName = deviceName,
@@ -29,13 +28,12 @@ fun PersonPasskeyEntity.asModel(
 ): PersonPasskey {
     return PersonPasskey(
         personGuid = personGuid,
-        personPasskeyUid = personPasskeyUid,
         lastModified = ppLastModified,
         stored = ppStored,
         attestationObj = ppAttestationObj,
         clientDataJson = ppClientDataJson,
         originString = ppOriginString,
-        id = ppId,
+        credentialId = ppCredentialId,
         challengeString = ppChallengeString,
         publicKey = ppPublicKey,
         isRevoked = isRevoked == PersonPasskeyEntity.REVOKED,

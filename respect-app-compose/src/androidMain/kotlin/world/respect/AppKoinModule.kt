@@ -545,10 +545,8 @@ val appKoinModule = module {
                 sender = get(),
                 json = get(),
                 createPublicKeyJsonUseCase = get(),
-                primaryKeyGenerator = {
-                    get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator.nextId(PersonPasskeyEntity.TABLE_ID)
-                },
-                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                uidNumberMapper = get(),
             )
         }
 

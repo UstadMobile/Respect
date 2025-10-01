@@ -15,8 +15,6 @@ import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
-import world.respect.credentials.passkey.request.EncodeUserHandleUseCase
-import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -63,7 +61,6 @@ class CreateAccountViewModel(
     private val accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val validateUsernameUseCase: ValidateUsernameUseCase,
-    private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val route: CreateAccount = savedStateHandle.toRoute()
 
@@ -169,20 +166,19 @@ class CreateAccountViewModel(
             try {
                 if (createPasskeyUseCase != null && rpIdVal != null && passkeySupported.await()) {
                     val createPasskeyResult = createPasskeyUseCase(
-                        username = usernameVal,
-                        rpId = rpIdVal
+                        CreatePasskeyUseCase.Request(
+                            personUid = route.respectRedeemInviteRequest.account.guid,
+                            username = usernameVal,
+                            rpId = rpIdVal
+                        )
                     )
 
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                             val redeemRequest = route.respectRedeemInviteRequest.copy(
-                                account = RespectRedeemInviteRequest.Account(
-                                    username = usernameVal,
+                                account = route.respectRedeemInviteRequest.account.copy(
                                     credential = RespectPasskeyCredential(
                                         passkeyWebAuthNResponse = createPasskeyResult.authenticationResponseJSON
-                                    ),
-                                    userHandleEncoded = encodeUserHandleUseCase(
-                                        createPasskeyResult.respectUserHandle
                                     ),
                                 )
                             )
@@ -229,10 +225,8 @@ class CreateAccountViewModel(
                             EnterPasswordSignup.create(
                                 schoolUrl = route.schoolUrl,
                                 inviteRequest = route.respectRedeemInviteRequest.copy(
-                                    account = RespectRedeemInviteRequest.Account(
+                                    account = route.respectRedeemInviteRequest.account.copy(
                                         username = usernameVal,
-                                        credential =route.respectRedeemInviteRequest.account.credential,
-                                        userHandleEncoded = null,
                                     )
                                 )
                             )
@@ -272,10 +266,8 @@ class CreateAccountViewModel(
                 OtherOptionsSignup.create(
                     schoolUrl = route.schoolUrl,
                     inviteRequest = route.respectRedeemInviteRequest.copy(
-                        account = RespectRedeemInviteRequest.Account(
-                            username = username,
-                            credential = route.respectRedeemInviteRequest.account.credential,
-                            userHandleEncoded = route.respectRedeemInviteRequest.account.userHandleEncoded,
+                        account = route.respectRedeemInviteRequest.account.copy(
+                            username = username
                         )
                     )
                 )

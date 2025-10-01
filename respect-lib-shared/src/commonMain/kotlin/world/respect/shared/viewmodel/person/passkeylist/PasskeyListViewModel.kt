@@ -103,8 +103,11 @@ class PasskeyListViewModel(
                 val username = accountAndPerson?.person?.username ?: return@launch
                 val rpId = accountAndPerson.account.school.rpId ?: return@launch
                 val passkeyResult = createPasskeyUseCase?.invoke(
-                    username = username,
-                    rpId = rpId,
+                    request = CreatePasskeyUseCase.Request(
+                        personUid = accountAndPerson.person.guid,
+                        username = username,
+                        rpId = rpId,
+                    ),
                 ) ?: return@launch
 
                 when(passkeyResult) {

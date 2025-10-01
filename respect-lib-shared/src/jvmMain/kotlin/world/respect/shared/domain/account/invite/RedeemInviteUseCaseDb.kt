@@ -6,7 +6,7 @@ import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
-import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
+import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -41,7 +41,6 @@ class RedeemInviteUseCaseDb(
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
     private val json: Json,
-    private val decodeUserHandle: DecodeUserHandleUseCase,
 ): RedeemInviteUseCase, KoinComponent {
 
     fun RespectRedeemInviteRequest.PersonInfo.toPerson(
@@ -82,9 +81,7 @@ class RedeemInviteUseCaseDb(
             throw IllegalArgumentException("Bad code").withHttpStatus(400)
         }
 
-        val accountGuid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-            Person.TABLE_ID
-        ).toString()
+        val accountGuid = redeemRequest.account.guid
 
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
             role = redeemRequest.role,
@@ -113,12 +110,11 @@ class RedeemInviteUseCaseDb(
             }
 
             is RespectPasskeyCredential -> {
-                val userHandleEncoded = redeemRequest.account.userHandleEncoded
-                    ?: throw kotlin.IllegalArgumentException("Passkey redeem requires a user handle")
-                        .withHttpStatus(400)
-                val userHandle = decodeUserHandle(userHandleEncoded)
                 val passkeyCreatedResult = CreatePasskeyUseCase.PasskeyCreatedResult(
-                    respectUserHandle = userHandle,
+                    respectUserHandle = RespectUserHandle(
+                        personUidNum = uidNumberMapper(accountGuid),
+                        schoolUrl = schoolUrl
+                    ),
                     authenticationResponseJSON = credential.passkeyWebAuthNResponse,
                 )
 

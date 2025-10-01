@@ -66,8 +66,9 @@ class VerifySignInWithPasskeyUseCase(
         val userPresenceRequired = true
 
         val passkeyData = schoolDb.getPersonPasskeyEntityDao()
-            .findByPersonPasskeyUid(
-                uid = userHandle.personPasskeyUid
+            .findByPersonUidAndCredentialId(
+                uid = userHandle.personUidNum,
+                credentialId = authenticationResponseJSON.id,
             ) ?: throw IllegalArgumentException().withHttpStatus(401)
 
         val credentialRecord = createCredentialRecord( passkeyData)
@@ -100,7 +101,7 @@ class VerifySignInWithPasskeyUseCase(
             webAuthnManager.verify(authenticationData, authenticationParameters)
             PasskeyVerifyResult(
                 isVerified =  true,
-                personUid = passkeyData.ppPersonUid
+                personUid = passkeyData.ppPersonUidNum
             )
         } catch (e: Exception) {
             Napier.w("VerifySigninWithPasskey: Failed", e)

@@ -6,15 +6,13 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Entity(
-    primaryKeys = ["ppPersonUid", "ppId"]
+    primaryKeys = ["ppPersonUidNum", "ppCredentialId"]
 )
 class PersonPasskeyEntity(
 
-    val ppPersonUid: Long,
+    val ppPersonUidNum: Long,
 
-    val personPasskeyUid: Long,
-
-    val ppId: String,
+    val ppCredentialId: String,
 
     val ppLastModified: Instant,
 

@@ -27,6 +27,13 @@ interface CreatePasskeyUseCase {
         val message: String?
     ) : CreatePasskeyResult()
 
-    suspend operator fun invoke(username:String,rpId:String): CreatePasskeyResult
+
+    data class Request(
+        val personUid: String,
+        val username: String,
+        val rpId: String,
+    )
+
+    suspend operator fun invoke(request: Request): CreatePasskeyResult
 
 }

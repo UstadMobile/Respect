@@ -25,8 +25,8 @@ data class RespectRedeemInviteRequest(
         FATHER, MOTHER, OTHER_GUARDIAN
     }
 
-   @Serializable
-   data class PersonInfo(
+    @Serializable
+    data class PersonInfo(
        val name: String = "",
        val gender: PersonGenderEnum = PersonGenderEnum.UNSPECIFIED,
        val dateOfBirth: LocalDate = LocalDate(1900, 1, 1),
@@ -37,10 +37,10 @@ data class RespectRedeemInviteRequest(
      *        as per RespectUserHandle.
      */
     @Serializable
-    class Account(
+    data class Account(
+        val guid: String,
         val username: String,
         val credential: RespectCredential,
-        val userHandleEncoded: String?,
     )
 
 }

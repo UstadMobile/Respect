@@ -22,14 +22,13 @@ fun CreatePasskeyUseCase.PasskeyCreatedResult.toPersonPasskey(
     val response = authenticationResponseJSON.response
 
     return PersonPasskey(
-        personGuid = personGuid, 
-        personPasskeyUid = respectUserHandle.personPasskeyUid,
+        personGuid = personGuid,
         lastModified = timeNow,
         stored = timeNow,
         attestationObj = response.attestationObject,
         clientDataJson = response.clientDataJSON,
         originString = clientDataJson.origin,
-        id = authenticationResponseJSON.id,
+        credentialId = authenticationResponseJSON.id,
         challengeString = clientDataJson.challenge,
         publicKey = response.publicKey,
         deviceName = deviceName,

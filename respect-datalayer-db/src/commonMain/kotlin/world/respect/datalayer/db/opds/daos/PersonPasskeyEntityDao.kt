@@ -15,89 +15,109 @@ abstract class PersonPasskeyEntityDao {
         personPasskey: List<PersonPasskeyEntity>
     )
 
-    @Query("""
-        SELECT ppId
+    @Query(
+        """
+        SELECT ppCredentialId
           FROM PersonPasskeyEntity
-    """)
+    """
+    )
     abstract suspend fun allPasskey(): List<String>
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
           FROM PersonPasskeyEntity
          WHERE isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
-           AND ppPersonUid = :uid
-    """)
+           AND ppPersonUidNum = :uid
+    """
+    )
     abstract fun getAllActivePasskeys(uid: Long): Flow<List<PersonPasskeyEntity>>
-    @Query("""
+    @Query(
+        """
         SELECT * 
           FROM PersonPasskeyEntity
          WHERE isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
-           AND ppPersonUid = :uid
-    """)
+           AND ppPersonUidNum = :uid
+    """
+    )
     abstract suspend fun getAllActivePasskeysList(uid: Long): List<PersonPasskeyEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT *
           FROM PersonPasskeyEntity
-         WHERE PersonPasskeyEntity.ppId = :id
+         WHERE PersonPasskeyEntity.ppCredentialId = :id
            AND PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
-    """)
+    """
+    )
     abstract suspend fun findPersonPasskeyFromClientDataJson(
         id: String,
     ): PersonPasskeyEntity?
 
-    @Query("""
+    @Query(
+        """
         SELECT PersonPasskeyEntity.*
           FROM PersonPasskeyEntity
-         WHERE PersonPasskeyEntity.personPasskeyUid = :uid
+         WHERE PersonPasskeyEntity.ppPersonUidNum = :uid
+           AND PersonPasskeyEntity.ppCredentialId = :credentialId
            AND PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
-    """)
-    abstract suspend fun findByPersonPasskeyUid(
+    """
+    )
+    abstract suspend fun findByPersonUidAndCredentialId(
         uid: Long,
+        credentialId: String,
     ): PersonPasskeyEntity?
 
 
-    @Query("""
+    @Query(
+        """
         UPDATE PersonPasskeyEntity
            SET isRevoked = ${PersonPasskeyEntity.REVOKED}
-         WHERE ppPersonUid = :personUidNum
-           AND ppId = :passKeyId
-    """)
+         WHERE ppPersonUidNum = :personUidNum
+           AND ppCredentialId = :passKeyId
+    """
+    )
     abstract suspend fun revokePersonPasskey(
         personUidNum: Long,
         passKeyId: String,
     )
 
-    @Query("""
+    @Query(
+        """
         SELECT PersonPasskeyEntity.*
           FROM PersonPasskeyEntity
-         WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
+         WHERE PersonPasskeyEntity.ppPersonUidNum = :personGuidNumber
            AND (:includeRevoked = 1 
                 OR PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED})
-    """)
+    """
+    )
     abstract suspend fun findAll(
         personGuidNumber: Long,
         includeRevoked: Int,
     ): List<PersonPasskeyEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT PersonPasskeyEntity.*
           FROM PersonPasskeyEntity
-         WHERE PersonPasskeyEntity.ppPersonUid = :personGuidNumber
+         WHERE PersonPasskeyEntity.ppPersonUidNum = :personGuidNumber
            AND (:includeRevoked = 1 
                 OR PersonPasskeyEntity.isRevoked = ${PersonPasskeyEntity.NOT_REVOKED})
-    """)
+    """
+    )
     abstract fun findAllAsFlow(
         personGuidNumber: Long,
         includeRevoked: Int,
     ): Flow<List<PersonPasskeyEntity>>
 
-    @Query("""
+    @Query(
+        """
         SELECT PersonPasskeyEntity.ppLastModified
           FROM PersonPasskeyEntity
-         WHERE PersonPasskeyEntity.ppPersonUid = :personUidNum
-           AND PersonPasskeyEntity.ppId = :passKeyId
-    """)
+         WHERE PersonPasskeyEntity.ppPersonUidNum = :personUidNum
+           AND PersonPasskeyEntity.ppCredentialId = :passKeyId
+    """
+    )
     abstract suspend fun getLastModifiedByPersonUidAndKeyId(
         personUidNum: Long,
         passKeyId: String,

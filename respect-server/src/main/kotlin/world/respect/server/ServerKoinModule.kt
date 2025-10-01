@@ -238,7 +238,6 @@ fun serverKoinModule(
                 },
                 uidNumberMapper = get(),
                 json = get(),
-                decodeUserHandle = get(),
             )
         }
     }

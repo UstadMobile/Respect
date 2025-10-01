@@ -60,7 +60,7 @@ fun PasskeyListScreen(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(
             items = passkeyList,
-            key = { it.id }
+            key = { it.credentialId }
         ) { personPasskey ->
             val createdAtStr = rememberFormattedDateTime(
                 timeInMillis = personPasskey.timeCreated.toEpochMilliseconds(),

@@ -33,7 +33,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     data class Request(
         val username: String,
         val rpId: String,
-        val personPasskeyUid: Long,
+        val personUidNum: Long,
     )
 
     suspend operator fun invoke(
@@ -42,7 +42,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
         val challenge = randomString(16) //TODO note: this should really take place on the server side
 
         val encodedUserHandle = encodeUserHandleUseCase(
-            RespectUserHandle(request.personPasskeyUid, schoolUrl)
+            RespectUserHandle(request.personUidNum, schoolUrl)
         )
 
         return PublicKeyCredentialCreationOptionsJSON(

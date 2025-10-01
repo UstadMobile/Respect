@@ -14,10 +14,12 @@ import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
@@ -50,6 +52,8 @@ class ConfirmationViewModel(
         )
 
     private val getInviteInfoUseCase: GetInviteInfoUseCase = scope.get()
+
+    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator = scope.get()
 
     private val _uiState = MutableStateFlow(ConfirmationUiState())
 
@@ -138,9 +142,9 @@ class ConfirmationViewModel(
         }
 
         val blankAccount = RespectRedeemInviteRequest.Account(
+            guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID).toString(),
             username = "",
             credential = RespectPasswordCredential(username = "", password = ""),
-            userHandleEncoded = null,
         )
 
         return RespectRedeemInviteRequest(

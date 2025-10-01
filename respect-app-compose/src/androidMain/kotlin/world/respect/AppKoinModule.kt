@@ -43,7 +43,7 @@ import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialRequestOptionsJsonUseCase
 import world.respect.credentials.passkey.request.EncodeUserHandleUseCase
-import world.respect.credentials.passkey.request.GetAaguidAndProvider
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -59,7 +59,6 @@ import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.personPassword.GetPersonPassword
 import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
-import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -92,7 +91,7 @@ import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
 import world.respect.shared.domain.account.passkey.EncodeUserHandleUseCaseImpl
-import world.respect.shared.domain.account.passkey.GetAaguidAndProviderImpl
+import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysClient
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
 import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCase
@@ -473,14 +472,16 @@ val appKoinModule = module {
     single<CreatePasskeyUseCaseAndroidChannelHost> {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
-    single<LoadAaguidJsonUseCase> {
+
+    factory<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseAndroid(
             appContext = androidContext().applicationContext,
             json = get(),
         )
     }
-    single<GetAaguidAndProvider> {
-        GetAaguidAndProviderImpl(
+
+    factory<GetPasskeyProviderInfoUseCase> {
+        GetPasskeyProviderInfoUseCaseImpl(
             json = get(),
             loadAaguidJsonUseCase = get()
         )
@@ -560,7 +561,7 @@ val appKoinModule = module {
                 createPublicKeyJsonUseCase = get(),
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 uidNumberMapper = get(),
-                getAaguidAndProvider = get(),
+                getPasskeyProviderInfoUseCase = get(),
             )
         }
 

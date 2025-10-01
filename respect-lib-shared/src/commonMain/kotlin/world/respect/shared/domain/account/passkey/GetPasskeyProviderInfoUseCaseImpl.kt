@@ -3,23 +3,22 @@ package world.respect.shared.domain.account.passkey
 import io.github.aakira.napier.Napier
 import io.ktor.util.decodeBase64Bytes
 import kotlinx.serialization.json.Json
-import world.respect.credentials.passkey.request.GetAaguidAndProvider
-import world.respect.credentials.passkey.model.PasskeyProviderInfo
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 //https://web.dev/articles/webauthn-aaguid
-class GetAaguidAndProviderImpl(
+class GetPasskeyProviderInfoUseCaseImpl(
     val json: Json,
     val loadAaguidJsonUseCase: LoadAaguidJsonUseCase
-): GetAaguidAndProvider {
+): GetPasskeyProviderInfoUseCase {
 
     /**
      * @param authenticatorData the Base64 encoded Authenticator data as per
      *        AuthenticatorAssertionResponseJSON.authenticatorData
      */
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun invoke(authenticatorData: String): PasskeyProviderInfo {
+    override suspend fun invoke(authenticatorData: String): GetPasskeyProviderInfoUseCase.PasskeyProviderInfo {
         return try {
             val authenticatorDataByteArray = authenticatorData.decodeBase64Bytes()
 
@@ -28,14 +27,28 @@ class GetAaguidAndProviderImpl(
             )
 
             val aaguidInfo = loadAaguidJsonUseCase()
-                ?: return PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown", icon_dark = null, icon_light = null)
+                ?: return GetPasskeyProviderInfoUseCase.PasskeyProviderInfo(
+                    aaguid = aaguidUuid,
+                    name = "Unknown authenticator",
+                )
 
             aaguidInfo[aaguidUuid.toString()]?.let {
-                PasskeyProviderInfo(aaguid = aaguidUuid, name = it.name ?: "", icon_dark = it.icon_dark, icon_light = it.icon_light)
-            } ?: PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown", icon_dark = null, icon_light = null)
+                GetPasskeyProviderInfoUseCase.PasskeyProviderInfo(
+                    aaguid = aaguidUuid,
+                    name = it.name ?: "",
+                    icon_dark = it.icon_dark,
+                    icon_light = it.icon_light
+                )
+            } ?: GetPasskeyProviderInfoUseCase.PasskeyProviderInfo(
+                aaguid = aaguidUuid,
+                name = "Unknown authenticator",
+            )
         }catch (t: Throwable) {
             Napier.w("Exception attempting to get aaguid data for passkey:", t)
-            PasskeyProviderInfo(aaguid = Uuid.NIL, name = "Unknown", icon_dark = null, icon_light = null)
+            GetPasskeyProviderInfoUseCase.PasskeyProviderInfo(
+                aaguid = Uuid.NIL,
+                name = "Unknown authenticator",
+            )
         }
     }
 

@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 import world.respect.credentials.passkey.request.CreatePublicKeyCredentialCreationOptionsJsonUseCase
 import world.respect.datalayer.UidNumberMapper
-import world.respect.credentials.passkey.request.GetAaguidAndProvider
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 
 /**
  * Create a passkey on Android. This will show a bottom sheet for the user to approve creating a new
@@ -30,7 +30,7 @@ class CreatePasskeyUseCaseAndroidImpl(
     private val createPublicKeyJsonUseCase: CreatePublicKeyCredentialCreationOptionsJsonUseCase,
     private val schoolUrl: Url,
     private val uidNumberMapper: UidNumberMapper,
-    private val getAaguidAndProvider: GetAaguidAndProvider,
+    private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
 ) : CreatePasskeyUseCase {
 
     data class CreatePublicKeyCredentialRequestJob(
@@ -72,7 +72,7 @@ class CreatePasskeyUseCaseAndroidImpl(
             val passkeyResponse = json.decodeFromString<AuthenticationResponseJSON>(
                 response.registrationResponseJson
             )
-            val passkeyProviderInfo = getAaguidAndProvider(
+            val passkeyProviderInfo = getPasskeyProviderInfoUseCase(
                 authenticatorData = passkeyResponse.response.authenticatorData
             )
             CreatePasskeyUseCase.PasskeyCreatedResult(

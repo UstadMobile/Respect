@@ -21,6 +21,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.passkey
 import world.respect.shared.generated.resources.passkeys
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.resources.UiText
@@ -69,7 +70,7 @@ class PasskeyListViewModel(
                 hideBottomNavigation = true,
                 fabState = FabUiState(
                     visible = true,
-                    text = Res.string.passkeys.asUiText(),
+                    text = Res.string.passkey.asUiText(),
                     icon = FabUiState.FabIcon.ADD,
                     onClick = ::onClickAdd,
                 )

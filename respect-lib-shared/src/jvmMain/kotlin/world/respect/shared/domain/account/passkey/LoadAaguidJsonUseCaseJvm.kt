@@ -15,7 +15,9 @@ class LoadAaguidJsonUseCaseJvm(
                 "/aaguid.json"
             )?.bufferedReader(Charsets.UTF_8)?.use {
                 it.readText()
-            }?.let { json.decodeFromString(it) }
+            }?.let {
+                json.decodeFromString(it)
+            }
         }
     }
 

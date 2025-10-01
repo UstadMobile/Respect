@@ -25,7 +25,7 @@ class GetDeviceInfoUseCaseAndroid(
             version = android.os.Build.VERSION.RELEASE,
             androidSdkInt = android.os.Build.VERSION.SDK_INT,
             manufacturer = android.os.Build.MANUFACTURER,
-            model = android.os.Build.BRAND,
+            model = android.os.Build.MODEL,
             ram = totalMem,
         )
     }

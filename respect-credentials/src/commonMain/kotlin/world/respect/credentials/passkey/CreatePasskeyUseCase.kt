@@ -1,7 +1,7 @@
 package world.respect.credentials.passkey
 
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
-import world.respect.credentials.passkey.model.PasskeyProviderInfo
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 
 interface CreatePasskeyUseCase {
 
@@ -10,7 +10,7 @@ interface CreatePasskeyUseCase {
     data class PasskeyCreatedResult(
         val authenticationResponseJSON : AuthenticationResponseJSON,
         val respectUserHandle: RespectUserHandle,
-        val passkeyProviderInfo: PasskeyProviderInfo
+        val passkeyProviderInfo: GetPasskeyProviderInfoUseCase.PasskeyProviderInfo
     ) : CreatePasskeyResult()
 
     class UserCanceledResult : CreatePasskeyResult(){

@@ -2,6 +2,7 @@ package world.respect.app.view.person.passkeyList
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -14,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.PasskeyIcon
 import world.respect.app.components.RespectBasicAlertDialog
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.PersonPasskey
@@ -83,9 +86,15 @@ fun PasskeyListScreen(
                     )
                 },
                 leadingContent = {
-
-                    PasskeyIcon(if (isSystemInDarkTheme()) personPasskey.iconDark else personPasskey.iconLight)
-
+                    val iconUrl = if (isSystemInDarkTheme()) personPasskey.iconDark else personPasskey.iconLight
+                    if(iconUrl != null) {
+                        AsyncImage(
+                            model = iconUrl,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.size(40.dp),
+                            contentDescription = ""
+                        )
+                    }
                 },
                 trailingContent = {
                     IconButton(

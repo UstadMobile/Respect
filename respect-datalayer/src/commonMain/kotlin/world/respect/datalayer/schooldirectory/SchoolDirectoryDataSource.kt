@@ -7,10 +7,12 @@ import world.respect.datalayer.respect.model.invite.RespectInviteInfo
  * DataSource to access all known directories
  */
 interface SchoolDirectoryDataSource {
-
     suspend fun allDirectories(): List<RespectSchoolDirectory>
 
     suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo
 
+    suspend fun deleteDirectory(directory: RespectSchoolDirectory)
+
+    suspend fun insertDirectory(directory: RespectSchoolDirectory)
 
 }

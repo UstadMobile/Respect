@@ -1,4 +1,5 @@
 package world.respect.server
+
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import io.ktor.http.Url
@@ -26,6 +27,7 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
+import world.respect.server.domain.school.add.AddDirectoryUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
@@ -105,6 +107,12 @@ fun serverKoinModule(
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
             schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
+        )
+    }
+
+    single<AddDirectoryUseCase> {
+        AddDirectoryUseCase(
+            directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
         )
     }
 

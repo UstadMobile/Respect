@@ -3,17 +3,14 @@ package world.respect.datalayer.http.schooldirectory
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
 import world.respect.datalayer.RespectAppDataSourceLocal
-import world.respect.datalayer.ext.useTokenProvider
-import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 import world.respect.libutil.ext.appendEndpointPathSegments
 
@@ -23,8 +20,16 @@ class SchoolDirectoryDataSourceHttp(
 ) : SchoolDirectoryDataSource {
 
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
-        return local.schoolDirectoryDataSource.allDirectories()
+        val directory = local.schoolDirectoryDataSource.allDirectories().firstOrNull()
+            ?: throw IllegalStateException("No base URL available to fetch directories")
+
+        val url = URLBuilder(directory.baseUrl)
+            .appendEndpointPathSegments(listOf("api/directory/school"))
+            .build()
+
+        return httpClient.get(url).body()
     }
+
 
     override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
         val directory = local.schoolDirectoryDataSource.getDirectoryByInviteCode(inviteCode)
@@ -46,13 +51,11 @@ class SchoolDirectoryDataSourceHttp(
     override suspend fun insertDirectory(directory: RespectSchoolDirectory) {
         httpClient.post(
             url = URLBuilder(directory.baseUrl).appendEndpointPathSegments(
-                listOf("api/directory/add")
+                listOf("api/directory/adddirectory")
             ).build()
         ) {
             contentType(ContentType.Application.Json)
-            setBody(directory)
+            parameter("url", directory.baseUrl.toString())
         }
     }
-
-
 }

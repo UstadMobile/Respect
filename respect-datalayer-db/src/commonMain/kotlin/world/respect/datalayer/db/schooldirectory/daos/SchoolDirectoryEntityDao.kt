@@ -47,13 +47,4 @@ interface SchoolDirectoryEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: SchoolDirectoryEntity)
 
-    @Query("""
-        SELECT SchoolDirectoryEntity.cLastModified
-          FROM SchoolDirectoryEntity
-         WHERE SchoolDirectoryEntity.rdUrl = :url  
-    """)
-    suspend fun getLastModifiedByUrl(
-        url: Url
-    ): Long?
-
 }

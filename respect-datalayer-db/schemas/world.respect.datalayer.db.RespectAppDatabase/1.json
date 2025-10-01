@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4fff5854098d371e977c72418da14bf7",
+    "identityHash": "7b13c2a61c374996babfbd6518093fd7",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -678,7 +678,7 @@
       },
       {
         "tableName": "SchoolDirectoryEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rdUid` INTEGER NOT NULL, `rdUrl` TEXT NOT NULL, `rdInvitePrefix` TEXT NOT NULL, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, PRIMARY KEY(`rdUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rdUid` INTEGER NOT NULL, `rdUrl` TEXT NOT NULL, `rdInvitePrefix` TEXT NOT NULL, PRIMARY KEY(`rdUid`))",
         "fields": [
           {
             "fieldPath": "rdUid",
@@ -696,18 +696,6 @@
             "fieldPath": "rdInvitePrefix",
             "columnName": "rdInvitePrefix",
             "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cLastModified",
-            "columnName": "cLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cStored",
-            "columnName": "cStored",
-            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -913,7 +901,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4fff5854098d371e977c72418da14bf7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b13c2a61c374996babfbd6518093fd7')"
     ]
   }
 }

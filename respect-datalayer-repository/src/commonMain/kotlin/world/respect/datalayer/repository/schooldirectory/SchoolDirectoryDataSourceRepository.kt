@@ -23,6 +23,7 @@ class SchoolDirectoryDataSourceRepository(
     }
 
     override suspend fun insertDirectory(directory: RespectSchoolDirectory) {
+        remote.insertDirectory(directory)
         local.insertDirectory(directory)
     }
 }

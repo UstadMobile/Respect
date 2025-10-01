@@ -10,12 +10,17 @@ https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/Authenti
  */
 @Serializable
 data class AaguidProviderInfo(
-    val name: String?
+    val name: String?,
+    val icon_light: String?,
+    val icon_dark: String?
 )
 //https://github.com/passkeydeveloper/passkey-authenticator-aaguids/blob/main/aaguid.json
 typealias AaguidProviderData = Map<String, AaguidProviderInfo>
 
 data class PasskeyProviderInfo @OptIn(ExperimentalUuidApi::class) constructor(
     val aaguid: Uuid,
-    val name: String
+    val name: String,
+    val icon_light: String?,
+    val icon_dark: String?,
+
 )

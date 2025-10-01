@@ -93,7 +93,10 @@ class ManageAccountViewModel(
             launch {
                 schoolDataSource.personPasskeyDataSource.listAllAsFlow().collect {
                     _uiState.update { prev ->
-                        prev.copy(passkeyCount = it.dataOrNull()?.size ?: 0)
+                        prev.copy(
+                            passkeyCount = it.dataOrNull()?.size ?: 0,
+                            showCreatePasskey = it.dataOrNull()?.isEmpty() == true,
+                            )
                     }
                 }
             }

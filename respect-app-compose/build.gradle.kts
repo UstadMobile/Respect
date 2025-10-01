@@ -85,6 +85,8 @@ kotlin {
             implementation(libs.androidx.webkit)
             implementation(libs.material)
             implementation(libs.androidx.appcompat)
+            implementation(libs.coil.coil.svg)
+            implementation(libs.coil.coil.compose)
 
 
             implementation(libs.acra.http)

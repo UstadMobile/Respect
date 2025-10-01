@@ -1,11 +1,11 @@
 package world.respect.app.view.person.passkeyList
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.PasskeyIcon
 import world.respect.app.components.RespectBasicAlertDialog
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.PersonPasskey
@@ -70,21 +71,21 @@ fun PasskeyListScreen(
             ListItem(
                 headlineContent = {
                     Text(
-                        text = "${stringResource(Res.string.key_created_on)}: ${personPasskey.deviceName}",
-                        maxLines = 2,
+                        text = "${personPasskey.providerName}",
+                        maxLines = 1,
                     )
                 },
                 supportingContent = {
                     Text(
-                        text = "${stringResource(Res.string.created_at)}: $createdAtStr",
-                        maxLines = 1,
+                        text = "${stringResource(Res.string.key_created_on)}: ${personPasskey.deviceName}" +
+                                "${stringResource(Res.string.created_at)}: $createdAtStr",
+                        maxLines = 2,
                     )
                 },
                 leadingContent = {
-                    Icon(
-                        Icons.Default.Security,
-                        contentDescription = null,
-                    )
+
+                    PasskeyIcon(if (isSystemInDarkTheme()) personPasskey.iconDark else personPasskey.iconLight)
+
                 },
                 trailingContent = {
                     IconButton(

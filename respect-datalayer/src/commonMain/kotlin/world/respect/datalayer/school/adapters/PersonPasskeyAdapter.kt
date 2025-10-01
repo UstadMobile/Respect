@@ -36,7 +36,9 @@ fun CreatePasskeyUseCase.PasskeyCreatedResult.toPersonPasskey(
         isRevoked = false,
         timeCreated = timeNow,
         aaguid = passkeyProviderInfo.aaguid.toString() ,
-        providerName = passkeyProviderInfo.name
+        providerName = passkeyProviderInfo.name,
+        iconDark = passkeyProviderInfo.icon_dark,
+        iconLight = passkeyProviderInfo.icon_light
 
     )
 }

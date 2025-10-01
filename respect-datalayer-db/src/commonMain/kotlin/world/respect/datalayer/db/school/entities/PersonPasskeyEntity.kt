@@ -40,7 +40,15 @@ class PersonPasskeyEntity(
     val ppAaguid: String = "",
 
     @ColumnInfo(defaultValue = "''")
-    val ppProviderName: String = ""
+    val ppProviderName: String = "",
+
+    @ColumnInfo(defaultValue = "''")
+    val ppIconLight: String = "",
+
+    @ColumnInfo(defaultValue = "''")
+    val ppIconDark: String = ""
+
+
 ){
     companion object {
 

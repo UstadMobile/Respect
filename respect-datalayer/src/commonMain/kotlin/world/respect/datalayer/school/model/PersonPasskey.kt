@@ -23,5 +23,7 @@ data class PersonPasskey(
     val deviceName: String,
     val timeCreated: InstantAsISO8601 = Clock.System.now(),
     val aaguid: String?,
-    val providerName: String?
+    val providerName: String?,
+    val iconLight: String?,
+    val iconDark: String?
 ): ModelWithTimes

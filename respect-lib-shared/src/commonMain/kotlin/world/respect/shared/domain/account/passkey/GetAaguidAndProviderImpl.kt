@@ -28,14 +28,14 @@ class GetAaguidAndProviderImpl(
             )
 
             val aaguidInfo = loadAaguidJsonUseCase()
-                ?: return PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown")
+                ?: return PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown", icon_dark = null, icon_light = null)
 
             aaguidInfo[aaguidUuid.toString()]?.let {
-                PasskeyProviderInfo(aaguid = aaguidUuid, name = it.name ?: "")
-            } ?: PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown")
+                PasskeyProviderInfo(aaguid = aaguidUuid, name = it.name ?: "", icon_dark = it.icon_dark, icon_light = it.icon_light)
+            } ?: PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown", icon_dark = null, icon_light = null)
         }catch (t: Throwable) {
             Napier.w("Exception attempting to get aaguid data for passkey:", t)
-            PasskeyProviderInfo(aaguid = Uuid.NIL, name = "Unknown")
+            PasskeyProviderInfo(aaguid = Uuid.NIL, name = "Unknown", icon_dark = null, icon_light = null)
         }
     }
 

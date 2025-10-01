@@ -21,7 +21,10 @@ fun PersonPasskey.asEntity(
         ppTimeCreated = timeCreated,
         isRevoked = if (isRevoked) PersonPasskeyEntity.REVOKED else PersonPasskeyEntity.NOT_REVOKED,
         ppAaguid = aaguid ?: "",
-        ppProviderName = providerName ?: ""
+        ppProviderName = providerName ?: "",
+        ppIconDark = iconDark?:"",
+        ppIconLight = iconLight?:""
+
     )
 }
 
@@ -42,6 +45,8 @@ fun PersonPasskeyEntity.asModel(
         deviceName = ppDeviceName,
         timeCreated = ppTimeCreated,
         aaguid = ppAaguid,
-        providerName = ppProviderName
+        providerName = ppProviderName,
+        iconDark = ppIconDark,
+        iconLight = ppIconLight
     )
 }

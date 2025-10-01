@@ -474,7 +474,10 @@ val appKoinModule = module {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
     single<LoadAaguidJsonUseCase> {
-        LoadAaguidJsonUseCaseAndroid(androidContext().applicationContext)
+        LoadAaguidJsonUseCaseAndroid(
+            appContext = androidContext().applicationContext,
+            json = get(),
+        )
     }
     single<GetAaguidAndProvider> {
         GetAaguidAndProviderImpl(

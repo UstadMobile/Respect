@@ -13,10 +13,14 @@ import world.respect.credentials.passkey.model.PasskeyProviderInfo
  * to map the Aaguid with provider We are usingthe community-driven repository
  * https://github.com/passkeydeveloper/passkey-authenticator-aaguids
 
- * @param authenticatorData The base64-encoded authenticator data received during passkey creation.
  * @return A [PasskeyProviderInfo] containing the Aaguid and provider name
  */
 interface GetAaguidAndProvider {
-    operator fun invoke(authenticatorData: String): PasskeyProviderInfo
+
+    /**
+     * @param authenticatorData The base64-encoded authenticator data received during passkey creation.
+     *
+     */
+    suspend operator fun invoke(authenticatorData: String): PasskeyProviderInfo
 
 }

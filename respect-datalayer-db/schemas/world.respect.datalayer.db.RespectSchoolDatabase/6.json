@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "af1b78409feb1eb040ebaaeca85a1188",
+    "identityHash": "886666ef1b5d446d94b72929229db843",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -222,23 +222,17 @@
       },
       {
         "tableName": "PersonPasskeyEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppPersonUid` INTEGER NOT NULL, `personPasskeyUid` INTEGER NOT NULL, `ppId` TEXT NOT NULL, `ppLastModified` INTEGER NOT NULL, `ppStored` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppDeviceName` TEXT NOT NULL DEFAULT '', `ppTimeCreated` INTEGER NOT NULL DEFAULT 0, `ppAaguid` TEXT NOT NULL DEFAULT '', `ppProviderName` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`ppPersonUid`, `ppId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppPersonUidNum` INTEGER NOT NULL, `ppCredentialId` TEXT NOT NULL, `ppLastModified` INTEGER NOT NULL, `ppStored` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppDeviceName` TEXT NOT NULL DEFAULT '', `ppTimeCreated` INTEGER NOT NULL DEFAULT 0, `ppAaguid` TEXT NOT NULL DEFAULT '', `ppProviderName` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`ppPersonUidNum`, `ppCredentialId`))",
         "fields": [
           {
-            "fieldPath": "ppPersonUid",
-            "columnName": "ppPersonUid",
+            "fieldPath": "ppPersonUidNum",
+            "columnName": "ppPersonUidNum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "personPasskeyUid",
-            "columnName": "personPasskeyUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ppId",
-            "columnName": "ppId",
+            "fieldPath": "ppCredentialId",
+            "columnName": "ppCredentialId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -317,8 +311,8 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "ppPersonUid",
-            "ppId"
+            "ppPersonUidNum",
+            "ppCredentialId"
           ]
         }
       },
@@ -688,7 +682,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af1b78409feb1eb040ebaaeca85a1188')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '886666ef1b5d446d94b72929229db843')"
     ]
   }
 }

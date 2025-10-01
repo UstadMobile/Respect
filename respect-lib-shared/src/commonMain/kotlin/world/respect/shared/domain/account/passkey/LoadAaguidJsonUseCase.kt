@@ -1,6 +1,8 @@
 package world.respect.shared.domain.account.passkey
 
+import world.respect.credentials.passkey.model.AaguidProviderData
+
 
 interface LoadAaguidJsonUseCase{
-    operator fun invoke(): String?
+    suspend operator fun invoke(): AaguidProviderData?
 } 

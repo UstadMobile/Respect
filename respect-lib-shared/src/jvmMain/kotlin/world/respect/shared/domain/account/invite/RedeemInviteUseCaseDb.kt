@@ -7,6 +7,7 @@ import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.RespectUserHandle
+import world.respect.credentials.passkey.request.GetAaguidAndProvider
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -41,6 +42,7 @@ class RedeemInviteUseCaseDb(
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
     private val json: Json,
+    private val getAaguidAndProviderUseCase: GetAaguidAndProvider,
 ): RedeemInviteUseCase, KoinComponent {
 
     fun RespectRedeemInviteRequest.PersonInfo.toPerson(
@@ -116,6 +118,9 @@ class RedeemInviteUseCaseDb(
                         schoolUrl = schoolUrl
                     ),
                     authenticationResponseJSON = credential.passkeyWebAuthNResponse,
+                    passkeyProviderInfo = getAaguidAndProviderUseCase(
+                        credential.passkeyWebAuthNResponse.response.authenticatorData
+                    )
                 )
 
                 schoolDataSourceVal.personPasskeyDataSource.store(

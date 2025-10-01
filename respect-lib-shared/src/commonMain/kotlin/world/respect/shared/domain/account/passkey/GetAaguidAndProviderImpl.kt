@@ -1,38 +1,60 @@
 package world.respect.shared.domain.account.passkey
 
+import io.github.aakira.napier.Napier
 import io.ktor.util.decodeBase64Bytes
 import kotlinx.serialization.json.Json
 import world.respect.credentials.passkey.request.GetAaguidAndProvider
-import world.respect.credentials.passkey.model.AaguidProviderData
 import world.respect.credentials.passkey.model.PasskeyProviderInfo
-import java.nio.ByteBuffer
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 //https://web.dev/articles/webauthn-aaguid
 class GetAaguidAndProviderImpl(
     val json: Json,
     val loadAaguidJsonUseCase: LoadAaguidJsonUseCase
 ): GetAaguidAndProvider {
-    override fun invoke(authenticatorData: String): PasskeyProviderInfo {
-        val authenticatorDataByteArray = authenticatorData.decodeBase64Bytes()
 
-        val aaguidOffset = 37
+    /**
+     * @param authenticatorData the Base64 encoded Authenticator data as per
+     *        AuthenticatorAssertionResponseJSON.authenticatorData
+     */
+    @OptIn(ExperimentalUuidApi::class)
+    override suspend fun invoke(authenticatorData: String): PasskeyProviderInfo {
+        return try {
+            val authenticatorDataByteArray = authenticatorData.decodeBase64Bytes()
 
-        val aaguidBytes = authenticatorDataByteArray.copyOfRange(aaguidOffset, aaguidOffset + 16)
-        val buffer = ByteBuffer.wrap(aaguidBytes)
-        val mostSignificantBits = buffer.long
-        val leastSignificantBits = buffer.long
+            val aaguidUuid = Uuid.fromByteArray(
+                authenticatorDataByteArray.copyOfRange(AAGUID_OFFSET, AAGUID_OFFSET + UUID_LEN)
+            )
 
-        val aaguidUuid = UUID(mostSignificantBits, leastSignificantBits)
-        val resourceText = loadAaguidJsonUseCase()
-        val aaguidInfo: AaguidProviderData = json.decodeFromString(resourceText?:"")
+            val aaguidInfo = loadAaguidJsonUseCase()
+                ?: return PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown")
 
-        val info = aaguidInfo[aaguidUuid.toString()]
-        return if (info==null){
-            PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown")
-        }else{
-            PasskeyProviderInfo(aaguid = aaguidUuid, name = info.name?:"")
+            aaguidInfo[aaguidUuid.toString()]?.let {
+                PasskeyProviderInfo(aaguid = aaguidUuid, name = it.name ?: "")
+            } ?: PasskeyProviderInfo(aaguid = aaguidUuid, name = "Unknown")
+        }catch (t: Throwable) {
+            Napier.w("Exception attempting to get aaguid data for passkey:", t)
+            PasskeyProviderInfo(aaguid = Uuid.NIL, name = "Unknown")
         }
+    }
+
+
+    companion object {
+
+        /**
+         * The authenticator data as per https://web.dev/articles/webauthn-aaguid contains:
+         * 32 bytes: rpId hash
+         * 1 byte: flags
+         * 4 bytes: counter
+         *
+         * 16 bytes: aaguid
+         * Hence the AAGUID starts at 37 (32 + 1 + 4)
+         *
+         */
+        const val AAGUID_OFFSET = 37
+
+        const val UUID_LEN = 16
 
     }
 }

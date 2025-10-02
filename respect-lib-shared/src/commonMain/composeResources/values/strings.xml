@@ -373,6 +373,7 @@
     <string name="invalid_username">Username must be 3 to 30 characters, use only letters, avoid spaces or special symbols.</string>
 
     <string name="created_at">Created at</string>
+    <string name="at">at</string>
     <string name="key_created_on">Key created on</string>
 
     <string name="confirm">Confirm</string>

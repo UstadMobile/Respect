@@ -25,7 +25,6 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.confirm
 import world.respect.shared.generated.resources.dismiss
-import world.respect.shared.generated.resources.loss_access_passkey_dialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,36 +59,31 @@ fun RespectBasicAlertDialog(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                Text(
-                    text = bodyText,
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                )
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = stringResource(Res.string.loss_access_passkey_dialog),
+                    text = bodyText,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if(confirmText != null || dismissText != null)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    confirmText?.also {
-                        TextButton(onClick = onConfirm) {
-                            Text(it)
+                if(confirmText != null || dismissText != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        confirmText?.also {
+                            TextButton(onClick = onConfirm) {
+                                Text(it)
+                            }
                         }
-                    }
 
-                    dismissText?.also {
-                        TextButton(onClick = onDismissRequest) {
-                            Text(it)
+                        dismissText?.also {
+                            TextButton(onClick = onDismissRequest) {
+                                Text(it)
+                            }
                         }
                     }
                 }

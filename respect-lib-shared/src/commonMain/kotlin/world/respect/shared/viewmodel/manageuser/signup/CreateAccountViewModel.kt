@@ -177,6 +177,7 @@ class CreateAccountViewModel(
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
                             val redeemRequest = route.respectRedeemInviteRequest.copy(
                                 account = route.respectRedeemInviteRequest.account.copy(
+                                    username = usernameVal,
                                     credential = RespectPasskeyCredential(
                                         passkeyWebAuthNResponse = createPasskeyResult.authenticationResponseJSON
                                     ),

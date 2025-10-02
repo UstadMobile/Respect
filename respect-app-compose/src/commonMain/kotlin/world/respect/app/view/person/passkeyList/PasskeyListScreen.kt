@@ -24,7 +24,7 @@ import world.respect.app.components.RespectBasicAlertDialog
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.PersonPasskey
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.created_at
+import world.respect.shared.generated.resources.at
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.delete_this_passkey
 import world.respect.shared.generated.resources.key_created_on
@@ -80,13 +80,17 @@ fun PasskeyListScreen(
                 },
                 supportingContent = {
                     Text(
-                        text = "${stringResource(Res.string.key_created_on)}: ${personPasskey.deviceName}" +
-                                "${stringResource(Res.string.created_at)}: $createdAtStr",
-                        maxLines = 2,
+                        text = "${stringResource(Res.string.key_created_on)}: ${personPasskey.deviceName} " +
+                                "${stringResource(Res.string.at)}: $createdAtStr",
+                        maxLines = 3,
                     )
                 },
                 leadingContent = {
-                    val iconUrl = if (isSystemInDarkTheme()) personPasskey.iconDark else personPasskey.iconLight
+                    val iconUrl = if (isSystemInDarkTheme())
+                        personPasskey.iconDark
+                    else
+                        personPasskey.iconLight
+
                     if(iconUrl != null) {
                         AsyncImage(
                             model = iconUrl,

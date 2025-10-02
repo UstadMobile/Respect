@@ -9,7 +9,7 @@ import world.respect.shared.util.ext.asUiText
 class GetWarningsUseCaseAndroid(): GetWarningsUseCase {
 
     override suspend fun invoke(): UiText? {
-        //See
+        //See https://github.com/UstadMobile/Respect/issues/72
         return if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             Res.string.android6_warning.asUiText()
         }else {

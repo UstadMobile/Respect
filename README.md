@@ -61,3 +61,8 @@ list (default or local)
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
  details on running via the command line etc.
 
+## Legal and license
+
+Copyright 2024-2025 UstadMobile FZ-LLC. This code is substantially derived from [UstadMobile](https://www.github.com/UstadMobile/UstadMobile/).
+Documentation: [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
+Code and all other works: [AGPLv3](LICENSE) license.

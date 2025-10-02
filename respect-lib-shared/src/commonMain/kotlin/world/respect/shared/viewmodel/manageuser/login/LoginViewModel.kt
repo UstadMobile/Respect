@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
@@ -15,6 +17,7 @@ import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.generated.resources.Res
@@ -28,6 +31,7 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -45,16 +49,22 @@ class LoginViewModel(
     private val accountManager: RespectAccountManager,
     getCredentialUseCase: GetCredentialUseCase,
     respectAppDataSource: RespectAppDataSource,
-    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val savePasswordUseCase: SavePasswordUseCase
-) : RespectViewModel(savedStateHandle) {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val _uiState = MutableStateFlow(LoginUiState())
 
     val uiState = _uiState.asStateFlow()
 
     private val route: LoginScreen = savedStateHandle.toRoute()
+
+    override val scope: Scope
+        get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+        )
+
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase = scope.get()
 
     //Short-term internal variable used so that we can avoid showing a save password prompt if/when
     //the user just used their saved password
@@ -79,7 +89,8 @@ class LoginViewModel(
                     else -> null
                 }
 
-                val isPasskeySupported = checkPasskeySupportUseCase(rpId?:"")
+                val isPasskeySupported = checkPasskeySupportUseCase()
+
                 if (isPasskeySupported){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {

@@ -459,12 +459,6 @@ val appKoinModule = module {
         SetUsageReportingEnabledUseCaseAndroid(androidContext())
     }
 
-    single<CheckPasskeySupportUseCase> {
-        CheckPasskeySupportUseCaseAndroidImpl(
-            verifyDomainUseCase = get()
-        )
-    }
-
     single<GetDeviceInfoUseCase> {
         GetDeviceInfoUseCaseAndroid(androidContext())
     }
@@ -570,6 +564,14 @@ val appKoinModule = module {
                 encodeUserHandleUseCase = get(),
                 appName = Res.string.app_name,
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+            )
+        }
+
+        scoped<CheckPasskeySupportUseCase> {
+            CheckPasskeySupportUseCaseAndroidImpl(
+                verifyDomainUseCase = get(),
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                respectAppDataSource = get(),
             )
         }
 

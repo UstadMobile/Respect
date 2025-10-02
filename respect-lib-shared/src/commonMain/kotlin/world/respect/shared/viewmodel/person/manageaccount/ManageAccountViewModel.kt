@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.personPassword.GetPersonPassword
@@ -34,14 +35,23 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class ManageAccountUiState(
+    val accountGuid: String = "",
     val passkeyCount: Int? = null,
-    val showCreatePasskey: Boolean = true,
-    val passkeySupported: Boolean = true,
+    val passkeySupported: Boolean = false,
     val personUsername: String = "",
     val personPasswordEntity: PersonPasswordEntity? = null,
     val errorText: UiText? = null,
     val selectedAccount: RespectAccountAndPerson? = null,
-)
+) {
+
+    val showCreatePasskey: Boolean
+        get() = passkeyCount == 0 && passkeySupported &&
+                selectedAccount?.person?.guid == accountGuid
+
+    val showManagePasskey: Boolean
+        get() = passkeyCount != null && passkeyCount > 0
+
+}
 
 class ManageAccountViewModel(
     savedStateHandle: SavedStateHandle,
@@ -51,6 +61,10 @@ class ManageAccountViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase by lazy {
+        scope.get()
+    }
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by lazy {
         scope.getOrNull()
@@ -65,7 +79,9 @@ class ManageAccountViewModel(
     private val personGuid = route.guid
 
     private val _uiState = MutableStateFlow(
-        ManageAccountUiState()
+        ManageAccountUiState(
+            accountGuid = personGuid
+        )
     )
 
     val uiState = _uiState.asStateFlow()
@@ -90,13 +106,20 @@ class ManageAccountViewModel(
         }
 
         viewModelScope.launch {
+            _uiState.takeIf { checkPasskeySupportUseCase() }?.update { prev ->
+                prev.copy(
+                    passkeySupported = true
+                )
+            }
+        }
+
+        viewModelScope.launch {
             launch {
                 schoolDataSource.personPasskeyDataSource.listAllAsFlow().collect {
                     _uiState.update { prev ->
                         prev.copy(
                             passkeyCount = it.dataOrNull()?.size ?: 0,
-                            showCreatePasskey = it.dataOrNull()?.isEmpty() == true,
-                            )
+                        )
                     }
                 }
             }

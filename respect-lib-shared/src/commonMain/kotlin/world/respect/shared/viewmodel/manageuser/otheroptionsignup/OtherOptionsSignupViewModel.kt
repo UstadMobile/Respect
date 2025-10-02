@@ -9,13 +9,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
-import world.respect.credentials.passkey.request.EncodeUserHandleUseCase
-import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -23,20 +24,24 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
+import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class OtherOptionsSignupUiState(
     val passkeyError: String? = null,
-    val generalError: StringResourceUiText? = null
+    val generalError: StringResourceUiText? = null,
+    val showPasskeyOption: Boolean = false,
 )
 
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
-    private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
+    private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: OtherOptionsSignup = savedStateHandle.toRoute()
@@ -44,6 +49,10 @@ class OtherOptionsSignupViewModel(
     override val scope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
         SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
     )
+
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase? by lazy {
+        scope.getOrNull()
+    }
 
     private val _uiState = MutableStateFlow(OtherOptionsSignupUiState())
 
@@ -68,6 +77,15 @@ class OtherOptionsSignupViewModel(
                     StringResourceUiText(Res.string.passkey_not_supported)
                 else null
             )
+        }
+
+        viewModelScope.launch {
+            val passkeySupportedVal = checkPasskeySupportUseCase?.invoke() ?: false
+            _uiState.update { prev ->
+                prev.copy(
+                    showPasskeyOption = passkeySupportedVal
+                )
+            }
         }
     }
 
@@ -97,23 +115,35 @@ class OtherOptionsSignupViewModel(
                     )
 
                     when (createPasskeyResult) {
-                        //This is quite wrong...
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                            val redeemInviteRequest = route.respectRedeemInviteRequest
-                            val account = route.respectRedeemInviteRequest.account.copy(
-                                username = username,
-                                credential = RespectPasskeyCredential(
-                                    createPasskeyResult.authenticationResponseJSON
-                                ),
+                            val redeemRequest = route.respectRedeemInviteRequest.copy(
+                                account = route.respectRedeemInviteRequest.account.copy(
+                                    credential = RespectPasskeyCredential(
+                                        createPasskeyResult.authenticationResponseJSON
+                                    )
+                                )
                             )
 
-                            val updatedRedeemInviteRequest = RespectRedeemInviteRequest(
-                                code = redeemInviteRequest.code,
-                                classUid = redeemInviteRequest.classUid,
-                                role = redeemInviteRequest.role,
-                                accountPersonInfo = redeemInviteRequest.accountPersonInfo,
-                                parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
-                                account = account
+                            accountManager.register(
+                                redeemInviteRequest = redeemRequest,
+                                schoolUrl = route.schoolUrl
+                            )
+
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = if(
+                                        route.respectRedeemInviteRequest.role == PersonRoleEnum.PARENT
+                                    ) {
+                                        SignupScreen.create(
+                                            schoolUrl = route.schoolUrl,
+                                            profileType = ProfileType.CHILD,
+                                            inviteRequest = redeemRequest
+                                        )
+                                    }else {
+                                        WaitingForApproval()
+                                    },
+                                    clearBackStack = true,
+                                )
                             )
                         }
 

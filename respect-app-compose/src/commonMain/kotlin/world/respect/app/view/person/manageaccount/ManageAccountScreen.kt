@@ -3,6 +3,7 @@ package world.respect.app.view.person.manageaccount
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import world.respect.app.components.RespectPasskeySignInFasterCard
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.*
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountUiState
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 
@@ -79,13 +81,18 @@ fun ManageAccountScreen(
 
             if (uiState.showCreatePasskey) {
                 RespectPasskeySignInFasterCard(
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                     onClickPasskeySignup = onCreatePasskeyClick,
                     onClickHowPasskeysWork = onClickHowPasskeysWork,
+                    buttonText = Res.string.create_passkey.asUiText(),
                 )
             }
 
-            if (!uiState.showCreatePasskey) {
+            if (uiState.showManagePasskey) {
                 ListItem(
+                    modifier = Modifier.clickable {
+                        onClickManagePasskey()
+                    },
                     leadingContent = {
                         Icon(Icons.Default.Security, contentDescription = null)
                     },
@@ -99,10 +106,7 @@ fun ManageAccountScreen(
                         Text(text = stringResource(Res.string.passkeys))
                     },
                     trailingContent = {
-                        Text(
-                            modifier = Modifier.clickable { onClickManagePasskey() },
-                            text = stringResource(Res.string.manage),
-                        )
+                        Text(text = stringResource(Res.string.manage))
                     }
                 )
             }
@@ -110,31 +114,30 @@ fun ManageAccountScreen(
         }
 
 
-            ListItem(
-                leadingContent = {
-                    Icon(Icons.Default.Password, contentDescription = null)
-                },
-                headlineContent = {
-                    Text(
-                        text = stringResource(Res.string.password_label),
-                        maxLines = 1,
-                    )
-                },
-                supportingContent = {
+        ListItem(
+            leadingContent = {
+                Icon(Icons.Default.Password, contentDescription = null)
+            },
+            headlineContent = {
+                Text(
+                    text = stringResource(Res.string.password_label),
+                    maxLines = 1,
+                )
+            },
+            supportingContent = {
 
-                    Text(
-                        text = "${stringResource(Res.string.last_updated)} ",
+                Text(
+                    text = "${stringResource(Res.string.last_updated)} "
+                )
 
-                        )
-
-                },
-                trailingContent = {
-                    Text(
-                        modifier = Modifier.clickable { onClickChangePassword() },
-                        text = stringResource(Res.string.change_password),
-                    )
-                }
-            )
+            },
+            trailingContent = {
+                Text(
+                    modifier = Modifier.clickable { onClickChangePassword() },
+                    text = stringResource(Res.string.change_password),
+                )
+            }
+        )
 
 
     }

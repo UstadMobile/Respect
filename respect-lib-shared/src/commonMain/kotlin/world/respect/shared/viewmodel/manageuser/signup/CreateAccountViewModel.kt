@@ -56,7 +56,6 @@ data class CreateAccountViewModelUiState(
 
 class CreateAccountViewModel(
     savedStateHandle: SavedStateHandle,
-    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase,
     private val respectAppDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
@@ -68,6 +67,10 @@ class CreateAccountViewModel(
         get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
             SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
         )
+
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase by lazy {
+        scope.get()
+    }
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? = scope.getOrNull()
 
@@ -104,15 +107,12 @@ class CreateAccountViewModel(
             }
 
             val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
-            val schoolDirEntryVal = respectAppDataSource.schoolDirectoryEntryDataSource
+            respectAppDataSource.schoolDirectoryEntryDataSource
                 .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {
                     schoolDirectoryEntry.complete(it)
                 } ?: throw IllegalStateException()
 
-            val rpId = schoolDirEntryVal.rpId
-            val passkeySupportedVal = createPasskeyUseCase != null &&
-                    rpId != null &&
-                    checkPasskeySupportUseCase(rpId)
+            val passkeySupportedVal = createPasskeyUseCase != null && checkPasskeySupportUseCase()
 
             passkeySupported.complete(passkeySupportedVal)
 
@@ -120,7 +120,7 @@ class CreateAccountViewModel(
                 prev.copy(
                     inviteInfo = inviteInfo,
                     passkeySupported = passkeySupportedVal,
-                    generalError = if (!(createPasskeyUseCase != null && rpId != null))
+                    generalError = if (!passkeySupportedVal)
                         StringResourceUiText(Res.string.passkey_not_supported)
                     else null
                 )

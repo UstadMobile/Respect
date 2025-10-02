@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
@@ -52,6 +53,10 @@ class PasskeyListViewModel(
         scope.getOrNull()
     }
 
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase? by lazy {
+        scope.getOrNull()
+    }
+
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(
@@ -69,12 +74,21 @@ class PasskeyListViewModel(
                 navigationVisible = true,
                 hideBottomNavigation = true,
                 fabState = FabUiState(
-                    visible = true,
+                    visible = false,
                     text = Res.string.passkey.asUiText(),
                     icon = FabUiState.FabIcon.ADD,
                     onClick = ::onClickAdd,
                 )
             )
+        }
+
+        viewModelScope.launch {
+            val passkeySupported = checkPasskeySupportUseCase?.invoke() ?: false
+            _appUiState.takeIf { passkeySupported }?.update { prev ->
+                prev.copy(
+                    fabState = prev.fabState.copy(visible = true)
+                )
+            }
         }
 
         viewModelScope.launch {

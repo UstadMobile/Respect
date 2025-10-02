@@ -56,7 +56,8 @@ class RedeemInviteIntegrationTest {
                     ),
                     schoolDataSource = { _, _ -> serverSchoolDataSource },
                     uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
-                    json = json
+                    json = json,
+                    getPasskeyProviderInfoUseCase = mock { },
                 )
 
                 val clazz = Clazz(

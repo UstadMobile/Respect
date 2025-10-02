@@ -103,6 +103,8 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
+import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
+import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -480,6 +482,13 @@ val appKoinModule = module {
             loadAaguidJsonUseCase = get()
         )
     }
+
+    single<GetAppVersionInfoUseCase> {
+        GetAppVersionInfoUseCaseAndroid(
+            context = androidContext()
+        )
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.

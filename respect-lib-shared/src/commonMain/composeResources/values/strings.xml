@@ -378,4 +378,6 @@
 
     <string name="confirm">Confirm</string>
     <string name="dismiss">Dismiss</string>
+
+    <string name="app_version">App version</string>
 </resources>

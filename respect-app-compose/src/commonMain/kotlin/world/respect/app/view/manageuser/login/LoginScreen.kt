@@ -20,6 +20,7 @@ import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.text.input.KeyboardType
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
+import world.respect.app.components.RespectShortVersionInfoText
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.uiTextStringResource
@@ -115,5 +116,7 @@ fun LoginScreen(
                 modifier = Modifier.defaultItemPadding(),
             )
         }
+
+        RespectShortVersionInfoText(Modifier.defaultItemPadding().fillMaxWidth())
     }
 }

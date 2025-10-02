@@ -23,6 +23,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectShortVersionInfoText
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -112,7 +113,6 @@ fun GetStartedScreen(
         if (uiState.showButtons){
             Spacer(modifier = Modifier.height(24.dp))
 
-
             OutlinedButton(
                 onClick = onClickOtherOptions,
                 modifier = Modifier.fillMaxWidth()
@@ -120,6 +120,8 @@ fun GetStartedScreen(
                 Text(text = stringResource(Res.string.other_options))
             }
         }
+
+        RespectShortVersionInfoText(Modifier.defaultItemPadding().fillMaxWidth())
     }
 
     LaunchedEffect(Unit) {

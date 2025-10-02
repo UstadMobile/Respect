@@ -155,6 +155,7 @@ class ConfirmationViewModel(
             parentOrGuardianRole = null,
             account = blankAccount,
             deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
+            deviceInfo = getDeviceInfoUseCase(),
         )
     }
 }

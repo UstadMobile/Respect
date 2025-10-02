@@ -494,6 +494,7 @@ val appKoinModule = module {
             GetTokenAndUserProfileWithCredentialUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 httpClient = get(),
+                getDeviceInfoUseCase = get(),
             )
         }
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "bbc430afc2bce07ab946e2ba05c1f112",
+    "identityHash": "6688352037d3b2db69c1360823385f8a",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -332,7 +332,7 @@
       },
       {
         "tableName": "AuthTokenEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`atUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `atPGuidHash` INTEGER NOT NULL, `atPGuid` TEXT NOT NULL, `atCode` TEXT, `atToken` TEXT NOT NULL, `atTimeCreated` INTEGER NOT NULL, `atTtl` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`atUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `atPGuidHash` INTEGER NOT NULL, `atPGuid` TEXT NOT NULL, `atCode` TEXT, `atToken` TEXT NOT NULL, `atTimeCreated` INTEGER NOT NULL, `atTtl` INTEGER NOT NULL, `atPlatform` TEXT, `atAndroidSdkInt` INTEGER, `atVersion` TEXT, `atManufacturer` TEXT, `atModel` TEXT, `atRam` INTEGER)",
         "fields": [
           {
             "fieldPath": "atUid",
@@ -374,6 +374,36 @@
             "columnName": "atTtl",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "atPlatform",
+            "columnName": "atPlatform",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atAndroidSdkInt",
+            "columnName": "atAndroidSdkInt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "atVersion",
+            "columnName": "atVersion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atManufacturer",
+            "columnName": "atManufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atModel",
+            "columnName": "atModel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atRam",
+            "columnName": "atRam",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -696,7 +726,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bbc430afc2bce07ab946e2ba05c1f112')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6688352037d3b2db69c1360823385f8a')"
     ]
   }
 }

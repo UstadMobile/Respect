@@ -1,6 +1,7 @@
 package world.respect.shared.domain.account.gettokenanduser
 
 import world.respect.credentials.passkey.RespectCredential
+import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.shared.domain.account.AuthResponse
 
 /**
@@ -16,6 +17,7 @@ interface GetTokenAndUserProfileWithCredentialUseCase {
 
     suspend operator fun invoke(
         credential: RespectCredential,
+        deviceInfo: DeviceInfo? = null,
     ): AuthResponse
 
     companion object {

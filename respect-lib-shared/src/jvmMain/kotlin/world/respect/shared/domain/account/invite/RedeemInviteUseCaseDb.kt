@@ -141,7 +141,11 @@ class RedeemInviteUseCaseDb(
 
                 val personGuidHash = uidNumberMapper(accountPerson.guid)
                 schoolDb.getAuthTokenEntityDao().insert(
-                    token.toEntity(accountPerson.guid, personGuidHash)
+                    token.toEntity(
+                        pGuid = accountPerson.guid,
+                        pGuidHash = personGuidHash,
+                        deviceInfo = redeemRequest.deviceInfo,
+                    )
                 )
 
                 AuthResponse(

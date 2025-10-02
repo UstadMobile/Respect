@@ -15,6 +15,7 @@ import world.respect.libutil.ext.randomString
 import world.respect.libxxhash.XXStringHasher
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
@@ -39,6 +40,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
 
     override suspend fun invoke(
         credential: RespectCredential,
+        deviceInfo: DeviceInfo?
     ): AuthResponse {
 
         val personEntity = when(credential) {
@@ -98,7 +100,11 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
 
         val personGuidHash = xxHash.hash(personEntity.person.pGuid)
         schoolDb.getAuthTokenEntityDao().insert(
-            token.toEntity(personEntity.person.pGuid, personGuidHash)
+            token.toEntity(
+                pGuid = personEntity.person.pGuid,
+                pGuidHash = personGuidHash,
+                deviceInfo = deviceInfo,
+            )
         )
 
         return AuthResponse(

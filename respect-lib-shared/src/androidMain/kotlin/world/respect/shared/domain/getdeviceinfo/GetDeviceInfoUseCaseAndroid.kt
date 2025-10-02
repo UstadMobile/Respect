@@ -2,7 +2,9 @@ package world.respect.shared.domain.getdeviceinfo
 
 import android.app.ActivityManager
 import android.content.Context
+import android.os.Build
 import io.github.aakira.napier.Napier
+import world.respect.datalayer.school.model.DeviceInfo
 
 class GetDeviceInfoUseCaseAndroid(
     context: Context
@@ -10,7 +12,7 @@ class GetDeviceInfoUseCaseAndroid(
 
     private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
-    override fun invoke() : GetDeviceInfoUseCase.DeviceInfo {
+    override fun invoke() : DeviceInfo {
         val totalMem = try {
             ActivityManager.MemoryInfo().also {
                 activityManager.getMemoryInfo(it)
@@ -20,12 +22,12 @@ class GetDeviceInfoUseCaseAndroid(
             0
         }
 
-        return GetDeviceInfoUseCase.DeviceInfo(
-            platform = GetDeviceInfoUseCase.Platform.ANDROID,
-            version = android.os.Build.VERSION.RELEASE,
-            androidSdkInt = android.os.Build.VERSION.SDK_INT,
-            manufacturer = android.os.Build.MANUFACTURER,
-            model = android.os.Build.MODEL,
+        return DeviceInfo(
+            platform = DeviceInfo.Platform.ANDROID,
+            version = Build.VERSION.RELEASE,
+            androidSdkInt = Build.VERSION.SDK_INT,
+            manufacturer = Build.MANUFACTURER,
+            model = Build.MODEL,
             ram = totalMem,
         )
     }

@@ -3,6 +3,7 @@ package world.respect.shared.domain.account.invite
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import world.respect.credentials.passkey.RespectCredential
+import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 
@@ -18,6 +19,7 @@ data class RespectRedeemInviteRequest(
     val parentOrGuardianRole: GuardianRole?,
     val account: Account,
     val deviceName: String? = null,
+    val deviceInfo: DeviceInfo? = null,
 ) {
 
     @Serializable

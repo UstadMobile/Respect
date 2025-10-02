@@ -174,7 +174,7 @@ import java.io.File
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
 
-const val SHARED_PREF_SETTINGS_NAME = "respect_settings"
+const val SHARED_PREF_SETTINGS_NAME = "respect_settings_"
 const val TAG_TMP_DIR = "tmpDir"
 
 val appKoinModule = module {
@@ -394,7 +394,7 @@ val appKoinModule = module {
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
-            appContext, appContext.getDatabasePath("respectapp.db").absolutePath
+            appContext, appContext.getDatabasePath("respect-app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
             .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
@@ -512,7 +512,7 @@ val appKoinModule = module {
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                "school_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
                 .addMigrations(MIGRATION_2_3(true))

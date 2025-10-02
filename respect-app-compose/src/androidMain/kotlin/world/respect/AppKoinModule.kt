@@ -109,6 +109,8 @@ import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
+import world.respect.shared.domain.getwarnings.GetWarningsUseCase
+import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -487,6 +489,10 @@ val appKoinModule = module {
         GetAppVersionInfoUseCaseAndroid(
             context = androidContext()
         )
+    }
+
+    single<GetWarningsUseCase> {
+        GetWarningsUseCaseAndroid()
     }
 
     /**

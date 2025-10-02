@@ -2,12 +2,18 @@ package world.respect.app.view.manageuser.getstarted
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -63,9 +69,26 @@ fun GetStartedScreen(
             .fillMaxSize()
             .defaultItemPadding()
     ) {
+        uiState.warning?.also {
+            Row(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                )
+
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = uiTextStringResource(it),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
         uiState.errorText?.let {
             Text(it)
         }
+
         OutlinedTextField(
             value = uiState.schoolName,
             onValueChange = onSchoolNameChanged,
@@ -110,6 +133,7 @@ fun GetStartedScreen(
                 )
             }
         }
+
         if (uiState.showButtons){
             Spacer(modifier = Modifier.height(24.dp))
 

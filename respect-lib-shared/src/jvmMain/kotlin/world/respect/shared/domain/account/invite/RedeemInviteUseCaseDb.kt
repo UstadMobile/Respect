@@ -28,6 +28,7 @@ import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfil
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
+import world.respect.shared.util.toPerson
 import java.lang.IllegalArgumentException
 
 /**
@@ -44,27 +45,6 @@ class RedeemInviteUseCaseDb(
     private val json: Json,
     private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
 ): RedeemInviteUseCase, KoinComponent {
-
-    fun RespectRedeemInviteRequest.PersonInfo.toPerson(
-        role: PersonRoleEnum,
-        username: String,
-        guid: String,
-    ) : Person {
-        return Person(
-            guid =  guid,
-            status = PersonStatusEnum.PENDING_APPROVAL,
-            givenName = name.substringBeforeLast(" "),
-            familyName = name.substringAfterLast(" "),
-            username = username,
-            gender = gender,
-            roles = listOf(
-                PersonRole(
-                    isPrimaryRole = true,
-                    roleEnum = role,
-                )
-            )
-        )
-    }
 
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest

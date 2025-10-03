@@ -1,0 +1,6 @@
+appId: world.respect.app
+---
+- clearState:  world.respect.app
+- launchApp
+
+- tapOn: "Get Started"

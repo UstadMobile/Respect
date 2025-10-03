@@ -54,7 +54,8 @@ data class ReportEditUiState(
     val reportTitleError: UiText? = null,
     val submitted: Boolean = false,
     val availableIndicators: List<Indicator> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isTemplate: Boolean = false,
 ) {
     val hasSingleSeries: Boolean
         get() = reportOptions.series.size == 1
@@ -139,7 +140,8 @@ class ReportEditViewModel(
                         _uiState.update { prev ->
                             prev.copy(
                                 reportOptions = reportOptions.dataOrNull()?.reportOptions
-                                    ?: ReportOptions()
+                                    ?: ReportOptions(),
+                                isTemplate = reportOptions.dataOrNull()?.reportIsTemplate ?: false
                             )
                         }
                     }
@@ -188,34 +190,42 @@ class ReportEditViewModel(
     fun onClickSave() {
         viewModelScope.launch {
             loadingState = LoadingUiState.INDETERMINATE
-            val newState = validateCurrentState()
-            _uiState.value = newState
+            val requiredFieldMessage =
+                StringResourceUiText(resource = Res.string.field_required_prompt)
+            _uiState.update { prev ->
+                prev.copy(
+                    submitted = true,
+                    reportTitleError = if (_uiState.value.reportOptions.title.isEmpty()) requiredFieldMessage else null,
+                )
+            }
 
-            if (newState.hasErrors() || newState.reportOptions.series.isEmpty()) {
+            if (_uiState.value.hasErrors() || _uiState.value.reportOptions.series.isEmpty()) {
                 loadingState = LoadingUiState.NOT_LOADING
                 return@launch
             }
 
             try {
                 val report = Report(
-                    guid = entityUid,
-                    title = newState.reportOptions.title,
-                    reportOptions = newState.reportOptions,
+                    guid = if (_uiState.value.isTemplate) {
+                        schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                            Report.TABLE_ID
+                        ).toString()
+                    } else {
+                        entityUid
+                    },
+                    title = _uiState.value.reportOptions.title,
+                    reportOptions = _uiState.value.reportOptions,
                     ownerGuid = "",
                     lastModified = Clock.System.now(),
                 )
 
                 schoolDataSource.reportDataSource.store(listOf(report))
 
-                if (route.reportUid == null) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            ReportDetail(entityUid), popUpTo = route, popUpToInclusive = true
-                        )
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        ReportDetail(entityUid), popUpTo = route, popUpToInclusive = true
                     )
-                } else {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
-                }
+                )
 
             } catch (e: Exception) {
                 _uiState.update {

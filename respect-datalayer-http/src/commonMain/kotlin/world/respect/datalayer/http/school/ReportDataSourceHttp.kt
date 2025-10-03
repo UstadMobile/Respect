@@ -78,7 +78,8 @@ class ReportDataSourceHttp(
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams
+        params: ReportDataSource.GetListParams,
+        template: Boolean
     ): IPagingSourceFactory<Int, Report> {
         return IPagingSourceFactory {
             OffsetLimitHttpPagingSource(
@@ -123,5 +124,9 @@ class ReportDataSourceHttp(
             contentType(ContentType.Application.Json)
             setBody(list)
         }
+    }
+
+    override suspend fun initializeTemplates(idGenerator: () -> String) {
+        throw IllegalStateException("initializeTemplates-http: Not yet supported")
     }
 }

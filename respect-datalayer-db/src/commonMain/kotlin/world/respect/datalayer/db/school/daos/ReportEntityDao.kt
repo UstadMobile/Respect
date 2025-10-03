@@ -75,11 +75,18 @@ interface ReportEntityDao {
          FROM ReportEntity
         WHERE ReportEntity.rStored > :since 
           AND (:guidHash = 0 OR ReportEntity.rGuidHash = :guidHash)
+        AND rIsTemplate = :template
      ORDER BY ReportEntity.rTitle
     """
     )
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
+        template: Boolean
     ): PagingSource<Int, ReportEntity>
+
+    @Query("SELECT COUNT(*) FROM ReportEntity WHERE rIsTemplate = :template")
+    suspend fun getReportCount(
+        template: Boolean
+    ): Int
 }

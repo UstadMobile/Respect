@@ -9,9 +9,9 @@ import kotlin.time.Instant
 
 @Serializable
 data class Report(
-    val guid: String,
-    val ownerGuid: String,
-    val title: String,
+    val guid: String = "",
+    val ownerGuid: String = "",
+    val title: String = "",
     val reportOptions: ReportOptions,
     val reportIsTemplate: Boolean = false,
     val active: Boolean = true,

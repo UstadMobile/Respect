@@ -47,7 +47,8 @@ class ReportDataSourceRepository(
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams
+        params: ReportDataSource.GetListParams,
+        template: Boolean
     ): IPagingSourceFactory<Int, Report> {
         val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
         return RepositoryPagingSourceFactory(
@@ -85,5 +86,9 @@ class ReportDataSourceRepository(
                 )
             }
         )
+    }
+
+    override suspend fun initializeTemplates(idGenerator: () -> String) {
+        local.initializeTemplates(idGenerator)
     }
 }

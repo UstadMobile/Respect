@@ -57,7 +57,8 @@ class ReportListViewModel(
     private val pagingSourceHolder = PagingSourceFactoryHolder {
         schoolDataSource.reportDataSource.listAsPagingSource(
             loadParams = DataLoadParams(),
-            params = ReportDataSource.GetListParams()
+            params = ReportDataSource.GetListParams(),
+            template = false
         )
     }
     init {

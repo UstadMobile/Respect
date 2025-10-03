@@ -319,6 +319,7 @@
     <string name="year">Year</string>
     <string name="class_name">Class name</string>
     <string name="gender_literal">Gender</string>
+    <string name="role">Role</string>
 
     <!-- Time Units -->
     <string name="hour_unit">hr</string>

@@ -41,6 +41,7 @@ interface ReportDataSource : WritableDataSource<Report> {
     fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: GetListParams,
+        template: Boolean = false
     ): IPagingSourceFactory<Int, Report>
 
 
@@ -51,6 +52,9 @@ interface ReportDataSource : WritableDataSource<Report> {
     override suspend fun store(
         list: List<Report>
     )
+
+    suspend fun initializeTemplates(idGenerator: () -> String)
+
 
     companion object {
         const val ENDPOINT_NAME = "report"

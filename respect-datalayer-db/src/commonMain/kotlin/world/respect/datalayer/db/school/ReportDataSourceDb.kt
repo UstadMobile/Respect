@@ -17,6 +17,7 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.school.model.report.Templates
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
@@ -84,12 +85,14 @@ class ReportDataSourceDb(
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams
+        params: ReportDataSource.GetListParams,
+        template: Boolean
     ): IPagingSourceFactory<Int, Report> {
         return IPagingSourceFactory {
             schoolDb.getReportEntityDao().findAllAsPagingSource(
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                template = template
             ).map {
                 ReportEntities(it).toModel()
             }
@@ -118,6 +121,23 @@ class ReportDataSourceDb(
 
     override suspend fun store(list: List<Report>) {
         upsertReports(list, false)
+    }
+
+    override suspend fun initializeTemplates(idGenerator: () -> String) {
+        // Check if templates already exist
+        val existingTemplateCount = schoolDb.getReportEntityDao().getReportCount(true)
+
+        if (existingTemplateCount == 0) {
+            val templates = Templates.list.map { report ->
+                report.copy(
+                    guid = idGenerator(),
+                    reportIsTemplate = true // Ensure this is set
+                )
+            }
+            store(templates)
+        } else {
+            println("Templates already exist: $existingTemplateCount")
+        }
     }
 
     override suspend fun updateLocal(

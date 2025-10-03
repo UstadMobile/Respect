@@ -46,6 +46,7 @@ enum class ReportXAxis(
     ACTIVITY_VERB,
     APPLICATION,
     DEVICE_TYPE,
+    ROLE
 }
 
 enum class FilterType {

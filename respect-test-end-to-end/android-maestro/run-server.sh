@@ -22,12 +22,14 @@ echo $ROOTDIR
 
 unzip -d $TESTSERVER_WORKSPACE $ROOTDIR/respect-server/build/distributions/respect-server-1.0.0.zip
 
+DATADIR=$TESTSERVER_WORKSPACE/data
+
+# Set the directory server admin authentication (passed from the TestServerController)
+echo $DIR_ADMIN_AUTH > $DATADIR/dir-admin.txt
+
 # Could set the credentials required to create a new instance here.
 $TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
      -P:ktor.deployment.port=$TESTSERVER_PORT \
-     -P:ktor.deployment.shutdown.url=/shutdown
-#    -serverauth foo \
-#    -datadir $TESTSERVER_WORKSPACE/data
-
-
+     -P:ktor.deployment.shutdown.url=/shutdown \
+     -p:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
 

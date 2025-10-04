@@ -7,7 +7,6 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.libxxhash.XXStringHasher
 
@@ -26,12 +25,6 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
-
-    override suspend fun getDirectoryByInviteCode(code: String): RespectSchoolDirectory? {
-        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectoryByInviteCode(code)?.let {
-            RespectSchoolDirectory(it.rdInvitePrefix, it.rdUrl)
-        }
-    }
 
     override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
         return respectAppDb.getSchoolDirectoryEntityDao().getServerManagerSchoolDirectory()?.let {
@@ -55,7 +48,4 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
-    override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
-        TODO("Not yet implemented")
-    }
 }

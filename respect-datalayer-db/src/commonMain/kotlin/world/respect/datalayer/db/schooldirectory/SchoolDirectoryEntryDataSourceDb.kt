@@ -54,7 +54,6 @@ class SchoolDirectoryEntryDataSourceDb(
         listParams: SchoolDirectoryEntryDataSource.GetListParams
     ): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
         return respectAppDb.getSchoolDirectoryEntryEntityDao().listAsFlow(
-            code = listParams.code,
             name = listParams.name?.let { "%$it%" }
         ).map { list ->
             DataReadyState(
@@ -69,7 +68,6 @@ class SchoolDirectoryEntryDataSourceDb(
     ): DataLoadState<List<SchoolDirectoryEntry>> {
         return DataReadyState(
             respectAppDb.getSchoolDirectoryEntryEntityDao().list(
-                code = listParams.code,
                 name = listParams.name?.let { "%$it%" }
             ).map { it.toModel() }
         )

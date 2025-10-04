@@ -34,6 +34,12 @@ TESTCONTROLLER_BIN=/home/mike/tmp/testservercontroller-0.0.1/bin/testservercontr
 
 DIR_ADMIN_AUTH_PASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
 
+# The Maestro test needs to use basic auth (which is base64 encoded) to authenticate to request the
+# creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's
+# Javascript (which does not have the btoa function)
+DIR_ADMIN_TO_ENCODE="admin:$DIR_ADMIN_AUTH_PASS"
+DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
+
 $TESTCONTROLLER_BIN -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
     -P:testservercontroller.portRange=$TEST_LEARNINGSPACE_PORTRANGE \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
@@ -50,6 +56,16 @@ echo "run-maestro-ci: TestServerController now running on port $TESTCONTROLLER_P
 
 echo "Run Maestro using $TESTSERVERCONTROLLER_URL and $DIR_ADMIN_AUTH_PASS"
 
-sleep 10
+if [ ! -e build/results ]; then
+    mkdir -p build/results
+fi
+
+maestro test \
+  --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
+  --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+  --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
+  --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+  e2e-tests/000_000_hello_world.yaml
+
 
 

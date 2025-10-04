@@ -1,7 +1,6 @@
 package world.respect.datalayer.repository.schooldirectory
 
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
-import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 
@@ -12,10 +11,6 @@ class SchoolDirectoryDataSourceRepository(
 
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
         return local.allDirectories()
-    }
-
-    override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
-        return remote.getInviteInfo(inviteCode)
     }
 
 }

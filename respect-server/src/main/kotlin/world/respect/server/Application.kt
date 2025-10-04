@@ -89,7 +89,7 @@ fun Application.module() {
         basic(AUTH_CONFIG_DIRECTORY_ADMIN_BASIC) {
             realm = "Access realm directory admin"
             validate { credentials ->
-                val adminPassword = dirAdminFile.readText()
+                val adminPassword = dirAdminFile.readText().trim()
                 if(credentials.password == adminPassword) {
                     UserIdPrincipal(credentials.name)
                 }else {

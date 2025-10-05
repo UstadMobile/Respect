@@ -68,6 +68,7 @@ maestro test \
   --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
   --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
   --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+  --env SCHOOL_NAME=TestSchool \
   e2e-tests/000_000_hello_world.yaml
 
 

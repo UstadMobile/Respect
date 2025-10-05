@@ -6,7 +6,6 @@ import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.http.compatibleapps.CompatibleAppDataSourceHttp
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
-import world.respect.datalayer.http.schooldirectory.SchoolDirectoryDataSourceHttp
 import world.respect.datalayer.http.schooldirectory.SchoolDirectoryEntryDataSourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.opds.OpdsDataSource
@@ -34,12 +33,8 @@ class RespectAppDataSourceHttp(
         )
     }
 
-    override val schoolDirectoryDataSource: SchoolDirectoryDataSource by lazy {
-        SchoolDirectoryDataSourceHttp(
-            httpClient = httpClient,
-            local = local
-        )
-    }
+    override val schoolDirectoryDataSource: SchoolDirectoryDataSource
+        get() = throw IllegalArgumentException("There is no http data source for directory list")
 
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource by lazy {
         SchoolDirectoryEntryDataSourceHttp(

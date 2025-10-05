@@ -5,6 +5,7 @@ import androidx.room.useWriterConnection
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
+import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
@@ -48,4 +49,24 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
+    override suspend fun insertOrIgnore(
+        schoolDirectory: RespectSchoolDirectory,
+        clearOthers: Boolean,
+    ) {
+        val directoryUidNum = xxStringHasher.hash(schoolDirectory.baseUrl.toString())
+        respectAppDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                respectAppDb.getSchoolDirectoryEntityDao().insertOrIgnore(
+                    SchoolDirectoryEntity(
+                        rdUid = directoryUidNum,
+                        rdUrl = schoolDirectory.baseUrl,
+                        rdInvitePrefix = "",
+                    )
+                )
+
+                respectAppDb.takeIf { clearOthers }?.getSchoolDirectoryEntityDao()
+                    ?.deleteOthers(exceptUid = directoryUidNum)
+            }
+        }
+    }
 }

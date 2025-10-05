@@ -6,6 +6,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import io.ktor.http.Url
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
@@ -20,6 +21,8 @@ import world.respect.credentials.passkey.GetCredentialUseCaseProcessor
 import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
 import world.respect.credentials.password.SavePasswordUseCaseProcessor
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
@@ -55,6 +58,7 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             jobChannel = savePasswordUseCase.requestChannel,
             processOnScope = lifecycleScope
         )
+
         //Launch processors for jobs that need an activity context.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -70,6 +74,32 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
                 }
             }
         }
+
+        /*
+         * Set a specific school directory to use based on bundle arguments (normally, but not
+         * necessarily, for end-to-end testing purposes).
+         */
+        intent.extras?.getString(EXTRA_RESPECT_DIRECTORY)?.also { directoryUrl ->
+            lifecycleScope.launch {
+                val respectAppDataSource = getKoin().get<RespectAppDataSource>()
+                respectAppDataSource.schoolDirectoryDataSource.insertOrIgnore(
+                    schoolDirectory = RespectSchoolDirectory(
+                        invitePrefix = "",
+                        baseUrl = Url(directoryUrl)
+                    ),
+                    clearOthers = true,
+                )
+            }
+        }
+    }
+
+    companion object {
+
+        /**
+         *
+         */
+        const val EXTRA_RESPECT_DIRECTORY = "respect_directory"
+
     }
 }
 

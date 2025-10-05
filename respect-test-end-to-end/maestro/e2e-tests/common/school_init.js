@@ -1,8 +1,15 @@
 
-if(typeof SCHOOL_ADMIN_PASSWORD != "string" || SCHOOL_ADMIN_PASSWORD.length < 1 ||
-        SCHOOL_ADMIN_PASSWORD == "undefined"
-) {
+function isSetString(value) {
+    return typeof value == "string" && value.length > 0 && value != "undefined";
+}
+
+if(!isSetString(SCHOOL_ADMIN_PASSWORD)) {
     throw "SCHOOL_ADMIN_PASSWORD not set. e.g. maestro test -e SCHOOL_ADMIN_PASSWORD=adminpassword . See README";
+}
+
+if(isSetString(SCHOOL_NAME)) {
+    output.SCHOOL_NAME = SCHOOL_NAME;
+    output.USE_SCHOOL_NAME = true;
 }
 
 /*
@@ -25,6 +32,11 @@ if(typeof TESTCONTROLLER_URL == "string" && TESTCONTROLLER_URL.startsWith("http"
 
     const timeNow = new Date().toISOString();
 
+    if(!isSetString(SCHOOL_NAME)) {
+        output.SCHOOL_NAME = "TestSchool";
+        output.USE_SCHOOL_NAME = true;
+    }
+
     const newSchoolResponse = http.post(serverUrl + "api/directory/school", {
         headers: {
             'Content-Type': 'application/json',
@@ -34,7 +46,7 @@ if(typeof TESTCONTROLLER_URL == "string" && TESTCONTROLLER_URL.startsWith("http"
             [
                 {
                     "school": {
-                        "name": "Test School",
+                        "name": output.SCHOOL_NAME,
                         "self": serverUrl,
                         "xapi": (schoolUrl + "api/school/xapi"),
                         "oneRoster": (schoolUrl + "api/school/oneroster"),

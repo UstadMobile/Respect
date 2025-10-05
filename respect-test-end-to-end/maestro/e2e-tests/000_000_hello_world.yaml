@@ -9,15 +9,24 @@ appId: world.respect.app
       SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
       DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
       SCHOOL_URL: ${SCHOOL_URL}
+      SCHOOL_NAME: ${SCHOOL_NAME}
 
-- launchApp
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
 
 - tapOn: "Get Started"
-- tapOn: "Other Options"
+
 - tapOn:
-    id: "school_url"
-- inputText: ${output.SCHOOL_URL}
-- tapOn: "Next"
+    id: "school_name"
+
+- inputText: ${SCHOOL_NAME}
+
+- tapOn:
+    text: ${SCHOOL_NAME}
+    childOf:
+      id: "schools_list"
+
 - tapOn:
     id: "username"
 - inputText: "admin"

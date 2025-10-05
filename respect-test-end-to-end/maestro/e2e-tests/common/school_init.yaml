@@ -1,0 +1,13 @@
+appId: world.respect.app
+---
+
+- runScript:
+    file: "common/school_init.js"
+    env:
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+      SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+      DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+      SCHOOL_URL: ${SCHOOL_URL}
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+

@@ -33,6 +33,9 @@ trap cleanup EXIT
 TESTCONTROLLER_BIN=/home/mike/tmp/testservercontroller-0.0.1/bin/testservercontroller
 
 DIR_ADMIN_AUTH_PASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
+if [ "$SCHOOL_ADMIN_PASSWORD" == "" ]; then
+    SCHOOL_ADMIN_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
+fi
 
 # The Maestro test needs to use basic auth (which is base64 encoded) to authenticate to request the
 # creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's

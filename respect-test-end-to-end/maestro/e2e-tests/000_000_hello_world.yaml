@@ -7,9 +7,21 @@ appId: world.respect.app
     env:
       TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
       SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
-      DIR_ADMIN_AUTH_PASS: ${DIR_ADMIN_AUTH_PASS}
       DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
 
 - launchApp
 
 - tapOn: "Get Started"
+- tapOn: "Other Options"
+- tapOn:
+    id: "school_url"
+- inputText: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- assertVisible: "Apps"

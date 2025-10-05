@@ -42,4 +42,4 @@ const newSchoolResponse = http.post(serverUrl + "api/directory/school", {
 });
 console.log("New school server URL requested: status = " + newSchoolResponse.status);
 
-output.SCHOOL_URL = serverUrl.href;
+output.SCHOOL_URL = serverUrl;

@@ -81,7 +81,7 @@ Admin Sends Invite Code, Parent Creates Account, Admin Approves Child, and Paren
 ### Part D: Parent verifies access after approval
 
 1. Launch the application as **Child**.
-2. ap on the **School name** field.
+2. Tap on the **School name** field.
 3. Enter the school URL.
 4. Select the entered school URL from the list.
 5. Log in with the Parent credentials created earlier.

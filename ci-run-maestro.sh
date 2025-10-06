@@ -10,11 +10,11 @@ SCRIPTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$SCRIPTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/2/artifact/build/distributions/testservercontroller-0.0.2.zip"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/2/artifact/build/distributions/testservercontroller-0.0.2.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
 
 if [ ! -e build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
-    wget --output-document=$SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_URL
+    wget --output-document=$SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
     unzip -d $SCRIPTDIR/build/testservercontroller/ \
           $SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi

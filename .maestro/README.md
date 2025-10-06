@@ -9,7 +9,7 @@
 * Build the project as per the main [README](../README.md)
 * Start respect-server and add a school as per the main project README.
 * Install the APK on the Android Emulator or device being used to run tests
-  e.g.
+  e.g. run project using Android Studio, drag/drop file onto Android emulator, or install using adb command:
 ```
 adb install ./respect-app-compose/build/outputs/apk/debug/respect-app-compose-debug.apk
 ```

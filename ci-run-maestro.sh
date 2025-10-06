@@ -15,8 +15,6 @@ TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
-exit 1
-
 if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
     if [ ! -e $ROOTDIR/build/testservercontroller ]; then
         mkdir -p $ROOTDIR/build/testservercontroller

@@ -13,6 +13,10 @@ TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/2/artifact/build/distributions/testservercontroller-0.0.2.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
 
+echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
+
+exit 1
+
 if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
     if [ ! -e $ROOTDIR/build/testservercontroller ]; then
         mkdir -p $ROOTDIR/build/testservercontroller

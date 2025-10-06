@@ -5,6 +5,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 
@@ -13,7 +14,9 @@ fun Route.AddChildAccountRoute(
 ) {
     post("addchild") {
         val personInfo: RespectRedeemInviteRequest.PersonInfo = call.receive()
-        call.respond(addChildAccountUseCase(call).invoke(personInfo))
+        val parentUsername = call.request.queryParameters["parentUsername"]
+            ?: throw IllegalArgumentException("missing parentUsername param").withHttpStatus(400)
+        call.respond(addChildAccountUseCase(call).invoke(personInfo,parentUsername))
     }
 
 }

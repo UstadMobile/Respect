@@ -180,7 +180,8 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {
-                        addChildAccountUseCase.invoke(personInfo)
+
+                        addChildAccountUseCase(personInfo, route.respectRedeemInviteRequest.account.username)
 
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(

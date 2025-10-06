@@ -3,23 +3,27 @@
 # Script used in CI environment (Continuous Integration - eg Jenkins) to run Maestro end to end tests (see
 # .maestro for test flows
 
-SCRIPTDIR=$(realpath $(dirname $BASH_SOURCE))
+ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 
 # Root directory for TestServerController to use (each server will get its own sub directory)
 # TestServerController will create the directory automatically.
-TESTSERVERCONTROLLER_BASEDIR="$SCRIPTDIR/build/testservercontroller/workspace"
+TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/2/artifact/build/distributions/testservercontroller-0.0.2.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
 
-if [ ! -e build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
-    wget --output-document=$SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
-    unzip -d $SCRIPTDIR/build/testservercontroller/ \
-          $SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
+    if [ !-e $ROOTDIR/build/testservercontroller ]; then
+        mkdir -p $ROOTDIR/build/testservercontroller
+    fi
+
+    wget --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+    unzip -d $ROOTDIR/build/testservercontroller/ \
+          $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
 
-TESTCONTROLLER_BIN=$SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME/bin/testservercontroller
+TESTCONTROLLER_BIN=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME/bin/testservercontroller
 
 if [ "$TESTCONTROLLER_PORT" == "" ]; then
     TESTCONTROLLER_PORT=8094
@@ -67,7 +71,7 @@ $TESTCONTROLLER_BIN -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
     -P:ktor.deployment.shutdown.url=/shutdown \
     -P:testservercontroller.shutdown.url=/shutdown \
-    -P:testservercontroller.cmd="$SCRIPTDIR/ci-run-test-server.sh" &
+    -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
 TESTCONTROLLER_PID=$!
 

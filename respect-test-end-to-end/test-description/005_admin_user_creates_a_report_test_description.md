@@ -75,7 +75,3 @@ A user (Students/parents, teacher, admin, or analyst) on the RESPECT platform, w
 6. Go back to the report configuration.
 7. Tap **Y-axis** and select *Assignment completion %*.
 8. Tap **Done**.
-
----
-
-Do you want me to also extend this flow with a **Part G (Teacher views final generated report with graph/chart)** so it ends with actual report output?

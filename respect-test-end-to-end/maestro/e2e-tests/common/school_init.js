@@ -1,6 +1,14 @@
+/*
+ * Sets up and checks the school variables. This can either use the test controller or the school
+ * url and name.
+ */
 
 function isSetString(value) {
     return typeof value == "string" && value.length > 0 && value != "undefined";
+}
+
+function isSetUrl(value) {
+    return isSetString(value) && value.startsWith("http");
 }
 
 if(!isSetString(SCHOOL_ADMIN_PASSWORD)) {
@@ -9,13 +17,12 @@ if(!isSetString(SCHOOL_ADMIN_PASSWORD)) {
 
 if(isSetString(SCHOOL_NAME)) {
     output.SCHOOL_NAME = SCHOOL_NAME;
-    output.USE_SCHOOL_NAME = true;
 }
 
 /*
  * If TESTCONTROLLER_URL is set, then use test controller to add a new school.
  */
-if(typeof TESTCONTROLLER_URL == "string" && TESTCONTROLLER_URL.startsWith("http")) {
+if(isSetUrl(TESTCONTROLLER_URL)) {
     console.log("Test controller= " + TESTCONTROLLER_URL);
 
     const testControllerResponse = http.get(
@@ -34,7 +41,6 @@ if(typeof TESTCONTROLLER_URL == "string" && TESTCONTROLLER_URL.startsWith("http"
 
     if(!isSetString(SCHOOL_NAME)) {
         output.SCHOOL_NAME = "TestSchool";
-        output.USE_SCHOOL_NAME = true;
     }
 
     const newSchoolResponse = http.post(serverUrl + "api/directory/school", {
@@ -48,9 +54,9 @@ if(typeof TESTCONTROLLER_URL == "string" && TESTCONTROLLER_URL.startsWith("http"
                     "school": {
                         "name": output.SCHOOL_NAME,
                         "self": serverUrl,
-                        "xapi": (schoolUrl + "api/school/xapi"),
-                        "oneRoster": (schoolUrl + "api/school/oneroster"),
-                        "respectExt": (schoolUrl + "api/school/respect"),
+                        "xapi": (serverUrl + "api/school/xapi"),
+                        "oneRoster": (serverUrl + "api/school/oneroster"),
+                        "respectExt": (serverUrl + "api/school/respect"),
                         "rpId": null,
                         "lastModified": timeNow,
                         "stored": timeNow
@@ -71,5 +77,7 @@ if(typeof TESTCONTROLLER_URL == "string" && TESTCONTROLLER_URL.startsWith("http"
     throw "SCHOOL_URL not set AND TESTCONTROLLER_URL not set. See README";
 }
 
-
+if(!isSetString(output.SCHOOL_NAME)) {
+    throw "SCHOOL_NAME not set and not using TESTCONTROLLER_URL. e.g. maestro test -e SCHOOL_NAME=TestSchool . See README"
+}
 

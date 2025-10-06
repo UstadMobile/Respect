@@ -35,3 +35,5 @@ appId: world.respect.app
 - inputText: ${SCHOOL_ADMIN_PASSWORD}
 - tapOn: "Login"
 - assertVisible: "Apps"
+- tapOn:
+    id: "user_account_icon"

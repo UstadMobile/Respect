@@ -30,7 +30,7 @@ function cleanup() {
 
 trap cleanup EXIT
 
-TESTCONTROLLER_BIN=/home/mike/tmp/testservercontroller-0.0.1/bin/testservercontroller
+TESTCONTROLLER_BIN=/home/mike/tmp/testservercontroller-0.0.2/bin/testservercontroller
 
 DIR_ADMIN_AUTH_PASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
 if [ "$SCHOOL_ADMIN_PASSWORD" == "" ]; then

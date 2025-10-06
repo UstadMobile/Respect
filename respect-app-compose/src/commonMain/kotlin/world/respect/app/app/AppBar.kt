@@ -168,6 +168,7 @@ fun RespectAppBar(
                 activeAccount?.also {
                     IconButton(
                         onClick = onProfileClick,
+                        modifier = Modifier.testTag("user_account_icon"),
                     ) {
                         RespectPersonAvatar(name = it.person.fullName())
                     }

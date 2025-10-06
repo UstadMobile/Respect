@@ -1,15 +1,15 @@
 appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "common/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
 ---
-- clearState:  world.respect.app
-
-- runScript:
-    file: "common/school_init.js"
-    env:
-      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
-      SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
-      DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
-      SCHOOL_URL: ${SCHOOL_URL}
-      SCHOOL_NAME: ${SCHOOL_NAME}
 
 - launchApp:
     arguments:
@@ -17,15 +17,10 @@ appId: world.respect.app
 
 - tapOn: "Get Started"
 
-- tapOn:
-    id: "school_name"
-
-- inputText: ${SCHOOL_NAME}
-
-- tapOn:
-    text: ${SCHOOL_NAME}
-    childOf:
-      id: "schools_list"
+- runFlow:
+    file: "common/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
 
 - tapOn:
     id: "username"

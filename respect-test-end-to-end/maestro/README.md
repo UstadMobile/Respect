@@ -19,13 +19,21 @@ adb install ./respect-app-compose/build/outputs/apk/debug/respect-app-compose-de
 maestro test \
     -e SCHOOL_URL=http://192.168.1.2:8094/ \
     -e SCHOOL_ADMIN_PASSWORD=adminpassword \
+    -e SCHOOL_NAME=TestSchool
     e2e-tests/flow_name.yaml
 ```
+
+Where:
+* ```SCHOOL_URL``` is the URL for the school as used with the addschool command as  as per the main
+  [README](../../README.md) 
+* ```SCHOOL_ADMIN_PASSWORD``` is the password for the admin user for the school (also as per addschool command)
+* ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
 ## Run multiple tests (suite)
 
 Running multiple tests with Maestro requires a blank server installation for each test. 
-[TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a 
-new blank server instance on a free port as required. 
+[TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a new blank server instance on a free port as 
+required. 
 
+See run-maestro-ci.sh (work in progress).
 

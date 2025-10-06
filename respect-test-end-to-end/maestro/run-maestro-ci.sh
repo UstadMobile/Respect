@@ -20,11 +20,14 @@ fi
 
 function cleanup() {
     if [ "$TESTCONTROLLER_PID" != "" ]; then
+        echo "run-maestro-ci: note 'No instance for key AttributeKey: KOIN_SCOPE' can be safely ignored"
         echo "run-maestro-ci: Stopping TestServerController"
         wget -qO- "${TESTCONTROLLER_URL}shutdown"
         sleep 10
-        echo "run-maestro-ci: calling kill just in case (no such process error can be ignored)"
-        kill $TESTCONTROLLER_PID
+        if [ -d "/proc/$PID" ]; then
+            echo "run-maestro-ci: calling kill just in case (no such process error can be ignored)"
+            kill $TESTCONTROLLER_PID
+        fi
     fi
 }
 

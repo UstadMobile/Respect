@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script used on CI (Continuous Integration - eg Jenkins) to run Maestro end to end tests (see 
+# Script used in CI environment (Continuous Integration - eg Jenkins) to run Maestro end to end tests (see
 # .maestro for test flows
 
 SCRIPTDIR=$(realpath $(dirname $BASH_SOURCE))
@@ -8,6 +8,18 @@ SCRIPTDIR=$(realpath $(dirname $BASH_SOURCE))
 # Root directory for TestServerController to use (each server will get its own sub directory)
 # TestServerController will create the directory automatically.
 TESTSERVERCONTROLLER_BASEDIR="$SCRIPTDIR/build/testservercontroller/workspace"
+
+
+TESTSERVERCONTROLLER_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/2/artifact/build/distributions/testservercontroller-0.0.2.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
+
+if [ ! -e build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
+    wget --output-document=$SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_URL
+    unzip -d $SCRIPTDIR/build/testservercontroller/ \
+          $SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+fi
+
+TESTCONTROLLER_BIN=$SCRIPTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME/bin/testservercontroller
 
 if [ "$TESTCONTROLLER_PORT" == "" ]; then
     TESTCONTROLLER_PORT=8094
@@ -37,7 +49,6 @@ function cleanup() {
 
 trap cleanup EXIT
 
-TESTCONTROLLER_BIN=/home/mike/tmp/testservercontroller-0.0.2/bin/testservercontroller
 
 DIR_ADMIN_AUTH_PASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
 if [ "$SCHOOL_ADMIN_PASSWORD" == "" ]; then
@@ -75,17 +86,73 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
-maestro test \
-  --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
-  --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
-  --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-  --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
-  --env SCHOOL_NAME=TestSchool \
-  --format=junit \
-  --test-output-dir=build/maestro/output \
-  --output=build/maestro/report.xml \
-  .maestro/flows/000_000_hello_world.yaml
-MAESTRO_STATUS=$?
+if [ "$1" == "cloud" ]; then
+    if [ "$MAESTRO_CLOUD_PROJECTID" == "" ]; then
+      echo "Must set Maestro cloud project id as MAESTRO_CLOUD_PROJECTID environment var"
+      exit 1
+    fi
+
+    if [ "$MAESTRO_CLOUD_APIKEY" == "" ]; then
+      echo "Must set Maestro cloud API key as MAESTRO_CLOUD_APIKEY environment var"
+      exit 1
+    fi
+
+    BRANCH_ARG=""
+    PULLREQUEST_ARG=""
+    NAME_ARG=""
+    COMMIT_ARG=""
+    BRANCH_ARG=""
+
+    if [ "$BUILD_TAG" != "" ]; then
+        NAME_ARG="--name=$BUILD_TAG"
+    fi
+
+    if [ "$GIT_BRANCH" != "" ]; then
+        BRANCH_ARG="--branch=$BRANCH"
+    fi
+
+    if [ "$GIT_COMMIT" != "" ]; then
+        COMMIT_ARG="--commit-sha=$GIT_COMMIT"
+    fi
+
+    if [ "$PULLREQUEST" != "" ]; then
+        PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
+    fi
+
+    maestro cloud \
+        --api-key=$MAESTRO_CLOUD_APIKEY \
+        --project-id=$MAESTRO_CLOUD_PROJECTID \
+        --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
+        --flows=.maestro/flows \
+        --format=junit \
+        --output=build/maestro/report.xml \
+        --timeout=300 \
+        $NAME_ARG \
+        --repo-name=Respect \
+        --repo-owner=UstadMobile \
+        $COMMIT_ARG \
+        $BRANCH_ARG \
+        $PULLREQUEST_ARG \
+        --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
+        --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+        --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
+        --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+        --env SCHOOL_NAME=TestSchool
+    TESTSTATUS=$?
+else
+    maestro test \
+      --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
+      --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+      --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
+      --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+      --env SCHOOL_NAME=TestSchool \
+      --format=junit \
+      --test-output-dir=build/maestro/output \
+      --output=build/maestro/report.xml \
+      .maestro/flows/000_000_hello_world.yaml
+    MAESTRO_STATUS=$?
+fi
+
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 

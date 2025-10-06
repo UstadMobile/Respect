@@ -144,7 +144,7 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool
-    TESTSTATUS=$?
+    MAESTRO_STATUS=$?
 else
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \

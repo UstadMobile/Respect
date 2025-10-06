@@ -2,9 +2,12 @@ package world.respect.shared.domain.account
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.mock
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.model.Person
@@ -14,8 +17,8 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -40,7 +43,7 @@ class AuthWithPasswordIntegrationTest {
 
     private lateinit var setPasswordUseCase: SetPasswordUseCase
 
-    private lateinit var getTokenUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+    private lateinit var getTokenUseCase: GetTokenAndUserProfileWithCredentialUseCase
 
     private lateinit var validateAuthUseCase: ValidateAuthorizationUseCase
 
@@ -53,6 +56,8 @@ class AuthWithPasswordIntegrationTest {
         gender = PersonGenderEnum.FEMALE,
     )
 
+    private val defaultSchoolUrl = Url("https://school.example.org/")
+
     @BeforeTest
     fun setup() {
         val dbDir = temporaryFolder.newFolder("dbdir")
@@ -63,8 +68,12 @@ class AuthWithPasswordIntegrationTest {
         xxHash = XXStringHasherCommonJvm()
         uidNumberMapper = XXHashUidNumberMapper(xxHash)
         setPasswordUseCase = SetPasswordUseDbImpl(schoolDb, xxHash)
-        getTokenUseCase = GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
-            schoolDb, xxHash,
+        getTokenUseCase = GetTokenAndUserProfileWithCredentialDbImpl(
+            schoolUrl = defaultSchoolUrl,
+            schoolDb = schoolDb,
+            xxHash = xxHash,
+            verifyPasskeyUseCase = mock { },
+            respectAppDataSource = mock { },
         )
 
         validateAuthUseCase = ValidateAuthorizationUseCaseDbImpl(schoolDb)
@@ -90,7 +99,9 @@ class AuthWithPasswordIntegrationTest {
                 )
             )
 
-            val authResponse = getTokenUseCase(defaultTestPerson.username!!, password)
+            val authResponse = getTokenUseCase(
+                RespectPasswordCredential(defaultTestPerson.username!!, password)
+            )
 
             val userIdPrincipal = validateAuthUseCase(
                 ValidateAuthorizationUseCase.BearerTokenCredential(
@@ -122,7 +133,9 @@ class AuthWithPasswordIntegrationTest {
                     )
                 )
 
-                getTokenUseCase(defaultTestPerson.username!!, "wrong")
+                getTokenUseCase(
+                    RespectPasswordCredential(defaultTestPerson.username!!, "wrong")
+                )
             }catch(e: Throwable) {
                 exception = e
             }

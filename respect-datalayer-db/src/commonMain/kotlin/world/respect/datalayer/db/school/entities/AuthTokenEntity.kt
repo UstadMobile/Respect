@@ -21,4 +21,10 @@ data class AuthTokenEntity(
     val atToken: String,
     val atTimeCreated: Long,
     val atTtl: Int,
+    val atPlatform: String? = null,
+    val atAndroidSdkInt: Int? = null,
+    val atVersion: String? = null,
+    val atManufacturer: String? = null,
+    val atModel: String? = null,
+    val atRam: Long? = null,
 )

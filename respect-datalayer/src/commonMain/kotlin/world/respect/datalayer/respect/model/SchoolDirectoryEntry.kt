@@ -19,10 +19,6 @@ import kotlin.time.Instant
  * @property oneRoster URL to OneRoster endpoint e.g. https://school.example.org/api/school/oneroster/
  * @property respectExt URL to Respect extensions endpoint (if available). Required for invites etc
  *           e.g. https://school.example.org/api/school/respect/.
- * @property schoolCode the code prefix for this specific school e.g. where the directory
- *           code prefix can be thought of as a country prefix in a phone number, this would be the
- *           area code.
- * @property directoryCode the directory code for the directory which contains this school.
  */
 @Serializable
 data class SchoolDirectoryEntry(
@@ -32,8 +28,6 @@ data class SchoolDirectoryEntry(
     val oneRoster: Url,
     val respectExt: Url?,
     val rpId : String?,
-    val schoolCode: String?,
-    val directoryCode: String?,
     @Serializable(with = InstantISO8601Serializer::class)
     override val lastModified: Instant,
     @Serializable(with = InstantISO8601Serializer::class)

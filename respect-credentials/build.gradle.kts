@@ -23,8 +23,6 @@ kotlin {
             api(libs.uri.kmp)
             api(libs.ktor.client.core)
             implementation(projects.respectLibUtil)
-            implementation(projects.respectLibPrimarykeygen)
-            implementation(projects.respectDatalayerDb)
             implementation(compose.components.resources)
             implementation(compose.runtime)
             implementation(libs.kotlinx.serialization.json)

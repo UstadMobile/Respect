@@ -36,13 +36,7 @@ class AddSchoolUseCase(
         requests: List<AddSchoolRequest>
     ) {
         requests.forEach { request ->
-            schoolDirectoryEntryDataSource.updateLocal(
-                listOf(
-                    request.school.copy(
-                        directoryCode = directoryDataSource.getServerManagedDirectory()?.invitePrefix
-                    )
-                )
-            )
+            schoolDirectoryEntryDataSource.updateLocal(listOf(request.school))
 
             directoryDataSource.setServerManagedSchoolConfig(
                 request.school,  request.dbUrl

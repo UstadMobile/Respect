@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -57,7 +58,7 @@ fun OtherOptionsScreen(
             placeholder = { Text(stringResource(Res.string.paste_link_here)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("school_url"),
             isError = uiState.errorMessage != null,
             supportingText = uiState.errorMessage?.let {
                 { Text(uiTextStringResource(it)) }

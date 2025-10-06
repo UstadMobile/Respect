@@ -17,6 +17,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
@@ -72,6 +73,7 @@ fun LoginScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag("username")
                 .defaultItemPadding()
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
@@ -91,9 +93,8 @@ fun LoginScreen(
             supportingText = uiState.passwordError?.let {
                 { Text(uiTextStringResource(it)) }
             },
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("password")
         )
-
 
         Button(
             onClick = onClickLogin,

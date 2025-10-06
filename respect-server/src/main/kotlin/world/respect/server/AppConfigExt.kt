@@ -108,6 +108,6 @@ fun ApplicationConfig.fileProperty(
 
 
 fun ApplicationConfig.absoluteDataDir() = fileProperty(
-    propertyName = "ktor.ustad.datadir", defaultPath = DEFAULT_DATA_DIR_NAME
+    propertyName = "ktor.respect.datadir", defaultPath = DEFAULT_DATA_DIR_NAME
 )
 

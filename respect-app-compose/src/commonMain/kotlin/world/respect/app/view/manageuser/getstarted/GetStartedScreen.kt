@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -100,7 +101,9 @@ fun GetStartedScreen(
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            modifier = Modifier.fillMaxWidth()
+                .focusRequester(focusRequester)
+                .testTag("school_name"),
             isError = uiState.errorMessage != null,
             supportingText = uiState.errorMessage?.let {
                 { Text(uiTextStringResource(it)) }
@@ -108,8 +111,7 @@ fun GetStartedScreen(
         )
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("schools_list")
         ) {
             items(
                 count = uiState.suggestions.size,

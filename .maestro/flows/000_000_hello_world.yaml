@@ -2,7 +2,7 @@ appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
-      file: "common/school_init.js"
+      file: "subflows/school_init.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
@@ -18,7 +18,7 @@ onFlowStart:
 - tapOn: "Get Started"
 
 - runFlow:
-    file: "common/get_started_select_school_by_name.yaml"
+    file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
 

@@ -14,7 +14,7 @@ TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/jo
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
 
 if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
-    if [ !-e $ROOTDIR/build/testservercontroller ]; then
+    if [ ! -e $ROOTDIR/build/testservercontroller ]; then
         mkdir -p $ROOTDIR/build/testservercontroller
     fi
 

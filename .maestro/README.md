@@ -20,7 +20,7 @@ maestro test \
     -e SCHOOL_URL=http://192.168.1.2:8094/ \
     -e SCHOOL_ADMIN_PASSWORD=adminpassword \
     -e SCHOOL_NAME=TestSchool
-    e2e-tests/flow_name.yaml
+    .maestro/flows/flow_name.yaml
 ```
 
 Where:

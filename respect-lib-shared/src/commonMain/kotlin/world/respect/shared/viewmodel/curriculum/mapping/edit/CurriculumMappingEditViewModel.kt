@@ -171,7 +171,7 @@ class CurriculumMappingEditViewModel(
         val currentChapters = _uiState.value.chapters
 
         val newChapter = ChapterMapping().apply {
-            uid = -(System.currentTimeMillis())
+            uid = UID_MULTIPLIER * (System.currentTimeMillis())
             chapterNumber = nextChapterNumber++
             title = null
             textbookUid = this@CurriculumMappingEditViewModel.textbookUid
@@ -219,7 +219,7 @@ class CurriculumMappingEditViewModel(
         val nextLessonNumberForChapter = existingLessonsInChapter.size + 1
 
         val newLesson = LessonMapping().apply {
-            uid = -(System.currentTimeMillis())
+            uid = UID_MULTIPLIER *(System.currentTimeMillis())
             chapterUid = chapter.uid
             lessonNumber = nextLessonNumberForChapter
             title = null
@@ -303,5 +303,8 @@ class CurriculumMappingEditViewModel(
 
     fun onRetry() {
         loadTextbookData()
+    }
+    companion object {
+        private const val UID_MULTIPLIER = -1
     }
 }

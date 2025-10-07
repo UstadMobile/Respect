@@ -82,7 +82,6 @@ fun CurriculumMappingListScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .testTag("map_fab")
         ) {
             Text(
                 text = stringResource(Res.string.map),
@@ -103,8 +102,7 @@ private fun TextbookCard(
         onClick = { onClickTextbook(textbook) },
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
-            .testTag("textbook_card_${textbook.uid}"),
+            .height(200.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,7 +44,7 @@ fun SettingsScreen(
                 onClick = onNavigateToLanguage,
                 testTag = "language_setting_item"
             )
-            Divider()
+
         }
 
         item {
@@ -53,7 +54,6 @@ fun SettingsScreen(
                 onClick = onNavigateToMapping,
                 testTag = "mapping_setting_item"
             )
-            Divider()
         }
     }
 }

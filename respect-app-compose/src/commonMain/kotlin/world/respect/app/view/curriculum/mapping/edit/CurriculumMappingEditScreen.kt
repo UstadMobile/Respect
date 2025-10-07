@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -84,44 +86,41 @@ fun CurriculumMappingEditScreen(
                         .wrapContentHeight()
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .clickable(onClick = onClickAddBookCover)
                         .padding(vertical = 20.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .background(
+                                    color = Color.Gray.copy(alpha = 0.6f),
+                                    shape = CircleShape
+                                )
+                                .clickable(onClick = onClickAddBookCover),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(250.dp)
-                                    .background(
-                                        color = Color.Gray.copy(alpha = 0.6f),
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        Icons.Filled.AddAPhoto,
-                                        contentDescription = stringResource(Res.string.add_book_cover),
-                                        modifier = Modifier.size(100.dp),
-                                        tint = Color.Gray
-                                    )
-                                }
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Text(
-                                        text = stringResource(Res.string.add_book_cover),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
+                            Icon(
+                                Icons.Filled.AddAPhoto,
+                                contentDescription = stringResource(Res.string.add_book_cover),
+                                modifier = Modifier.size(48.dp),
+                                tint = Color.Gray
+                            )
                         }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(Res.string.add_book_cover),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
+                }
+            }
+
 
             item {
                 Spacer(modifier = Modifier.height(2.dp))
@@ -162,8 +161,7 @@ fun CurriculumMappingEditScreen(
                     onValueChange = onBookDescriptionChanged,
                     label = { Text(stringResource(Res.string.book_description)) },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("book_description_field"),
+                        .fillMaxWidth(),
                     singleLine = false,
                     minLines = 1,
                     maxLines = Int.MAX_VALUE,
@@ -181,8 +179,7 @@ fun CurriculumMappingEditScreen(
                 OutlinedButton(
                     onClick = onClickAddChapter,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("add_chapter_button"),
+                        .fillMaxWidth(),
                     enabled = uiState.fieldsEnabled
                 ) {
                     Row(
@@ -208,7 +205,7 @@ fun CurriculumMappingEditScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            Icons.Filled.ContentPaste,
+                            Icons.Outlined.ContentPaste,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)

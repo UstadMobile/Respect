@@ -1,8 +1,16 @@
 appId: world.respect.app
-tags:
-  - respect
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "subflows/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
 ---
-- runFlow: "common/school_admin_login_flow.yaml"
+- runFlow: "subflows/school_admin_login_flow.yaml"
 
 - tapOn:
     id: "floating_action_button"

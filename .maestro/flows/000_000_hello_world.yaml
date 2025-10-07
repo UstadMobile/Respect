@@ -11,6 +11,9 @@ onFlowStart:
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
 
+onFlowComplete:
+  - runScript:
+      file: "subflows/teardown.js"
 ---
 
 - launchApp:

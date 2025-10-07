@@ -9,7 +9,6 @@ import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.libxxhash.XXStringHasher
 

@@ -73,7 +73,8 @@ fi
 DIR_ADMIN_TO_ENCODE="admin:$DIR_ADMIN_AUTH_PASS"
 DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
 
-$TESTCONTROLLER_BIN -Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/ \
+export JAVA_OPTS="-Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/"
+$TESTCONTROLLER_BIN  \
     -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
     -P:testservercontroller.portRange=$TEST_LEARNINGSPACE_PORTRANGE \
     -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \

@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import org.koin.java.KoinJavaComponent.getKoin
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.generated.resources.Res
@@ -31,7 +33,6 @@ import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
-import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
@@ -55,18 +56,15 @@ data class SignupUiState(
 
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent  {
+
+    override val scope: Scope = accountManager.requireSelectedAccountScope()
 
     private val route: SignupScreen = savedStateHandle.toRoute()
 
-    val schoolScopeId = SchoolDirectoryEntryScopeId(
-        route.schoolUrl, null,
-    )
-    val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
-        schoolScopeId.scopeId
-    )
+    val addChildAccountUseCase : AddChildAccountUseCase by inject()
 
-    val addChildAccountUseCase : AddChildAccountUseCase = schoolScope.get()
     private val _uiState = MutableStateFlow(SignupUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -181,7 +179,11 @@ class SignupViewModel(
                 when (route.type) {
                     ProfileType.CHILD -> {
 
-                        addChildAccountUseCase(personInfo, route.respectRedeemInviteRequest.account.username)
+                        addChildAccountUseCase(
+                            personInfo = personInfo,
+                            parentUsername = route.respectRedeemInviteRequest.account.username,
+                            classUid = route.respectRedeemInviteRequest.classUid?:""
+                        )
 
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(

@@ -29,12 +29,6 @@ class SchoolDirectoryDataSourceDb(
             }
     }
 
-    override suspend fun getDirectoryByInviteCode(code: String): RespectSchoolDirectory? {
-        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectoryByInviteCode(code)
-            ?.let {
-                RespectSchoolDirectory(it.rdInvitePrefix, it.rdUrl)
-            }
-    }
 
     override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
         return respectAppDb.getSchoolDirectoryEntityDao().getServerManagerSchoolDirectory()?.let {

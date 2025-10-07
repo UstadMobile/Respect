@@ -15,7 +15,6 @@ interface SchoolDirectoryDataSource {
 
     suspend fun allDirectories(): List<RespectSchoolDirectory>
 
-    suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo
 
     suspend fun deleteDirectory(directory: RespectSchoolDirectory)
 

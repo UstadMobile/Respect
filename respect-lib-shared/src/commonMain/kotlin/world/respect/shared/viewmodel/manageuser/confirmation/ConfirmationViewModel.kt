@@ -10,11 +10,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
@@ -36,6 +41,7 @@ data class ConfirmationUiState(
 
 class ConfirmationViewModel(
     savedStateHandle: SavedStateHandle,
+    private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: ConfirmationScreen = savedStateHandle.toRoute()
@@ -46,6 +52,8 @@ class ConfirmationViewModel(
         )
 
     private val getInviteInfoUseCase: GetInviteInfoUseCase = scope.get()
+
+    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator = scope.get()
 
     private val _uiState = MutableStateFlow(ConfirmationUiState())
 
@@ -134,8 +142,9 @@ class ConfirmationViewModel(
         }
 
         val blankAccount = RespectRedeemInviteRequest.Account(
+            guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID).toString(),
             username = "",
-            credential = RespectRedeemInviteRequest.RedeemInvitePasswordCredential(password = "")
+            credential = RespectPasswordCredential(username = "", password = ""),
         )
 
         return RespectRedeemInviteRequest(
@@ -144,7 +153,9 @@ class ConfirmationViewModel(
             role = role,
             accountPersonInfo = RespectRedeemInviteRequest.PersonInfo(),
             parentOrGuardianRole = null,
-            account = blankAccount
+            account = blankAccount,
+            deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
+            deviceInfo = getDeviceInfoUseCase(),
         )
     }
 }

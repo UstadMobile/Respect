@@ -19,3 +19,10 @@ fun Person.isAdminOrTeacher() : Boolean {
                 it.roleEnum == PersonRoleEnum.TEACHER
     }
 }
+
+fun Person.isAdmin() : Boolean {
+    return roles.any {
+        it.roleEnum == PersonRoleEnum.SYSTEM_ADMINISTRATOR
+    }
+}
+

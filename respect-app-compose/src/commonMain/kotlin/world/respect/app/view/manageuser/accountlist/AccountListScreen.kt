@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectLongVersionInfoItem
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
@@ -39,6 +40,7 @@ fun AccountListScreen(
         onClickAccount = viewModel::onClickAccount,
         onClickAddAccount = viewModel::onClickAddAccount,
         onClickLogout = viewModel::onClickLogout,
+        onClickProfile = viewModel::onClickProfile,
         onClickSettings = viewModel::onClickSettings
     )
 }
@@ -49,6 +51,7 @@ fun AccountListScreen(
     onClickAccount: (RespectAccount) -> Unit,
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
+    onClickProfile: () -> Unit,
     onClickSettings: () -> Unit
 ) {
     Column(
@@ -61,7 +64,7 @@ fun AccountListScreen(
                 extras = {
                     Row {
                         OutlinedButton(
-                            onClick = {},
+                            onClick =  {onClickProfile()},
                         ) {
                             Text(stringResource(Res.string.profile))
                         }
@@ -111,5 +114,9 @@ fun AccountListScreen(
             }
         )
 
+
+        HorizontalDivider()
+
+        RespectLongVersionInfoItem()
     }
 }

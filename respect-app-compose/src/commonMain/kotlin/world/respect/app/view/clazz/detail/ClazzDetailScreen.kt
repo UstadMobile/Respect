@@ -94,6 +94,13 @@ fun ClazzDetailScreen(
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
+    fun Person?.key(role: EnrollmentRoleEnum, index: Int) : Any {
+        return this?.guid?.let {
+            Pair(it, role)
+        } ?: "${role}_$index"
+    }
+
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -174,7 +181,9 @@ fun ClazzDetailScreen(
         if (uiState.isPendingExpanded) {
             respectPagingItems(
                 items = pendingTeacherLazyPagingItems,
-                key = { person, index -> person?.guid ?: "tp$index" }
+                key = { person, index ->
+                    person.key(EnrollmentRoleEnum.PENDING_TEACHER, index)
+                }
             ) { person ->
                 ListItem(
                     modifier = Modifier
@@ -217,7 +226,9 @@ fun ClazzDetailScreen(
 
             respectPagingItems(
                 items = pendingStudentLazyPagingItems,
-                key = { person, index -> person?.guid ?: "ps$index" }
+                key = { person, index ->
+                    person.key(EnrollmentRoleEnum.PENDING_STUDENT, index)
+                }
             ) { person ->
                 ListItem(
                     modifier = Modifier
@@ -311,7 +322,9 @@ fun ClazzDetailScreen(
 
             respectPagingItems(
                 items = teacherLazyPagingItems,
-                key = { person, index -> person?.guid ?: "t$index" }
+                key = { person, index ->
+                    person.key(EnrollmentRoleEnum.TEACHER, index)
+                }
             ) { teacher ->
                 ListItem(
                     modifier = Modifier
@@ -384,7 +397,9 @@ fun ClazzDetailScreen(
 
             respectPagingItems(
                 items = studentLazyPagingItems,
-                key = { person, index -> person?.guid ?: "s$index" }
+                key = { person, index ->
+                    person.key(EnrollmentRoleEnum.STUDENT, index)
+                }
             ) { student ->
                 ListItem(
                     modifier = Modifier

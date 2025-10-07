@@ -24,10 +24,11 @@ class AddSchoolDirectoryCallback(
             props.load(it)
         }
 
-        props.forEach { key, value ->
-            val url = value.toString()
+
+        props.entries.forEach { entry ->
+            val url = entry.value.toString()
             val uid = xxStringHasher.hash(url)
-            val prefix = key.toString()
+            val prefix = entry.key.toString()
 
             connection.execSQL(
                 """

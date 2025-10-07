@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.schooldirectory.adapters.toEntities
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
+import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
@@ -57,8 +58,25 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
-    override suspend fun getInviteInfo(inviteCode: String): RespectInviteInfo {
-        TODO("Not yet implemented")
+    override suspend fun insertOrIgnore(
+        schoolDirectory: RespectSchoolDirectory,
+        clearOthers: Boolean,
+    ) {
+        val directoryUidNum = xxStringHasher.hash(schoolDirectory.baseUrl.toString())
+        respectAppDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                respectAppDb.getSchoolDirectoryEntityDao().insertOrIgnore(
+                    SchoolDirectoryEntity(
+                        rdUid = directoryUidNum,
+                        rdUrl = schoolDirectory.baseUrl,
+                        rdInvitePrefix = "",
+                    )
+                )
+
+                respectAppDb.takeIf { clearOthers }?.getSchoolDirectoryEntityDao()
+                    ?.deleteOthers(exceptUid = directoryUidNum)
+            }
+        }
     }
 
     override suspend fun deleteDirectory(directory: RespectSchoolDirectory) {

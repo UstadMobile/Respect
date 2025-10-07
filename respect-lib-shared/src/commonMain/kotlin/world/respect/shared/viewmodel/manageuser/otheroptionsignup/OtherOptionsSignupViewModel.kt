@@ -7,10 +7,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.passkey_not_supported
@@ -18,24 +24,43 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
+import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class OtherOptionsSignupUiState(
     val passkeyError: String? = null,
-    val generalError: StringResourceUiText? = null
+    val generalError: StringResourceUiText? = null,
+    val showPasskeyOption: Boolean = false,
 )
 
 class OtherOptionsSignupViewModel(
     savedStateHandle: SavedStateHandle,
-    private val createPasskeyUseCase: CreatePasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
     private val route: OtherOptionsSignup = savedStateHandle.toRoute()
 
+    override val scope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+        SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+    )
+
+    private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase? by lazy {
+        scope.getOrNull()
+    }
+
     private val _uiState = MutableStateFlow(OtherOptionsSignupUiState())
+
     val uiState = _uiState.asStateFlow()
+
+    private val createPasskeyUseCase: CreatePasskeyUseCase? by lazy {
+        scope.getOrNull()
+    }
 
     init {
         _appUiState.update {
@@ -45,6 +70,7 @@ class OtherOptionsSignupViewModel(
                 userAccountIconVisible = false
             )
         }
+
         _uiState.update { prev ->
             prev.copy(
                 generalError = if (createPasskeyUseCase == null)
@@ -52,10 +78,20 @@ class OtherOptionsSignupViewModel(
                 else null
             )
         }
+
+        viewModelScope.launch {
+            val passkeySupportedVal = checkPasskeySupportUseCase?.invoke() ?: false
+            _uiState.update { prev ->
+                prev.copy(
+                    showPasskeyOption = passkeySupportedVal
+                )
+            }
+        }
     }
 
 
     fun onClickSignupWithPasskey() {
+        val createPasskeyUseCaseVal = createPasskeyUseCase
         viewModelScope.launch {
             try {
                 val schoolDirEntry = respectAppDataSource.schoolDirectoryEntryDataSource
@@ -63,35 +99,51 @@ class OtherOptionsSignupViewModel(
                 val rpId = schoolDirEntry.rpId
                 val username = route.respectRedeemInviteRequest.account.username
 
-                if (createPasskeyUseCase == null || rpId==null){
+                if (createPasskeyUseCaseVal == null || rpId==null){
                     _uiState.update {
                         it.copy(
                             generalError = StringResourceUiText(Res.string.passkey_not_supported)
                         )
                     }
                 }else {
-                    val createPasskeyResult = createPasskeyUseCase(
-                        username = username,
-                        rpId = rpId
+                    val createPasskeyResult = createPasskeyUseCaseVal(
+                        CreatePasskeyUseCase.Request(
+                            personUid = route.respectRedeemInviteRequest.account.guid,
+                            username = username,
+                            rpId = rpId
+                        )
                     )
 
                     when (createPasskeyResult) {
                         is CreatePasskeyUseCase.PasskeyCreatedResult -> {
-                            val redeemInviteRequest = route.respectRedeemInviteRequest
-                            val account = RespectRedeemInviteRequest.Account(
-                                username = username,
-                                credential = RespectRedeemInviteRequest.RedeemInvitePasskeyCredential(
-                                    createPasskeyResult.authenticationResponseJSON
+                            val redeemRequest = route.respectRedeemInviteRequest.copy(
+                                account = route.respectRedeemInviteRequest.account.copy(
+                                    credential = RespectPasskeyCredential(
+                                        createPasskeyResult.authenticationResponseJSON
+                                    )
                                 )
                             )
 
-                            val updatedRedeemInviteRequest = RespectRedeemInviteRequest(
-                                code = redeemInviteRequest.code,
-                                classUid = redeemInviteRequest.classUid,
-                                role = redeemInviteRequest.role,
-                                accountPersonInfo = redeemInviteRequest.accountPersonInfo,
-                                parentOrGuardianRole = redeemInviteRequest.parentOrGuardianRole,
-                                account = account
+                            accountManager.register(
+                                redeemInviteRequest = redeemRequest,
+                                schoolUrl = route.schoolUrl
+                            )
+
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = if(
+                                        route.respectRedeemInviteRequest.role == PersonRoleEnum.PARENT
+                                    ) {
+                                        SignupScreen.create(
+                                            schoolUrl = route.schoolUrl,
+                                            profileType = ProfileType.CHILD,
+                                            inviteRequest = redeemRequest
+                                        )
+                                    }else {
+                                        WaitingForApproval()
+                                    },
+                                    clearBackStack = true,
+                                )
                             )
                         }
 

@@ -36,27 +36,15 @@ interface SchoolDirectoryEntryEntityDao {
     )
     fun searchSchoolsByName(query: String): Flow<List<SchoolDirectoryEntryEntity>>
 
-    @Query("""
-        SELECT SchoolDirectoryEntryEntity.*
-          FROM SchoolDirectoryEntryEntity
-         WHERE :code LIKE (SchoolDirectoryEntryEntity.reSchoolCode || '%')
-    """)
-    /**
-     * @param code an invite code (with the directory prefix removed)
-     */
-    suspend fun findSchoolByInviteCode(code: String): SchoolDirectoryEntryEntity?
-
     @Transaction
     @Query(SELECT_LIST_SQL)
     fun listAsFlow(
-        code: String?,
         name: String?,
     ): Flow<List<SchoolDirectoryEntryEntities>>
 
     @Transaction
     @Query(SELECT_LIST_SQL)
     suspend fun list(
-        code: String?,
         name: String?,
     ): List<SchoolDirectoryEntryEntities>
 
@@ -66,8 +54,7 @@ interface SchoolDirectoryEntryEntityDao {
         const val SELECT_LIST_SQL = """
         SELECT SchoolDirectoryEntryEntity.*
           FROM SchoolDirectoryEntryEntity
-         WHERE (:code IS NULL OR :code LIKE (SchoolDirectoryEntryEntity.reSchoolCode || '%'))
-           AND (:name IS NULL OR SchoolDirectoryEntryEntity.reUid IN
+         WHERE (:name IS NULL OR SchoolDirectoryEntryEntity.reUid IN
                 (SELECT SchoolDirectoryEntryLangMapEntity.sdelReUid
                    FROM SchoolDirectoryEntryLangMapEntity
                   WHERE SchoolDirectoryEntryLangMapEntity.sdelValue LIKE :name))

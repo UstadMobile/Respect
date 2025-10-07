@@ -8,8 +8,6 @@ package world.respect.credentials.passkey
  */
 interface CheckPasskeySupportUseCase {
 
-    suspend operator fun invoke(
-        rpId: String
-    ): Boolean
+    suspend operator fun invoke(): Boolean
 
 }

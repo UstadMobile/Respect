@@ -10,6 +10,10 @@ import world.respect.datalayer.respect.model.RespectSchoolDirectory
 
 @Dao
 interface SchoolDirectoryEntityDao {
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOrIgnore(schoolDirectory: SchoolDirectoryEntity)
+
     @Query(
         """
             SELECT * FROM SchoolDirectoryEntity
@@ -28,14 +32,21 @@ interface SchoolDirectoryEntityDao {
         code: String
     ): SchoolDirectoryEntity?
 
-    @Query(
-        """
+    @Query("""
         SELECT SchoolDirectoryEntity.*
           FROM SchoolDirectoryEntity
          WHERE SchoolDirectoryEntity.rdUrl = '${RespectSchoolDirectory.SERVER_MANAGED_DIRECTORY_URL}'
     """
     )
     suspend fun getServerManagerSchoolDirectory(): SchoolDirectoryEntity?
+
+    @Query("""
+        DELETE FROM SchoolDirectoryEntity
+         WHERE rdUid != :exceptUid
+    """)
+    suspend fun deleteOthers(
+        exceptUid: Long
+    )
 
     @Query(
         """

@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
 import world.respect.shared.navigation.LoginScreen
@@ -21,9 +23,20 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 
+data class GetStartedUiState(
+    val schoolName: String = "",
+    val errorText: String? = null,
+    val showButtons: Boolean = true,
+    val errorMessage: UiText? = null,
+    val suggestions: List<SchoolDirectoryEntry> = emptyList(),
+    val warning: UiText? = null,
+)
+
+
 class GetStartedViewModel(
     savedStateHandle: SavedStateHandle,
-    val respectAppDataSource: RespectAppDataSource
+    val respectAppDataSource: RespectAppDataSource,
+    private val getWarningsUseCase: GetWarningsUseCase? = null,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(GetStartedUiState())
@@ -38,6 +51,11 @@ class GetStartedViewModel(
                 userAccountIconVisible = false,
                 showBackButton = false,
             )
+        }
+
+        viewModelScope.launch {
+            val warning = getWarningsUseCase?.invoke()
+            _uiState.takeIf { warning != null }?.update { it.copy(warning = warning) }
         }
     }
 
@@ -86,12 +104,3 @@ class GetStartedViewModel(
 
     }
 }
-
-data class GetStartedUiState(
-    val schoolName: String = "",
-    val errorText: String? = null,
-    val showButtons: Boolean = true,
-    val errorMessage: UiText? = null,
-    val suggestions: List<SchoolDirectoryEntry> = emptyList()
-
-)

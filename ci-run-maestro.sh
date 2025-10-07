@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/2/artifact/build/distributions/testservercontroller-0.0.2.zip"
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.2"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/3/artifact/build/distributions/testservercontroller-0.0.3.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.3"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
@@ -32,9 +32,15 @@ if [ "$TESTCONTROLLER_PORT" == "" ]; then
 fi
 
 if [ "$TESTCONTROLLER_URL" == "" ]; then
-    TESTCONTROLLER_URL="http://$(hostname -I | xargs):$TESTCONTROLLER_PORT/"
-    echo "ci-run-maestro: ATTN: TESTCONTROLLER_URL not set. Setting to $TESTCONTROLLER_URL (this might not be correct)"
+    if [ "$URL_SUBSTITUTION" != "" ]; then
+        echo "ci-run-maestro: no TESTCONTROLLER_URL set: using hostname - this might not be correct"
+        TESTCONTROLLER_URL=$(echo $URL_SUBSTITUTION | sed s/_PORT_/$TESTCONTROLLER_PORT/g)
+    else
+        TESTCONTROLLER_URL="http://$(hostname -I | xargs):$TESTCONTROLLER_PORT/"
+    fi
 fi
+
+echo "ci-run-maestro: TESTCONTROLLER_URL is $TESTCONTROLLER_URL"
 
 if [ "$TEST_LEARNINGSPACE_PORTRANGE" == "" ]; then
     TEST_LEARNINGSPACE_PORTRANGE="8000-9000"
@@ -69,6 +75,7 @@ DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
 
 $TESTCONTROLLER_BIN -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
     -P:testservercontroller.portRange=$TEST_LEARNINGSPACE_PORTRANGE \
+    -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
     -P:ktor.deployment.shutdown.url=/shutdown \

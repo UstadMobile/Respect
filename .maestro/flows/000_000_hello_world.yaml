@@ -9,6 +9,8 @@ onFlowStart:
         DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+
 ---
 
 - launchApp:

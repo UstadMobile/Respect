@@ -29,6 +29,9 @@ Where:
 * ```SCHOOL_ADMIN_PASSWORD``` is the password for the admin user for the school (also as per addschool command)
 * ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
+## Testing using HTTPS
+
+
 ## Run multiple tests (suite)
 
 Running multiple tests with Maestro requires a blank server installation for each test.

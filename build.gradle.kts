@@ -10,3 +10,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary) apply false
     alias(libs.plugins.kotlinAndroid) apply false
 }
+
+tasks.register("clean", Delete::class) {
+    this.delete(project.layout.buildDirectory)
+}

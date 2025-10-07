@@ -143,6 +143,7 @@ class PersonDataSourceDb(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+                filterByName = params.filterByName,
             ).map(tag = "persondb-mapped") {
                 it.toPersonEntities().toModel()
             }
@@ -176,7 +177,13 @@ class PersonDataSourceDb(
         listParams: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, PersonListDetails> {
         return IPagingSourceFactory {
-            schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource()
+            schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource(
+                since = listParams.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzGuidHash = listParams.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzRoleFlag = listParams.filterByEnrolmentRole?.flag ?: 0,
+                filterByName = listParams.filterByName,
+            )
         }
     }
 }

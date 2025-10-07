@@ -65,7 +65,7 @@ fun RespectAppBar(
     val showUserAccountIcon = appUiState.userAccountIconVisible ?: !appUiState.actionBarButtonState.visible
 
     val accountManager: RespectAccountManager = koinInject()
-    val activeAccount by accountManager.activeAccountAndPersonFlow.collectAsState(null)
+    val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
 
     var searchActive by remember {
         mutableStateOf(false)
@@ -181,6 +181,7 @@ fun RespectAppBar(
                 activeAccount?.also {
                     IconButton(
                         onClick = onProfileClick,
+                        modifier = Modifier.testTag("user_account_icon"),
                     ) {
                         RespectPersonAvatar(name = it.person.fullName())
                     }

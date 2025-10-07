@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
 
     implementation(libs.napier)
+    implementation(libs.webauthn4j.core)
 
     testImplementation(libs.kotlin.test.junit)
 
@@ -71,3 +72,11 @@ dependencies {
 }
 
 tasks.named("build").dependsOn("generateSwaggerUI")
+
+tasks.withType<Tar>() {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Zip>() {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

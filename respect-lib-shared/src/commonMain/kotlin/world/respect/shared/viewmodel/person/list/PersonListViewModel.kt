@@ -1,9 +1,11 @@
 package world.respect.shared.viewmodel.person.list
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -24,6 +26,9 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.shared.util.LaunchDebouncer
+import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 
 
 data class PersonListUiState(
@@ -45,9 +50,14 @@ class PersonListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    private val launchDebounced = LaunchDebouncer(viewModelScope)
+
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
-            DataLoadParams(), PersonDataSource.GetListParams()
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() }
+            )
         )
     }
 
@@ -55,19 +65,49 @@ class PersonListViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.people.asUiText(),
-                fabState = FabUiState(
-                    visible = true,
+                fabState = it.fabState.copy(
                     onClick = ::onClickAdd,
                     text = Res.string.person.asUiText(),
                     icon = FabUiState.FabIcon.ADD,
+                ),
+                searchState = AppBarSearchUiState(
+                    visible = true,
+                    searchText = "",
+                    onSearchTextChanged = ::onSearchTextChanged
                 )
             )
+        }
+
+        viewModelScope.launch {
+            accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
+                _appUiState.update { prev ->
+                    prev.copy(
+                        fabState = prev.fabState.copy(
+                            visible = selectedAcct?.person?.isAdminOrTeacher() == true
+                        )
+                    )
+                }
+            }
         }
 
         _uiState.update {
             it.copy(
                 persons = pagingSourceFactoryHolder
             )
+        }
+    }
+
+    fun onSearchTextChanged(text: String) {
+        _appUiState.update {
+            it.copy(
+                searchState = it.searchState.copy(
+                    searchText = text
+                )
+            )
+        }
+
+        launchDebounced.launch("") {
+            pagingSourceFactoryHolder.invalidate()
         }
     }
 

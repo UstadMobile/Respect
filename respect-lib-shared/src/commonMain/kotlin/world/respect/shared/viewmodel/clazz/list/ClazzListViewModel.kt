@@ -1,9 +1,11 @@
 package world.respect.shared.viewmodel.clazz.list
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -25,6 +27,7 @@ import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -61,8 +64,7 @@ class ClazzListViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.classes.asUiText(),
-                fabState = FabUiState(
-                    visible = true,
+                fabState = it.fabState.copy(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.clazz.asUiText(),
                     onClick = ::onClickAdd
@@ -88,6 +90,17 @@ class ClazzListViewModel(
             )
         }
 
+        viewModelScope.launch {
+            accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
+                _appUiState.update { prev ->
+                    prev.copy(
+                        fabState = prev.fabState.copy(
+                            visible = selectedAcct?.person?.isAdminOrTeacher() == true
+                        )
+                    )
+                }
+            }
+        }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

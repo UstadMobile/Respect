@@ -20,6 +20,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
@@ -56,7 +57,7 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
-            respectAccountManager.activeAccountAndPersonFlow.collect { accountAndPerson ->
+            respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
                     prev.copy(selectedAccount = accountAndPerson)
                 }
@@ -65,7 +66,7 @@ class AccountListViewModel(
 
         viewModelScope.launch {
             respectAccountManager.accounts.combine(
-                respectAccountManager.activeAccountFlow
+                respectAccountManager.selectedAccountFlow
             ) { storedAccounts, activeAccount ->
                 Pair(storedAccounts, activeAccount)
             }.collectLatest { (storedAccounts, activeAccount) ->
@@ -149,6 +150,17 @@ class AccountListViewModel(
 
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(NavCommand.Navigate(GetStartedScreen))
+    }
+    fun onClickProfile() {
+        uiState.value.selectedAccount?.also {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    PersonDetail(
+                        guid = it.account.userGuid
+                    )
+                )
+            )
+        }
     }
 
 

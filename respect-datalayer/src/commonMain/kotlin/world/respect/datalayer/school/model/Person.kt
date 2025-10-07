@@ -1,5 +1,6 @@
 package world.respect.datalayer.school.model
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.shared.ModelWithTimes
@@ -40,6 +41,7 @@ data class Person(
     val pronouns: String? = null,
     val roles: List<PersonRole>,
     val relatedPersonUids: List<String> = emptyList(),
+    val dateOfBirth: LocalDate? = null,
 ): ModelWithTimes {
 
     companion object {

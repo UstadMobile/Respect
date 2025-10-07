@@ -1,6 +1,7 @@
 package world.respect.datalayer.ext
 
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
@@ -62,9 +63,10 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
                 )
             )
         }
-    }catch(e: Throwable) {
+    }catch(t: Throwable) {
+        Napier.d("Exception loading $url", t)
         DataErrorResult(
-            error = e,
+            error = t,
             metaInfo = DataLoadMetaInfo(url = url)
         )
     }

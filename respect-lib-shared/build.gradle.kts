@@ -72,6 +72,7 @@ kotlin {
             implementation(libs.jsoup)
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.webauthn4j.core)
         }
 
         jvmTest.dependencies {
@@ -83,6 +84,7 @@ kotlin {
             implementation(libs.ktor.server.conditional.headers)
             implementation(libs.ktor.client.core)
             implementation(libs.koin.test)
+            implementation(libs.mockito.kotlin)
         }
 
         commonTest.dependencies {

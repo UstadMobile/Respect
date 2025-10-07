@@ -8,7 +8,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
@@ -356,8 +356,9 @@ class CreateAccount(
     val type = profileType
 
     @Transient
-    val respectRedeemInviteRequest : RespectRedeemInviteRequest =
-        Json.decodeFromString(inviteRedeemRequestStr)
+    val respectRedeemInviteRequest : RespectRedeemInviteRequest = Json.decodeFromString(
+        inviteRedeemRequestStr
+    )
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
@@ -450,6 +451,16 @@ object PersonList : RespectAppRoute
 
 @Serializable
 data class PersonDetail(
+    val guid: String,
+) : RespectAppRoute
+
+@Serializable
+data class PasskeyList(
+    val guid: String,
+) : RespectAppRoute
+
+@Serializable
+data class ManageAccount(
     val guid: String,
 ) : RespectAppRoute
 

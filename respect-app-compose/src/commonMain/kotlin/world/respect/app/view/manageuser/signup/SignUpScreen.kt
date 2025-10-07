@@ -75,7 +75,9 @@ fun SignupScreen(
 
         RespectExposedDropDownMenuField(
             value = uiState.personInfo.gender,
-            label = uiState.genderLabel,
+            label = {
+                uiState.genderLabel?.also { Text(uiTextStringResource(it)) }
+            },
             options = PersonGenderEnum.entries.filterNot { it == PersonGenderEnum.UNSPECIFIED },
             onOptionSelected = { onGenderChanged(it) },
             itemText = { gender ->

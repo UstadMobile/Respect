@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -25,6 +26,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
+import world.respect.shared.generated.resources.settings
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 
@@ -39,6 +41,7 @@ fun AccountListScreen(
         onClickAddAccount = viewModel::onClickAddAccount,
         onClickLogout = viewModel::onClickLogout,
         onClickProfile = viewModel::onClickProfile,
+        onClickSettings = viewModel::onClickSettings
     )
 }
 
@@ -49,6 +52,7 @@ fun AccountListScreen(
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
+    onClickSettings: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -97,6 +101,19 @@ fun AccountListScreen(
                 Icon(Icons.Default.Add, contentDescription = "")
             }
         )
+
+        ListItem(
+            modifier = Modifier.clickable {
+                onClickSettings()
+            },
+            headlineContent = {
+                Text(stringResource(Res.string.settings))
+            },
+            leadingContent = {
+                Icon(Icons.Default.Settings, contentDescription = "Settings Option")
+            }
+        )
+
 
         HorizontalDivider()
 

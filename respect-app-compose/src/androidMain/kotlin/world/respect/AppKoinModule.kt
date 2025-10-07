@@ -174,6 +174,10 @@ import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewMode
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import java.io.File
+import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
+import world.respect.shared.viewmodel.settings.SettingViewModel
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -274,6 +278,10 @@ val appKoinModule = module {
     viewModelOf(::ReportFilterEditViewModel)
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
+    viewModelOf(::SettingViewModel)
+    viewModelOf(::SchoolDirectoryListViewModel)
+    viewModelOf(::SchoolDirectoryEditViewModel)
+
 
 
     single<GetOfflineStorageOptionsUseCase> {

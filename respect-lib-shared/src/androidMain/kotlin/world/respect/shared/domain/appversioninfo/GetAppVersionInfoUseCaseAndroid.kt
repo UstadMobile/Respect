@@ -35,8 +35,8 @@ class GetAppVersionInfoUseCaseAndroid(
                             Res.readBytes("files/buildinfo.properties")
                         )
                     )
-                }catch(e: Exception) {
-                    Napier.w("Failed to load build info properties", e)
+                }catch(t: Throwable) {
+                    Napier.w("Failed to load build info properties", t)
                     buildInfoProperties.setProperty("loadfailed", "dontloadagain")
                 }
             }

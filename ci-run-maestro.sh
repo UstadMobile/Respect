@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/4/artifact/build/distributions/testservercontroller-0.0.4.zip"
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.4"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/6/artifact/build/distributions/testservercontroller-0.0.6.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.6"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
@@ -81,7 +81,6 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
     -P:ktor.deployment.shutdown.url=/shutdown \
-    -P:testservercontroller.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
 TESTCONTROLLER_PID=$!

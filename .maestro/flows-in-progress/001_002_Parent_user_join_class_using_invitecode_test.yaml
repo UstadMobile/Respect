@@ -9,6 +9,7 @@ onFlowStart:
         DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
@@ -64,8 +65,8 @@ onFlowStart:
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "Parent User"
-#- tapOn: "Gender"
-#- tapOn: "Female"
+- tapOn: "Gender"
+- tapOn: "Female"
 #- tapOn: "Your date of birth"
 #- runScript:
 #    file: "common/setDate.js"
@@ -88,8 +89,8 @@ onFlowStart:
     text: "Child Profile"
 - tapOn: "Child's name*"
 - inputText: "Child user"
-#- tapOn: "Gender"
-#- tapOn: "Male"
+- tapOn: "Gender"
+- tapOn: "Male"
 #- tapOn: "Child date of birth"
 #- runScript:
 #    file: "common/setDate.js"

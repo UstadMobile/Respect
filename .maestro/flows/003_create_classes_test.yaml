@@ -9,6 +9,7 @@ onFlowStart:
         DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 
@@ -25,20 +26,7 @@ onFlowStart:
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course Description"
-#- tapOn: "Start date"
-#- runScript:
-#      file: "subflows/setDate.js"
-#- inputText: ${output.yesterdayDate}
-#- tapOn: "End date"
-#- runScript:
-#      file: "subflows/setDate.js"
-#- inputText: ${output.tomorrowDate}
 - tapOn: "Save"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Classes"
-#- assertVisible: "New Class"
-#- tapOn: "New Class"
 - assertVisible:
     id: "app_title"
     text: "New Class"
@@ -51,16 +39,9 @@ onFlowStart:
 - eraseText
 - inputText: "New Class Edited"
 - tapOn: "Save"
-#- assertVisible:
-#      id: "app_title"
-#      text: "Classes"
 - assertVisible: "New Class Edited"
 - tapOn: "New Class Edited"
 - assertVisible: "Description"
-#- assertVisible: "New Course Description"
-#- assertVisible: "Start date"
-#- assertVisible: "End date"
-
 - assertVisible: "Teachers"
 - assertVisible: "Add teacher"
 - assertVisible: "Students"

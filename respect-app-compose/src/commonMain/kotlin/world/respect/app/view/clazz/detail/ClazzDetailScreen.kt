@@ -29,9 +29,12 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.teacher
+import world.respect.shared.generated.resources.student
 import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.description
@@ -115,13 +118,9 @@ fun ClazzDetailScreen(
                     )
                 },
 
-                /**Description field needed**/
-
-                /* supportingContent = {
-                     Text(
-                        uiState.clazzDetail?.description
-                     )
-                 }*/
+                supportingContent = {
+                    Text(text = uiState.clazz.dataOrNull()?.description ?: "")
+                }
             )
         }
 
@@ -149,9 +148,11 @@ fun ClazzDetailScreen(
                         .clickable { onTogglePendingSection() },
                     headlineContent = {
                         Text(
-                            text = stringResource(
-                                resource = Res.string.pending_requests
-                            )
+                            text = stringResource(Res.string.pending_requests)
+                                    + " (${
+                                pendingTeacherLazyPagingItems.itemCount
+                                        + pendingStudentLazyPagingItems.itemCount
+                            })"
                         )
                     },
                     trailingContent = {
@@ -194,10 +195,17 @@ fun ClazzDetailScreen(
                         )
                     },
                     headlineContent = {
-                        Text(text = person?.fullName() ?: "")
+                        Text(
+                            text = "${
+                                person?.fullName().orEmpty()
+                            } ${stringResource(Res.string.teacher)}"
+                        )
                     },
                     supportingContent = {
-                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                        Text(
+                            text = (person?.gender?.value ?: "") +
+                                    ", ${person?.dateOfBirth?.toString() ?: ""}"
+                        )
                     },
                     trailingContent = {
                         Row {
@@ -239,10 +247,17 @@ fun ClazzDetailScreen(
                         )
                     },
                     headlineContent = {
-                        Text(text = person?.fullName() ?: "")
+                        Text(
+                            text = "${
+                                person?.fullName().orEmpty()
+                            } ${stringResource(Res.string.student)}"
+                        )
                     },
                     supportingContent = {
-                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                        Text(
+                            text = (person?.gender?.value ?: "") +
+                                    ", ${person?.dateOfBirth?.toString() ?: ""}"
+                        )
                     },
                     trailingContent = {
                         Row {
@@ -299,7 +314,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if(uiState.isTeachersExpanded) {
+        if (uiState.isTeachersExpanded) {
             item("add_teacher") {
                 ListItem(
                     modifier = Modifier.clickable {

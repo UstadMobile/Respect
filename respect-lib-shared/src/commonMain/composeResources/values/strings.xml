@@ -342,6 +342,9 @@
     <string name="person">Person</string>
     <string name="back">Back</string>
 
+    <string name="teacher">Teacher</string>
+    <string name="student">Student</string>
+
     <string name="expand_pending_invites">Expand Pending invites list</string>
     <string name="collapse_pending_invites">Collapse pending invites list</string>
 

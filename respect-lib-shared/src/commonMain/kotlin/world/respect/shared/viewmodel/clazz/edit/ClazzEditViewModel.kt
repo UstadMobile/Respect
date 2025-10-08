@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -85,7 +84,7 @@ class ClazzEditViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             if (route.guid != null) {
                 loadEntity(
                     json = json,
@@ -137,7 +136,7 @@ class ClazzEditViewModel(
             _uiState.update { prev -> prev.copy(clazzNameError = null) }
         }
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             try {
                 schoolDataSource.classDataSource.store(listOf(clazz))
                 if (route.guid == null) {

@@ -15,10 +15,8 @@
 #    or by string substitution (e.g. https://portnum.example.org/ where a reverse proxy is setup).
 # d) Maestro test calls /stop?port=(portnum) to stop the server.
 
-echo $(realpath $BASH_SOURCE)
-
 # TESTSERVER_WORKSPACE and TESSTSERVER_PORT is set by TestServerController.
-echo "Workspace = $TESTSERVER_WORKSPACE"
+echo "ci-run-test-server.sh: Workspace = $TESTSERVER_WORKSPACE Port=$TESTSERVER_PORT"
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 
@@ -32,11 +30,18 @@ mkdir -p $DATADIR
 # Set the directory server admin authentication (passed from the TestServerController)
 echo $DIR_ADMIN_AUTH > $DATADIR/dir-admin.txt
 
-echo "ci-run-test-server.sh: saved admin auth ($DIR_ADMIN_AUTH) to $DATADIR/dir-admin.txt"
+echo "ci-run-test-server.sh: saved admin auth to $DATADIR/dir-admin.txt"
+
+export JAVA_OPTS="-Dlogs_dir=$TESTSERVER_WORKSPACE/logs/"
+echo "ci-run-test-server.sh starting server :"
+echo $TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
+          -P:ktor.deployment.port=$TESTSERVER_PORT \
+          -P:ktor.deployment.shutdown.url=/shutdown \
+          -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
 
 # Could set the credentials required to create a new instance here.
 $TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
      -P:ktor.deployment.port=$TESTSERVER_PORT \
      -P:ktor.deployment.shutdown.url=/shutdown \
-     -p:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
+     -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
 

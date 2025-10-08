@@ -1,12 +1,10 @@
 package world.respect.shared.viewmodel.apps.enterlink
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_link
 import world.respect.shared.generated.resources.invalid_url
@@ -53,7 +51,7 @@ class EnterLinkViewModel(
     }
 
     fun onClickNext() {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             try {
                 val linkUrl = Url(uiState.value.linkUrl)
                 val appResult = appDataSource.compatibleAppsDataSource.getApp(

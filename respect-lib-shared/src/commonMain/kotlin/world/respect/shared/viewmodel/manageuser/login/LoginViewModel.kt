@@ -170,7 +170,7 @@ class LoginViewModel(
     }
 
     fun onClickLogin() {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             val username = uiState.value.username
             val password = uiState.value.password
 
@@ -187,8 +187,8 @@ class LoginViewModel(
                 )
             }
 
-            if (uiState.value.usernameError!=null || uiState.value.passwordError!=null) {
-                return@launch
+            if (uiState.value.usernameError != null || uiState.value.passwordError != null) {
+                return@launchWithLoadingIndicator
             }
 
             viewModelScope.launch {

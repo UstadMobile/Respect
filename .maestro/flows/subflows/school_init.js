@@ -30,9 +30,10 @@ if(isSetUrl(TESTCONTROLLER_URL)) {
     );
 
     console.log("Response body = " + testControllerResponse.body);
+    const responseJson = json(testControllerResponse.body);
 
-
-    const serverUrl = json(testControllerResponse.body).url;
+    const serverUrl = isSetUrl(URL_SUBSTITUTION) ?
+        URL_SUBSTITUTION.replace("_PORT_", responseJson.port) : responseJson.url;
 
     console.log("RESPECT server started on url " + serverUrl);
     console.log("RESPECT dir admin Auth: " + DIR_ADMIN_AUTH_HEADER);

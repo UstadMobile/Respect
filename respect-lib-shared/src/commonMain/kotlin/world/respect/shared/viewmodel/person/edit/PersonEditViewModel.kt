@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -78,13 +77,12 @@ class PersonEditViewModel(
                 actionBarButtonState = ActionBarButtonUiState(
                     onClick = ::onClickSave,
                     text = Res.string.save.asUiText(),
-                    enabled = false,
                     visible = true,
                 )
             )
         }
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             if(route.guid != null) {
                 loadEntity(
                     json = json,
@@ -111,12 +109,6 @@ class PersonEditViewModel(
                     )
                 }
             }
-
-            _appUiState.update { prev ->
-                prev.copy(
-                    actionBarButtonState = prev.actionBarButtonState.copy(enabled = true)
-                )
-            }
         }
     }
 
@@ -135,7 +127,7 @@ class PersonEditViewModel(
             lastModified = Clock.System.now(),
         ) ?: return
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             try {
                 schoolDataSource.personDataSource.store(listOf(person))
 
@@ -148,7 +140,7 @@ class PersonEditViewModel(
                 }else {
                     _navCommandFlow.tryEmit(NavCommand.PopUp())
                 }
-            }catch(e: Throwable) {
+            }catch(_: Throwable) {
                 //needs to display snack bar here
             }
         }

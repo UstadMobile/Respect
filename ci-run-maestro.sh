@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/8/artifact/build/distributions/testservercontroller-0.0.7.zip"
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.7"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 

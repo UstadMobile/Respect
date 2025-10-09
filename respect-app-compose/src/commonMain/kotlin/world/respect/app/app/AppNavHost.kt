@@ -37,6 +37,7 @@ import world.respect.app.view.person.edit.PersonEditScreen
 import world.respect.app.view.person.list.PersonListScreen
 import world.respect.app.view.person.manageaccount.ManageAccountScreen
 import world.respect.app.view.person.passkeyList.PasskeyListScreen
+import world.respect.app.view.person.setusernameandpassword.SetUsernameAndPasswordScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -96,6 +97,7 @@ import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -474,6 +476,15 @@ fun AppNavHost(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController
+                )
+            )
+        }
+
+        composable<SetUsernameAndPassword> {
+            SetUsernameAndPasswordScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
                 )
             )
         }

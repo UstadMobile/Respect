@@ -10,6 +10,7 @@ import world.respect.libutil.util.throwable.ForbiddenException
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 import kotlin.text.toCharArray
+import kotlin.time.Clock
 
 class SetPasswordUseDbImpl(
     private val schoolDb: RespectSchoolDatabase,
@@ -27,14 +28,18 @@ class SetPasswordUseDbImpl(
 
             val keyFactory = SecretKeyFactory.getInstance(KEY_ALGO)
 
+            val now = Clock.System.now()
             schoolDb.getPersonPasswordEntityDao().upsert(
                 PersonPasswordEntity(
-                    pppGuid = xxHash.hash(request.userGuid),
+                    ppwGuid = request.userGuid,
+                    ppwGuidNum = xxHash.hash(request.userGuid),
                     authAlgorithm = KEY_ALGO,
                     authEncoded = keyFactory.generateSecret(keySpec).encoded.encodeBase64(),
                     authSalt = salt,
                     authIterations = DEFAULT_ITERATIONS,
                     authKeyLen = DEFAULT_KEY_LEN,
+                    ppwStored = now,
+                    ppwLastModified = now,
                 )
             )
         }else {

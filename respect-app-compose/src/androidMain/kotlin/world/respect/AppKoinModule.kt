@@ -99,6 +99,8 @@ import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseAndroid
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCaseClient
 import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
@@ -164,6 +166,7 @@ import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
@@ -274,7 +277,7 @@ val appKoinModule = module {
     viewModelOf(::ReportFilterEditViewModel)
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
-
+    viewModelOf(::SetUsernameAndPasswordViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -493,6 +496,10 @@ val appKoinModule = module {
 
     single<GetWarningsUseCase> {
         GetWarningsUseCaseAndroid()
+    }
+
+    single<EncryptPersonPasswordUseCase> {
+        EncryptPersonPasswordUseCaseImpl()
     }
 
     /**

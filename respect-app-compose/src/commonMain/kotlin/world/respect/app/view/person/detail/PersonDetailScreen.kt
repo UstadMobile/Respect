@@ -22,6 +22,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.viewmodel.person.detail.PersonDetailUiState
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.username_label
@@ -35,14 +36,16 @@ fun PersonDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     PersonDetailScreen(
         uiState = uiState,
-        onClickManageAccount = { viewModel.navigateToManageAccount() }
+        onClickManageAccount = { viewModel.navigateToManageAccount() },
+        onClickCreateAccount = viewModel::onClickCreateAccount,
     )
 }
 
 @Composable
 fun PersonDetailScreen(
     uiState: PersonDetailUiState,
-    onClickManageAccount:()->Unit
+    onClickManageAccount:() -> Unit,
+    onClickCreateAccount: () -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     Column(
@@ -54,6 +57,14 @@ fun PersonDetailScreen(
                     labelText = stringResource(Res.string.manage_account),
                     imageVector = Icons.Default.Key,
                     onClick = onClickManageAccount
+                )
+            }
+
+            if(uiState.createAccountVisible){
+                RespectQuickActionButton(
+                    labelText = stringResource(Res.string.create_account),
+                    imageVector = Icons.Default.Key,
+                    onClick = onClickCreateAccount,
                 )
             }
         }

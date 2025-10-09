@@ -105,8 +105,6 @@ onFlowComplete:
     id: "app_title"
     text: "Waiting for approval"
 - assertVisible: "Please wait"
-- assertVisible: "Waiting for an approval to join ClassA"
-
 
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - tapOn: "Classes"

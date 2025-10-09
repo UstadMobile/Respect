@@ -11,6 +11,7 @@ import kotlinx.datetime.LocalDate
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
@@ -56,14 +57,10 @@ data class SignupUiState(
 
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
-) : RespectViewModel(savedStateHandle), KoinScopeComponent  {
-
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+   private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle)  {
 
     private val route: SignupScreen = savedStateHandle.toRoute()
-
-    val addChildAccountUseCase : AddChildAccountUseCase by inject()
 
     private val _uiState = MutableStateFlow(SignupUiState())
 
@@ -178,7 +175,10 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {
-
+                        val scope: Scope = accountManager.requireSelectedAccountScope()
+                        val addChildAccountUseCase : AddChildAccountUseCase by lazy {
+                            scope.get()
+                        }
                         addChildAccountUseCase(
                             personInfo = personInfo,
                             parentUsername = route.respectRedeemInviteRequest.account.username,

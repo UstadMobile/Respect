@@ -8,5 +8,5 @@ appId: world.respect.app
 
 - tapOn:
     text: ${SCHOOL_NAME}
-    childOf:
-      id: "schools_list"
+    below:
+      id: "school_name"

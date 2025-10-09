@@ -4,9 +4,11 @@ import io.ktor.client.HttpClient
 import io.ktor.http.Url
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.school.IndicatorDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
 import world.respect.datalayer.http.school.PersonDataSourceHttp
+import world.respect.datalayer.http.school.ReportDataSourceHttp
 import world.respect.datalayer.http.school.PersonPasskeyDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.IndicatorDataSource
@@ -34,7 +36,6 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
-
     override val personPasskeyDataSource: PersonPasskeyDataSource by lazy {
         PersonPasskeyDataSourceHttp(
             schoolUrl = schoolUrl,
@@ -44,11 +45,26 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
-    override val reportDataSource: ReportDataSource
-        get() = TODO("Not yet implemented")
+    override val reportDataSource: ReportDataSource by lazy {
+        ReportDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
 
-    override val indicatorDataSource: IndicatorDataSource
-        get() = TODO("Not yet implemented")
+
+    override val indicatorDataSource: IndicatorDataSource by lazy {
+        IndicatorDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
 
     override val classDataSource: ClassDataSource by lazy {
         ClassDataSourceHttp(

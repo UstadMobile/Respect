@@ -37,10 +37,12 @@ import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
+import world.respect.server.routes.school.respect.IndicatorRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.routes.school.respect.ReportRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
@@ -204,6 +206,8 @@ fun Application.module() {
                         PersonPasskeyRoute()
                         ClassRoute()
                         EnrollmentRoute()
+                        ReportRoute()
+                        IndicatorRoute()
                     }
                 }
             }

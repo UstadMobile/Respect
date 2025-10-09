@@ -202,10 +202,7 @@ fun ClazzDetailScreen(
                         )
                     },
                     supportingContent = {
-                        Text(
-                            text = (person?.gender?.value ?: "") +
-                                    ", ${person?.dateOfBirth?.toString() ?: ""}"
-                        )
+                        Text(text = person?.gender?.value?:"")
                     },
                     trailingContent = {
                         Row {
@@ -255,9 +252,7 @@ fun ClazzDetailScreen(
                     },
                     supportingContent = {
                         Text(
-                            text = (person?.gender?.value ?: "") +
-                                    ", ${person?.dateOfBirth?.toString() ?: ""}"
-                        )
+                            text = person?.gender?.value ?: "")
                     },
                     trailingContent = {
                         Row {

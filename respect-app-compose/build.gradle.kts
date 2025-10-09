@@ -128,6 +128,7 @@ kotlin {
             implementation(libs.koalaplot)
             implementation(libs.kotlinx.io.core)
             implementation(libs.androidx.paging.compose)
+            implementation(libs.libphonenumber)
         }
 
         desktopMain.dependencies {

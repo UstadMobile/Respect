@@ -63,8 +63,8 @@ onFlowComplete:
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "Child User"
-- tapOn: "Gender"
-- tapOn: "Female"
+#- tapOn: "Gender"
+#- tapOn: "Female"
 #- tapOn: "Your date of birth"
 #- runScript:
 #    file: "common/setDate.js"

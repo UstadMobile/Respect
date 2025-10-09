@@ -6,7 +6,10 @@ import androidx.compose.runtime.Composable
 expect fun rememberFormattedDateTime(
     timeInMillis: Long,
     timeZoneId: String,
-    joinDateAndTime: (date: String, time: String) -> String = { date, time ->
+    joinDateAndTime: (
+        @ParameterName(name = "date") String,
+        @ParameterName(name = "time") String
+    ) -> String = { date, time ->
         "$date $time"
     },
 ): String

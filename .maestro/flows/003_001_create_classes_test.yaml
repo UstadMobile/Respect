@@ -10,6 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "003_001_create_classes_test"
 
 onFlowComplete:
   - runScript:

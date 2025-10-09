@@ -81,11 +81,13 @@
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
+    <string name="manage_account">Manage account</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="name">Name</string>
     <string name="other_options">Other options</string>
     <string name="something_went_wrong">Something went wrong.</string>
     <string name="waiting_title">Waiting for approval</string>
@@ -154,6 +156,8 @@
     <string name="sign_in_faster">Sign in faster next time</string>
     <string name="sign_in_faster_description">You can sign in securely with your passkey using your fingerprints, face or other screen-lock method.</string>
     <string name="sign_up_with_passkey">Sign up with a passkey</string>
+    <string name="create_passkey">Create passkey</string>
+    <string name="passkey">Passkey</string>
 
 
     <string name="add_account">Add account</string>
@@ -354,4 +358,29 @@
     <string name="edit_person">Edit person</string>
 
     <string name="first_names">First names</string>
+    <string name="security">Security</string>
+
+    <string name="passkeys">Passkeys</string>
+    <string name="manage">Manage</string>
+    <string name="change_password">Change password</string>
+    <string name="created">Created</string>
+    <string name="last_updated">Last Updated</string>
+    <string name="delete_this_passkey">Delete this passkey?</string>
+    <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
+
+    <string name="toggle_visibility">toggle visibility</string>
+    <string name="username_too_short">Username must be at least 3 characters</string>
+    <string name="username_too_long">Username must be less than 30 characters</string>
+    <string name="username_starts_with_number">Username cannot start with a number</string>
+    <string name="invalid_username">Username must be 3 to 30 characters, use only letters, avoid spaces or special symbols.</string>
+
+    <string name="created_at">Created at</string>
+    <string name="at">at</string>
+    <string name="key_created_on">Key created on</string>
+
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+
+    <string name="app_version">App version</string>\
+    <string name="android6_warning">Your device is running Android 6, which is not fully supported. You may experience issues. We recommend using Android 7 or higher</string>
 </resources>

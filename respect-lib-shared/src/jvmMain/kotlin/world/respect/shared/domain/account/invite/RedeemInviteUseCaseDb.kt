@@ -1,29 +1,37 @@
 package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
+import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.credentials.passkey.RespectPasskeyCredential
+import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.RespectUserHandle
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.toEntity
+import world.respect.datalayer.school.adapters.toPersonPasskey
+import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
-import world.respect.shared.domain.account.addpasskeyusecase.SavePersonPasskeyUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithPasskeyUseCase
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import java.lang.IllegalArgumentException
 
 /**
- * Server-side use case that
+ * Server-side use case that handles redeeming an invite
  */
 class RedeemInviteUseCaseDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -31,20 +39,19 @@ class RedeemInviteUseCaseDb(
     private val schoolUrl: Url,
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator,
     private val setPasswordUseCase: SetPasswordUseCase,
-    private val savePasskeyUseCase: SavePersonPasskeyUseCase,
-    private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase,
-    private val getTokenAndUserProfileWithPasskeyUseCase: GetTokenAndUserProfileWithPasskeyUseCase,
+    private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
+    private val json: Json,
+    private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
 ): RedeemInviteUseCase, KoinComponent {
 
     fun RespectRedeemInviteRequest.PersonInfo.toPerson(
         role: PersonRoleEnum,
         username: String,
+        guid: String,
     ) : Person {
         return Person(
-            guid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                Person.TABLE_ID
-            ).toString(),
+            guid =  guid,
             status = PersonStatusEnum.PENDING_APPROVAL,
             givenName = name.substringBeforeLast(" "),
             familyName = name.substringAfterLast(" "),
@@ -76,12 +83,12 @@ class RedeemInviteUseCaseDb(
             throw IllegalArgumentException("Bad code").withHttpStatus(400)
         }
 
-        val accountGuid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-            Person.TABLE_ID
-        ).toString()
+        val accountGuid = redeemRequest.account.guid
 
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
-            redeemRequest.role, redeemRequest.account.username
+            role = redeemRequest.role,
+            username = redeemRequest.account.username,
+            guid = accountGuid,
         )
 
         val schoolDataSourceVal = schoolDataSource(
@@ -92,7 +99,7 @@ class RedeemInviteUseCaseDb(
         val credential = redeemRequest.account.credential
 
         val authResponse = when(credential) {
-            is RespectRedeemInviteRequest.RedeemInvitePasswordCredential ->{
+            is RespectPasswordCredential ->{
                 setPasswordUseCase(
                     SetPasswordUseCase.SetPasswordRequest(
                         authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
@@ -101,21 +108,50 @@ class RedeemInviteUseCaseDb(
                     )
                 )
 
-                getTokenAndUserProfileUseCase(
-                    username = redeemRequest.account.username,
-                    password = credential.password,
-                )
+                getTokenAndUserProfileUseCase(credential)
             }
-            is RespectRedeemInviteRequest.RedeemInvitePasskeyCredential -> {
-                savePasskeyUseCase(
-                    SavePersonPasskeyUseCase.Request(
-                        authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
-                        userGuid = accountPerson.guid,
-                        passkeyWebAuthNResponse = credential.authResponseJson
+
+            is RespectPasskeyCredential -> {
+                val passkeyCreatedResult = CreatePasskeyUseCase.PasskeyCreatedResult(
+                    respectUserHandle = RespectUserHandle(
+                        personUidNum = uidNumberMapper(accountGuid),
+                        schoolUrl = schoolUrl
+                    ),
+                    authenticationResponseJSON = credential.passkeyWebAuthNResponse,
+                    passkeyProviderInfo = getPasskeyProviderInfoUseCase(
+                        credential.passkeyWebAuthNResponse.response.authenticatorData
                     )
                 )
 
-                getTokenAndUserProfileWithPasskeyUseCase(credential.authResponseJson)
+                schoolDataSourceVal.personPasskeyDataSource.store(
+                    listOf(
+                        passkeyCreatedResult.toPersonPasskey(
+                            json = json,
+                            personGuid = accountPerson.guid,
+                            deviceName = redeemRequest.deviceName ?: "Unknown device type",
+                        )
+                    )
+                )
+
+                val token = AuthToken(
+                    accessToken = randomString(32),
+                    timeCreated = System.currentTimeMillis(),
+                    ttl = TOKEN_DEFAULT_TTL,
+                )
+
+                val personGuidHash = uidNumberMapper(accountPerson.guid)
+                schoolDb.getAuthTokenEntityDao().insert(
+                    token.toEntity(
+                        pGuid = accountPerson.guid,
+                        pGuidHash = personGuidHash,
+                        deviceInfo = redeemRequest.deviceInfo,
+                    )
+                )
+
+                AuthResponse(
+                    token = token,
+                    person = accountPerson,
+                )
             }
         }
 

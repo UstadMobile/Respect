@@ -17,6 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.how_passkey_works
 import world.respect.shared.generated.resources.next
@@ -82,7 +87,15 @@ fun CreateAccountScreen(
                     )
                 )
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        !ValidateUsernameUseCase.isValidUsernameChar(
+                            keyEvent.utf16CodePoint.toChar()
+                        )
+                    } else false
+                }
         )
         if (uiState.passkeySupported) {
             Spacer(modifier = Modifier.height(16.dp))

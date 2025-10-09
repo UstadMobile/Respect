@@ -56,8 +56,8 @@ class OkHttpWebViewClient(
                         .url(request.url.toString())
                         .apply {
                             method(request.method, null)
-                            request.requestHeaders.forEach { headerName, headerVal ->
-                                header(headerName, headerVal)
+                            request.requestHeaders.entries.forEach {
+                                header(it.key, it.value)
                             }
                         }
                         .build()

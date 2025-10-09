@@ -7,11 +7,13 @@ import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.IndicatorDataSourceDb
 import world.respect.datalayer.db.school.PersonDataSourceDb
+import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
+import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 
 /**
@@ -32,6 +34,11 @@ class SchoolDataSourceDb(
     override val personDataSource: PersonDataSourceLocal by lazy {
         PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
+
+    override val personPasskeyDataSource: PersonPasskeyDataSourceLocal by lazy {
+        PersonPasskeyDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+    }
+
     override val reportDataSource: ReportDataSourceLocal by lazy {
         ReportDataSourceDb(schoolDb)
     }

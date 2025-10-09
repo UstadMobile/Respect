@@ -47,7 +47,7 @@ fun AccountListItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = account.person.fullName(),
+                        text = account.person.username ?: "",
                         maxLines = 1,
                         modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                     )

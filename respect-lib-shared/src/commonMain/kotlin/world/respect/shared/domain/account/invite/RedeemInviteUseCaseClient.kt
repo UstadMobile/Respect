@@ -7,7 +7,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import world.respect.credentials.passkey.RespectRedeemInviteRequest
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.AuthResponse
 

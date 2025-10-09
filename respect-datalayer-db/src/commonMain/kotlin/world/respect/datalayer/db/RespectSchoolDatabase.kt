@@ -6,7 +6,6 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import world.respect.datalayer.db.opds.daos.PersonPasskeyEntityDao
-import world.respect.datalayer.db.opds.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao
 import world.respect.datalayer.db.school.daos.PersonEntityDao
@@ -26,6 +25,7 @@ import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
@@ -48,8 +48,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         EnrollmentEntity::class,
         WriteQueueItemEntity::class,
     ],
-    version = 1,
-
+    version = 7,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

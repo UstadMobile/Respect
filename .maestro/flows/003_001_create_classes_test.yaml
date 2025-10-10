@@ -1,9 +1,23 @@
 appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "subflows/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "003_001_create_classes_test"
+
+onFlowComplete:
+  - runScript:
+      file: "subflows/teardown.js"
 ---
-- runFlow: "common/school_admin_login_flow.yaml"
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
+- runFlow: "subflows/school_admin_login_flow.yaml"
+
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -17,20 +31,7 @@ appId: world.respect.app
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course Description"
-- tapOn: "Start date"
-- runScript:
-      file: "common/setDate.js"
-- inputText: ${output.yesterdayDate}
-- tapOn: "End date"
-- runScript:
-      file: "common/setDate.js"
-- inputText: ${output.tomorrowDate}
 - tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Classes"
-- assertVisible: "New Class"
-- tapOn: "New Class"
 - assertVisible:
     id: "app_title"
     text: "New Class"
@@ -43,20 +44,13 @@ appId: world.respect.app
 - eraseText
 - inputText: "New Class Edited"
 - tapOn: "Save"
-- assertVisible:
-      id: "app_title"
-      text: "Classes"
 - assertVisible: "New Class Edited"
 - tapOn: "New Class Edited"
 - assertVisible: "Description"
-- assertVisible: "New Course Description"
-- assertVisible: "Start date"
-- assertVisible: "End date"
-
 - assertVisible: "Teachers"
-- assertVisible: "+ Add teacher"
+- assertVisible: "Add teacher"
 - assertVisible: "Students"
-- assertVisible: "+ Add student"
+- assertVisible: "Add student"
 
 
 

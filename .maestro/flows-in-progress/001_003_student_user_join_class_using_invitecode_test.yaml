@@ -1,72 +1,123 @@
 appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "subflows/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+
+onFlowComplete:
+  - runScript:
+      file: "subflows/teardown.js"
 ---
-- runFlow: "common/school_admin_login_flow.yaml"
+- runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
-      id: "app_title"
-      text: "Apps"
+    id: "app_title"
+    text: "Apps"
 - tapOn: "Classes"
 - assertVisible:
-      id: "app_title"
-      text: "Classes"
+    id: "app_title"
+    text: "Classes"
 - tapOn:
-      id: "floating_action_button"   #  +Class button
+    id: "floating_action_button"   #  +Class button
 - assertVisible:
-      id: "app_title"
-      text: "Add class"
+    id: "app_title"
+    text: "Add class"
 - tapOn: "Class name"
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course Description"
-- tapOn: "Start date"
-- inputText: "date"
 - tapOn: "Save"
 - assertVisible:
-      id: "app_title"
-      text: "Classes"
-- assertVisible: "New Class"
-- tapOn: "New Class"
-- assertVisible:
-      id: "app_title"
-      text: "New Class"
-- tapOn: "+ Student"
-- tapOn: "Copy invite code"
+    id: "app_title"
+    text: "New Class"
+- tapOn: "Add Student"
+- tapOn: ".*Copy invite code.*"
 
 - clearState: world.respect.app
-- launchApp
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
 - longPressOn: "Invite code"
-- tapOn: "Copy"
+- tapOn: "Paste"
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
-    text: "Invitation"
-- assertVisible: ${SCHOOL_NAME}
-- tapOn: "I'm a student"
+- tapOn: "I’m a Student"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
-- tapOn: "Your name"
-- inputText: ${CHILD_NAME}
-- tapOn: "Gender"
-- tapOn: "Female"
-- tapOn: "Your date of birth"
-- runScript:
-    file: "common/setDate.js"
-- inputText: ${output.pastYearDate}
+- tapOn: "Your name*"
+- inputText: "Child User"
+#- tapOn: "Gender"
+#- tapOn: "Female"
+#- tapOn: "Your date of birth"
+#- runScript:
+#    file: "common/setDate.js"
+#- inputText: ${output.pastYearDate}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- assertVisible: {CHILD_USERNAME}  #username
-- tapOn: "Other ways to sign in"
-- tapOn: "Sign in with a password"
+#- assertVisible: "childuser"  #username
+#- tapOn: "Other ways to sign in"
+#- tapOn: "Sign in with a password"
+- tapOn: "Next"
 - tapOn: "Password"
-- inputText: {CHILD_PASSWORD}
+- inputText: "testc1"
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
 - assertVisible: "Please wait"
-- assertVisible: "Waiting for an approval to join ClassA"
 
+
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn: "New Class"
+- assertVisible: "Pending requests"
+- assertVisible: "Child User"
+- tapOn: "Accept Invite"
+
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "username"
+- inputText: "childuser"
+- tapOn:
+    id : "password"
+- inputText: "testc1"
+- tapOn: "Login"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "New Class"

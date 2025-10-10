@@ -136,24 +136,25 @@ class RedeemInviteUseCaseDb(
         }
 
         //If a teacher/student, make the pending enrollment now
-        schoolDataSourceVal.enrollmentDataSource.store(
-            listOf(
-                Enrollment(
-                    uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                        Enrollment.TABLE_ID
-                    ).toString(),
-                    classUid = classUid,
-                    personUid = accountPerson.guid,
-                    role = if(redeemRequest.role == PersonRoleEnum.TEACHER) {
-                        EnrollmentRoleEnum.PENDING_TEACHER
-                    }else {
-                        EnrollmentRoleEnum.PENDING_STUDENT
-                    },
-                    inviteCode = redeemRequest.code,
+        if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
+            schoolDataSourceVal.enrollmentDataSource.store(
+                listOf(
+                    Enrollment(
+                        uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                            Enrollment.TABLE_ID
+                        ).toString(),
+                        classUid = classUid,
+                        personUid = accountPerson.guid,
+                        role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
+                            EnrollmentRoleEnum.PENDING_TEACHER
+                        } else {
+                            EnrollmentRoleEnum.PENDING_STUDENT
+                        },
+                        inviteCode = redeemRequest.code,
+                    )
                 )
             )
-        )
-
+        }
         return authResponse
     }
 }

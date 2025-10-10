@@ -121,8 +121,13 @@ fun GetStartedScreen(
             ) { index ->
                 val school = uiState.suggestions[index]
                 ListItem(
+                    modifier = Modifier
+                        .testTag("school_list_item")
+                        .fillMaxWidth()
+                        .clickable { onSchoolSelected(school) },
                     headlineContent = {
                         Text(
+                            modifier = Modifier.testTag("school_name_text"),
                             text = school.name.getTitle()
                         )
                     },
@@ -132,8 +137,6 @@ fun GetStartedScreen(
                             maxLines = 1
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
-                        .clickable { onSchoolSelected(school) }
                 )
             }
         }

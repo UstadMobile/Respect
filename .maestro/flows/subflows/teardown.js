@@ -11,7 +11,7 @@ function isSetUrl(value) {
  * Call the shutdown URL on the test server directly.
  */
 if(isSetUrl(TESTCONTROLLER_URL)) {
-    const stopUrl = output.SCHOOL_URL + "shutdown";
+    const stopUrl = output.SCHOOL_URL + "api/shutdown";
 
     const testControllerResponse = http.get(stopUrl);
     console.log("teardown.js: status="  + testControllerResponse.status + " (" + stopUrl + ")");

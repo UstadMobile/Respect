@@ -7,6 +7,5 @@ appId: world.respect.app
 - inputText: ${SCHOOL_NAME}
 
 - tapOn:
+    id: "school_name_text"
     text: ${SCHOOL_NAME}
-    below:
-      id: "school_name"

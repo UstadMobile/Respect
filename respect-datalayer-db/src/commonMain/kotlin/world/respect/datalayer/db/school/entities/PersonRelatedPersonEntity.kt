@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class PersonRelatedPersonEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val prpUid: Int = 0,
     val prpPersonUidNum: Long,
     val prpOtherPersonUid: String,

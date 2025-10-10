@@ -61,22 +61,35 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Your profile"
+
+# validating mandatory fields
+- tapOn: "Next"
+- assertVisible: "Required*" # Name is mandatory field
 - tapOn: "Your name*"
 - inputText: "Child User"
-#- tapOn: "Gender"
-#- tapOn: "Female"
-#- tapOn: "Your date of birth"
-#- runScript:
-#    file: "common/setDate.js"
-#- inputText: ${output.pastYearDate}
 - tapOn: "Next"
+- assertVisible: "Required*"  # Gender is a mandatory field
+- tapOn: "Gender"
+- tapOn: "Female"
+- tapOn: "Next"
+- assertVisible: "Required*" # DOB is mandatory field
+- tapOn: "Your date of birth*"
+- longPressOn: ".*1900.*"
+- tapOn: "Select all"
+- eraseText
+- runScript:
+    file: "subflows/setDate.js"
+- inputText: ${output.pastYearDateC}
+- tapOn: "Next"
+
 - assertVisible:
     id: "app_title"
     text: "Create account"
-#- assertVisible: "childuser"  #username
-#- tapOn: "Other ways to sign in"
-#- tapOn: "Sign in with a password"
+- assertVisible: "childuser"  #username
 - tapOn: "Next"
+- assertVisible: "Password"
+- tapOn: "Next"
+- assertVisible: "Required*" # Password is a mandatory field
 - tapOn: "Password"
 - inputText: "testc1"
 - tapOn: "Sign-up"
@@ -84,7 +97,6 @@ onFlowComplete:
     id: "app_title"
     text: "Waiting for approval"
 - assertVisible: "Please wait"
-
 
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - tapOn: "Classes"

@@ -202,7 +202,10 @@ fun ClazzDetailScreen(
                         )
                     },
                     supportingContent = {
-                        Text(text = person?.gender?.value ?: "")
+                        val gender = person?.gender?.value
+                        val dob = person?.dateOfBirth?.toString()
+
+                        Text(text = "Gender: $gender, DOB: $dob")
                     },
                     trailingContent = {
                         Row {
@@ -251,9 +254,10 @@ fun ClazzDetailScreen(
                         )
                     },
                     supportingContent = {
-                        Text(
-                            text = person?.gender?.value ?: ""
-                        )
+                        val gender = person?.gender?.value
+                        val dob = person?.dateOfBirth?.toString()
+
+                        Text(text = "Gender: $gender, DOB: $dob")
                     },
                     trailingContent = {
                         Row {
@@ -342,11 +346,11 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = teacher?.givenName ?: ""
+                            name = teacher?.fullName() ?: ""
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher?.username ?: "")
+                        Text(text = teacher?.fullName() ?: "")
                     }
                 )
             }
@@ -418,13 +422,13 @@ fun ClazzDetailScreen(
 
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = student?.givenName ?: ""
+                            name = student?.fullName() ?: ""
                         )
                     },
 
                     headlineContent = {
                         Text(
-                            text = student?.username ?: ""
+                            text = student?.fullName() ?: ""
                         )
                     }
                 )

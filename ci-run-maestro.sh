@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/3/artifact/build/distributions/testservercontroller-0.0.3.zip"
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.3"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
@@ -73,13 +73,14 @@ fi
 DIR_ADMIN_TO_ENCODE="admin:$DIR_ADMIN_AUTH_PASS"
 DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
 
-$TESTCONTROLLER_BIN -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
+export JAVA_OPTS="-Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/"
+$TESTCONTROLLER_BIN  \
+    -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
     -P:testservercontroller.portRange=$TEST_LEARNINGSPACE_PORTRANGE \
     -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
     -P:ktor.deployment.shutdown.url=/shutdown \
-    -P:testservercontroller.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
 TESTCONTROLLER_PID=$!

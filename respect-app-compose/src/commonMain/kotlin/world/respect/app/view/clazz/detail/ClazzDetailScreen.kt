@@ -345,7 +345,7 @@ fun ClazzDetailScreen(
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher?.givenName ?: "")
+                        Text(text = teacher?.username ?: "")
                     }
                 )
             }
@@ -423,7 +423,7 @@ fun ClazzDetailScreen(
 
                     headlineContent = {
                         Text(
-                            text = student?.givenName ?: ""
+                            text = student?.username ?: ""
                         )
                     }
                 )

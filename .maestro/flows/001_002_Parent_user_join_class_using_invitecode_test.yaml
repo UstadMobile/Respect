@@ -120,6 +120,7 @@ onFlowComplete:
 - runScript:
     file: "subflows/setDate.js"
 - inputText: ${output.pastYearDateC}
+- hideKeyboard
 - tapOn: "Done"
 - assertVisible:
     id: "app_title"

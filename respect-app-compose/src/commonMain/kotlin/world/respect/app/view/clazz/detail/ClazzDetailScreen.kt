@@ -97,7 +97,7 @@ fun ClazzDetailScreen(
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
-    fun Person?.key(role: EnrollmentRoleEnum, index: Int) : Any {
+    fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
             Pair(it, role)
         } ?: "${role}_$index"
@@ -141,7 +141,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0) {
+        if ((pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0) {
             item("pending_header") {
                 ListItem(
                     modifier = Modifier
@@ -198,11 +198,11 @@ fun ClazzDetailScreen(
                         Text(
                             text = "${
                                 person?.fullName().orEmpty()
-                            } ${stringResource(Res.string.teacher)}"
+                            } (${stringResource(Res.string.teacher)})"
                         )
                     },
                     supportingContent = {
-                        Text(text = person?.gender?.value?:"")
+                        Text(text = person?.gender?.value ?: "")
                     },
                     trailingContent = {
                         Row {
@@ -247,12 +247,13 @@ fun ClazzDetailScreen(
                         Text(
                             text = "${
                                 person?.fullName().orEmpty()
-                            } ${stringResource(Res.string.student)}"
+                            } (${stringResource(Res.string.student)})"
                         )
                     },
                     supportingContent = {
                         Text(
-                            text = person?.gender?.value ?: "")
+                            text = person?.gender?.value ?: ""
+                        )
                     },
                     trailingContent = {
                         Row {

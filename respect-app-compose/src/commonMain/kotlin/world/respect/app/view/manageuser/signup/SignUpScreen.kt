@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.LocalDate
@@ -87,12 +88,12 @@ fun SignupScreen(
             supportingText = {
                 uiState.genderError?.let { Text(uiTextStringResource(it)) }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("gender")
         )
 
 
         RespectLocalDateField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("dateOfBirth"),
             value = uiState.personInfo.dateOfBirth,
             onValueChange = {onDateOfBirthChanged(it) },
             isError = uiState.dateOfBirthError!=null,

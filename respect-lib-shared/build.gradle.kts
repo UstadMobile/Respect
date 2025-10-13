@@ -77,6 +77,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(projects.respectLibTest)
+            implementation(projects.respectLibSharedSe)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)

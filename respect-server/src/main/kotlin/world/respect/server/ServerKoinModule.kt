@@ -35,6 +35,7 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
+import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -58,6 +59,7 @@ import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
@@ -208,6 +210,15 @@ fun serverKoinModule(
                 xxHash = get(),
                 verifyPasskeyUseCase = get(),
                 respectAppDataSource = get(),
+                authenticatePasswordUseCase = get(),
+            )
+        }
+
+        scoped<AuthenticatePasswordUseCase> {
+            AuthenticatePasswordUseCaseDbImpl(
+                schoolDb = get(),
+                encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
             )
         }
 

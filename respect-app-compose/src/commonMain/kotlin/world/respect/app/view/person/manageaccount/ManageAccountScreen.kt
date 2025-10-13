@@ -40,7 +40,7 @@ fun ManageAccountScreen(
         uiState = uiState,
         onCreatePasskeyClick = viewModel::onCreatePasskeyClick,
         onClickManagePasskey = viewModel::onClickManagePasskey,
-        onClickChangePassword = viewModel::navigateToEditAccount,
+        onClickChangePassword = viewModel::onClickChangePassword,
         onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
     )
 

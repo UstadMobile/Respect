@@ -32,6 +32,7 @@ import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.onboarding.OnboardingScreen
+import world.respect.app.view.person.changepassword.ChangePasswordScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
 import world.respect.app.view.person.list.PersonListScreen
@@ -61,6 +62,7 @@ import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.AddPersonToClazz
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.Assignment
+import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ConfirmationScreen
@@ -482,6 +484,15 @@ fun AppNavHost(
 
         composable<SetUsernameAndPassword> {
             SetUsernameAndPasswordScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<ChangePassword> {
+            ChangePasswordScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

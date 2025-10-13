@@ -23,6 +23,7 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -74,6 +75,11 @@ class AuthWithPasswordIntegrationTest {
             xxHash = xxHash,
             verifyPasskeyUseCase = mock { },
             respectAppDataSource = mock { },
+            authenticatePasswordUseCase = AuthenticatePasswordUseCaseDbImpl(
+                schoolDb = schoolDb,
+                encryptPersonPasswordUseCase = EncryptPersonPasswordUseCaseImpl(),
+                uidNumberMapper = uidNumberMapper,
+            )
         )
 
         validateAuthUseCase = ValidateAuthorizationUseCaseDbImpl(schoolDb)

@@ -26,11 +26,11 @@ import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PasskeyList
-import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -150,12 +150,10 @@ class ManageAccountViewModel(
         }
     }
 
-    fun navigateToEditAccount() {
+    fun onClickChangePassword() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                PersonEdit(
-                    guid = route.guid
-                )
+                ChangePassword(guid = route.guid)
             )
         )
     }

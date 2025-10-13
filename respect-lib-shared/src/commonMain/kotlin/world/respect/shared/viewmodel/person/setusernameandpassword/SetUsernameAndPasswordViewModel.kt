@@ -57,6 +57,7 @@ class SetUsernameAndPasswordViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.create_account.asUiText(),
+                hideBottomNavigation = true,
                 actionBarButtonState = ActionBarButtonUiState(
                     text = Res.string.save.asUiText(),
                     visible = true,

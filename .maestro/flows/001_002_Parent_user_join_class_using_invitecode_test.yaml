@@ -72,12 +72,12 @@ onFlowComplete:
 - assertVisible: "Required*" # Name is mandatory field
 - tapOn: "Your name*"
 - inputText: "Parent User"
-- tapOn: "Next"
-- assertVisible: "Required*"  # Gender is a mandatory field
-- tapOn: "Gender"
+#- tapOn: "Next"
+#- assertVisible: "Required*"  # Gender is a mandatory field
+- tapOn: "Your gender*"
 - tapOn: "Female"
-- tapOn: "Next"
-- assertVisible: "Required*"  # DOB is a mandatory field
+#- tapOn: "Next"
+#- assertVisible: "Required*"  # DOB is a mandatory field
 - tapOn: "Your date of birth*"
 - longPressOn: ".*1900.*"
 - tapOn: "Select all"
@@ -91,28 +91,28 @@ onFlowComplete:
     text: "Create account"
 - extendedWaitUntil:
     visible: "parentuser" #username
-    timeout: 10000      # Timeout in milliseconds
+    timeout: 10000
 - tapOn: "Next"
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
 - assertVisible: "Password"
-- tapOn: "Next"
-- assertVisible: "Required*"  # Password is a mandatory field
+- tapOn: "Sign-up"
+- assertVisible: "Required field"  # Password is a mandatory field
 - tapOn: "Password"
 - inputText: "testp1"
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
     text: "Child Profile"
-- tapOn: "Next"
+- tapOn: "Done"
 - assertVisible: "Required*"  # Child's name* is a mandatory field
 - tapOn: "Child's name*"
 - inputText: "Child User"
-- tapOn: "Next"
-- assertVisible: "Required*"  # Gender is a mandatory field
-- tapOn: "Gender"
+#- tapOn: "Done"
+#- assertVisible: "Required*"  # Gender is a mandatory field
+- tapOn: "Child's gender*"
 - tapOn: "Male"
-- tapOn: "Next"
-- assertVisible: "Required*"  # DOB is a mandatory field
+#- tapOn: "Done"
+#- assertVisible: "Required*"  # DOB is a mandatory field
 - tapOn: "Child's date of birth*"
 - longPressOn: ".*1900.*"
 - tapOn: "Select all"

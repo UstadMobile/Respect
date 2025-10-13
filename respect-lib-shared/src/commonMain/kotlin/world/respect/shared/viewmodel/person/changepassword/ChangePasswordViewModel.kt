@@ -18,10 +18,13 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.change_password
+import world.respect.shared.generated.resources.invalid_password
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ChangePassword
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
@@ -42,6 +45,7 @@ class ChangePasswordViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
+    private val validatePasswordUseCase: ValidatePasswordUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -96,46 +100,78 @@ class ChangePasswordViewModel(
 
     fun onClickSave() {
         launchWithLoadingIndicator {
+            _uiState.update {
+                it.copy(
+                    oldPasswordError = null,
+                    newPasswordError = null,
+                    generalError = null,
+                )
+            }
+
             val person = schoolDataSource.personDataSource.findByGuid(
                 DataLoadParams(),route.guid
             ).dataOrNull() ?: return@launchWithLoadingIndicator
 
-            if(uiState.value.requireOldPassword) {
-                //check existing password
-                try {
-                    val usernameVal = person.username ?: throw IllegalStateException()
-                    authenticatePasswordUseCase(
-                        RespectPasswordCredential(usernameVal, _uiState.value.oldPassword)
-                    )
-                }catch(t: Throwable) {
-                    _uiState.update {
-                        it.copy(
-                            oldPasswordError = t.getUiTextOrGeneric()
+            try {
+                if(uiState.value.requireOldPassword) {
+                    //check existing password
+                    try {
+                        val usernameVal = person.username ?: throw IllegalStateException()
+                        authenticatePasswordUseCase(
+                            RespectPasswordCredential(usernameVal, _uiState.value.oldPassword)
                         )
+                    }catch(_: Throwable) {
+                        _uiState.update {
+                            it.copy(
+                                oldPasswordError = Res.string.invalid_password.asUiText(),
+                            )
+                        }
+
+                        return@launchWithLoadingIndicator
                     }
                 }
-            }
 
-            schoolDataSource.personPasswordDataSource.store(
-                listOf(
-                    encryptPersonPasswordUseCase(
-                        EncryptPersonPasswordUseCase.Request(
-                            personGuid = person.guid,
-                            password = uiState.value.newPassword,
+
+                val newPassword = _uiState.value.newPassword.trim()
+
+                try {
+                    validatePasswordUseCase(newPassword)
+                }catch(t: Throwable) {
+                    _uiState.update { it.copy(newPasswordError = t.getUiTextOrGeneric()) }
+                    return@launchWithLoadingIndicator
+                }
+
+                schoolDataSource.personPasswordDataSource.store(
+                    listOf(
+                        encryptPersonPasswordUseCase(
+                            EncryptPersonPasswordUseCase.Request(
+                                personGuid = person.guid,
+                                password = newPassword,
+                            )
                         )
                     )
                 )
-            )
+
+                _navCommandFlow.tryEmit(
+                    NavCommand.PopUp()
+                )
+            }catch(t: Throwable) {
+                _uiState.update {
+                    it.copy(
+                        generalError = t.getUiTextOrGeneric(),
+                    )
+                }
+            }
         }
     }
 
 
     fun onChangeOldPassword(oldPassword: String) {
-        _uiState.update { it.copy(oldPassword = oldPassword) }
+        _uiState.update { it.copy(oldPassword = oldPassword, oldPasswordError = null) }
     }
 
     fun onChangeNewPassword(newPassword: String) {
-        _uiState.update { it.copy(newPassword = newPassword) }
+        _uiState.update { it.copy(newPassword = newPassword, newPasswordError = null) }
     }
 
 }

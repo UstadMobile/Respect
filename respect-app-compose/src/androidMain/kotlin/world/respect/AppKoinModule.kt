@@ -104,6 +104,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
+import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -502,6 +503,10 @@ val appKoinModule = module {
 
     single<EncryptPersonPasswordUseCase> {
         EncryptPersonPasswordUseCaseImpl()
+    }
+
+    single<ValidatePasswordUseCase> {
+        ValidatePasswordUseCase()
     }
 
     /**

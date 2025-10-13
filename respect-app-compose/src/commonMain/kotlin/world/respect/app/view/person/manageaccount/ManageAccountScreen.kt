@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -141,10 +142,15 @@ fun ManageAccountScreen(
                 }
             },
             trailingContent = {
-                Text(
-                    modifier = Modifier.clickable { onClickChangePassword() },
-                    text = stringResource(Res.string.change_password),
-                )
+                OutlinedButton(
+                    onClick = {
+                        onClickChangePassword()
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.change),
+                    )
+                }
             }
         )
 

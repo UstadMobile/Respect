@@ -14,6 +14,8 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
+import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.save
@@ -41,6 +43,8 @@ class SetUsernameAndPasswordViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
+    private val filterUsernameUseCase: FilterUsernameUseCase,
+    private val validateUsernameUseCase: ValidateUsernameUseCase,
 ): RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -69,7 +73,7 @@ class SetUsernameAndPasswordViewModel(
 
 
     fun onUsernameChanged(username: String) {
-        _uiState.update { it.copy(username = username) }
+        _uiState.update { it.copy(username = filterUsernameUseCase(username, "")) }
     }
 
     fun onPasswordChanged(password: String) {
@@ -79,6 +83,18 @@ class SetUsernameAndPasswordViewModel(
     fun onClickSave() {
         launchWithLoadingIndicator {
             try {
+                val username = uiState.value.username.trim()
+                val usernameValidation = validateUsernameUseCase(username)
+                _uiState.update {
+                    it.copy(
+                        usernameErr = usernameValidation.errorMessage?.asUiText()
+                    )
+                }
+
+                if(usernameValidation.errorMessage != null)
+                    return@launchWithLoadingIndicator
+
+
                 val person = schoolDataSource.personDataSource.findByGuid(
                     DataLoadParams(), route.guid
                 ).dataOrNull() ?: throw IllegalStateException()

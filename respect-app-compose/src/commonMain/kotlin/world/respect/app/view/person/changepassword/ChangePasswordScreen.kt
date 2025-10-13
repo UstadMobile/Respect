@@ -12,9 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.new_password
 import world.respect.shared.generated.resources.old_password
+import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordUiState
@@ -54,8 +56,15 @@ fun ChangePasswordScreen(
                 onValueChange = onChangeOldPassword,
                 enabled = !appUiState.isLoading,
                 label = {
-                    Text(stringResource(Res.string.old_password))
+                    Text(stringResource(Res.string.old_password) + "*")
                 },
+                supportingText = {
+                    Text(
+                        uiState.oldPasswordError?.let { uiTextStringResource(it) }
+                            ?: stringResource(Res.string.required)
+                    )
+                },
+                isError = uiState.oldPasswordError != null,
             )
         }
 
@@ -67,8 +76,15 @@ fun ChangePasswordScreen(
             onValueChange = onChangeNewPassword,
             enabled = !appUiState.isLoading,
             label = {
-                Text(stringResource(Res.string.new_password))
-            }
+                Text(stringResource(Res.string.new_password) + "*")
+            },
+            supportingText = {
+                Text(
+                    uiState.newPasswordError?.let { uiTextStringResource(it) }
+                        ?: stringResource(Res.string.required)
+                )
+            },
+            isError = uiState.newPasswordError != null,
         )
     }
 }

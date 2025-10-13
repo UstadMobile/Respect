@@ -17,6 +17,7 @@ import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
@@ -105,6 +106,9 @@ fun PersonEditScreen(
                 }
             },
             enabled = uiState.fieldsEnabled,
+            supportingText = uiState.dateOfBirthError?.let {
+                { Text(uiTextStringResource(it)) }
+            }
         )
 
         RespectPhoneNumberTextField(

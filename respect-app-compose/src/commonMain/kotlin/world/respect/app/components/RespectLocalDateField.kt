@@ -130,15 +130,7 @@ fun RespectLocalDateField(
         )
     }
 
-    val todayMillis = System.currentTimeMillis()
-    val datePickerState = rememberDatePickerState(
-        selectableDates = object : androidx.compose.material3.SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return utcTimeMillis <= todayMillis // prevent future dates
-            }
-        }
-    )
-
+    val datePickerState = rememberDatePickerState()
     var isDialogOpen by remember { mutableStateOf(false) }
 
     OutlinedTextField(

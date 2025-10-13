@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -23,11 +26,14 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
+import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -37,6 +43,7 @@ import kotlin.time.Clock
 
 data class PersonEditUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
+    val dateOfBirthError: UiText? = null,
     val nationalPhoneNumSet: Boolean = false,
     ) {
     val fieldsEnabled : Boolean
@@ -70,7 +77,7 @@ class PersonEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = if(route.guid == null)
+                title = if (route.guid == null)
                     Res.string.add_person.asUiText()
                 else
                     Res.string.edit_person.asUiText(),
@@ -84,7 +91,7 @@ class PersonEditViewModel(
         }
 
         launchWithLoadingIndicator {
-            if(route.guid != null) {
+            if (route.guid != null) {
                 loadEntity(
                     json = json,
                     serializer = Person.serializer(),
@@ -95,7 +102,7 @@ class PersonEditViewModel(
                         _uiState.update { prev -> prev.copy(person = person) }
                     }
                 )
-            }else {
+            } else {
                 _uiState.update { prev ->
                     prev.copy(
                         person = DataReadyState(
@@ -122,33 +129,49 @@ class PersonEditViewModel(
             savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(personToCommit)
         }
     }
+
     fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
         _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
             prev.copy(nationalPhoneNumSet = phoneNumSet)
         }
     }
+
     fun onClickSave() {
         val person = _uiState.value.person.dataOrNull()?.copy(
             lastModified = Clock.System.now(),
         ) ?: return
 
+        val today = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+        val dob = person.dateOfBirth
+
+        if (dob != null && dob > today) {
+            _uiState.update { prev ->
+                prev.copy(
+                    dateOfBirthError = StringResourceUiText(
+                        Res.string.date_of_birth_in_future
+                    )
+                )
+            }
+            return
+        }
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.personDataSource.store(listOf(person))
 
-                if(route.guid == null) {
+                if (route.guid == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             PersonDetail(guid), popUpTo = route, popUpToInclusive = true
                         )
                     )
-                }else {
+                } else {
                     _navCommandFlow.tryEmit(NavCommand.PopUp())
                 }
-            }catch(_: Throwable) {
+            } catch (_: Throwable) {
                 //needs to display snack bar here
             }
         }
     }
-
 }

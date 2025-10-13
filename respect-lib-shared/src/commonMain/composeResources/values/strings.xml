@@ -389,5 +389,6 @@
     <string name="change">Change</string>
 
     <string name="password_must_be_at_least">Password must be at least 6 characters</string>
+    <string name="saved">Saved</string>
 
 </resources>

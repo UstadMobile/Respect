@@ -23,6 +23,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.change_password
 import world.respect.shared.generated.resources.invalid_password
 import world.respect.shared.generated.resources.save
+import world.respect.shared.generated.resources.saved
 import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
@@ -31,6 +32,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.canAdminAccountFor
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class ChangePasswordUiState(
     val requireOldPassword: Boolean = true,
@@ -46,6 +49,7 @@ class ChangePasswordViewModel(
     accountManager: RespectAccountManager,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -151,6 +155,8 @@ class ChangePasswordViewModel(
                         )
                     )
                 )
+
+                snackBarDispatcher.showSnackBar(Snack(Res.string.saved.asUiText()))
 
                 _navCommandFlow.tryEmit(
                     NavCommand.PopUp()

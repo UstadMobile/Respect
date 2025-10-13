@@ -136,6 +136,8 @@ import world.respect.shared.navigation.NavResultReturnerImpl
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
@@ -507,6 +509,14 @@ val appKoinModule = module {
 
     single<ValidatePasswordUseCase> {
         ValidatePasswordUseCase()
+    }
+
+    single<SnackBarFlowDispatcher> {
+        SnackBarFlowDispatcher()
+    }
+
+    single<SnackBarDispatcher> {
+        get<SnackBarFlowDispatcher>()
     }
 
     /**

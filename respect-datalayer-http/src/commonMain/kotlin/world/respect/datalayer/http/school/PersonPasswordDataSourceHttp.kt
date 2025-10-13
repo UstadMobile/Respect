@@ -7,9 +7,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getAsDataLoadState
+import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
@@ -42,6 +45,21 @@ class PersonPasswordDataSourceHttp(
             useValidationCacheControl(validationHelper)
         }
     }
+
+    override fun listAllAsFlow(
+        loadParams: DataLoadParams,
+        listParams: PersonPasswordDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonPassword>>> {
+        return httpClient.getDataLoadResultAsFlow(
+            urlFn = { listParams.urlWithParams() },
+            dataLoadParams = loadParams,
+            validationHelper = validationHelper,
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }
+    }
+
 
     override suspend fun store(list: List<PersonPassword>) {
         httpClient.post(

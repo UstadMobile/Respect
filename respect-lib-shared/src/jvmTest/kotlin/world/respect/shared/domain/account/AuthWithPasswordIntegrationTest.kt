@@ -13,14 +13,14 @@ import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.model.Person
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.school.adapters.asEntity
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import java.io.File
@@ -41,7 +41,7 @@ class AuthWithPasswordIntegrationTest {
 
     private lateinit var uidNumberMapper: UidNumberMapper
 
-    private lateinit var setPasswordUseCase: SetPasswordUseCase
+    private lateinit var encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase
 
     private lateinit var getTokenUseCase: GetTokenAndUserProfileWithCredentialUseCase
 
@@ -67,7 +67,7 @@ class AuthWithPasswordIntegrationTest {
             .build()
         xxHash = XXStringHasherCommonJvm()
         uidNumberMapper = XXHashUidNumberMapper(xxHash)
-        setPasswordUseCase = SetPasswordUseDbImpl(schoolDb, xxHash)
+        encryptPersonPasswordUseCase = EncryptPersonPasswordUseCaseImpl()
         getTokenUseCase = GetTokenAndUserProfileWithCredentialDbImpl(
             schoolUrl = defaultSchoolUrl,
             schoolDb = schoolDb,
@@ -89,14 +89,13 @@ class AuthWithPasswordIntegrationTest {
                 defaultTestPerson.toEntities(uidNumberMapper).personEntity
             )
 
-            setPasswordUseCase(
-                SetPasswordUseCase.SetPasswordRequest(
-                    authenticatedUserId = AuthenticatedUserPrincipalId(
-                        AuthenticatedUserPrincipalId.DIRECTORY_ADMIN_GUID
-                    ),
-                    userGuid = personGuid,
-                    password = password,
-                )
+            schoolDb.getPersonPasswordEntityDao().upsert(
+                encryptPersonPasswordUseCase(
+                    EncryptPersonPasswordUseCase.Request(
+                        personGuid = personGuid,
+                        password = password,
+                    )
+                ).asEntity(uidNumberMapper)
             )
 
             val authResponse = getTokenUseCase(
@@ -125,12 +124,13 @@ class AuthWithPasswordIntegrationTest {
                     defaultTestPerson.toEntities(uidNumberMapper).personEntity
                 )
 
-                setPasswordUseCase(
-                    SetPasswordUseCase.SetPasswordRequest(
-                        authenticatedUserId = AuthenticatedUserPrincipalId("foo"),
-                        userGuid = personGuid,
-                        password = password,
-                    )
+                schoolDb.getPersonPasswordEntityDao().upsert(
+                    encryptPersonPasswordUseCase(
+                        EncryptPersonPasswordUseCase.Request(
+                            personGuid = personGuid,
+                            password = password,
+                        )
+                    ).asEntity(uidNumberMapper)
                 )
 
                 getTokenUseCase(

@@ -57,8 +57,6 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
-import world.respect.datalayer.db.personPassword.GetPersonPassword
-import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -643,12 +641,6 @@ val appKoinModule = module {
             )
         }
 
-        scoped<GetPersonPassword> {
-            GetPersonPasswordDbImpl(
-                respectSchoolDatabase = get(),
-                xxHash = get()
-            )
-        }
         scoped<GetActivePersonPasskeysUseCase> {
             GetActivePersonPasskeysClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.PersonPasswordEntity
 
 @Dao
@@ -52,5 +53,16 @@ interface PersonPasswordEntityDao {
     suspend fun findAll(
         personGuidNum: Long
     ): List<PersonPasswordEntity>
+
+    @Query("""
+        SELECT PersonPasswordEntity.*
+          FROM PersonPasswordEntity
+         WHERE PersonPasswordEntity.ppwGuidNum = :personGuidNum
+    """)
+    fun findAllAsFlow(
+        personGuidNum: Long
+    ): Flow<List<PersonPasswordEntity>>
+
+
 
 }

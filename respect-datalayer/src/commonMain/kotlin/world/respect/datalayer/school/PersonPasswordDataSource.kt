@@ -1,6 +1,8 @@
 package world.respect.datalayer.school
 
 import io.ktor.http.Parameters
+import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.PersonPassword
 import world.respect.datalayer.shared.WritableDataSource
@@ -24,9 +26,14 @@ interface PersonPasswordDataSource: WritableDataSource<PersonPassword> {
         listParams: GetListParams = GetListParams(),
     ): DataLoadState<List<PersonPassword>>
 
+    fun listAllAsFlow(
+        loadParams: DataLoadParams = DataLoadParams(),
+        listParams: GetListParams = GetListParams(),
+    ): Flow<DataLoadState<List<PersonPassword>>>
+
     companion object {
 
-        const val ENDPOINT_NAME = "PersonPassword"
+        const val ENDPOINT_NAME = "personpassword"
 
     }
 

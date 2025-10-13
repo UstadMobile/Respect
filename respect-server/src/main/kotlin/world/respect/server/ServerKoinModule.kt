@@ -48,8 +48,8 @@ import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCase
 import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseJvm
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -122,6 +122,7 @@ fun serverKoinModule(
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
             schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
+            encryptPasswordUseCase = get(),
         )
     }
 
@@ -140,6 +141,10 @@ fun serverKoinModule(
             json = get(),
             loadAaguidJsonUseCase = get(),
         )
+    }
+
+    single<EncryptPersonPasswordUseCase> {
+        EncryptPersonPasswordUseCaseImpl()
     }
 
     /*
@@ -192,13 +197,6 @@ fun serverKoinModule(
                 .build()
         }
 
-        scoped<SetPasswordUseCase> {
-            SetPasswordUseDbImpl(
-                schoolDb = get(),
-                xxHash = get()
-            )
-        }
-
         scoped<ValidateAuthorizationUseCase> {
             ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
@@ -246,7 +244,6 @@ fun serverKoinModule(
                 schoolDb = get(),
                 schoolUrl = schoolScopeId.schoolUrl,
                 schoolPrimaryKeyGenerator = get(),
-                setPasswordUseCase = get(),
                 getTokenAndUserProfileUseCase = get(),
                 schoolDataSource = { schoolUrl, user ->
                     getKoin().getOrCreateScope<RespectAccount>(
@@ -256,6 +253,7 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
                 json = get(),
                 getPasskeyProviderInfoUseCase = get(),
+                encryptPersonPasswordUseCase = get(),
             )
         }
     }

@@ -2,7 +2,10 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.UidNumberMapper
@@ -17,6 +20,7 @@ import kotlin.time.Clock
 class PersonPasswordDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
+    @Suppress("unused") //reserved for future use
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : PersonPasswordDataSourceLocal{
 
@@ -56,11 +60,24 @@ class PersonPasswordDataSourceDb(
     override suspend fun listAll(listParams: PersonPasswordDataSource.GetListParams): DataLoadState<List<PersonPassword>> {
         return DataReadyState(
             data = schoolDb.getPersonPasswordEntityDao().findAll(
-                personGuidNum = uidNumberMapper(authenticatedUser.guid)
+                personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
             ).map {
                 it.asModel()
             }
         )
+    }
+
+    override fun listAllAsFlow(
+        loadParams: DataLoadParams,
+        listParams: PersonPasswordDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonPassword>>> {
+        return schoolDb.getPersonPasswordEntityDao().findAllAsFlow(
+            personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+        ).map { list ->
+            DataReadyState(
+                data = list.map { it.asModel() }
+            )
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<PersonPassword> {

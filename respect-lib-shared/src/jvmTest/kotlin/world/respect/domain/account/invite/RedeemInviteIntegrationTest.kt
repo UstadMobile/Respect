@@ -17,7 +17,7 @@ import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
-import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,10 +43,6 @@ class RedeemInviteIntegrationTest {
                     schoolDb = serverSchoolSourceAndDb.first,
                     schoolUrl = schoolUrl,
                     schoolPrimaryKeyGenerator = serverSchoolPrimaryKeyGenerator,
-                    setPasswordUseCase = SetPasswordUseDbImpl(
-                        schoolDb = serverSchoolSourceAndDb.first,
-                        xxHash = xxStringHasher,
-                    ),
                     getTokenAndUserProfileUseCase = GetTokenAndUserProfileWithCredentialDbImpl(
                         schoolDb = serverSchoolSourceAndDb.first,
                         xxHash = xxStringHasher,
@@ -58,6 +54,7 @@ class RedeemInviteIntegrationTest {
                     uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
                     json = json,
                     getPasskeyProviderInfoUseCase = mock { },
+                    encryptPersonPasswordUseCase = EncryptPersonPasswordUseCaseImpl(),
                 )
 
                 val clazz = Clazz(

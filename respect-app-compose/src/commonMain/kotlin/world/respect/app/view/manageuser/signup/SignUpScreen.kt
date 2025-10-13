@@ -95,6 +95,7 @@ fun SignupScreen(
             modifier = Modifier.fillMaxWidth(),
             value = uiState.personInfo.dateOfBirth,
             onValueChange = {onDateOfBirthChanged(it) },
+            isError = uiState.dateOfBirthError!=null,
             label = {
                 uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it)) }
             },

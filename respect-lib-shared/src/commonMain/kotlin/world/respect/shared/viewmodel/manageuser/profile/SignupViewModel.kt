@@ -8,10 +8,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.scope.Scope
-import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
@@ -21,6 +20,7 @@ import world.respect.shared.generated.resources.child_dob_label
 import world.respect.shared.generated.resources.child_gender_label
 import world.respect.shared.generated.resources.child_name_label
 import world.respect.shared.generated.resources.child_profile_title
+import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.required
@@ -37,6 +37,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import kotlin.time.Clock
 
 data class SignupUiState(
     val screenTitle: UiText? = null,
@@ -155,17 +156,24 @@ class SignupViewModel(
     fun onClickSave() {
         viewModelScope.launch {
             val personInfo = _uiState.value.personInfo
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
             _uiState.update { prev ->
                 prev.copy(
                     fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required) else null,
                     genderError = if (personInfo.gender.value.isEmpty()) StringResourceUiText(
                         Res.string.required
-                    ) else null
+                    ) else null,
+                    dateOfBirthError =    if (personInfo.dateOfBirth > today) {
+                        StringResourceUiText(Res.string.date_of_birth_in_future)
+                    } else null
+
                 )
             }
 
             val hasError = listOf(
                 personInfo.name.isBlank(),
+                personInfo.dateOfBirth > today
                 //personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
                 //personInfo?.dateOfBirth == null
             ).any { it }

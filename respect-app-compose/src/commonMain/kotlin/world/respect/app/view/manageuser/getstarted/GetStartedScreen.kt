@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectShortVersionInfoText
 import world.respect.app.components.defaultItemPadding
@@ -46,7 +47,7 @@ import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 fun GetStartedScreen(
     viewModel: GetStartedViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState(context = Dispatchers.Main.immediate)
 
     GetStartedScreen(
         uiState = uiState,
@@ -101,7 +102,8 @@ fun GetStartedScreen(
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.testTag("school_name")
+                .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .testTag("school_name"),
             isError = uiState.errorMessage != null,
@@ -119,8 +121,13 @@ fun GetStartedScreen(
             ) { index ->
                 val school = uiState.suggestions[index]
                 ListItem(
+                    modifier = Modifier
+                        .testTag("school_list_item")
+                        .fillMaxWidth()
+                        .clickable { onSchoolSelected(school) },
                     headlineContent = {
                         Text(
+                            modifier = Modifier.testTag("school_name_text"),
                             text = school.name.getTitle()
                         )
                     },
@@ -130,8 +137,6 @@ fun GetStartedScreen(
                             maxLines = 1
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
-                        .clickable { onSchoolSelected(school) }
                 )
             }
         }

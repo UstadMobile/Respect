@@ -26,3 +26,9 @@ fun Person.isAdmin() : Boolean {
     }
 }
 
+fun Person.canAdminAccountFor(
+    other: Person
+): Boolean {
+    return isAdmin() || (isAdminOrTeacher() && !other.isAdminOrTeacher())
+}
+

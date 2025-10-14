@@ -70,6 +70,7 @@ kotlin {
 
         androidMain.dependencies {
             api(projects.respectCredentials)
+            implementation(projects.respectLibSharedSe)
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
@@ -134,6 +135,7 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(projects.respectLibSharedSe)
         }
     }
 }

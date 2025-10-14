@@ -2,11 +2,12 @@ package world.respect.datalayer.db.schooldirectory
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import world.respect.datalayer.db.RespectAppDatabase
-import world.respect.datalayer.db.schooldirectory.adapters.toEntities
+import world.respect.datalayer.db.schooldirectory.adapters.toEntity
+import world.respect.datalayer.db.schooldirectory.adapters.toModel
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
-import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
@@ -14,25 +15,21 @@ import world.respect.libxxhash.XXStringHasher
 
 class SchoolDirectoryDataSourceDb(
     private val respectAppDb: RespectAppDatabase,
-    private val json: Json,
     private val xxStringHasher: XXStringHasher,
 ) : SchoolDirectoryDataSourceLocal {
 
     override suspend fun allDirectories(): List<RespectSchoolDirectory> {
-        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectories()
-            .map { schoolDirectory ->
-                RespectSchoolDirectory(
-                    invitePrefix = schoolDirectory.rdInvitePrefix,
-                    baseUrl = schoolDirectory.rdUrl
-                )
-            }
+        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectories().map { it.toModel() }
     }
 
+    override fun allDirectoriesAsFlow(): Flow<List<RespectSchoolDirectory>> {
+        return respectAppDb.getSchoolDirectoryEntityDao().getSchoolDirectoriesAsFlow().map { list ->
+            list.map { it.toModel() }
+        }
+    }
 
     override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
-        return respectAppDb.getSchoolDirectoryEntityDao().getServerManagerSchoolDirectory()?.let {
-            RespectSchoolDirectory(it.rdInvitePrefix, it.rdUrl)
-        }
+        return respectAppDb.getSchoolDirectoryEntityDao().getServerManagerSchoolDirectory()?.toModel()
     }
 
     override suspend fun setServerManagedSchoolConfig(
@@ -59,11 +56,7 @@ class SchoolDirectoryDataSourceDb(
         respectAppDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 respectAppDb.getSchoolDirectoryEntityDao().insertOrIgnore(
-                    SchoolDirectoryEntity(
-                        rdUid = directoryUidNum,
-                        rdUrl = schoolDirectory.baseUrl,
-                        rdInvitePrefix = "",
-                    )
+                    schoolDirectory.toEntity(xxStringHasher)
                 )
 
                 respectAppDb.takeIf { clearOthers }?.getSchoolDirectoryEntityDao()
@@ -76,15 +69,4 @@ class SchoolDirectoryDataSourceDb(
         respectAppDb.getSchoolDirectoryEntityDao().deleteByUrl(directory.baseUrl.toString())
     }
 
-    override suspend fun insertDirectory(directory: RespectSchoolDirectory) {
-
-        respectAppDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val entities = directory.toEntities(xxStringHasher)
-
-                respectAppDb.getSchoolDirectoryEntityDao()
-                    .upsert(entities.directory)
-            }
-        }
-    }
 }

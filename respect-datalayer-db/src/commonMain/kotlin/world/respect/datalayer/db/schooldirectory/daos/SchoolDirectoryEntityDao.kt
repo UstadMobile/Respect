@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 
@@ -20,6 +20,13 @@ interface SchoolDirectoryEntityDao {
         """
     )
     suspend fun getSchoolDirectories(): List<SchoolDirectoryEntity>
+
+    @Query(
+        """
+            SELECT * FROM SchoolDirectoryEntity
+        """
+    )
+    fun getSchoolDirectoriesAsFlow(): Flow<List<SchoolDirectoryEntity>>
 
     @Query(
         """

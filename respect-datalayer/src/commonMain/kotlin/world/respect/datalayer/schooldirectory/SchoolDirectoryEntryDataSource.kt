@@ -22,16 +22,16 @@ interface SchoolDirectoryEntryDataSource {
 
         companion object {
 
-            fun fromParams(stringValues: StringValues): GetListParams {
+            fun fromParams(stringValues: StringValues) : GetListParams {
                 return GetListParams(
                     name = stringValues[PARAM_NAME],
                     code = stringValues[PARAM_CODE],
-                    limit = stringValues[DataLayerParams.LIMIT]?.toIntOrNull()
-                        ?: DEFAULT_MAX_SCHOOL_LIST
+                    limit = stringValues[DataLayerParams.LIMIT]?.toIntOrNull() ?: DEFAULT_MAX_SCHOOL_LIST
                 )
             }
 
         }
+
     }
 
     fun listAsFlow(

@@ -43,7 +43,7 @@ class SchoolDirectoryEntryDataSourceRepository(
     ): DataLoadState<SchoolDirectoryEntry> {
         return local.getSchoolDirectoryEntryByUrl(url).takeIf { it is DataReadyState }
             ?: remote.getSchoolDirectoryEntryByUrl(url).also {
-                if (it is DataReadyState) {
+                if(it is DataReadyState) {
                     local.updateLocal(listOf(it.data))
                 }
             }

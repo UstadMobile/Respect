@@ -20,9 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add
 import world.respect.shared.generated.resources.example_url_placeholder
 import world.respect.shared.generated.resources.link_label
-import world.respect.shared.generated.resources.next
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditUIState
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 
@@ -35,7 +35,7 @@ fun SchoolDirectoryEditScreen(
     SchoolDirectoryEditScreen(
         uiState = uiState,
         onLinkChanged = viewModel::onLinkChanged,
-        onClickNext = viewModel::onClickNext,
+        onClickAdd = viewModel::onClickAdd,
     )
 }
 
@@ -43,7 +43,7 @@ fun SchoolDirectoryEditScreen(
 fun SchoolDirectoryEditScreen(
     uiState: SchoolDirectoryEditUIState,
     onLinkChanged: (String) -> Unit,
-    onClickNext: () -> Unit,
+    onClickAdd: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -82,11 +82,11 @@ fun SchoolDirectoryEditScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = onClickNext,
+            onClick = onClickAdd,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = stringResource(Res.string.next),
+                text = stringResource(Res.string.add),
             )
         }
 

@@ -22,7 +22,6 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
-import world.respect.shared.navigation.SettingScreen
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
 import world.respect.shared.viewmodel.RespectViewModel
@@ -35,13 +34,12 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectAccountAndPerson? = null,
     val accounts: List<RespectAccountAndPerson> = emptyList(),
-    val loading: Boolean = false
 )
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle) {
+) : RespectViewModel(savedStateHandle){
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
@@ -59,11 +57,9 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true) }
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson, loading = false)
-
+                    prev.copy(selectedAccount = accountAndPerson)
                 }
             }
         }
@@ -79,7 +75,7 @@ class AccountListViewModel(
                  * or if a session is terminated remotely (eg password reset), then must go to
                  * GetStarted screen.
                  */
-                if (storedAccounts.isEmpty() && !emittedNavToGetStartedCommand) {
+                if(storedAccounts.isEmpty() && !emittedNavToGetStartedCommand) {
                     emittedNavToGetStartedCommand = true
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
@@ -167,9 +163,6 @@ class AccountListViewModel(
         }
     }
 
-    fun onClickSettings() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(SettingScreen))
-    }
 
     fun onClickLogout() {
         uiState.value.selectedAccount?.also {

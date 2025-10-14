@@ -182,7 +182,6 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
-import world.respect.shared.viewmodel.settings.SettingViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
 
@@ -287,11 +286,8 @@ val appKoinModule = module {
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)
     viewModelOf(::ChangePasswordViewModel)
-    viewModelOf(::SettingViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
-
-
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -407,7 +403,6 @@ val appKoinModule = module {
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
-            json = get(),
             xxStringHasher = get()
         )
     }

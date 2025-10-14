@@ -49,7 +49,6 @@ import world.respect.app.view.report.list.ReportListScreen
 import world.respect.app.view.report.list.ReportTemplateListScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
-import world.respect.app.view.settings.SettingScreen
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
@@ -104,7 +103,6 @@ import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
-import world.respect.shared.navigation.SettingScreen
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -132,7 +130,6 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.settings.SettingViewModel
 
 @Composable
 fun AppNavHost(
@@ -489,15 +486,6 @@ fun AppNavHost(
                     navController = respectNavController
                 )
             )
-        }
-
-        composable<SettingScreen>{
-            val viewModel: SettingViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-
-            SettingScreen(viewModel)
         }
 
         composable<SchoolDirectoryList>{

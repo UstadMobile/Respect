@@ -45,9 +45,6 @@ data class JoinClazzWithCode(
 object Onboarding : RespectAppRoute
 
 @Serializable
-object SettingScreen : RespectAppRoute
-
-@Serializable
 object SchoolDirectoryList : RespectAppRoute
 
 @Serializable

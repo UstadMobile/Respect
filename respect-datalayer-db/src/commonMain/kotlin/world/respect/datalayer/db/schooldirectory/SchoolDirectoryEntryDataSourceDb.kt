@@ -16,7 +16,6 @@ import world.respect.datalayer.db.schooldirectory.adapters.toModel
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libxxhash.XXStringHasher
 
 class SchoolDirectoryEntryDataSourceDb(

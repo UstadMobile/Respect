@@ -1,5 +1,6 @@
 package world.respect.datalayer.schooldirectory
 
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 
 /**
@@ -14,9 +15,8 @@ interface SchoolDirectoryDataSource {
 
     suspend fun allDirectories(): List<RespectSchoolDirectory>
 
+    fun allDirectoriesAsFlow(): Flow<List<RespectSchoolDirectory>>
 
     suspend fun deleteDirectory(directory: RespectSchoolDirectory)
-
-    suspend fun insertDirectory(directory: RespectSchoolDirectory)
 
 }

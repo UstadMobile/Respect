@@ -19,8 +19,8 @@ import world.respect.libutil.ext.resolve
 
 class SchoolDirectoryEntryDataSourceHttp(
     private val httpClient: HttpClient,
-    private val local: RespectAppDataSourceLocal,
-) : SchoolDirectoryEntryDataSource {
+    private val local : RespectAppDataSourceLocal,
+): SchoolDirectoryEntryDataSource {
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
@@ -36,8 +36,7 @@ class SchoolDirectoryEntryDataSourceHttp(
                 }
             }
 
-            emit(
-                DataReadyState(
+            emit(DataReadyState(
                 data = listEntries.flatMap {
                     it.dataOrNull() ?: emptyList()
                 }

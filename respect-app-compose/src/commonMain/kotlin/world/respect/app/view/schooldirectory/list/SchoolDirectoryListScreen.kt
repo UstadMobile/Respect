@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.delete_directory
-import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListUIState
+import world.respect.shared.generated.resources.delete
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListUiState
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
 
@@ -35,7 +35,7 @@ fun SchoolDirectoryListScreen(
 
 @Composable
 fun SchoolDirectoryListScreen(
-    uiState: SchoolDirectoryListUIState,
+    uiState: SchoolDirectoryListUiState,
     onDeleteClick: (RespectSchoolDirectory) -> Unit
 ) {
 
@@ -55,8 +55,7 @@ fun SchoolDirectoryListItem(
     onDeleteClick: () -> Unit
 ) {
     ListItem(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         headlineContent = {
             Text(text = directory.baseUrl.toString())
         },
@@ -65,7 +64,7 @@ fun SchoolDirectoryListItem(
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(Res.string.delete_directory)
+                    contentDescription = stringResource(Res.string.delete)
                 )
             }
         }

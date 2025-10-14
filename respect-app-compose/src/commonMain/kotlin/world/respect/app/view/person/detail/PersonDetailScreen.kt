@@ -1,5 +1,6 @@
 package world.respect.app.view.person.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,8 +39,9 @@ fun PersonDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     PersonDetailScreen(
         uiState = uiState,
-        onClickManageAccount = { viewModel.navigateToManageAccount() },
+        onClickManageAccount = viewModel::navigateToManageAccount,
         onClickCreateAccount = viewModel::onClickCreateAccount,
+        onClickPhoneNumber = viewModel::onClickPhoneNumber,
     )
 }
 
@@ -48,6 +50,7 @@ fun PersonDetailScreen(
     uiState: PersonDetailUiState,
     onClickManageAccount:() -> Unit,
     onClickCreateAccount: () -> Unit,
+    onClickPhoneNumber: () -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     Column(
@@ -96,7 +99,9 @@ fun PersonDetailScreen(
         }
         person?.phoneNumber?.also {
             RespectDetailField(
-                modifier = Modifier.defaultItemPadding(),
+                modifier = Modifier.defaultItemPadding().fillMaxWidth().clickable {
+                    onClickPhoneNumber()
+                },
                 label = { Text(stringResource(Res.string.phone_number)) },
                 value = { Text(it) }
             )

@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +23,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_school_link
+import world.respect.shared.generated.resources.manage_school_directories
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.paste_link_here
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsUiState
@@ -36,6 +39,7 @@ fun OtherOptionsScreen(
         uiState = uiState,
         onLinkChanged = viewModel::onLinkChanged,
         onClickNext = viewModel::onClickNext,
+        onClickManageSchoolDirectories = viewModel::onClickManageSchoolDirectories,
     )
 }
 
@@ -44,6 +48,7 @@ fun OtherOptionsScreen(
     uiState: OtherOptionsUiState,
     onLinkChanged: (String) -> Unit,
     onClickNext: () -> Unit,
+    onClickManageSchoolDirectories: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -68,11 +73,18 @@ fun OtherOptionsScreen(
 
         Button(
             onClick = onClickNext,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         ) {
             Text(
                 text = stringResource(Res.string.next),
             )
+        }
+
+        OutlinedButton(
+            onClick = onClickManageSchoolDirectories,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        ) {
+            Text(stringResource(Res.string.manage_school_directories))
         }
     }
 }

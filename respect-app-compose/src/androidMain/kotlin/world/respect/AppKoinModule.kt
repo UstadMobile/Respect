@@ -213,6 +213,9 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.domain.curriculum.mapping.MockGetCurriculumMappingsUseCaseImpl
+import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -318,6 +321,8 @@ val appKoinModule = module {
     viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)
     viewModelOf(::ChangePasswordViewModel)
+    viewModelOf(::SchoolDirectoryListViewModel)
+    viewModelOf(::SchoolDirectoryEditViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -457,7 +462,6 @@ val appKoinModule = module {
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
-            json = get(),
             xxStringHasher = get()
         )
     }

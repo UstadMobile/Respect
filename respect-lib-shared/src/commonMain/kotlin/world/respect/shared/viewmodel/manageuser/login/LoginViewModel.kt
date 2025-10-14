@@ -33,6 +33,7 @@ import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -170,7 +171,7 @@ class LoginViewModel(
     }
 
     fun onClickLogin() {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             val username = uiState.value.username
             val password = uiState.value.password
 
@@ -187,8 +188,8 @@ class LoginViewModel(
                 )
             }
 
-            if (uiState.value.usernameError!=null || uiState.value.passwordError!=null) {
-                return@launch
+            if (uiState.value.usernameError != null || uiState.value.passwordError != null) {
+                return@launchWithLoadingIndicator
             }
 
             viewModelScope.launch {
@@ -205,13 +206,16 @@ class LoginViewModel(
                    }
 
                     _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(RespectAppLauncher)
+                        NavCommand.Navigate(
+                            destination = RespectAppLauncher,
+                            clearBackStack = true,
+                        )
                     )
                 }catch(e: Exception) {
                     e.printStackTrace()
                     _uiState.update { prev ->
                         prev.copy(
-                            errorText = e.getUiText() ?: StringResourceUiText(Res.string.something_went_wrong)
+                            errorText = e.getUiTextOrGeneric()
                         )
                     }
                 }

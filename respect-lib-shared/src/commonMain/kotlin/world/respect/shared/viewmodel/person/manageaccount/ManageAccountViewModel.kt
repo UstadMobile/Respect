@@ -13,22 +13,24 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.db.personPassword.GetPersonPassword
-import world.respect.datalayer.db.school.entities.PersonPasswordEntity
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
+import world.respect.datalayer.school.findByPersonGuidAsFlow
+import world.respect.datalayer.school.model.PersonPassword
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PasskeyList
-import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -39,7 +41,7 @@ data class ManageAccountUiState(
     val passkeyCount: Int? = null,
     val passkeySupported: Boolean = false,
     val personUsername: String = "",
-    val personPasswordEntity: PersonPasswordEntity? = null,
+    val personPassword: DataLoadState<PersonPassword> = DataLoadingState(),
     val errorText: UiText? = null,
     val selectedAccount: RespectAccountAndPerson? = null,
 ) {
@@ -72,8 +74,6 @@ class ManageAccountViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val getPersonPassword: GetPersonPassword by inject()
-
     private val route: ManageAccount = savedStateHandle.toRoute()
 
     private val personGuid = route.guid
@@ -97,11 +97,10 @@ class ManageAccountViewModel(
         }
 
         viewModelScope.launch {
-            val personPasswordEntity = getPersonPassword.getPersonPassword(personGuid)
-            _uiState.update { prev ->
-                prev.copy(
-                    personPasswordEntity = personPasswordEntity
-                )
+            schoolDataSource.personPasswordDataSource.findByPersonGuidAsFlow(
+                route.guid
+            ).collect { password ->
+                _uiState.update { it.copy(personPassword = password) }
             }
         }
 
@@ -151,12 +150,10 @@ class ManageAccountViewModel(
         }
     }
 
-    fun navigateToEditAccount() {
+    fun onClickChangePassword() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                PersonEdit(
-                    guid = route.guid
-                )
+                ChangePassword(guid = route.guid)
             )
         )
     }

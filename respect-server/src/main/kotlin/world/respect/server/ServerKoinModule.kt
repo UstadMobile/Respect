@@ -37,6 +37,7 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
+import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -50,8 +51,8 @@ import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCase
 import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseJvm
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -60,6 +61,7 @@ import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
@@ -124,6 +126,7 @@ fun serverKoinModule(
         AddSchoolUseCase(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
             schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
+            encryptPasswordUseCase = get(),
         )
     }
 
@@ -148,6 +151,10 @@ fun serverKoinModule(
             json = get(),
             loadAaguidJsonUseCase = get(),
         )
+    }
+
+    single<EncryptPersonPasswordUseCase> {
+        EncryptPersonPasswordUseCaseImpl()
     }
 
     /*
@@ -200,13 +207,6 @@ fun serverKoinModule(
                 .build()
         }
 
-        scoped<SetPasswordUseCase> {
-            SetPasswordUseDbImpl(
-                schoolDb = get(),
-                xxHash = get()
-            )
-        }
-
         scoped<ValidateAuthorizationUseCase> {
             ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
@@ -218,6 +218,15 @@ fun serverKoinModule(
                 xxHash = get(),
                 verifyPasskeyUseCase = get(),
                 respectAppDataSource = get(),
+                authenticatePasswordUseCase = get(),
+            )
+        }
+
+        scoped<AuthenticatePasswordUseCase> {
+            AuthenticatePasswordUseCaseDbImpl(
+                schoolDb = get(),
+                encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
             )
         }
 
@@ -254,7 +263,6 @@ fun serverKoinModule(
                 schoolDb = get(),
                 schoolUrl = schoolScopeId.schoolUrl,
                 schoolPrimaryKeyGenerator = get(),
-                setPasswordUseCase = get(),
                 getTokenAndUserProfileUseCase = get(),
                 schoolDataSource = { schoolUrl, user ->
                     getKoin().getOrCreateScope<RespectAccount>(
@@ -264,6 +272,7 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
                 json = get(),
                 getPasskeyProviderInfoUseCase = get(),
+                encryptPersonPasswordUseCase = get(),
             )
         }
     }

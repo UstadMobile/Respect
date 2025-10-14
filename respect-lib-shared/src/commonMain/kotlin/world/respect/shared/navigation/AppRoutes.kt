@@ -476,3 +476,15 @@ data class ManageAccount(
 data class PersonEdit(
     val guid: String?,
 ) : RespectAppRoute
+
+@Serializable
+data class SetUsernameAndPassword(
+    val guid: String
+): RespectAppRoute
+
+
+@Serializable
+data class ChangePassword(
+    val guid: String,
+): RespectAppRoute
+

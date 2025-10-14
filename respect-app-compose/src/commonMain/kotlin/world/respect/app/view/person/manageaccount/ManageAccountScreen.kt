@@ -12,17 +12,21 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasskeySignInFasterCard
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.*
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountUiState
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 
@@ -37,7 +41,7 @@ fun ManageAccountScreen(
         uiState = uiState,
         onCreatePasskeyClick = viewModel::onCreatePasskeyClick,
         onClickManagePasskey = viewModel::onClickManagePasskey,
-        onClickChangePassword = viewModel::navigateToEditAccount,
+        onClickChangePassword = viewModel::onClickChangePassword,
         onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
     )
 
@@ -114,6 +118,12 @@ fun ManageAccountScreen(
         }
 
 
+        val personPasswordVal = uiState.personPassword.dataOrNull()
+        val passwordLastUpdatedStr = rememberFormattedDateTime(
+            timeInMillis = personPasswordVal?.lastModified?.toEpochMilliseconds() ?: 0,
+            timeZoneId = TimeZone.currentSystemDefault().id,
+        )
+
         ListItem(
             leadingContent = {
                 Icon(Icons.Default.Password, contentDescription = null)
@@ -125,17 +135,22 @@ fun ManageAccountScreen(
                 )
             },
             supportingContent = {
-
-                Text(
-                    text = "${stringResource(Res.string.last_updated)} "
-                )
-
+                if(personPasswordVal != null) {
+                    Text(
+                        text = "${stringResource(Res.string.last_updated)}: $passwordLastUpdatedStr"
+                    )
+                }
             },
             trailingContent = {
-                Text(
-                    modifier = Modifier.clickable { onClickChangePassword() },
-                    text = stringResource(Res.string.change_password),
-                )
+                OutlinedButton(
+                    onClick = {
+                        onClickChangePassword()
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.change),
+                    )
+                }
             }
         )
 

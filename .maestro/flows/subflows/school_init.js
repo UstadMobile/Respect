@@ -26,7 +26,9 @@ if(isSetUrl(TESTCONTROLLER_URL)) {
     console.log("Test controller= " + TESTCONTROLLER_URL);
 
     const testControllerResponse = http.get(
-        TESTCONTROLLER_URL + "testcontroller/start?waitForUrl=" + encodeURIComponent("api/directory/school")
+        TESTCONTROLLER_URL + "testcontroller/start?waitForUrl=" +
+            encodeURIComponent("api/directory/school") +
+            (isSetString(NAME) ? "&name=" + encodeURIComponent(NAME) : "")
     );
 
     console.log("Response body = " + testControllerResponse.body);

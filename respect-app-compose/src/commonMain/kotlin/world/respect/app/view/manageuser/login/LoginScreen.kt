@@ -31,6 +31,8 @@ import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.password_label
 import world.respect.shared.generated.resources.username_label
+import world.respect.shared.util.ext.isLoading
+import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.manageuser.login.LoginUiState
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 
@@ -39,9 +41,11 @@ fun LoginScreen(
     viewModel: LoginViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val appUiState by viewModel.appUiState.collectAsState()
 
     LoginScreen(
         uiState = uiState,
+        appUiState = appUiState,
         onUsernameChanged = viewModel::onUsernameChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
         onClickLogin = viewModel::onClickLogin,
@@ -52,6 +56,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreen(
     uiState: LoginUiState,
+    appUiState: AppUiState,
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onClickLogin: () -> Unit,
@@ -71,6 +76,7 @@ fun LoginScreen(
             supportingText = uiState.usernameError?.let {
                 { Text(uiTextStringResource(it)) }
             },
+            enabled = !appUiState.isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("username")
@@ -93,12 +99,14 @@ fun LoginScreen(
             supportingText = uiState.passwordError?.let {
                 { Text(uiTextStringResource(it)) }
             },
+            enabled = !appUiState.isLoading,
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("password")
         )
 
         Button(
             onClick = onClickLogin,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            enabled = !appUiState.isLoading,
         ) {
             Text(text = stringResource(Res.string.login))
         }

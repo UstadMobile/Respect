@@ -1,7 +1,7 @@
-package com.ustadmobile.libuicompose.util.phonenum
+package world.respect.app.util.phonenum
 
 import androidx.compose.runtime.Composable
-import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtil
 
 @Composable
 expect fun guessInitialPhoneCountryCode(

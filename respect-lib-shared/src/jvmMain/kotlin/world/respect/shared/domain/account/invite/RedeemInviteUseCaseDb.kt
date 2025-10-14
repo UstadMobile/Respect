@@ -25,7 +25,7 @@ import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import java.lang.IllegalArgumentException
@@ -38,11 +38,11 @@ class RedeemInviteUseCaseDb(
     private val uidNumberMapper: UidNumberMapper,
     private val schoolUrl: Url,
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator,
-    private val setPasswordUseCase: SetPasswordUseCase,
     private val getTokenAndUserProfileUseCase: GetTokenAndUserProfileWithCredentialUseCase,
     private val schoolDataSource: SchoolDataSourceLocalProvider,
     private val json: Json,
     private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
+    private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
 ): RedeemInviteUseCase, KoinComponent {
 
     fun RespectRedeemInviteRequest.PersonInfo.toPerson(
@@ -99,12 +99,15 @@ class RedeemInviteUseCaseDb(
         val credential = redeemRequest.account.credential
 
         val authResponse = when(credential) {
-            is RespectPasswordCredential ->{
-                setPasswordUseCase(
-                    SetPasswordUseCase.SetPasswordRequest(
-                        authenticatedUserId = AuthenticatedUserPrincipalId(accountPerson.guid),
-                        userGuid = accountPerson.guid,
-                        password = credential.password,
+            is RespectPasswordCredential -> {
+                schoolDataSourceVal.personPasswordDataSource.store(
+                    listOf(
+                        encryptPersonPasswordUseCase(
+                            EncryptPersonPasswordUseCase.Request(
+                                personGuid = accountGuid,
+                                password = credential.password,
+                            )
+                        )
                     )
                 )
 

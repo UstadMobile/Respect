@@ -12,7 +12,7 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
@@ -22,6 +22,7 @@ import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 class AddSchoolUseCase(
     private val directoryDataSource: SchoolDirectoryDataSourceLocal,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal,
+    private val encryptPasswordUseCase: EncryptPersonPasswordUseCase,
 ): KoinComponent {
 
     @Serializable
@@ -58,7 +59,6 @@ class AddSchoolUseCase(
             accountScope.linkTo(schoolScope)
 
             val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
-            val setPasswordUseCase: SetPasswordUseCase = accountScope.get()
 
             val adminPerson = Person(
                 guid = "1",
@@ -75,12 +75,14 @@ class AddSchoolUseCase(
             )
 
             schoolDataSource.personDataSource.store(listOf(adminPerson))
-
-            setPasswordUseCase(
-                SetPasswordUseCase.SetPasswordRequest(
-                    authenticatedUserId = AuthenticatedUserPrincipalId.directoryAdmin,
-                    userGuid = adminPerson.guid,
-                    password = request.adminPassword,
+            schoolDataSource.personPasswordDataSource.store(
+                listOf(
+                    encryptPasswordUseCase(
+                        EncryptPersonPasswordUseCase.Request(
+                            personGuid = adminPerson.guid,
+                            password = request.adminPassword,
+                        )
+                    )
                 )
             )
         }

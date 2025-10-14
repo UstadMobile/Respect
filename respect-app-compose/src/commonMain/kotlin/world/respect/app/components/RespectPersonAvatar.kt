@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
-import world.respect.app.util.extt.rgbaColor
+import world.respect.app.util.ext.rgbaColor
 import world.respect.shared.util.avatarColorForName
 import world.respect.shared.util.initial
 

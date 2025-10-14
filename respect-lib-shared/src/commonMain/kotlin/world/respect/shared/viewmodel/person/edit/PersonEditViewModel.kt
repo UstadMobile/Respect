@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
-import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
@@ -23,16 +22,17 @@ import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
+import world.respect.shared.generated.resources.invalid
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -44,16 +44,30 @@ import kotlin.time.Clock
 data class PersonEditUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
     val dateOfBirthError: UiText? = null,
+
+    /**
+     * Used to determine if the user has actually set a phone number. This is set by the UI
+     * components as a user inputs a number. True if the national phone number part (e.g. not just
+     * country code) is set, false otherwise.
+     *
+     * A person without any phone number set is allowed, but if a number is entered, it will be
+     * validated.
+     */
     val nationalPhoneNumSet: Boolean = false,
-    ) {
+    val phoneNumError: UiText? = null,
+) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
+
+    val hasErrors: Boolean
+        get() = dateOfBirthError != null || phoneNumError != null
 }
 
 class PersonEditViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val json: Json,
+    private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -122,7 +136,16 @@ class PersonEditViewModel(
 
     fun onEntityChanged(person: Person) {
         val personToCommit = _uiState.updateAndGet { prev ->
-            prev.copy(person = DataReadyState(person))
+            val prevPerson = prev.person.dataOrNull()
+
+            prev.copy(
+                person = DataReadyState(person),
+                phoneNumError = if(prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
+                    prev.phoneNumError
+                }else {
+                    null
+                }
+            )
         }.person.dataOrNull() ?: return
 
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
@@ -141,21 +164,31 @@ class PersonEditViewModel(
             lastModified = Clock.System.now(),
         ) ?: return
 
-        val today = Clock.System.now()
-            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
         val dob = person.dateOfBirth
 
-        if (dob != null && dob > today) {
-            _uiState.update { prev ->
-                prev.copy(
-                    dateOfBirthError = StringResourceUiText(
-                        Res.string.date_of_birth_in_future
-                    )
-                )
-            }
-            return
+        _uiState.update { prev ->
+            prev.copy(
+                dateOfBirthError = if(dob != null && dob > today) {
+                    Res.string.date_of_birth_in_future.asUiText()
+                }else {
+                    null
+                },
+                phoneNumError = if(uiState.value.nationalPhoneNumSet &&
+                    !phoneNumValidatorUseCase.isValid(person.phoneNumber ?: "")
+                ) {
+                    Res.string.invalid.asUiText()
+                }else {
+                    null
+                }
+            )
         }
+
+
+        if(uiState.value.hasErrors)
+            return
+
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.personDataSource.store(listOf(person))

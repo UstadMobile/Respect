@@ -70,6 +70,7 @@ kotlin {
 
         androidMain.dependencies {
             api(projects.respectCredentials)
+            implementation(projects.respectLibSharedSe)
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
@@ -88,6 +89,7 @@ kotlin {
             implementation(libs.coil3.coil.svg)
             implementation(libs.acra.http)
             implementation(libs.acra.core)
+            implementation(libs.libphonenumber.android)
         }
 
         commonMain.dependencies {
@@ -128,12 +130,12 @@ kotlin {
             implementation(libs.koalaplot)
             implementation(libs.kotlinx.io.core)
             implementation(libs.androidx.paging.compose)
-            implementation(libs.libphonenumber)
         }
 
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(projects.respectLibSharedSe)
         }
     }
 }

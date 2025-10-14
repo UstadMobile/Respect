@@ -1,7 +1,6 @@
 package world.respect.shared.domain.account.authwithpassword
 
 import io.ktor.http.Url
-import io.ktor.util.decodeBase64Bytes
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
@@ -18,11 +17,11 @@ import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import java.lang.IllegalStateException
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.PBEKeySpec
+
 
 
 /**
@@ -36,6 +35,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
     private val xxHash: XXStringHasher,
     private val verifyPasskeyUseCase: VerifySignInWithPasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
+    private val authenticatePasswordUseCase: AuthenticatePasswordUseCase,
 ): GetTokenAndUserProfileWithCredentialUseCase {
 
     override suspend fun invoke(
@@ -43,29 +43,9 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
         deviceInfo: DeviceInfo?
     ): AuthResponse {
 
-        val personEntity = when(credential) {
+        val authenticatedPerson = when(credential) {
             is RespectPasswordCredential -> {
-                val personEntity = schoolDb.getPersonEntityDao().findByUsername(credential.username)
-                    ?: throw IllegalArgumentException()
-                val personGuidHash = xxHash.hash(personEntity.person.pGuid)
-                val personPassword = schoolDb.getPersonPasswordEntityDao().findByUid(personGuidHash)
-                    ?: throw ForbiddenException("Invalid username/password")
-
-                val keySpec = PBEKeySpec(
-                    credential.password.toCharArray(),
-                    personPassword.authSalt.toByteArray(),
-                    personPassword.authIterations,
-                    personPassword.authKeyLen
-                )
-                val keyFactory = SecretKeyFactory.getInstance(personPassword.authAlgorithm)
-                val expectedAuthEncoded = personPassword.authEncoded.decodeBase64Bytes()
-                val actualAuthEncoded = keyFactory.generateSecret(keySpec).encoded
-
-                if (expectedAuthEncoded.contentEquals(actualAuthEncoded)) {
-                    personEntity
-                }else {
-                    throw ForbiddenException("Invalid username/password")
-                }
+                authenticatePasswordUseCase(credential).authenticatedPerson
             }
 
             is RespectPasskeyCredential -> {
@@ -88,7 +68,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
 
                 schoolDb.getPersonEntityDao().findByGuidNum(
                     personPasskey.ppPersonUidNum
-                ) ?: throw ForbiddenException("Person not found")
+                )?.toPersonEntities()?.toModel() ?: throw ForbiddenException("Person not found")
             }
         }
 
@@ -98,10 +78,10 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
             ttl = TOKEN_DEFAULT_TTL,
         )
 
-        val personGuidHash = xxHash.hash(personEntity.person.pGuid)
+        val personGuidHash = xxHash.hash(authenticatedPerson.guid)
         schoolDb.getAuthTokenEntityDao().insert(
             token.toEntity(
-                pGuid = personEntity.person.pGuid,
+                pGuid = authenticatedPerson.guid,
                 pGuidHash = personGuidHash,
                 deviceInfo = deviceInfo,
             )
@@ -109,9 +89,8 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
 
         return AuthResponse(
             token = token,
-            person = personEntity.toPersonEntities().toModel(),
+            person = authenticatedPerson,
         )
-
     }
 
     companion object {

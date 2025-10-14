@@ -36,12 +36,12 @@ export JAVA_OPTS="-Dlogs_dir=$TESTSERVER_WORKSPACE/logs/"
 echo "ci-run-test-server.sh starting server :"
 echo $TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
           -P:ktor.deployment.port=$TESTSERVER_PORT \
-          -P:ktor.deployment.shutdown.url=/shutdown \
+          -P:ktor.deployment.shutdown.url=/api/shutdown \
           -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
 
 # Could set the credentials required to create a new instance here.
 $TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
      -P:ktor.deployment.port=$TESTSERVER_PORT \
-     -P:ktor.deployment.shutdown.url=/shutdown \
+     -P:ktor.deployment.shutdown.url=/api/shutdown \
      -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
 

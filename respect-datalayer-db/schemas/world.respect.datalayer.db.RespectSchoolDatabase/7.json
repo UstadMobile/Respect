@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "9ecd8b7028e4ece4d75aec3ccf8b0ba6",
+    "identityHash": "bdf56d323f92d673ea85b58b36938f48",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -138,7 +138,7 @@
       },
       {
         "tableName": "PersonRelatedPersonEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL, PRIMARY KEY(`prpUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "prpUid",
@@ -166,7 +166,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "prpUid"
           ]
@@ -744,7 +744,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ecd8b7028e4ece4d75aec3ccf8b0ba6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bdf56d323f92d673ea85b58b36938f48')"
     ]
   }
 }

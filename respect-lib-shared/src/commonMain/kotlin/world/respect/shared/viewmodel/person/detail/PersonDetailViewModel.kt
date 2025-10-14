@@ -23,6 +23,7 @@ import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
+import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.isAdmin
@@ -84,8 +85,9 @@ class PersonDetailViewModel(
                     prev.copy(
                         person = person,
                         manageAccountVisible = hasAccountPermission && personVal?.username != null,
-                        createAccountVisible = personVal != null && personVal.username == null &&
-                            personVal.isAdminOrTeacher()
+                        createAccountVisible = personVal != null &&
+                                activeAccount?.person?.isAdminOrTeacher() == true &&
+                                personVal.username == null
                     )
                 }
             }
@@ -97,6 +99,13 @@ class PersonDetailViewModel(
             NavCommand.Navigate(PersonEdit(route.guid))
         )
     }
+
+    fun onClickCreateAccount() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(SetUsernameAndPassword(route.guid))
+        )
+    }
+
     fun navigateToManageAccount() {
         uiState.value.person.dataOrNull().let {
             _navCommandFlow.tryEmit(

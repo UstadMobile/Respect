@@ -57,8 +57,6 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
-import world.respect.datalayer.db.personPassword.GetPersonPassword
-import world.respect.datalayer.db.personPassword.GetPersonPasswordDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -83,6 +81,7 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
+import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -99,10 +98,13 @@ import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseAndroid
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCaseClient
 import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
+import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -134,6 +136,8 @@ import world.respect.shared.navigation.NavResultReturnerImpl
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
@@ -159,6 +163,7 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
+import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
@@ -191,6 +196,7 @@ import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCas
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
@@ -200,6 +206,7 @@ import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewMode
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
@@ -309,8 +316,8 @@ val appKoinModule = module {
     viewModelOf(::SettingsViewModel)
     viewModelOf(::CurriculumMappingListViewModel)
     viewModelOf(::CurriculumMappingEditViewModel)
-
-
+    viewModelOf(::SetUsernameAndPasswordViewModel)
+    viewModelOf(::ChangePasswordViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -555,6 +562,22 @@ val appKoinModule = module {
         GetWarningsUseCaseAndroid()
     }
 
+    single<EncryptPersonPasswordUseCase> {
+        EncryptPersonPasswordUseCaseImpl()
+    }
+
+    single<ValidatePasswordUseCase> {
+        ValidatePasswordUseCase()
+    }
+
+    single<SnackBarFlowDispatcher> {
+        SnackBarFlowDispatcher()
+    }
+
+    single<SnackBarDispatcher> {
+        get<SnackBarFlowDispatcher>()
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -651,6 +674,13 @@ val appKoinModule = module {
             )
         }
 
+        scoped<AuthenticatePasswordUseCase> {
+            AuthenticatePasswordUseCaseDbImpl(
+                schoolDb = get(),
+                encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
+            )
+        }
     }
 
     /**
@@ -696,12 +726,6 @@ val appKoinModule = module {
             )
         }
 
-        scoped<GetPersonPassword> {
-            GetPersonPasswordDbImpl(
-                respectSchoolDatabase = get(),
-                xxHash = get()
-            )
-        }
         scoped<GetActivePersonPasskeysUseCase> {
             GetActivePersonPasskeysClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,

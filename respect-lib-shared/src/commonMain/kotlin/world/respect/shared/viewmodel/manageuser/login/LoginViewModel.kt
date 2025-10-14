@@ -33,6 +33,7 @@ import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -205,13 +206,16 @@ class LoginViewModel(
                    }
 
                     _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(RespectAppLauncher)
+                        NavCommand.Navigate(
+                            destination = RespectAppLauncher,
+                            clearBackStack = true,
+                        )
                     )
                 }catch(e: Exception) {
                     e.printStackTrace()
                     _uiState.update { prev ->
                         prev.copy(
-                            errorText = e.getUiText() ?: StringResourceUiText(Res.string.something_went_wrong)
+                            errorText = e.getUiTextOrGeneric()
                         )
                     }
                 }

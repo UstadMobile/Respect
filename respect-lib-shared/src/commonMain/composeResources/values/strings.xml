@@ -403,4 +403,14 @@
 
     <string name="app_version">App version</string>\
     <string name="android6_warning">Your device is running Android 6, which is not fully supported. You may experience issues. We recommend using Android 7 or higher</string>
+
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+
+    <string name="invalid_password">Invalid password</string>
+    <string name="change">Change</string>
+
+    <string name="password_must_be_at_least">Password must be at least 6 characters</string>
+    <string name="saved">Saved</string>
+
 </resources>

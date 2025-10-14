@@ -20,8 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
@@ -33,8 +31,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.getKoin
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
@@ -48,9 +49,11 @@ import world.respect.shared.navigation.Assignment
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.Report
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.StringUiText
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
 
 /**
  * @property routeName this is required because it will be obfuscated in the release variant (the
@@ -119,15 +122,26 @@ fun App(
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
     }
-    val scope = rememberCoroutineScope()
+
     val snackbarHostState = remember { SnackbarHostState() }
-    val onShowSnackBar: SnackBarDispatcher = remember {
-        SnackBarDispatcher { snack ->
-            scope.launch {
-                snackbarHostState.showSnackbar(snack.message, snack.action)
+
+    val koin = getKoin()
+
+    LaunchedEffect(Unit) {
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
+            val uiText = it.message
+            val message = if(uiText is StringUiText) {
+                uiText.text
+            }else if(uiText is StringResourceUiText) {
+                getString(uiText.resource)
+            }else {
+                ""
             }
+
+            snackbarHostState.showSnackbar(message, it.action)
         }
     }
+
     CompositionLocalProvider(LocalWidthClass provides widthClass) {
         Scaffold(
             topBar = {

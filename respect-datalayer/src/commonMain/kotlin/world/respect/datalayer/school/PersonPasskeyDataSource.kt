@@ -22,7 +22,7 @@ interface PersonPasskeyDataSource: WritableDataSource<PersonPasskey> {
 
     companion object {
 
-        const val ENDPOINT_NAME = "PersonPasskey"
+        const val ENDPOINT_NAME = "personpasskey"
 
         const val PARAM_INCLUDE_REVOKED = "includeRevoked"
 

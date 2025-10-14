@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.phonenumber
+package world.respect.shared.domain.phonenumber
 
 interface OnClickPhoneNumUseCase {
 

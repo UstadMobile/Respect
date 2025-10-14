@@ -5,11 +5,10 @@ package world.respect
 import android.content.Context
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
-import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
-import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtilAndroid
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtil
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtilAndroid
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
@@ -23,6 +22,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
@@ -119,6 +119,8 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -202,7 +204,9 @@ val appKoinModule = module {
         }
     }
 
-    single { PhoneNumberUtil.getInstance() }
+    single<PhoneNumberUtil> {
+        PhoneNumberUtil.createInstance(androidContext())
+    }
 
     single<IPhoneNumberUtil> {
         IPhoneNumberUtilAndroid(phoneNumberUtil = get<PhoneNumberUtil>())
@@ -530,6 +534,10 @@ val appKoinModule = module {
 
     single<SnackBarDispatcher> {
         get<SnackBarFlowDispatcher>()
+    }
+
+    single<PhoneNumValidatorUseCase> {
+        PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
     }
 
     /**

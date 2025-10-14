@@ -1,4 +1,5 @@
-package world.respect.app.util.extt
+package world.respect.app.util.ext
+
 
 import androidx.compose.ui.graphics.Color
 

@@ -121,6 +121,10 @@ fun PersonEditScreen(
                 }
             },
             onNationalNumberSetChanged = onNationalNumberSetChanged,
+            isError = uiState.phoneNumError != null,
+            supportingText = uiState.phoneNumError?.let {
+                { Text(uiTextStringResource(it)) }
+            },
         )
 
         OutlinedTextField(

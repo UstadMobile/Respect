@@ -1,6 +1,10 @@
 package com.ustadmobile.core.domain.phonenumber
 
-class PhoneNumValidatorAndroid(
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtil
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
+
+
+class PhoneNumValidatorJvm(
     private val iPhoneNumberUtil: IPhoneNumberUtil
 ): PhoneNumValidatorUseCase {
     override fun isValid(phoneNumber: String): Boolean {
@@ -10,4 +14,5 @@ class PhoneNumValidatorAndroid(
             false
         }
     }
+
 }

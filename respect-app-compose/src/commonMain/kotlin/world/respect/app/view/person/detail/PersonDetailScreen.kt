@@ -26,7 +26,6 @@ import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.gender
-import world.respect.shared.generated.resources.phone_memory
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.manage_account

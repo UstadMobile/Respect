@@ -1,4 +1,4 @@
-package com.ustadmobile.libuicompose.util.phonenum
+package world.respect.app.util.phonenum
 
 
 //As per
@@ -9,7 +9,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import com.ustadmobile.core.domain.phonenumber.IAsYouTypeFormatter
+import world.respect.shared.domain.phonenumber.IAsYouTypeFormatter
 import kotlin.math.max
 
 // https://medium.com/google-developer-experts/hands-on-jetpack-compose-visualtransformation-to-create-a-phone-number-formatter-99b0347fc4f6

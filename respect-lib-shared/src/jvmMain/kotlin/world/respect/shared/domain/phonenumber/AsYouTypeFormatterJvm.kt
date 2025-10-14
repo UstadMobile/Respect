@@ -1,11 +1,10 @@
-package com.ustadmobile.core.domain.phonenumber
+package world.respect.shared.domain.phonenumber
 
 import com.google.i18n.phonenumbers.AsYouTypeFormatter
 
-class IAsYouTypeFormatterAdapterAndroid(
+class AsYouTypeFormatterJvm(
     private val formatter: AsYouTypeFormatter
-): IAsYouTypeFormatter {
-
+) : IAsYouTypeFormatter {
     override fun clear() {
         formatter.clear()
     }
@@ -18,4 +17,5 @@ class IAsYouTypeFormatterAdapterAndroid(
         return formatter.inputDigit(nextChar)
     }
 }
-fun AsYouTypeFormatter.asIAsYouTypeFormatter() = IAsYouTypeFormatterAdapterAndroid(this)
+
+fun AsYouTypeFormatter.asIAsYouTypeFormatter() = AsYouTypeFormatterJvm(this)

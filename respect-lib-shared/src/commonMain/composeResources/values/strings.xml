@@ -399,4 +399,6 @@
 
     <string name="manage_school_directories">Manage school directories</string>
     <string name="school_directories">School directories</string>
+
+    <string name="invalid">Invalid</string>
 </resources>

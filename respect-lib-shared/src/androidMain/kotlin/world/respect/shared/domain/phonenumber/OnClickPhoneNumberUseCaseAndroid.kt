@@ -1,4 +1,4 @@
-package com.ustadmobile.core.domain.phonenumber
+package world.respect.shared.domain.phonenumber
 
 import android.content.Context
 import android.content.Intent
@@ -6,7 +6,7 @@ import android.net.Uri
 
 class OnClickPhoneNumberUseCaseAndroid(
     private val appContext: Context
-): OnClickPhoneNumUseCase{
+): OnClickPhoneNumUseCase {
 
     override fun invoke(number: String) {
         val intent = Intent(Intent.ACTION_VIEW)

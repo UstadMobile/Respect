@@ -1,11 +1,11 @@
-package com.ustadmobile.core.domain.phonenumber
+package world.respect.shared.domain.phonenumber
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 
-
-class IPhoneNumberUtilAndroid(
+class PhoneNumberUtilJvm(
     private val phoneNumberUtil: PhoneNumberUtil
-): IPhoneNumberUtil {
+) : IPhoneNumberUtil {
+
     override fun getAsYouTypeFormatter(regionCode: String?): IAsYouTypeFormatter {
         return phoneNumberUtil.getAsYouTypeFormatter(regionCode).asIAsYouTypeFormatter()
     }
@@ -23,15 +23,15 @@ class IPhoneNumberUtilAndroid(
     }
 
     override fun parse(numberToParse: String, defaultRegion: String?): IPhoneNumber {
-        return PhoneNumberAndroid(phoneNumberUtil.parse(numberToParse, defaultRegion))
+        return PhoneNumberJvm(phoneNumberUtil.parse(numberToParse, defaultRegion))
     }
 
     override fun isValidNumber(number: IPhoneNumber): Boolean {
-        return phoneNumberUtil.isValidNumber((number as PhoneNumberAndroid).phoneNumber)
+        return phoneNumberUtil.isValidNumber((number as PhoneNumberJvm).phoneNumber)
     }
 
     override fun formatInternational(number: IPhoneNumber): String {
-        return phoneNumberUtil.format((number as PhoneNumberAndroid).phoneNumber,
+        return phoneNumberUtil.format((number as PhoneNumberJvm).phoneNumber,
             PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
     }
 }

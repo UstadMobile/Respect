@@ -1,8 +1,8 @@
-package com.ustadmobile.libuicompose.util.phonenum
+package world.respect.app.util.phonenum
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.ustadmobile.core.domain.phonenumber.IPhoneNumberUtil
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtil
 import java.util.Locale
 
 @Composable

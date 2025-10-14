@@ -1,5 +1,5 @@
 [versions]
-agp = "8.12.3"
+agp = "8.12.2"
 android-compileSdk = "36"
 android-minSdk = "23"
 android-targetSdk = "36"
@@ -7,7 +7,8 @@ androidx-activityCompose = "1.11.0"
 androidx-appcompat = "1.7.1"
 androidx-lifecycle = "2.9.4"
 # As per https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html
-libphonenumber = "9.0.15"
+libphonenumber-android = "9.0.16"
+libphonenumber-google = "9.0.16"
 navigation = "2.9.0"
 argparse4j = "0.9.0"
 compose-multiplatform = "1.9.0"
@@ -75,7 +76,8 @@ androidx-lifecycle-viewmodel-savedstate = { group = "org.jetbrains.androidx.life
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
+libphonenumber-google = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber-google" }
+libphonenumber-android = { module = "io.michaelrocks:libphonenumber-android", version.ref = "libphonenumber-android"}
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }

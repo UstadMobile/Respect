@@ -479,3 +479,13 @@ data object CurriculumMappingList : RespectAppRoute
 data class CurriculumMappingEdit(
     val textbookUid: Long = 0L
 ) : RespectAppRoute
+data class SetUsernameAndPassword(
+    val guid: String
+): RespectAppRoute
+
+
+@Serializable
+data class ChangePassword(
+    val guid: String,
+): RespectAppRoute
+

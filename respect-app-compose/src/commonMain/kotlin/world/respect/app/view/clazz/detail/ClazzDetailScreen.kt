@@ -29,9 +29,12 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.teacher
+import world.respect.shared.generated.resources.student
 import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.description
@@ -94,7 +97,7 @@ fun ClazzDetailScreen(
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
-    fun Person?.key(role: EnrollmentRoleEnum, index: Int) : Any {
+    fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
             Pair(it, role)
         } ?: "${role}_$index"
@@ -115,13 +118,9 @@ fun ClazzDetailScreen(
                     )
                 },
 
-                /**Description field needed**/
-
-                /* supportingContent = {
-                     Text(
-                        uiState.clazzDetail?.description
-                     )
-                 }*/
+                supportingContent = {
+                    Text(text = uiState.clazz.dataOrNull()?.description ?: "")
+                }
             )
         }
 
@@ -142,16 +141,18 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0) {
+        if ((pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0) {
             item("pending_header") {
                 ListItem(
                     modifier = Modifier
                         .clickable { onTogglePendingSection() },
                     headlineContent = {
                         Text(
-                            text = stringResource(
-                                resource = Res.string.pending_requests
-                            )
+                            text = stringResource(Res.string.pending_requests)
+                                    + " (${
+                                pendingTeacherLazyPagingItems.itemCount
+                                        + pendingStudentLazyPagingItems.itemCount
+                            })"
                         )
                     },
                     trailingContent = {
@@ -194,10 +195,17 @@ fun ClazzDetailScreen(
                         )
                     },
                     headlineContent = {
-                        Text(text = person?.fullName() ?: "")
+                        Text(
+                            text = "${
+                                person?.fullName().orEmpty()
+                            } (${stringResource(Res.string.teacher)})"
+                        )
                     },
                     supportingContent = {
-                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                        val gender = person?.gender?.value
+                        val dob = person?.dateOfBirth?.toString()
+
+                        Text(text = "Gender: $gender, DOB: $dob")
                     },
                     trailingContent = {
                         Row {
@@ -239,10 +247,17 @@ fun ClazzDetailScreen(
                         )
                     },
                     headlineContent = {
-                        Text(text = person?.fullName() ?: "")
+                        Text(
+                            text = "${
+                                person?.fullName().orEmpty()
+                            } (${stringResource(Res.string.student)})"
+                        )
                     },
                     supportingContent = {
-                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                        val gender = person?.gender?.value
+                        val dob = person?.dateOfBirth?.toString()
+
+                        Text(text = "Gender: $gender, DOB: $dob")
                     },
                     trailingContent = {
                         Row {
@@ -299,7 +314,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if(uiState.isTeachersExpanded) {
+        if (uiState.isTeachersExpanded) {
             item("add_teacher") {
                 ListItem(
                     modifier = Modifier.clickable {
@@ -331,11 +346,11 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = teacher?.givenName ?: ""
+                            name = teacher?.fullName() ?: ""
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher?.givenName ?: "")
+                        Text(text = teacher?.fullName() ?: "")
                     }
                 )
             }
@@ -407,13 +422,13 @@ fun ClazzDetailScreen(
 
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = student?.givenName ?: ""
+                            name = student?.fullName() ?: ""
                         )
                     },
 
                     headlineContent = {
                         Text(
-                            text = student?.givenName ?: ""
+                            text = student?.fullName() ?: ""
                         )
                     }
                 )

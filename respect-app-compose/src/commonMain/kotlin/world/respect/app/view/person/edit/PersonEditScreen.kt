@@ -15,15 +15,19 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
+import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
+import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.first_names
 import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.last_name
+import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -36,6 +40,7 @@ fun PersonEditScreen(
     PersonEditScreen(
         uiState = uiState,
         onEntityChanged = viewModel::onEntityChanged,
+        onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
     )
 }
 
@@ -43,6 +48,7 @@ fun PersonEditScreen(
 fun PersonEditScreen(
     uiState: PersonEditUiState,
     onEntityChanged: (Person) -> Unit,
+    onNationalNumberSetChanged: (Boolean) -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     val fieldsEnabled = uiState.fieldsEnabled
@@ -100,6 +106,38 @@ fun PersonEditScreen(
                 }
             },
             enabled = uiState.fieldsEnabled,
+            supportingText = uiState.dateOfBirthError?.let {
+                { Text(uiTextStringResource(it)) }
+            }
+        )
+
+        RespectPhoneNumberTextField(
+            value = person?.phoneNumber ?: "",
+            modifier = Modifier.testTag("phone_number").fillMaxWidth().defaultItemPadding(),
+            label = { Text(stringResource(Res.string.phone_number)) },
+            onValueChange = { phoneNumber ->
+                person?.also {
+                    onEntityChanged(it.copy(phoneNumber = phoneNumber))
+                }
+            },
+            onNationalNumberSetChanged = onNationalNumberSetChanged,
+            isError = uiState.phoneNumError != null,
+            supportingText = uiState.phoneNumError?.let {
+                { Text(uiTextStringResource(it)) }
+            },
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.testTag("email").fillMaxWidth().defaultItemPadding(),
+            value = person?.email ?: "",
+            label = { Text(stringResource(Res.string.email)) },
+            singleLine = true,
+            onValueChange = { email ->
+                person?.also {
+                    onEntityChanged(it.copy(email = email))
+                }
+            },
+            enabled = uiState.fieldsEnabled
         )
     }
 

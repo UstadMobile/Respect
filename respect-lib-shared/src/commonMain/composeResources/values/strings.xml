@@ -70,6 +70,7 @@
     <string name="your_gender_label">Your gender*</string>
     <string name="your_dob_label">Your date of birth*</string>
     <string name="your_note">Please enter your details accurately.</string>
+    <string name="date_of_birth_in_future">Date of Birth cannot be in the future.</string>
 
     <string name="child_profile_title">Child profile</string>
     <string name="child_name_label">Child's name*</string>
@@ -77,6 +78,8 @@
     <string name="child_dob_label">Child's date of birth*</string>
     <string name="child_note">Please enter your child's details.</string>
     <string name="date_of_birth">Date of birth</string>
+    <string name="email">Email</string>
+    <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
     <string name="manage_account">Manage account</string>
@@ -396,4 +399,6 @@
 
     <string name="manage_school_directories">Manage school directories</string>
     <string name="school_directories">School directories</string>
+
+    <string name="invalid">Invalid</string>
 </resources>

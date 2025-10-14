@@ -89,6 +89,7 @@ kotlin {
             implementation(libs.coil3.coil.svg)
             implementation(libs.acra.http)
             implementation(libs.acra.core)
+            implementation(libs.libphonenumber.android)
         }
 
         commonMain.dependencies {

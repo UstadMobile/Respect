@@ -162,3 +162,5 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - assertVisible: "New Class"
+- tapOn: "New Class"
+#- assertVisible: "Child User"

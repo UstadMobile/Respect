@@ -98,7 +98,6 @@ fun serverKoinModule(
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
-            json = get(),
             xxStringHasher = get()
         )
     }

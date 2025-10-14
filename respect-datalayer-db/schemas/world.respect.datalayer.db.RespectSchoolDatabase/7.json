@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "94d564fc47ce6dfbbf96d2e8d3a0c042",
+    "identityHash": "bdf56d323f92d673ea85b58b36938f48",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -174,12 +174,18 @@
       },
       {
         "tableName": "PersonPasswordEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pppGuid` INTEGER NOT NULL, `authAlgorithm` TEXT NOT NULL, `authEncoded` TEXT NOT NULL, `authSalt` TEXT NOT NULL, `authIterations` INTEGER NOT NULL, `authKeyLen` INTEGER NOT NULL, PRIMARY KEY(`pppGuid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppwGuidNum` INTEGER NOT NULL, `ppwGuid` TEXT NOT NULL, `authAlgorithm` TEXT NOT NULL, `authEncoded` TEXT NOT NULL, `authSalt` TEXT NOT NULL, `authIterations` INTEGER NOT NULL, `authKeyLen` INTEGER NOT NULL, `ppwLastModified` INTEGER NOT NULL, `ppwStored` INTEGER NOT NULL, PRIMARY KEY(`ppwGuidNum`))",
         "fields": [
           {
-            "fieldPath": "pppGuid",
-            "columnName": "pppGuid",
+            "fieldPath": "ppwGuidNum",
+            "columnName": "ppwGuidNum",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwGuid",
+            "columnName": "ppwGuid",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -211,12 +217,24 @@
             "columnName": "authKeyLen",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "ppwLastModified",
+            "columnName": "ppwLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwStored",
+            "columnName": "ppwStored",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "pppGuid"
+            "ppwGuidNum"
           ]
         }
       },
@@ -726,7 +744,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '94d564fc47ce6dfbbf96d2e8d3a0c042')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bdf56d323f92d673ea85b58b36938f48')"
     ]
   }
 }

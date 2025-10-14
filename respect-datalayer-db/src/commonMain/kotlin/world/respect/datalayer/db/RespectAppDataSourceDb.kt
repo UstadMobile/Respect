@@ -28,7 +28,7 @@ class RespectAppDataSourceDb(
 
     override val schoolDirectoryDataSource: SchoolDirectoryDataSourceLocal by lazy {
         SchoolDirectoryDataSourceDb(
-            respectAppDatabase, json, xxStringHasher
+            respectAppDatabase, xxStringHasher
         )
     }
 

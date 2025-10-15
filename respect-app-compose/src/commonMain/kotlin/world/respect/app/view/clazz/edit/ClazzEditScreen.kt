@@ -54,7 +54,7 @@ fun ClazzEditScreen(
             value = clazz?.title ?: "",
             label = {
                 Text(
-                    stringResource(Res.string.class_name_label)
+                    stringResource(Res.string.class_name_label) + "*"
                 )
             },
             onValueChange = { value ->

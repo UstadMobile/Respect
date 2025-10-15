@@ -29,6 +29,10 @@ kotlin {
             implementation(libs.koin.core)
         }
 
+        androidMain.dependencies {
+            implementation(libs.acra.core)
+        }
+
         jvmMain.dependencies {
 
         }

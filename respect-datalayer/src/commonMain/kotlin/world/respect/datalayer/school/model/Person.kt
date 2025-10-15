@@ -42,7 +42,9 @@ data class Person(
     val roles: List<PersonRole>,
     val relatedPersonUids: List<String> = emptyList(),
     val dateOfBirth: LocalDate? = null,
-): ModelWithTimes {
+    val email: String? = null,
+    val phoneNumber: String? = null,
+) : ModelWithTimes {
 
     companion object {
         const val TABLE_ID = 2

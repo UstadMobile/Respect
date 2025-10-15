@@ -76,7 +76,7 @@ fun CreateAccountScreen(
         OutlinedTextField(
             value = uiState.username,
             onValueChange = onUsernameChanged,
-            label = { Text(stringResource(Res.string.username_label)) },
+            label = { Text(stringResource(Res.string.username_label) + "*") },
             placeholder = { Text(stringResource(Res.string.username_label)) },
             singleLine = true,
             isError = uiState.usernameError != null,

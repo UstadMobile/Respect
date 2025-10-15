@@ -37,6 +37,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.getKoin
 import world.respect.app.components.uiTextStringResource
+import world.respect.app.effects.NavControllerLogEffect
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
@@ -118,6 +119,9 @@ fun App(
     }
 
     val navController = rememberNavController()
+
+    NavControllerLogEffect(navController)
+
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)

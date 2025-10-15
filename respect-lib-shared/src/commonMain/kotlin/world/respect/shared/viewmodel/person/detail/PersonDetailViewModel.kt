@@ -17,6 +17,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.ManageAccount
@@ -41,6 +42,7 @@ data class PersonDetailUiState(
 class PersonDetailViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val onClickPhoneNumUseCase: OnClickPhoneNumUseCase? = null,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent{
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -115,4 +117,11 @@ class PersonDetailViewModel(
             )
         }
     }
+
+    fun onClickPhoneNumber() {
+        uiState.value.person.dataOrNull()?.phoneNumber?.also { phoneNum ->
+            onClickPhoneNumUseCase?.invoke(phoneNum)
+        }
+    }
+
 }

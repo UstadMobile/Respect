@@ -47,6 +47,8 @@ fun PersonEntities.toModel(): Person {
         },
         relatedPersonUids = relatedPersonEntities.map { it.prpOtherPersonUid },
         dateOfBirth = personEntity.pDateOfBirth,
+        phoneNumber = personEntity.pPhoneNumber,
+        email = personEntity.pEmail,
     )
 }
 
@@ -69,6 +71,8 @@ fun Person.toEntities(
             pMiddleName = middleName,
             pGender = gender,
             pDateOfBirth = dateOfBirth,
+            pEmail = email,
+            pPhoneNumber = phoneNumber
         ),
         personRoleEntities = roles.map {
             PersonRoleEntity(

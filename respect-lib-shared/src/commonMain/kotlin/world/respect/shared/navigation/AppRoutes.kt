@@ -45,6 +45,12 @@ data class JoinClazzWithCode(
 object Onboarding : RespectAppRoute
 
 @Serializable
+object SchoolDirectoryList : RespectAppRoute
+
+@Serializable
+object SchoolDirectoryEdit : RespectAppRoute
+
+@Serializable
 data class LoginScreen(
     val schoolUrlStr: String,
 ) : RespectAppRoute {
@@ -467,3 +473,15 @@ data class ManageAccount(
 data class PersonEdit(
     val guid: String?,
 ) : RespectAppRoute
+
+@Serializable
+data class SetUsernameAndPassword(
+    val guid: String
+): RespectAppRoute
+
+
+@Serializable
+data class ChangePassword(
+    val guid: String,
+): RespectAppRoute
+

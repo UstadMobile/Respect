@@ -7,6 +7,7 @@ import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasskeyDataSourceRepository
+import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -18,8 +19,6 @@ class SchoolDataSourceRepository(
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
 ) : SchoolDataSource {
-
-
 
     override val reportDataSource: ReportDataSource by lazy {
         local.reportDataSource
@@ -54,6 +53,15 @@ class SchoolDataSourceRepository(
             validationHelper,
             remoteWriteQueue,
             enrollmentDataSource
+        )
+    }
+
+    override val personPasswordDataSource: PersonPasswordDataSourceRepository by lazy {
+        PersonPasswordDataSourceRepository(
+            local = local.personPasswordDataSource,
+            remote = remote.personPasswordDataSource,
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
         )
     }
 

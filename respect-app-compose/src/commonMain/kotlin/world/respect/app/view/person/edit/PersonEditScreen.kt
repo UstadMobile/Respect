@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.RespectExposedDropDownMenuField
+import world.respect.app.components.RespectGenderExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
@@ -25,10 +25,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.first_names
-import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.last_name
 import world.respect.shared.generated.resources.phone_number
-import world.respect.shared.util.ext.label
+import world.respect.shared.generated.resources.required
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 
@@ -66,6 +65,9 @@ fun PersonEditScreen(
             },
             singleLine = true,
             enabled = fieldsEnabled,
+            supportingText = {
+                Text(stringResource(Res.string.required))
+            }
         )
 
         OutlinedTextField(
@@ -78,22 +80,20 @@ fun PersonEditScreen(
                 }
             },
             singleLine = true,
+            supportingText = {
+                Text(stringResource(Res.string.required))
+            }
         )
 
-        RespectExposedDropDownMenuField(
+        RespectGenderExposedDropDownMenuField(
             modifier = Modifier.testTag("gender").fillMaxWidth().defaultItemPadding(),
-            value = person?.gender,
-            label = {
-                Text(stringResource(Res.string.gender))
-            },
-            options = PersonGenderEnum.entries,
-            itemText = { stringResource(it.label) },
-            onOptionSelected = { gender ->
+            value = person?.gender ?: PersonGenderEnum.UNSPECIFIED,
+            onValueChanged = { gender ->
                 person?.also {
                     onEntityChanged(it.copy(gender = gender))
                 }
             },
-            enabled = uiState.fieldsEnabled,
+            isError = uiState.genderError != null,
         )
 
         RespectLocalDateField(

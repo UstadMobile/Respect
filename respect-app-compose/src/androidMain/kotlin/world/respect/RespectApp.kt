@@ -2,7 +2,6 @@ package world.respect
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -14,7 +13,6 @@ import okhttp3.OkHttpClient
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
-import org.acra.security.TLS
 import org.acra.sender.HttpSender
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -54,16 +52,6 @@ class RespectApp : Application(), SingletonImageLoader.Factory {
                     basicAuthLogin = BuildConfig.ACRA_BASICAUTHLOGIN.trim()
                     basicAuthPassword = BuildConfig.ACRA_BASICAUTHPASSWORD.trim()
                     httpMethod = HttpSender.Method.POST
-
-                    /* As per https://github.com/ACRA/acra/issues/1458 ACRA may attmept to use
-                     * obsolete protocols which will cause a crash when sending a crash log.
-                     */
-                    tlsProtocols = if(Build.VERSION.SDK_INT >= 29) {
-                        //Android 10 and higher TLS1.3 is enabled by default
-                        listOf(TLS.V1_2, TLS.V1_3)
-                    } else {
-                        listOf(TLS.V1_2)
-                    }
                 }
             }
         }

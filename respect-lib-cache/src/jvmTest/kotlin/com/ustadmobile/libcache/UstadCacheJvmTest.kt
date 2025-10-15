@@ -12,6 +12,7 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
@@ -142,6 +143,7 @@ class UstadCacheJvmTest {
             db = cacheDb,
             xxStringHasher = XXStringHasherCommonJvm(),
             logger = NapierLoggingAdapter(),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
         )
 
         val createdLocks = if(createLock) {
@@ -277,7 +279,8 @@ class UstadCacheJvmTest {
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
             xxStringHasher = XXStringHasherCommonJvm(),
-            db = cacheDb
+            db = cacheDb,
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
         )
 
         val url = "http://server.com/file.css"
@@ -317,6 +320,7 @@ class UstadCacheJvmTest {
             pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb,
             xxStringHasher = XXStringHasherCommonJvm(),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
         )
 
         val url = "http://server.com/file.css"
@@ -332,6 +336,7 @@ class UstadCacheJvmTest {
             pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb,
             xxStringHasher = XXStringHasherCommonJvm(),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
         )
 
         val url = "http://server.com/file.css"

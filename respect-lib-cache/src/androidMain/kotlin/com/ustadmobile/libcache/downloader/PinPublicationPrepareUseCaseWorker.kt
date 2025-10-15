@@ -9,7 +9,7 @@ class PinPublicationPrepareUseCaseWorker(
     params: WorkerParameters
 ) :CoroutineWorker(appContext, params) {
 
-    private val pinPublicationPrepareUseCase: PinPublicationPrepareUseCase by inje
+    //private val pinPublicationPrepareUseCase: PinPublicationPrepareUseCase by inject()
 
     override suspend fun doWork(): Result {
         return Result.success()

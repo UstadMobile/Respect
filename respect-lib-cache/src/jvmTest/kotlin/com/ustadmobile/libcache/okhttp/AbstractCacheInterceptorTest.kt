@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.util.initNapierLog
 import io.ktor.client.HttpClient
@@ -83,6 +84,7 @@ abstract class AbstractCacheInterceptorTest {
                 logger = logger,
                 listener = cacheListener,
                 xxStringHasher = XXStringHasherCommonJvm(),
+                enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
             )
         )
         okHttpClient = OkHttpClient.Builder()

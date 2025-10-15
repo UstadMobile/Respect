@@ -15,10 +15,6 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.opds.model.OpdsFacet
-import world.respect.datalayer.opds.model.OpdsGroup
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
 import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication

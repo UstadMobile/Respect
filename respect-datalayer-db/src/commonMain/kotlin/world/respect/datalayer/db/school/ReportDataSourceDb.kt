@@ -131,7 +131,7 @@ class ReportDataSourceDb(
             val templates = Templates.list.map { report ->
                 report.copy(
                     guid = idGenerator(),
-                    reportIsTemplate = true // Ensure this is set
+                    reportIsTemplate = true
                 )
             }
             store(templates)

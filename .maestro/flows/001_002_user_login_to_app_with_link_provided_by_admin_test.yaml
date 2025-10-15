@@ -33,6 +33,7 @@ onFlowComplete:
 - assertVisible: "Invalid app Url"
 
 - tapOn: "Paste the link here"
+- eraseText
 - inputText: ${output.SCHOOL_URL}
 - tapOn: "Next"
 

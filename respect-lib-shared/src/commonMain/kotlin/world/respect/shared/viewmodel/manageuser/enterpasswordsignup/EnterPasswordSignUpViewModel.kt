@@ -76,7 +76,7 @@ class EnterPasswordSignupViewModel(
         if (password.isBlank())
             return
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             val redeemRequest = route.respectRedeemInviteRequest.copy(
                 account = route.respectRedeemInviteRequest.account.copy(
                     credential = RespectPasswordCredential(

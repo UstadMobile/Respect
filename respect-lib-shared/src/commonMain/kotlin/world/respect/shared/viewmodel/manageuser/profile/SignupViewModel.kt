@@ -154,7 +154,7 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             val personInfo = _uiState.value.personInfo
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -179,7 +179,7 @@ class SignupViewModel(
             ).any { it }
 
             if (hasError) {
-                return@launch
+                return@launchWithLoadingIndicator
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {

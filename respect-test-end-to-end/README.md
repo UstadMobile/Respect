@@ -8,7 +8,7 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ### 1 : Apps
 
-1.1 [User Can Browse Apps and lessons ](test-description/001_browse_lessons_test_description.md)
+1.1 [User Can Browse Apps and lessons ](test-description/001_004_add_app_via_link_and_browse_lessons_test_description.md)
 
 ### 2 : Assignments
 
@@ -16,4 +16,4 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ### 4 : Reports
 
-4.1 [User Can Create Reports ](test-description/004_create_report_test_description.md)
+4.1 [User Can Create Reports ](test-description/001_003_admin_create_a_person_and_validate_user_login_and_credentials_test_description.md)

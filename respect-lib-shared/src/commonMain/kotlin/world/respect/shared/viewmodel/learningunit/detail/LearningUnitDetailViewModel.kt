@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.learningunit.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,6 +33,7 @@ class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
+    private val ustadCache: UstadCache,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
@@ -95,6 +97,17 @@ class LearningUnitDetailViewModel(
             }
         )
     }
+
+    fun onClickDownload() {
+        viewModelScope.launch {
+            try {
+                ustadCache.pinPublication(route.learningUnitManifestUrl)
+            }catch(t: Throwable) {
+                t.printStackTrace()
+            }
+        }
+    }
+
 
     companion object{
         const val IMAGE="image/png"

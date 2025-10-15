@@ -49,6 +49,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.RespectQuickActionButton
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 
@@ -61,6 +62,7 @@ fun LearningUnitDetailScreen(
     LearningUnitDetailScreen(
         uiState = uiState,
         onClickOpen = viewModel::onClickOpen,
+        onClickDownload = viewModel::onClickDownload,
     )
 }
 
@@ -68,6 +70,7 @@ fun LearningUnitDetailScreen(
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
+    onClickDownload: () -> Unit,
 ) {
 
     LazyColumn(
@@ -168,9 +171,10 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconLabel(
-                    Icons.Filled.ArrowCircleDown,
-                    stringResource(Res.string.download)
+                RespectQuickActionButton(
+                    imageVector = Icons.Filled.ArrowCircleDown,
+                    labelText = stringResource(Res.string.download),
+                    onClick = onClickDownload,
                 )
                 IconLabel(
                     Icons.Filled.Share,

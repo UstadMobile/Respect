@@ -62,7 +62,7 @@ class RunDownloadJobUseCaseImpl(
                     var totalBytesRead = 0L
                     var bytesRead = 0
 
-                    response.body?.byteStream()?.use { inStream ->
+                    response.body.byteStream().use { inStream ->
                         while(isActive && inStream.read(buffer).also { bytesRead = it } != -1) {
                             totalBytesRead += bytesRead
                             onProgress(

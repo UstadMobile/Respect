@@ -40,6 +40,8 @@ kotlin {
             implementation(projects.respectLibIhttpOkhttp)
             implementation(libs.androidx.room.runtime)
             implementation(libs.kotlinx.date.time)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
         }
 
         commonTest.dependencies {
@@ -73,6 +75,7 @@ kotlin {
             implementation(libs.androidx.room.ktx)
             implementation(libs.androidx.lifecycle.common.java8)
             implementation(libs.androidx.work.runtime)
+            implementation(libs.koin.android)
         }
     }
 }

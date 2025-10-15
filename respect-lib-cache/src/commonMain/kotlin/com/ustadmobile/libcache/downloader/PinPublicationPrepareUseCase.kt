@@ -132,5 +132,7 @@ class PinPublicationPrepareUseCase(
 
         const val PARALLEL_SIZE_FETCH_LIMIT = 4
 
+        const val DEFAULT_MAX_ATTEMPTS = 5
+
     }
 }

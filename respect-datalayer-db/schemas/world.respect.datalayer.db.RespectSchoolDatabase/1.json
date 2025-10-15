@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "75cbdc618a4040e1748fc6ada07c686e",
+    "identityHash": "32b9f0ebd9b1675f6f33a38020973d3e",
     "entities": [
       {
         "tableName": "PersonEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, PRIMARY KEY(`pGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, `pEmail` TEXT, `pPhoneNumber` TEXT, PRIMARY KEY(`pGuidHash`))",
         "fields": [
           {
             "fieldPath": "pGuid",
@@ -81,6 +81,16 @@
             "fieldPath": "pDateOfBirth",
             "columnName": "pDateOfBirth",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pEmail",
+            "columnName": "pEmail",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pPhoneNumber",
+            "columnName": "pPhoneNumber",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -670,7 +680,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75cbdc618a4040e1748fc6ada07c686e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '32b9f0ebd9b1675f6f33a38020973d3e')"
     ]
   }
 }

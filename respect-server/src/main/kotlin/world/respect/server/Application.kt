@@ -40,6 +40,7 @@ import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.IndicatorRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
+import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.ReportRoute
@@ -204,6 +205,7 @@ fun Application.module() {
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         PersonRoute()
                         PersonPasskeyRoute()
+                        PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
                         ReportRoute()

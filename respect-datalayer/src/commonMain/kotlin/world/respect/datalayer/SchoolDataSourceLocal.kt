@@ -5,6 +5,7 @@ import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSourceLocal
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
+import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 
 /**
@@ -17,6 +18,8 @@ interface SchoolDataSourceLocal: SchoolDataSource {
     override val personDataSource: PersonDataSourceLocal
 
     override val personPasskeyDataSource: PersonPasskeyDataSourceLocal
+
+    override val personPasswordDataSource: PersonPasswordDataSourceLocal
 
     override val reportDataSource: ReportDataSourceLocal
 

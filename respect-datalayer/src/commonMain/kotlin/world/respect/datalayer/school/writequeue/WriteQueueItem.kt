@@ -21,7 +21,7 @@ class WriteQueueItem(
     enum class Model(
         val flag: Int
     ) {
-        PERSON(1), CLASS(2), ENROLLMENT(3), REPORT(4),INDICATOR(5);
+        PERSON(1), CLASS(2), ENROLLMENT(3), PERSON_PASSWORD(4),  REPORT(5),INDICATOR(6);
 
         companion object {
 

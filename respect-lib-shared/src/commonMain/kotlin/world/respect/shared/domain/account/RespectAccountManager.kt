@@ -20,6 +20,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
@@ -101,6 +102,10 @@ class RespectAccountManager(
         }
     }
 
+    init {
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
+    }
+
     /**
      * Login a user with the given credentials
      */
@@ -178,6 +183,7 @@ class RespectAccountManager(
         mkDirUseCase?.invoke()
 
         selectedAccount = respectAccount
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
     }
 
 

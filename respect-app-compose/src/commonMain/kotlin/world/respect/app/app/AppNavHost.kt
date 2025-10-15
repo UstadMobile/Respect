@@ -32,11 +32,13 @@ import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.onboarding.OnboardingScreen
+import world.respect.app.view.person.changepassword.ChangePasswordScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
 import world.respect.app.view.person.list.PersonListScreen
 import world.respect.app.view.person.manageaccount.ManageAccountScreen
 import world.respect.app.view.person.passkeyList.PasskeyListScreen
+import world.respect.app.view.person.setusernameandpassword.SetUsernameAndPasswordScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -45,6 +47,8 @@ import world.respect.app.view.report.indicator.edit.IndictorEditScreen
 import world.respect.app.view.report.indicator.list.IndicatorListScreen
 import world.respect.app.view.report.list.ReportListScreen
 import world.respect.app.view.report.list.ReportTemplateListScreen
+import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
+import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
@@ -60,6 +64,7 @@ import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.AddPersonToClazz
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.Assignment
+import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ConfirmationScreen
@@ -96,6 +101,9 @@ import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.SchoolDirectoryEdit
+import world.respect.shared.navigation.SchoolDirectoryList
+import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -120,6 +128,8 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
+import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
 @Composable
 fun AppNavHost(
@@ -474,6 +484,42 @@ fun AppNavHost(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController
+                )
+            )
+        }
+
+        composable<SchoolDirectoryList>{
+            val viewModel: SchoolDirectoryListViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            SchoolDirectoryListScreen(viewModel)
+        }
+
+        composable<SchoolDirectoryEdit>{
+            val viewModel: SchoolDirectoryEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            SchoolDirectoryEditScreen(viewModel)
+        }
+
+        composable<SetUsernameAndPassword> {
+            SetUsernameAndPasswordScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<ChangePassword> {
+            ChangePasswordScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
                 )
             )
         }

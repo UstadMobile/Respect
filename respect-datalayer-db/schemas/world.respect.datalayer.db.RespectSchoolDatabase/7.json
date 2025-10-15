@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "984cb20d66ddc25d27bf651a1195a3da",
+    "identityHash": "182c09377416a2ba3e55afea160a9f59",
     "entities": [
       {
         "tableName": "PersonEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, PRIMARY KEY(`pGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, `pEmail` TEXT, `pPhoneNumber` TEXT, PRIMARY KEY(`pGuidHash`))",
         "fields": [
           {
             "fieldPath": "pGuid",
@@ -81,6 +81,16 @@
             "fieldPath": "pDateOfBirth",
             "columnName": "pDateOfBirth",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pEmail",
+            "columnName": "pEmail",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pPhoneNumber",
+            "columnName": "pPhoneNumber",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -138,7 +148,7 @@
       },
       {
         "tableName": "PersonRelatedPersonEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL, PRIMARY KEY(`prpUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "prpUid",
@@ -166,7 +176,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "prpUid"
           ]
@@ -174,12 +184,18 @@
       },
       {
         "tableName": "PersonPasswordEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pppGuid` INTEGER NOT NULL, `authAlgorithm` TEXT NOT NULL, `authEncoded` TEXT NOT NULL, `authSalt` TEXT NOT NULL, `authIterations` INTEGER NOT NULL, `authKeyLen` INTEGER NOT NULL, PRIMARY KEY(`pppGuid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppwGuidNum` INTEGER NOT NULL, `ppwGuid` TEXT NOT NULL, `authAlgorithm` TEXT NOT NULL, `authEncoded` TEXT NOT NULL, `authSalt` TEXT NOT NULL, `authIterations` INTEGER NOT NULL, `authKeyLen` INTEGER NOT NULL, `ppwLastModified` INTEGER NOT NULL, `ppwStored` INTEGER NOT NULL, PRIMARY KEY(`ppwGuidNum`))",
         "fields": [
           {
-            "fieldPath": "pppGuid",
-            "columnName": "pppGuid",
+            "fieldPath": "ppwGuidNum",
+            "columnName": "ppwGuidNum",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwGuid",
+            "columnName": "ppwGuid",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -211,12 +227,24 @@
             "columnName": "authKeyLen",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "ppwLastModified",
+            "columnName": "ppwLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwStored",
+            "columnName": "ppwStored",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "pppGuid"
+            "ppwGuidNum"
           ]
         }
       },
@@ -750,7 +778,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '984cb20d66ddc25d27bf651a1195a3da')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '182c09377416a2ba3e55afea160a9f59')"
     ]
   }
 }

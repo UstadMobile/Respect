@@ -39,6 +39,7 @@ dependencies {
     implementation(projects.respectLibPrimarykeygen)
 
     implementation(projects.respectLibIhttpCore)
+    implementation(projects.respectLibSharedSe)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)

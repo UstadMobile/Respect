@@ -1,17 +1,30 @@
 package world.respect.shared.navigation
 
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import world.respect.libutil.util.time.systemTimeInMillis
+import kotlin.reflect.KClass
 
-@OptIn(ExperimentalTime::class)
 sealed class NavCommand(
-    val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
+    val timestamp: Long = systemTimeInMillis(),
 ) {
-    @OptIn(ExperimentalTime::class)
     class Navigate(
         val destination: RespectAppRoute,
-        timestamp: Long= Clock.System.now().toEpochMilliseconds(),
+        val clearBackStack: Boolean = false,
+        val popUpTo: RespectAppRoute? = null,
+        val popUpToClass: KClass<*>? = null,
+        val popUpToInclusive: Boolean = false,
+        timestamp: Long = systemTimeInMillis(),
+    ) : NavCommand(timestamp)
+
+    class Pop(
+        val destination: RespectAppRoute,
+        val inclusive: Boolean,
+        timestamp: Long = systemTimeInMillis(),
     ): NavCommand(timestamp)
+
+    class PopUp(
+        timestamp: Long = systemTimeInMillis(),
+    ): NavCommand(timestamp)
+
 
 }
 

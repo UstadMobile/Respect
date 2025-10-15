@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
-class DataLoadParams(
+data class DataLoadParams(
     val mustRevalidate: Boolean = false,
+    val onlyIfCached: Boolean = false,
 )

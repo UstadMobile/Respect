@@ -12,12 +12,11 @@ import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.db.RespectDatabase
+import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.compatibleapps.CompatibleAppDataSourceDb
 import world.respect.datalayer.http.compatibleapps.CompatibleAppDataSourceHttp
 import world.respect.datalayer.repository.compatibleapps.CompatibleAppDataSourceRepository
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import kotlin.test.Test
 
 @Suppress("unused")
 class RespectAppDataSourceRepositoryTest {
@@ -30,7 +29,7 @@ class RespectAppDataSourceRepositoryTest {
     //@Test
     fun runIt() {
         val dbFile = temporaryFolder.newFile("respect.db")
-        val db = Room.databaseBuilder<RespectDatabase>(dbFile.absolutePath)
+        val db = Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .build()
 

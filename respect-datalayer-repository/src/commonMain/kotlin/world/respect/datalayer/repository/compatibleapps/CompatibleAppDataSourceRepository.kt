@@ -3,7 +3,6 @@ package world.respect.datalayer.repository.compatibleapps
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
@@ -64,14 +63,18 @@ class CompatibleAppDataSourceRepository(
     override fun getLaunchpadApps(
         loadParams: DataLoadParams
     ): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>> {
-        return emptyFlow()
+        return local.getLaunchpadApps(loadParams)
     }
 
     override suspend fun addAppToLaunchpad(manifestUrl: Url) {
-
+        local.addAppToLaunchpad(manifestUrl)
     }
 
     override suspend fun removeAppFromLaunchpad(manifestUrl: Url) {
+        local.removeAppFromLaunchpad(manifestUrl)
+    }
 
+    override fun appIsAddedToLaunchpadAsFlow(manifestUrl: Url): Flow<Boolean> {
+        return local.appIsAddedToLaunchpadAsFlow(manifestUrl)
     }
 }

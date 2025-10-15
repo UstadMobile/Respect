@@ -7,6 +7,12 @@ So that they can choose a suitable lesson and start learning directly from one p
 ## Step-by-step procedure:
 
 1. Launch the application.
+2. Verify user on "Enter invite code" screen
+3. User clicks on "I already have an account"
+4. Verify user on "Login" screen
+5. User enters "admin" in "User ID" field
+6. User enters "testpass" in "Password" field
+7. User clicks on "Login" button
 2. Verify that the app home screen is displayed with title “Apps”.
 3. Tap on the floating action button "+ App" to add a new app.
 4. Select the option “Add from Link”.

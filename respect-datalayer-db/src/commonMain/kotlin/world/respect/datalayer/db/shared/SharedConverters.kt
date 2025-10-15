@@ -6,6 +6,7 @@ import io.ktor.http.Url
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.db.shared.entities.LangMapEntity
+import kotlin.time.Instant
 
 class SharedConverters {
 
@@ -68,5 +69,16 @@ class SharedConverters {
     fun toUrl(value: String?): Url? {
         return value?.let { Url(it) }
     }
+
+    @TypeConverter
+    fun fromInstant(value: Instant?): Long? {
+        return value?.toEpochMilliseconds()
+    }
+
+    @TypeConverter
+    fun toInstant(value: Long?): Instant? {
+        return value?.let { Instant.fromEpochMilliseconds(it) }
+    }
+
 
 }

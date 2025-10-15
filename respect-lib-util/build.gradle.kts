@@ -17,11 +17,22 @@ kotlin {
 
     jvm()
 
+    /*
+     * This module MUST NOT depend on any other module within this project to avoid circular
+     * dependencies. It provides utility functions that may be used in any other module.
+     */
     sourceSets {
         commonMain.dependencies {
             // put your Multiplatform dependencies here
             api(libs.uri.kmp)
             api(libs.ktor.client.core)
+            implementation(libs.kotlinx.date.time)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.acra.core)
         }
 
         jvmMain.dependencies {

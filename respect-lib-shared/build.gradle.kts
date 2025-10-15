@@ -21,13 +21,23 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+
     jvm()
 
     sourceSets {
         commonMain.dependencies {
             api(projects.respectDatalayer)
+            api(projects.respectCredentials)
             api(projects.respectLibUtil)
+            api(projects.respectDatalayerDb)
+            api(projects.respectDatalayerHttp)
+
             implementation(projects.respectLibCache)
+            implementation(projects.respectLibXxhash)
+            implementation(projects.respectLibPrimarykeygen)
 
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel.savedstate)
@@ -44,23 +54,40 @@ kotlin {
 
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+
             implementation(libs.multiplatformsettings)
+            implementation(libs.napier)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.preference)
+            implementation(libs.androidx.preference.ktx)
+            implementation(libs.acra.core)
+            implementation(libs.libphonenumber.android)
         }
 
         jvmMain.dependencies {
+            implementation(projects.respectDatalayerDb)
+            implementation(libs.androidx.room.runtime)
             implementation(libs.json.schema.validator)
             implementation(libs.jsoup)
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.webauthn4j.core)
+            implementation(libs.libphonenumber.google)
         }
 
         jvmTest.dependencies {
+            implementation(projects.respectLibTest)
+            implementation(projects.respectLibSharedSe)
+            implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
             implementation(libs.ktor.server.content.negotiation)
             implementation(libs.ktor.server.conditional.headers)
             implementation(libs.ktor.client.core)
             implementation(libs.koin.test)
+            implementation(libs.mockito.kotlin)
         }
 
         commonTest.dependencies {

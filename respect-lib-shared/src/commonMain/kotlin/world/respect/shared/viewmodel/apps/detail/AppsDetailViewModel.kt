@@ -9,17 +9,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
-import world.respect.shared.datasource.RespectAppDataSourceProvider
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
@@ -27,18 +26,20 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.libutil.ext.resolve
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.ext.asUiText
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<RespectAppManifest>? = null,
     val publications: List<OpdsPublication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
-    val appIcon: String? = null
+    val appIcon: String? = null,
+    val isAdded: Boolean = false,
 )
 
 class AppsDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    dataSourceProvider: RespectAppDataSourceProvider,
+    private val appDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(AppsDetailUiState())
@@ -47,18 +48,15 @@ class AppsDetailViewModel(
 
     private val route: AppsDetail = savedStateHandle.toRoute()
 
-    private val dataSource = dataSourceProvider.getDataSource(activeAccount)
-
     init {
+        _appUiState.update {
+            it.copy(
+                title = Res.string.apps_detail.asUiText()
+            )
+        }
 
         viewModelScope.launch {
-            _appUiState.update {
-                it.copy(
-                    title = getString(resource = Res.string.apps_detail)
-                )
-            }
-
-            dataSource.compatibleAppsDataSource.getAppAsFlow(
+            appDataSource.compatibleAppsDataSource.getAppAsFlow(
                 manifestUrl = route.manifestUrl,
                 loadParams = DataLoadParams()
             ).collectLatest { result ->
@@ -75,7 +73,7 @@ class AppsDetailViewModel(
                 }
 
                 result.dataOrNull()?.learningUnits?.also { learningUnitsUri ->
-                    dataSource.opdsDataSource.loadOpdsFeed(
+                    appDataSource.opdsDataSource.loadOpdsFeed(
                         url = route.manifestUrl.resolve(
                             learningUnitsUri.toString()
                         ),
@@ -95,6 +93,16 @@ class AppsDetailViewModel(
                             else -> {}
                         }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            appDataSource.compatibleAppsDataSource.appIsAddedToLaunchpadAsFlow(
+                manifestUrl = route.manifestUrl
+            ).collect { isAdded ->
+                _uiState.update {
+                    it.copy(isAdded = isAdded)
                 }
             }
         }
@@ -155,8 +163,9 @@ class AppsDetailViewModel(
     }
 
     fun onClickAdd() {
-        /*Add App Button Click*/
-
+        viewModelScope.launch {
+            appDataSource.compatibleAppsDataSource.addAppToLaunchpad(route.manifestUrl)
+        }
     }
 
     companion object {

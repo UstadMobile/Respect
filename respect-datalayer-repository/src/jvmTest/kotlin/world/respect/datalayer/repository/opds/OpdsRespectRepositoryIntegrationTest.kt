@@ -12,6 +12,7 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.conditionalheaders.ConditionalHeaders
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.flow.filter
@@ -25,7 +26,7 @@ import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.db.RespectDatabase
+import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.opds.OpdsDataSourceDb
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
 import world.respect.lib.opds.model.LangMapStringValue
@@ -46,7 +47,7 @@ class OpdsRespectRepositoryIntegrationTest {
 
     data class OpdsRepositoryIntegrationTestContext(
         val port: Int,
-        val db: RespectDatabase,
+        val db: RespectAppDatabase,
         val json: Json,
         val okHttpClient: OkHttpClient,
         val httpClient: HttpClient,
@@ -63,6 +64,7 @@ class OpdsRespectRepositoryIntegrationTest {
         println("port = $port")
         val server = embeddedServer(Netty, port = port) {
             install(ConditionalHeaders)
+            install(CallLogging)
 
             routing {
                 staticResources("/resources", "/world/respect/datalayer/repository/opds")
@@ -71,7 +73,7 @@ class OpdsRespectRepositoryIntegrationTest {
 
         try {
             val dbFile = temporaryFolder.newFile("respect.db")
-            val db = Room.databaseBuilder<RespectDatabase>(dbFile.absolutePath)
+            val db = Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
                 .build()
 

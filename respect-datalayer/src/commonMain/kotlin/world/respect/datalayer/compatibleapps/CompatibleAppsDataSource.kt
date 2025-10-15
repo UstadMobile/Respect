@@ -50,4 +50,6 @@ interface CompatibleAppsDataSource {
         manifestUrl: Url
     )
 
+    fun appIsAddedToLaunchpadAsFlow(manifestUrl: Url): Flow<Boolean>
+
 }

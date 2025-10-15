@@ -7,6 +7,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadParams
@@ -17,14 +18,14 @@ import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.libutil.ext.resolve
 
 
 class CompatibleAppDataSourceHttp(
     private val httpClient: HttpClient,
     defaultCompatibleAppListUrl: String,
-    private val validationValidationHelper: NetworkDataSourceValidationHelper? = null,
+    private val validationValidationHelper: BaseDataSourceValidationHelper? = null,
 ): CompatibleAppsDataSource {
 
     private val defaultCompatibleAppListUrlObj = Url(defaultCompatibleAppListUrl)
@@ -87,4 +88,8 @@ class CompatibleAppDataSourceHttp(
         //do nothing - does not run remotely
     }
 
+    override fun appIsAddedToLaunchpadAsFlow(manifestUrl: Url): Flow<Boolean> {
+        //currently does nothing
+        return flowOf(false)
+    }
 }

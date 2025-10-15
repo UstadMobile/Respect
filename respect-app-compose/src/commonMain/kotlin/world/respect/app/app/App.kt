@@ -20,59 +20,87 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ImportContacts
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.getKoin
+import world.respect.app.components.uiTextStringResource
+import world.respect.app.effects.NavControllerLogEffect
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
-import world.respect.shared.generated.resources.clazz
-import world.respect.shared.generated.resources.report
+import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.people
+import world.respect.shared.generated.resources.reports
+import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.Assignment
-import world.respect.shared.navigation.Clazz
+import world.respect.shared.navigation.ClazzList
+import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.Report
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.StringUiText
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
 
+/**
+ * @property routeName this is required because it will be obfuscated in the release variant (the
+ *           path as per currentBackStack.lastOrNull()?.destination?.route is preserved, but not
+ *           the Route class name from AppRoutes)
+ */
 data class TopNavigationItem(
     val destRoute: Any,
     val icon: ImageVector,
-    val label: StringResource
+    val label: StringResource,
+    val routeName: String,
 )
+
+private val routeNamePrefix = "world.respect.shared.navigation"
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = RespectAppLauncher,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps
+        label = Res.string.apps,
+        routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
     TopNavigationItem(
         destRoute = Assignment,
         icon = Icons.Filled.ImportContacts,
-        label = Res.string.assignments
+        label = Res.string.assignments,
+        routeName = "$routeNamePrefix.Assignment"
     ),
     TopNavigationItem(
-        destRoute = Clazz,
+        destRoute = ClazzList,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
-        label = Res.string.clazz
+        label = Res.string.classes,
+        routeName = "$routeNamePrefix.ClazzList",
     ),
     TopNavigationItem(
         destRoute = Report,
         icon = Icons.Filled.BarChart,
-        label = Res.string.report
-    )
+        label = Res.string.reports,
+        routeName = "$routeNamePrefix.Report"
+    ),
+    TopNavigationItem(
+        destRoute = PersonList,
+        icon = Icons.Filled.Person,
+        label = Res.string.people,
+        routeName = "$routeNamePrefix.PersonList",
+    ),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -91,19 +119,33 @@ fun App(
     }
 
     val navController = rememberNavController()
+
+    NavControllerLogEffect(navController)
+
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
     }
-    val scope = rememberCoroutineScope()
+
     val snackbarHostState = remember { SnackbarHostState() }
-    val onShowSnackBar: SnackBarDispatcher = remember {
-        SnackBarDispatcher { snack ->
-            scope.launch {
-                snackbarHostState.showSnackbar(snack.message, snack.action)
+
+    val koin = getKoin()
+
+    LaunchedEffect(Unit) {
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
+            val uiText = it.message
+            val message = if(uiText is StringUiText) {
+                uiText.text
+            }else if(uiText is StringResourceUiText) {
+                getString(uiText.resource)
+            }else {
+                ""
             }
+
+            snackbarHostState.showSnackbar(message, it.action)
         }
     }
+
     CompositionLocalProvider(LocalWidthClass provides widthClass) {
         Scaffold(
             topBar = {
@@ -112,6 +154,9 @@ fun App(
                         compactHeader = (widthClass != SizeClass.EXPANDED),
                         appUiState = appUiStateVal,
                         navController = navController,
+                        onProfileClick = {
+                            navController.navigate(AccountList)
+                        }
                     )
                 }
             },
@@ -126,10 +171,12 @@ fun App(
                                     icon = {
                                         Icon(item.icon, contentDescription = null)
                                     },
-                                   label = { Text(label) },
+                                    label = { Text(label, maxLines = 1) },
                                     selected = selectedTopLevelItemIndex == index,
                                     onClick = {
-                                        navController.navigate(item.destRoute)
+                                        navController.navigate(item.destRoute)  {
+                                            popUpTo(0) { inclusive = true }
+                                        }
                                         selectedTopLevelItemIndex = index
                                     }
                                 )
@@ -146,12 +193,15 @@ fun App(
                         text = {
                             Text(
                                 modifier = Modifier.testTag("floating_action_button_text"),
-                                text = appUiStateVal.fabState.text ?: ""
+                                text = appUiStateVal.fabState.text?.let {
+                                    uiTextStringResource(it)
+                                } ?: ""
                             )
                         },
                         icon = {
                             val imageVector = when (appUiStateVal.fabState.icon) {
                                 FabUiState.FabIcon.ADD -> Icons.Default.Add
+                                FabUiState.FabIcon.EDIT -> Icons.Default.Edit
                                 else -> null
                             }
                             if (imageVector != null) {

@@ -6,16 +6,22 @@
     <string name="app_link_provided_message">Copy/paste the RESPECT app link provided by the app developer</string>
     <string name="error_link_message">"ERROR: Invalid link. Please check the URL and try again."</string>
     <string name="link_label">Link*</string>
+    <string name="start_date_label">Start date</string>
+    <string name="end_date_label">End date</string>
     <string name="example_url_placeholder">e.g. https://</string>
     <string name="next">Next</string>
+    <string name="save">Save</string>
+    <string name="done">Done</string>
     <string name="try_it">Try it</string>
     <string name="add_app">Add App</string>
     <string name="lessons">Lessons</string>
     <string name="apps">Apps</string>
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
-    <string name="clazz">Classes</string>
-    <string name="report">Reports</string>
+    <string name="classes">Classes</string>
+    <string name="clazz">Class</string>
+    <string name="report">Report</string>
+    <string name="reports">Reports</string>
     <string name="select_app">Select app</string>
     <string name="enter_link">Enter link</string>
     <string name="add">Add</string>
@@ -37,6 +43,361 @@
     <string name="loading">Loading</string>
     <string name="close">Close</string>
     <string name="open">Open</string>
+    <string name="all">All</string>
+    <string name="active">Active</string>
+    <string name="supported_by">Supported by:</string>
+    <string name="network_powered_by">Network powered by:</string>
+    <string name="enter_invite_code_message">Enter the code provided by your teacher or school admin</string>
+    <string name="invite_code_label">Invite code</string>
+    <string name="enter_code_label">Enter invite code</string>
+    <string name="invalid_invite_code">Invalid code, try again</string>
+    <string name="already_have_account">I already have an account</string>
+    <string name="add_my_school">Add my school</string>
+    <string name="required_field">Required field</string>
+    <string name="login">Login</string>
+    <string name="userId_placeholder">user@school.example.org</string>
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">Enter your password</string>
+    <string name="invitation">Invitation</string>
+    <string name="invitation_for">Invitation for:</string>
+    <string name="i_am_student">I’m a Student</string>
+    <string name="i_am_parent">I’m a Parent</string>
+    <string name="accept">Accept</string>
+    <string name="terms_and_conditions">Terms and conditions</string>
+    <string name="your_profile_title">Your profile</string>
+    <string name="your_name_label">Your name</string>
+    <string name="your_gender_label">Your gender</string>
+    <string name="your_dob_label">Your date of birth</string>
+    <string name="your_note">Please enter your details accurately.</string>
+    <string name="date_of_birth_in_future">Date of Birth cannot be in the future.</string>
+
+    <string name="child_profile_title">Child profile</string>
+    <string name="child_name_label">Child's name</string>
+    <string name="child_gender_label">Child's gender</string>
+    <string name="child_dob_label">Child's date of birth</string>
+    <string name="child_note">Please enter your child's details.</string>
+    <string name="date_of_birth">Date of birth</string>
+    <string name="email">Email</string>
+    <string name="phone_number">Phone number</string>
+    <string name="create_account">Create account</string>
+    <string name="username_label">Username</string>
+    <string name="manage_account">Manage account</string>
+    <string name="passkey_not_supported">Passkeys are not supported</string>
+    <string name="required">Required*</string>
+    <string name="signup_with_passkey">Sign-up with passkey</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <string name="name">Name</string>
+    <string name="other_options">Other options</string>
+    <string name="something_went_wrong">Something went wrong.</string>
+    <string name="waiting_title">Waiting for approval</string>
+    <string name="please_wait">Please wait</string>
+    <string name="waiting_for_approval_to_join">Waiting for approval to join %1$s</string>
+    <string name="refresh">Refresh</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="other">Other</string>
+    <string name="gender">Gender</string>
+    <string name="teachers">Teachers</string>
+    <string name="students">Students</string>
+    <string name="add_teacher">Add Teacher</string>">
+    <string name="add_student">Add Student</string>">
+    <string name="accept_invite">Accept Invite</string>">
+    <string name="dismiss_invite">Dismiss invite</string>
+    <string name="pending_requests">Pending requests</string>">
+    <string name="copy_invite_code">Copy invite code : </string>">
+    <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
+    <string name="share_qr_code">Share QR code</string>">
+    <string name="description">Description</string>">
+    <string name="unspecified">Unspecified</string>
     <string name="phone_memory">Phone memory</string>
     <string name="memory_card">Memory card</string>
+    <string name="select_picture_from_gallery">Select picture from gallery</string>
+    <string name="select_picture_from_files">Select picture from files</string>
+    <string name="take_new_photo_from_camera">Take new photo from camera</string>
+    <string name="remove_picture">Remove picture</string>
+    <string name="select_date">Select date</string>
+    <string name="first_name">First name</string>"
+    <string name="last_name">Last name</string>"
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="sort_by">Sort by</string>
+    <string name="edit">Edit</string>
+    <string name="edit_clazz">Edit class</string>
+    <string name="add_clazz">Add class</string>
+    <string name="settings">Settings</string>
+    <string name="school_directory">School Directory</string>
+    <string name="lets_get_started">Let's get started</string>
+    <string name="enter_school_name">School name</string>
+    <string name="school_name_placeholder">Type school name here...</string>
+    <string name="i_have_an_invite_code">I have an invite code</string>
+    <string name="invalid_school_name">Invalid school name</string>
+    <string name="school_not_found">School not found</string>
+    <string name="add_directory">Add Directory</string>
+    <string name="edit_directory">Edit Directory</string>
+
+    <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
+    <string name="paste_link_here">Paste the link here</string>
+    <string name="invalid_code">Invalid link, try again</string>
+    <string name="passkey_title">Passwordless sign-in with passkeys</string>
+    <string name="how_passkey_works">How passkeys work?</string>
+
+    <string name="passkey_q1">What are passkeys?</string>
+    <string name="passkey_a1">Passkeys are encrypted digital keys you create using your fingerprint, face or other screen-lock method.</string>
+
+    <string name="passkey_q2">Where are passkeys saved?</string>
+    <string name="passkey_a2">They are saved to your password manager, so you can sign in on other devices.</string>
+
+    <string name="passkey_q3">Are they better than passwords?</string>
+    <string name="passkey_a3">Passkeys protect you from phishing attacks. Passkeys work only on your registered apps and websites, and your password manager protects passkeys from unauthorized access and use.</string>
+    <string name="signing_in">Signing in</string>
+    <string name="passkey_description">A passkey is a faster and safe way to sign in than a password.Your account is created with one unless you choose another option.</string>
+    <string name="sign_up">Sign-up</string>
+    <string name="other_way_to_sign_in">Other way to sign-in</string>
+
+    <string name="sign_up_with_password">Sign up with a password</string>
+    <string name="sign_in_faster">Sign in faster next time</string>
+    <string name="sign_in_faster_description">You can sign in securely with your passkey using your fingerprints, face or other screen-lock method.</string>
+    <string name="sign_up_with_passkey">Sign up with a passkey</string>
+    <string name="create_passkey">Create passkey</string>
+    <string name="passkey">Passkey</string>
+
+
+    <string name="add_account">Add account</string>
+    <string name="logout">Logout</string>
+    <string name="profile">Profile</string>
+
+    <string name="get_started">Get Started</string>
+    <string name="onboardingTitle1">Digital Library of Edtech Apps</string>
+    <string name="onboardingTitle2">Works Offline and Saves Data</string>
+    <string name="onboardingTitle3">Assignments</string>
+    <string name="onboardingTitle4">Data Reporting</string>
+
+    <string name="onboardingDescription1">RESPECT™ makes it easy to discover and use great edtech apps with a single account.</string>
+    <string name="onboardingDescription2">Download lessons to use offline. RESPECT™'s compression can reduce data usage.</string>
+    <string name="onboardingDescription3">Teachers can easily assign lessons from any edtech app on RESPECT™ as homework for students to complete on their parents' phone or any other device.</string>
+    <string name="onboardingDescription4">Track progress with detailed reports.</string>
+
+    <string name="send_usage_stats_and_crash_reports">Send anonymous usage data and crash reports to RESPECT™.</string>
+
+    <!-- Edit Report -->
+    <string name="edit_report">Edit report</string>
+    <string name="add_a_new_report">Add a new report</string>
+    <string name="field">Field</string>
+    <string name="condition">Condition</string>
+    <string name="value">Value</string>
+    <string name="person_age">Person age</string>
+    <string name="person_gender">Person gender</string>
+    <string name="x_axis">X Axis</string>
+    <string name="series_title">Series Title</string>
+    <string name="series">Series</string>
+    <string name="title">Title</string>
+    <string name="y_axis">Y Axis</string>
+    <string name="subgroup_by">Subgroup by</string>
+    <string name="chart_type">Chart type</string>
+    <string name="time_range">Time range</string>
+    <string name="filters">Filters</string>
+    <string name="add_filter">Add Filter</string>
+    <string name="add_series">Add Series</string>
+    <string name="total_duration">Total Duration</string>
+    <string name="average_duration">Average Duration</string>
+    <string name="number_sessions">Number of Sessions</string>
+    <string name="interactions_recorded">Interactions Recorded</string>
+    <string name="number_active_users">Number of Active Users</string>
+    <string name="average_usage_time_per_user">Average Usage Time per User</string>
+    <string name="none">None</string>
+    <string name="quantity">Quantity</string>
+    <string name="unit">Unit</string>
+    <string name="from">From</string>
+    <string name="to_">To</string>
+    <string name="at_least_one_series_required">At least one series required</string>
+    <string name="field_required_prompt">Field required prompt</string>
+    <string name="quantity_must_be_at_least_1">Quantity must be at least 1</string>
+    <string name="untitled_report">Untitled Report</string>
+    <string name="select_template">Select template</string>
+    <string name="indicator_name">Indicator Name</string>
+    <string name="sql">SQL</string>
+    <string name="edit_filters">Edit Filters</string>
+    <string name="blank_template">Blank Template</string>>
+
+    <!-- Duration Metrics -->
+    <string name="total_content_usage_duration">Total Content Usage Duration</string>
+    <string name="average_content_usage_duration_per_user">Average Content Usage Duration Per User</string>
+
+    <!-- Percentage Metrics -->
+    <string name="percentage_pass">% Pass</string>
+    <string name="percentage_fail">% Fail</string>
+    <string name="attendance_percentage">Attendance %</string>
+    <string name="absence_percentage">Absence %</string>
+    <string name="completion_rate">Completion Rate</string>
+    <string name="task_completion_percentage">Completion per Assigned Task %</string>
+    <string name="retention_rate">Retention Rate</string>
+    <string name="offline_usage_percentage">Offline Usage %</string>
+
+    <!-- Score Metrics -->
+    <string name="average_score">Average Score</string>
+    <string name="total_score">Total Score</string>
+
+    <!-- Count Metrics -->
+    <string name="number_of_activities">Number of Activities</string>
+    <string name="active_days_per_user">Active Days per User</string>
+
+    <!-- Top 5 Metrics -->
+    <string name="top_5_apps">Top 5 Apps</string>
+    <string name="top_5_languages">Top 5 Languages</string>
+    <string name="top_5_lessons">Top 5 Lessons</string>
+    <string name="top_5_schools">Top 5 Schools</string>
+    <string name="top_5_students">Top 5 Students</string>
+    <string name="percentage">Percentage</string>
+    <string name="indicators">Indicators</string>
+    <string name="manage_indicators">Manage Indicators</string>
+    <string name="indicator">Indicator</string>
+    <string name="indicator_detail">Indicator detail</string>
+
+
+    <!-- Conditions -->
+    <string name="equals">= Equals</string>
+    <string name="not_equals">!= Not Equals</string>
+    <string name="greater">&gt; Greater</string>
+    <string name="lesser">&lt; Lesser</string>
+    <string name="in_list">In List</string>
+    <string name="not_in_list">Not In List</string>
+    <string name="greater_or_equal">&gt; = Greater Than or Equal</string>
+    <string name="lesser_or_equal">&lt; = Less Than or Equal</string>
+
+    <!-- Export Options -->
+    <string name="export_data">Export data</string>
+    <string name="graph_data">Graph Format</string>
+    <string name="raw_data">Raw data</string>
+
+    <!-- Misc -->
+    <string name="count">Count</string>
+    <string name="invalid_report_format">invalid report format</string>
+    <string name="invalid_report_config">invalid report config</string>
+    <string name="unknown_error">unknown error</string>
+
+    <!-- Time Units -->
+    <string name="day">Day</string>
+    <string name="months">Months</string>
+    <string name="weeks">Weeks</string>
+    <string name="years">Years</string>
+    <string name="weekly">Weekly</string>
+    <string name="daily">Every working day</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+    <string name="time_of_day">Time of Day (Morning/Evening)</string>
+    <string name="quarterly">Quarterly</string>
+
+    <!-- Educational Dimensions -->
+    <string name="subject">Subject</string>
+    <string name="school">School</string>
+    <string name="grade_level">Grade Level</string>
+    <string name="assessment_type">Assessment Type (Self/Assignment)</string>
+
+
+    <!-- Demographic Dimensions -->
+    <string name="age_group">Age Group</string>
+    <string name="region">Region</string>
+    <string name="language">Language</string>
+
+    <!-- Role-Based Dimensions -->
+    <string name="activity_verb">Activity Verb</string>
+    <string name="user_role">Role (Teacher/Student/Parent)</string>
+
+    <!-- Technical Dimensions -->
+    <string name="application">Application</string>
+    <string name="device_type">Device Type</string>
+    <string name="platform">Platform</string>
+
+    <!-- Time Ranges -->
+    <string name="custom_period">Custom period (e.g. last x days/weeks)</string>
+    <string name="custom_date_range">Custom date range</string>
+    <string name="last_30_days">Last 30 days</string>
+    <string name="last_3_months">Last 3 months</string>
+    <string name="last_week_date_range">Last week</string>
+    <string name="last_two_week_date_range">Last two weeks</string>
+    <string name="last_month_date_range">Last month</string>
+    <string name="last_three_months_date_range">Last three months</string>
+    <string name="last_week">Last week</string>
+
+    <!-- Chart Types -->
+    <string name="bar_chart">Bar Chart</string>
+    <string name="line_chart">Line Chart</string>
+
+    <!-- X Axis Options -->
+    <string name="year">Year</string>
+    <string name="class_name">Class name</string>
+    <string name="gender_literal">Gender</string>
+
+    <!-- Time Units -->
+    <string name="hour_unit">hr</string>
+    <string name="minute_unit">min</string>
+    <string name="second_unit">sec</string>
+
+    <!-- Empty States -->
+    <string name="No_data_available">No data available</string>
+    <string name="empty_data">Empty data</string>
+
+    <!-- Actions -->
+    <string name="delete">Delete</string>
+
+    <string name="accounts">Accounts</string>
+
+    <string name="people">People</string>
+    <string name="person">Person</string>
+    <string name="back">Back</string>
+
+    <string name="expand_pending_invites">Expand Pending invites list</string>
+    <string name="collapse_pending_invites">Collapse pending invites list</string>
+
+    <string name="expand_teachers">Expand teachers list</string>
+    <string name="collapse_teachers">Collapse teachers list</string>
+
+    <string name="expand_students">Expand students list</string>
+    <string name="collapse_students">Collapse students list</string>
+
+
+    <string name="add_person">Add person</string>
+    <string name="edit_person">Edit person</string>
+
+    <string name="first_names">First names</string>
+    <string name="security">Security</string>
+
+    <string name="passkeys">Passkeys</string>
+    <string name="manage">Manage</string>
+    <string name="change_password">Change password</string>
+    <string name="created">Created</string>
+    <string name="last_updated">Last Updated</string>
+    <string name="delete_this_passkey">Delete this passkey?</string>
+    <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
+
+    <string name="toggle_visibility">toggle visibility</string>
+    <string name="username_too_short">Username must be at least 3 characters</string>
+    <string name="username_too_long">Username must be less than 30 characters</string>
+    <string name="username_starts_with_number">Username cannot start with a number</string>
+    <string name="invalid_username">Username must be 3 to 30 characters, use only letters, avoid spaces or special symbols.</string>
+
+    <string name="created_at">Created at</string>
+    <string name="at">at</string>
+    <string name="key_created_on">Key created on</string>
+
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+
+    <string name="app_version">App version</string>\
+    <string name="android6_warning">Your device is running Android 6, which is not fully supported. You may experience issues. We recommend using Android 7 or higher</string>
+
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+
+    <string name="invalid_password">Invalid password</string>
+    <string name="change">Change</string>
+
+    <string name="password_must_be_at_least">Password must be at least 6 characters</string>
+    <string name="saved">Saved</string>
+
+    <string name="manage_school_directories">Manage school directories</string>
+    <string name="school_directories">School directories</string>
+
+    <string name="invalid">Invalid</string>
 </resources>

@@ -7,18 +7,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_app
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.EnterLink
-import world.respect.shared.datasource.RespectAppDataSourceProvider
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.ext.asUiText
 
 
 data class AppListUiState(
@@ -27,24 +27,22 @@ data class AppListUiState(
 
 class AppListViewModel(
     savedStateHandle: SavedStateHandle,
-    dataSourceProvider: RespectAppDataSourceProvider,
+    private val appDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle) {
 
-
-    private val dataSource = dataSourceProvider.getDataSource(activeAccount)
     private val _uiState = MutableStateFlow(AppListUiState())
 
     val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            _appUiState.update {
-                it.copy(
-                    title = getString(resource = Res.string.select_app),
-                )
-            }
+        _appUiState.update {
+            it.copy(
+                title = Res.string.select_app.asUiText(),
+            )
+        }
 
-            dataSource.compatibleAppsDataSource.getAddableApps(
+        viewModelScope.launch {
+            appDataSource.compatibleAppsDataSource.getAddableApps(
                 loadParams = DataLoadParams()
             ).collect { result ->
                 when (result) {

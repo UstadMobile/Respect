@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.*
 import world.respect.app.components.uiTextStringResource
+import world.respect.shared.util.ext.isLoading
+import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkUiState
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 
@@ -22,8 +24,11 @@ fun EnterLinkScreen(
         EnterLinkUiState(), Dispatchers.Main.immediate
     )
 
+    val appUiState by viewModel.appUiState.collectAsState()
+
     EnterLinkScreen(
         uiState = uiState,
+        appUiState = appUiState,
         onLinkChanged = viewModel::onLinkChanged,
         onClickNext = viewModel::onClickNext,
     )
@@ -32,6 +37,7 @@ fun EnterLinkScreen(
 @Composable
 fun EnterLinkScreen(
     uiState: EnterLinkUiState,
+    appUiState: AppUiState,
     onLinkChanged: (String) -> Unit,
     onClickNext: () -> Unit,
 ) {
@@ -59,6 +65,7 @@ fun EnterLinkScreen(
                     text = stringResource(Res.string.example_url_placeholder),
                 )
             },
+            enabled = !appUiState.isLoading,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             modifier = Modifier.fillMaxWidth(),
@@ -76,13 +83,12 @@ fun EnterLinkScreen(
 
         Button(
             onClick = onClickNext,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !appUiState.isLoading,
         ) {
             Text(
                 text = stringResource(Res.string.next),
             )
         }
-
-
     }
 }

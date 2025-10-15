@@ -23,4 +23,25 @@ class UrlResolveTest {
     }
 
 
+    @Test
+    fun testAppendEndpointSegments() {
+        val endpoint = Url("https://school.example.org/api/school/xapi")
+        val endpointWithSlash = Url("https://school.example.org/api/school/xapi/")
+
+        assertEquals("https://school.example.org/api/school/xapi/statements",
+            endpoint.appendEndpointSegments(listOf("statements")).toString())
+        assertEquals("https://school.example.org/api/school/xapi/statements",
+            endpointWithSlash.appendEndpointSegments(listOf("statements")).toString())
+
+        assertEquals("https://school.example.org/api/school/xapi/actor/profile",
+            endpoint.appendEndpointSegments(listOf("actor", "profile")).toString())
+        assertEquals("https://school.example.org/api/school/xapi/actor/profile",
+            endpointWithSlash.appendEndpointSegments(listOf("actor", "profile")).toString())
+
+        assertEquals("https://school.example.org/api/school/xapi/actor/profile",
+            endpoint.appendEndpointSegments(listOf("actor/profile")).toString())
+        assertEquals("https://school.example.org/api/school/xapi/actor/profile",
+            endpointWithSlash.appendEndpointSegments(listOf("actor/profile")).toString())
+    }
+
 }

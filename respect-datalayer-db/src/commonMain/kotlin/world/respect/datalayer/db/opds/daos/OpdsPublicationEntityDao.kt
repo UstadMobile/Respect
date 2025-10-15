@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
-import world.respect.datalayer.db.shared.ValidationInfo
+import world.respect.datalayer.db.shared.LastModifiedAndETagDb
 
 @Dao
 abstract class OpdsPublicationEntityDao {
@@ -52,7 +52,7 @@ abstract class OpdsPublicationEntityDao {
           FROM OpdsPublicationEntity
          WHERE OpdsPublicationEntity.opeUrlHash = :urlHash 
     """)
-    abstract suspend fun getValidationInfo(urlHash: Long): ValidationInfo?
+    abstract suspend fun getLastModifiedAndETag(urlHash: Long): LastModifiedAndETagDb?
 
     companion object {
 

@@ -4,9 +4,15 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -17,12 +23,19 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.respectLibIhttpCore)
+            api(projects.respectLibXxhash)
+            api(projects.respectCredentials)
             api(projects.respectLibOpdsModel)
             api(projects.respectLibSerializers)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
+            api(libs.androidx.paging.common)
+            implementation(libs.atomicfu)
+            implementation(libs.napier)
+
         }
 
         jvmMain.dependencies {

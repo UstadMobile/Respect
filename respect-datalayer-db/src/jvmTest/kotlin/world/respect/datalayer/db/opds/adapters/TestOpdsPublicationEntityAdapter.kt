@@ -23,7 +23,7 @@ class TestOpdsPublicationEntityAdapter {
                 "/world/respect/datalayer/db/opds/adapters/lesson001.json"
             )!!.bufferedReader().use { it.readText() }
         )
-        val pkGenerator = PrimaryKeyGenerator(RespectDatabase.TABLE_IDS)
+        val pkGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
 
         val entities = publication.asEntities(
             dataLoadResult = null,

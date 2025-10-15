@@ -2,8 +2,11 @@ package world.respect.datalayer.db.compatibleapps.adapters
 
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.db.shared.adapters.asEntities
@@ -98,4 +101,29 @@ fun CompatibleAppEntities.asModel(
             url =compatibleAppEntity.caeUrl,
         )
     )
+}
+
+fun Flow<List<CompatibleAppEntity>>.combineWithLangMaps(
+    langmaps: Flow<List<LangMapEntity>>,
+    json: Json,
+): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>> {
+    return combine(langmaps) { appEntities, langmaps ->
+        DataReadyState(
+            data = appEntities.map { appEntity ->
+                appEntity.asModel(
+                    langMapEntities = langmaps.filter { it.lmeTopParentUid1 == appEntity.caeUid },
+                    json = json
+                )
+                CompatibleAppEntities(
+                    compatibleAppEntity = appEntity,
+                    langMapEntities = langmaps.filter { it.lmeTopParentUid1 == appEntity.caeUid }
+                ).asModel(json)
+            },
+            metaInfo = DataLoadMetaInfo(
+                lastModified = appEntities.maxOfOrNull { it.caeLastModified } ?: 0,
+                etag = null,
+                url = null,
+            )
+        )
+    }
 }

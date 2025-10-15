@@ -136,22 +136,19 @@ fun AppsDetailScreen(
                 ) {
                     Text(text = stringResource(Res.string.try_it))
                 }
-                OutlinedButton(
-                    onClick = {
-                        onClickAdd()
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = null
-                    )
-                    Spacer(
-                        Modifier.width(4.dp)
-                    )
-                    Text(
-                        text = stringResource(Res.string.add_app)
-                    )
+
+                if(!uiState.isAdded) {
+                    OutlinedButton(
+                        onClick = onClickAdd,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(Res.string.add_app))
+                    }
                 }
             }
         }

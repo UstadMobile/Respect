@@ -6,15 +6,15 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 
 class OpdsDataSourceHttp(
     private val httpClient: HttpClient,
-    private val feedValidationHelper: NetworkDataSourceValidationHelper? = null,
-    private val publicationValidationHelper: NetworkDataSourceValidationHelper? = null,
+    private val feedValidationHelper: BaseDataSourceValidationHelper? = null,
+    private val publicationValidationHelper: BaseDataSourceValidationHelper? = null,
 ) : OpdsDataSource {
 
     override fun loadOpdsFeed(

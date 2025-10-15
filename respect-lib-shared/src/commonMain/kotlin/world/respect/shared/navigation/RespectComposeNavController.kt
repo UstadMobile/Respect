@@ -24,7 +24,29 @@ class RespectComposeNavController(
         when (navCommand) {
             is NavCommand.Navigate -> {
                 lastNavCommandTime = navCommand.timestamp
-                navHostController.navigate(navCommand.destination)
+                if (navCommand.clearBackStack) {
+                    navHostController.navigate(navCommand.destination) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                } else {
+                    navHostController.navigate(navCommand.destination) {
+                        navCommand.popUpTo?.also {
+                            popUpTo(it) { inclusive = navCommand.popUpToInclusive }
+                        }
+                    }
+                }
+            }
+
+            is NavCommand.Pop -> {
+                lastNavCommandTime = navCommand.timestamp
+                navHostController.popBackStack(
+                    navCommand.destination, navCommand.inclusive
+                )
+            }
+
+            is NavCommand.PopUp -> {
+                lastNavCommandTime = navCommand.timestamp
+                navHostController.popBackStack()
             }
         }
     }

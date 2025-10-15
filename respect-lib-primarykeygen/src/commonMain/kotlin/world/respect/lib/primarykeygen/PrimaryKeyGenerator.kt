@@ -44,9 +44,7 @@ class PrimaryKeyGenerator(
     private inline val timestamp: Long
         get() = (Clock.System.now().epochSeconds) - CUSTOM_EPOCH
 
-    val nodeId: Int by lazy(LazyThreadSafetyMode.NONE) {
-        generateDoorNodeId(MAX_NODE_ID)
-    }
+    val nodeId: Int = generateDoorNodeId(MAX_NODE_ID)
 
     init {
         tableIdList.forEach {

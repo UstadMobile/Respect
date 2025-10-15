@@ -29,6 +29,7 @@ import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
 import world.respect.shared.generated.resources.invalid
+import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -55,12 +56,13 @@ data class PersonEditUiState(
      */
     val nationalPhoneNumSet: Boolean = false,
     val phoneNumError: UiText? = null,
+    val genderError: UiText? = null,
 ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
     val hasErrors: Boolean
-        get() = dateOfBirthError != null || phoneNumError != null
+        get() = dateOfBirthError != null || phoneNumError != null || genderError != null
 }
 
 class PersonEditViewModel(
@@ -144,7 +146,8 @@ class PersonEditViewModel(
                     prev.phoneNumError
                 }else {
                     null
-                }
+                },
+                genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender }
             )
         }.person.dataOrNull() ?: return
 
@@ -179,6 +182,11 @@ class PersonEditViewModel(
                     !phoneNumValidatorUseCase.isValid(person.phoneNumber ?: "")
                 ) {
                     Res.string.invalid.asUiText()
+                }else {
+                    null
+                },
+                genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {
+                    Res.string.required.asUiText()
                 }else {
                     null
                 }

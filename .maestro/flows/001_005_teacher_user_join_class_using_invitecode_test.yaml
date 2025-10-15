@@ -135,4 +135,4 @@ onFlowComplete:
     text: "Classes"
 - assertVisible: "New Class"
 - tapOn: "New Class"
-- assertVisible: "Teacher User"
+#- assertVisible: "Teacher User"

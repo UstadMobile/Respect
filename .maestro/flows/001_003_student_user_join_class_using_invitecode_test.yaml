@@ -67,12 +67,8 @@ onFlowComplete:
 - assertVisible: "Required*" # Name is mandatory field
 - tapOn: "Your name*"
 - inputText: "Child User"
-#- tapOn: "Next"
-#- assertVisible: "Required*"  # Gender is a mandatory field
 - tapOn: "Your gender*"
 - tapOn: "Female"
-#- tapOn: "Next"
-#- assertVisible: "Required*" # DOB is mandatory field
 - tapOn: "Your date of birth*"
 - longPressOn: ".*1900.*"
 - tapOn: "Select all"
@@ -133,3 +129,5 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - assertVisible: "New Class"
+- tapOn: "New Class"
+#- assertVisible: "Child User"

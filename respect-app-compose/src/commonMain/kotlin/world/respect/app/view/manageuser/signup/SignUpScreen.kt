@@ -22,6 +22,7 @@ import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.required
 import world.respect.shared.viewmodel.manageuser.profile.SignupUiState
@@ -84,7 +85,9 @@ fun SignupScreen(
 
         RespectLocalDateField(
             modifier = Modifier.fillMaxWidth(),
-            value = uiState.personInfo.dateOfBirth,
+            value = uiState.personInfo.dateOfBirth.takeIf {
+                it != RespectRedeemInviteRequest.DATE_OF_BIRTH_EPOCH
+            },
             onValueChange = {onDateOfBirthChanged(it) },
             label = {
                 uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it) + "*") }

@@ -9,34 +9,33 @@ import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
-import world.respect.datalayer.school.ReportDataSource
-import world.respect.datalayer.school.ReportDataSourceLocal
-import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.school.IndicatorDataSource
+import world.respect.datalayer.school.IndicatorDataSourceLocal
+import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.util.time.systemTimeInMillis
 
-class ReportDataSourceRepository(
-    override val local: ReportDataSourceLocal,
-    override val remote: ReportDataSource,
+class IndicatorDataSourceRepository(
+    override val local: IndicatorDataSourceLocal,
+    override val remote: IndicatorDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-) : ReportDataSource, RepositoryModelDataSource<Report> {
+) : IndicatorDataSource, RepositoryModelDataSource<Indicator> {
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
-        listParams: ReportDataSource.GetListParams,
-        template: Boolean
-    ): Flow<DataLoadState<List<Report>>> {
-        return local.listAsFlow(loadParams, listParams, template)
+        searchQuery: String?
+    ): Flow<DataLoadState<List<Indicator>>> {
+        return local.listAsFlow(loadParams, searchQuery)
     }
 
     override suspend fun findByGuid(
         params: DataLoadParams,
         guid: String
-    ): DataLoadState<Report> {
+    ): DataLoadState<Indicator> {
         val remote = remote.findByGuid(params, guid)
         local.updateFromRemoteIfNeeded(
             remote, validationHelper
@@ -47,9 +46,8 @@ class ReportDataSourceRepository(
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        params: ReportDataSource.GetListParams,
-        template: Boolean
-    ): IPagingSourceFactory<Int, Report> {
+        params: IndicatorDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Indicator> {
         val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
         return RepositoryPagingSourceFactory(
             local = local.listAsPagingSource(loadParams, params),
@@ -58,11 +56,11 @@ class ReportDataSourceRepository(
                     remoteLoadParams, local::updateLocal
                 )
             },
-            tag = "ReportRepo.listAsPagingSource"
+            tag = "IndicatorRepo.listAsPagingSource"
         )
     }
 
-    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Report>> {
+    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>> {
         return local.findByGuidAsFlow(guid).combineWithRemote(
             remoteFlow = remote.findByGuidAsFlow(guid).onEach {
                 local.updateFromRemoteIfNeeded(it, validationHelper)
@@ -70,25 +68,21 @@ class ReportDataSourceRepository(
         )
     }
 
-    override suspend fun delete(guid: String) {
-        local.delete(guid)
+    override suspend fun initializeDefaultIndicators(idGenerator: () -> String) {
+        local.initializeDefaultIndicators(idGenerator)
     }
 
-    override suspend fun store(list: List<Report>) {
+    override suspend fun store(list: List<Indicator>) {
         local.store(list)
         val timeNow = systemTimeInMillis()
         remoteWriteQueue.add(
             list.map {
                 WriteQueueItem(
-                    model = WriteQueueItem.Model.REPORT,
-                    uid = it.guid,
+                    model = WriteQueueItem.Model.INDICATOR,
+                    uid = it.indicatorId,
                     timeQueued = timeNow,
                 )
             }
         )
-    }
-
-    override suspend fun initializeTemplates(idGenerator: () -> String) {
-        local.initializeTemplates(idGenerator)
     }
 }

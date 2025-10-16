@@ -63,6 +63,7 @@ val ReportXAxis.label: StringResource
         ReportXAxis.ACTIVITY_VERB -> Res.string.activity_verb
         ReportXAxis.APPLICATION -> Res.string.application
         ReportXAxis.DEVICE_TYPE -> Res.string.device_type
+        ReportXAxis.ROLE -> Res.string.role
     }
 
 val FilterType.label: StringResource

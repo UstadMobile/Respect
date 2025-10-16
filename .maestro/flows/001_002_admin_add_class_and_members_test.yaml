@@ -89,6 +89,12 @@ onFlowComplete:
 - tapOn: "Your date of birth*"
 - runScript:
     file: "subflows/setDate.js"
+- inputText: ${output.tomorrowDate}
+- tapOn: "Next"
+- assertVisible: "Date of Birth cannot be in the future"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "subflows/setDate.js"
 - inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:

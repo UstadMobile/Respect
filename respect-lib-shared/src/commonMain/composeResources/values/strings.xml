@@ -6,7 +6,6 @@
     <string name="app_link_provided_message">Copy/paste the RESPECT app link provided by the app developer</string>
     <string name="error_link_message">"ERROR: Invalid link. Please check the URL and try again."</string>
     <string name="link_label">Link*</string>
-    <string name="class_name_label">Class Name</string>
     <string name="start_date_label">Start date</string>
     <string name="end_date_label">End date</string>
     <string name="example_url_placeholder">e.g. https://</string>
@@ -401,4 +400,12 @@
     <string name="school_directories">School directories</string>
 
     <string name="invalid">Invalid</string>
+
+    <string name="parent">Parent</string>
+    <string name="student">Student</string>
+    <string name="teacher">Teacher</string>
+    <string name="system_administrator">System administrator</string>
+    <string name="site_administrator">Site administrator</string>
+    <string name="role">Role</string>
+
 </resources>

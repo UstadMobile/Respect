@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.datetime.TimeZone
@@ -21,6 +22,8 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -44,6 +47,8 @@ import kotlin.time.Clock
 
 data class PersonEditUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
+    val roleOptions: List<PersonRoleEnum> = emptyList(),
+    val showRoleDropdown: Boolean = false,
     val dateOfBirthError: UiText? = null,
 
     /**
@@ -107,6 +112,32 @@ class PersonEditViewModel(
         }
 
         launchWithLoadingIndicator {
+            val currentPersonRole = accountManager.selectedAccountAndPersonFlow.first()
+                ?.person?.roles?.first()?.roleEnum
+
+            _uiState.update { prev ->
+                prev.copy(
+                    roleOptions = when (currentPersonRole) {
+                        PersonRoleEnum.TEACHER -> {
+                            listOf(
+                                PersonRoleEnum.STUDENT,
+                                PersonRoleEnum.PARENT,
+                                PersonRoleEnum.TEACHER,
+                            )
+                        }
+                        PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> {
+                            listOf(
+                                PersonRoleEnum.STUDENT,
+                                PersonRoleEnum.PARENT,
+                                PersonRoleEnum.TEACHER,
+                                PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                            )
+                        }
+                        else -> emptyList()
+                    }
+                )
+            }
+
             if (route.guid != null) {
                 loadEntity(
                     json = json,
@@ -126,10 +157,16 @@ class PersonEditViewModel(
                                 guid = guid,
                                 givenName = "",
                                 familyName = "",
-                                roles = emptyList(),
+                                roles = listOf(
+                                    PersonRole(
+                                        isPrimaryRole = true,
+                                        roleEnum = PersonRoleEnum.STUDENT,
+                                    )
+                                ),
                                 gender = PersonGenderEnum.UNSPECIFIED
                             )
-                        )
+                        ),
+                        showRoleDropdown = true,
                     )
                 }
             }

@@ -16,10 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.class_name_label
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
+import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.required
 
@@ -54,7 +54,7 @@ fun ClazzEditScreen(
             value = clazz?.title ?: "",
             label = {
                 Text(
-                    stringResource(Res.string.class_name_label) + "*"
+                    stringResource(Res.string.class_name) + "*"
                 )
             },
             onValueChange = { value ->

@@ -401,4 +401,12 @@
     <string name="school_directories">School directories</string>
 
     <string name="invalid">Invalid</string>
+
+    <string name="parent">Parent</string>
+    <string name="student">Student</string>
+    <string name="teacher">Teacher</string>
+    <string name="system_administrator">System administrator</string>
+    <string name="site_administrator">Site administrator</string>
+    <string name="role">Role</string>
+
 </resources>

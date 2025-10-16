@@ -30,6 +30,7 @@ import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.generated.resources.role
 import world.respect.shared.util.ext.label
 
 @Composable
@@ -75,6 +76,14 @@ fun PersonDetailScreen(
         }
 
         HorizontalDivider()
+
+        person?.roles?.firstOrNull()?.also { role ->
+            RespectDetailField(
+                modifier = Modifier.defaultItemPadding(),
+                value = { Text(stringResource(role.roleEnum.label)) },
+                label = { Text(stringResource(Res.string.role)) },
+            )
+        }
 
         person?.username?.also {
             RespectDetailField(

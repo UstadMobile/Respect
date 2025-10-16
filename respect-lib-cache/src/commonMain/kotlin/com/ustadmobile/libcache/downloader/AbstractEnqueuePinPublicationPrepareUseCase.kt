@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.ktor.http.Url
+import world.respect.libxxhash.XXStringHasher
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -14,7 +15,8 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 abstract class AbstractEnqueuePinPublicationPrepareUseCase(
-    private val db: UstadCacheDb
+    private val db: UstadCacheDb,
+    private val xxStringHasher: XXStringHasher,
 ) : EnqueuePinPublicationPrepareUseCase {
 
     /**
@@ -29,6 +31,7 @@ abstract class AbstractEnqueuePinPublicationPrepareUseCase(
                 djStatus = TransferJobItemStatus.STATUS_QUEUED_INT,
                 djTimeCreated = Clock.System.now().toEpochMilliseconds(),
                 djPubManifestUrl = manifestUrl,
+                djPubManifestHash = xxStringHasher.hash(manifestUrl.toString()),
             )
 
             val jobUid = db.downloadJobDao.insert(downloadJob).toInt()

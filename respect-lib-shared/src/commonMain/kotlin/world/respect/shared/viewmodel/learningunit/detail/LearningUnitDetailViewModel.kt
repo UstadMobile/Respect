@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.learningunit.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,9 @@ import world.respect.shared.viewmodel.app.appstate.getTitle
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
     val app: DataLoadState<RespectAppManifest> = DataLoadingState(),
+    val pinState: PublicationPinState = PublicationPinState(
+        PublicationPinState.Status.NOT_PINNED, 0, 0
+    ),
 )
 
 class LearningUnitDetailViewModel(
@@ -77,6 +81,13 @@ class LearningUnitDetailViewModel(
                 _uiState.update { it.copy(app = app) }
             }
         }
+
+        viewModelScope.launch {
+            ustadCache.publicationPinState(route.learningUnitManifestUrl).collect { pinState ->
+                _uiState.update { it.copy(pinState = pinState) }
+            }
+        }
+
     }
 
 
@@ -101,7 +112,18 @@ class LearningUnitDetailViewModel(
     fun onClickDownload() {
         viewModelScope.launch {
             try {
-                ustadCache.pinPublication(route.learningUnitManifestUrl)
+                when(uiState.value.pinState.status) {
+                    PublicationPinState.Status.NOT_PINNED -> {
+                        ustadCache.pinPublication(route.learningUnitManifestUrl)
+                    }
+                    PublicationPinState.Status.READY -> {
+                        ustadCache.unpinPublication(route.learningUnitManifestUrl)
+                    }
+                    else -> {
+                        //Do nothing
+                    }
+                }
+
             }catch(t: Throwable) {
                 t.printStackTrace()
             }

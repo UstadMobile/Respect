@@ -41,7 +41,7 @@ class UstadCacheBuilder(
             sizeLimit = sizeLimit,
             xxStringHasher = xxStringHasher,
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseAndroid(
-                appContext = appContext, db = dbVal
+                appContext = appContext, db = dbVal, xxStringHasher = xxStringHasher,
             ),
             db = dbVal
         )

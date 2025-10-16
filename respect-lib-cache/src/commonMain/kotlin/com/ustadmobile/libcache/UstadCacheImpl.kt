@@ -41,7 +41,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -875,9 +874,10 @@ class UstadCacheImpl(
         //Do nothing yet
     }
 
-    override fun publicationPinState(manifestUrl: Url): Flow<Int> {
-        //nothing yet
-        return emptyFlow()
+    override fun publicationPinState(manifestUrl: Url): Flow<PublicationPinState> {
+        return db.downloadJobItemDao.publicationPinState(
+            pubManifestHash = xxStringHasher.hash(manifestUrl.toString())
+        )
     }
 
     suspend fun commit() {

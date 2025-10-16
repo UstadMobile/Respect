@@ -53,7 +53,7 @@ class UstadCacheBuilder(
             logger = logger,
             cacheName = cacheName,
             xxStringHasher = xxStringHasher,
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(dbVal)
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(dbVal, xxStringHasher),
         )
     }
 }

@@ -11,12 +11,14 @@ import androidx.work.WorkManager
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.DownloadJob
 import io.ktor.http.Url
+import world.respect.libxxhash.XXStringHasher
 import java.util.concurrent.TimeUnit
 
 class EnqueuePinPublicationPrepareUseCaseAndroid(
     private val appContext: Context,
-    db: UstadCacheDb
-) : AbstractEnqueuePinPublicationPrepareUseCase(db){
+    db: UstadCacheDb,
+    xxStringHasher: XXStringHasher,
+) : AbstractEnqueuePinPublicationPrepareUseCase(db, xxStringHasher){
 
     override suspend fun invoke(manifestUrl: Url): DownloadJob {
         val transferJob = createTransferJob(manifestUrl)

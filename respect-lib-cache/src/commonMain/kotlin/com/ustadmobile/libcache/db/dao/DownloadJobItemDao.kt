@@ -4,8 +4,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class DownloadJobItemDao {
@@ -58,6 +60,35 @@ abstract class DownloadJobItemDao {
         jobItemUid: Int,
         status: Int,
     )
+
+    @Query("""
+        WITH MostRecentDlUid(uid) AS (
+            SELECT COALESCE(
+                   (SELECT DownloadJob.djUid
+                      FROM DownloadJob
+                     WHERE DownloadJob.djPubManifestHash = :pubManifestHash
+                  ORDER BY DownloadJob.djTimeCreated DESC
+                     LIMIT 1), 0)
+        )
+        
+        SELECT CASE((SELECT DownloadJob.djStatus
+                       FROM DownloadJob
+                      WHERE DownloadJob.djUid = (SELECT uid FROM MostRecentDlUid)))
+                   WHEN ${TransferJobItemStatus.STATUS_COMPLETE_INT} THEN ${PublicationPinState.Status.READY_STATUS_INT}
+                   WHEN ${TransferJobItemStatus.STATUS_IN_PROGRESS_INT} THEN ${PublicationPinState.Status.IN_PROGRESS_INT}
+                   ELSE ${PublicationPinState.Status.NOT_PINNED_INT}
+                   END AS status,
+               (SELECT SUM(DownloadJobItem.djiTransferred)
+                  FROM DownloadJobItem
+                 WHERE DownloadJobItem.djiDjUid = (SELECT uid FROM MostRecentDlUid)) AS transferred,
+               (SELECT SUM(DownloadJobItem.djiTotalSize)
+                  FROM DownloadJobItem
+                 WHERE DownloadJobItem.djiDjUid = (SELECT uid FROM MostRecentDlUid)) AS totalSize  
+    """)
+    abstract fun publicationPinState(
+        pubManifestHash: Long,
+    ): Flow<PublicationPinState>
+
 
 
 }

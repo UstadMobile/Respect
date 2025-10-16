@@ -18,6 +18,28 @@ data class RemoveLockRequest(
     val lockId: Long,
 )
 
+data class PublicationPinState(
+    val status: Status,
+    val totalSize: Long,
+    val transferred: Long,
+) {
+    enum class Status(val flagVal: Int) {
+
+        NOT_PINNED(0), IN_PROGRESS(3), READY(10), FAILED(20);
+
+
+        companion object {
+
+            const val NOT_PINNED_INT = 0
+
+            const val IN_PROGRESS_INT = 3
+            const val READY_STATUS_INT = 10
+
+            const val FAILED_INT = 20
+        }
+    }
+}
+
 /**
  *
  */
@@ -149,26 +171,25 @@ interface UstadCache {
     suspend fun pinPublication(manifestUrl: Url)
 
     /**
-     * Deleted the PinnedPublication entity and all associated locks
-     */
-    suspend fun unpinPublication(manifestUrl: Url)
-
-    /**
      * The state of the publication is:
      *
-     * Pinned/Ready: if there is a PinnedPublication entity, the pinned publication has locks, and
-     * there are no active transfer job for the publication.
+     * Pinned/Ready: there is a downloadjob for the given manifest url AND the job status is completed
      *
-     * Pinned/In-progress: if there is a PinnedPublication and the most recent transfer job for the
-     * manifestUrl is pending
+     * Pinned/in-progress: There is a downloadjob for the given manifest URL nad the job status is
+     * in progress
      *
-     * Pinned/failed: if there is a PinnedPublication and the most recent transfer job for the the
-     * manifestUrl has a failed status
+     * Pinned/failed: most recent downloadjob for given manifest url failed.
      *
      * Otherwise: not pinned
+     */
+    fun publicationPinState(manifestUrl: Url): Flow<PublicationPinState>
+
+    /**
+     * Update the status of the most recent download job for the given manifest URL to unpinned.
+     * Remove any retention locks
      *
      */
-    fun publicationPinState(manifestUrl: Url): Flow<Int>
+    suspend fun unpinPublication(manifestUrl: Url)
 
     fun close()
 

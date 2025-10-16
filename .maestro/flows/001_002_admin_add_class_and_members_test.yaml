@@ -48,7 +48,6 @@ onFlowComplete:
 - tapOn: ".*Copy invite code.*"
 
 # C) Teacher sign-up via invite code to the class
-
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -99,8 +98,8 @@ onFlowComplete:
     timeout: 10000      # Timeout in milliseconds
 - tapOn: "Next"
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
-- assertVisible: "Password"
-- tapOn: "Password"
+- assertVisible: "Password*"
+- tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"
 - assertVisible:
@@ -201,7 +200,7 @@ onFlowComplete:
     text: "Create account"
 - assertVisible: "childuser"  #username
 - tapOn: "Next"
-- tapOn: "Password"
+- tapOn: "Password*"
 - inputText: "testc1"
 - tapOn: "Sign-up"
 - assertVisible:
@@ -310,7 +309,7 @@ onFlowComplete:
     timeout: 10000
 - tapOn: "Next"
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
-- tapOn: "Password"
+- tapOn: "Password*"
 - inputText: "testp1"
 - tapOn: "Sign-up"
 - assertVisible:

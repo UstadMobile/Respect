@@ -80,8 +80,12 @@ onFlowComplete:
 - assertVisible: "Required*" # Name is mandatory field
 - tapOn: "Your name*"
 - inputText: "Teacher User"
+- tapOn: "Next"
+- assertVisible: "Required*" # Gender is mandatory field
 - tapOn: "Gender*"
 - tapOn: "Female"
+- tapOn: "Next"
+- assertVisible: "Required*" # DOB is mandatory field
 - tapOn: "Your date of birth*"
 - runScript:
     file: "subflows/setDate.js"
@@ -96,6 +100,8 @@ onFlowComplete:
 - tapOn: "Next"
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
 - assertVisible: "Password*"
+- tapOn: "Sign-up"
+- assertVisible: "Required*" # Password is mandatory field
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"

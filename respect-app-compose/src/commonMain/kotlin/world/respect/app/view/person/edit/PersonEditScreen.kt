@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectGenderExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.RespectPhoneNumberTextField
@@ -21,6 +22,8 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email
@@ -28,6 +31,8 @@ import world.respect.shared.generated.resources.first_names
 import world.respect.shared.generated.resources.last_name
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.role
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 
@@ -95,6 +100,38 @@ fun PersonEditScreen(
             },
             isError = uiState.genderError != null,
         )
+
+        if(uiState.showRoleDropdown) {
+            val roleEnumVal = person?.roles?.first()?.roleEnum ?: PersonRoleEnum.STUDENT
+            RespectExposedDropDownMenuField(
+                value = roleEnumVal,
+                modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
+                label = {
+                    Text(stringResource(Res.string.role) + "*")
+                },
+                onOptionSelected = { newRole ->
+                    person?.also {
+                        onEntityChanged(
+                            it.copy(
+                                roles = listOf(
+                                    PersonRole(
+                                        isPrimaryRole = true,
+                                        roleEnum = newRole,
+                                    )
+                                )
+                            )
+                        )
+                    }
+                },
+                options = uiState.roleOptions,
+                itemText = { stringResource(it.label) },
+                enabled = uiState.fieldsEnabled,
+                supportingText = {
+                    Text(stringResource(Res.string.required))
+                }
+            )
+
+        }
 
         RespectLocalDateField(
             modifier = Modifier.testTag("date_of_birth").fillMaxWidth().defaultItemPadding(),

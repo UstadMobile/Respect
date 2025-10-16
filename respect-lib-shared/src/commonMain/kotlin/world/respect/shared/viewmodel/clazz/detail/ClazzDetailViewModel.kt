@@ -24,6 +24,7 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
+import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
 import world.respect.shared.generated.resources.last_name
@@ -37,6 +38,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
@@ -61,6 +63,8 @@ data class ClazzDetailUiState(
     val isTeachersExpanded: Boolean = true,
     val isStudentsExpanded: Boolean = true,
     val inviteCodePrefix: String? = null,
+    val showAddStudent: Boolean = false,
+    val showAddTeacher: Boolean = false,
 )
 
 class ClazzDetailViewModel(
@@ -138,6 +142,27 @@ class ClazzDetailViewModel(
                     it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
                 _uiState.update { it.copy(clazz = clazz) }
+            }
+        }
+
+        viewModelScope.launch {
+            _uiState.whenSubscribed {
+                accountManager.selectedAccountAndPersonFlow.collect { selectedAccountAndPerson ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
+                            showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
+                        )
+                    }
+
+                    _appUiState.update {
+                        it.copy(
+                            fabState = it.fabState.copy(
+                                visible = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true
+                            )
+                        )
+                    }
+                }
             }
         }
     }

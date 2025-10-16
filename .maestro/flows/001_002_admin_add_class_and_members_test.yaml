@@ -83,9 +83,6 @@ onFlowComplete:
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
-- longPressOn: ".*1900.*"
-- tapOn: "Select all"
-- eraseText
 - runScript:
     file: "subflows/setDate.js"
 - inputText: ${output.pastYearDateP}
@@ -188,9 +185,6 @@ onFlowComplete:
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
-- longPressOn: ".*1900.*"
-- tapOn: "Select all"
-- eraseText
 - runScript:
     file: "subflows/setDate.js"
 - inputText: ${output.pastYearDateC}
@@ -294,9 +288,6 @@ onFlowComplete:
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
-- longPressOn: ".*1900.*"
-- tapOn: "Select all"
-- eraseText
 - runScript:
     file: "subflows/setDate.js"
 - inputText: ${output.pastYearDateP}
@@ -320,9 +311,6 @@ onFlowComplete:
 - tapOn: "Gender*"
 - tapOn: "Male"
 - tapOn: "Child's date of birth*"
-- longPressOn: ".*1900.*"
-- tapOn: "Select all"
-- eraseText
 - runScript:
     file: "subflows/setDate.js"
 - inputText: ${output.pastYearDateC}

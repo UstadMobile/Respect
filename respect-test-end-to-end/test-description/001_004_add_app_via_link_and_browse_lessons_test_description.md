@@ -24,10 +24,17 @@ So that they can choose a suitable lesson and start learning directly from one p
 16. Verify that the app detail screen is displayed with title “App detail”.
 17. Verify the app name is visible.
 18. Verify buttons/labels “Try it”, “Add App”, and “Lessons” are visible.
-19. Click on "Lessons".
-20. Verify user able to browse the lessons.
-21. Click on a lesson - Grade 1
-22. Verify lesson list with lesson 1 in it is visible
-23. Click on lesson 1
-24. Verify the lesson screen is displayed.
-25. Verify the lesson name , Play button, Download button are visible to user
+19. Click on "Add App" button.
+20. Go to Apps screen and verify the App got added to Apps screen.
+21. Click on App name.
+22. Click on "Lessons".
+23. Verify user able to browse the lessons.
+24. Click on a lesson - Grade 1
+25. Verify lesson list with lesson 1 in it is visible
+26. Click on lesson 1
+27. Verify the lesson screen is displayed.
+28. Verify the lesson name , Open, Download, Share and Assign buttons are visible to user
+29. Click on Open button.
+30. Verify user able to see lesson content
+31. Click on Close icon
+32. Verify user directed back to the Lesson detail screen.

@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "002_001_user_add_app_via_link_and_browse_lessons_test"
+        NAME: "001_004_add_app_via_link_and_browse_lessons_test"
 
 onFlowComplete:
   - runScript:
@@ -30,12 +30,28 @@ onFlowComplete:
 - assertVisible: "My app"
 - assertVisible: "Try it"
 - assertVisible: "Add App"
+# verify App got added to Apps section
 - tapOn: "Add App"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- assertVisible: "My app"
+- tapOn: "My app"
 - assertVisible: "Lessons"
 - tapOn: "Lessons"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "Open"
 - assertVisible: "App name"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 1000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+- assertVisible:
+    id: "app_title"
+    text: "Lesson 001"
+
 

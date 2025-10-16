@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002_user_login_to_app_with_link_provided_by_admin_test"
+        NAME: "001_001_admin_login_with_school_url_test"
 
 onFlowComplete:
   - runScript:

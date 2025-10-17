@@ -69,15 +69,14 @@ interface EnrollmentEntityDao {
     ): List<EnrollmentEntities>
 
     companion object {
-
-        const val SELECT_PERSON_AND_CLASS_UID  = """
-            (SELECT ClassEntity.cGuid 
-               FROM ClassEntity 
-              WHERE ClassEntity.cGuidHash = EnrollmentEntity.eClassUidNum) AS classUid,
-           (SELECT PersonEntity.pGuid
-              FROM PersonEntity
-             WHERE PersonEntity.pGuidHash = EnrollmentEntity.ePersonUidNum) AS personUid
-        """
-
+        const val SELECT_PERSON_AND_CLASS_UID = """
+    COALESCE((SELECT ClassEntity.cGuid FROM ClassEntity WHERE ClassEntity.cGuidHash = EnrollmentEntity.eClassUidNum),
+      ''
+    ) AS classUid,
+    COALESCE(
+      (SELECT PersonEntity.pGuid FROM PersonEntity WHERE PersonEntity.pGuidHash = EnrollmentEntity.ePersonUidNum),
+      ''
+    ) AS personUid
+  """
     }
 }

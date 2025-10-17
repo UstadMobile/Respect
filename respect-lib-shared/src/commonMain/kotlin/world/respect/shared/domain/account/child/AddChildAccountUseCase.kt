@@ -18,7 +18,8 @@ class AddChildAccountUseCase(
      suspend operator fun invoke(
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
-        classUid: String
+        classUid: String,
+        inviteCode: String
     ) {
 
         val accountGuid =
@@ -46,6 +47,7 @@ class AddChildAccountUseCase(
             classUid = classUid,
             personUid = childPerson.guid,
             role = EnrollmentRoleEnum.PENDING_STUDENT,
+            inviteCode = inviteCode,
         )
         schoolDataSource.enrollmentDataSource.store(listOf(newEnrollment))
     }

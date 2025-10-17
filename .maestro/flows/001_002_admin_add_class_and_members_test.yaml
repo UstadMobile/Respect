@@ -196,7 +196,7 @@ onFlowComplete:
     id: "app_title"
     text: "Your profile"
 - tapOn: "Your name*"
-- inputText: "Child User"
+- inputText: "Student User"
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
@@ -207,10 +207,10 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- assertVisible: "childuser"  #username
+- assertVisible: "studentuser"  #username
 - tapOn: "Next"
 - tapOn: "Password*"
-- inputText: "testc1"
+- inputText: "tests1"
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
@@ -225,7 +225,7 @@ onFlowComplete:
     text: "Classes"
 - tapOn: "New Class"
 - assertVisible: "Pending requests"
-- assertVisible: "Child User"
+- assertVisible: "Student User"
 - tapOn: "Accept Invite"
 
 # I) Student login to the class
@@ -243,10 +243,10 @@ onFlowComplete:
 
 - tapOn:
     id: "username"
-- inputText: "childuser"
+- inputText: "studentuser"
 - tapOn:
     id : "password"
-- inputText: "testc1"
+- inputText: "tests1"
 - tapOn: "Login"
 - assertVisible: "Apps"
 - tapOn: "Classes"
@@ -255,7 +255,7 @@ onFlowComplete:
     text: "Classes"
 - assertVisible: "New Class"
 - tapOn: "New Class"
-- assertVisible: "Child User"
+- assertVisible: "Student User"
 
 # J) Admin sending invite code to the Parent user
 - runFlow: "subflows/school_admin_login_flow.yaml"
@@ -338,6 +338,9 @@ onFlowComplete:
 
 # H) Admin approve student's request to join the class
 - runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn: "People"
+- assertVisible: "Parent User"
+- assertVisible: "Child User"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

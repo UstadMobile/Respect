@@ -2,11 +2,13 @@ package com.ustadmobile.libcache.db.entities
 
 @Suppress("unused") //some items reserved for future use.
 enum class TransferJobItemStatus(val value: Int) {
-    QUEUED(1), IN_PROGRESS(11), COMPLETE(21), FAILED(22), CANCELLED(23);
+    QUEUED(1), PREPARING(2), IN_PROGRESS(11), COMPLETE(21), FAILED(22), CANCELLED(23);
 
     companion object {
 
         const val STATUS_QUEUED_INT = 1
+
+        const val STATUS_PREPARING_INT = 2
 
         const val STATUS_IN_PROGRESS_INT = 11
 

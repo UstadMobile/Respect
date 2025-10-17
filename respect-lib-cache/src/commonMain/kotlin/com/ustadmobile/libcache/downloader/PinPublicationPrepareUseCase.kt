@@ -5,6 +5,7 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.PinnedPublication
+import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -59,6 +60,10 @@ class PinPublicationPrepareUseCase(
         val downloadJob = db.downloadJobDao.findByUid(downloadJobUid)
             ?: throw IllegalArgumentException("No transfer job with uid $downloadJobUid")
         val manifestJobItem = db.downloadJobItemDao.findPendingByJobUid(downloadJobUid).first()
+        db.downloadJobDao.updateStatus(
+            jobUid = downloadJobUid,
+            status = TransferJobItemStatus.STATUS_PREPARING_INT,
+        )
 
         val manifestUrl = downloadJob.djPubManifestUrl
             ?: throw IllegalArgumentException("no manifest url")
@@ -152,7 +157,7 @@ class PinPublicationPrepareUseCase(
 
     companion object {
 
-        const val PARALLEL_SIZE_FETCH_LIMIT = 4
+        const val PARALLEL_SIZE_FETCH_LIMIT = 8
 
         const val DEFAULT_MAX_ATTEMPTS = 5
 

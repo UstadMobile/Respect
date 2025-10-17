@@ -25,12 +25,14 @@ data class PublicationPinState(
 ) {
     enum class Status(val flagVal: Int) {
 
-        NOT_PINNED(0), IN_PROGRESS(3), READY(10), FAILED(20);
+        NOT_PINNED(0), PREPARING(2), IN_PROGRESS(3), READY(10), FAILED(20);
 
 
         companion object {
 
             const val NOT_PINNED_INT = 0
+
+            const val PREPARING_INT = 2
 
             const val IN_PROGRESS_INT = 3
             const val READY_STATUS_INT = 10

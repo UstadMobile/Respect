@@ -76,6 +76,7 @@ abstract class DownloadJobItemDao {
                       WHERE DownloadJob.djUid = (SELECT uid FROM MostRecentDlUid)))
                    WHEN ${TransferJobItemStatus.STATUS_COMPLETE_INT} THEN ${PublicationPinState.Status.READY_STATUS_INT}
                    WHEN ${TransferJobItemStatus.STATUS_IN_PROGRESS_INT} THEN ${PublicationPinState.Status.IN_PROGRESS_INT}
+                   WHEN ${TransferJobItemStatus.STATUS_PREPARING_INT} THEN ${PublicationPinState.Status.PREPARING_INT}
                    ELSE ${PublicationPinState.Status.NOT_PINNED_INT}
                    END AS status,
                (SELECT SUM(DownloadJobItem.djiTransferred)

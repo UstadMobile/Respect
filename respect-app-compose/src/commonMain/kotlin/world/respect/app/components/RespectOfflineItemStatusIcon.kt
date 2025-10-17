@@ -31,19 +31,24 @@ fun RespectOfflineItemStatusIcon(
             contentDescription = null,
         )
 
-        if(state.status == PublicationPinState.Status.IN_PROGRESS) {
-            if(state.totalSize == 0L) {
+        when (state.status) {
+            PublicationPinState.Status.PREPARING -> {
                 CircularProgressIndicator()
-            }else {
+            }
+
+            PublicationPinState.Status.IN_PROGRESS -> {
                 CircularProgressIndicator(
                     progress = {
-                        state.transferred.toFloat() / state.totalSize.toFloat()
+                        state.transferred.toFloat() / state.totalSize.toFloat().let {
+                            if(it == 0f) 1f else it
+                        }
                     }
                 )
             }
 
+            else -> {
+                //no progress indicator
+            }
         }
-
-
     }
 }

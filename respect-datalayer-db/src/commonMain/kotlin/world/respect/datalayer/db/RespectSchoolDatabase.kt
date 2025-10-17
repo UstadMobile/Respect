@@ -19,10 +19,16 @@ import world.respect.datalayer.db.shared.SharedConverters
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.daos.AssignmentAssigneeRefEntityDao
+import world.respect.datalayer.db.school.daos.AssignmentEntityDao
+import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntityDao
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
+import world.respect.datalayer.db.school.entities.AssignmentAssigneeRefEntity
+import world.respect.datalayer.db.school.entities.AssignmentEntity
+import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
@@ -46,6 +52,9 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         IndicatorEntity::class,
         ClassEntity::class,
         EnrollmentEntity::class,
+        AssignmentEntity::class,
+        AssignmentAssigneeRefEntity::class,
+        AssignmentLearningResourceRefEntity::class,
         WriteQueueItemEntity::class,
     ],
     version = 7,
@@ -73,6 +82,12 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getClassEntityDao(): ClassEntityDao
 
     abstract fun getEnrollmentEntityDao(): EnrollmentEntityDao
+
+    abstract fun getAssignmentEntityDao(): AssignmentEntityDao
+
+    abstract fun getAssignmentAssigneeRefEntityDao(): AssignmentAssigneeRefEntityDao
+
+    abstract fun getAssignmentLearningResourceRefEntityDao(): AssignmentLearningResourceRefEntityDao
 
     abstract fun getWriteQueueItemEntityDao(): WriteQueueItemEntityDao
 

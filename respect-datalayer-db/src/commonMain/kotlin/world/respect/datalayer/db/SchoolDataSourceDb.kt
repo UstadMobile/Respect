@@ -3,6 +3,7 @@ package world.respect.datalayer.db
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.IndicatorDataSourceDb
@@ -10,6 +11,7 @@ import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
+import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSource
@@ -59,5 +61,9 @@ class SchoolDataSourceDb(
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal by lazy {
         EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+    }
+
+    override val assignmentDataSource: AssignmentDataSource by lazy {
+        AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 }

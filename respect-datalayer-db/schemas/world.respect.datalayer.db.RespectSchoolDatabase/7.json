@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "182c09377416a2ba3e55afea160a9f59",
+    "identityHash": "00803529925a7141f37d390f8fecd1ee",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -698,6 +698,134 @@
         }
       },
       {
+        "tableName": "AssignmentEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeDeadline` INTEGER NOT NULL, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "aeUid",
+            "columnName": "aeUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeUidNum",
+            "columnName": "aeUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeTitle",
+            "columnName": "aeTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeDescription",
+            "columnName": "aeDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeDeadline",
+            "columnName": "aeDeadline",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeLastModified",
+            "columnName": "aeLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeStored",
+            "columnName": "aeStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "aeUidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "AssignmentAssigneeRefEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aarAeUidNum` INTEGER NOT NULL, `aarType` TEXT NOT NULL, `aarAeAssigneeUid` TEXT NOT NULL, `aarAeAssigneeUidNum` INTEGER NOT NULL, PRIMARY KEY(`aarAeUidNum`, `aarAeAssigneeUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "aarAeUidNum",
+            "columnName": "aarAeUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aarType",
+            "columnName": "aarType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aarAeAssigneeUid",
+            "columnName": "aarAeAssigneeUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aarAeAssigneeUidNum",
+            "columnName": "aarAeAssigneeUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "aarAeUidNum",
+            "aarAeAssigneeUidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "AssignmentLearningResourceRefEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`alrrAeUidNum` INTEGER NOT NULL, `alrrLearningUnitManifestUrlHash` INTEGER NOT NULL, `alrrLearningUnitManifestUrl` TEXT NOT NULL, `alrrAppManifestUrl` TEXT NOT NULL, PRIMARY KEY(`alrrAeUidNum`, `alrrLearningUnitManifestUrlHash`))",
+        "fields": [
+          {
+            "fieldPath": "alrrAeUidNum",
+            "columnName": "alrrAeUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alrrLearningUnitManifestUrlHash",
+            "columnName": "alrrLearningUnitManifestUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alrrLearningUnitManifestUrl",
+            "columnName": "alrrLearningUnitManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alrrAppManifestUrl",
+            "columnName": "alrrAppManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "alrrAeUidNum",
+            "alrrLearningUnitManifestUrlHash"
+          ]
+        }
+      },
+      {
         "tableName": "WriteQueueItemEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimeQueued` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
         "fields": [
@@ -754,7 +882,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '182c09377416a2ba3e55afea160a9f59')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '00803529925a7141f37d390f8fecd1ee')"
     ]
   }
 }

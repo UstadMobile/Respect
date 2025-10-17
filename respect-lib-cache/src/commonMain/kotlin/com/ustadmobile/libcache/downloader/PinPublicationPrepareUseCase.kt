@@ -108,9 +108,10 @@ class PinPublicationPrepareUseCase(
                 async {
                     for (item in jobItemProducer) {
                         val jobItemWithSize = if(item.djiTotalSize <= 0) {
-                            val contentLength = httpClient.head(item.djiUrl) {
+                            val headResponse = httpClient.head(item.djiUrl) {
                                 header("cache-control", "no-cache, no-store")
-                            }.contentLength()
+                            }
+                            val contentLength = headResponse.contentLength()
 
                             item.copy(
                                 djiTotalSize = contentLength ?: 0

@@ -31,7 +31,17 @@ abstract class DownloadJobDao {
                WHERE DownloadJobItem.djiDjUid = :jobUid
                  AND DownloadJobItem.djiStatus != ${TransferJobItemStatus.STATUS_COMPLETE_INT}) 
     """)
-    abstract suspend fun updateStatusIfComplete(jobUid: Int): Int
+    abstract suspend fun updateStatusSetCompleteIfAllItemsComplete(jobUid: Int): Int
 
+
+    @Query("""
+        UPDATE DownloadJob
+           SET djStatus = :status
+         WHERE djUid = :jobUid
+    """)
+    abstract suspend fun updateStatus(
+        jobUid: Int,
+        status: Int
+    )
 
 }

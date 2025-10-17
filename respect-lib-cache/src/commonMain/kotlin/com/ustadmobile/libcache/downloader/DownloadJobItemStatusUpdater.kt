@@ -11,6 +11,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import world.respect.libutil.ext.lastDistinctBy
 
+/**
+ * Update the status of DownloadJobItems in batches periodically.
+ */
 class DownloadJobItemStatusUpdater(
     private val db: UstadCacheDb,
     scope: CoroutineScope,
@@ -66,7 +69,6 @@ class DownloadJobItemStatusUpdater(
             it.jobItem.djiUid
         }
 
-
         db.takeIf {
             progressUpdatesToCommit.isNotEmpty() || statusUpdatesToCommit.isNotEmpty()
                     || updateTransferJobStatusUid != 0
@@ -86,7 +88,7 @@ class DownloadJobItemStatusUpdater(
             }
 
             if(updateTransferJobStatusUid != 0) {
-                val numUpdates = db.downloadJobDao.updateStatusIfComplete(
+                val numUpdates = db.downloadJobDao.updateStatusSetCompleteIfAllItemsComplete(
                     jobUid = updateTransferJobStatusUid
                 )
                 Napier.d { "TransferJobItemStatusUpdater: update status complete for " +

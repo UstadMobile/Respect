@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.okhttp.await
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.github.aakira.napier.Napier
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -54,6 +55,7 @@ class RunDownloadJobUseCaseImpl(
                             queueItem.djiPartialTmpFile?.also {
                                 header("X-Interceptor-Partial-File", it)
                             }
+                            header(HttpHeaders.AcceptEncoding, "gzip, deflate")
                         }
                         .build()
 
@@ -130,6 +132,10 @@ class RunDownloadJobUseCaseImpl(
 
         coroutineScope {
             val transferJobItemStatusUpdater = DownloadJobItemStatusUpdater(db,  this)
+            db.downloadJobDao.updateStatus(
+                jobUid = downloadJobUid,
+                status = TransferJobItemStatus.STATUS_IN_PROGRESS_INT
+            )
             try {
                 invoke(
                     items = transferJobItems,

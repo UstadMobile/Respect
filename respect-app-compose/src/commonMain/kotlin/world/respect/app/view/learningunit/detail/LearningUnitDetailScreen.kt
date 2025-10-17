@@ -17,9 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.NearMe
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,20 +33,22 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.score_or_progress
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.graphics.vector.ImageVector
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
-import world.respect.shared.generated.resources.share
 import world.respect.shared.generated.resources.open
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
+import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.RespectOfflineItemStatusIcon
+import world.respect.app.components.RespectQuickActionButton
+import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 
@@ -61,6 +61,7 @@ fun LearningUnitDetailScreen(
     LearningUnitDetailScreen(
         uiState = uiState,
         onClickOpen = viewModel::onClickOpen,
+        onClickDownload = viewModel::onClickDownload,
     )
 }
 
@@ -68,6 +69,7 @@ fun LearningUnitDetailScreen(
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
+    onClickDownload: () -> Unit,
 ) {
 
     LazyColumn(
@@ -136,16 +138,6 @@ fun LearningUnitDetailScreen(
                                 ?.getTitle().orEmpty()
                         )
 
-                        Text(
-                            text = stringResource(Res.string.score_or_progress),
-                        )
-
-                        LinearProgressIndicator(
-                            progress = { 0f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                        )
                     }
                 }
             )
@@ -168,17 +160,26 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconLabel(
-                    Icons.Filled.ArrowCircleDown,
-                    stringResource(Res.string.download)
+                RespectQuickActionButton(
+                    labelText = when(uiState.pinState.status) {
+                        PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
+                        PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
+                        else -> stringResource(Res.string.download)
+                    },
+                    iconContent = {
+                        RespectOfflineItemStatusIcon(
+                            state = uiState.pinState,
+                        )
+                    },
+                    onClick = onClickDownload
                 )
-                IconLabel(
-                    Icons.Filled.Share,
-                    stringResource(Res.string.share)
-                )
-                IconLabel(
-                    Icons.Filled.NearMe,
-                    stringResource(Res.string.assign)
+
+                RespectQuickActionButton(
+                    imageVector = Icons.Filled.NearMe,
+                    labelText = stringResource(Res.string.assign),
+                    onClick = {
+
+                    }
                 )
             }
         }

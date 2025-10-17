@@ -7,8 +7,8 @@ import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
 import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.opds.model.OpdsGroup
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsGroup
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.XXStringHasher
 
@@ -98,7 +98,7 @@ fun OpdsGroupEntities.asModel(
         metadata = metadata.asModel(),
         links = links.asModelsSub(ReadiumLinkEntity.PropertyType.OPDS_GROUP_LINKS),
         navigation = links.asModelsSub(ReadiumLinkEntity.PropertyType.OPDS_GROUP_NAVIGATION),
-        publications = publications.mapNotNull { publication ->
+        publications = publications.map { publication ->
             OpdsPublicationEntities(
                 opdsPublicationEntity = publication,
                 langMapEntities = langMapEntities.filter { it.lmeTopParentUid1 == publication.opeUid },

@@ -5,7 +5,7 @@ import world.respect.datalayer.db.opds.OpdsParentType
 import world.respect.datalayer.db.opds.entities.OpdsFacetEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
-import world.respect.datalayer.opds.model.OpdsFacet
+import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 data class OpdsFacetEntities(

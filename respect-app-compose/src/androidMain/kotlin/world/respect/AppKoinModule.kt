@@ -13,8 +13,14 @@ import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
+import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCaseAndroid
+import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
+import com.ustadmobile.libcache.downloader.RunDownloadJobUseCase
+import com.ustadmobile.libcache.downloader.RunDownloadJobUseCaseImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
@@ -239,6 +245,7 @@ val appKoinModule = module {
                     tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                     logger = NapierLoggingAdapter(),
                     json = get(),
+                    connectivityMonitor = ConnectivityMonitorAndroid(androidContext()),
                 )
             )
             .build()
@@ -545,6 +552,27 @@ val appKoinModule = module {
 
     single<OnClickPhoneNumUseCase> {
         OnClickPhoneNumberUseCaseAndroid(androidContext())
+    }
+
+    single<PinPublicationPrepareUseCase> {
+        PinPublicationPrepareUseCase(
+            httpClient = get(),
+            db = get(),
+            cache = get(),
+            enqueueRunDownloadJobUseCase = get(),
+        )
+    }
+
+    single<EnqueueRunDownloadJobUseCase> {
+        EnqueueRunDownloadJobUseCaseAndroid(androidContext())
+    }
+
+    single<RunDownloadJobUseCase> {
+        RunDownloadJobUseCaseImpl(
+            okHttpClient = get(),
+            db = get(),
+            httpCache = get(),
+        )
     }
 
     /**

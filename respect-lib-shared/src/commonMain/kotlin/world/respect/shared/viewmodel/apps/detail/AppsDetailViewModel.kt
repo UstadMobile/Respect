@@ -20,9 +20,9 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.opds.model.OpdsGroup
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsGroup
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.libutil.ext.resolve
 import world.respect.shared.navigation.NavCommand

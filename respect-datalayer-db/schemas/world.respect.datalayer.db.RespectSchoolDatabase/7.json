@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "00803529925a7141f37d390f8fecd1ee",
+    "identityHash": "014befb85f29746537eb290371e6e9e3",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -753,7 +753,7 @@
       },
       {
         "tableName": "AssignmentAssigneeRefEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aarAeUidNum` INTEGER NOT NULL, `aarType` TEXT NOT NULL, `aarAeAssigneeUid` TEXT NOT NULL, `aarAeAssigneeUidNum` INTEGER NOT NULL, PRIMARY KEY(`aarAeUidNum`, `aarAeAssigneeUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aarAeUidNum` INTEGER NOT NULL, `aarType` INTEGER NOT NULL, `aarAeAssigneeUid` TEXT NOT NULL, `aarAeAssigneeUidNum` INTEGER NOT NULL, PRIMARY KEY(`aarAeUidNum`, `aarAeAssigneeUidNum`))",
         "fields": [
           {
             "fieldPath": "aarAeUidNum",
@@ -764,7 +764,7 @@
           {
             "fieldPath": "aarType",
             "columnName": "aarType",
-            "affinity": "TEXT",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -882,7 +882,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '00803529925a7141f37d390f8fecd1ee')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '014befb85f29746537eb290371e6e9e3')"
     ]
   }
 }

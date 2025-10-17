@@ -7,6 +7,8 @@ import world.respect.datalayer.db.school.entities.AssignmentAssigneeRefEntity
 import world.respect.datalayer.db.school.entities.AssignmentEntity
 import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
 import world.respect.datalayer.school.model.Assignment
+import world.respect.datalayer.school.model.AssignmentAssigneeRef
+import world.respect.datalayer.school.model.AssignmentLearningResourceRef
 
 data class AssignmentEntities(
     @Embedded
@@ -34,13 +36,13 @@ fun AssignmentEntities.toModel(): Assignment {
         lastModified = assignment.aeLastModified,
         stored = assignment.aeStored,
         assignees = assignees.map {
-            Assignment.AssigneeRef(
+            AssignmentAssigneeRef(
                 type = it.aarType,
                 uid = it.aarAeAssigneeUid
             )
         },
         learningUnits = learningUnits.map {
-            Assignment.LearningResourceRef(
+            AssignmentLearningResourceRef(
                 learningUnitManifestUrl = it.alrrLearningUnitManifestUrl,
                 appManifestUrl = it.alrrAppManifestUrl
             )

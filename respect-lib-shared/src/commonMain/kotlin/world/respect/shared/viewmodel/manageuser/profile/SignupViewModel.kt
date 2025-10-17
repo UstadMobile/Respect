@@ -15,6 +15,7 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest.Companion.DATE_OF_BIRTH_EPOCH
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.child_dob_label
 import world.respect.shared.generated.resources.child_gender_label
@@ -161,10 +162,11 @@ class SignupViewModel(
             _uiState.update { prev ->
                 prev.copy(
                     fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required) else null,
-                    genderError = if (personInfo.gender.value.isEmpty()) StringResourceUiText(
-                        Res.string.required
-                    ) else null,
-                    dateOfBirthError =    if (personInfo.dateOfBirth > today) {
+                    genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
+                        Res.string.required) else null,
+                    dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {
+                        StringResourceUiText(Res.string.required)
+                    } else if (personInfo.dateOfBirth > today) {
                         StringResourceUiText(Res.string.date_of_birth_in_future)
                     } else null
 
@@ -173,9 +175,9 @@ class SignupViewModel(
 
             val hasError = listOf(
                 personInfo.name.isBlank(),
-                personInfo.dateOfBirth > today
-                //personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
-                //personInfo?.dateOfBirth == null
+                personInfo.dateOfBirth > today,
+                personInfo.gender == PersonGenderEnum.UNSPECIFIED,
+                personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH
             ).any { it }
 
             if (hasError) {

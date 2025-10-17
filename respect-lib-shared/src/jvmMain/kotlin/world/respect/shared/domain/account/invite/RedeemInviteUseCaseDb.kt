@@ -28,6 +28,7 @@ import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfil
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
+import world.respect.shared.util.toPerson
 import java.lang.IllegalArgumentException
 
 /**
@@ -44,27 +45,6 @@ class RedeemInviteUseCaseDb(
     private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
 ): RedeemInviteUseCase, KoinComponent {
-
-    fun RespectRedeemInviteRequest.PersonInfo.toPerson(
-        role: PersonRoleEnum,
-        username: String,
-        guid: String,
-    ) : Person {
-        return Person(
-            guid =  guid,
-            status = PersonStatusEnum.PENDING_APPROVAL,
-            givenName = name.substringBeforeLast(" "),
-            familyName = name.substringAfterLast(" "),
-            username = username,
-            gender = gender,
-            roles = listOf(
-                PersonRole(
-                    isPrimaryRole = true,
-                    roleEnum = role,
-                )
-            )
-        )
-    }
 
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
@@ -159,24 +139,25 @@ class RedeemInviteUseCaseDb(
         }
 
         //If a teacher/student, make the pending enrollment now
-        schoolDataSourceVal.enrollmentDataSource.store(
-            listOf(
-                Enrollment(
-                    uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                        Enrollment.TABLE_ID
-                    ).toString(),
-                    classUid = classUid,
-                    personUid = accountPerson.guid,
-                    role = if(redeemRequest.role == PersonRoleEnum.TEACHER) {
-                        EnrollmentRoleEnum.PENDING_TEACHER
-                    }else {
-                        EnrollmentRoleEnum.PENDING_STUDENT
-                    },
-                    inviteCode = redeemRequest.code,
+        if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
+            schoolDataSourceVal.enrollmentDataSource.store(
+                listOf(
+                    Enrollment(
+                        uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                            Enrollment.TABLE_ID
+                        ).toString(),
+                        classUid = classUid,
+                        personUid = accountPerson.guid,
+                        role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
+                            EnrollmentRoleEnum.PENDING_TEACHER
+                        } else {
+                            EnrollmentRoleEnum.PENDING_STUDENT
+                        },
+                        inviteCode = redeemRequest.code,
+                    )
                 )
             )
-        )
-
+        }
         return authResponse
     }
 }

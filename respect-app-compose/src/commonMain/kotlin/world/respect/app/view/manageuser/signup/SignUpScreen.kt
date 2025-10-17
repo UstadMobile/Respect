@@ -84,11 +84,12 @@ fun SignupScreen(
         Spacer(Modifier.height(16.dp))
 
         RespectLocalDateField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("dateOfBirth"),
             value = uiState.personInfo.dateOfBirth.takeIf {
                 it != RespectRedeemInviteRequest.DATE_OF_BIRTH_EPOCH
             },
             onValueChange = {onDateOfBirthChanged(it) },
+            isError = uiState.dateOfBirthError!=null,
             label = {
                 uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it) + "*") }
             },

@@ -156,6 +156,10 @@ interface UstadCache {
      */
     suspend fun removeRetentionLocks(locksToRemove: List<RemoveLockRequest>)
 
+    suspend fun findLocksByPublicationUid(publicationUid: Long): List<RetentionLock>
+
+
+
     /**
      * To pin a given publication
      * a) Create a PinnedPublication Entity

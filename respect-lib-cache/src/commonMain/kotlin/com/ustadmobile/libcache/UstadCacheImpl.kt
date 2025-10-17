@@ -27,6 +27,7 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
+import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCase
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.util.LruMap
@@ -866,11 +867,31 @@ class UstadCacheImpl(
         }
     }
 
+    override suspend fun findLocksByPublicationUid(publicationUid: Long): List<RetentionLock> {
+        return db.retentionLockDao.findByPublicationUid(publicationUid)
+    }
+
     override suspend fun pinPublication(manifestUrl: Url) {
         enqueuePinPublicationPrepareUseCase(manifestUrl)
     }
 
     override suspend fun unpinPublication(manifestUrl: Url) {
+        val locks = findLocksByPublicationUid(
+            xxStringHasher.hash(manifestUrl.toString())
+        )
+
+        removeRetentionLocks(locks.map {
+            RemoveLockRequest(
+                url = it.lockKey,
+                lockId = it.lockId
+            )
+        })
+
+        db.downloadJobDao.updateStatusByManifestHash(
+            manifestHash = xxStringHasher.hash(manifestUrl.toString()),
+            status = TransferJobItemStatus.STATUS_CANCELLED
+        )
+
         //Do nothing yet
     }
 

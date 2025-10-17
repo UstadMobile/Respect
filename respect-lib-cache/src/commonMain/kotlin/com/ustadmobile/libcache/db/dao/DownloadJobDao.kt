@@ -44,4 +44,15 @@ abstract class DownloadJobDao {
         status: Int
     )
 
+
+    @Query("""
+        UPDATE DownloadJob
+           SET djStatus = :status
+         WHERE DownloadJob.djPubManifestHash = :manifestHash
+    """)
+    abstract suspend fun updateStatusByManifestHash(
+        manifestHash: Long,
+        status: Int
+    )
+
 }

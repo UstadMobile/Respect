@@ -83,7 +83,7 @@
     <string name="manage_account">Manage account</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
-    <string name="date_of_birth_in_future">Date of Birth cannot be in the future</string>
+    <string name="date_of_birth_in_future">Date of Birth cannot be in the future.</string>
 
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>

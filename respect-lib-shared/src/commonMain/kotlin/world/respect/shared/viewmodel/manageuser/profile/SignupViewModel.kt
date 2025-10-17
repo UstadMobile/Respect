@@ -185,16 +185,18 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {
+                        viewModelScope.launch {
                         val scope: Scope = accountManager.requireSelectedAccountScope()
-                        val addChildAccountUseCase : AddChildAccountUseCase by lazy {
+                        val addChildAccountUseCase: AddChildAccountUseCase by lazy {
                             scope.get()
                         }
                         addChildAccountUseCase(
                             personInfo = personInfo,
                             parentUsername = route.respectRedeemInviteRequest.account.username,
-                            classUid = route.respectRedeemInviteRequest.classUid?:""
+                            classUid = route.respectRedeemInviteRequest.classUid ?: "",
+                            inviteCode = route.respectRedeemInviteRequest.code
                         )
-
+                    }
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(
                                 destination = WaitingForApproval(),

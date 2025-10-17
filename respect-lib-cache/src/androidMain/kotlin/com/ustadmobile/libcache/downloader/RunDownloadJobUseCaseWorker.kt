@@ -14,7 +14,9 @@ class RunDownloadJobUseCaseWorker(
     private val runDownloadJobUseCase: RunDownloadJobUseCase by inject()
 
     override suspend fun doWork(): Result {
-        return runWithJobRetry {
+        return runWithJobRetry(
+            logFailureMessage = { "RunDownloadJobUseCase failed" }
+        ) {
             runDownloadJobUseCase(
                 inputData.getInt(
                     EnqueueRunDownloadJobUseCaseAndroid.JOB_UID, 0

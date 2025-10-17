@@ -33,10 +33,8 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.score_or_progress
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.graphics.vector.ImageVector
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
@@ -140,16 +138,6 @@ fun LearningUnitDetailScreen(
                                 ?.getTitle().orEmpty()
                         )
 
-                        Text(
-                            text = stringResource(Res.string.score_or_progress),
-                        )
-
-                        LinearProgressIndicator(
-                            progress = { 0f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                        )
                     }
                 }
             )

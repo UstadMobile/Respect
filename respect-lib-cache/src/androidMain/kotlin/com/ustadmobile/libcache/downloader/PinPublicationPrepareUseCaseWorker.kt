@@ -15,7 +15,10 @@ class PinPublicationPrepareUseCaseWorker(
     private val pinPublicationPrepareUseCase: PinPublicationPrepareUseCase by inject()
 
     override suspend fun doWork(): Result {
-        return runWithJobRetry(maxAttempts = PinPublicationPrepareUseCase.DEFAULT_MAX_ATTEMPTS) {
+        return runWithJobRetry(
+            maxAttempts = PinPublicationPrepareUseCase.DEFAULT_MAX_ATTEMPTS,
+            logFailureMessage = { "PinPublicationPrepareUseCaseWorker failed" }
+        ) {
             pinPublicationPrepareUseCase(inputData.getInt(JOB_UID, 0))
         }
     }

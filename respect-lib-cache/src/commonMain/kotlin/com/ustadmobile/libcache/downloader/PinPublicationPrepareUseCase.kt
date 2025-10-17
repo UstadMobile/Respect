@@ -11,6 +11,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.header
+import io.ktor.http.URLBuilder
 import io.ktor.http.contentLength
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -41,6 +42,14 @@ class PinPublicationPrepareUseCase(
     private val enqueueRunDownloadJobUseCase: EnqueueRunDownloadJobUseCase,
 ) {
 
+
+    /**
+     * This is here because some manifests contain spaces in hrefwhich should NOT be there.
+     */
+    fun String.cleanHref(): String {
+        return this.replace(" ", "%20")
+    }
+
     /**
      *
      */
@@ -57,14 +66,26 @@ class PinPublicationPrepareUseCase(
         val publication: OpdsPublication = httpClient.get(manifestUrl).body()
 
         val resourceAndAcquireJobItems = buildList {
+            val acquisitionLinks = publication.findLearningUnitAcquisitionLinks()
+
+            //This isn't ideal - but needed to ensure it will open.
+            val acquisitionLinksWithRespectParams = acquisitionLinks.map {
+                it.copy(
+                    href = URLBuilder(manifestUrl.resolve(it.href.cleanHref()))
+                        .apply {
+                            this.parameters.append("respectLaunchVersion", "1")
+                        }
+                        .build().toString()
+                )
+            }
             val linksToDownload = (publication.resources ?: emptyList()) +
-                    publication.findLearningUnitAcquisitionLinks()
+                    acquisitionLinks + acquisitionLinksWithRespectParams
 
             addAll(
                 linksToDownload.map { resource ->
                     DownloadJobItem(
                         djiDjUid = downloadJobUid,
-                        djiUrl = manifestUrl.resolve(resource.href),
+                        djiUrl = manifestUrl.resolve(resource.href.cleanHref()),
                         djiTotalSize = (resource.size ?: 0).toLong()
                     )
                 }

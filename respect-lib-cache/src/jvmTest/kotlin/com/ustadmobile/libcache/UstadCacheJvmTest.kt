@@ -143,7 +143,9 @@ class UstadCacheJvmTest {
             db = cacheDb,
             xxStringHasher = XXStringHasherCommonJvm(),
             logger = NapierLoggingAdapter(),
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb, XXStringHasherCommonJvm()
+            ),
         )
 
         val createdLocks = if(createLock) {
@@ -280,7 +282,9 @@ class UstadCacheJvmTest {
             pathsProvider = temporaryFolderPathsProvider,
             xxStringHasher = XXStringHasherCommonJvm(),
             db = cacheDb,
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb, XXStringHasherCommonJvm()
+            ),
         )
 
         val url = "http://server.com/file.css"
@@ -320,7 +324,9 @@ class UstadCacheJvmTest {
             pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb,
             xxStringHasher = XXStringHasherCommonJvm(),
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb, XXStringHasherCommonJvm()
+            ),
         )
 
         val url = "http://server.com/file.css"
@@ -336,7 +342,9 @@ class UstadCacheJvmTest {
             pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb,
             xxStringHasher = XXStringHasherCommonJvm(),
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb, XXStringHasherCommonJvm()
+            ),
         )
 
         val url = "http://server.com/file.css"

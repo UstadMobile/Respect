@@ -16,6 +16,7 @@ import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.cachecontrol.RequestCacheControlHeader
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityChecker
 import com.ustadmobile.libcache.cachecontrol.ResponseCacheabilityCheckerImpl
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
@@ -65,6 +66,7 @@ class UstadCacheInterceptor(
         ResponseCacheabilityCheckerImpl(),
     private val fileSystem: FileSystem = SystemFileSystem,
     private val json: Json,
+    private val connectivityMonitor: ConnectivityMonitor,
 ): Interceptor {
 
     private val executor = Executors.newCachedThreadPool()
@@ -121,10 +123,9 @@ class UstadCacheInterceptor(
                     )
                 )
 
-                val responseInStream = response.body?.byteStream()
-                    ?.let {
-                        DigestInputStream(it, digest)
-                    } ?: throw IllegalStateException()
+                val responseInStream = response.body.byteStream().let {
+                    DigestInputStream(it, digest)
+                }
 
                 responseInStream.use { responseIn ->
                     responseBodyFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
@@ -291,13 +292,17 @@ class UstadCacheInterceptor(
             )
         }
 
+        val isConnected = connectivityMonitor.statusFlow.value.isConnected
+
         return when {
             /*
              * When response isFresh - can immediately return the cached response.
              * If the cache-control only-if-cached is set, then
              */
             cacheResponse != null &&
-                    (cachedResponseStatus?.isFresh == true || requestCacheControlHeader?.onlyIfCached == true) -> {
+                    (cachedResponseStatus?.isFresh == true ||
+                            !isConnected ||
+                            requestCacheControlHeader?.onlyIfCached == true) -> {
                 cacheResponse.asOkHttpResponse().also {
                     logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url ${it.logSummary()}")
                 }

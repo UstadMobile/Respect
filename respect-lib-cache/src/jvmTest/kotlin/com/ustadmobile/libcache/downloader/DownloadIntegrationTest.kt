@@ -18,6 +18,7 @@ import org.mockito.kotlin.verifyBlocking
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.findFreePort
+import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -63,7 +64,9 @@ class DownloadIntegrationTest : AbstractCacheInterceptorTest() {
     fun givenValidManifestUrl_whenPreparedAndDownloaded_thenShouldDownload() {
         runBlocking {
             downloadIntegrationTest {
-                val enqueueUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb)
+                val enqueueUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                    cacheDb, XXStringHasherCommonJvm()
+                )
                 val runDownloadUseCase = RunDownloadJobUseCaseImpl(
                     okHttpClient = okHttpClient,
                     db = cacheDb,

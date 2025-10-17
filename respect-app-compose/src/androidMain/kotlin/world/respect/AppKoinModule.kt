@@ -13,6 +13,7 @@ import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
@@ -243,6 +244,7 @@ val appKoinModule = module {
                     tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                     logger = NapierLoggingAdapter(),
                     json = get(),
+                    connectivityMonitor = ConnectivityMonitorAndroid(androidContext()),
                 )
             )
             .build()

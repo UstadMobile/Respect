@@ -122,7 +122,9 @@ class DistributedCacheHashtableIntegrationTest {
             db = cacheDb1,
             xxStringHasher = XXStringHasherCommonJvm(),
             databaseCommitInterval = 100,
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb1),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb1, XXStringHasherCommonJvm()
+            ),
         )
 
         val cache2 = UstadCacheImpl(
@@ -130,7 +132,9 @@ class DistributedCacheHashtableIntegrationTest {
             db = cacheDb2,
             xxStringHasher = XXStringHasherCommonJvm(),
             databaseCommitInterval = 100,
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb2),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb2, XXStringHasherCommonJvm()
+            ),
         )
 
         val httpServer1 = TestHttpServer(DistributedCacheHttpEndpoint(cache1)).also {

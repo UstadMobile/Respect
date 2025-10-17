@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.CachePaths
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorJvm
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
@@ -84,7 +85,9 @@ abstract class AbstractCacheInterceptorTest {
                 logger = logger,
                 listener = cacheListener,
                 xxStringHasher = XXStringHasherCommonJvm(),
-                enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(cacheDb),
+                enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                    cacheDb, XXStringHasherCommonJvm()
+                ),
             )
         )
         okHttpClient = OkHttpClient.Builder()
@@ -93,6 +96,7 @@ abstract class AbstractCacheInterceptorTest {
                     ustadCache, { interceptorTmpDir } ,
                     logger = logger,
                     json = json,
+                    connectivityMonitor = ConnectivityMonitorJvm(),
                 ))
             .callTimeout(Duration.ofSeconds(500))
             .connectTimeout(Duration.ofSeconds(500))

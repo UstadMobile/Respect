@@ -72,7 +72,7 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
-        destRoute = RespectAppLauncher,
+        destRoute = RespectAppLauncher(),
         icon = Icons.Filled.GridView,
         label = Res.string.apps,
         routeName = "$routeNamePrefix.RespectAppLauncher",

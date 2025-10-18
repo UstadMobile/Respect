@@ -27,6 +27,8 @@ import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.AssignmentEdit
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -145,6 +147,17 @@ class AssignmentEditViewModel(
         }
     }
 
+
+    fun onClickAddLearningUnit() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                RespectAppLauncher.create(
+                    resultPopUpTo = AssignmentEdit::class,
+                    resultKey = "learningunit"
+                )
+            )
+        )
+    }
 
     fun onClickSave() {
 

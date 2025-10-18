@@ -1,12 +1,18 @@
 package world.respect.app.view.assignment.edit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,7 +35,10 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.assignment_tasks
 import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.description
+import world.respect.shared.generated.resources.lesson_assessment
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.required
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
@@ -44,7 +53,8 @@ fun AssignmentEditScreen(
     AssignmentEditScreen(
         uiState = uiState,
         onEntityChanged = viewModel::onEntityChanged,
-        onAssigneeTextChanged = viewModel::onAssigneeTextChanged
+        onAssigneeTextChanged = viewModel::onAssigneeTextChanged,
+        onClickAddLearningUnit = viewModel::onClickAddLearningUnit,
     )
 }
 
@@ -54,6 +64,7 @@ fun AssignmentEditScreen(
     uiState: AssignmentEditUiState,
     onEntityChanged: (Assignment) -> Unit,
     onAssigneeTextChanged: (String) -> Unit,
+    onClickAddLearningUnit: () -> Unit,
 ) {
     val assignment = uiState.assignment.dataOrNull()
     val filteredOptions = if(uiState.assigneeText.isNotBlank()) {
@@ -130,6 +141,19 @@ fun AssignmentEditScreen(
             }
         }
 
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("description"),
+            value = assignment?.description ?: "",
+            label = {
+                Text(stringResource(Res.string.description))
+            },
+            onValueChange = { newDescription ->
+                assignment?.also {
+                    onEntityChanged(it.copy(description = newDescription))
+                }
+            }
+        )
+
         RespectLocalDateTimeField(
             modifier = Modifier.defaultItemPadding().fillMaxWidth(),
             value = assignment?.deadline?.toLocalDateTime(TimeZone.currentSystemDefault()),
@@ -143,6 +167,33 @@ fun AssignmentEditScreen(
                 }
             }
         )
+
+        Text(
+            modifier = Modifier.defaultItemPadding(),
+            text = stringResource(Res.string.assignment_tasks),
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        ListItem(
+            modifier = Modifier.fillMaxWidth().clickable {
+
+            },
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = ""
+                )
+            },
+            headlineContent = {
+                Text(stringResource(Res.string.lesson_assessment))
+            }
+        )
+
+        assignment?.learningUnits?.forEach { learningUnit ->
+
+        }
+
+
     }
 
 }

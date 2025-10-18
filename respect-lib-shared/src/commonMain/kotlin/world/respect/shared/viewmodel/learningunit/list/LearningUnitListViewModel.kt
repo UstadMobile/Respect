@@ -115,20 +115,29 @@ class LearningUnitListViewModel(
 
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
 
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = route.opdsFeedUrl.resolve(
-                        publicationHref
-                    ),
-                    appManifestUrl = route.appManifestUrl,
-                    refererUrl = Url(
-                        refererUrl
-                    ),
-                    expectedIdentifier = publication.metadata.identifier.toString()
+        val popUpToVal = route.resultPopUpTo
+
+        if(popUpToVal != null){
+            NavCommand.PopToRouteClass(
+                destination = popUpToVal,
+                inclusive = false,
+            )
+        }else {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = route.opdsFeedUrl.resolve(
+                            publicationHref
+                        ),
+                        appManifestUrl = route.appManifestUrl,
+                        refererUrl = Url(
+                            refererUrl
+                        ),
+                        expectedIdentifier = publication.metadata.identifier.toString()
+                    )
                 )
             )
-        )
+        }
     }
 
     fun onClickNavigation(navigation: ReadiumLink) {

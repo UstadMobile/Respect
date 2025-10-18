@@ -144,7 +144,7 @@ class AccountListViewModel(
     fun onClickAccount(account: RespectAccount) {
         respectAccountManager.selectedAccount = account
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(RespectAppLauncher, clearBackStack = true)
+            NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
         )
     }
 

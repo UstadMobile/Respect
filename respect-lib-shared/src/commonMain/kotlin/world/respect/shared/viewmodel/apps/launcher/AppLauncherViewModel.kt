@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.apps.launcher
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,6 +22,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 
 data class AppLauncherUiState(
@@ -38,6 +40,8 @@ class AppLauncherViewModel(
     val uiState = _uiState.asStateFlow()
 
     var errorMessage: String = ""
+
+    private val route: RespectAppLauncher = savedStateHandle.toRoute()
 
     init {
         _appUiState.update {
@@ -88,7 +92,11 @@ class AppLauncherViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AppsDetail.create(url)
+                AppsDetail.create(
+                    manifestUrl = url,
+                    resultPopUpTo = route.resultPopUpTo,
+                    resultKey = route.resultKey,
+                )
             )
         )
     }

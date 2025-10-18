@@ -412,4 +412,6 @@
     <string name="site_administrator">Site administrator</string>
     <string name="role">Role</string>
 
+    <string name="date">Date</string>
+    <string name="time">Time</string>
 </resources>

@@ -20,7 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
@@ -126,6 +130,19 @@ fun AssignmentEditScreen(
             }
         }
 
+        RespectLocalDateTimeField(
+            modifier = Modifier.defaultItemPadding().fillMaxWidth(),
+            value = assignment?.deadline?.toLocalDateTime(TimeZone.currentSystemDefault()),
+            onValueChanged = { newDeadline ->
+                assignment?.also {
+                    onEntityChanged(
+                        it.copy(
+                            deadline = newDeadline?.toInstant(TimeZone.currentSystemDefault())
+                        )
+                    )
+                }
+            }
+        )
     }
 
 }

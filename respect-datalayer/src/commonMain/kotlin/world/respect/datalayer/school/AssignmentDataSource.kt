@@ -1,6 +1,7 @@
 package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Assignment
@@ -25,7 +26,14 @@ interface AssignmentDataSource: WritableDataSource<Assignment> {
 
     }
 
-    suspend fun listAsPagingSource(
+    fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Assignment>>
+
+    suspend fun findByGuid(
+        params: DataLoadParams,
+        guid: String
+    ): DataLoadState<Assignment>
+
+    fun listAsPagingSource(
         loadParams: DataLoadParams = DataLoadParams(),
         params: GetListParams = GetListParams(),
     ): IPagingSourceFactory<Int, Assignment>

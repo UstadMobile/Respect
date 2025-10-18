@@ -3,6 +3,7 @@ package world.respect.datalayer.repository
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
@@ -73,4 +74,12 @@ class SchoolDataSourceRepository(
         )
     }
 
+    override val assignmentDataSource: AssignmentDataSourceRepository by lazy {
+        AssignmentDataSourceRepository(
+            local = local.assignmentDataSource,
+            remote = remote.assignmentDataSource,
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
+        )
+    }
 }

@@ -68,7 +68,17 @@ data class LoginScreen(
 object RespectAppLauncher : RespectAppRoute
 
 @Serializable
-object Assignment : RespectAppRoute
+object AssignmentList : RespectAppRoute
+
+@Serializable
+data class AssignmentDetail(
+    val uid: String,
+) : RespectAppRoute
+
+@Serializable
+data class AssignmentEdit(
+    val guid: String?,
+): RespectAppRoute
 
 @Serializable
 object ClazzList : RespectAppRoute

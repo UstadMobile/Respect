@@ -46,7 +46,7 @@ import world.respect.shared.generated.resources.people
 import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
-import world.respect.shared.navigation.Assignment
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.Report
@@ -78,7 +78,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
     TopNavigationItem(
-        destRoute = Assignment,
+        destRoute = AssignmentList,
         icon = Icons.Filled.ImportContacts,
         label = Res.string.assignments,
         routeName = "$routeNamePrefix.Assignment"

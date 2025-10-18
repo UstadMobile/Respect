@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "014befb85f29746537eb290371e6e9e3",
+    "identityHash": "7422bad28c381a5c52208fb811971463",
     "entities": [
       {
         "tableName": "PersonEntity",
@@ -699,7 +699,7 @@
       },
       {
         "tableName": "AssignmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeDeadline` INTEGER NOT NULL, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeDeadline` INTEGER, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
         "fields": [
           {
             "fieldPath": "aeUid",
@@ -728,8 +728,7 @@
           {
             "fieldPath": "aeDeadline",
             "columnName": "aeDeadline",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "aeLastModified",
@@ -882,7 +881,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '014befb85f29746537eb290371e6e9e3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7422bad28c381a5c52208fb811971463')"
     ]
   }
 }

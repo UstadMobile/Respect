@@ -92,6 +92,7 @@ import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseClient
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -780,10 +781,9 @@ val appKoinModule = module {
             )
         }
         scoped<AddChildAccountUseCase> {
-            AddChildAccountUseCase(
-                schoolDataSource = get(),
-                primaryKeyGenerator = PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
-
+            AddChildAccountUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get()
             )
         }
     }

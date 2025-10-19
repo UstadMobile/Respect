@@ -79,7 +79,7 @@ class AccountListViewModel(
                     emittedNavToGetStartedCommand = true
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            GetStartedScreen, clearBackStack = true
+                            GetStartedScreen(), clearBackStack = true
                         )
                     )
 
@@ -149,7 +149,9 @@ class AccountListViewModel(
     }
 
     fun onClickAddAccount() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(GetStartedScreen))
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(GetStartedScreen(canGoBack = true))
+        )
     }
     fun onClickProfile() {
         uiState.value.selectedAccount?.also {

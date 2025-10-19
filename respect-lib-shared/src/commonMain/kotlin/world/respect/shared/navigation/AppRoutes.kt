@@ -95,7 +95,7 @@ data class AssignmentDetail(
 ) : RespectAppRoute
 
 @Serializable
-data class AssignmentEdit private constructor(
+data class AssignmentEdit(
     val guid: String?,
     private val learningUnitStr: String? = null,
 ): RespectAppRoute {
@@ -200,7 +200,9 @@ object RespectAppList : RespectAppRoute
 object EnterLink : RespectAppRoute
 
 @Serializable
-object GetStartedScreen : RespectAppRoute
+data class GetStartedScreen(
+    val canGoBack: Boolean = false,
+) : RespectAppRoute
 
 @Serializable
 object OtherOption : RespectAppRoute

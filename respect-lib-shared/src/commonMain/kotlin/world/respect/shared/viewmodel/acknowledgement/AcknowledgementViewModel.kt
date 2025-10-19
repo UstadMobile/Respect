@@ -45,7 +45,7 @@ class AcknowledgementViewModel(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
                         hasAccount -> RespectAppLauncher()
-                        else -> GetStartedScreen
+                        else -> GetStartedScreen()
                     },
                     clearBackStack = true,
                 )

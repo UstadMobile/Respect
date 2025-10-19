@@ -2,21 +2,27 @@ package world.respect.shared.viewmodel.assignment.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment
@@ -31,11 +37,13 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class AssignmentListUiState(
     val assignments: IPagingSourceFactory<Int, Assignment> = EmptyPagingSourceFactory(),
+    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
 )
 
 class AssignmentListViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager
+    accountManager: RespectAccountManager,
+    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -70,6 +78,7 @@ class AssignmentListViewModel(
         _uiState.update {
             it.copy(
                 assignments = pagingSourceHolder,
+                learningUnitInfoFlow = ::learningUnitInfoFlowFor,
             )
         }
 
@@ -100,6 +109,12 @@ class AssignmentListViewModel(
             NavCommand.Navigate(
                 AssignmentEdit(guid = null)
             )
+        )
+    }
+
+    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+        return respectAppDataSource.opdsDataSource.loadOpdsPublication(
+            url = url, params = DataLoadParams(), null, null
         )
     }
 

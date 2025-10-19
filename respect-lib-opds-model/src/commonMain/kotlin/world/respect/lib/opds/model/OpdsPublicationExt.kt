@@ -8,3 +8,13 @@ fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
                 LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
     }
 }
+
+fun OpdsPublication.findSelfLinks(): List<ReadiumLink> {
+    return links.filter {
+        it.rel?.contains("self") == true
+    }
+}
+
+fun OpdsPublication.findIcons(): List<ReadiumLink> {
+    return images ?: emptyList()
+}

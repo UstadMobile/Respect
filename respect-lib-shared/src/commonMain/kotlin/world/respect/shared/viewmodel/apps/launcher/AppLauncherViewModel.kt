@@ -21,6 +21,9 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.libutil.ext.resolve
+import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
@@ -58,7 +61,8 @@ class AppLauncherViewModel(
                             )
                         )
                     }
-                )
+                ),
+                hideBottomNavigation = route.resultKey == null,
             )
         }
 
@@ -89,14 +93,24 @@ class AppLauncherViewModel(
 
     fun onClickApp(app: DataLoadState<RespectAppManifest>) {
         val url = app.metaInfo.url ?: return
+        val appData = app.dataOrNull() ?: return
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AppsDetail.create(
-                    manifestUrl = url,
-                    resultPopUpTo = route.resultPopUpTo,
-                    resultKey = route.resultKey,
-                )
+                if(route.resultKey != null) {
+                    LearningUnitList.create(
+                        opdsFeedUrl = url.resolve(appData.learningUnits.toString()),
+                        appManifestUrl = url,
+                        resultPopUpTo = route.resultPopUpTo,
+                        resultKey = route.resultKey,
+                    )
+                }else {
+                    AppsDetail.create(
+                        manifestUrl = url,
+                        resultPopUpTo = route.resultPopUpTo,
+                        resultKey = route.resultKey,
+                    )
+                }
             )
         )
     }

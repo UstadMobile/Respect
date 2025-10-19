@@ -8,7 +8,7 @@ import world.respect.datalayer.db.school.entities.AssignmentEntity
 import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentAssigneeRef
-import world.respect.datalayer.school.model.AssignmentLearningResourceRef
+import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 
 data class AssignmentEntities(
     @Embedded
@@ -42,7 +42,7 @@ fun AssignmentEntities.toModel(): Assignment {
             )
         },
         learningUnits = learningUnits.map {
-            AssignmentLearningResourceRef(
+            AssignmentLearningUnitRef(
                 learningUnitManifestUrl = it.alrrLearningUnitManifestUrl,
                 appManifestUrl = it.alrrAppManifestUrl
             )

@@ -4,14 +4,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
@@ -25,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -32,15 +37,22 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
+import world.respect.datalayer.school.model.AssignmentLearningUnitRef
+import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.opds.model.findIcons
+import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment_tasks
 import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.lesson_assessment
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.required
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 
@@ -55,6 +67,8 @@ fun AssignmentEditScreen(
         onEntityChanged = viewModel::onEntityChanged,
         onAssigneeTextChanged = viewModel::onAssigneeTextChanged,
         onClickAddLearningUnit = viewModel::onClickAddLearningUnit,
+        onAssigneeClassSelected = viewModel::onAssigneeClassSelected,
+        onClickRemoveLearningUnit = viewModel::onClickRemoveLearningUnit,
     )
 }
 
@@ -64,7 +78,9 @@ fun AssignmentEditScreen(
     uiState: AssignmentEditUiState,
     onEntityChanged: (Assignment) -> Unit,
     onAssigneeTextChanged: (String) -> Unit,
+    onAssigneeClassSelected: (Clazz) -> Unit,
     onClickAddLearningUnit: () -> Unit,
+    onClickRemoveLearningUnit: (AssignmentLearningUnitRef) -> Unit,
 ) {
     val assignment = uiState.assignment.dataOrNull()
     val filteredOptions = if(uiState.assigneeText.isNotBlank()) {
@@ -134,6 +150,7 @@ fun AssignmentEditScreen(
                         },
                         onClick = {
                             expanded = false
+                            onAssigneeClassSelected(clazz)
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     )
@@ -176,11 +193,12 @@ fun AssignmentEditScreen(
 
         ListItem(
             modifier = Modifier.fillMaxWidth().clickable {
-
+                onClickAddLearningUnit()
             },
             leadingContent = {
                 Icon(
                     imageVector = Icons.Default.Add,
+                    modifier = Modifier.size(40.dp).padding(8.dp),
                     contentDescription = ""
                 )
             },
@@ -190,7 +208,44 @@ fun AssignmentEditScreen(
         )
 
         assignment?.learningUnits?.forEach { learningUnit ->
+            val learningUnitInfoFlow = remember(
+                uiState.learningUnitInfoFlow, learningUnit.learningUnitManifestUrl
+            ) {
+                uiState.learningUnitInfoFlow(learningUnit.learningUnitManifestUrl)
+            }
 
+            val learningUnitInfo by learningUnitInfoFlow.collectAsState(DataLoadingState())
+
+            ListItem(
+                headlineContent = {
+                    Text(learningUnitInfo.dataOrNull()?.metadata?.title?.getTitle() ?: "")
+                },
+                leadingContent = {
+                    val iconLink = learningUnitInfo.dataOrNull()?.findIcons()?.firstOrNull()
+                    val iconUrl = iconLink?.let {
+                        learningUnit.learningUnitManifestUrl.resolve(it.href)
+                    }
+                    iconUrl?.also {
+                        AsyncImage(
+                            modifier = Modifier.size(40.dp),
+                            model = iconUrl.toString(),
+                            contentDescription = iconLink.title,
+                        )
+                    }
+                },
+                trailingContent = {
+                    IconButton(
+                        onClick = {
+                            onClickRemoveLearningUnit(learningUnit)
+                        }
+                    )  {
+                        Icon(
+                            Icons.Default.Delete,
+                            stringResource(Res.string.delete)
+                        )
+                    }
+                },
+            )
         }
 
 

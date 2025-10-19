@@ -4,7 +4,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AssignmentLearningResourceRef(
+data class AssignmentLearningUnitRef(
     val learningUnitManifestUrl: Url,
     val appManifestUrl: Url,
 )

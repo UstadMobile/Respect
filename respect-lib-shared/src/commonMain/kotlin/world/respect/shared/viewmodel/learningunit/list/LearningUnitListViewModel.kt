@@ -27,7 +27,7 @@ import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.learningunit.LearningUnitResult
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitListUiState(
     val publications: List<OpdsPublication> = emptyList(),
@@ -122,7 +122,7 @@ class LearningUnitListViewModel(
             !resultReturner.sendResultIfResultExpected(
                 route = route,
                 navCommandFlow = _navCommandFlow,
-                result = LearningUnitResult(
+                result = LearningUnitSelection(
                     opdsFeedUrl = route.opdsFeedUrl,
                     selectedPublication = publication,
                     appManifestUrl = route.appManifestUrl,

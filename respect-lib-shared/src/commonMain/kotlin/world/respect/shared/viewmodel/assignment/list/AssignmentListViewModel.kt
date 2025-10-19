@@ -62,7 +62,8 @@ class AssignmentListViewModel(
                     text = Res.string.assignment.asUiText(),
                     icon = FabUiState.FabIcon.ADD,
                     onClick = ::onClickAdd
-                )
+                ),
+                showBackButton = false,
             )
         }
 

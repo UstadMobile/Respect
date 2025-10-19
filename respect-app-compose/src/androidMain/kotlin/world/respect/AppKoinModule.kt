@@ -155,6 +155,7 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
+import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
@@ -312,6 +313,7 @@ val appKoinModule = module {
     viewModelOf(::SchoolDirectoryEditViewModel)
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

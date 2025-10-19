@@ -36,6 +36,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
 import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
@@ -45,7 +46,8 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.learningunit.LearningUnitResult
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import kotlin.time.Clock
 
 data class AssignmentEditUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -77,7 +79,6 @@ class AssignmentEditViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val debouncer = LaunchDebouncer(viewModelScope)
-
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
@@ -121,10 +122,20 @@ class AssignmentEditViewModel(
                     json = json,
                     serializer = Assignment.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.assignmentDataSource.findByGuid(params, route.guid)
+                        schoolDataSource.assignmentDataSource.findByGuid(
+                            params, route.guid
+                        )
                     },
-                    uiUpdateFn = {
-                        _uiState.update { prev -> prev.copy(assignment = it) }
+                    uiUpdateFn = { entity ->
+                        _uiState.update { prev ->
+                            val assigneeClassUid = entity.dataOrNull()?.assignees?.firstOrNull()?.uid
+                            prev.copy(
+                                assignment = entity,
+                                assigneeText = classes.firstOrNull {
+                                    it.guid == assigneeClassUid
+                                }?.title ?: ""
+                            )
+                        }
                     }
                 )
             }else {
@@ -143,7 +154,7 @@ class AssignmentEditViewModel(
 
             viewModelScope.launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                    val learningUnit = result.result as? LearningUnitResult ?: return@collect
+                    val learningUnit = result.result as? LearningUnitSelection ?: return@collect
                     val assignmentResourceRef = AssignmentLearningUnitRef(
                         learningUnitManifestUrl = learningUnit.opdsFeedUrl.resolve(
                             learningUnit.selectedPublication.findSelfLinks().first().href
@@ -244,7 +255,21 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.assignment.dataOrNull() ?: return
 
         launchWithLoadingIndicator {
-            schoolDataSource.assignmentDataSource.store(listOf(assignment))
+            schoolDataSource.assignmentDataSource.store(
+                listOf(assignment.copy(lastModified = Clock.System.now()))
+            )
+
+            if(route.guid == null) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = AssignmentDetail(uid = uid),
+                        popUpTo = route,
+                        popUpToInclusive = true,
+                    )
+                )
+            }else {
+                _navCommandFlow.tryEmit(NavCommand.PopUp())
+            }
         }
     }
 

@@ -74,7 +74,8 @@ class PersonListViewModel(
                     visible = true,
                     searchText = "",
                     onSearchTextChanged = ::onSearchTextChanged
-                )
+                ),
+                showBackButton = false,
             )
         }
 

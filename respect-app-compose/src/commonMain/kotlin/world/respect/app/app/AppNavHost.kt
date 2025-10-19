@@ -11,6 +11,7 @@ import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
 import world.respect.app.view.apps.launcher.AppLauncherScreen
 import world.respect.app.view.apps.list.AppListScreen
+import world.respect.app.view.assignment.detail.AssignmentDetailScreen
 import world.respect.app.view.assignment.edit.AssignmentEditScreen
 import world.respect.app.view.assignment.list.AssignmentListScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
@@ -63,6 +64,7 @@ import world.respect.shared.navigation.Acknowledgement
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.AddPersonToClazz
 import world.respect.shared.navigation.AppsDetail
+import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ChangePassword
@@ -211,6 +213,15 @@ fun AppNavHost(
 
         composable<AssignmentEdit> {
             AssignmentEditScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<AssignmentDetail> {
+            AssignmentDetailScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

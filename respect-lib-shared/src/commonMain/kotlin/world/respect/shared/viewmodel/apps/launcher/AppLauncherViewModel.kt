@@ -62,7 +62,8 @@ class AppLauncherViewModel(
                         )
                     }
                 ),
-                hideBottomNavigation = route.resultKey == null,
+                hideBottomNavigation = route.resultKey != null,
+                showBackButton = route.resultKey != null,
             )
         }
 

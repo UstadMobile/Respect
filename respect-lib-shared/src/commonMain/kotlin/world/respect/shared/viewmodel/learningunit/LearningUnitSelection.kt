@@ -7,7 +7,7 @@ import world.respect.lib.opds.model.OpdsPublication
  * Represents a Learning Unit when selected by a user to be returned to another screen (e.g. as
  * part of selecting an assignment)
  */
-data class LearningUnitResult(
+data class LearningUnitSelection(
     val opdsFeedUrl: Url,
     val selectedPublication: OpdsPublication,
     val appManifestUrl: Url,

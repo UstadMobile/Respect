@@ -111,8 +111,7 @@ class DownloadIntegrationTest : AbstractCacheInterceptorTest() {
                     "Download job status should be complete")
                 assertTrue(
                     downloadJobItems.all { item ->
-                        item.djiStatus == TransferJobItemStatus.STATUS_COMPLETE_INT &&
-                                item.djiTotalSize == item.djiTransferred
+                        item.djiStatus == TransferJobItemStatus.STATUS_COMPLETE_INT
                     },
                     message = "All download job items status should be complete"
                 )

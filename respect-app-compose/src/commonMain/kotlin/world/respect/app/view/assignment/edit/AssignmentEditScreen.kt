@@ -37,6 +37,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
@@ -52,6 +53,7 @@ import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.lesson_assessment
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.required
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
@@ -106,7 +108,7 @@ fun AssignmentEditScreen(
                 }
             },
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(uiState.nameError ?: Res.string.required.asUiText()))
             },
             isError = uiState.nameError != null,
         )
@@ -136,6 +138,10 @@ fun AssignmentEditScreen(
                     )
                 },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                supportingText = {
+                    Text(uiTextStringResource(uiState.classError ?: Res.string.required.asUiText()))
+                },
+                isError = uiState.classError != null,
             )
 
             ExposedDropdownMenu(

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
@@ -33,6 +34,7 @@ import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
@@ -52,10 +54,14 @@ data class AssignmentEditUiState(
     val assigneeText: String = "",
     val nameError: UiText? = null,
     val classOptions: List<Clazz> = emptyList(),
+    val classError: UiText? = null,
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
 ) {
     val fieldsEnabled: Boolean
         get() = assignment.isReadyAndSettled()
+
+    val hasErrors: Boolean
+        get() = nameError != null || classError != null
 }
 
 class AssignmentEditViewModel(
@@ -199,6 +205,7 @@ class AssignmentEditViewModel(
                     )
                 ),
                 assigneeText = clazz.title,
+                classError = null,
             )
         }
     }
@@ -209,7 +216,7 @@ class AssignmentEditViewModel(
                 assignment = DataReadyState(assignment),
                 nameError = prev.nameError?.takeIf {
                     prev.assignment.dataOrNull()?.title == assignment.title
-                }
+                },
             )
         }
 
@@ -220,7 +227,7 @@ class AssignmentEditViewModel(
 
     fun onAssigneeTextChanged(text: String) {
         _uiState.update {
-            it.copy(assigneeText = text)
+            it.copy(assigneeText = text, classError = null)
         }
     }
 
@@ -255,6 +262,22 @@ class AssignmentEditViewModel(
     }
 
     fun onClickSave() {
+        val stateToSave = _uiState.updateAndGet { prev ->
+            val assignmentVal = prev.assignment.dataOrNull()
+
+            prev.copy(
+                nameError = Res.string.required_field.asUiText().takeIf {
+                    assignmentVal?.title.isNullOrBlank()
+                },
+                classError = Res.string.required_field.asUiText().takeIf {
+                    assignmentVal?.assignees?.isEmpty() != false
+                }
+            )
+        }
+
+        if(stateToSave.hasErrors)
+            return
+
         val assignment = uiState.value.assignment.dataOrNull() ?: return
 
         launchWithLoadingIndicator {

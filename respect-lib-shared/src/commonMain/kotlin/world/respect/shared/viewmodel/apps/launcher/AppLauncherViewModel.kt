@@ -37,16 +37,18 @@ import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdmin
 
 data class AppLauncherUiState(
     val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
     val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
+    val canRemove: Boolean = false,
 )
 
 class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -73,7 +75,6 @@ class AppLauncherViewModel(
             it.copy(
                 title = Res.string.apps.asUiText(),
                 fabState = FabUiState(
-                    visible = true,
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
                     onClick = {
@@ -95,6 +96,20 @@ class AppLauncherViewModel(
                 apps = pagingSourceHolder
             )
 
+        }
+
+        viewModelScope.launch {
+            accountManager.selectedAccountAndPersonFlow.collect { selected ->
+                val isAdmin = selected?.person?.isAdmin() == true
+                _appUiState.update {
+                    it.copy(
+                        fabState = it.fabState.copy(
+                            visible = isAdmin
+                        )
+                    )
+                }
+                _uiState.update { it.copy(canRemove = isAdmin) }
+            }
         }
     }
 

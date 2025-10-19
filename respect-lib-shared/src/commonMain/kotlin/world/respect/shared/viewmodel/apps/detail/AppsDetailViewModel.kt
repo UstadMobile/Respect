@@ -34,6 +34,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdmin
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<RespectAppManifest>? = null,
@@ -42,6 +43,7 @@ data class AppsDetailUiState(
     val group: List<OpdsGroup> = emptyList(),
     val appIcon: String? = null,
     val isAdded: Boolean = false,
+    val showAddRemoveButton: Boolean = false,
 )
 
 class AppsDetailViewModel(
@@ -105,6 +107,14 @@ class AppsDetailViewModel(
                             else -> {}
                         }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            accountManager.selectedAccountAndPersonFlow.collect { selected ->
+                _uiState.update {
+                    it.copy(showAddRemoveButton = selected?.person?.isAdmin() == true)
                 }
             }
         }

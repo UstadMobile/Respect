@@ -135,7 +135,8 @@ fun AppLauncherScreen(
                         },
                         onClickRemove = {
                             onClickRemove(respectApp)
-                        }
+                        },
+                        showRemove = uiState.canRemove,
                     )
                 }
             }
@@ -147,7 +148,8 @@ fun AppLauncherScreen(
 fun AppGridItem(
     app: DataLoadState<RespectAppManifest>,
     onClickApp: () -> Unit,
-    onClickRemove: () -> Unit
+    onClickRemove: () -> Unit,
+    showRemove: Boolean = false,
 ) {
     val appData = app.dataOrNull()
 
@@ -199,15 +201,17 @@ fun AppGridItem(
                             onClickApp()
                         }
                     )
-                    DropdownMenuItem(
-                        text = {
-                            Text(stringResource(resource = Res.string.remove))
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onClickRemove()
-                        }
-                    )
+                    if(showRemove) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(stringResource(resource = Res.string.remove))
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                onClickRemove()
+                            }
+                        )
+                    }
                 }
             }
         }

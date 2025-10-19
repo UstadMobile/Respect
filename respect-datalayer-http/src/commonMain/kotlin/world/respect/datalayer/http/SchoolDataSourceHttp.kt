@@ -10,6 +10,7 @@ import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
 import world.respect.datalayer.http.school.PersonDataSourceHttp
 import world.respect.datalayer.http.school.PersonPasskeyDataSourceHttp
 import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
+import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
@@ -19,6 +20,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.ReportDataSource
+import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class SchoolDataSourceHttp(
@@ -28,6 +30,16 @@ class SchoolDataSourceHttp(
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper
 ) : SchoolDataSource {
+
+    override val schoolAppDataSource: SchoolAppDataSource by lazy {
+        SchoolAppDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
 
     override val personDataSource: PersonDataSource by lazy {
         PersonDataSourceHttp(

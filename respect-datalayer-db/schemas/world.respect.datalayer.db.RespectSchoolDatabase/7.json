@@ -2,8 +2,56 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "7422bad28c381a5c52208fb811971463",
+    "identityHash": "73f1d1acf9e4389a1974303301d49b1a",
     "entities": [
+      {
+        "tableName": "SchoolAppEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saUid` TEXT NOT NULL, `saUidNum` INTEGER NOT NULL, `saManifestUrl` TEXT NOT NULL, `saStatus` INTEGER NOT NULL, `saLastModified` INTEGER NOT NULL, `saStored` INTEGER NOT NULL, PRIMARY KEY(`saUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "saUid",
+            "columnName": "saUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saUidNum",
+            "columnName": "saUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saManifestUrl",
+            "columnName": "saManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saStatus",
+            "columnName": "saStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saLastModified",
+            "columnName": "saLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saStored",
+            "columnName": "saStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "saUidNum"
+          ]
+        }
+      },
       {
         "tableName": "PersonEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, `pEmail` TEXT, `pPhoneNumber` TEXT, PRIMARY KEY(`pGuidHash`))",
@@ -881,7 +929,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7422bad28c381a5c52208fb811971463')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73f1d1acf9e4389a1974303301d49b1a')"
     ]
   }
 }

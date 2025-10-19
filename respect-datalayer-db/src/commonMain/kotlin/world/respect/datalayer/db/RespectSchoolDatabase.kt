@@ -25,6 +25,7 @@ import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntit
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
+import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.AssignmentAssigneeRefEntity
 import world.respect.datalayer.db.school.entities.AssignmentEntity
@@ -34,6 +35,7 @@ import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
+import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 
 
@@ -42,6 +44,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
  */
 @Database(
     entities = [
+        SchoolAppEntity::class,
         PersonEntity::class,
         PersonRoleEntity::class,
         PersonRelatedPersonEntity::class,
@@ -62,6 +65,8 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
 abstract class RespectSchoolDatabase: RoomDatabase() {
+
+    abstract fun getSchoolAppEntityDao(): SchoolAppEntityDao
 
     abstract fun getPersonEntityDao(): PersonEntityDao
 

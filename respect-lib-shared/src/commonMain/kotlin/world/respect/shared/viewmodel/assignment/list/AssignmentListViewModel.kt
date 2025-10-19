@@ -107,7 +107,7 @@ class AssignmentListViewModel(
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AssignmentEdit(guid = null)
+                AssignmentEdit.create(uid = null)
             )
         )
     }

@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 import kotlin.reflect.KClass
 
@@ -94,9 +95,31 @@ data class AssignmentDetail(
 ) : RespectAppRoute
 
 @Serializable
-data class AssignmentEdit(
+data class AssignmentEdit private constructor(
     val guid: String?,
-): RespectAppRoute
+    private val learningUnitStr: String? = null,
+): RespectAppRoute {
+
+    @Transient
+    val learningUnitSelected: LearningUnitSelection? = learningUnitStr?.let {
+        Json.decodeFromString(LearningUnitSelection.serializer(), it)
+    }
+
+    companion object {
+
+        fun create(
+            uid: String?,
+            learningUnitSelected: LearningUnitSelection? = null,
+        ) = AssignmentEdit(
+            guid = uid,
+            learningUnitStr = learningUnitSelected?.let {
+                Json.encodeToString(LearningUnitSelection.serializer(), it)
+            },
+        )
+
+    }
+
+}
 
 @Serializable
 object ClazzList : RespectAppRoute

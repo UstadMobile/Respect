@@ -28,8 +28,6 @@ import world.respect.datalayer.school.model.AssignmentAssigneeRef
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.findSelfLinks
-import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -85,6 +83,13 @@ class AssignmentEditViewModel(
     private val uid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
         Assignment.TABLE_ID
     ).toString()
+
+    private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
+        return AssignmentLearningUnitRef(
+            learningUnitManifestUrl = this.learningUnitManifestUrl,
+            appManifestUrl = this.appManifestUrl,
+        )
+    }
 
     init {
         _appUiState.update { prev ->
@@ -146,6 +151,9 @@ class AssignmentEditViewModel(
                                 uid = uid,
                                 title = "",
                                 description = "",
+                                learningUnits = route.learningUnitSelected?.let {
+                                    listOf(it.toRef())
+                                } ?: emptyList()
                             )
                         )
                     )
@@ -155,12 +163,7 @@ class AssignmentEditViewModel(
             viewModelScope.launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
                     val learningUnit = result.result as? LearningUnitSelection ?: return@collect
-                    val assignmentResourceRef = AssignmentLearningUnitRef(
-                        learningUnitManifestUrl = learningUnit.opdsFeedUrl.resolve(
-                            learningUnit.selectedPublication.findSelfLinks().first().href
-                        ),
-                        appManifestUrl = result.result.appManifestUrl,
-                    )
+                    val assignmentResourceRef = learningUnit.toRef()
 
                     _uiState.update { prev ->
                         val prevAssignment = prev.assignment.dataOrNull() ?: return@update prev

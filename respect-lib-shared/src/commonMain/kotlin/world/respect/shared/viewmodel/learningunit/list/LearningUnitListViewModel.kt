@@ -117,13 +117,14 @@ class LearningUnitListViewModel(
         }?.href.toString()
 
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
+        val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
         if(
             !resultReturner.sendResultIfResultExpected(
                 route = route,
                 navCommandFlow = _navCommandFlow,
                 result = LearningUnitSelection(
-                    opdsFeedUrl = route.opdsFeedUrl,
+                    learningUnitManifestUrl = learningUnitManifestUrl,
                     selectedPublication = publication,
                     appManifestUrl = route.appManifestUrl,
                 )
@@ -132,9 +133,7 @@ class LearningUnitListViewModel(
             _navCommandFlow.tryEmit(
                 value = NavCommand.Navigate(
                     LearningUnitDetail.create(
-                        learningUnitManifestUrl = route.opdsFeedUrl.resolve(
-                            publicationHref
-                        ),
+                        learningUnitManifestUrl = learningUnitManifestUrl,
                         appManifestUrl = route.appManifestUrl,
                         refererUrl = Url(
                             refererUrl

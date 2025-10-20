@@ -13,8 +13,14 @@ import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
+import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCaseAndroid
+import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
+import com.ustadmobile.libcache.downloader.RunDownloadJobUseCase
+import com.ustadmobile.libcache.downloader.RunDownloadJobUseCaseImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
@@ -149,7 +155,9 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
-import world.respect.shared.viewmodel.assignments.AssignmentViewModel
+import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
+import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
@@ -238,6 +246,7 @@ val appKoinModule = module {
                     tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                     logger = NapierLoggingAdapter(),
                     json = get(),
+                    connectivityMonitor = ConnectivityMonitorAndroid(androidContext()),
                 )
             )
             .build()
@@ -264,7 +273,6 @@ val appKoinModule = module {
     viewModelOf(::AppLauncherViewModel)
     viewModelOf(::EnterLinkViewModel)
     viewModelOf(::AppListViewModel)
-    viewModelOf(::AssignmentViewModel)
     viewModelOf(::ClazzListViewModel)
     viewModelOf(::ClazzEditViewModel)
     viewModelOf(::ClazzDetailViewModel)
@@ -303,6 +311,9 @@ val appKoinModule = module {
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
+    viewModelOf(::AssignmentListViewModel)
+    viewModelOf(::AssignmentEditViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -544,6 +555,27 @@ val appKoinModule = module {
 
     single<OnClickPhoneNumUseCase> {
         OnClickPhoneNumberUseCaseAndroid(androidContext())
+    }
+
+    single<PinPublicationPrepareUseCase> {
+        PinPublicationPrepareUseCase(
+            httpClient = get(),
+            db = get(),
+            cache = get(),
+            enqueueRunDownloadJobUseCase = get(),
+        )
+    }
+
+    single<EnqueueRunDownloadJobUseCase> {
+        EnqueueRunDownloadJobUseCaseAndroid(androidContext())
+    }
+
+    single<RunDownloadJobUseCase> {
+        RunDownloadJobUseCaseImpl(
+            okHttpClient = get(),
+            db = get(),
+            httpCache = get(),
+        )
     }
 
     /**

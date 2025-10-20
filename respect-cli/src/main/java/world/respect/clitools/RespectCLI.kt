@@ -9,9 +9,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.di.jvmKoinAppModule
 import world.respect.domain.validator.ListAndPrintlnValidatorReporter
 import world.respect.domain.validator.ValidateLinkUseCase

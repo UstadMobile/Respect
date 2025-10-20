@@ -13,6 +13,8 @@ kotlin {
         }
     }
 
+    jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
     jvm()
 
     /*

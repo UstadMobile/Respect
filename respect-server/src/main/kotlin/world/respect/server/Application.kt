@@ -35,6 +35,7 @@ import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
@@ -42,6 +43,7 @@ import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
@@ -201,11 +203,13 @@ fun Application.module() {
                         )
                     }
                     authenticate(AUTH_CONFIG_SCHOOL) {
+                        SchoolAppRoute()
                         PersonRoute()
                         PersonPasskeyRoute()
                         PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
+                        AssignmentRoute()
                     }
                 }
             }

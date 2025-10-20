@@ -3,8 +3,8 @@ package world.respect.datalayer.compatibleapps.model
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.opds.model.LangMap
-import world.respect.datalayer.shared.serialization.UriStringSerializer
+import world.respect.lib.opds.model.LangMap
+import world.respect.lib.serializers.UriStringSerializer
 
 /**
  * Represents the RESPECT manifest as described in the RESPECT Launcher App Integration Guide.

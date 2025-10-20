@@ -23,7 +23,6 @@ import kotlin.Boolean
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ImportContacts
@@ -43,13 +42,11 @@ import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.people
-import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
-import world.respect.shared.navigation.Assignment
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.PersonList
-import world.respect.shared.navigation.Report
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -72,13 +69,13 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
-        destRoute = RespectAppLauncher,
+        destRoute = RespectAppLauncher(),
         icon = Icons.Filled.GridView,
         label = Res.string.apps,
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
     TopNavigationItem(
-        destRoute = Assignment,
+        destRoute = AssignmentList,
         icon = Icons.Filled.ImportContacts,
         label = Res.string.assignments,
         routeName = "$routeNamePrefix.Assignment"
@@ -88,12 +85,6 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
         label = Res.string.classes,
         routeName = "$routeNamePrefix.ClazzList",
-    ),
-    TopNavigationItem(
-        destRoute = Report,
-        icon = Icons.Filled.BarChart,
-        label = Res.string.reports,
-        routeName = "$routeNamePrefix.Report"
     ),
     TopNavigationItem(
         destRoute = PersonList,

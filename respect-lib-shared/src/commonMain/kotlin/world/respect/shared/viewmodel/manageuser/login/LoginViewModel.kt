@@ -104,7 +104,7 @@ class LoginViewModel(
 
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
-                                    destination = RespectAppLauncher, clearBackStack = true
+                                    destination = RespectAppLauncher(), clearBackStack = true
                                 )
                             )
                         }
@@ -207,7 +207,7 @@ class LoginViewModel(
 
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            destination = RespectAppLauncher,
+                            destination = RespectAppLauncher(),
                             clearBackStack = true,
                         )
                     )

@@ -157,7 +157,9 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
-import world.respect.shared.viewmodel.assignments.AssignmentViewModel
+import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
+import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
@@ -273,7 +275,6 @@ val appKoinModule = module {
     viewModelOf(::AppLauncherViewModel)
     viewModelOf(::EnterLinkViewModel)
     viewModelOf(::AppListViewModel)
-    viewModelOf(::AssignmentViewModel)
     viewModelOf(::ClazzListViewModel)
     viewModelOf(::ClazzEditViewModel)
     viewModelOf(::ClazzDetailViewModel)
@@ -312,6 +313,9 @@ val appKoinModule = module {
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
+    viewModelOf(::AssignmentListViewModel)
+    viewModelOf(::AssignmentEditViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

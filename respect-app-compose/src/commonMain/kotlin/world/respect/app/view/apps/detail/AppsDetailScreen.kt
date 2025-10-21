@@ -137,7 +137,7 @@ fun AppsDetailScreen(
                     Text(text = stringResource(Res.string.try_it))
                 }
 
-                if(!uiState.isAdded) {
+                if(!uiState.isAdded && uiState.showAddRemoveButton) {
                     OutlinedButton(
                         onClick = onClickAdd,
                         modifier = Modifier.weight(1f)

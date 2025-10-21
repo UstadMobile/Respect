@@ -62,6 +62,7 @@ fun LearningUnitDetailScreen(
         uiState = uiState,
         onClickOpen = viewModel::onClickOpen,
         onClickDownload = viewModel::onClickDownload,
+        onClickAssign = viewModel::onClickAssign,
     )
 }
 
@@ -70,6 +71,7 @@ fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
     onClickDownload: () -> Unit,
+    onClickAssign: () -> Unit,
 ) {
 
     LazyColumn(
@@ -171,15 +173,15 @@ fun LearningUnitDetailScreen(
                             state = uiState.pinState,
                         )
                     },
-                    onClick = onClickDownload
+                    onClick = onClickDownload,
+                    enabled = uiState.buttonsEnabled,
                 )
 
                 RespectQuickActionButton(
                     imageVector = Icons.Filled.NearMe,
                     labelText = stringResource(Res.string.assign),
-                    onClick = {
-
-                    }
+                    onClick = onClickAssign,
+                    enabled = uiState.buttonsEnabled,
                 )
             }
         }

@@ -18,6 +18,9 @@
     <string name="apps">Apps</string>
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
+    <string name="assignment">Assignment</string>
+    <string name="add_assignment">Add assignment</string>
+    <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
     <string name="clazz">Class</string>
     <string name="report">Report</string>
@@ -410,4 +413,10 @@
     <string name="site_administrator">Site administrator</string>
     <string name="role">Role</string>
 
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="assignment_tasks">Assignment tasks</string>
+    <string name="lesson_assessment">Lesson/assessment</string>
+
+    <string name="due_date">Due date</string>
 </resources>

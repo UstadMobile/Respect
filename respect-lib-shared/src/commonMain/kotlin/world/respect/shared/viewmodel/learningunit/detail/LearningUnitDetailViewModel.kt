@@ -22,8 +22,11 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
+import world.respect.shared.navigation.AssignmentEdit
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
@@ -31,7 +34,10 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
-)
+) {
+    val buttonsEnabled: Boolean
+        get() = lessonDetail != null
+}
 
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -128,6 +134,23 @@ class LearningUnitDetailViewModel(
                 t.printStackTrace()
             }
         }
+    }
+
+    fun onClickAssign() {
+        val publicationVal = uiState.value.lessonDetail ?: return
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = AssignmentEdit.create(
+                    uid = null,
+                    learningUnitSelected = LearningUnitSelection(
+                        learningUnitManifestUrl = route.learningUnitManifestUrl,
+                        selectedPublication = publicationVal,
+                        appManifestUrl = route.appManifestUrl
+                    )
+                )
+            )
+        )
     }
 
 

@@ -107,7 +107,7 @@ class ClazzDetailViewModel(
     init {
         _appUiState.update {
             it.copy(
-                showBackButton = false, fabState = FabUiState(
+                fabState = FabUiState(
                     visible = true,
                     icon = FabUiState.FabIcon.EDIT,
                     text = Res.string.edit.asUiText(),

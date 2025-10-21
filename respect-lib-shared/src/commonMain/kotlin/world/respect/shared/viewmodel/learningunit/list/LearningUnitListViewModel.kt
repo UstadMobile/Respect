@@ -23,8 +23,11 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.language
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitListUiState(
     val publications: List<OpdsPublication> = emptyList(),
@@ -42,6 +45,7 @@ data class LearningUnitListUiState(
 class LearningUnitListViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LearningUnitListUiState())
@@ -108,27 +112,37 @@ class LearningUnitListViewModel(
     }
 
     fun onClickPublication(publication: OpdsPublication) {
-
         val publicationHref = publication.links.find {
             it.rel?.contains(SELF) == true
         }?.href.toString()
 
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
+        val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = route.opdsFeedUrl.resolve(
-                        publicationHref
-                    ),
+        if(
+            !resultReturner.sendResultIfResultExpected(
+                route = route,
+                navCommandFlow = _navCommandFlow,
+                result = LearningUnitSelection(
+                    learningUnitManifestUrl = learningUnitManifestUrl,
+                    selectedPublication = publication,
                     appManifestUrl = route.appManifestUrl,
-                    refererUrl = Url(
-                        refererUrl
-                    ),
-                    expectedIdentifier = publication.metadata.identifier.toString()
                 )
             )
-        )
+        ) {
+            _navCommandFlow.tryEmit(
+                value = NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = learningUnitManifestUrl,
+                        appManifestUrl = route.appManifestUrl,
+                        refererUrl = Url(
+                            refererUrl
+                        ),
+                        expectedIdentifier = publication.metadata.identifier.toString()
+                    )
+                )
+            )
+        }
     }
 
     fun onClickNavigation(navigation: ReadiumLink) {
@@ -142,6 +156,8 @@ class LearningUnitListViewModel(
                         navigationHref
                     ),
                     appManifestUrl = route.appManifestUrl,
+                    resultPopUpTo = route.resultPopUpTo,
+                    resultKey = route.resultKey,
                 )
             )
         )

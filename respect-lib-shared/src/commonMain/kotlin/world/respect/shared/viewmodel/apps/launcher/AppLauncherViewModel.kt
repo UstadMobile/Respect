@@ -35,6 +35,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdmin
@@ -74,6 +75,8 @@ class AppLauncherViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.apps.asUiText(),
+                settingsIconVisible = true,
+                onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
@@ -134,6 +137,11 @@ class AppLauncherViewModel(
                     )
                 }
             )
+        )
+    }
+    fun onClickSettings() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(Settings)
         )
     }
 

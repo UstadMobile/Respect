@@ -1,11 +1,11 @@
 package world.respect.shared.viewmodel.app.appstate
 
-import world.respect.datalayer.opds.model.LangMap
-import world.respect.datalayer.opds.model.LangMapObjectValue
-import world.respect.datalayer.opds.model.LangMapStringValue
-import world.respect.datalayer.opds.model.ReadiumSubject
-import world.respect.datalayer.opds.model.ReadiumSubjectObject
-import world.respect.datalayer.opds.model.ReadiumSubjectStringValue
+import world.respect.lib.opds.model.LangMap
+import world.respect.lib.opds.model.LangMapObjectValue
+import world.respect.lib.opds.model.LangMapStringValue
+import world.respect.lib.opds.model.ReadiumSubject
+import world.respect.lib.opds.model.ReadiumSubjectObject
+import world.respect.lib.opds.model.ReadiumSubjectStringValue
 
 
 fun ReadiumSubject.toDisplayString(preferredLanguages: List<String> = listOf("en")): String = when (this) {

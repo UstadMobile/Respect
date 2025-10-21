@@ -79,7 +79,7 @@ class AccountListViewModel(
                     emittedNavToGetStartedCommand = true
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            GetStartedScreen, clearBackStack = true
+                            GetStartedScreen(), clearBackStack = true
                         )
                     )
 
@@ -144,12 +144,14 @@ class AccountListViewModel(
     fun onClickAccount(account: RespectAccount) {
         respectAccountManager.selectedAccount = account
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(RespectAppLauncher, clearBackStack = true)
+            NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
         )
     }
 
     fun onClickAddAccount() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(GetStartedScreen))
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(GetStartedScreen(canGoBack = true))
+        )
     }
     fun onClickProfile() {
         uiState.value.selectedAccount?.also {

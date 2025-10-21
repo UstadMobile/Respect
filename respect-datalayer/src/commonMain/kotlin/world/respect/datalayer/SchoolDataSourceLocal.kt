@@ -1,11 +1,13 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
+import world.respect.datalayer.school.SchoolAppDataSourceLocal
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal
@@ -13,6 +15,8 @@ import world.respect.datalayer.school.ReportDataSourceLocal
  * checks (to run an offline-first cache).
  */
 interface SchoolDataSourceLocal: SchoolDataSource {
+
+    override val schoolAppDataSource: SchoolAppDataSourceLocal
 
     override val personDataSource: PersonDataSourceLocal
 
@@ -26,4 +30,5 @@ interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal
 
+    override val assignmentDataSource: AssignmentDataSourceLocal
 }

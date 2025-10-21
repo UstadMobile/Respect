@@ -3,7 +3,7 @@ package world.respect.shared.domain.opds.validator
 import com.networknt.schema.InputFormat
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.opds.model.OpdsPublication
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.domain.opds.validator.verifyMimeTypeAndGetBodyAsText
 import world.respect.domain.validator.ValidateLinkUseCase
 import world.respect.domain.validator.ValidatorMessage

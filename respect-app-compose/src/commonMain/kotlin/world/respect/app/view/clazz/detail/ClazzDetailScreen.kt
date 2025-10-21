@@ -142,7 +142,9 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0) {
+        if((uiState.showAddTeacher || uiState.showAddStudent) &&
+            (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
+        ) {
             item("pending_header") {
                 ListItem(
                     modifier = Modifier
@@ -177,96 +179,99 @@ fun ClazzDetailScreen(
             }
         }
 
-
         if (uiState.isPendingExpanded) {
-            respectPagingItems(
-                items = pendingTeacherLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.PENDING_TEACHER, index)
-                }
-            ) { person ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = person?.fullName() ?: ""
-                        )
-                    },
-                    headlineContent = {
-                        Text(text = person?.fullName() ?: "")
-                    },
-                    supportingContent = {
-                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
-                    },
-                    trailingContent = {
-                        Row {
-                            Icon(
-                                modifier = Modifier.size(24.dp)
-                                    .clickable {
-                                        person?.also(onClickAcceptInvite)
-                                    },
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = stringResource(resource = Res.string.accept_invite)
-                            )
-
-                            Spacer(Modifier.width(16.dp))
-
-                            Icon(
-                                modifier = Modifier.size(24.dp).clickable {
-                                    person?.also(onClickDismissInvite)
-                                },
-                                imageVector = Icons.Outlined.Cancel,
-                                contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                            )
-                        }
+            if(uiState.showAddTeacher) {
+                respectPagingItems(
+                    items = pendingTeacherLazyPagingItems,
+                    key = { person, index ->
+                        person.key(EnrollmentRoleEnum.PENDING_TEACHER, index)
                     }
-                )
+                ) { person ->
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingContent = {
+                            RespectPersonAvatar(
+                                name = person?.fullName() ?: ""
+                            )
+                        },
+                        headlineContent = {
+                            Text(text = person?.fullName() ?: "")
+                        },
+                        supportingContent = {
+                            Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                        },
+                        trailingContent = {
+                            Row {
+                                Icon(
+                                    modifier = Modifier.size(24.dp)
+                                        .clickable {
+                                            person?.also(onClickAcceptInvite)
+                                        },
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = stringResource(resource = Res.string.accept_invite)
+                                )
+
+                                Spacer(Modifier.width(16.dp))
+
+                                Icon(
+                                    modifier = Modifier.size(24.dp).clickable {
+                                        person?.also(onClickDismissInvite)
+                                    },
+                                    imageVector = Icons.Outlined.Cancel,
+                                    contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                                )
+                            }
+                        }
+                    )
+                }
             }
 
-            respectPagingItems(
-                items = pendingStudentLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.PENDING_STUDENT, index)
-                }
-            ) { person ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = person?.fullName() ?: ""
-                        )
-                    },
-                    headlineContent = {
-                        Text(text = person?.fullName() ?: "")
-                    },
-                    supportingContent = {
-                        Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
-                    },
-                    trailingContent = {
-                        Row {
-                            Icon(
-                                modifier = Modifier.size(24.dp)
-                                    .clickable {
-                                        person?.also(onClickAcceptInvite)
-                                    },
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = stringResource(resource = Res.string.accept_invite)
-                            )
 
-                            Spacer(Modifier.width(16.dp))
-
-                            Icon(
-                                modifier = Modifier.size(24.dp).clickable {
-                                    person?.also(onClickDismissInvite)
-                                },
-                                imageVector = Icons.Outlined.Cancel,
-                                contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                            )
-                        }
+            if(uiState.showAddStudent) {
+                respectPagingItems(
+                    items = pendingStudentLazyPagingItems,
+                    key = { person, index ->
+                        person.key(EnrollmentRoleEnum.PENDING_STUDENT, index)
                     }
-                )
+                ) { person ->
+                    ListItem(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        leadingContent = {
+                            RespectPersonAvatar(
+                                name = person?.fullName() ?: ""
+                            )
+                        },
+                        headlineContent = {
+                            Text(text = person?.fullName() ?: "")
+                        },
+                        supportingContent = {
+                            Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                        },
+                        trailingContent = {
+                            Row {
+                                Icon(
+                                    modifier = Modifier.size(24.dp)
+                                        .clickable {
+                                            person?.also(onClickAcceptInvite)
+                                        },
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = stringResource(resource = Res.string.accept_invite)
+                                )
+
+                                Spacer(Modifier.width(16.dp))
+
+                                Icon(
+                                    modifier = Modifier.size(24.dp).clickable {
+                                        person?.also(onClickDismissInvite)
+                                    },
+                                    imageVector = Icons.Outlined.Cancel,
+                                    contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
 
@@ -300,24 +305,26 @@ fun ClazzDetailScreen(
         }
 
         if(uiState.isTeachersExpanded) {
-            item("add_teacher") {
-                ListItem(
-                    modifier = Modifier.clickable {
-                        onClickAddPersonToClazz(EnrollmentRoleEnum.TEACHER)
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(resource = Res.string.add_teacher)
-                        )
-                    },
-                    headlineContent = {
-                        Text(
-                            text =
-                                stringResource(resource = Res.string.add_teacher)
-                        )
-                    }
-                )
+            if(uiState.showAddTeacher) {
+                item("add_teacher") {
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            onClickAddPersonToClazz(EnrollmentRoleEnum.TEACHER)
+                        },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(resource = Res.string.add_teacher)
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                text =
+                                    stringResource(resource = Res.string.add_teacher)
+                            )
+                        }
+                    )
+                }
             }
 
             respectPagingItems(
@@ -373,26 +380,28 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isStudentsExpanded) {
-            item("add_student") {
-                ListItem(
-                    modifier = Modifier.clickable {
-                        onClickAddPersonToClazz(EnrollmentRoleEnum.STUDENT)
-                    },
+            if(uiState.showAddStudent) {
+                item("add_student") {
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            onClickAddPersonToClazz(EnrollmentRoleEnum.STUDENT)
+                        },
 
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(resource = Res.string.add_student)
-                        )
-                    },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(resource = Res.string.add_student)
+                            )
+                        },
 
-                    headlineContent = {
-                        Text(
-                            text =
-                                stringResource(resource = Res.string.add_student)
-                        )
-                    }
-                )
+                        headlineContent = {
+                            Text(
+                                text =
+                                    stringResource(resource = Res.string.add_student)
+                            )
+                        }
+                    )
+                }
             }
 
             respectPagingItems(

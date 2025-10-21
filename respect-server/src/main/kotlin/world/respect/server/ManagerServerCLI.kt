@@ -15,8 +15,8 @@ import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
-import world.respect.datalayer.opds.model.LangMapStringValue
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase

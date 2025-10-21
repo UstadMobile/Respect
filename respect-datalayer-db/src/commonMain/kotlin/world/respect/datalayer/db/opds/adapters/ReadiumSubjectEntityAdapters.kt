@@ -7,9 +7,9 @@ import world.respect.datalayer.db.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.shared.adapters.asEntities
 import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.opds.model.ReadiumSubject
-import world.respect.datalayer.opds.model.ReadiumSubjectObject
-import world.respect.datalayer.opds.model.ReadiumSubjectStringValue
+import world.respect.lib.opds.model.ReadiumSubject
+import world.respect.lib.opds.model.ReadiumSubjectObject
+import world.respect.lib.opds.model.ReadiumSubjectStringValue
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 class ReadiumSubjectEntities(

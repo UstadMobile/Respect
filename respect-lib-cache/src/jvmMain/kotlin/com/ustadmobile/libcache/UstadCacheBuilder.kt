@@ -4,6 +4,7 @@ import androidx.room.Room
 import com.ustadmobile.libcache.UstadCache.Companion.DEFAULT_SIZE_LIMIT
 import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 
 import kotlinx.io.files.Path
@@ -38,19 +39,21 @@ class UstadCacheBuilder(
 ){
 
     fun build(): UstadCache {
+        val dbVal = db ?: Room.databaseBuilder<UstadCacheDb>(dbFile.absolutePath)
+            .apply {
+                if(distributedCacheEnabled) {
+                    addCallback(AddNewEntryTriggerCallback())
+                }
+            }
+            .build()
         return UstadCacheImpl(
             pathsProvider = pathsProvider,
-            db = db ?: Room.databaseBuilder<UstadCacheDb>(dbFile.absolutePath)
-                .apply {
-                    if(distributedCacheEnabled) {
-                        addCallback(AddNewEntryTriggerCallback())
-                    }
-                }
-                .build(),
+            db = dbVal,
             sizeLimit = sizeLimit,
             logger = logger,
             cacheName = cacheName,
             xxStringHasher = xxStringHasher,
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(dbVal, xxStringHasher),
         )
     }
 }

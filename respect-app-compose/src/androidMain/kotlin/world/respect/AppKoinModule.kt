@@ -7,12 +7,20 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtil
+import world.respect.shared.domain.phonenumber.IPhoneNumberUtilAndroid
 import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
+import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCaseAndroid
+import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
+import com.ustadmobile.libcache.downloader.RunDownloadJobUseCase
+import com.ustadmobile.libcache.downloader.RunDownloadJobUseCaseImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
@@ -20,6 +28,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
@@ -116,6 +125,10 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
+import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
@@ -142,7 +155,9 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
-import world.respect.shared.viewmodel.assignments.AssignmentViewModel
+import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
+import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
 import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
@@ -220,7 +235,7 @@ import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListVi
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
 
-const val SHARED_PREF_SETTINGS_NAME = "respect_settings_"
+const val SHARED_PREF_SETTINGS_NAME = "respect_settings2_"
 const val TAG_TMP_DIR = "tmpDir"
 
 val appKoinModule = module {
@@ -229,6 +244,14 @@ val appKoinModule = module {
             encodeDefaults = false
             ignoreUnknownKeys = true
         }
+    }
+
+    single<PhoneNumberUtil> {
+        PhoneNumberUtil.createInstance(androidContext())
+    }
+
+    single<IPhoneNumberUtil> {
+        IPhoneNumberUtilAndroid(phoneNumberUtil = get<PhoneNumberUtil>())
     }
 
     single<XXStringHasher> {
@@ -255,6 +278,7 @@ val appKoinModule = module {
                     tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                     logger = NapierLoggingAdapter(),
                     json = get(),
+                    connectivityMonitor = ConnectivityMonitorAndroid(androidContext()),
                 )
             )
             .build()
@@ -281,7 +305,6 @@ val appKoinModule = module {
     viewModelOf(::AppLauncherViewModel)
     viewModelOf(::EnterLinkViewModel)
     viewModelOf(::AppListViewModel)
-    viewModelOf(::AssignmentViewModel)
     viewModelOf(::ClazzListViewModel)
     viewModelOf(::ClazzEditViewModel)
     viewModelOf(::ClazzDetailViewModel)
@@ -323,6 +346,9 @@ val appKoinModule = module {
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
+    viewModelOf(::AssignmentListViewModel)
+    viewModelOf(::AssignmentEditViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -469,7 +495,7 @@ val appKoinModule = module {
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
-            appContext, appContext.getDatabasePath("respect-app.db").absolutePath
+            appContext, appContext.getDatabasePath("respect__app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
             .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
@@ -582,6 +608,35 @@ val appKoinModule = module {
         get<SnackBarFlowDispatcher>()
     }
 
+    single<PhoneNumValidatorUseCase> {
+        PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
+    }
+
+    single<OnClickPhoneNumUseCase> {
+        OnClickPhoneNumberUseCaseAndroid(androidContext())
+    }
+
+    single<PinPublicationPrepareUseCase> {
+        PinPublicationPrepareUseCase(
+            httpClient = get(),
+            db = get(),
+            cache = get(),
+            enqueueRunDownloadJobUseCase = get(),
+        )
+    }
+
+    single<EnqueueRunDownloadJobUseCase> {
+        EnqueueRunDownloadJobUseCaseAndroid(androidContext())
+    }
+
+    single<RunDownloadJobUseCase> {
+        RunDownloadJobUseCaseImpl(
+            okHttpClient = get(),
+            db = get(),
+            httpCache = get(),
+        )
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -614,7 +669,7 @@ val appKoinModule = module {
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                "school_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                "school__" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
                 .addMigrations(MIGRATION_2_3(true))

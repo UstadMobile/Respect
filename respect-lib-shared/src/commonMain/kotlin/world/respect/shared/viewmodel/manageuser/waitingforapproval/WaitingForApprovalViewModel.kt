@@ -59,7 +59,7 @@ class WaitingForApprovalViewModel(
                     .findByGuid(DataLoadParams(), activeUserUid)
                 if(personLoaded.dataOrNull()?.status == PersonStatusEnum.ACTIVE) {
                     _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(RespectAppLauncher)
+                        NavCommand.Navigate(RespectAppLauncher())
                     )
                     return@launch
                 }

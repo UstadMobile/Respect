@@ -4,9 +4,9 @@ import world.respect.datalayer.db.shared.entities.ILangMapEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity.Companion.LANG_NONE
 import world.respect.datalayer.db.shared.ext.langMapKey
-import world.respect.datalayer.opds.model.LangMap
-import world.respect.datalayer.opds.model.LangMapObjectValue
-import world.respect.datalayer.opds.model.LangMapStringValue
+import world.respect.lib.opds.model.LangMap
+import world.respect.lib.opds.model.LangMapObjectValue
+import world.respect.lib.opds.model.LangMapStringValue
 
 
 fun <T: ILangMapEntity> LangMap.asEntities(

@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.androidx.preference)
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)
+            implementation(libs.libphonenumber.android)
         }
 
         jvmMain.dependencies {
@@ -73,6 +74,7 @@ kotlin {
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.webauthn4j.core)
+            implementation(libs.libphonenumber.google)
         }
 
         jvmTest.dependencies {

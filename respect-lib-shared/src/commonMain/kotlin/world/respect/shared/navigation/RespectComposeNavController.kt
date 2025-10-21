@@ -30,17 +30,32 @@ class RespectComposeNavController(
                     }
                 } else {
                     navHostController.navigate(navCommand.destination) {
-                        navCommand.popUpTo?.also {
-                            popUpTo(it) { inclusive = navCommand.popUpToInclusive }
+                        val popUpToRoute = navCommand.popUpTo
+                        val popUpToClass = navCommand.popUpToClass
+
+                        when {
+                            popUpToRoute != null -> {
+                                popUpTo(popUpToRoute) { inclusive = navCommand.popUpToInclusive }
+                            }
+                            popUpToClass != null -> {
+                                popUpTo(route = popUpToClass) { inclusive = navCommand.popUpToInclusive }
+                            }
                         }
                     }
                 }
             }
 
-            is NavCommand.Pop -> {
+            is NavCommand.PopToRoute -> {
                 lastNavCommandTime = navCommand.timestamp
                 navHostController.popBackStack(
                     navCommand.destination, navCommand.inclusive
+                )
+            }
+
+            is NavCommand.PopToRouteClass -> {
+                lastNavCommandTime = navCommand.timestamp
+                navHostController.popBackStack(
+                    route = navCommand.destination, inclusive = navCommand.inclusive
                 )
             }
 

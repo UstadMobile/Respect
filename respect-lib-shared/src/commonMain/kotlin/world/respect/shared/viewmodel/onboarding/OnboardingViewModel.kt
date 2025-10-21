@@ -55,7 +55,7 @@ class OnboardingViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = GetStartedScreen,
+                destination = GetStartedScreen(),
                 clearBackStack = hasAccount,
             )
         )

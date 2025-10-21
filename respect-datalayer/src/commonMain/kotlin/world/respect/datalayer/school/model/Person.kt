@@ -4,9 +4,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.shared.ModelWithTimes
-import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
+import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 /**
  * @property guid unique system identifier. As per various specs it MUST NOT contain personal
@@ -24,10 +23,8 @@ data class Person(
     val guid: String,
     val userActive: Boolean = true,
     val status: PersonStatusEnum = PersonStatusEnum.ACTIVE,
-    @Serializable(with = InstantISO8601Serializer::class)
-    override val lastModified: Instant = Clock.System.now(),
-    @Serializable(with = InstantISO8601Serializer::class)
-    override val stored: Instant = Clock.System.now(),
+    override val lastModified: InstantAsISO8601 = Clock.System.now(),
+    override val stored: InstantAsISO8601 = Clock.System.now(),
     val metadata: JsonObject? = null,
     val userMasterIdentifier: String? = null,
     val username: String? = null,
@@ -42,7 +39,9 @@ data class Person(
     val roles: List<PersonRole>,
     val relatedPersonUids: List<String> = emptyList(),
     val dateOfBirth: LocalDate? = null,
-): ModelWithTimes {
+    val email: String? = null,
+    val phoneNumber: String? = null,
+) : ModelWithTimes {
 
     companion object {
         const val TABLE_ID = 2

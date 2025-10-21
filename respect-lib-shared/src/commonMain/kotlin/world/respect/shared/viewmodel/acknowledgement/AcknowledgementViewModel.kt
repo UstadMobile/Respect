@@ -44,8 +44,8 @@ class AcknowledgementViewModel(
                 NavCommand.Navigate(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
-                        hasAccount -> RespectAppLauncher
-                        else -> GetStartedScreen
+                        hasAccount -> RespectAppLauncher()
+                        else -> GetStartedScreen()
                     },
                     clearBackStack = true,
                 )

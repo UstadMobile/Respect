@@ -68,7 +68,8 @@ class ClazzListViewModel(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.clazz.asUiText(),
                     onClick = ::onClickAdd
-                )
+                ),
+                showBackButton = false,
             )
         }
 

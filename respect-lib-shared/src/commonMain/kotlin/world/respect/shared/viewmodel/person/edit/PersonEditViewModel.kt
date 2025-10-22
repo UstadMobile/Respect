@@ -183,6 +183,9 @@ class PersonEditViewModel(
 
             prev.copy(
                 person = DataReadyState(person),
+                emailError = prev.emailError?.takeIf {
+                    prevPerson?.email == person.email
+                },
                 phoneNumError = if (prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
                     prev.phoneNumError
                 } else {

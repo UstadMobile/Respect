@@ -4,13 +4,17 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 
 fun Person.fullName(): String = buildString {
-    append(givenName)
-    append(" ")
-    middleName?.also {
-        append(it)
-        append(" ")
+    if (givenName.isNotBlank()) {
+        append(givenName.trim())
     }
-    append(familyName)
+    if (!middleName.isNullOrBlank()) {
+        if (isNotEmpty()) append(" ")
+        append(middleName?.trim())
+    }
+    if (familyName.isNotBlank()) {
+        if (isNotEmpty()) append(" ")
+        append(familyName.trim())
+    }
 }
 
 fun Person.isAdminOrTeacher() : Boolean {

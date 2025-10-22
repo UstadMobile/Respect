@@ -9,8 +9,8 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.datalayer.opds.OpdsDataSourceLocal
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.OpdsPublication
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.ext.combineWithRemote
 
 class OpdsDataSourceRepository(

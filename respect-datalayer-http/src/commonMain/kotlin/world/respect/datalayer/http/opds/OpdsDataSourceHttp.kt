@@ -8,8 +8,8 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.opds.OpdsDataSource
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.OpdsPublication
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsPublication
 
 class OpdsDataSourceHttp(
     private val httpClient: HttpClient,

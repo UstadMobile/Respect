@@ -15,8 +15,14 @@ sealed class NavCommand(
         timestamp: Long = systemTimeInMillis(),
     ) : NavCommand(timestamp)
 
-    class Pop(
+    class PopToRoute(
         val destination: RespectAppRoute,
+        val inclusive: Boolean,
+        timestamp: Long = systemTimeInMillis(),
+    ): NavCommand(timestamp)
+
+    class PopToRouteClass(
+        val destination: KClass<*>,
         val inclusive: Boolean,
         timestamp: Long = systemTimeInMillis(),
     ): NavCommand(timestamp)

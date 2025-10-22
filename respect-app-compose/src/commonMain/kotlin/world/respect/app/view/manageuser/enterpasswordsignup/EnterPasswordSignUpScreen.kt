@@ -50,7 +50,7 @@ fun EnterPasswordSignupScreen(
         RespectPasswordField(
             value = uiState.password,
             onValueChange = onPasswordChanged,
-            label = { Text(stringResource(Res.string.password_label)) },
+            label = { Text(stringResource(Res.string.password_label) + "*") },
             isError = uiState.passwordError != null,
             supportingText = {
                 Text(

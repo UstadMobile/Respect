@@ -13,6 +13,8 @@ kotlin {
         }
     }
 
+    jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
     jvm()
 
     /*
@@ -27,6 +29,10 @@ kotlin {
             implementation(libs.kotlinx.date.time)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.acra.core)
         }
 
         jvmMain.dependencies {

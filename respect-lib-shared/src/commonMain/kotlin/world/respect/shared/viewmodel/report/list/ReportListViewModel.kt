@@ -26,7 +26,6 @@ import world.respect.shared.generated.resources.report
 import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ReportDetail
-import world.respect.shared.navigation.ReportTemplateList
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -62,7 +61,8 @@ class ReportListViewModel(
                         icon = FabUiState.FabIcon.ADD,
                         onClick = { this@ReportListViewModel.onClickAdd() },
                         visible = true
-                    )
+                    ),
+                    showBackButton = false,
                 )
             }
 

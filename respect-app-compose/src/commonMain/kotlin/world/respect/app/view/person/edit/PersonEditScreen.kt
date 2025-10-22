@@ -137,6 +137,10 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(email = email))
                 }
             },
+            isError = uiState.emailError != null,
+            supportingText = uiState.emailError?.let {
+                { Text(uiTextStringResource(it)) }
+            },
             enabled = uiState.fieldsEnabled
         )
     }

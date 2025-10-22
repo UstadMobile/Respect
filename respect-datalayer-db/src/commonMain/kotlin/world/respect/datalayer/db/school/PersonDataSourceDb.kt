@@ -2,7 +2,6 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -16,69 +15,91 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
+import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.exceptions.ForbiddenException
+import world.respect.datalayer.exceptions.UnauthorizedException
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
-import kotlin.time.Clock
 import kotlin.time.Instant
 
 class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
-    @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ): PersonDataSourceLocal {
 
-    private suspend fun upsertPersons(
-        persons: List<Person>,
-        forceOverwrite: Boolean = false,
+
+    private suspend fun doUpsertPerson(
+        person: Person
     ) {
-        if(persons.isEmpty())
-            return
+        val entities = person.toEntities(uidNumberMapper)
 
-        schoolDb.useWriterConnection { con ->
-            val timeStored = Clock.System.now()
-            var numStored = 0
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                persons.map { it.copy(stored = timeStored) }.forEach { person ->
-                    val entities = person.toEntities(uidNumberMapper)
-                    val lastModified = schoolDb.getPersonEntityDao().getLastModifiedByGuid(
-                        entities.personEntity.pGuidHash
-                    ) ?: -1
+        schoolDb.getPersonEntityDao().insert(entities.personEntity)
 
-                    if(forceOverwrite || entities.personEntity.pLastModified > lastModified) {
-                        schoolDb.getPersonEntityDao().insert(entities.personEntity)
+        schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(
+            entities.personEntity.pGuidHash
+        )
+        schoolDb.getPersonRoleEntityDao().upsertList(
+            entities.personRoleEntities
+        )
 
-                        schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(
-                            entities.personEntity.pGuidHash
-                        )
-                        schoolDb.getPersonRoleEntityDao().upsertList(
-                            entities.personRoleEntities
-                        )
-
-                        schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(
-                            entities.personEntity.pGuidHash
-                        )
-                        schoolDb.getPersonRelatedPersonEntityDao().upsert(
-                            entities.relatedPersonEntities
-                        )
-                        numStored++
-                    }
-                }
-                Napier.d("PersonDataSource: updated $numStored/${persons.size}")
-            }
-        }
+        schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(
+            entities.personEntity.pGuidHash
+        )
+        schoolDb.getPersonRelatedPersonEntityDao().upsert(
+            entities.relatedPersonEntities
+        )
     }
 
-
     override suspend fun store(list: List<Person>) {
-        upsertPersons(list)
+        if(list.isEmpty())
+            return
+
+        val authenticatedPerson = findByGuid(
+            DataLoadParams(), authenticatedUser.guid
+        ).dataOrNull() ?: throw UnauthorizedException()
+
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { person ->
+                    val personInDb = schoolDb.getPersonEntityDao().findByGuidNum(
+                        uidNumberMapper(person.guid)
+                    )?.toPersonEntities()?.toModel()
+
+                    val authenticatedUserCanEdit = when {
+                        //User can update their own information
+                        person.guid == authenticatedUser.guid -> true
+
+                        //System admin can edit anything
+                        authenticatedPerson.isAdmin() -> true
+
+                        //Teacher can edit student and parent profiles
+                        authenticatedPerson.roles.any { it.roleEnum == PersonRoleEnum.TEACHER } -> {
+                            person.roles.any {
+                                it.roleEnum == PersonRoleEnum.STUDENT || it.roleEnum == PersonRoleEnum.PARENT
+                            }
+                        }
+
+                        else -> false
+                    }
+
+                    if(!authenticatedUserCanEdit)
+                        throw ForbiddenException()
+
+                    //Check that roles have not been change
+                    doUpsertPerson(person)
+                }
+            }
+        }
     }
 
     override suspend fun findByUsername(username: String): Person? {
@@ -111,7 +132,17 @@ class PersonDataSourceDb(
         list: List<Person>,
         forceOverwrite: Boolean
     ) {
-        upsertPersons(list, forceOverwrite)
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE){
+                list.filter { person ->
+                    forceOverwrite || schoolDb.getPersonEntityDao().getLastModifiedByGuid(
+                        uidNumberMapper(person.guid)
+                    ).let { it ?: 0L } < person.lastModified.toEpochMilliseconds()
+                }.forEach { person ->
+                    doUpsertPerson(person)
+                }
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Person> {

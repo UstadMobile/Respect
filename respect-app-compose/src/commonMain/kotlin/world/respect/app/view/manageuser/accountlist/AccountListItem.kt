@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
-import world.respect.shared.util.ext.fullName
+import world.respect.datalayer.db.school.ext.fullName
 
 @Composable
 fun AccountListItem(

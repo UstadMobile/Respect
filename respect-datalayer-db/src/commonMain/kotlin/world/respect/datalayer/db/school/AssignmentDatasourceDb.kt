@@ -8,7 +8,6 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
@@ -61,14 +60,16 @@ class AssignmentDatasourceDb(
         return schoolDb.getAssignmentEntityDao().findByUidNumAsFlow(
             uidNumberMapper(guid)
         ).map { assignmentEntity ->
-            assignmentEntity?.let { DataReadyState(it.toModel()) } ?: NoDataLoadedState.notFound()
+            DataLoadState.readyOrNotFoundIfNull(assignmentEntity?.toModel())
         }
     }
 
     override suspend fun findByGuid(params: DataLoadParams, guid: String): DataLoadState<Assignment> {
-        return schoolDb.getAssignmentEntityDao().findByUidNum(uidNumberMapper(guid))?.let {
-            DataReadyState(it.toModel())
-        } ?: NoDataLoadedState.notFound()
+        return DataLoadState.readyOrNotFoundIfNull(
+            data = schoolDb.getAssignmentEntityDao().findByUidNum(
+                uidNumberMapper(guid)
+            )?.toModel()
+        )
     }
 
     override fun listAsPagingSource(

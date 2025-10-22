@@ -37,7 +37,7 @@ import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdmin
 
 data class AppLauncherUiState(
     val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),

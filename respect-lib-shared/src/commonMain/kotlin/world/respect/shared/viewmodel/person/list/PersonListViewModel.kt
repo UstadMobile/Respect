@@ -27,7 +27,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.util.LaunchDebouncer
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 
 

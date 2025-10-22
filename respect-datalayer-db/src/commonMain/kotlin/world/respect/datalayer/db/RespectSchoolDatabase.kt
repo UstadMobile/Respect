@@ -37,6 +37,8 @@ import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
+import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
+import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 
 
 /**
@@ -59,8 +61,9 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         AssignmentAssigneeRefEntity::class,
         AssignmentLearningResourceRefEntity::class,
         WriteQueueItemEntity::class,
+        SchoolPermissionGrantEntity::class,
     ],
-    version = 7,
+    version = 8,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -95,6 +98,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getAssignmentLearningResourceRefEntityDao(): AssignmentLearningResourceRefEntityDao
 
     abstract fun getWriteQueueItemEntityDao(): WriteQueueItemEntityDao
+
+    abstract fun getSchoolPermissionGrantDao(): SchoolPermissionGrantDao
 
 }
 

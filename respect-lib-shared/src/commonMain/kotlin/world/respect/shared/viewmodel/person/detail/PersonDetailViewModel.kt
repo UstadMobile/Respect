@@ -27,9 +27,9 @@ import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.fullName
-import world.respect.shared.util.ext.isAdmin
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue

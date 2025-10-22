@@ -31,7 +31,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment_tasks
 import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.students
-import world.respect.shared.util.ext.fullName
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState

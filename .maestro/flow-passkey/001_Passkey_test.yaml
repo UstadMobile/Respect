@@ -1,0 +1,156 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        USERNAME: ${USERNAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "001_Passkey_test.yaml"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+
+---
+
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn:
+    id: "floating_action_button"   #  +Class button
+- assertVisible:
+    id: "app_title"
+    text: "Add class"
+- tapOn: "Save"
+- assertVisible: "Required*"
+- tapOn: "Class name*"
+- inputText: "New Class"
+- tapOn: "Description"
+- inputText: "New Course"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "New Class"
+# A) Admin manage
+
+- tapOn: "People"
+- tapOn: "Admin Admin"
+- tapOn: "Manage account"
+- tapOn: "Create passkey"
+- runFlow:
+    when:
+      visible: "Create passkey to sign in to Respect?"
+    file: "subflows/create_passkey_to_sign_in_flow.yaml"
+- tapOn: "1 Passkeys"
+- tapOn: "Delete"
+- assertVisible: "Delete this passkey?"
+- tapOn: "Dismiss"
+- back
+- back
+# B) Admin copy invite code to the teacher
+- tapOn: "Classes"
+- tapOn: "New Class"
+- assertVisible:
+    id: "app_title"
+    text: "New Class"
+- tapOn: "Add Teacher"
+- tapOn: ".*Copy invite code.*"
+
+# C) Teacher sign-up via invite code to the class
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- runFlow:
+    when:
+      visible: "Choose a saved passkey for Respect"
+    file: "subflows/choose_passkey_prompt_cancel.yaml"
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- longPressOn: "Invite code"
+- tapOn: "Paste"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "New Class"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "Teacher User"
+- tapOn: "Gender*"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- extendedWaitUntil:
+    visible: ".*teacheruser.*" #username
+    timeout: 10000      # Timeout in milliseconds
+- tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Create passkey to sign in to Respect?"
+    file: "subflows/create_passkey_to_sign_in_flow.yaml"
+- extendedWaitUntil:
+    visible: "Please wait" #username
+    timeout: 10000
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+# D) Admin approve teacher's request to join the class
+- runFlow:
+    file: "subflows/school_user_passkey_login_flow.yaml"
+    env:
+        USERNAME: "admin"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn: "New Class"
+- assertVisible: "Pending requests"
+- assertVisible: "Teacher User"
+- tapOn: "Accept Invite"
+
+# E) Teacher login to the class
+- runFlow:
+    file: "subflows/school_user_passkey_login_flow.yaml"
+    env:
+      USERNAME: "teacheruser"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "New Class"
+- tapOn: "New Class"
+- assertVisible: "Teacher User"

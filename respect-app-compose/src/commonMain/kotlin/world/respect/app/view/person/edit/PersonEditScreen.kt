@@ -101,7 +101,7 @@ fun PersonEditScreen(
             isError = uiState.genderError != null,
         )
 
-        if(uiState.showRoleDropdown) {
+        if (uiState.showRoleDropdown) {
             val roleEnumVal = person?.roles?.first()?.roleEnum ?: PersonRoleEnum.STUDENT
             RespectExposedDropDownMenuField(
                 value = roleEnumVal,
@@ -142,6 +142,7 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(dateOfBirth = date))
                 }
             },
+            isError = uiState.dateOfBirthError != null,
             enabled = uiState.fieldsEnabled,
             supportingText = uiState.dateOfBirthError?.let {
                 { Text(uiTextStringResource(it)) }

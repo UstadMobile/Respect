@@ -27,12 +27,14 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
 import world.respect.shared.generated.resources.invalid
 import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -61,13 +63,14 @@ data class PersonEditUiState(
      */
     val nationalPhoneNumSet: Boolean = false,
     val phoneNumError: UiText? = null,
+    val emailError: UiText? = null,
     val genderError: UiText? = null,
 ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
     val hasErrors: Boolean
-        get() = dateOfBirthError != null || phoneNumError != null || genderError != null
+        get() = dateOfBirthError != null || phoneNumError != null || genderError != null || emailError!=null
 }
 
 class PersonEditViewModel(
@@ -75,6 +78,7 @@ class PersonEditViewModel(
     accountManager: RespectAccountManager,
     private val json: Json,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
+    private val validateEmailUseCase: ValidateEmailUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -179,9 +183,12 @@ class PersonEditViewModel(
 
             prev.copy(
                 person = DataReadyState(person),
-                phoneNumError = if(prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
+                emailError = prev.emailError?.takeIf {
+                    prevPerson?.email == person.email
+                },
+                phoneNumError = if (prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
                     prev.phoneNumError
-                }else {
+                } else {
                     null
                 },
                 genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender }
@@ -210,18 +217,22 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                dateOfBirthError = if(dob != null && dob > today) {
+                dateOfBirthError = if (dob != null && dob > today) {
                     Res.string.date_of_birth_in_future.asUiText()
-                }else {
+                } else {
                     null
                 },
-                phoneNumError = if(uiState.value.nationalPhoneNumSet &&
+                phoneNumError = if (uiState.value.nationalPhoneNumSet &&
                     !phoneNumValidatorUseCase.isValid(person.phoneNumber ?: "")
                 ) {
                     Res.string.invalid.asUiText()
-                }else {
+                } else {
                     null
                 },
+                emailError = if (!validateEmailUseCase(person.email.toString())) {
+                    Res.string.invalid_email.asUiText()
+                } else null
+                ,
                 genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {
                     Res.string.required.asUiText()
                 }else {
@@ -231,7 +242,7 @@ class PersonEditViewModel(
         }
 
 
-        if(uiState.value.hasErrors)
+        if (uiState.value.hasErrors)
             return
 
         launchWithLoadingIndicator {

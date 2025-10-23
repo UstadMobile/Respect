@@ -47,7 +47,6 @@ import world.respect.shared.generated.resources.expand_teachers
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 
@@ -191,11 +190,11 @@ fun ClazzDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         leadingContent = {
                             RespectPersonAvatar(
-                                name = person?.fullName() ?: ""
+                                name = person?.givenName ?: ""
                             )
                         },
                         headlineContent = {
-                            Text(text = person?.fullName() ?: "")
+                            Text(text = person?.givenName ?: "")
                         },
                         supportingContent = {
                             Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
@@ -239,11 +238,11 @@ fun ClazzDetailScreen(
                             .fillMaxWidth(),
                         leadingContent = {
                             RespectPersonAvatar(
-                                name = person?.fullName() ?: ""
+                                name = person?.givenName ?: ""
                             )
                         },
                         headlineContent = {
-                            Text(text = person?.fullName() ?: "")
+                            Text(text = person?.givenName ?: "")
                         },
                         supportingContent = {
                             Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")

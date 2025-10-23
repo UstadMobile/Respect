@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.HorizontalDivider
@@ -50,56 +51,63 @@ fun AccountListScreen(
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxSize())
+      {
         uiState.selectedAccount?.also { activeAccount ->
-            AccountListItem(
-                account = activeAccount,
-                onClickAccount = null,
-                extras = {
-                    Row {
-                        OutlinedButton(
-                            onClick =  {onClickProfile()},
-                        ) {
-                            Text(stringResource(Res.string.profile))
-                        }
+            item {
+                AccountListItem(
+                    account = activeAccount,
+                    onClickAccount = null,
+                    extras = {
+                        Row {
+                            OutlinedButton(
+                                onClick =  {onClickProfile()},
+                            ) {
+                                Text(stringResource(Res.string.profile))
+                            }
 
-                        Spacer(Modifier.width(16.dp))
+                            Spacer(Modifier.width(16.dp))
 
-                        OutlinedButton(onClick = onClickLogout) {
-                            Text(stringResource(Res.string.logout))
+                            OutlinedButton(onClick = onClickLogout) {
+                                Text(stringResource(Res.string.logout))
+                            }
                         }
                     }
-                }
-            )
-        }
-
-        HorizontalDivider()
-
-        uiState.accounts.forEach { account ->
-            AccountListItem(
-                account = account,
-                onClickAccount = onClickAccount,
-            )
-        }
-
-        HorizontalDivider()
-
-        ListItem(
-            modifier = Modifier.clickable {
-                onClickAddAccount()
-            },
-            headlineContent = {
-                Text(stringResource(Res.string.add_account))
-            },
-            leadingContent = {
-                Icon(Icons.Default.Add, contentDescription = "")
+                )
             }
-        )
-
-        HorizontalDivider()
-
-        RespectLongVersionInfoItem()
+        }
+          item {
+              HorizontalDivider()
+          }
+        uiState.accounts.forEach { account ->
+            item {
+                AccountListItem(
+                    account = account,
+                    onClickAccount = onClickAccount,
+                )
+            }
+        }
+          item {
+              HorizontalDivider()
+          }
+          item {
+              ListItem(
+                  modifier = Modifier.clickable {
+                      onClickAddAccount()
+                  },
+                  headlineContent = {
+                      Text(stringResource(Res.string.add_account))
+                  },
+                  leadingContent = {
+                      Icon(Icons.Default.Add, contentDescription = "")
+                  }
+              )
+          }
+          item {
+              HorizontalDivider()
+          }
+          item {
+              RespectLongVersionInfoItem()
+          }
     }
 }

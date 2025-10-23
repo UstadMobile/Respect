@@ -66,6 +66,8 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -76,6 +78,7 @@ import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
@@ -782,6 +785,26 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
+
+        scoped<GetAuthenticatedPersonUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            GetAuthenticatedPersonUseCase(
+                authenticatedUserPrincipalId = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckPersonPermissionUseCase> {
+            CheckPersonPermissionUseCaseDbImpl(
+                getAuthenticatedPersonUseCase = get(),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

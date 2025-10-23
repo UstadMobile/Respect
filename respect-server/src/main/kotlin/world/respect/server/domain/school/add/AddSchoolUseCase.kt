@@ -8,6 +8,8 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
@@ -23,6 +25,9 @@ class AddSchoolUseCase(
     private val directoryDataSource: SchoolDirectoryDataSourceLocal,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal,
     private val encryptPasswordUseCase: EncryptPersonPasswordUseCase,
+    private val addDefaultGrantsUseCase: (SchoolDataSource) -> AddDefaultSchoolPermissionGrantsUseCase = {
+        AddDefaultSchoolPermissionGrantsUseCase(it)
+    }
 ): KoinComponent {
 
     @Serializable
@@ -61,7 +66,7 @@ class AddSchoolUseCase(
             val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
 
             val adminPerson = Person(
-                guid = "1",
+                guid = adminGuid,
                 username = request.adminUsername,
                 givenName = "Admin",
                 familyName = "Admin",
@@ -74,7 +79,8 @@ class AddSchoolUseCase(
                 )
             )
 
-            schoolDataSource.personDataSource.store(listOf(adminPerson))
+            //Use updateLocal to bypass permission check for adding first user
+            schoolDataSource.personDataSource.updateLocal(listOf(adminPerson))
             schoolDataSource.personPasswordDataSource.store(
                 listOf(
                     encryptPasswordUseCase(
@@ -85,6 +91,9 @@ class AddSchoolUseCase(
                     )
                 )
             )
+
+            //insert default SchoolPermissionGrants
+            addDefaultGrantsUseCase(schoolDataSource)
         }
     }
 

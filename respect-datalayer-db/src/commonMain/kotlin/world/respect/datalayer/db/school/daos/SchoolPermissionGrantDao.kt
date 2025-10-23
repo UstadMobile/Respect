@@ -60,4 +60,19 @@ interface SchoolPermissionGrantDao {
     """)
     suspend fun findByUidNums(uidNums: List<Long>): List<SchoolPermissionGrantEntity>
 
+    @Query("""
+        SELECT EXISTS(
+               SELECT SchoolPermissionGrantEntity.spgUidNum
+                 FROM SchoolPermissionGrantEntity
+                WHERE SchoolPermissionGrantEntity.spgToRole IN (
+                      SELECT PersonRoleEntity.prRoleEnum
+                        FROM PersonRoleEntity
+                       WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum) 
+                  AND (SchoolPermissionGrantEntity.spgPermissions & :permissionFlag) = :permissionFlag)
+    """)
+    suspend fun personHasPermission(
+        authenticatedPersonUidNum: Long,
+        permissionFlag: Long
+    ): Boolean
+
 }

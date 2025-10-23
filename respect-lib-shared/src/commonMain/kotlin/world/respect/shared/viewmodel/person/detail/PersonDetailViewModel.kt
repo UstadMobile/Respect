@@ -16,7 +16,6 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.generated.resources.Res
@@ -30,6 +29,9 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.ext.primaryRole
+import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
@@ -54,6 +56,8 @@ class PersonDetailViewModel(
 
     private val _uiState = MutableStateFlow(PersonDetailUiState())
 
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase by inject()
+
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -76,11 +80,13 @@ class PersonDetailViewModel(
                 val personVal = person.dataOrNull()
                 val hasAccountPermission = activeAccount?.person?.isAdmin() == true
                         || activeAccount?.person?.guid == person.dataOrNull()?.guid
-                val personRole = personVal?.roles?.firstOrNull()?.roleEnum
 
-                val canEdit = hasAccountPermission ||
-                        (personRole in listOf(PersonRoleEnum.STUDENT, PersonRoleEnum.PARENT)
-                                && activeAccount?.person?.isAdminOrTeacher() == true)
+                val canEdit = personVal?.let {
+                    checkPersonPermissionUseCase(
+                        subject = it,
+                        permission = it.primaryRole().writePermissionFlag,
+                    )
+                } ?: false
 
                 _appUiState.update { prev ->
                     prev.copy(

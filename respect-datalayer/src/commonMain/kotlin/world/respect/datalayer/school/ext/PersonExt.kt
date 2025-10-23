@@ -11,3 +11,7 @@ fun Person?.assertPersonHasRole(
         throw ForbiddenException("Person does not have ${role.value} role")
     }
 }
+
+fun Person.primaryRole(): PersonRoleEnum {
+    return roles.first { it.isPrimaryRole }.roleEnum
+}

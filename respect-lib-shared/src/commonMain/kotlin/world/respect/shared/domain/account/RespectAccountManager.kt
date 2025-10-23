@@ -20,6 +20,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -177,6 +178,11 @@ class RespectAccountManager(
         schoolDataSource.personDataSource.findByGuid(
             DataLoadParams(), authResponse.person.guid
         )
+
+        //Load school permission grants (rules)
+        schoolDataSource.schoolPermissionGrantDataSource.list(
+            DataLoadParams(), SchoolPermissionGrantDataSource.GetListParams()
+        ).dataOrNull() ?: throw IllegalStateException("Could not load permission grants")
 
         //now we can get the datalayer by creating a RespectAccount scope
         val mkDirUseCase: MakeSchoolPathDirUseCase? = schoolScope.getOrNull()

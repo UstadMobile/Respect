@@ -14,6 +14,7 @@ import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -24,6 +25,7 @@ import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 
 /**
  * SchoolDataSource implementation based on a local (Room) database
@@ -46,6 +48,14 @@ class SchoolDataSourceDb(
         )
     }
 
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase by lazy {
+        CheckPersonPermissionUseCaseDbImpl(
+            getAuthenticatedPersonUseCase = getAuthenticatedPersonUseCase,
+            schoolDb = schoolDb,
+            uidNumberMapper = uidNumberMapper
+        )
+    }
+
     override val schoolAppDataSource: SchoolAppDataSourceLocal by lazy{
         SchoolAppDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
@@ -59,7 +69,7 @@ class SchoolDataSourceDb(
     }
 
     override val personDataSource: PersonDataSourceLocal by lazy {
-        PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+        PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, checkPersonPermissionUseCase)
     }
 
     override val personPasskeyDataSource: PersonPasskeyDataSourceLocal by lazy {

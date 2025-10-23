@@ -15,14 +15,14 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
-import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.exceptions.UnauthorizedException
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.ext.primaryRole
+import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
@@ -35,6 +35,7 @@ class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
 ): PersonDataSourceLocal {
 
 
@@ -64,39 +65,32 @@ class PersonDataSourceDb(
         if(list.isEmpty())
             return
 
-        val authenticatedPerson = findByGuid(
-            DataLoadParams(), authenticatedUser.guid
-        ).dataOrNull() ?: throw UnauthorizedException()
-
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                list.forEach { person ->
+                list.forEach { personToStore ->
                     val personInDb = schoolDb.getPersonEntityDao().findByGuidNum(
-                        uidNumberMapper(person.guid)
+                        uidNumberMapper(personToStore.guid)
                     )?.toPersonEntities()?.toModel()
 
-                    val authenticatedUserCanEdit = when {
-                        //User can update their own information
-                        person.guid == authenticatedUser.guid -> true
-
-                        //System admin can edit anything
-                        authenticatedPerson.isAdmin() -> true
-
-                        //Teacher can edit student and parent profiles
-                        authenticatedPerson.roles.any { it.roleEnum == PersonRoleEnum.TEACHER } -> {
-                            person.roles.any {
-                                it.roleEnum == PersonRoleEnum.STUDENT || it.roleEnum == PersonRoleEnum.PARENT
-                            }
-                        }
-
-                        else -> false
+                    //Check that if person is in db, role is not being changed.
+                    if(personInDb != null &&
+                        (personInDb.primaryRole() != personToStore.primaryRole() ||
+                                personToStore.roles.size != 1)
+                    ) {
+                        throw UnauthorizedException("Role cannot be changed")
                     }
 
-                    if(!authenticatedUserCanEdit)
+                    if(
+                        !checkPersonPermissionUseCase(
+                            subject = personToStore,
+                            permission = personToStore.primaryRole().writePermissionFlag
+                        )
+                     ) {
                         throw ForbiddenException()
+                    }
 
                     //Check that roles have not been change
-                    doUpsertPerson(person)
+                    doUpsertPerson(personToStore)
                 }
             }
         }

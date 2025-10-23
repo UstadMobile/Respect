@@ -45,4 +45,10 @@ interface SchoolPermissionGrantDataSource: WritableDataSource<SchoolPermissionGr
     )
 
 
+    companion object {
+
+        const val ENDPOINT_NAME = "schoolpermissiongrant"
+
+    }
+
 }

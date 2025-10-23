@@ -20,11 +20,11 @@ import world.respect.datalayer.shared.paging.map
 class SchoolPermissionGrantDataSourceDb(
     private val schoolPermissionGrantDao: SchoolPermissionGrantDao,
     private val uidNumberMapper: UidNumberMapper,
-    private val authenticatedPersonDataSource: GetAuthenticatedPersonUseCase,
+    private val getAuthenticatedPersonUseCase: GetAuthenticatedPersonUseCase,
 ) : SchoolPermissionGrantDataSourceLocal {
 
     override suspend fun store(list: List<SchoolPermissionGrant>) {
-        authenticatedPersonDataSource().assertPersonHasRole(PersonRoleEnum.SYSTEM_ADMINISTRATOR)
+        getAuthenticatedPersonUseCase().assertPersonHasRole(PersonRoleEnum.SYSTEM_ADMINISTRATOR)
         schoolPermissionGrantDao.upsert(list.map { it.toEntity(uidNumberMapper) })
     }
 

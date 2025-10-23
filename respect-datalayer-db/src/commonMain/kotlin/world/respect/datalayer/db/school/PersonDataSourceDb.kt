@@ -29,6 +29,7 @@ import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 class PersonDataSourceDb(
@@ -42,7 +43,7 @@ class PersonDataSourceDb(
     private suspend fun doUpsertPerson(
         person: Person
     ) {
-        val entities = person.toEntities(uidNumberMapper)
+        val entities = person.copy(stored = Clock.System.now()).toEntities(uidNumberMapper)
 
         schoolDb.getPersonEntityDao().insert(entities.personEntity)
 
@@ -65,6 +66,7 @@ class PersonDataSourceDb(
         if(list.isEmpty())
             return
 
+        val now = Clock.System.now()
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach { personToStore ->

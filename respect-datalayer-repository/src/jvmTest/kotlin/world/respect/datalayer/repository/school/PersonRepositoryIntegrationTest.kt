@@ -17,6 +17,8 @@ import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.server.routes.school.respect.PersonRoute
 import kotlin.test.Test
@@ -41,7 +43,9 @@ class PersonRepositoryIntegrationTest {
         username = "test",
         givenName = "test",
         familyName = "test",
-        roles = emptyList(),
+        roles = listOf(
+            PersonRole(true, PersonRoleEnum.SITE_ADMINISTRATOR)
+        ),
         gender = PersonGenderEnum.FEMALE,
     )
 
@@ -67,20 +71,14 @@ class PersonRepositoryIntegrationTest {
                 val validatedData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams(), null)
 
-                assertEquals(
-                    defaultTestPerson.guid,
-                    initData.dataOrNull()!!.first().guid
-                )
+                assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
 
                 assertEquals(
                     NoDataLoadedState.Reason.NOT_MODIFIED,
                     (validatedData.remoteState as? NoDataLoadedState)?.reason
                 )
 
-                assertEquals(
-                    defaultTestPerson.guid,
-                    validatedData.dataOrNull()!!.first().guid
-                )
+                assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
             }
         }
     }
@@ -120,16 +118,13 @@ class PersonRepositoryIntegrationTest {
                 val newData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams(), null)
 
-                assertEquals(
-                    defaultTestPerson.guid,
-                    initData.dataOrNull()!!.first().guid
-                )
+                assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
 
                 assertTrue(newData.remoteState is DataReadyState)
 
                 assertEquals(
                     updatedName,
-                    newData.dataOrNull()!!.first().givenName
+                    newData.dataOrNull()!!.first { it.guid == defaultTestPerson.guid}.givenName
                 )
             }
         }
@@ -258,9 +253,9 @@ class PersonRepositoryIntegrationTest {
                     timeout = 10.seconds
                 ) {
                     val localData = awaitItem()
-                    assertEquals(1, localData.dataOrNull()?.size)
+                    assertEquals(2, localData.dataOrNull()?.size)
                     assertEquals(defaultTestPerson.givenName,
-                        localData.dataOrNull()?.first()?.givenName)
+                        localData.dataOrNull()?.first { it.guid == defaultTestPerson.guid}?.givenName)
                 }
             }
         }

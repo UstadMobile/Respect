@@ -31,6 +31,7 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -38,6 +39,10 @@ import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
@@ -76,7 +81,8 @@ class ClientServerDataSourceTestBuilder internal constructor(
     },
     numClients: Int = 1,
     val stringHasher: XXStringHasher = XXStringHasherCommonJvm(),
-    val authenticatedUser: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("4242")
+    val adminUserId: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("4242"),
+    val useDefaultPermissions: Boolean = true,
 ) {
 
     private lateinit var serverRouting: Routing.() -> Unit
@@ -106,10 +112,27 @@ class ClientServerDataSourceTestBuilder internal constructor(
     private val serverDir = File(baseDir, "server").also { it.mkdirs() }
 
     val serverSchoolSourceAndDb = newLocalSchoolDatabase(
-        serverDir, stringHasher, authenticatedUser
+        serverDir, stringHasher, adminUserId
     )
 
-    val serverSchoolDataSource = serverSchoolSourceAndDb.second
+    val serverAdminPerson = Person(
+        guid = adminUserId.guid,
+        givenName = "Admin",
+        familyName = "User",
+        gender = PersonGenderEnum.UNSPECIFIED,
+        roles = listOf(
+            PersonRole(true, PersonRoleEnum.SYSTEM_ADMINISTRATOR)
+        ),
+    )
+
+    val serverSchoolDataSource = serverSchoolSourceAndDb.second.also {
+        runBlocking {
+            it.personDataSource.updateLocal(listOf(serverAdminPerson))
+            if(useDefaultPermissions) {
+                AddDefaultSchoolPermissionGrantsUseCase(it).invoke()
+            }
+        }
+    }
 
     val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
 
@@ -165,7 +188,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         )
 
         val (schoolDb, schoolDataSourceLocal) = newLocalSchoolDatabase(
-            clientDir, stringHasher, authenticatedUser
+            clientDir, stringHasher, adminUserId
         )
 
 
@@ -201,7 +224,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
         val remoteWriteQueue = RemoteWriteQueueDbImpl(
             schoolDb = schoolDb,
-            account = authenticatedUser,
+            account = adminUserId,
             enqueueDrainRemoteWriteQueueUseCase = enqueueRemoteWorkUseCase,
         )
 
@@ -244,10 +267,12 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
 suspend fun clientServerDatasourceTest(
     baseDir: File,
+    useDefaultPermissions: Boolean = true,
     block: suspend ClientServerDataSourceTestBuilder.() -> Unit,
 ) {
     val testBuilder = ClientServerDataSourceTestBuilder(
         baseDir = baseDir,
+        useDefaultPermissions = useDefaultPermissions,
     )
 
     try {

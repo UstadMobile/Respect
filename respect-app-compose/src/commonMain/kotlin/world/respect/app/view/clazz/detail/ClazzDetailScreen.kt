@@ -50,7 +50,6 @@ import world.respect.shared.generated.resources.expand_teachers
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 
@@ -191,13 +190,13 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = person?.fullName() ?: ""
+                            name = person?.givenName ?: ""
                         )
                     },
                     headlineContent = {
                         Text(
                             text = "${
-                                person?.fullName().orEmpty()
+                                person?.givenName.orEmpty()
                             } (${stringResource(Res.string.teacher)})"
                         )
                     },
@@ -243,13 +242,13 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = person?.fullName() ?: ""
+                            name = person?.givenName ?: ""
                         )
                     },
                     headlineContent = {
                         Text(
                             text = "${
-                                person?.fullName().orEmpty()
+                                person?.givenName.orEmpty()
                             } (${stringResource(Res.string.student)})"
                         )
                     },
@@ -346,11 +345,11 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = teacher?.fullName() ?: ""
+                            name = teacher?.givenName ?: ""
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher?.fullName() ?: "")
+                        Text(text = teacher?.givenName ?: "")
                     }
                 )
             }
@@ -422,13 +421,13 @@ fun ClazzDetailScreen(
 
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = student?.fullName() ?: ""
+                            name = student?.givenName ?: ""
                         )
                     },
 
                     headlineContent = {
                         Text(
-                            text = student?.fullName() ?: ""
+                            text = student?.givenName ?: ""
                         )
                     }
                 )

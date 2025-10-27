@@ -93,13 +93,10 @@ fun AppLauncherScreen(
                     painter = painterResource(Res.drawable.empty),
                     contentDescription = stringResource(resource = Res.string.empty_list),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(150.dp)
+                    modifier = Modifier.size(200.dp)
                 )
                 Spacer(
                     modifier = Modifier.height(16.dp)
-                )
-                Spacer(
-                    modifier = Modifier.height(8.dp)
                 )
                 Text(
                     text = uiState.emptyListDescription?.let {

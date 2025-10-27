@@ -1,5 +1,6 @@
 package world.respect.app.view.apps.launcher
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CrueltyFree
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,16 +37,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.emptyFlow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.respectRememberPager
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
-import world.respect.shared.generated.resources.empty_list_description
 import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.remove
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -87,22 +89,22 @@ fun AppLauncherScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Filled.CrueltyFree,
-                    contentDescription = null,
-                    modifier = Modifier.size(100.dp)
+                Image(
+                    painter = painterResource(Res.drawable.empty),
+                    contentDescription = stringResource(resource = Res.string.empty_list),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(150.dp)
                 )
                 Spacer(
                     modifier = Modifier.height(16.dp)
-                )
-                Text(
-                    text = stringResource(resource = Res.string.empty_list),
                 )
                 Spacer(
                     modifier = Modifier.height(8.dp)
                 )
                 Text(
-                    text = stringResource(resource = Res.string.empty_list_description),
+                    text = uiState.emptyListDescription?.let {
+                        uiTextStringResource(it)
+                    } ?: "",
                     textAlign = TextAlign.Center
                 )
             }

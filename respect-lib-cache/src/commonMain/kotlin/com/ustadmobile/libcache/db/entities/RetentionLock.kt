@@ -11,6 +11,11 @@ import androidx.room.PrimaryKey
  * This ensures that a particular item will be available in the cache on demand (e.g. if a user
  * specifically requests a given item, the cache entry will be kept indefinitely, even when it
  * otherwise be evicted based on last access time).
+ *
+ * @property lockKey The key as per CacheEntry.key
+ * @property A remark that can be added at the time of creating the lock e.g. a note on why the entry
+ *           is to be retained
+ * @property lockPublicationUid if this lock is part of a publication, the publication uid
  */
 @Entity(
     indices = [Index("lockKey", name = "idx_lockKey")]
@@ -19,14 +24,10 @@ data class RetentionLock(
     @PrimaryKey(autoGenerate = true)
     val lockId: Long = 0,
 
-    /**
-     * The key as per CacheEntry.key
-     */
     val lockKey: String = "",
 
-    /**
-     * A remark that can be added at the time of creating the lock e.g. a note on why the entry
-     * is to be retained
-     */
     val lockRemark: String = "",
+
+    val lockPublicationUid: Long = 0,
+
 )

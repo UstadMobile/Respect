@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.datetime.TimeZone
@@ -21,6 +22,8 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -29,6 +32,7 @@ import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
 import world.respect.shared.generated.resources.invalid
+import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -43,6 +47,8 @@ import kotlin.time.Clock
 
 data class PersonEditUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
+    val roleOptions: List<PersonRoleEnum> = emptyList(),
+    val showRoleDropdown: Boolean = false,
     val dateOfBirthError: UiText? = null,
 
     /**
@@ -55,12 +61,13 @@ data class PersonEditUiState(
      */
     val nationalPhoneNumSet: Boolean = false,
     val phoneNumError: UiText? = null,
+    val genderError: UiText? = null,
 ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
     val hasErrors: Boolean
-        get() = dateOfBirthError != null || phoneNumError != null
+        get() = dateOfBirthError != null || phoneNumError != null || genderError != null
 }
 
 class PersonEditViewModel(
@@ -105,6 +112,32 @@ class PersonEditViewModel(
         }
 
         launchWithLoadingIndicator {
+            val currentPersonRole = accountManager.selectedAccountAndPersonFlow.first()
+                ?.person?.roles?.first()?.roleEnum
+
+            _uiState.update { prev ->
+                prev.copy(
+                    roleOptions = when (currentPersonRole) {
+                        PersonRoleEnum.TEACHER -> {
+                            listOf(
+                                PersonRoleEnum.STUDENT,
+                                PersonRoleEnum.PARENT,
+                                PersonRoleEnum.TEACHER,
+                            )
+                        }
+                        PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> {
+                            listOf(
+                                PersonRoleEnum.STUDENT,
+                                PersonRoleEnum.PARENT,
+                                PersonRoleEnum.TEACHER,
+                                PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                            )
+                        }
+                        else -> emptyList()
+                    }
+                )
+            }
+
             if (route.guid != null) {
                 loadEntity(
                     json = json,
@@ -124,10 +157,16 @@ class PersonEditViewModel(
                                 guid = guid,
                                 givenName = "",
                                 familyName = "",
-                                roles = emptyList(),
+                                roles = listOf(
+                                    PersonRole(
+                                        isPrimaryRole = true,
+                                        roleEnum = PersonRoleEnum.STUDENT,
+                                    )
+                                ),
                                 gender = PersonGenderEnum.UNSPECIFIED
                             )
-                        )
+                        ),
+                        showRoleDropdown = true,
                     )
                 }
             }
@@ -144,7 +183,8 @@ class PersonEditViewModel(
                     prev.phoneNumError
                 }else {
                     null
-                }
+                },
+                genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender }
             )
         }.person.dataOrNull() ?: return
 
@@ -179,6 +219,11 @@ class PersonEditViewModel(
                     !phoneNumValidatorUseCase.isValid(person.phoneNumber ?: "")
                 ) {
                     Res.string.invalid.asUiText()
+                }else {
+                    null
+                },
+                genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {
+                    Res.string.required.asUiText()
                 }else {
                     null
                 }

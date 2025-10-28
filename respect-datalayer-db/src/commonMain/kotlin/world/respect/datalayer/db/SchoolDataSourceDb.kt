@@ -3,6 +3,7 @@ package world.respect.datalayer.db
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.IndicatorDataSourceDb
@@ -10,6 +11,8 @@ import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
+import world.respect.datalayer.db.school.SchoolAppDataSourceDb
+import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSourceLocal
@@ -17,6 +20,7 @@ import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
+import world.respect.datalayer.school.SchoolAppDataSourceLocal
 
 /**
  * SchoolDataSource implementation based on a local (Room) database
@@ -32,6 +36,10 @@ class SchoolDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : SchoolDataSourceLocal {
+
+    override val schoolAppDataSource: SchoolAppDataSourceLocal by lazy{
+        SchoolAppDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+    }
 
     override val personDataSource: PersonDataSourceLocal by lazy {
         PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
@@ -59,5 +67,9 @@ class SchoolDataSourceDb(
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal by lazy {
         EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+    }
+
+    override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
+        AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 }

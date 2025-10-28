@@ -2,7 +2,7 @@ package world.respect.datalayer.oneroster.model
 
 import com.eygraber.uri.Uri
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.shared.serialization.UriStringSerializer
+import world.respect.lib.serializers.UriStringSerializer
 
 /**
  * As per OneRoster spec: 6.1.21

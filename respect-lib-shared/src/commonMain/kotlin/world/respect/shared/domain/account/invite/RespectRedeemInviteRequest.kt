@@ -31,7 +31,7 @@ data class RespectRedeemInviteRequest(
     data class PersonInfo(
        val name: String = "",
        val gender: PersonGenderEnum = PersonGenderEnum.UNSPECIFIED,
-       val dateOfBirth: LocalDate = LocalDate(1900, 1, 1),
+       val dateOfBirth: LocalDate = DATE_OF_BIRTH_EPOCH,
     )
 
     /**
@@ -44,5 +44,11 @@ data class RespectRedeemInviteRequest(
         val username: String,
         val credential: RespectCredential,
     )
+
+    companion object {
+
+        val DATE_OF_BIRTH_EPOCH = LocalDate(1900, 1, 1)
+
+    }
 
 }

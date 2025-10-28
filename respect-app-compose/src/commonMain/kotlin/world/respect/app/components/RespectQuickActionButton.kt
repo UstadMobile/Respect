@@ -17,6 +17,7 @@ fun RespectQuickActionButton(
     labelText: String,
     modifier: Modifier = Modifier,
     iconContent: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     val interactionSource =  remember { MutableInteractionSource() }
@@ -32,6 +33,7 @@ fun RespectQuickActionButton(
             FilledTonalIconButton(
                 onClick = onClick,
                 interactionSource = interactionSource,
+                enabled = enabled,
             ) {
                 iconContent?.invoke()
             }
@@ -50,6 +52,7 @@ fun RespectQuickActionButton(
 fun RespectQuickActionButton(
     imageVector: ImageVector? = null,
     labelText: String,
+    enabled: Boolean = true,
     onClick: (() -> Unit) = {  },
 ){
     RespectQuickActionButton(
@@ -59,6 +62,7 @@ fun RespectQuickActionButton(
             }
         },
         labelText = labelText,
-        onClick = onClick
+        onClick = onClick,
+        enabled = enabled,
     )
 }

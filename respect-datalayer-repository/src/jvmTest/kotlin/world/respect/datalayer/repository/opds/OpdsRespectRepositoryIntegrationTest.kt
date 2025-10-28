@@ -29,7 +29,7 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.opds.OpdsDataSourceDb
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
-import world.respect.datalayer.opds.model.LangMapStringValue
+import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.libutil.findFreePort
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm

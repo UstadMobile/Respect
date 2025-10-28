@@ -1,13 +1,10 @@
 package world.respect.app.view.manageuser.termsandcondition
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.ktor.http.Url
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.BasicWebView
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.shared.generated.resources.Res
@@ -34,7 +33,7 @@ fun TermsAndConditionScreen(viewModel: TermsAndConditionViewModel) {
 
 @Composable
 fun TermsAndConditionScreen(
-    uiState: TermsAndConditionUiState,
+    @Suppress("unused") uiState: TermsAndConditionUiState,
     onAcceptClicked: () -> Unit
 ) {
 
@@ -43,13 +42,10 @@ fun TermsAndConditionScreen(
             .fillMaxSize()
             .defaultScreenPadding()
     ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Text(text = uiState.termsAndConditionText)
-        }
+        BasicWebView(
+            url = Url("https://www.ustadmobile.com/policies/ustad.html"),
+            modifier = Modifier.weight(1f)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

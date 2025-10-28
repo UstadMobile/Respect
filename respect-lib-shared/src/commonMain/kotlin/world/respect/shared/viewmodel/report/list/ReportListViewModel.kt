@@ -14,6 +14,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
@@ -23,7 +24,6 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.report
 import world.respect.shared.generated.resources.reports

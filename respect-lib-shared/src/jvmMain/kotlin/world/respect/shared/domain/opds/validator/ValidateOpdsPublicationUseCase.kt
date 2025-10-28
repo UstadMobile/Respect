@@ -3,9 +3,9 @@ package world.respect.shared.domain.opds.validator
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import org.jsoup.Jsoup
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
-import world.respect.datalayer.opds.model.toStringMap
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.toStringMap
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.domain.validator.HttpLinkHeader
 import world.respect.shared.domain.validator.ValidateHttpResponseForUrlUseCase

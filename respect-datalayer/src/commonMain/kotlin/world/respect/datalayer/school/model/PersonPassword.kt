@@ -2,7 +2,7 @@ package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.shared.ModelWithTimes
-import world.respect.datalayer.shared.serialization.InstantAsISO8601
+import world.respect.lib.serializers.InstantAsISO8601
 
 @Serializable
 data class PersonPassword(

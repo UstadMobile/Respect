@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.manageuser.getstarted
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,6 +15,7 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
+import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
@@ -43,13 +45,15 @@ class GetStartedViewModel(
     val uiState = _uiState.asStateFlow()
     private val debouncer = LaunchDebouncer(viewModelScope)
 
+    private val route: GetStartedScreen = savedStateHandle.toRoute()
+
     init {
         _appUiState.update { prev ->
             prev.copy(
                 title = Res.string.lets_get_started.asUiText(),
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
-                showBackButton = false,
+                showBackButton = route.canGoBack,
             )
         }
 

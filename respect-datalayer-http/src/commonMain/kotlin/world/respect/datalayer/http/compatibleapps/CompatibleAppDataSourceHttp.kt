@@ -18,14 +18,14 @@ import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.libutil.ext.resolve
 
 
 class CompatibleAppDataSourceHttp(
     private val httpClient: HttpClient,
     defaultCompatibleAppListUrl: String,
-    private val validationValidationHelper: NetworkDataSourceValidationHelper? = null,
+    private val validationValidationHelper: BaseDataSourceValidationHelper? = null,
 ): CompatibleAppsDataSource {
 
     private val defaultCompatibleAppListUrlObj = Url(defaultCompatibleAppListUrl)

@@ -2,6 +2,9 @@ package world.respect.credentials.passkey.request
 
 import io.ktor.http.Url
 import io.ktor.util.encodeBase64
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.model.AuthenticatorSelectionCriteria
 import world.respect.credentials.passkey.model.PublicKeyCredentialCreationOptionsJSON
 import world.respect.credentials.passkey.model.PublicKeyCredentialParameters
@@ -19,34 +22,39 @@ import world.respect.libutil.ext.randomString
  * The passkey user.id will be a unique 64bit long.
  *
  * The userHandle (PublicKeyCredentialUserEntityJSON.id) is encoded to include the person passkey
- * UID and Learning Space URL - see EncodeUserHandleUseCase
+ * UID and School URL - see EncodeUserHandleUseCase
  */
 class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
-    private val rpId:Url,
-    private val encodeUserHandleUseCase : EncodeUserHandleUseCase,
+    private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
+    private val appName: StringResource,
+    private val schoolUrl: Url,
 ) {
 
-    operator fun invoke(
-        username: String,
-        appName: String
+    data class Request(
+        val username: String,
+        val rpId: String,
+        val personUidNum: Long,
+    )
+
+    suspend operator fun invoke(
+        request: Request,
     ): PublicKeyCredentialCreationOptionsJSON {
         val challenge = randomString(16) //TODO note: this should really take place on the server side
 
-        //will change this with actual uid of person who is going to
-        // signup when doing implementation with server
-        val personPasskeyUid = 2745456645645645654
-        val encodeUserHandle = encodeUserHandleUseCase(personPasskeyUid)
+        val encodedUserHandle = encodeUserHandleUseCase(
+            RespectUserHandle(request.personUidNum, schoolUrl)
+        )
 
         return PublicKeyCredentialCreationOptionsJSON(
             rp = PublicKeyCredentialRpEntity(
-                id = rpId.host,
-                name = appName,
+                id = request.rpId,
+                name = getString(appName),
                 icon = null,
             ),
             user = PublicKeyCredentialUserEntityJSON(
-                id = encodeUserHandle,
-                name = username,
-                displayName = username,
+                id = encodedUserHandle,
+                name = request.username,
+                displayName = request.username,
             ),
             //Important: timeout may be optional as per the spec, but if omitted, Google Password
             //Manager won't work as expected

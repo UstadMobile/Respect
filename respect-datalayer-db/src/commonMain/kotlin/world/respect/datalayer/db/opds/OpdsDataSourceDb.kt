@@ -3,6 +3,7 @@ package world.respect.datalayer.db.opds
 import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,11 +19,11 @@ import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.opds.OpdsDataSourceLocal
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.OpdsPublication
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.XXStringHasher
 
@@ -35,17 +36,23 @@ class OpdsDataSourceDb(
     ),
 ): OpdsDataSourceLocal {
 
-    override val feedNetworkValidationHelper = object: NetworkDataSourceValidationHelper {
-        override suspend fun getValidationInfo(url: Url): NetworkValidationInfo? {
-            return respectDatabase.getOpdsFeedEntityDao().getValidationInfo(
+    override val feedNetworkValidationHelper = object: BaseDataSourceValidationHelper {
+        override suspend fun getValidationInfo(
+            url: Url,
+            requestHeaders: IHttpHeaders,
+        ): NetworkValidationInfo? {
+            return respectDatabase.getOpdsFeedEntityDao().getLastModifiedAndETag(
                 xxStringHasher.hash(url.toString())
             )?.asNetworkValidationInfo()
         }
     }
 
-    override val publicationNetworkValidationHelper = object: NetworkDataSourceValidationHelper {
-        override suspend fun getValidationInfo(url: Url): NetworkValidationInfo? {
-            return respectDatabase.getOpdsPublicationEntityDao().getValidationInfo(
+    override val publicationNetworkValidationHelper = object: BaseDataSourceValidationHelper {
+        override suspend fun getValidationInfo(
+            url: Url,
+            requestHeaders: IHttpHeaders,
+        ): NetworkValidationInfo? {
+            return respectDatabase.getOpdsPublicationEntityDao().getLastModifiedAndETag(
                 xxStringHasher.hash(url.toString())
             )?.asNetworkValidationInfo()
         }

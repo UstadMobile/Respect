@@ -7,20 +7,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_code
 import world.respect.shared.generated.resources.invalid_url
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 class OtherOptionsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getInviteInfoUseCase: GetInviteInfoUseCase
+    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OtherOptionsUiState())
@@ -56,18 +58,32 @@ class OtherOptionsViewModel(
              return
          }
 
-         try {
-             _navCommandFlow.tryEmit(
-                 NavCommand.Navigate(
-                     LoginScreen.create(Url(link))
+         launchWithLoadingIndicator {
+             try {
+                 val schoolUrl = Url(link)
+                 val schoolEntry = respectAppDataSource.schoolDirectoryEntryDataSource
+                     .getSchoolDirectoryEntryByUrl(schoolUrl).dataOrNull()
+
+                 if(schoolEntry == null)
+                     throw IllegalStateException()
+
+                 _navCommandFlow.tryEmit(
+                     NavCommand.Navigate(
+                         LoginScreen.create(Url(link))
+                     )
                  )
-             )
-         }catch(e: Throwable){
-             _uiState.update {
-                 it.copy(errorMessage = StringResourceUiText(Res.string.invalid_url))
+             }catch(_: Throwable){
+                 _uiState.update {
+                     it.copy(errorMessage = StringResourceUiText(Res.string.invalid_url))
+                 }
              }
          }
     }
+
+    fun onClickManageSchoolDirectories() {
+        _navCommandFlow.tryEmit(NavCommand.Navigate(SchoolDirectoryList))
+    }
+
 }
 
 data class OtherOptionsUiState(

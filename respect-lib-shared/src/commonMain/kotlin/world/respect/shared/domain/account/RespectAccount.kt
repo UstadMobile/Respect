@@ -1,23 +1,30 @@
 package world.respect.shared.domain.account
 
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.respect.model.RespectRealm
+import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.shared.util.di.RespectAccountScopeId
 
 /**
- * Placeholder representing a user account (likely linked to an upstream xAPI and OneRoster server)
+ * Represents a single Respect account
  *
  * The RESPECT Account Manager can provide a Koin Scope for a given account.
+ * @property userGuid the guid for this user as per Person.guid . When using OneRoster, this is the
+ *           sourcedId property.
  */
 @Serializable
 data class RespectAccount(
-    val userSourcedId: String,
-    val realm: RespectRealm,
+    val userGuid: String,
+    val school: SchoolDirectoryEntry,
 ) {
 
     /**
      * The ScopeId to use for dependency injection - always the userSourcedId@realmUrl
      */
     val scopeId: String
-        get() = "$userSourcedId@${realm.self}"
+        get() = RespectAccountScopeId(
+            school.self,
+            AuthenticatedUserPrincipalId(userGuid),
+        ).scopeId
 
 }

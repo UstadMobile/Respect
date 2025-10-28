@@ -32,6 +32,10 @@ kotlin {
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
             implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.paging.common)
+            implementation(libs.androidx.room.paging)
+            implementation(libs.napier)
+
         }
 
         androidMain.dependencies {
@@ -43,7 +47,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-
+            implementation(libs.androidx.sqlite.bundled)
         }
 
         val commonTest by getting {

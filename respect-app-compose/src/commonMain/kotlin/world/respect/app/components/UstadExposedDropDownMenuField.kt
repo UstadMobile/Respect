@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 @Composable
 fun <T> RespectExposedDropDownMenuField(
     value: T?,
-    label: String,
     options: List<T>,
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
+    label: (@Composable () -> Unit)? = null,
     isError: Boolean = false,
     itemText: @Composable (T) -> String,
     enabled: Boolean = true,
@@ -42,7 +42,7 @@ fun <T> RespectExposedDropDownMenuField(
     ) {
 
         OutlinedTextField(
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, enabled).fillMaxWidth(),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled).fillMaxWidth(),
             readOnly = true,
             enabled = enabled,
             value = if(value != null) {
@@ -50,9 +50,7 @@ fun <T> RespectExposedDropDownMenuField(
             }else {
                 ""
             },
-            label = {
-                Text(label)
-            },
+            label = label,
             onValueChange = { },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)

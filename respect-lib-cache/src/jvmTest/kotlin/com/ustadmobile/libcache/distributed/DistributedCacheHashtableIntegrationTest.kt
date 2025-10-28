@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.distributed.http.DistributedCacheHttpEndpoint
+import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
@@ -121,6 +122,9 @@ class DistributedCacheHashtableIntegrationTest {
             db = cacheDb1,
             xxStringHasher = XXStringHasherCommonJvm(),
             databaseCommitInterval = 100,
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb1, XXStringHasherCommonJvm()
+            ),
         )
 
         val cache2 = UstadCacheImpl(
@@ -128,6 +132,9 @@ class DistributedCacheHashtableIntegrationTest {
             db = cacheDb2,
             xxStringHasher = XXStringHasherCommonJvm(),
             databaseCommitInterval = 100,
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                cacheDb2, XXStringHasherCommonJvm()
+            ),
         )
 
         val httpServer1 = TestHttpServer(DistributedCacheHttpEndpoint(cache1)).also {
@@ -299,7 +306,7 @@ class DistributedCacheHashtableIntegrationTest {
                 try {
                     val okHttpClient = OkHttpClient.Builder().build()
                     val neighborResponse = okHttpClient.newCall(neighborRequest.asOkHttpRequest()).execute()
-                    val bytesReceived = neighborResponse.body!!.bytes()
+                    val bytesReceived = neighborResponse.body.bytes()
                     assertContentEquals(tmpTestFile.readBytes(), bytesReceived,
                         "Bytes received through peer should match original file")
                     println("Fucking done, what the fuck, it's fuckin done, fuck it")

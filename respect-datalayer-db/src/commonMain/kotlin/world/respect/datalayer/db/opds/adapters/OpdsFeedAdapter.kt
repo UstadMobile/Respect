@@ -12,8 +12,8 @@ import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_LINKS
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_NAVIGATION
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.XXStringHasher
 

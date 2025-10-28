@@ -44,3 +44,26 @@
 }
 
 # End XXHash rules
+
+
+## Napier bug as per https://github.com/AAkira/Napier/issues/132
+-keep class io.github.aakira.napier.** {
+  *;
+}
+## End Napier rule
+
+# Begin ACRA Rules: ACRA does not cooperate with R8 and has no significant effect on APK size
+#
+#-keepclassmembers class org.acra.config.DefaultRetryPolicy {
+#    public <init>(...);
+#}
+#
+#-keepclassmembers class org.acra.attachment.DefaultAttachmentProvider {
+#    public <init>(...);
+#}
+
+-keep class org.acra.** { *; }
+
+-keep class world.respect.app.BuildConfig
+
+# End ACRA Rules.

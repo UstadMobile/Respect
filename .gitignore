@@ -17,3 +17,7 @@ captures
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+acra.properties
+respect-lib-shared/src/commonMain/composeResources/files/buildinfo.properties
+respect-server/log/

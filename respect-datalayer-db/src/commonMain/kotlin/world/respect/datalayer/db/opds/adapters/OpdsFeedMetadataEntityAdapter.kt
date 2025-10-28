@@ -1,7 +1,7 @@
 package world.respect.datalayer.db.opds.adapters
 
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
-import world.respect.datalayer.opds.model.OpdsFeedMetadata
+import world.respect.lib.opds.model.OpdsFeedMetadata
 
 fun OpdsFeedMetadata.asEntity(
     ofmeOfeUid: Long,

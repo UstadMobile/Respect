@@ -1,21 +1,21 @@
 package world.respect.shared.domain.account.validateauth
 
-import world.respect.datalayer.db.RespectRealmDatabase
-import world.respect.shared.domain.AuthenticatedUserPrincipalId
-import world.respect.shared.util.systemTimeInMillis
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.libutil.util.time.systemTimeInMillis
 
 class ValidateAuthorizationUseCaseDbImpl(
-    private val realmDb: RespectRealmDatabase,
+    private val schoolDb: RespectSchoolDatabase,
 ): ValidateAuthorizationUseCase {
 
     override suspend fun invoke(
         credential: ValidateAuthorizationUseCase.AuthorizationCredential
-    ): AuthenticatedUserPrincipalId {
+    ): AuthenticatedUserPrincipalId? {
         when(credential) {
             is ValidateAuthorizationUseCase.BearerTokenCredential -> {
-                val dbToken = realmDb.getAuthTokenEntityDao().findByToken(
+                val dbToken = schoolDb.getAuthTokenEntityDao().findByToken(
                     credential.token, systemTimeInMillis(),
-                ) ?: throw IllegalArgumentException()
+                ) ?: return null
 
                 return AuthenticatedUserPrincipalId(dbToken.atPGuid)
             }
@@ -24,6 +24,5 @@ class ValidateAuthorizationUseCaseDbImpl(
                 throw IllegalArgumentException()
             }
         }
-
     }
 }

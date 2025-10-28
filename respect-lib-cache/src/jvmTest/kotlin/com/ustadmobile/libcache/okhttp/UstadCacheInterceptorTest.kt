@@ -1,16 +1,9 @@
 package com.ustadmobile.libcache.okhttp
 
-import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.ustadmobile.ihttp.headers.IHttpHeaders
-import com.ustadmobile.libcache.CachePaths
-import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.CompressionType
-import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.assertTempDirectoryIsEmptied
-import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
 import com.ustadmobile.libcache.integrity.sha256Integrity
@@ -21,109 +14,36 @@ import com.ustadmobile.libcache.partial.ContentRange.Companion.parseRangeHeader
 import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.libcache.util.ResourcesDispatcher
-import com.ustadmobile.libcache.util.initNapierLog
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.files.Path
 import kotlinx.io.readByteArray
-import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.verifyNoInteractions
-import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import java.io.File
 import java.security.MessageDigest
-import java.time.Duration
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class UstadCacheInterceptorTest {
+class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
 
 
-    @get:Rule
-    val tempDir = TemporaryFolder()
-
-    private lateinit var okHttpClient: OkHttpClient
-
-    private lateinit var cacheRootDir: File
-
-    private lateinit var cachePathsProvider: CachePathsProvider
-
-    private lateinit var interceptorTmpDir: File
-
-    private lateinit var cacheDb: UstadCacheDb
-
-    private lateinit var ustadCache: UstadCacheImpl
-
-    private lateinit var cacheListener: UstadCache.CacheListener
-
-    private val json = Json {
-        encodeDefaults = true
-        ignoreUnknownKeys = true
-    }
 
     private fun ByteArray.sha256(): ByteArray {
         val digest = MessageDigest.getInstance("SHA-256")
         digest.update(this)
         return digest.digest()
-    }
-
-    @BeforeTest
-    fun setup() {
-        initNapierLog()
-        val logger = NapierLoggingAdapter()
-        cacheListener = mock { }
-        cacheRootDir = tempDir.newFolder("cachedir")
-        cachePathsProvider = CachePathsProvider {
-            Path(cacheRootDir.absolutePath).let {
-                CachePaths(
-                    tmpWorkPath = Path(it, "tmpWork"),
-                    persistentPath = Path(it, "persistent"),
-                    cachePath = Path(it, "cache"),
-                )
-            }
-        }
-        interceptorTmpDir = tempDir.newFolder("interceptor-tmp")
-        cacheDb = Room.databaseBuilder<UstadCacheDb>(
-            tempDir.newFile("ustadcache.db").absolutePath
-        ).setDriver(BundledSQLiteDriver()).build()
-        ustadCache = spy(
-            UstadCacheImpl(
-                pathsProvider = cachePathsProvider,
-                db = cacheDb,
-                logger = logger,
-                listener = cacheListener,
-                xxStringHasher = XXStringHasherCommonJvm(),
-            )
-        )
-        okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(
-                UstadCacheInterceptor(
-                    ustadCache, { interceptorTmpDir } ,
-                    logger = logger,
-                    json = json,
-                ))
-            .callTimeout(Duration.ofSeconds(500))
-            .connectTimeout(Duration.ofSeconds(500))
-            .readTimeout(Duration.ofSeconds(500))
-            .build()
     }
 
     private fun UstadCache.verifyUrlStored(requestUrl: String) {

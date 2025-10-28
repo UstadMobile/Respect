@@ -2,9 +2,6 @@ package world.respect.shared.domain.account
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,14 +13,18 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.RespectCredential
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.RespectRealmDataSource
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.respect.model.RESPECT_REALM_JSON_PATH
-import world.respect.datalayer.respect.model.RespectRealm
-import world.respect.libutil.ext.resolve
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.realm.MakeRealmPathDirUseCase
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.util.putDebugCrashCustomData
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.isSameAccount
 
 /**
@@ -38,7 +39,7 @@ class RespectAccountManager(
     private val settings: Settings,
     private val json: Json,
     private val tokenManager: RespectTokenManager,
-    private val httpClient: HttpClient,
+    private val appDataSource: RespectAppDataSource,
 ): KoinComponent {
 
     private val _storedAccounts = MutableStateFlow<List<RespectAccount>>(
@@ -49,45 +50,45 @@ class RespectAccountManager(
 
     val accounts = _storedAccounts.asStateFlow()
 
-    private val _activeAccountSourcedId = MutableStateFlow(
+    private val _selectedAccountGuid = MutableStateFlow(
         settings.getStringOrNull(SETTINGS_KEY_ACTIVE_ACCOUNT)
     )
 
     var selectedAccount: RespectAccount?
         get() = _storedAccounts.value.firstOrNull {
-            it.userSourcedId == _activeAccountSourcedId.value
+            it.userGuid == _selectedAccountGuid.value
         }
 
         set(value) {
             if(value == null) {
-                _activeAccountSourcedId.value = null
+                _selectedAccountGuid.value = null
                 settings.remove(SETTINGS_KEY_ACTIVE_ACCOUNT)
             }else {
-                if(!_storedAccounts.value.any { it.userSourcedId == value.userSourcedId }) {
+                if(!_storedAccounts.value.any { it.userGuid == value.userGuid }) {
                     val newValue = _storedAccounts.updateAndGet { prev ->
                         listOf(value) + prev
                     }
                     settings[SETTINGS_KEY_STORED_ACCOUNTS] = json.encodeToString(newValue)
                 }
 
-                _activeAccountSourcedId.value = value.userSourcedId
-                settings.set(SETTINGS_KEY_ACTIVE_ACCOUNT, value.userSourcedId)
+                _selectedAccountGuid.value = value.userGuid
+                settings.set(SETTINGS_KEY_ACTIVE_ACCOUNT, value.userGuid)
             }
         }
 
-    val activeAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
-        _activeAccountSourcedId
+    val selectedAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
+        _selectedAccountGuid
     ) { accountList, activeAccountSourcedId ->
-        accountList.firstOrNull { it.userSourcedId == activeAccountSourcedId }
+        accountList.firstOrNull { it.userGuid == activeAccountSourcedId }
     }
 
-    val activeAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
-        activeAccountFlow.collectLatest { account ->
+    val selectedAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
+        selectedAccountFlow.collectLatest { account ->
             val person = if(account != null) {
                 val accountScope = getOrCreateAccountScope(account)
-                val realmDataSource: RespectRealmDataSource = accountScope.get()
-                realmDataSource.personDataSource.findByGuid(
-                    DataLoadParams(onlyIfCached = true), account.userSourcedId
+                val schoolDataSource: SchoolDataSource = accountScope.get()
+                schoolDataSource.personDataSource.findByGuid(
+                    DataLoadParams(onlyIfCached = true), account.userGuid
                 ).dataOrNull()
             }else {
                 null
@@ -101,53 +102,88 @@ class RespectAccountManager(
         }
     }
 
+    init {
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
+    }
+
     /**
      * Login a user with the given credentials
      */
     suspend fun login(
-        username: String,
-        password: String,
-        realmUrl: Url,
+        credential: RespectCredential,
+        schoolUrl: Url,
     ) {
-        val realmScope = getKoin().getOrCreateScope<RespectRealm>(realmUrl.toString())
-        val authUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase = realmScope.get()
-        val authResponse = authUseCase(
-            username = username,
-            password = password,
+        val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
         )
 
-        //This could/should move to using the datasource instead of httpclient directly
-        val realm: RespectRealm = httpClient.get(
-            realmUrl.resolve(RESPECT_REALM_JSON_PATH)
-        ).body()
+        val authUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
+        val authResponse = authUseCase(credential)
+
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource
+            .getSchoolDirectoryEntryByUrl(schoolUrl)
+            .dataOrNull() ?: throw IllegalStateException()
 
         val respectAccount = RespectAccount(
-            userSourcedId = authResponse.person.guid,
-            realm = realm,
+            userGuid = authResponse.person.guid,
+            school = schoolDirectoryEntry,
         )
 
         initSession(authResponse, respectAccount)
+    }
+
+    @Suppress("unused")
+    suspend fun register(
+        redeemInviteRequest: RespectRedeemInviteRequest,
+        schoolUrl: Url,
+    ) {
+        val schoolScopeId = SchoolDirectoryEntryScopeId(
+            schoolUrl, null,
+        )
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
+        )
+
+        val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
+        val authResponse = redeemInviteUseCase(redeemInviteRequest)
+
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+            schoolUrl
+        ).dataOrNull() ?: throw IllegalStateException()
+
+        initSession(
+            authResponse = authResponse,
+            respectAccount = RespectAccount(
+                authResponse.person.guid, schoolDirectoryEntry
+            )
+        )
     }
 
     private suspend fun initSession(
         authResponse: AuthResponse,
         respectAccount: RespectAccount,
     ) {
-        val realmScope: Scope = getKoin().getOrCreateScope<RespectRealm>(
-            respectAccount.realm.self.toString()
+        val schoolScope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(respectAccount.school.self, null).scopeId
         )
         tokenManager.storeToken(respectAccount.scopeId, authResponse.token)
 
         val accountScope = getOrCreateAccountScope(respectAccount)
 
-        val realmDataSource: RespectRealmDataSource = accountScope.get()
-        realmDataSource.personDataSource.putPerson(authResponse.person)
+        val schoolDataSource: SchoolDataSource = accountScope.get()
+
+        //Ensure the active user is loaded into the database
+        schoolDataSource.personDataSource.findByGuid(
+            DataLoadParams(), authResponse.person.guid
+        )
 
         //now we can get the datalayer by creating a RespectAccount scope
-        val mkDirUseCase: MakeRealmPathDirUseCase? = realmScope.getOrNull()
+        val mkDirUseCase: MakeSchoolPathDirUseCase? = schoolScope.getOrNull()
         mkDirUseCase?.invoke()
 
         selectedAccount = respectAccount
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
     }
 
 
@@ -171,12 +207,12 @@ class RespectAccountManager(
         settings[SETTINGS_KEY_STORED_ACCOUNTS] = json.encodeToString(storedAccountsToCommit)
 
         val accountsOnRealmScope = accounts.value.count {
-            it.realm.self == account.realm.self
+            it.school.self == account.school.self
         }
 
         if(accountsOnRealmScope == 0) {
             //close it
-            val realmScope = getKoin().getScope(account.realm.self.toString())
+            val realmScope = getKoin().getScope(account.school.self.toString())
             realmScope.close()
         }
 
@@ -186,14 +222,7 @@ class RespectAccountManager(
      * When the RespectAccount scope is created it MUST be linked to the parent Realm scope.
      */
     fun getOrCreateAccountScope(account: RespectAccount): Scope {
-        //need to ensure that the scope ids are never going to conflict ourself...
-        val realmScope = getKoin().getOrCreateScope<RespectRealm>(account.realm.self.toString())
-        val accountScope = getKoin().getScopeOrNull(account.scopeId)
-            ?: getKoin().createScope<RespectAccount>(account.scopeId).also {
-                it.linkTo(realmScope)
-            }
-
-        return accountScope
+        return getKoin().getOrCreateScope<RespectAccount>(account.scopeId)
     }
 
     fun requireSelectedAccountScope(): Scope {

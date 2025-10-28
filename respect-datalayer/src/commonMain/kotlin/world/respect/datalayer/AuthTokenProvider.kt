@@ -1,6 +1,6 @@
 package world.respect.datalayer
 
-import world.respect.datalayer.realm.model.AuthToken
+import world.respect.datalayer.school.model.AuthToken
 
 /**
  * Interface that will provide an auth token for a specific account. This is handled in the

@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.domain.account.createinviteredeemrequest.RespectRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.invite.SubmitRedeemInviteRequestUseCase
-import world.respect.shared.domain.account.signup.SignupCredential
-import world.respect.shared.domain.account.signup.SignupUseCase
+import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.password.SavePasswordUseCase
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.required_field
@@ -19,21 +19,22 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class EnterPasswordSignupUiState(
     val password: String = "",
-    val passwordError: StringResourceUiText? = null,
-    val generalError: StringResourceUiText? = null,
+    val passwordError: UiText? = null,
+    val generalError: UiText? = null,
 )
 
 class EnterPasswordSignupViewModel(
     savedStateHandle: SavedStateHandle,
-    private val submitRedeemInviteRequestUseCase: SubmitRedeemInviteRequestUseCase,
-    private val respectRedeemInviteRequestUseCase: RespectRedeemInviteRequestUseCase,
-    private val signupUseCase: SignupUseCase
+    private val accountManager: RespectAccountManager,
+    private val savePasswordUseCase: SavePasswordUseCase
 ) : RespectViewModel(savedStateHandle) {
     private val route: EnterPasswordSignup = savedStateHandle.toRoute()
 
@@ -61,44 +62,62 @@ class EnterPasswordSignupViewModel(
     }
 
     fun onClickSignup() {
-        viewModelScope.launch {
-            val password = _uiState.value.password
+        val password = _uiState.value.password
 
-            _uiState.update {
-                it.copy(
-                    passwordError = if (password.isBlank())
-                        StringResourceUiText(Res.string.required_field)
-                    else
-                        null
-                )
-            }
-
-            if (password.isBlank()) return@launch
-            val signupCredential = SignupCredential.Password(
-                username = route.username,
-                password = password
+        _uiState.update {
+            it.copy(
+                passwordError = if (password.isBlank())
+                    StringResourceUiText(Res.string.required_field)
+                else
+                    null
             )
-            signupUseCase(signupCredential)
-            val redeemRequest = respectRedeemInviteRequestUseCase(route.inviteInfo,route.username)
+        }
 
-            val result = submitRedeemInviteRequestUseCase(redeemRequest)
-            when (route.type) {
-                ProfileType.CHILD , ProfileType.STUDENT->{
-                    viewModelScope.launch {
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(WaitingForApproval.create(route.type,route.inviteInfo,result.uid))
-                        )
-                    }
-                }
-                ProfileType.PARENT ->{
-                    viewModelScope.launch {
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(SignupScreen.create(ProfileType.CHILD,route.inviteInfo))
-                        )
-                    }
+        if (password.isBlank())
+            return
+
+        viewModelScope.launch {
+            val redeemRequest = route.respectRedeemInviteRequest.copy(
+                account = route.respectRedeemInviteRequest.account.copy(
+                    credential = RespectPasswordCredential(
+                        username = route.respectRedeemInviteRequest.account.username,
+                        password = password,
+                    )
+                )
+            )
+
+            try {
+                accountManager.register(
+                    redeemInviteRequest = redeemRequest,
+                    schoolUrl = route.schoolUrl,
+                )
+                savePasswordUseCase(
+                    username = route.respectRedeemInviteRequest.account.username,
+                    password = password
+                )
+
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = if(redeemRequest.role == PersonRoleEnum.PARENT) {
+                            SignupScreen.create(
+                                schoolUrl = route.schoolUrl,
+                                profileType = ProfileType.CHILD,
+                                inviteRequest = redeemRequest,
+                            )
+                        }else {
+                            WaitingForApproval()
+                        },
+                        clearBackStack = true
+                    )
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+                _uiState.update {
+                    it.copy(
+                        generalError = e.getUiTextOrGeneric()
+                    )
                 }
             }
-
         }
 
     }

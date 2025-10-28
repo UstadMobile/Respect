@@ -2,27 +2,7 @@
 
 End-to-end tests that start a blank new server/app and test functionality end-to-end.
 
-* Android-maestro - Android end-to-end tests built using [Maestro](https://maestro.mobile.dev)
-
-**To Run Respect-test-end-to-end in Android-Maestro Test**
-
-1) Install Respect app on device
-2) Run Maestro test
-
-```
-cd respect-test-end-to-end/android-maestro
-```
-
-   a) To run all tests in the e2e-tests folder:
-
-```
-./run_test.sh
-```
-  b) To run a specific test file:
-
-```
-./run_test.sh e2e-tests/<test_file_name>.yaml
-```
+* [Maestro](/maestro) - End-to-end tests built using [Maestro](https://maestro.mobile.dev)
 
 ## Scenarios
 

@@ -4,7 +4,7 @@ import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.realm.model.AuthToken
+import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.AuthTokenProvider
 
 /**
@@ -30,24 +30,27 @@ class RespectTokenManager(
         }
     }
 
-    fun providerFor(accountId: String): AuthTokenProvider {
-        return AuthTokenProviderImpl(accountId)
+    fun providerFor(accountKey: String): AuthTokenProvider {
+        return AuthTokenProviderImpl(accountKey)
     }
 
-    fun storeToken(accountId: String, token: AuthToken) {
+    /**
+     * @param accountKey string - should be in the form of user@server
+     */
+    fun storeToken(accountKey: String, token: AuthToken) {
         val newTokenMap = tokenFlow.updateAndGet { prev ->
             prev.toMutableMap().apply {
-                put(accountId, token)
+                put(accountKey, token)
             }
         }
 
         settings.putString(SETTINGS_KEY, json.encodeToString(newTokenMap))
     }
 
-    fun removeToken(accountId: String) {
+    fun removeToken(accountKey: String) {
         val newTokenMap = tokenFlow.updateAndGet { prev ->
             prev.toMutableMap().apply {
-                remove(accountId)
+                remove(accountKey)
             }
         }
 

@@ -8,31 +8,58 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
+import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
-import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.account.invite.GetInviteInfoUseCaseServer
+import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
+import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
+import world.respect.shared.domain.account.passkey.DecodeUserHandleUseCaseImpl
+import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysDbImpl
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
+import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCase
+import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseJvm
+import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
+import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
@@ -47,6 +74,7 @@ fun serverKoinModule(
         Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
+            .addCommonMigrations()
             .build()
     }
 
@@ -60,11 +88,21 @@ fun serverKoinModule(
         XXStringHasherCommonJvm()
     }
 
+    single<UidNumberMapper> {
+        XXHashUidNumberMapper(xxStringHasher = get())
+    }
+
     single<PrimaryKeyGenerator> {
         PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
     }
+    single<SchoolDirectoryDataSourceLocal> {
+        SchoolDirectoryDataSourceDb(
+            respectAppDb = get(),
+            xxStringHasher = get()
+        )
+    }
 
-    single<RespectAppDataSource> {
+    single<RespectAppDataSourceLocal> {
         RespectAppDataSourceDb(
             respectAppDatabase = get(),
             json = get(),
@@ -73,10 +111,41 @@ fun serverKoinModule(
         )
     }
 
+    single<RespectAppDataSource> {
+        get<RespectAppDataSourceLocal>()
+    }
+
+    single<FilterUsernameUseCase> {
+        FilterUsernameUseCase()
+    }
+
     single<AddSchoolUseCase> {
         AddSchoolUseCase(
-            directoryDataSource = get<RespectAppDataSource>().schoolDirectoryDataSource as SchoolDirectoryDataSourceLocal
+            directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
+            encryptPasswordUseCase = get(),
         )
+    }
+
+    single<DecodeUserHandleUseCase> {
+        DecodeUserHandleUseCaseImpl()
+    }
+
+    single<LoadAaguidJsonUseCase> {
+        LoadAaguidJsonUseCaseJvm(
+            json = get(),
+        )
+    }
+
+    single<GetPasskeyProviderInfoUseCase> {
+        GetPasskeyProviderInfoUseCaseImpl(
+            json = get(),
+            loadAaguidJsonUseCase = get(),
+        )
+    }
+
+    single<EncryptPersonPasswordUseCase> {
+        EncryptPersonPasswordUseCaseImpl()
     }
 
     /*
@@ -85,6 +154,19 @@ fun serverKoinModule(
     scope<SchoolDirectoryEntry> {
         fun Scope.schoolUrl(): Url = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
 
+        scoped<UsernameSuggestionUseCase> {
+            UsernameSuggestionUseCaseServer(
+                schoolDb = get(),
+                filterUsernameUseCase = get(),
+            )
+        }
+        scoped<VerifySignInWithPasskeyUseCase> {
+            VerifySignInWithPasskeyUseCase(
+                schoolDb = get(),
+                json = get(),
+                decodeUserHandleUseCase = get(),
+            )
+        }
         scoped<RespectSchoolPath> {
             val schoolDirName = schoolUrl().sanitizedForFilename()
             val schoolDirFile = File(dataDir, schoolDirName).also {
@@ -111,24 +193,77 @@ fun serverKoinModule(
 
             Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
+                .addCommonMigrations()
+                .addMigrations(MIGRATION_2_3(false))
                 .build()
-        }
-
-        scoped<SetPasswordUseCase> {
-            SetPasswordUseDbImpl(
-                schoolDb = get(),
-                xxHash = get()
-            )
         }
 
         scoped<ValidateAuthorizationUseCase> {
             ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
 
-        scoped<GetTokenAndUserProfileWithUsernameAndPasswordUseCase> {
-            GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
+        scoped<GetTokenAndUserProfileWithCredentialUseCase> {
+            GetTokenAndUserProfileWithCredentialDbImpl(
+                schoolUrl = schoolUrl(),
                 schoolDb = get(),
                 xxHash = get(),
+                verifyPasskeyUseCase = get(),
+                respectAppDataSource = get(),
+                authenticatePasswordUseCase = get(),
+            )
+        }
+
+        scoped<AuthenticatePasswordUseCase> {
+            AuthenticatePasswordUseCaseDbImpl(
+                schoolDb = get(),
+                encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<GetActivePersonPasskeysUseCase> {
+            GetActivePersonPasskeysDbImpl(
+                schoolDb = get(),
+                xxStringHasher = get(),
+            )
+        }
+
+        scoped<RevokePasskeyUseCase> {
+            RevokePersonPasskeyUseCaseDbImpl(
+                schoolDb = get(),
+                xxStringHasher = get(),
+            )
+        }
+
+        scoped<SchoolPrimaryKeyGenerator> {
+            SchoolPrimaryKeyGenerator(
+                PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
+            )
+        }
+
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseServer(
+                schoolDb = get(),
+            )
+        }
+
+        scoped<RedeemInviteUseCase> {
+            val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
+
+            RedeemInviteUseCaseDb(
+                schoolDb = get(),
+                schoolUrl = schoolScopeId.schoolUrl,
+                schoolPrimaryKeyGenerator = get(),
+                getTokenAndUserProfileUseCase = get(),
+                schoolDataSource = { schoolUrl, user ->
+                    getKoin().getOrCreateScope<RespectAccount>(
+                        RespectAccountScopeId(schoolUrl, user).scopeId,
+                    ).get()
+                },
+                uidNumberMapper = get(),
+                json = get(),
+                getPasskeyProviderInfoUseCase = get(),
+                encryptPersonPasswordUseCase = get(),
             )
         }
     }
@@ -144,10 +279,21 @@ fun serverKoinModule(
      */
     scope<RespectAccount> {
         factory<SchoolDataSourceLocal> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            val directoryEntryScopeId = SchoolDirectoryEntryScopeId(
+                accountScopeId.schoolUrl, null
+            )
+
+            linkTo(
+                getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+                    directoryEntryScopeId.scopeId
+                )
+            )
+
             SchoolDataSourceDb(
                 schoolDb = get(),
-                xxStringHasher = get(),
-                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId
+                uidNumberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId
             )
         }
 

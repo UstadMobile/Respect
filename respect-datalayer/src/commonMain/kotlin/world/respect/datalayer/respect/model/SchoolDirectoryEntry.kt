@@ -2,7 +2,9 @@ package world.respect.datalayer.respect.model
 
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.opds.model.LangMap
+import world.respect.datalayer.shared.ModelWithTimes
+import world.respect.lib.opds.model.LangMap
+import world.respect.lib.serializers.InstantAsISO8601
 
 /**
  * A RESPECT school endpoint (a logical grouping of networked resources), each with its own users,
@@ -24,4 +26,7 @@ data class SchoolDirectoryEntry(
     val xapi: Url,
     val oneRoster: Url,
     val respectExt: Url?,
-)
+    val rpId : String?,
+    override val lastModified: InstantAsISO8601,
+    override val stored: InstantAsISO8601,
+): ModelWithTimes

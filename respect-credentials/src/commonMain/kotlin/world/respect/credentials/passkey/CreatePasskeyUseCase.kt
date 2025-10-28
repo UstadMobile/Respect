@@ -1,13 +1,16 @@
 package world.respect.credentials.passkey
 
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 
 interface CreatePasskeyUseCase {
 
     sealed class CreatePasskeyResult
 
     data class PasskeyCreatedResult(
-        val authenticationResponseJSON : AuthenticationResponseJSON
+        val authenticationResponseJSON : AuthenticationResponseJSON,
+        val respectUserHandle: RespectUserHandle,
+        val passkeyProviderInfo: GetPasskeyProviderInfoUseCase.PasskeyProviderInfo
     ) : CreatePasskeyResult()
 
     class UserCanceledResult : CreatePasskeyResult(){
@@ -26,6 +29,13 @@ interface CreatePasskeyUseCase {
         val message: String?
     ) : CreatePasskeyResult()
 
-    suspend operator fun invoke(username:String,appName : String): CreatePasskeyResult
+
+    data class Request(
+        val personUid: String,
+        val username: String,
+        val rpId: String,
+    )
+
+    suspend operator fun invoke(request: Request): CreatePasskeyResult
 
 }

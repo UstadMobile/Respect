@@ -28,9 +28,24 @@ import world.respect.server.routes.getRespectSchoolJson
 import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
+import org.koin.ktor.ext.inject
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
+import world.respect.server.routes.passkey.RevokePasskeyRoute
+import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.school.respect.AssignmentRoute
+import world.respect.server.routes.school.respect.ClassRoute
+import world.respect.server.routes.school.respect.EnrollmentRoute
+import world.respect.server.routes.school.respect.InviteInfoRoute
+import world.respect.server.routes.school.respect.PersonPasskeyRoute
+import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.username.UsernameSuggestionRoute
+import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -51,6 +66,9 @@ fun Application.module() {
     ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }
+
+    val wellKnownDir = File(ktorAppHomeDir(), "well-known")
+    val assetLinksFile = File(wellKnownDir, "assetlinks.json")
 
     val dirAdminFile = File(environment.config.absoluteDataDir(), DIRECTORY_ADMIN_FILENAME)
     dirAdminFile.takeIf { !it.exists() }?.also {
@@ -74,7 +92,7 @@ fun Application.module() {
         basic(AUTH_CONFIG_DIRECTORY_ADMIN_BASIC) {
             realm = "Access realm directory admin"
             validate { credentials ->
-                val adminPassword = dirAdminFile.readText()
+                val adminPassword = dirAdminFile.readText().trim()
                 if(credentials.password == adminPassword) {
                     UserIdPrincipal(credentials.name)
                 }else {
@@ -135,6 +153,10 @@ fun Application.module() {
 
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
+
+            get("assetlinks.json") {
+                call.respondFile(assetLinksFile)
+            }
         }
 
         swaggerUI(
@@ -143,8 +165,22 @@ fun Application.module() {
         )
 
         route("api") {
+            route("passkey"){
+
+                VerifySignInWithPasskeyRoute(
+                    useCase =  { it.getSchoolKoinScope().get() }
+                )
+
+                GetAllActivePasskeysRoute(
+                    useCase =  { it.getSchoolKoinScope().get() }
+                )
+                RevokePasskeyRoute(
+                    useCase =  { it.getSchoolKoinScope().get() }
+                )
+            }
             route("directory") {
-                RespectSchoolDirectoryRoute()
+                val respectAppDataSource: RespectAppDataSource by inject()
+                RespectSchoolDirectoryRoute(respectAppDataSource)
             }
 
             route("school") {
@@ -153,8 +189,27 @@ fun Application.module() {
                         AuthRoute()
                     }
 
+                    route("invite") {
+                        RedeemInviteRoute(
+                            redeemInviteUseCase = { it.getSchoolKoinScope().get() }
+                        )
+                        InviteInfoRoute(
+                            getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
+                        )
+                    }
+                    route("username"){
+                        UsernameSuggestionRoute(
+                            usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
+                        )
+                    }
                     authenticate(AUTH_CONFIG_SCHOOL) {
+                        SchoolAppRoute()
                         PersonRoute()
+                        PersonPasskeyRoute()
+                        PersonPasswordRoute()
+                        ClassRoute()
+                        EnrollmentRoute()
+                        AssignmentRoute()
                     }
                 }
             }

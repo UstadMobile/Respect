@@ -18,6 +18,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLayerHeaders
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.ext.lastModifiedForHttpResponseHeader
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.shared.ModelWithTimes
@@ -157,10 +158,19 @@ suspend inline fun <reified T: Any> ApplicationCall.respondDataLoadState(
         return
     }
 
-    if(dataLoadState is DataReadyState) {
-        respond(dataLoadState.data)
-    }else {
-        respond(HttpStatusCode.ServiceUnavailable)
+
+    when {
+        dataLoadState is DataReadyState -> {
+            respond(dataLoadState.data)
+        }
+
+        dataLoadState is NoDataLoadedState && dataLoadState.reason == NoDataLoadedState.Reason.NOT_FOUND -> {
+            respond(HttpStatusCode.NotFound)
+        }
+
+        else -> {
+            respond(HttpStatusCode.ServiceUnavailable)
+        }
     }
 
 }

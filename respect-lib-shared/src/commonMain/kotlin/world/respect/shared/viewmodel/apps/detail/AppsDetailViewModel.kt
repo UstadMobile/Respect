@@ -7,8 +7,12 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.navigation.AppsDetail
@@ -19,14 +23,18 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.opds.model.OpdsGroup
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsGroup
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.model.SchoolApp
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdmin
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<RespectAppManifest>? = null,
@@ -35,12 +43,18 @@ data class AppsDetailUiState(
     val group: List<OpdsGroup> = emptyList(),
     val appIcon: String? = null,
     val isAdded: Boolean = false,
+    val showAddRemoveButton: Boolean = false,
 )
 
 class AppsDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireSelectedAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(AppsDetailUiState())
 
@@ -98,11 +112,19 @@ class AppsDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.appIsAddedToLaunchpadAsFlow(
-                manifestUrl = route.manifestUrl
-            ).collect { isAdded ->
+            accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 _uiState.update {
-                    it.copy(isAdded = isAdded)
+                    it.copy(showAddRemoveButton = selected?.person?.isAdmin() == true)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.schoolAppDataSource.listAsFlow().map { list ->
+                list.dataOrNull()?.any { it.appManifestUrl == route.manifestUrl } == true
+            }.collect { appIsAdded ->
+                _uiState.update {
+                    it.copy(isAdded = appIsAdded)
                 }
             }
         }
@@ -118,6 +140,8 @@ class AppsDetailViewModel(
                     LearningUnitList.create(
                         opdsFeedUrl = route.manifestUrl.resolve(uri),
                         appManifestUrl = route.manifestUrl,
+                        resultPopUpTo = route.resultPopUpTo,
+                        resultKey = route.resultKey,
                     )
                 )
             )
@@ -164,7 +188,14 @@ class AppsDetailViewModel(
 
     fun onClickAdd() {
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.addAppToLaunchpad(route.manifestUrl)
+            schoolDataSource.schoolAppDataSource.store(
+                listOf(
+                    SchoolApp(
+                        uid = route.manifestUrl.toString(),
+                        appManifestUrl = route.manifestUrl,
+                    )
+                )
+            )
         }
     }
 

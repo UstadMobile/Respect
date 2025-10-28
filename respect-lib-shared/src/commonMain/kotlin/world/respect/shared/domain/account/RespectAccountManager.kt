@@ -13,12 +13,16 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.RespectCredential
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
+import world.respect.libutil.util.putDebugCrashCustomData
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.school.MakeSchoolPathDirUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.isSameAccount
@@ -72,14 +76,14 @@ class RespectAccountManager(
             }
         }
 
-    val activeAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
+    val selectedAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
         _selectedAccountGuid
     ) { accountList, activeAccountSourcedId ->
         accountList.firstOrNull { it.userGuid == activeAccountSourcedId }
     }
 
-    val activeAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
-        activeAccountFlow.collectLatest { account ->
+    val selectedAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
+        selectedAccountFlow.collectLatest { account ->
             val person = if(account != null) {
                 val accountScope = getOrCreateAccountScope(account)
                 val schoolDataSource: SchoolDataSource = accountScope.get()
@@ -98,12 +102,15 @@ class RespectAccountManager(
         }
     }
 
+    init {
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
+    }
+
     /**
      * Login a user with the given credentials
      */
     suspend fun login(
-        username: String,
-        password: String,
+        credential: RespectCredential,
         schoolUrl: Url,
     ) {
         val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
@@ -111,15 +118,12 @@ class RespectAccountManager(
             schoolScopeId.scopeId
         )
 
-        val authUseCase: GetTokenAndUserProfileWithUsernameAndPasswordUseCase = schoolScope.get()
-        val authResponse = authUseCase(
-            username = username,
-            password = password,
-        )
+        val authUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
+        val authResponse = authUseCase(credential)
 
-        val schoolDirectoryEntry = appDataSource.schoolDirectoryDataSource.getSchoolDirectoryEntryByUrl(
-            schoolUrl
-        ).dataOrNull() ?: throw IllegalStateException()
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource
+            .getSchoolDirectoryEntryByUrl(schoolUrl)
+            .dataOrNull() ?: throw IllegalStateException()
 
         val respectAccount = RespectAccount(
             userGuid = authResponse.person.guid,
@@ -127,6 +131,33 @@ class RespectAccountManager(
         )
 
         initSession(authResponse, respectAccount)
+    }
+
+    @Suppress("unused")
+    suspend fun register(
+        redeemInviteRequest: RespectRedeemInviteRequest,
+        schoolUrl: Url,
+    ) {
+        val schoolScopeId = SchoolDirectoryEntryScopeId(
+            schoolUrl, null,
+        )
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
+        )
+
+        val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
+        val authResponse = redeemInviteUseCase(redeemInviteRequest)
+
+        val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+            schoolUrl
+        ).dataOrNull() ?: throw IllegalStateException()
+
+        initSession(
+            authResponse = authResponse,
+            respectAccount = RespectAccount(
+                authResponse.person.guid, schoolDirectoryEntry
+            )
+        )
     }
 
     private suspend fun initSession(
@@ -152,6 +183,7 @@ class RespectAccountManager(
         mkDirUseCase?.invoke()
 
         selectedAccount = respectAccount
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
     }
 
 
@@ -190,14 +222,7 @@ class RespectAccountManager(
      * When the RespectAccount scope is created it MUST be linked to the parent Realm scope.
      */
     fun getOrCreateAccountScope(account: RespectAccount): Scope {
-        val schoolScopeId = SchoolDirectoryEntryScopeId(account.school.self, null)
-        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
-        val accountScope = getKoin().getScopeOrNull(account.scopeId)
-            ?: getKoin().createScope<RespectAccount>(account.scopeId).also {
-                it.linkTo(schoolScope)
-            }
-
-        return accountScope
+        return getKoin().getOrCreateScope<RespectAccount>(account.scopeId)
     }
 
     fun requireSelectedAccountScope(): Scope {

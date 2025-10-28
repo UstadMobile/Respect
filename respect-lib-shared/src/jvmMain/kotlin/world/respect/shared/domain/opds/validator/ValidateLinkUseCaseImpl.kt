@@ -3,9 +3,9 @@ package world.respect.shared.domain.opds.validator
 import io.ktor.http.isSuccess
 import world.respect.shared.domain.respectappmanifest.validator.RespectAppManifestValidator
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.domain.validator.ValidateHttpResponseForUrlUseCase
 import world.respect.domain.validator.ValidateLinkUseCase
 import world.respect.domain.validator.ValidatorMessage

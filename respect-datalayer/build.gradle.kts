@@ -10,6 +10,7 @@ plugins {
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     androidTarget {
@@ -24,6 +25,9 @@ kotlin {
         commonMain.dependencies {
             api(projects.respectLibIhttpCore)
             api(projects.respectLibXxhash)
+            api(projects.respectCredentials)
+            api(projects.respectLibOpdsModel)
+            api(projects.respectLibSerializers)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
@@ -31,7 +35,6 @@ kotlin {
             api(libs.androidx.paging.common)
             implementation(libs.atomicfu)
             implementation(libs.napier)
-            api(libs.paging.multiplatform.common)
 
         }
 

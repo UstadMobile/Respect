@@ -1,0 +1,837 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "cc352074c4d3b21c12ffcfc1e712890e",
+    "entities": [
+      {
+        "tableName": "LangMapEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lmeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lmeTopParentType` INTEGER NOT NULL, `lmeTopParentUid1` INTEGER NOT NULL, `lmeTopParentUid2` INTEGER NOT NULL, `lmePropType` INTEGER NOT NULL, `lmePropFk` INTEGER NOT NULL, `lmeLang` TEXT NOT NULL, `lmeRegion` TEXT, `lmeValue` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "lmeId",
+            "columnName": "lmeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeTopParentType",
+            "columnName": "lmeTopParentType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeTopParentUid1",
+            "columnName": "lmeTopParentUid1",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeTopParentUid2",
+            "columnName": "lmeTopParentUid2",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmePropType",
+            "columnName": "lmePropType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmePropFk",
+            "columnName": "lmePropFk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeLang",
+            "columnName": "lmeLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lmeRegion",
+            "columnName": "lmeRegion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lmeValue",
+            "columnName": "lmeValue",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "lmeId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_LangMapEntity_lmeTopParentType_lmeTopParentUid1_lmeTopParentUid2_lmePropType",
+            "unique": false,
+            "columnNames": [
+              "lmeTopParentType",
+              "lmeTopParentUid1",
+              "lmeTopParentUid2",
+              "lmePropType"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LangMapEntity_lmeTopParentType_lmeTopParentUid1_lmeTopParentUid2_lmePropType` ON `${TABLE_NAME}` (`lmeTopParentType`, `lmeTopParentUid1`, `lmeTopParentUid2`, `lmePropType`)"
+          }
+        ]
+      },
+      {
+        "tableName": "ReadiumLinkEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rleId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rleOpdsParentType` INTEGER NOT NULL, `rleOpdsParentUid` INTEGER NOT NULL, `rlePropType` TEXT NOT NULL, `rlePropFk` INTEGER NOT NULL, `rleIndex` INTEGER NOT NULL, `rleHref` TEXT NOT NULL, `rleRel` TEXT, `rleType` TEXT, `rleTitle` TEXT, `rleTemplated` INTEGER, `rleProperties` TEXT, `rleHeight` INTEGER, `rleWidth` INTEGER, `rleSize` INTEGER, `rleBitrate` REAL, `rleDuration` REAL, `rleLanguage` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "rleId",
+            "columnName": "rleId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rleOpdsParentType",
+            "columnName": "rleOpdsParentType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rleOpdsParentUid",
+            "columnName": "rleOpdsParentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rlePropType",
+            "columnName": "rlePropType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rlePropFk",
+            "columnName": "rlePropFk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rleIndex",
+            "columnName": "rleIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rleHref",
+            "columnName": "rleHref",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rleRel",
+            "columnName": "rleRel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rleType",
+            "columnName": "rleType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rleTitle",
+            "columnName": "rleTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rleTemplated",
+            "columnName": "rleTemplated",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rleProperties",
+            "columnName": "rleProperties",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rleHeight",
+            "columnName": "rleHeight",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rleWidth",
+            "columnName": "rleWidth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rleSize",
+            "columnName": "rleSize",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rleBitrate",
+            "columnName": "rleBitrate",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "rleDuration",
+            "columnName": "rleDuration",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "rleLanguage",
+            "columnName": "rleLanguage",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rleId"
+          ]
+        }
+      },
+      {
+        "tableName": "OpdsPublicationEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`opeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `opeOfeUid` INTEGER NOT NULL, `opeOgeUid` INTEGER NOT NULL, `opeIndex` INTEGER NOT NULL, `opeUrl` TEXT, `opeUrlHash` INTEGER NOT NULL, `opeLastModified` INTEGER NOT NULL, `opeEtag` TEXT, `opeMdIdentifier` TEXT, `opeMdLanguage` TEXT, `opeMdType` TEXT, `opeMdDescription` TEXT, `opeMdNumberOfPages` INTEGER, `opeMdDuration` REAL)",
+        "fields": [
+          {
+            "fieldPath": "opeUid",
+            "columnName": "opeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "opeOfeUid",
+            "columnName": "opeOfeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "opeOgeUid",
+            "columnName": "opeOgeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "opeIndex",
+            "columnName": "opeIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "opeUrl",
+            "columnName": "opeUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "opeUrlHash",
+            "columnName": "opeUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "opeLastModified",
+            "columnName": "opeLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "opeEtag",
+            "columnName": "opeEtag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "opeMdIdentifier",
+            "columnName": "opeMdIdentifier",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "opeMdLanguage",
+            "columnName": "opeMdLanguage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "opeMdType",
+            "columnName": "opeMdType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "opeMdDescription",
+            "columnName": "opeMdDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "opeMdNumberOfPages",
+            "columnName": "opeMdNumberOfPages",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "opeMdDuration",
+            "columnName": "opeMdDuration",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "opeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "ReadiumSubjectEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rseStringValue` TEXT, `rseTopParentType` INTEGER NOT NULL, `rseTopParentUid` INTEGER NOT NULL, `rseSubjectSortAs` TEXT, `rseSubjectCode` TEXT, `rseSubjectScheme` TEXT, `rseIndex` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "rseUid",
+            "columnName": "rseUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rseStringValue",
+            "columnName": "rseStringValue",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rseTopParentType",
+            "columnName": "rseTopParentType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rseTopParentUid",
+            "columnName": "rseTopParentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rseSubjectSortAs",
+            "columnName": "rseSubjectSortAs",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rseSubjectCode",
+            "columnName": "rseSubjectCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rseSubjectScheme",
+            "columnName": "rseSubjectScheme",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rseIndex",
+            "columnName": "rseIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rseUid"
+          ]
+        }
+      },
+      {
+        "tableName": "OpdsFacetEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ofaeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ofaeOfeUid` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ofaeUid",
+            "columnName": "ofaeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofaeOfeUid",
+            "columnName": "ofaeOfeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ofaeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "OpdsGroupEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ogeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ogeOfeUid` INTEGER NOT NULL, `ogeIndex` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ogeUid",
+            "columnName": "ogeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ogeOfeUid",
+            "columnName": "ogeOfeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ogeIndex",
+            "columnName": "ogeIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ogeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "OpdsFeedEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ofeUid` INTEGER NOT NULL, `ofeUrl` TEXT NOT NULL, `ofeUrlHash` INTEGER NOT NULL, `ofeLastModifiedHeader` INTEGER NOT NULL, `ofeEtag` TEXT, PRIMARY KEY(`ofeUid`))",
+        "fields": [
+          {
+            "fieldPath": "ofeUid",
+            "columnName": "ofeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofeUrl",
+            "columnName": "ofeUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofeUrlHash",
+            "columnName": "ofeUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofeLastModifiedHeader",
+            "columnName": "ofeLastModifiedHeader",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofeEtag",
+            "columnName": "ofeEtag",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ofeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "OpdsFeedMetadataEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ofmeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ofmeOfeUid` INTEGER NOT NULL, `ofmePropType` INTEGER NOT NULL, `ofmePropFk` INTEGER NOT NULL, `ofmeIdentifier` TEXT, `ofmeType` TEXT, `ofmeTitle` TEXT NOT NULL, `ofmeSubtitle` TEXT, `ofmeModified` TEXT, `ofmeDescription` TEXT, `ofmeItemsPerPage` INTEGER, `ofmeCurrentPage` INTEGER, `ofmeNumberOfItems` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "ofmeUid",
+            "columnName": "ofmeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofmeOfeUid",
+            "columnName": "ofmeOfeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofmePropType",
+            "columnName": "ofmePropType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofmePropFk",
+            "columnName": "ofmePropFk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofmeIdentifier",
+            "columnName": "ofmeIdentifier",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ofmeType",
+            "columnName": "ofmeType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ofmeTitle",
+            "columnName": "ofmeTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofmeSubtitle",
+            "columnName": "ofmeSubtitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ofmeModified",
+            "columnName": "ofmeModified",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ofmeDescription",
+            "columnName": "ofmeDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ofmeItemsPerPage",
+            "columnName": "ofmeItemsPerPage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ofmeCurrentPage",
+            "columnName": "ofmeCurrentPage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ofmeNumberOfItems",
+            "columnName": "ofmeNumberOfItems",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ofmeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "CompatibleAppEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caeUid` INTEGER NOT NULL, `caeUrl` TEXT NOT NULL, `caeIcon` TEXT, `caeLastModified` INTEGER NOT NULL, `caeEtag` TEXT, `caeLicense` TEXT NOT NULL, `caeWebsite` TEXT NOT NULL, `caeLearningUnits` TEXT NOT NULL, `caeDefaultLaunchUri` TEXT NOT NULL, `caeAndroidPackageId` TEXT, `caeAndroidStoreList` TEXT, `caeAndroidSourceCode` TEXT, PRIMARY KEY(`caeUid`))",
+        "fields": [
+          {
+            "fieldPath": "caeUid",
+            "columnName": "caeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeUrl",
+            "columnName": "caeUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeIcon",
+            "columnName": "caeIcon",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeLastModified",
+            "columnName": "caeLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeEtag",
+            "columnName": "caeEtag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeLicense",
+            "columnName": "caeLicense",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeWebsite",
+            "columnName": "caeWebsite",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeLearningUnits",
+            "columnName": "caeLearningUnits",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeDefaultLaunchUri",
+            "columnName": "caeDefaultLaunchUri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caeAndroidPackageId",
+            "columnName": "caeAndroidPackageId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeAndroidStoreList",
+            "columnName": "caeAndroidStoreList",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caeAndroidSourceCode",
+            "columnName": "caeAndroidSourceCode",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "caeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "CompatibleAppAddJoin",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`appCaeUid` INTEGER NOT NULL, `added` INTEGER NOT NULL, PRIMARY KEY(`appCaeUid`))",
+        "fields": [
+          {
+            "fieldPath": "appCaeUid",
+            "columnName": "appCaeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "added",
+            "columnName": "added",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "appCaeUid"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolDirectoryEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rdUid` INTEGER NOT NULL, `rdUrl` TEXT NOT NULL, `rdInvitePrefix` TEXT NOT NULL, PRIMARY KEY(`rdUid`))",
+        "fields": [
+          {
+            "fieldPath": "rdUid",
+            "columnName": "rdUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rdUrl",
+            "columnName": "rdUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rdInvitePrefix",
+            "columnName": "rdInvitePrefix",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rdUid"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolDirectoryEntryEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, `reLastModified` INTEGER NOT NULL, `reStored` INTEGER NOT NULL, PRIMARY KEY(`reUid`))",
+        "fields": [
+          {
+            "fieldPath": "reUid",
+            "columnName": "reUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reSelf",
+            "columnName": "reSelf",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reXapi",
+            "columnName": "reXapi",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reOneRoster",
+            "columnName": "reOneRoster",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reRespectExt",
+            "columnName": "reRespectExt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reRpId",
+            "columnName": "reRpId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reLastModified",
+            "columnName": "reLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reStored",
+            "columnName": "reStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "reUid"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolDirectoryEntryLangMapEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sdelUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sdelReUid` INTEGER NOT NULL, `sdelLang` TEXT NOT NULL, `sdelRegion` TEXT, `sdelValue` TEXT NOT NULL, `sdelPropId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "sdelUid",
+            "columnName": "sdelUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelReUid",
+            "columnName": "sdelReUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelLang",
+            "columnName": "sdelLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelRegion",
+            "columnName": "sdelRegion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sdelValue",
+            "columnName": "sdelValue",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sdelPropId",
+            "columnName": "sdelPropId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "sdelUid"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolConfigEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rcUid` INTEGER NOT NULL, `dbUrl` TEXT NOT NULL, PRIMARY KEY(`rcUid`))",
+        "fields": [
+          {
+            "fieldPath": "rcUid",
+            "columnName": "rcUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dbUrl",
+            "columnName": "dbUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rcUid"
+          ]
+        }
+      },
+      {
+        "tableName": "NetworkValidationInfoEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nviUrlHash` INTEGER NOT NULL, `nviKey` INTEGER NOT NULL, `nviVaryHeader` TEXT, `nviLastModified` INTEGER NOT NULL, `nviEtag` TEXT, `nviConsistentThrough` INTEGER NOT NULL, `nviLastChecked` INTEGER NOT NULL, PRIMARY KEY(`nviUrlHash`, `nviKey`))",
+        "fields": [
+          {
+            "fieldPath": "nviUrlHash",
+            "columnName": "nviUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviKey",
+            "columnName": "nviKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviVaryHeader",
+            "columnName": "nviVaryHeader",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nviLastModified",
+            "columnName": "nviLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviEtag",
+            "columnName": "nviEtag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nviConsistentThrough",
+            "columnName": "nviConsistentThrough",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nviLastChecked",
+            "columnName": "nviLastChecked",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nviUrlHash",
+            "nviKey"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc352074c4d3b21c12ffcfc1e712890e')"
+    ]
+  }
+}

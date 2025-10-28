@@ -15,8 +15,8 @@ import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
-import world.respect.datalayer.opds.model.LangMapStringValue
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
@@ -24,6 +24,7 @@ import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
+import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
     val json = Json { encodeDefaults = true }
@@ -62,6 +63,7 @@ fun managerServerMain(ns: Namespace) {
         when(ns.getString("subparser_name")) {
             CMD_ADD_SCHOOL -> {
                 val schoolBaseUrl = Url(ns.getString("url"))
+                val rpId = ns.getString("rpId") ?: schoolBaseUrl.host
 
                 val response = httpClient.post(
                     serverUrl.appendEndpointSegments("api/directory/school")
@@ -77,6 +79,10 @@ fun managerServerMain(ns: Namespace) {
                                     xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
                                     oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+                                    //Will be set on server
+                                    rpId = rpId,
+                                    lastModified = Clock.System.now(),
+                                    stored = Clock.System.now(),
                                 ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,

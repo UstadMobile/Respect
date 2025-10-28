@@ -32,7 +32,6 @@ fun WaitingForApprovalScreen(viewModel: WaitingForApprovalViewModel) {
     WaitingForApprovalScreen(
         className = uiState.className,
         isRefreshing = uiState.isRefreshing,
-        onRefresh = viewModel::onRefresh
     )
 }
 
@@ -40,7 +39,6 @@ fun WaitingForApprovalScreen(viewModel: WaitingForApprovalViewModel) {
 fun WaitingForApprovalScreen(
     className: String,
     isRefreshing: Boolean,
-    onRefresh: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -64,7 +62,7 @@ fun WaitingForApprovalScreen(
         if (isRefreshing) {
             CircularProgressIndicator()
         } else {
-            IconButton(onClick = onRefresh) {
+            IconButton(onClick = {  }) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
                     contentDescription = stringResource(Res.string.refresh)

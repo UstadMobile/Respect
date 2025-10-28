@@ -27,9 +27,11 @@ import world.respect.datalayer.db.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.schooldirectory.daos.SchoolConfigEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntryEntityDao
+import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntryLangMapEntityDao
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
+import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryLangMapEntity
 import world.respect.datalayer.db.shared.SharedConverters
 import world.respect.datalayer.db.shared.daos.LangMapEntityDao
 import world.respect.datalayer.db.shared.entities.LangMapEntity
@@ -55,16 +57,17 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
         //SchoolDirectory
         SchoolDirectoryEntity::class,
         SchoolDirectoryEntryEntity::class,
+        SchoolDirectoryEntryLangMapEntity::class,
         SchoolConfigEntity::class,
 
         //Network validation
         NetworkValidationInfoEntity::class,
     ],
-    version = 1,
+    version = 2,
 )
 @TypeConverters(SharedConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)
-abstract class RespectAppDatabase: RoomDatabase() {
+abstract class RespectAppDatabase : RoomDatabase() {
 
     abstract fun getCompatibleAppEntityDao(): CompatibleAppEntityDao
 
@@ -82,7 +85,9 @@ abstract class RespectAppDatabase: RoomDatabase() {
 
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
-    abstract fun getSchoolEntityDao(): SchoolDirectoryEntryEntityDao
+    abstract fun getSchoolDirectoryEntryEntityDao(): SchoolDirectoryEntryEntityDao
+
+    abstract fun getSchoolDirectoryEntryLangMapEntityDao(): SchoolDirectoryEntryLangMapEntityDao
 
     abstract fun getSchoolConfigEntityDao(): SchoolConfigEntityDao
 
@@ -105,7 +110,7 @@ abstract class RespectAppDatabase: RoomDatabase() {
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING",
-    "KotlinNoActualForExpect"
+    "KotlinNoActualForExpect", "RedundantSuppression"
 )
 expect object RespectAppDatabaseConstructor : RoomDatabaseConstructor<RespectAppDatabase> {
     override fun initialize(): RespectAppDatabase

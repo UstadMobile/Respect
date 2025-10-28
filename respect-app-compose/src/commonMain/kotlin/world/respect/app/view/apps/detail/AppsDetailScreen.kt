@@ -52,8 +52,8 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 import world.respect.datalayer.DataReadyState
 
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 
 @Composable
 fun AppsDetailScreen(
@@ -137,7 +137,7 @@ fun AppsDetailScreen(
                     Text(text = stringResource(Res.string.try_it))
                 }
 
-                if(!uiState.isAdded) {
+                if(!uiState.isAdded && uiState.showAddRemoveButton) {
                     OutlinedButton(
                         onClick = onClickAdd,
                         modifier = Modifier.weight(1f)

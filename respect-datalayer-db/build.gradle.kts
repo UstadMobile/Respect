@@ -36,8 +36,6 @@ kotlin {
             implementation(libs.androidx.room.paging)
             implementation(libs.napier)
 
-            api(libs.paging.multiplatform.compose)
-            api(libs.paging.multiplatform.common)
         }
 
         androidMain.dependencies {
@@ -49,7 +47,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-
+            implementation(libs.androidx.sqlite.bundled)
         }
 
         val commonTest by getting {

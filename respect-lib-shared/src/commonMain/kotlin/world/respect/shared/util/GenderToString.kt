@@ -2,7 +2,7 @@ package world.respect.shared.util
 
 import org.jetbrains.compose.resources.StringResource
 
-import world.respect.datalayer.oneroster.rostering.model.OneRosterGenderEnum
+import world.respect.datalayer.oneroster.model.OneRosterGenderEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.*
 

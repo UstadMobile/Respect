@@ -16,7 +16,7 @@ class AddServerManagedDirectoryCallback(
 ): RoomDatabase.Callback() {
 
     override fun onCreate(connection: SQLiteConnection) {
-        val randomInvitePrefix = Random.nextInt(1, 10_000)
+        val randomInvitePrefix = Random.nextInt(1, MAX_INVITE_PREFIX)
         val invitePrefixStr = randomInvitePrefix.toString().padStart(
             MAX_INVITE_PREFIX.toString().length, '0'
         )

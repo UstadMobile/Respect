@@ -6,10 +6,10 @@
     "en-US": "Short learning app description < 80 chars"
   },
   "license": "AGPL-3.0",
-  "website": "$TESTBASEURL/app.html",
-  "icon": "$TESTBASEURL/icon.webp",
-  "learningUnits": "$TESTBASEURL/index.json",
-  "defaultLaunchUri": "$TESTBASEURL/",
+  "website": "http://localhost/opds/case_valid/app.html",
+  "icon": "icon.webp",
+  "learningUnits": "index.json",
+  "defaultLaunchUri": "http://localhost/opds/case_valid/",
 
   "android": {
     "packageId": "org.example.app",
@@ -17,6 +17,6 @@
     "sourceCode": "https://www.github.com/Developer/App"
   },
   "web" : {
-    "url": "$TESTBASEURL"
+    "url": "http://localhost/opds/case_valid"
   }
 }

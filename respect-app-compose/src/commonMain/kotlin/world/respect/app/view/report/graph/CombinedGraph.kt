@@ -28,10 +28,10 @@ import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
 import world.respect.datalayer.school.model.report.ReportSeriesVisualType
 import world.respect.datalayer.school.model.report.YAxisTypes
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.ext.label
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.count

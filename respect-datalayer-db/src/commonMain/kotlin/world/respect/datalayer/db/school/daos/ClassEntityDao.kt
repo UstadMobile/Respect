@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.ClassEntity
+import world.respect.datalayer.school.model.ClazzUidAndName
 
 @Dao
 interface ClassEntityDao {
@@ -82,6 +83,13 @@ interface ClassEntityDao {
             OR ClassEntity.cTeacherInviteCode = :code
     """)
     suspend fun findByInviteCode(code: String): ClassEntity?
+
+    @Query("""
+        SELECT ClassEntity.cGuid, ClassEntity.cTitle
+          FROM ClassEntity
+         WHERE ClassEntity.cGuid IN (:uidList) 
+    """)
+     suspend fun findClazzNamesByUids(uidList: List<Long>): List<ClazzUidAndName>
 
 
     companion object {

@@ -26,11 +26,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.report.graph.CombinedGraph
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.No_data_available
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.blank_template
@@ -98,7 +98,7 @@ private fun ReportTemplateCard(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth()
-            .height(100.dp)  // Fixed height for consistency
+            .height(100.dp)
             .clickable { viewModel.onTemplateSelected(report) },
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -66,6 +66,9 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
+import world.respect.datalayer.db.school.domain.report.query.MockRunReportUseCaseClientImpl
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -130,8 +133,6 @@ import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
-import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
@@ -785,6 +786,9 @@ val appKoinModule = module {
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
+    }
+    single<GenerateReportQueriesUseCase> {
+        GenerateReportQueriesUseCase()
     }
     single<CreateGraphFormatterUseCase> {
         CreateGraphFormatterUseCase()

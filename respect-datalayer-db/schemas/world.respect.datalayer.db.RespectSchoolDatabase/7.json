@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "73f1d1acf9e4389a1974303301d49b1a",
+    "identityHash": "e330f078cccf1972ad56d7e92121efa7",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -897,6 +897,84 @@
         }
       },
       {
+        "tableName": "ReportQueryResult",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` INTEGER NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "rqrUid",
+            "columnName": "rqrUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrReportUid",
+            "columnName": "rqrReportUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrLastModified",
+            "columnName": "rqrLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrLastValidated",
+            "columnName": "rqrLastValidated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrReportSeriesUid",
+            "columnName": "rqrReportSeriesUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrXAxis",
+            "columnName": "rqrXAxis",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrYAxis",
+            "columnName": "rqrYAxis",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrSubgroup",
+            "columnName": "rqrSubgroup",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrTimeZone",
+            "columnName": "rqrTimeZone",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rqrUid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_reportqueryresult_rqrreportuid_rqrtimezone",
+            "unique": false,
+            "columnNames": [
+              "rqrReportUid",
+              "rqrTimeZone"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_reportqueryresult_rqrreportuid_rqrtimezone` ON `${TABLE_NAME}` (`rqrReportUid`, `rqrTimeZone`)"
+          }
+        ]
+      },
+      {
         "tableName": "WriteQueueItemEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimeQueued` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
         "fields": [
@@ -953,7 +1031,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73f1d1acf9e4389a1974303301d49b1a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e330f078cccf1972ad56d7e92121efa7')"
     ]
   }
 }

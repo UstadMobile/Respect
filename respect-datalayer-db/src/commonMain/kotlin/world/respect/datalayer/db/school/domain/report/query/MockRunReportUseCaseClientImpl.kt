@@ -1,4 +1,4 @@
-package world.respect.shared.domain.report.query
+package world.respect.datalayer.db.school.domain.report.query
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

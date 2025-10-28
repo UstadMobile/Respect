@@ -10,7 +10,7 @@ data class ReportSeries(
     val reportSeriesTitle: String = "Series 1",
     val reportSeriesYAxis: Indicator = DefaultIndicators.list.first(),
     val reportSeriesVisualType: ReportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
-    val reportSeriesSubGroup: ReportXAxis? = ReportXAxis.DAY,
+    val reportSeriesSubGroup: ReportXAxis = ReportXAxis.DAY,
     val reportSeriesFilters: List<ReportFilter>? = null
 )
 

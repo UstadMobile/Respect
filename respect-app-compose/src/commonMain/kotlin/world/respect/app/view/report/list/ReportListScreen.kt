@@ -33,10 +33,10 @@ import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.respectRememberPager
 import world.respect.app.view.report.graph.CombinedGraph
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.school.model.Report
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.No_data_available
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete

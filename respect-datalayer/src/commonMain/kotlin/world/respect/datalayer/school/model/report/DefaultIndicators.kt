@@ -10,12 +10,15 @@ object DefaultIndicators {
         Indicator(
             name = "Total content usage duration",
             type = YAxisTypes.DURATION.name,
-            description = "The cumulative amount of time spent by all users engaging with educational content, measured in hours and minutes"
+            description = "The cumulative amount of time spent by all users engaging with educational content, measured in hours and minutes",
+            sql = "SUM(ResultSource.resultDuration)"
+
         ),
         Indicator(
             name = "Average content usage duration per user",
             type = YAxisTypes.DURATION.name,
-            description = "The mean time spent by individual users interacting with learning materials, calculated as total usage time divided by number of active users"
+            description = "The mean time spent by individual users interacting with learning materials, calculated as total usage time divided by number of active users",
+            sql = "SUM(ResultSource.resultDuration) / COUNT(DISTINCT ResultSource.contextRegistrationHash)"
         ),
 
         // Percentage Metrics

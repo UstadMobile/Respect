@@ -1,4 +1,4 @@
-package world.respect.shared.domain.report.query
+package world.respect.datalayer.db.school.domain.report.query
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
@@ -7,9 +7,9 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.db.shared.entities.ReportQueryResult
-import world.respect.datalayer.http.headers.directives.directivesToMap
-import world.respect.shared.domain.report.ext.asStatementReportRow
+import world.respect.datalayer.db.school.domain.report.ext.asStatementReportRow
+import world.respect.datalayer.db.school.domain.report.ext.directivesToMap
+import world.respect.datalayer.db.school.entities.ReportQueryResult
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.report.ReportSeries
 import world.respect.datalayer.school.model.report.StatementReportRow

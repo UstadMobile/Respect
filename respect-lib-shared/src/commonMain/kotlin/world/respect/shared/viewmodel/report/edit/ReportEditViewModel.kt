@@ -302,8 +302,7 @@ class ReportEditViewModel(
                             reportSeriesUid = newUid,
                             reportSeriesTitle = getString(resource = Res.string.series) + newUid,
                             reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
-                            reportSeriesSubGroup = null,
-                            reportSeriesYAxis = defaultIndicator // Use the type-matched default
+                            reportSeriesYAxis = defaultIndicator
                         ),
                     )
                 )

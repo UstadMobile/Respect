@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "73f1d1acf9e4389a1974303301d49b1a",
+    "identityHash": "e330f078cccf1972ad56d7e92121efa7",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -491,12 +491,18 @@
       },
       {
         "tableName": "ReportEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rGuidHash` INTEGER NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuidHash`))",
         "fields": [
           {
             "fieldPath": "rGuid",
             "columnName": "rGuid",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rGuidHash",
+            "columnName": "rGuidHash",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -545,49 +551,67 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "rGuid"
+            "rGuidHash"
           ]
         }
       },
       {
         "tableName": "IndicatorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`indicatorId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, `sql` TEXT NOT NULL, PRIMARY KEY(`indicatorId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iName` TEXT NOT NULL, `iDescription` TEXT NOT NULL, `iType` TEXT NOT NULL, `iSql` TEXT NOT NULL, `iStored` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, PRIMARY KEY(`iGuidHash`))",
         "fields": [
           {
-            "fieldPath": "indicatorId",
-            "columnName": "indicatorId",
+            "fieldPath": "iGuid",
+            "columnName": "iGuid",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "name",
-            "columnName": "name",
+            "fieldPath": "iGuidHash",
+            "columnName": "iGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iName",
+            "columnName": "iName",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "description",
-            "columnName": "description",
+            "fieldPath": "iDescription",
+            "columnName": "iDescription",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "type",
-            "columnName": "type",
+            "fieldPath": "iType",
+            "columnName": "iType",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "sql",
-            "columnName": "sql",
+            "fieldPath": "iSql",
+            "columnName": "iSql",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStored",
+            "columnName": "iStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iLastModified",
+            "columnName": "iLastModified",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "indicatorId"
+            "iGuidHash"
           ]
         }
       },
@@ -873,6 +897,84 @@
         }
       },
       {
+        "tableName": "ReportQueryResult",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` INTEGER NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "rqrUid",
+            "columnName": "rqrUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrReportUid",
+            "columnName": "rqrReportUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrLastModified",
+            "columnName": "rqrLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrLastValidated",
+            "columnName": "rqrLastValidated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrReportSeriesUid",
+            "columnName": "rqrReportSeriesUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrXAxis",
+            "columnName": "rqrXAxis",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrYAxis",
+            "columnName": "rqrYAxis",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrSubgroup",
+            "columnName": "rqrSubgroup",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rqrTimeZone",
+            "columnName": "rqrTimeZone",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rqrUid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_reportqueryresult_rqrreportuid_rqrtimezone",
+            "unique": false,
+            "columnNames": [
+              "rqrReportUid",
+              "rqrTimeZone"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_reportqueryresult_rqrreportuid_rqrtimezone` ON `${TABLE_NAME}` (`rqrReportUid`, `rqrTimeZone`)"
+          }
+        ]
+      },
+      {
         "tableName": "WriteQueueItemEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimeQueued` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
         "fields": [
@@ -929,7 +1031,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73f1d1acf9e4389a1974303301d49b1a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e330f078cccf1972ad56d7e92121efa7')"
     ]
   }
 }

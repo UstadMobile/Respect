@@ -13,15 +13,18 @@ import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.model.report.ReportOptions
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
+import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_template
 import world.respect.shared.navigation.NavCommand
@@ -50,7 +53,7 @@ class ReportTemplateListViewModel(
     val uiState = _uiState.asStateFlow()
     private val activeUserPersonUid: Long = 0
     private val schoolDataSource: SchoolDataSource by inject()
-
+    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
     init {
         _appUiState.update { prev ->
@@ -61,10 +64,30 @@ class ReportTemplateListViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.reportDataSource.allReportsAsFlow(template = true).collect {
+            initializeTemplatesAndObserve()
+        }
+    }
+
+    private suspend fun initializeTemplatesAndObserve() {
+        try {
+            schoolDataSource.reportDataSource.initializeTemplates {
+                schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Report.TABLE_ID).toString()
+            }
+            schoolDataSource.reportDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                listParams = ReportDataSource.GetListParams(),
+                template = true
+            ).collect { templates ->
                 _uiState.update { state ->
-                    state.copy(templates = it)
+                    state.copy(templates = templates)
                 }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _uiState.update {
+                it.copy(
+                    error = e.message ?: "Error initializing templates"
+                )
             }
         }
     }

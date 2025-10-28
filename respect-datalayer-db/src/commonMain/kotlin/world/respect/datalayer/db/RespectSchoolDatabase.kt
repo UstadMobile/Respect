@@ -18,13 +18,13 @@ import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.db.shared.SharedConverters
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
-import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.AssignmentAssigneeRefEntityDao
 import world.respect.datalayer.db.school.daos.AssignmentEntityDao
 import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntityDao
-import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
+import world.respect.datalayer.db.school.daos.ReportQueryResultDao
 import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.AssignmentAssigneeRefEntity
@@ -33,8 +33,10 @@ import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefE
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
+import world.respect.datalayer.db.school.entities.IndicatorEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
+import world.respect.datalayer.db.school.entities.ReportQueryResult
 import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 
@@ -58,6 +60,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         AssignmentEntity::class,
         AssignmentAssigneeRefEntity::class,
         AssignmentLearningResourceRefEntity::class,
+        ReportQueryResult::class,
         WriteQueueItemEntity::class,
     ],
     version = 7,
@@ -95,6 +98,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getAssignmentLearningResourceRefEntityDao(): AssignmentLearningResourceRefEntityDao
 
     abstract fun getWriteQueueItemEntityDao(): WriteQueueItemEntityDao
+
+    abstract fun reportRunResultRowDao(): ReportQueryResultDao
 
 }
 

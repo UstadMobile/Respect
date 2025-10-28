@@ -102,7 +102,8 @@ fun AppLauncherScreen(
                     text = uiState.emptyListDescription?.let {
                         uiTextStringResource(it)
                     } ?: "",
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
         } else {

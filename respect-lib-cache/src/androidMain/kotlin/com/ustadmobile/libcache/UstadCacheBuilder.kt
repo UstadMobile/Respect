@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseAndroid
 import com.ustadmobile.libcache.logging.UstadCacheLogger
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -29,15 +30,20 @@ class UstadCacheBuilder(
 ) {
 
     fun build(): UstadCache {
+        val dbVal = db ?: Room.databaseBuilder<UstadCacheDb>(appContext, dbName)
+            .addCallback(AddNewEntryTriggerCallback())
+            .addCallback(AddNewEntryTriggerCallback())
+            .build()
         return UstadCacheImpl(
             fileSystem = SystemFileSystem,
             pathsProvider = cachePathsProvider,
             logger =  logger,
             sizeLimit = sizeLimit,
             xxStringHasher = xxStringHasher,
-            db = db ?: Room.databaseBuilder<UstadCacheDb>(appContext, dbName)
-                .addCallback(AddNewEntryTriggerCallback())
-                .build()
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseAndroid(
+                appContext = appContext, db = dbVal, xxStringHasher = xxStringHasher,
+            ),
+            db = dbVal
         )
     }
 

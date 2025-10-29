@@ -6,42 +6,75 @@ import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
+import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
+import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.RespectRealmDataSource
-import world.respect.datalayer.RespectRealmDataSourceLocal
+import world.respect.datalayer.RespectAppDataSourceLocal
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
-import world.respect.datalayer.db.RespectRealmDataSourceDb
-import world.respect.datalayer.db.RespectRealmDatabase
-import world.respect.datalayer.realmdirectory.RealmDirectoryDataSourceLocal
-import world.respect.datalayer.respect.model.RespectRealm
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import world.respect.server.domain.realm.add.AddRealmUseCase
-import world.respect.server.domain.realm.add.AddServerManagedDirectoryCallback
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithUsernameAndPasswordDbImpl
-import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithUsernameAndPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseCase
-import world.respect.shared.domain.account.setpassword.SetPasswordUseDbImpl
-import world.respect.shared.domain.realm.RespectRealmPath
+import world.respect.server.account.invite.GetInviteInfoUseCaseServer
+import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
+import world.respect.server.domain.school.add.AddSchoolUseCase
+import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
+import world.respect.shared.domain.account.RespectAccount
+import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
+import world.respect.shared.domain.account.passkey.DecodeUserHandleUseCaseImpl
+import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysDbImpl
+import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
+import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCase
+import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseJvm
+import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
+import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
+import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
+import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
 
 fun serverKoinModule(
     config: ApplicationConfig,
+    dataDir: File = config.absoluteDataDir()
 ) = module {
-
-    val dataDir = config.absoluteDataDir()
 
     single<RespectAppDatabase> {
         val dbFile = File(dataDir, APP_DB_FILENAME)
         Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
+            .addCommonMigrations()
             .build()
     }
 
@@ -55,11 +88,21 @@ fun serverKoinModule(
         XXStringHasherCommonJvm()
     }
 
+    single<UidNumberMapper> {
+        XXHashUidNumberMapper(xxStringHasher = get())
+    }
+
     single<PrimaryKeyGenerator> {
         PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
     }
+    single<SchoolDirectoryDataSourceLocal> {
+        SchoolDirectoryDataSourceDb(
+            respectAppDb = get(),
+            xxStringHasher = get()
+        )
+    }
 
-    single<RespectAppDataSource> {
+    single<RespectAppDataSourceLocal> {
         RespectAppDataSourceDb(
             respectAppDatabase = get(),
             json = get(),
@@ -68,68 +111,196 @@ fun serverKoinModule(
         )
     }
 
-    single<AddRealmUseCase> {
-        AddRealmUseCase(
-            directoryDataSource = get<RespectAppDataSource>().realmDirectoryDataSource as RealmDirectoryDataSourceLocal
+    single<RespectAppDataSource> {
+        get<RespectAppDataSourceLocal>()
+    }
+
+    single<FilterUsernameUseCase> {
+        FilterUsernameUseCase()
+    }
+
+    single<AddSchoolUseCase> {
+        AddSchoolUseCase(
+            directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
+            schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
+            encryptPasswordUseCase = get(),
         )
     }
 
+    single<DecodeUserHandleUseCase> {
+        DecodeUserHandleUseCaseImpl()
+    }
+
+    single<LoadAaguidJsonUseCase> {
+        LoadAaguidJsonUseCaseJvm(
+            json = get(),
+        )
+    }
+
+    single<GetPasskeyProviderInfoUseCase> {
+        GetPasskeyProviderInfoUseCaseImpl(
+            json = get(),
+            loadAaguidJsonUseCase = get(),
+        )
+    }
+
+    single<EncryptPersonPasswordUseCase> {
+        EncryptPersonPasswordUseCaseImpl()
+    }
+
     /*
-     * Realm scope: realm id = the full realm url as per RespectRealm.self
+     * School scope: used as the basis for virtual hosting.
      */
-    scope<RespectRealm> {
-        scoped<RespectRealmPath> {
-            val realmDirName = Url(id).sanitizedForFilename()
-            val realmDirFile = File(dataDir, realmDirName).also {
+    scope<SchoolDirectoryEntry> {
+        fun Scope.schoolUrl(): Url = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+
+        scoped<UsernameSuggestionUseCase> {
+            UsernameSuggestionUseCaseServer(
+                schoolDb = get(),
+                filterUsernameUseCase = get(),
+            )
+        }
+        scoped<VerifySignInWithPasskeyUseCase> {
+            VerifySignInWithPasskeyUseCase(
+                schoolDb = get(),
+                json = get(),
+                decodeUserHandleUseCase = get(),
+            )
+        }
+        scoped<RespectSchoolPath> {
+            val schoolDirName = schoolUrl().sanitizedForFilename()
+            val schoolDirFile = File(dataDir, schoolDirName).also {
                 if(!it.exists())
                     it.mkdirs()
             }
 
-            RespectRealmPath(
-                path = Path(realmDirFile.absolutePath)
+            RespectSchoolPath(
+                path = Path(schoolDirFile.absolutePath)
             )
         }
 
-        scoped<RespectRealmDatabase> {
-            val realmPath: RespectRealmPath = get()
+        scoped<RespectSchoolDatabase> {
+            val schoolPath: RespectSchoolPath = get()
             val appDb: RespectAppDatabase = get()
             val xxHasher: XXStringHasher = get()
 
-            val realmConfig = runBlocking {
-                appDb.getRealmConfigEntityDao().findByUid(xxHasher.hash(id))
-            } ?: throw IllegalStateException("Realm config not found")
+            val schoolConfig = runBlocking {
+                appDb.getSchoolConfigEntityDao().findByUid(xxHasher.hash(schoolUrl().toString()))
+            } ?: throw IllegalStateException("School config not found for $id")
 
-            val realmPathFile = File(realmPath.path.toString())
-            val dbFile = realmPathFile.resolve(realmConfig.dbUrl)
+            val schoolConfigFile = File(schoolPath.path.toString())
+            val dbFile = schoolConfigFile.resolve(schoolConfig.dbUrl)
 
-            Room.databaseBuilder<RespectRealmDatabase>(dbFile.absolutePath)
+            Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
+                .addCommonMigrations()
+                .addMigrations(MIGRATION_2_3(false))
                 .build()
         }
 
-        scoped<SetPasswordUseCase> {
-            SetPasswordUseDbImpl(
-                realmDb = get(),
-                xxHash = get()
-            )
+        scoped<ValidateAuthorizationUseCase> {
+            ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
         }
 
-        scoped<RespectRealmDataSourceLocal> {
-            RespectRealmDataSourceDb(realmDb = get(), xxStringHasher = get())
-        }
-
-        scoped<RespectRealmDataSource> {
-            get<RespectRealmDataSourceLocal>()
-        }
-
-        scoped<GetTokenAndUserProfileWithUsernameAndPasswordUseCase> {
-            GetTokenAndUserProfileWithUsernameAndPasswordDbImpl(
-                realmDb = get(),
+        scoped<GetTokenAndUserProfileWithCredentialUseCase> {
+            GetTokenAndUserProfileWithCredentialDbImpl(
+                schoolUrl = schoolUrl(),
+                schoolDb = get(),
                 xxHash = get(),
-                personDataSource = get<RespectRealmDataSource>().personDataSource,
+                verifyPasskeyUseCase = get(),
+                respectAppDataSource = get(),
+                authenticatePasswordUseCase = get(),
             )
+        }
 
+        scoped<AuthenticatePasswordUseCase> {
+            AuthenticatePasswordUseCaseDbImpl(
+                schoolDb = get(),
+                encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<GetActivePersonPasskeysUseCase> {
+            GetActivePersonPasskeysDbImpl(
+                schoolDb = get(),
+                xxStringHasher = get(),
+            )
+        }
+
+        scoped<RevokePasskeyUseCase> {
+            RevokePersonPasskeyUseCaseDbImpl(
+                schoolDb = get(),
+                xxStringHasher = get(),
+            )
+        }
+
+        scoped<SchoolPrimaryKeyGenerator> {
+            SchoolPrimaryKeyGenerator(
+                PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
+            )
+        }
+
+        scoped<GetInviteInfoUseCase> {
+            GetInviteInfoUseCaseServer(
+                schoolDb = get(),
+            )
+        }
+
+        scoped<RedeemInviteUseCase> {
+            val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
+
+            RedeemInviteUseCaseDb(
+                schoolDb = get(),
+                schoolUrl = schoolScopeId.schoolUrl,
+                schoolPrimaryKeyGenerator = get(),
+                getTokenAndUserProfileUseCase = get(),
+                schoolDataSource = { schoolUrl, user ->
+                    getKoin().getOrCreateScope<RespectAccount>(
+                        RespectAccountScopeId(schoolUrl, user).scopeId,
+                    ).get()
+                },
+                uidNumberMapper = get(),
+                json = get(),
+                getPasskeyProviderInfoUseCase = get(),
+                encryptPersonPasswordUseCase = get(),
+            )
         }
     }
+
+    /*
+     * AccountScope: as per the client, the Account Scope is linked to a parent School scope.
+     *
+     * All server-side dependencies in the account scope are cheap wrappers e.g. the
+     * SchoolDataSource wrapper (which is tied to a specific account guid) is kept in the AccountScope,
+     * but the RespectSchoolDatabase which has the actual DB connection is kept in the school scope.
+     *
+     * Dependencies in the account scope use factory so they are not retained in memory
+     */
+    scope<RespectAccount> {
+        factory<SchoolDataSourceLocal> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            val directoryEntryScopeId = SchoolDirectoryEntryScopeId(
+                accountScopeId.schoolUrl, null
+            )
+
+            linkTo(
+                getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+                    directoryEntryScopeId.scopeId
+                )
+            )
+
+            SchoolDataSourceDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId
+            )
+        }
+
+        factory<SchoolDataSource> {
+            get<SchoolDataSourceLocal>()
+        }
+    }
+
 
 }

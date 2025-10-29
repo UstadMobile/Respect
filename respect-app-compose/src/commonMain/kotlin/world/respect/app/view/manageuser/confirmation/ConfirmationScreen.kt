@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -57,16 +58,13 @@ fun ConfirmationScreen(
 
         ListItem(
             headlineContent = {
-                Text(text = uiState.inviteInfo?.schoolName ?: "")
+                Text(text = uiState.inviteInfo?.className ?: "")
             },
             supportingContent = {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(text = uiState.inviteInfo?.className ?: "")
-
-                    Text(text = uiState.inviteInfo?.classGUIDRef?.sourcedId ?: "")
-
+                    Text(text = uiState.inviteInfo?.classGuid ?: "")
                 }
             }
         )
@@ -92,8 +90,7 @@ fun ConfirmationScreen(
         }
 
         if (uiState.isTeacherInvite) {
-
-            OutlinedButton(
+            Button(
                 onClick = onClickNext,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding()
             ) {

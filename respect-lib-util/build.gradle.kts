@@ -13,6 +13,8 @@ kotlin {
         }
     }
 
+    jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
     jvm()
 
     /*
@@ -24,6 +26,13 @@ kotlin {
             // put your Multiplatform dependencies here
             api(libs.uri.kmp)
             api(libs.ktor.client.core)
+            implementation(libs.kotlinx.date.time)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.acra.core)
         }
 
         jvmMain.dependencies {

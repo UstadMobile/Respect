@@ -2,15 +2,17 @@ package world.respect.shared.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import io.ktor.http.Url
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.koin.mp.KoinPlatform.getKoin
@@ -18,14 +20,10 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.opds.model.LangMapStringValue
-import world.respect.datalayer.respect.model.RespectRealm
-import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.RespectAppRoute
-import world.respect.shared.util.systemTimeInMillis
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 
@@ -35,7 +33,7 @@ abstract class RespectViewModel(
 
     protected val _appUiState = MutableStateFlow(AppUiState())
 
-    val appUiState: Flow<AppUiState> = _appUiState.asStateFlow()
+    val appUiState: StateFlow<AppUiState> = _appUiState.asStateFlow()
 
     protected val _navCommandFlow = MutableSharedFlow<NavCommand>(
         replay = 1,
@@ -44,18 +42,6 @@ abstract class RespectViewModel(
     )
 
     val navCommandFlow: Flow<NavCommand> = _navCommandFlow.asSharedFlow()
-
-    //Placeholder: will be provided via an AccountManager that will use multiplatform settings.
-    protected val activeAccount = RespectAccount(
-        userSourcedId = "testacct",
-        realm = RespectRealm(
-            name = LangMapStringValue("School"),
-            self = Url("https://example.org/respect-realm.json"),
-            xapi = Url("https://example.org/xapi"),
-            oneRoster = Url("https://example.org/oneroster"),
-            respectExt = Url("https://example.org/respect-ext"),
-        )
-    )
 
     /**
      * Shorthand to make it easier to update the loading state
@@ -89,12 +75,10 @@ abstract class RespectViewModel(
      * The result from sendResultAndPop should be collected using filteredResultFlowForKey
      *
      * @param destKey the argument key name (used to avoid conflicts)
-     * @param destScreen the screen to pop back to
      * @param result the result being returned
      */
     protected fun sendResultAndPop(
         destKey: String,
-        destScreen: RespectAppRoute,
         result: Any?,
     ) {
         val navResultReturner: NavResultReturner = getKoin().get()
@@ -105,8 +89,7 @@ abstract class RespectViewModel(
                 result = result,
             )
         )
-
-        _navCommandFlow.tryEmit(NavCommand.Pop(destScreen, false))
+        _navCommandFlow.tryEmit(NavCommand.PopUp())
     }
 
     /**
@@ -171,7 +154,7 @@ abstract class RespectViewModel(
             loadFn(DataLoadParams(onlyIfCached = true)).also {
                 uiUpdateFn(it)
             }
-        }catch(e: Throwable) {
+        }catch(_: Throwable) {
             //Log it
             null
         }
@@ -192,6 +175,31 @@ abstract class RespectViewModel(
     init {
         if(lastNavResultTimestampCollected == 0L)
             lastNavResultTimestampCollected = systemTimeInMillis()
+    }
+
+    /**
+     * Run the given block using viewModelScope.launch. When the block is running set app ui state
+     * to loading.
+     *
+     * @param runIfAlreadyLoading by default, if loading is already in progress, the block will not
+     *        be run.
+     * @param block suspended function to run
+     */
+    fun launchWithLoadingIndicator(
+        runIfAlreadyLoading: Boolean = false,
+        block: suspend () -> Unit,
+    ) {
+        if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE)
+            return
+
+        viewModelScope.launch {
+            loadingState = LoadingUiState.INDETERMINATE
+            try {
+                block()
+            }finally {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
+        }
     }
 
     companion object {

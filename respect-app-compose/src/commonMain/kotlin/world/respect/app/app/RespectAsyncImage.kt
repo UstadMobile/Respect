@@ -14,7 +14,7 @@ fun RespectAsyncImage(
     uri: String?,
     contentDescription: String,
     contentScale: ContentScale,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
 ) {
     val placeholderPainter: Painter = rememberVectorPainter(image = Icons.Default.Image)
 

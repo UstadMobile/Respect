@@ -7,5 +7,5 @@ val LEARNING_UNIT_MIME_TYPES = listOf("text/html", "application/xml", "applicati
 /**
  * Path from the Realm root directory to the respect-realm json
  */
-val RESPECT_REALM_JSON_PATH = ".well-known/respect-realm.json"
+val RESPECT_SCHOOL_JSON_PATH = ".well-known/respect-school.json"
 

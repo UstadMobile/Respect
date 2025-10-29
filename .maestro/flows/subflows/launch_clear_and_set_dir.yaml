@@ -1,0 +1,7 @@
+appId: world.respect.app
+---
+
+- launchApp:
+    appId: world.respect.app
+    arguments:
+      respect_directory: ""

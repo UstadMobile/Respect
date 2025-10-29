@@ -6,22 +6,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_my_school
-import world.respect.shared.generated.resources.already_have_account
 import world.respect.shared.generated.resources.enter_invite_code_message
 import world.respect.shared.generated.resources.invite_code_label
 import world.respect.shared.generated.resources.next
@@ -70,7 +69,13 @@ fun JoinClazzWithCodeScreen(
                 )
             },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { onClickNext() }
+            ),
             modifier = Modifier.fillMaxWidth(),
             isError = uiState.errorMessage != null,
             supportingText = uiState.errorMessage?.let {

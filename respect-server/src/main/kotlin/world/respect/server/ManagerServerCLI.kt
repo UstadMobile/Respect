@@ -15,15 +15,16 @@ import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
-import world.respect.datalayer.opds.model.LangMapStringValue
-import world.respect.datalayer.respect.model.RespectRealm
-import world.respect.libutil.ext.resolve
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.lib.opds.model.LangMapStringValue
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
-import world.respect.server.domain.realm.add.AddRealmUseCase
-import world.respect.server.domain.realm.add.AddRealmUseCase.Companion.DEFAULT_ADMIN_USERNAME
+import world.respect.server.domain.school.add.AddSchoolUseCase
+import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
+import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
     val json = Json { encodeDefaults = true }
@@ -60,24 +61,33 @@ fun managerServerMain(ns: Namespace) {
 
     runBlocking {
         when(ns.getString("subparser_name")) {
-            CMD_ADD_REALM -> {
-                val realmBaseUrl = Url(ns.getString("url"))
+            CMD_ADD_SCHOOL -> {
+                val schoolBaseUrl = Url(ns.getString("url"))
+                val rpId = ns.getString("rpId") ?: schoolBaseUrl.host
 
-                val response = httpClient.post(serverUrl.resolve("api/directory/admin/add-realm")) {
+                val response = httpClient.post(
+                    serverUrl.appendEndpointSegments("api/directory/school")
+                ) {
                     header(HttpHeaders.Authorization, authHeader)
                     contentType(ContentType.Application.Json)
                     setBody(
-                        AddRealmUseCase.AddRealmRequest(
-                            realm = RespectRealm(
-                                name = LangMapStringValue(ns.getString("name")),
-                                self = realmBaseUrl,
-                                xapi = realmBaseUrl.resolve("api/xapi"),
-                                oneRoster = realmBaseUrl.resolve("api/oneroster"),
-                                respectExt = realmBaseUrl.resolve("api/respect-ext"),
-                            ),
-                            dbUrl = ns.getString("dburl") ?: realmBaseUrl.sanitizedForFilename(),
-                            adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,
-                            adminPassword = ns.getString("adminpassword"),
+                        listOf(
+                            AddSchoolUseCase.AddSchoolRequest(
+                                school = SchoolDirectoryEntry(
+                                    name = LangMapStringValue(ns.getString("name")),
+                                    self = schoolBaseUrl,
+                                    xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
+                                    oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
+                                    respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
+                                    //Will be set on server
+                                    rpId = rpId,
+                                    lastModified = Clock.System.now(),
+                                    stored = Clock.System.now(),
+                                ),
+                                dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
+                                adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,
+                                adminPassword = ns.getString("adminpassword"),
+                            )
                         )
                     )
                 }

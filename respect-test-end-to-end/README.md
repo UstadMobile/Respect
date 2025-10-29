@@ -2,56 +2,18 @@
 
 End-to-end tests that start a blank new server/app and test functionality end-to-end.
 
-* Android-maestro - Android end-to-end tests built using [Maestro](https://maestro.mobile.dev)
-
-**To Run Respect-test-end-to-end in Android-Maestro Test**
-
-1) Install Respect app on device
-2) Run Maestro test
-
-```
-cd respect-test-end-to-end/android-maestro
-```
-
-   a) To run all tests in the e2e-tests folder:
-
-```
-./run_test.sh
-```
-  b) To run a specific test file:
-
-```
-./run_test.sh e2e-tests/<test_file_name>.yaml
-```
+* [Maestro](/maestro) - End-to-end tests built using [Maestro](https://maestro.mobile.dev)
 
 ## Scenarios
 
-### 1 : Login to Respect
+### 1 : Apps
 
-1.1 [User Can Login to Respect App with school name](test-description/001_001_user_login_to_app_with_school_name_test_description.md)
+1.1 [User Can Browse Apps and lessons ](test-description/001_browse_lessons_test_description.md)
 
-1.2 [User Can Login to Respect App with school link provided by admin](test-description/001_002_user_login_to_app_with_school_link_provided_by_admin_test_description.md)
+### 2 : Assignments
 
-1.3 [Parent user joins class using invite code](test-description/001_003_Parent_user_join_class_using_invitecode_test_description.md)
+### 3 : Classes
 
-1.4 [Child user joins class using invite code](test-description/001_004_child_user_join_class_using_invitecode_test_description.md)
+### 4 : Reports
 
-### 2 : Apps
-
-2.1 [User Can Browse Apps and lessons ](test-description/002_browse_lessons_test_description.md)
-
-### 3 : Assignments
-
-3.1 [Teacher Assigns a Learning Unit as Homework via Assignments Tab](test-description/003_admin_user_assigns_assignment_to_a_class_test_description.md)
-
-### 4 : Classes
-
-4.1 [Admin Creates a Class](test-description/004_admin_user_adds_classes_test_description.md)
-
-### 5 : Reports
-
-5.1 [Admin Creates a Report](test-description/005_admin_user_creates_a_report_test_description.md)
-
-### 6 : People
-
-6.1 [Admin Creates a Profile](test-description/006_admin_user_adds_person_account_test_description.md)
+4.1 [User Can Create Reports ](test-description/004_create_report_test_description.md)

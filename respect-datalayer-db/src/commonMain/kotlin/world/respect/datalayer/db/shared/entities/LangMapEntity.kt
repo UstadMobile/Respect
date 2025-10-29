@@ -41,7 +41,7 @@ data class LangMapEntity(
         RESPECT_MANIFEST(RESPECT_MANIFEST_PARENT_ID),
         OPDS_FEED(OPDS_FEED_PARENT_ID),
         OPDS_PUBLICATION(ODPS_PUBLICATION_PARENT_ID),
-        RESPECT_REALM(RESPECT_REALM_PARENT_ID),
+        RESPECT_SCHOOL_DIRECTORY_ENTRY(RESPECT_SCHOOL_DIRECTORY_ENTRY_ID),
     }
 
     enum class PropType(val id: Int) {
@@ -51,7 +51,7 @@ data class LangMapEntity(
 
         OPDS_PUB_TITLE(4), OPDS_PUB_SORT_AS(5), OPDS_PUB_SUBTITLE(6),
 
-        RESPECT_REALM_NAME(7),
+        RESPECT_SCHOOL_DIRECTORY_ENTRY_NAME(7),
     }
 
 
@@ -63,7 +63,7 @@ data class LangMapEntity(
 
         const val ODPS_PUBLICATION_PARENT_ID = 3
 
-        const val RESPECT_REALM_PARENT_ID = 4
+        const val RESPECT_SCHOOL_DIRECTORY_ENTRY_ID = 4
 
         const val LANG_NONE = ""
 

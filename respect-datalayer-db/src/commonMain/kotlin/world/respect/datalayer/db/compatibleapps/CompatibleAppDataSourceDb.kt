@@ -13,6 +13,7 @@ import world.respect.datalayer.db.compatibleapps.adapters.asModel
 import world.respect.libxxhash.XXStringHasher
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -21,16 +22,19 @@ import world.respect.datalayer.db.compatibleapps.adapters.combineWithLangMaps
 import world.respect.datalayer.db.compatibleapps.entities.CompatibleAppAddJoin
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.networkvalidation.NetworkDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 
 class CompatibleAppDataSourceDb(
     private val respectDb: RespectAppDatabase,
     private val json: Json,
     private val xxStringHasher: XXStringHasher,
-): CompatibleAppsDataSourceLocal, NetworkDataSourceValidationHelper {
+): CompatibleAppsDataSourceLocal, BaseDataSourceValidationHelper {
 
-    override suspend fun getValidationInfo(url: Url): NetworkValidationInfo? {
+    override suspend fun getValidationInfo(
+        url: Url,
+        requestHeaders: IHttpHeaders,
+    ): NetworkValidationInfo? {
         return respectDb.getCompatibleAppEntityDao().getNetworkValidationInfo(
             xxStringHasher.hash(url.toString())
         )?.asNetworkValidationInfo()

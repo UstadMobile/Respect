@@ -24,8 +24,10 @@ kotlin {
         commonMain.dependencies  {
             implementation(kotlin("stdlib-common"))
             api(projects.respectLibIhttpCore)
+            implementation(projects.respectLibOpdsModel)
             implementation(projects.respectLibIhttpIostreams)
             implementation(projects.respectLibXxhash)
+            implementation(projects.respectLibUtil)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.atomicfu)
             implementation(libs.kotlinx.io.core)
@@ -38,6 +40,8 @@ kotlin {
             implementation(projects.respectLibIhttpOkhttp)
             implementation(libs.androidx.room.runtime)
             implementation(libs.kotlinx.date.time)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
         }
 
         commonTest.dependencies {
@@ -55,11 +59,23 @@ kotlin {
             implementation(libs.turbine)
             implementation(libs.androidx.sqlite.bundled)
             implementation(projects.respectLibIhttpNanohttpd)
+
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.netty)
+            implementation(libs.ktor.server.content.negotiation)
+            implementation(libs.ktor.server.conditional.headers)
+            implementation(libs.ktor.server.auto.head.response)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.json)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.room.ktx)
             implementation(libs.androidx.lifecycle.common.java8)
+            implementation(libs.androidx.work.runtime)
+            implementation(libs.koin.android)
         }
     }
 }

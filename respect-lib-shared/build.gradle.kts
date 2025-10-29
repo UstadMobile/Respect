@@ -32,6 +32,9 @@ kotlin {
             api(projects.respectDatalayer)
             api(projects.respectCredentials)
             api(projects.respectLibUtil)
+            api(projects.respectDatalayerDb)
+            api(projects.respectDatalayerHttp)
+
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
             implementation(projects.respectLibPrimarykeygen)
@@ -51,7 +54,16 @@ kotlin {
 
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+
             implementation(libs.multiplatformsettings)
+            implementation(libs.napier)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.preference)
+            implementation(libs.androidx.preference.ktx)
+            implementation(libs.acra.core)
+            implementation(libs.libphonenumber.android)
         }
 
         jvmMain.dependencies {
@@ -61,9 +73,13 @@ kotlin {
             implementation(libs.jsoup)
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.webauthn4j.core)
+            implementation(libs.libphonenumber.google)
         }
 
         jvmTest.dependencies {
+            implementation(projects.respectLibTest)
+            implementation(projects.respectLibSharedSe)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
@@ -71,6 +87,7 @@ kotlin {
             implementation(libs.ktor.server.conditional.headers)
             implementation(libs.ktor.client.core)
             implementation(libs.koin.test)
+            implementation(libs.mockito.kotlin)
         }
 
         commonTest.dependencies {

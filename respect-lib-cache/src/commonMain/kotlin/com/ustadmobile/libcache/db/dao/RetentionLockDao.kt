@@ -36,4 +36,11 @@ abstract class RetentionLockDao {
     """)
     abstract suspend fun findByKey(urlKey: String): List<RetentionLock>
 
+    @Query("""
+        SELECT RetentionLock.*
+          FROM RetentionLock
+         WHERE RetentionLock.lockPublicationUid = :publicationUid
+    """)
+    abstract suspend fun findByPublicationUid(publicationUid: Long): List<RetentionLock>
+
 }

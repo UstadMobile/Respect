@@ -8,9 +8,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.datalayer.RespectRealmDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.realm.model.Person
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
@@ -19,6 +20,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
@@ -55,7 +57,7 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
-            respectAccountManager.activeAccountAndPersonFlow.collect { accountAndPerson ->
+            respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
                     prev.copy(selectedAccount = accountAndPerson)
                 }
@@ -64,7 +66,7 @@ class AccountListViewModel(
 
         viewModelScope.launch {
             respectAccountManager.accounts.combine(
-                respectAccountManager.activeAccountFlow
+                respectAccountManager.selectedAccountFlow
             ) { storedAccounts, activeAccount ->
                 Pair(storedAccounts, activeAccount)
             }.collectLatest { (storedAccounts, activeAccount) ->
@@ -77,7 +79,7 @@ class AccountListViewModel(
                     emittedNavToGetStartedCommand = true
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            GetStartedScreen, clearBackStack = true
+                            GetStartedScreen(), clearBackStack = true
                         )
                     )
 
@@ -96,10 +98,11 @@ class AccountListViewModel(
                             RespectAccountAndPerson(
                                 account = it,
                                 person = Person(
-                                    guid = it.userSourcedId,
+                                    guid = it.userGuid,
                                     givenName = "",
                                     familyName = "",
                                     roles = emptyList(),
+                                    gender = PersonGenderEnum.UNSPECIFIED,
                                 )
                             )
                         }
@@ -109,9 +112,9 @@ class AccountListViewModel(
                 storedAccountList.forEach { account ->
                     launch {
                         val accountScope = respectAccountManager.getOrCreateAccountScope(account)
-                        val dataSource: RespectRealmDataSource = accountScope.get()
+                        val dataSource: SchoolDataSource = accountScope.get()
                         dataSource.personDataSource.findByGuidAsFlow(
-                            account.userSourcedId
+                            account.userGuid
                         ).collect { person ->
                             _uiState.update { prev ->
                                 prev.copy(
@@ -119,10 +122,11 @@ class AccountListViewModel(
                                         RespectAccountAndPerson(
                                             account = account,
                                             person = person.dataOrNull() ?: Person(
-                                                guid = account.userSourcedId,
+                                                guid = account.userGuid,
                                                 givenName = "",
                                                 familyName = "",
                                                 roles = emptyList(),
+                                                gender = PersonGenderEnum.UNSPECIFIED,
                                             )
                                         )
                                     ) {
@@ -140,12 +144,25 @@ class AccountListViewModel(
     fun onClickAccount(account: RespectAccount) {
         respectAccountManager.selectedAccount = account
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(RespectAppLauncher, clearBackStack = true)
+            NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
         )
     }
 
     fun onClickAddAccount() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(GetStartedScreen))
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(GetStartedScreen(canGoBack = true))
+        )
+    }
+    fun onClickProfile() {
+        uiState.value.selectedAccount?.also {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    PersonDetail(
+                        guid = it.account.userGuid
+                    )
+                )
+            )
+        }
     }
 
 

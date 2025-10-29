@@ -1,0 +1,27 @@
+appId: world.respect.app
+tags:
+  - respect
+---
+- runFlow: "common/school_admin_login_flow.yaml"
+
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add from Link"
+- tapOn: "Link*"
+- inputText: "https://respect.world/respect-ds/case_valid/appmanifest.json"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "App detail"
+- assertVisible: "My app"
+- assertVisible: "Try it"
+- assertVisible: "Add App"
+- tapOn: "Add App"
+- assertVisible: "Lessons"
+- tapOn: "Lessons"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- assertVisible: "Lesson 001"
+- assertVisible: "Open"
+- assertVisible: "App name"
+

@@ -1,8 +1,11 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     application
+    alias(libs.plugins.swagger.generator)
 }
 
 group = "world.respect.app"
@@ -19,6 +22,15 @@ kotlin {
     }
 }
 
+
+// As per https://swagger.io/docs/open-source-tools/swagger-codegen/codegen-v3/workflow-integration/
+swaggerSources {
+    create("respect") {
+        setInputFile(project.file("src/main/resources/openapi/openapi.yaml"))
+        code.language = "html2"
+    }
+}
+
 dependencies {
     implementation(projects.respectLibShared)
     implementation(projects.respectDatalayer)
@@ -27,6 +39,7 @@ dependencies {
     implementation(projects.respectLibPrimarykeygen)
 
     implementation(projects.respectLibIhttpCore)
+    implementation(projects.respectLibSharedSe)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)
@@ -46,6 +59,25 @@ dependencies {
     implementation(libs.ktor.client.json)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.server.swagger)
+    implementation(libs.ktor.server.cors)
+    implementation(libs.ktor.server.status.pages)
+
+    implementation(libs.napier)
+    implementation(libs.webauthn4j.core)
 
     testImplementation(libs.kotlin.test.junit)
+
+    swaggerUI(libs.swagger.ui)
+    swaggerCodegen(libs.swagger.codegen.cli)
+}
+
+tasks.named("build").dependsOn("generateSwaggerUI")
+
+tasks.withType<Tar>() {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Zip>() {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

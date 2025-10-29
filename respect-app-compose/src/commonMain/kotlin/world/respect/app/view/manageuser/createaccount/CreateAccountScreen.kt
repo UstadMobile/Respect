@@ -17,6 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -25,8 +29,10 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.how_passkey_works
+import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.other_way_to_sign_in
 import world.respect.shared.generated.resources.passkey_description
 import world.respect.shared.generated.resources.required
@@ -64,13 +70,13 @@ fun CreateAccountScreen(
             .defaultItemPadding()
     ) {
         uiState.signupError?.let {
-            Text(it)
+            Text(uiTextStringResource(it))
         }
 
         OutlinedTextField(
             value = uiState.username,
             onValueChange = onUsernameChanged,
-            label = { Text(stringResource(Res.string.username_label)) },
+            label = { Text(stringResource(Res.string.username_label) + "*") },
             placeholder = { Text(stringResource(Res.string.username_label)) },
             singleLine = true,
             isError = uiState.usernameError != null,
@@ -81,44 +87,56 @@ fun CreateAccountScreen(
                     )
                 )
             },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(Res.string.signing_in),
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp))
-                .padding(8.dp)
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append(stringResource(Res.string.passkey_description))
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.Bold
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        !ValidateUsernameUseCase.isValidUsernameChar(
+                            keyEvent.utf16CodePoint.toChar()
                         )
-                    ) {
-                        append(stringResource(Res.string.how_passkey_works))
-                    }
-                },
+                    } else false
+                }
+        )
+        if (uiState.passkeySupported) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(Res.string.signing_in),
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onClickHowPasskeysWork() }
-            )
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        append(stringResource(Res.string.passkey_description))
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append(stringResource(Res.string.how_passkey_works))
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onClickHowPasskeysWork() }
+                )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = stringResource(Res.string.other_way_to_sign_in),
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.clickable { onClickOtherOptions() }
-            )
+                Text(
+                    text = stringResource(Res.string.other_way_to_sign_in),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.clickable { onClickOtherOptions() }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -128,7 +146,14 @@ fun CreateAccountScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(stringResource(Res.string.sign_up))
+            Text(
+                if (uiState.passkeySupported) {
+                    stringResource(Res.string.sign_up)
+                }
+                else {
+                    stringResource(Res.string.next)
+                }
+            )
         }
 
         uiState.generalError?.let {

@@ -10,10 +10,10 @@ import world.respect.datalayer.db.shared.adapters.asEntities
 import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.shared.ext.takeIfNotEmpty
-import world.respect.datalayer.opds.model.LangMap
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
-import world.respect.datalayer.opds.model.ReadiumMetadata
+import world.respect.lib.opds.model.LangMap
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.XXStringHasher
 

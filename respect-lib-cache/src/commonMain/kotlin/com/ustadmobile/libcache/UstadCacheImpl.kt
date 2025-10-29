@@ -27,9 +27,12 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
+import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
+import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCase
 import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
+import io.ktor.http.Url
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
 import kotlinx.atomicfu.update
@@ -38,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -82,6 +86,7 @@ class UstadCacheImpl(
     ),
     override val storageCompressionFilter: CacheStorageCompressionFilter = DefaultCacheCompressionFilter(),
     private val xxStringHasher: XXStringHasher,
+    private val enqueuePinPublicationPrepareUseCase: EnqueuePinPublicationPrepareUseCase,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -860,6 +865,40 @@ class UstadCacheImpl(
         pendingCacheEntryUpdates.update { prev ->
             prev +  entriesWithLostLock
         }
+    }
+
+    override suspend fun findLocksByPublicationUid(publicationUid: Long): List<RetentionLock> {
+        return db.retentionLockDao.findByPublicationUid(publicationUid)
+    }
+
+    override suspend fun pinPublication(manifestUrl: Url) {
+        enqueuePinPublicationPrepareUseCase(manifestUrl)
+    }
+
+    override suspend fun unpinPublication(manifestUrl: Url) {
+        val locks = findLocksByPublicationUid(
+            xxStringHasher.hash(manifestUrl.toString())
+        )
+
+        removeRetentionLocks(locks.map {
+            RemoveLockRequest(
+                url = it.lockKey,
+                lockId = it.lockId
+            )
+        })
+
+        db.downloadJobDao.updateStatusByManifestHash(
+            manifestHash = xxStringHasher.hash(manifestUrl.toString()),
+            status = TransferJobItemStatus.STATUS_CANCELLED
+        )
+
+        //Do nothing yet
+    }
+
+    override fun publicationPinState(manifestUrl: Url): Flow<PublicationPinState> {
+        return db.downloadJobItemDao.publicationPinState(
+            pubManifestHash = xxStringHasher.hash(manifestUrl.toString())
+        )
     }
 
     suspend fun commit() {

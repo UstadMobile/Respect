@@ -1,7 +1,5 @@
 package world.respect.libutil.util.throwable
 
-import world.respect.libutil.ext.getCauseOfType
-
 /**
  * Some exceptions map to a particular http status code This interface makes it easier for http
  * server and client components to handle exceptions e.g. an http server's exception handling can
@@ -19,10 +17,6 @@ class ExceptionWithHttpStatusCodeWrapper internal constructor(
     override val statusCode: Int
 ): Exception(message, cause), ExceptionWithHttpStatusCode
 
-fun Throwable.withHttpStatusCode(statusCode: Int): Exception {
+fun Throwable.withHttpStatus(statusCode: Int): Exception {
     return ExceptionWithHttpStatusCodeWrapper(this, message, statusCode)
-}
-
-fun Throwable.getHttpStatusCode(): Int? {
-    return getCauseOfType<ExceptionWithHttpStatusCode>()?.statusCode
 }

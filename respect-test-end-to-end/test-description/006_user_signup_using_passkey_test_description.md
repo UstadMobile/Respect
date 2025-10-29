@@ -5,7 +5,7 @@ User can signup using passkey with an invite code
 
 ## Step-by-step procedure:
 
-### Admin creates class and manages passkey
+### A) Admin creates class and manages passkey
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -35,7 +35,7 @@ User can signup using passkey with an invite code
 26. User clicks on "1 Passkeys".
 27. User able to see icon to delete the passkey
 
-## B) Admin sending invite code to the teacher
+### B) Admin sending invite code to the teacher
 
 1. Click on the "Classes" tab.
 2. Click on class name.
@@ -44,7 +44,7 @@ User can signup using passkey with an invite code
 5. Admin click on "Copy invite code" button and copy the code.
 6. Admin send this code to teacher user via a messaging app (eg: Whatsapp)
 
-## C) Teacher sign-up via invite code to the class
+### C) Teacher sign-up via invite code to the class
 
 1. Teacher launch the application on their device.
 2. Click **Get started** button on On-boarding screen.
@@ -73,7 +73,7 @@ User can signup using passkey with an invite code
 25. Passkey got created.
 26. Wait until Waiting for approval screen appears with Please wait message.
 
-## D) Admin approve teacher's request to join the class
+### D) Admin approve teacher's request to join the class
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -91,7 +91,7 @@ User can signup using passkey with an invite code
 14. Click on "Approve" button.
 15. Verify user able to see the Teacher name under teacher's list.
 
-## E) Teacher login to the class
+### E) Teacher login to the class
 
 1. Launch the app again
 2. Click **Get started** button on On-boarding screen.

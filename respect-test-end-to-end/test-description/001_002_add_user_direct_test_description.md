@@ -6,7 +6,7 @@ Admin create a person and validate user login and credentials
 
 ## Step-by-step procedure:
 
-## A) Admin add new Person
+### A) Admin add new Person
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -46,7 +46,7 @@ Admin create a person and validate user login and credentials
 36. Verify the user able to see username in person detail screen.
 
 
-## B) New person login to the app with credentials shared by admin
+### B) New person login to the app with credentials shared by admin
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -77,7 +77,7 @@ Admin create a person and validate user login and credentials
 27. Click on "Save" button.
 28. Verify new password got saved.
 
-## C) New person login to the app with new password
+### C) New person login to the app with new password
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.

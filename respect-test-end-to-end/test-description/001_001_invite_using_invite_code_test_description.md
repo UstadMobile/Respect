@@ -5,7 +5,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 
 ## Step-by-step procedure:
 
-## A) Admin add new class
+### A) Admin add new class
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
 3. On "Let's get started" screen, Tap on the **School name** field.
@@ -25,14 +25,14 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 17. Click on the Save button.
 18. Verify user is in newly added class detail screen.
 
-## B) Admin sending invite code to the teacher
+### B) Admin sending invite code to the teacher
 
 1. Admin user on class detail screen clicks on "+ Add Teacher" button.
 2. Verify user is in "Add teacher" screen.
 3. Admin click on "Copy invite code" button and copy the code.
 4. Admin send this code to teacher user via a messaging app (eg: Whatsapp)
 
-## C) Teacher sign-up via invite code to the class
+### C) Teacher sign-up via invite code to the class
 
 1. Teacher launch the application on their device.
 2. Click **Get started** button on On-boarding screen.
@@ -67,7 +67,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 31. Verify user is in "Waiting for approval" screen.
 
 
-## D) Admin approve teacher's request to join the class
+### D) Admin approve teacher's request to join the class
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -86,7 +86,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 15. Click on "Approve" button.
 16. Verify user able to see the Teacher name under teacher's list.
 
-## E) Teacher login to the class
+### E) Teacher login to the class
 
 1. Launch the app again
 2. Click **Get started** button on On-boarding screen.
@@ -107,7 +107,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 17. Teacher click on "Copy invite code" button and copy the code.
 18. Teacher send this code to student user via a messaging app (eg: Whatsapp)
 
-## G) Student sign-up via invite code to the class
+### G) Student sign-up via invite code to the class
 
 1. Student launch the application on their device.
 2. Click **Get started** button on On-boarding screen.
@@ -131,7 +131,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 20. Verify user is in "Waiting for approval" screen.
 
 
-## H) Teacher approve student's request to join the class
+### H) Teacher approve student's request to join the class
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -150,7 +150,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 15. Click on "Approve" button.
 16. Verify user able to see the Student name under Student's list.
 
-## I) Student login to the class
+### I) Student login to the class
 
 1. Launch the app again
 2. Click **Get started** button on On-boarding screen.
@@ -167,7 +167,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 13. On class detail screen verify user able to see members list.
 14. Verify user able to see their name under Student's list.
 
-## J) Teacher sending invite code to the Parent user
+### J) Teacher sending invite code to the Parent user
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -186,7 +186,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 15. Teacher click on "Copy invite code" button and copy the code.
 16. Teacher send this code to student user via a messaging app (eg: Whatsapp)
 
-## K) Parent sign-up their child to the class using invite code
+### K) Parent sign-up their child to the class using invite code
 
 1. Parent user launch the application on their device.
 2. Click **Get started** button on On-boarding screen.
@@ -214,7 +214,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 24. User clicks on "Done" button.
 25. Verify user is in "Waiting for approval" screen.
 
-## L) Teacher approve student's request to join the class
+### L) Teacher approve student's request to join the class
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -233,7 +233,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 15. Click on "Approve" button.
 16. Verify user able to see the Student name under Student's list.
 
-## M) Parent login to the class
+### M) Parent login to the class
 
 1. Launch the app again
 2. Click **Get started** button on On-boarding screen.

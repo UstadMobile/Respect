@@ -62,9 +62,20 @@ class LearningUnitDetailViewModel(
             ).collect { result ->
                 when (result) {
                     is DataReadyState -> {
+
+                        val lessonData = result.data
+
+                        val resolvedLessonDetail = lessonData.copy(
+                            images = lessonData.images?.map { image ->
+                                image.copy(
+                                    href = route.learningUnitManifestUrl.resolve(image.href).toString()
+                                )
+                            }
+                        )
+
                         _uiState.update {
                             it.copy(
-                                lessonDetail = result.data,
+                                lessonDetail = resolvedLessonDetail
                             )
                         }
                         _appUiState.update {

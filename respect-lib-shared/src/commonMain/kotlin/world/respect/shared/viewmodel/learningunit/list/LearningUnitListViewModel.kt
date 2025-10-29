@@ -167,7 +167,7 @@ class LearningUnitListViewModel(
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
         val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
-        if (
+        if(
             !resultReturner.sendResultIfResultExpected(
                 route = route,
                 navCommandFlow = _navCommandFlow,

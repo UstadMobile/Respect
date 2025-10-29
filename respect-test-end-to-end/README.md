@@ -8,11 +8,11 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ### 1 : Login to Respect
 
-1.1 [Admin can invite teacher, teacher can invite student and parent using invite code](01_01_invite_using_invite_code.md)
+1.1 [Admin can invite teacher, teacher can invite student and parent using invite code](test-description/001_001_invite_using_invite_code_test_description.md)
 
-1.2 [Admin can add a new user and directly set the username and password. User can change password and profile details](01_02_add_user_direct.md)
+1.2 [Admin can add a new user and directly set the username and password. User can change password and profile details](test-description/001_002_add_user_direct.md)
 
-1.3 [User can login to school using school link instead of school name](01_03_login_using_school_link.md)
+1.3 [User can login to school using school link instead of school name](test-description/001_003_login_using_school_link_test_description.md)
 
 ### 2 : Apps
 
@@ -32,4 +32,4 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ## Semi automated scenarios
 
-6.1 [User can signup using passkey with an invite code]()
+6.1 [User can signup using passkey with an invite code](test-description/006_user_signup_using_passkey_test_description.md)

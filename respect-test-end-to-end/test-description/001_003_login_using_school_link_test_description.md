@@ -1,7 +1,7 @@
 # A school admin can login to Respect App with school url
 
 ## Description:
-A school admin wants to login to Respect app using school url
+A school admin can login to Respect app using school url
 
 ## Step-by-step procedure:
 1. Launch the application.

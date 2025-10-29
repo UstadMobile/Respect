@@ -24,11 +24,10 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 
 data class CurriculumMappingEditUiState(
-    val textbook: TextbookMapping? = null,
-    val chapters: List<ChapterMapping> = emptyList(),
-    val lessons: List<LessonMapping> = emptyList(),
+    val mapping: CurriculumMapping? = null,
     val loading: Boolean = false,
     val isNew: Boolean = true,
     val bookTitleError: UiText? = null,

@@ -90,9 +90,57 @@ class LearningUnitListViewModel(
 
                         _uiState.update {
                             it.copy(
-                                navigation = result.data.navigation ?: emptyList(),
-                                publications = result.data.publications ?: emptyList(),
-                                group = result.data.groups ?: emptyList(),
+                                navigation = result.data.navigation?.map { nav ->
+                                        nav.copy(
+                                            href = route.opdsFeedUrl.resolve(nav.href).toString(),
+                                            alternate = nav.alternate?.map { alt ->
+                                                alt.copy(
+                                                    href = route.opdsFeedUrl.resolve(alt.href)
+                                                        .toString()
+                                                )
+                                            }
+                                        )
+                                    } ?: emptyList(),
+
+                                publications = result.data.publications?.map { publication ->
+                                    publication.copy(
+                                        images = publication.images?.map { image ->
+                                            image.copy(
+                                                href = route.opdsFeedUrl.resolve(image.href)
+                                                    .toString()
+                                            )
+                                        }
+                                    )
+                                } ?: emptyList(),
+
+                                group =
+                                    result.data.groups?.map { group ->
+                                        group.copy(
+                                            publications = group.publications?.map { pub ->
+                                                pub.copy(
+                                                    images = pub.images?.map { img ->
+                                                        img.copy(
+                                                            href = route.opdsFeedUrl.resolve(img.href)
+                                                                .toString()
+                                                        )
+                                                    }
+                                                )
+                                            },
+                                            navigation = group.navigation?.map { nav ->
+                                                nav.copy(
+                                                    href = route.opdsFeedUrl.resolve(nav.href)
+                                                        .toString(),
+                                                    alternate = nav.alternate?.map { alt ->
+                                                        alt.copy(
+                                                            href = route.opdsFeedUrl.resolve(alt.href)
+                                                                .toString()
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    } ?: emptyList(),
+
                                 facetOptions = facetOptions,
                                 sortOptions = sortOptions
                             )
@@ -119,7 +167,7 @@ class LearningUnitListViewModel(
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
         val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
-        if(
+        if (
             !resultReturner.sendResultIfResultExpected(
                 route = route,
                 navCommandFlow = _navCommandFlow,

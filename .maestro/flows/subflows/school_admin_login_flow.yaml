@@ -1,19 +1,23 @@
 appId: world.respect.app
+
 ---
-- clearState:  world.respect.app
-- launchApp
-- tapOn: "Other options"
-- assertVisible: "Enter the link provided by your teacher or school admin"
-- tapOn: "paste the link here"
-- inputText: ${SCHOOL_URL}
-- tapOn: "Next"
-- tapOn: "UserId"
-- inputText: ${SCHOOL_ADMIN_USER}
-- tapOn: "Password"
-- inputText: ${SCHOOL_ADMIN_PASS}
+- launchApp:
+      arguments:
+          respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+      file: "get_started_select_school_by_name.yaml"
+      env:
+          SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
-    text: "Login"
-    index: 1
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
+     id: "username"
+- inputText: "admin"
+- tapOn:
+      id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- assertVisible: "Apps"
+
+

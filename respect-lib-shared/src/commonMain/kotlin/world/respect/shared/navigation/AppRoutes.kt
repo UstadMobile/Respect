@@ -10,7 +10,9 @@ import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
+import kotlin.reflect.KClass
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -45,6 +47,12 @@ data class JoinClazzWithCode(
 object Onboarding : RespectAppRoute
 
 @Serializable
+object SchoolDirectoryList : RespectAppRoute
+
+@Serializable
+object SchoolDirectoryEdit : RespectAppRoute
+
+@Serializable
 data class LoginScreen(
     val schoolUrlStr: String,
 ) : RespectAppRoute {
@@ -59,10 +67,59 @@ data class LoginScreen(
 }
 
 @Serializable
-object RespectAppLauncher : RespectAppRoute
+data class RespectAppLauncher(
+    val resultPopUpToStr: String? = null,
+    override val resultKey: String? = null,
+) : RespectAppRoute, RouteWithResultDest{
+
+    override val resultPopUpTo: KClass<*>?
+        get() = resultPopUpToStr?.let { Class.forName(it).kotlin }
+
+    companion object {
+        fun create(
+            resultPopUpTo: KClass<*>? = null,
+            resultKey: String? = null,
+        ) = RespectAppLauncher(
+            resultPopUpToStr = resultPopUpTo?.qualifiedName,
+            resultKey = resultKey,
+        )
+    }
+}
 
 @Serializable
-object Assignment : RespectAppRoute
+object AssignmentList : RespectAppRoute
+
+@Serializable
+data class AssignmentDetail(
+    val uid: String,
+) : RespectAppRoute
+
+@Serializable
+data class AssignmentEdit(
+    val guid: String?,
+    private val learningUnitStr: String? = null,
+): RespectAppRoute {
+
+    @Transient
+    val learningUnitSelected: LearningUnitSelection? = learningUnitStr?.let {
+        Json.decodeFromString(LearningUnitSelection.serializer(), it)
+    }
+
+    companion object {
+
+        fun create(
+            uid: String?,
+            learningUnitSelected: LearningUnitSelection? = null,
+        ) = AssignmentEdit(
+            guid = uid,
+            learningUnitStr = learningUnitSelected?.let {
+                Json.encodeToString(LearningUnitSelection.serializer(), it)
+            },
+        )
+
+    }
+
+}
 
 @Serializable
 object ClazzList : RespectAppRoute
@@ -143,7 +200,9 @@ object RespectAppList : RespectAppRoute
 object EnterLink : RespectAppRoute
 
 @Serializable
-object GetStartedScreen : RespectAppRoute
+data class GetStartedScreen(
+    val canGoBack: Boolean = false,
+) : RespectAppRoute
 
 @Serializable
 object OtherOption : RespectAppRoute
@@ -156,16 +215,29 @@ object HowPasskeyWorks : RespectAppRoute
  */
 @Serializable
 class AppsDetail private constructor(
-    private val manifestUrlStr: String
-) : RespectAppRoute {
+    private val manifestUrlStr: String,
+    val resultPopUpToStr: String? = null,
+    override val resultKey: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     val manifestUrl = Url(manifestUrlStr)
 
+    override val resultPopUpTo: KClass<*>?
+        get() = resultPopUpToStr?.let { Class.forName(it).kotlin }
+
     companion object {
 
-        fun create(manifestUrl: Url): AppsDetail {
-            return AppsDetail(manifestUrl.toString())
+        fun create(
+            manifestUrl: Url,
+            resultPopUpTo: KClass<*>? = null,
+            resultKey: String? = null,
+        ): AppsDetail {
+            return AppsDetail(
+                manifestUrlStr = manifestUrl.toString(),
+                resultPopUpToStr = resultPopUpTo?.qualifiedName,
+                resultKey = resultKey,
+            )
         }
 
     }
@@ -180,7 +252,9 @@ class AppsDetail private constructor(
 class LearningUnitList(
     private val opdsFeedUrlStr: String,
     private val appManifestUrlStr: String,
-) : RespectAppRoute {
+    private val resultPopUpToStr: String? = null,
+    override val resultKey: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     val opdsFeedUrl = Url(opdsFeedUrlStr)
@@ -188,14 +262,22 @@ class LearningUnitList(
     @Transient
     val appManifestUrl = Url(appManifestUrlStr)
 
+    override val resultPopUpTo: KClass<*>?
+        get() = resultPopUpToStr?.let { Class.forName(it).kotlin }
+
     companion object {
 
         fun create(
             opdsFeedUrl: Url,
             appManifestUrl: Url,
+            resultPopUpTo: KClass<*>? = null,
+            resultKey: String? = null,
         ): LearningUnitList {
             return LearningUnitList(
-                opdsFeedUrl.toString(), appManifestUrl.toString()
+                opdsFeedUrlStr = opdsFeedUrl.toString(),
+                appManifestUrlStr = appManifestUrl.toString(),
+                resultPopUpToStr = resultPopUpTo?.qualifiedName,
+                resultKey = resultKey,
             )
         }
 
@@ -467,3 +549,15 @@ data class ManageAccount(
 data class PersonEdit(
     val guid: String?,
 ) : RespectAppRoute
+
+@Serializable
+data class SetUsernameAndPassword(
+    val guid: String
+): RespectAppRoute
+
+
+@Serializable
+data class ChangePassword(
+    val guid: String,
+): RespectAppRoute
+

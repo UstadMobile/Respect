@@ -1,5 +1,6 @@
 package world.respect.app.view.person.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,10 +23,14 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.viewmodel.person.detail.PersonDetailUiState
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.date_of_birth
+import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.gender
+import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.generated.resources.role
 import world.respect.shared.util.ext.label
 
 @Composable
@@ -35,14 +40,18 @@ fun PersonDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     PersonDetailScreen(
         uiState = uiState,
-        onClickManageAccount = { viewModel.navigateToManageAccount() }
+        onClickManageAccount = viewModel::navigateToManageAccount,
+        onClickCreateAccount = viewModel::onClickCreateAccount,
+        onClickPhoneNumber = viewModel::onClickPhoneNumber,
     )
 }
 
 @Composable
 fun PersonDetailScreen(
     uiState: PersonDetailUiState,
-    onClickManageAccount:()->Unit
+    onClickManageAccount:() -> Unit,
+    onClickCreateAccount: () -> Unit,
+    onClickPhoneNumber: () -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     Column(
@@ -56,9 +65,25 @@ fun PersonDetailScreen(
                     onClick = onClickManageAccount
                 )
             }
+
+            if(uiState.createAccountVisible){
+                RespectQuickActionButton(
+                    labelText = stringResource(Res.string.create_account),
+                    imageVector = Icons.Default.Key,
+                    onClick = onClickCreateAccount,
+                )
+            }
         }
 
         HorizontalDivider()
+
+        person?.roles?.firstOrNull()?.also { role ->
+            RespectDetailField(
+                modifier = Modifier.defaultItemPadding(),
+                value = { Text(stringResource(role.roleEnum.label)) },
+                label = { Text(stringResource(Res.string.role)) },
+            )
+        }
 
         person?.username?.also {
             RespectDetailField(
@@ -81,6 +106,21 @@ fun PersonDetailScreen(
                 value = { Text(it.toString()) }
             )
         }
-
+        person?.phoneNumber?.also {
+            RespectDetailField(
+                modifier = Modifier.defaultItemPadding().fillMaxWidth().clickable {
+                    onClickPhoneNumber()
+                },
+                label = { Text(stringResource(Res.string.phone_number)) },
+                value = { Text(it) }
+            )
+        }
+        person?.email?.also {
+            RespectDetailField(
+                modifier = Modifier.defaultItemPadding(),
+                label = { Text(stringResource(Res.string.email)) },
+                value = { Text(it) }
+            )
+        }
     }
 }

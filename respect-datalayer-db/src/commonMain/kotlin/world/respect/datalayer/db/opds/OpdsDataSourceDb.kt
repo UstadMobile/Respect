@@ -22,8 +22,8 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.opds.OpdsDataSourceLocal
-import world.respect.datalayer.opds.model.OpdsFeed
-import world.respect.datalayer.opds.model.OpdsPublication
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.XXStringHasher
 

@@ -40,6 +40,18 @@ class DrainRemoteWriteQueueUseCase(
                     WriteQueueItem.Model.ENROLLMENT -> {
                         repository.enrollmentDataSource.sendToRemote(listOf(item))
                     }
+
+                    WriteQueueItem.Model.PERSON_PASSWORD -> {
+                        repository.personPasswordDataSource.sendToRemote(listOf(item))
+                    }
+
+                    WriteQueueItem.Model.ASSIGNMENT -> {
+                        repository.assignmentDataSource.sendToRemote(listOf(item))
+                    }
+
+                    WriteQueueItem.Model.SCHOOL_APP -> {
+                        repository.schoolAppDataSource.sendToRemote(listOf(item))
+                    }
                 }
 
             }

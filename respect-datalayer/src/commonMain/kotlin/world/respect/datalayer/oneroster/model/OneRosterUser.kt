@@ -2,7 +2,7 @@ package world.respect.datalayer.oneroster.model
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import world.respect.datalayer.shared.serialization.InstantISO8601Serializer
+import world.respect.lib.serializers.InstantISO8601Serializer
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 

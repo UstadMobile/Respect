@@ -18,9 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ListItem
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,9 +37,9 @@ import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.datalayer.opds.model.OpdsPublication
-import world.respect.datalayer.opds.model.ReadiumLink
 import world.respect.shared.util.SortOrderOption
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel.Companion.ICON
 
 @Composable
@@ -224,14 +221,6 @@ fun NavigationListItem(
                 }
             }
         },
-
-        trailingContent = {
-            Icon(
-                imageVector = Icons.Filled.ArrowCircleDown,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-            )
-        }
     )
 }
 
@@ -302,13 +291,5 @@ fun PublicationListItem(
                 }
             }
         },
-
-        trailingContent = {
-            Icon(
-                imageVector = Icons.Filled.ArrowCircleDown,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-            )
-        }
     )
 }

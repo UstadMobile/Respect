@@ -1,11 +1,14 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
+import world.respect.datalayer.school.PersonPasswordDataSource
+import world.respect.datalayer.school.SchoolAppDataSource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -15,9 +18,13 @@ import world.respect.datalayer.school.PersonPasskeyDataSource
  */
 interface SchoolDataSource {
 
+    val schoolAppDataSource: SchoolAppDataSource
+
     val personDataSource: PersonDataSource
 
     val personPasskeyDataSource: PersonPasskeyDataSource
+
+    val personPasswordDataSource: PersonPasswordDataSource
 
     val reportDataSource: ReportDataSource
 
@@ -26,5 +33,7 @@ interface SchoolDataSource {
     val classDataSource: ClassDataSource
 
     val enrollmentDataSource: EnrollmentDataSource
+
+    val assignmentDataSource: AssignmentDataSource
 
 }

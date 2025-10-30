@@ -2,7 +2,7 @@ appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
-      file: "subflows/school_init.js"
+      file: "scripts/school_init.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
@@ -14,7 +14,7 @@ onFlowStart:
 
 onFlowComplete:
   - runScript:
-      file: "subflows/teardown.js"
+      file: "scripts/teardown.js"
 ---
 
 - launchApp:

@@ -60,12 +60,7 @@ fun RespectAppBar(
     onProfileClick: () -> Unit = {},
 ) {
     val currentBackStack by navController.currentBackStack.collectAsState()
-    val currentRoute = currentBackStack.lastOrNull()?.destination?.route
-    val isRootDest = remember(currentRoute) {
-        APP_TOP_LEVEL_NAV_ITEMS.any { it.routeName == currentRoute }
-    }
-
-    val canGoBack = appUiState.showBackButton ?: !isRootDest && currentBackStack.size > 1
+    val canGoBack = appUiState.showBackButton ?: (currentBackStack.size > 1)
 
     val showUserAccountIcon = appUiState.userAccountIconVisible ?: !appUiState.actionBarButtonState.visible
 

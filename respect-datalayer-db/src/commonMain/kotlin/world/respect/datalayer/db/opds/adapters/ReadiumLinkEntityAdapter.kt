@@ -5,7 +5,7 @@ import world.respect.datalayer.db.opds.OpdsParentType
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity.PropertyType
 import world.respect.datalayer.db.shared.ext.takeIfNotEmpty
-import world.respect.datalayer.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 /**

@@ -1,0 +1,48 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "001_001_admin_login_with_school_url_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+- tapOn: "Other options"
+
+# link field verification
+- tapOn: "Paste the link here"  # Blank link field
+- tapOn: "Next"
+- assertVisible: "Invalid link, try again"
+- tapOn: "Paste the link here"
+- inputText: "Test"  #Entering text instead of link
+- tapOn: "Next"
+- assertVisible: "Invalid app Url"
+
+- tapOn: "Paste the link here"
+- eraseText
+- inputText: ${output.SCHOOL_URL}
+- tapOn: "Next"
+
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- assertVisible: "Apps"
+

@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002_admin_add_class_and_members_test.yaml"
+        NAME: "001_001_invite_using_invite_code_test.yaml"
 
 onFlowComplete:
   - runScript:
@@ -120,6 +120,7 @@ onFlowComplete:
 - assertVisible: "Please wait"
 
 # D) Admin approve teacher's request to join the class
+- clearState: world.respect.app
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - tapOn: "Classes"
 - assertVisible:
@@ -130,7 +131,7 @@ onFlowComplete:
 - assertVisible: "Teacher User"
 - tapOn: "Accept Invite"
 
-# E) Teacher login to the class
+# E) Teacher login to the class and share invite code to Student
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -158,17 +159,6 @@ onFlowComplete:
 - assertVisible: "New Class"
 - tapOn: "New Class"
 - assertVisible: "Teacher User"
-
-# F) Admin sending invite code to the student
-- runFlow: "subflows/school_admin_login_flow.yaml"
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
-- tapOn: "Classes"
-- assertVisible:
-    id: "app_title"
-    text: "Classes"
-- tapOn: "New Class"
 - tapOn: "Add Student"
 - tapOn: ".*Copy invite code.*"
 
@@ -217,8 +207,27 @@ onFlowComplete:
     text: "Waiting for approval"
 - assertVisible: "Please wait"
 
-# H) Admin approve student's request to join the class
-- runFlow: "subflows/school_admin_login_flow.yaml"
+# H) Teacher approve student's request to join the class
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "username"
+- inputText: "teacheruser"
+- tapOn:
+    id : "password"
+- inputText: "testt1"
+- tapOn: "Login"
+- assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -227,6 +236,8 @@ onFlowComplete:
 - assertVisible: "Pending requests"
 - assertVisible: "Student User"
 - tapOn: "Accept Invite"
+- tapOn: "Add Student"
+- tapOn: ".*Copy invite code.*"
 
 # I) Student login to the class
 - clearState: world.respect.app
@@ -256,19 +267,6 @@ onFlowComplete:
 - assertVisible: "New Class"
 - tapOn: "New Class"
 - assertVisible: "Student User"
-
-# J) Admin sending invite code to the Parent user
-- runFlow: "subflows/school_admin_login_flow.yaml"
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
-- tapOn: "Classes"
-- assertVisible:
-    id: "app_title"
-    text: "Classes"
-- tapOn: "New Class"
-- tapOn: "Add Student"
-- tapOn: ".*Copy invite code.*"
 
 # G) Parent sign-up their child to the class using invite code
 - clearState: world.respect.app
@@ -336,8 +334,27 @@ onFlowComplete:
     text: "Waiting for approval"
 - assertVisible: "Please wait"
 
-# H) Admin approve student's request to join the class
-- runFlow: "subflows/school_admin_login_flow.yaml"
+# H) Teacher approve student's request to join the class
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "username"
+- inputText: "teacheruser"
+- tapOn:
+    id : "password"
+- inputText: "testt1"
+- tapOn: "Login"
+- assertVisible: "Apps"
 - tapOn: "People"
 - assertVisible: "Parent User"
 - assertVisible: "Child User"

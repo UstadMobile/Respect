@@ -167,26 +167,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 13. On class detail screen verify user able to see members list.
 14. Verify user able to see their name under Student's list.
 
-### J) Teacher sending invite code to the Parent user
-
-1. Launch the application.
-2. Click **Get started** button on On-boarding screen.
-3. On "Let's get started" screen, Tap on the **School name** field.
-4. Enter the **School name**.
-5. Select on School name that will appear below the School name field.
-6. Verify the user is in **Login** screen.
-7. Tap on the **Username** field and enter the username.
-8. Tap on the **Password** field and enter the password.
-9. Tap on the **Login** button.
-10. Verify the user is in the **Apps** screen.
-11. Click on the "Classes" tab.
-12. Click on class name
-13. Teacher user on class detail screen clicks on "+ Add Student" button.
-14. Verify user is in "Add student" screen.
-15. Teacher click on "Copy invite code" button and copy the code.
-16. Teacher send this code to student user via a messaging app (eg: Whatsapp)
-
-### K) Parent sign-up their child to the class using invite code
+### J) Parent sign-up their child to the class using invite code
 
 1. Parent user launch the application on their device.
 2. Click **Get started** button on On-boarding screen.
@@ -214,7 +195,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 24. User clicks on "Done" button.
 25. Verify user is in "Waiting for approval" screen.
 
-### L) Teacher approve student's request to join the class
+### K) Teacher approve student's request to join the class
 
 1. Launch the application.
 2. Click **Get started** button on On-boarding screen.
@@ -233,7 +214,7 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 15. Click on "Approve" button.
 16. Verify user able to see the Student name under Student's list.
 
-### M) Parent login to the class
+### L) Parent login to the class
 
 1. Launch the app again
 2. Click **Get started** button on On-boarding screen.

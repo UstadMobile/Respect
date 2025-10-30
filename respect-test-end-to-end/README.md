@@ -20,7 +20,7 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ### 3 : Assignments
 
-3.1 [Teacher Assigns a Learning Unit as Homework via Assignments Tab](test-description/003_admin_user_assigns_assignment_to_a_class_test_description.md)
+3.1 [Teacher Assigns a Learning Unit as Homework via Assignments Tab](test-description/003_teacher_user_assigns_assignment_to_a_class_test_description.md)
 
 ### 4 : Classes
 

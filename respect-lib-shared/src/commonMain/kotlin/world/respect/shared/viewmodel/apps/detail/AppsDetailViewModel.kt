@@ -125,9 +125,9 @@ class AppsDetailViewModel(
                                         group =
                                             result.data.groups?.map { group ->
                                                 group.copy(
-                                                    publications = group.publications?.map { pub ->
-                                                        pub.copy(
-                                                            images = pub.images?.map { img ->
+                                                    publications = group.publications?.map { publication ->
+                                                        publication.copy(
+                                                            images = publication.images?.map { img ->
                                                                 img.copy(
                                                                     href = route.manifestUrl.resolve(
                                                                         img.href

@@ -35,6 +35,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdmin
+import world.respect.shared.util.ext.resolve
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<RespectAppManifest>? = null,
@@ -95,15 +96,17 @@ class AppsDetailViewModel(
                     ).collect { result ->
                         when (result) {
                             is DataReadyState -> {
+
+                                val resolvedFeed = result.data.resolve(route.manifestUrl)
+
                                 _uiState.update {
                                     it.copy(
-                                        publications = result.data.publications ?: emptyList(),
-                                        navigation = result.data.navigation ?: emptyList(),
-                                        group = result.data.groups ?: emptyList()
+                                        navigation = resolvedFeed.navigation ?: emptyList(),
+                                        publications = resolvedFeed.publications ?: emptyList(),
+                                        group = resolvedFeed.groups ?: emptyList()
                                     )
                                 }
                             }
-
                             else -> {}
                         }
                     }

@@ -50,7 +50,6 @@ import world.respect.app.components.RespectQuickActionButton
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 
 @Composable
 fun LearningUnitDetailScreen(
@@ -84,9 +83,7 @@ fun LearningUnitDetailScreen(
         item {
             ListItem(
                 leadingContent = {
-                    val iconUrl = uiState.lessonDetail?.images?.find {
-                        it.type?.contains(IMAGE) == true
-                    }?.href
+                    val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
 
                     iconUrl.also { icon ->
                         RespectAsyncImage(

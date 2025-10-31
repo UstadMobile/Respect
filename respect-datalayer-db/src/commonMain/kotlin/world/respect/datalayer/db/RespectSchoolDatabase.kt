@@ -60,7 +60,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
         AssignmentLearningResourceRefEntity::class,
         WriteQueueItemEntity::class,
     ],
-    version = 7,
+    version = 8,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

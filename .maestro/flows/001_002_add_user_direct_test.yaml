@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_003_admin_create_a_person_and_validate_user_login_and_credentials_test"
+        NAME: "001_002_add_user_direct_test"
 
 onFlowComplete:
   - runScript:
@@ -50,7 +50,7 @@ onFlowComplete:
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
-- inputText: ${output.pastYearDate}
+- inputText: ${output.pastYearDateC}
 - hideKeyboard
 
 # Validate Phone number
@@ -61,7 +61,7 @@ onFlowComplete:
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
-- inputText: "8547214432"
+- inputText: "544085432"
 - hideKeyboard
 - scrollUntilVisible:
     element:
@@ -123,6 +123,10 @@ onFlowComplete:
     id : "password"
 - inputText: "test234"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "People"
 - tapOn: "Test User"
@@ -164,4 +168,8 @@ onFlowComplete:
     id : "password"
 - inputText: "test123"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"

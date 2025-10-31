@@ -27,6 +27,7 @@ import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitListUiState(
@@ -71,6 +72,7 @@ class LearningUnitListViewModel(
                 when (result) {
                     is DataReadyState -> {
 
+                        val resolvedFeed = result.data.resolve(route.opdsFeedUrl)
                         val appBarTitle = result.data.metadata.title
                         val facetOptions = result.data.facets ?: emptyList()
                         val sortOptions = facetOptions.mapIndexed { index, facet ->
@@ -90,57 +92,9 @@ class LearningUnitListViewModel(
 
                         _uiState.update {
                             it.copy(
-                                navigation = result.data.navigation?.map { nav ->
-                                        nav.copy(
-                                            href = route.opdsFeedUrl.resolve(nav.href).toString(),
-                                            alternate = nav.alternate?.map { alt ->
-                                                alt.copy(
-                                                    href = route.opdsFeedUrl.resolve(alt.href)
-                                                        .toString()
-                                                )
-                                            }
-                                        )
-                                    } ?: emptyList(),
-
-                                publications = result.data.publications?.map { publication ->
-                                    publication.copy(
-                                        images = publication.images?.map { image ->
-                                            image.copy(
-                                                href = route.opdsFeedUrl.resolve(image.href)
-                                                    .toString()
-                                            )
-                                        }
-                                    )
-                                } ?: emptyList(),
-
-                                group =
-                                    result.data.groups?.map { group ->
-                                        group.copy(
-                                            publications = group.publications?.map { publication ->
-                                                publication.copy(
-                                                    images = publication.images?.map { img ->
-                                                        img.copy(
-                                                            href = route.opdsFeedUrl.resolve(img.href)
-                                                                .toString()
-                                                        )
-                                                    }
-                                                )
-                                            },
-                                            navigation = group.navigation?.map { nav ->
-                                                nav.copy(
-                                                    href = route.opdsFeedUrl.resolve(nav.href)
-                                                        .toString(),
-                                                    alternate = nav.alternate?.map { alt ->
-                                                        alt.copy(
-                                                            href = route.opdsFeedUrl.resolve(alt.href)
-                                                                .toString()
-                                                        )
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    } ?: emptyList(),
-
+                                navigation = resolvedFeed.navigation ?: emptyList(),
+                                publications = resolvedFeed.publications?: emptyList(),
+                                group = resolvedFeed.groups?: emptyList(),
                                 facetOptions = facetOptions,
                                 sortOptions = sortOptions
                             )
@@ -167,7 +121,7 @@ class LearningUnitListViewModel(
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
         val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
-        if(
+        if (
             !resultReturner.sendResultIfResultExpected(
                 route = route,
                 navCommandFlow = _navCommandFlow,

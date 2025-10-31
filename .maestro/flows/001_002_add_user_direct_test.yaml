@@ -61,7 +61,7 @@ onFlowComplete:
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
-- inputText: "544085432"
+- inputText: "5440854326"
 - hideKeyboard
 - scrollUntilVisible:
     element:

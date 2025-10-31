@@ -2,20 +2,34 @@
 
 End-to-end tests that start a blank new server/app and test functionality end-to-end.
 
-* [Maestro](/maestro) - End-to-end tests built using [Maestro](https://maestro.mobile.dev)
+* [Maestro](../.maestro/) - End-to-end tests built using [Maestro](https://maestro.mobile.dev)
 
-## Scenarios
+## Fully automated scenarios
 
-### 1 : Apps
+### 1 : Login to Respect
 
-1.1 [A school admin wants to login to Respect app using school url](test-description/001_001_admin_login_with_school_url_test_description.md)
+1.1 [Admin can invite teacher, teacher can invite student and parent using invite code](test-description/001_001_invite_using_invite_code_test_description.md)
 
+1.2 [Admin can add a new user and directly set the username and password. User can change password and profile details](test-description/001_002_add_user_direct_test_description.md)
 
-1.2 [A school admin add class and members to the class](test-description/001_002_admin_add_class_and_members_test_description.md)
+1.3 [User can login to school using school link instead of school name](test-description/001_003_login_using_school_link_test_description.md)
 
+### 2 : Apps
 
-1.3 [Admin create a person and validate user login and credentials](test-description/001_003_admin_create_a_person_and_validate_user_login_and_credentials_test_description.md)
+2.1 [User Can Browse Apps and lessons ](test-description/002_browse_lessons_test_description.md)
 
+### 3 : Assignments
 
-1.4 [A learner/Educator can add app via link and browse available lessons](test-description/001_004_add_app_via_link_and_browse_lessons_test_description.md)
+3.1 [Teacher Assigns a Learning Unit as Homework via Assignments Tab](test-description/003_teacher_user_assigns_assignment_to_a_class_test_description.md)
 
+### 4 : Classes
+
+...
+
+### 5 : Reports
+
+...
+
+## Semi automated scenarios
+
+6.1 [User can signup using passkey with an invite code](test-description/006_user_signup_using_passkey_test_description.md)

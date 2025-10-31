@@ -29,9 +29,12 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.teacher
+import world.respect.shared.generated.resources.student
 import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.description
@@ -47,7 +50,6 @@ import world.respect.shared.generated.resources.expand_teachers
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 
@@ -94,7 +96,7 @@ fun ClazzDetailScreen(
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
-    fun Person?.key(role: EnrollmentRoleEnum, index: Int) : Any {
+    fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
             Pair(it, role)
         } ?: "${role}_$index"
@@ -115,13 +117,9 @@ fun ClazzDetailScreen(
                     )
                 },
 
-                /**Description field needed**/
-
-                /* supportingContent = {
-                     Text(
-                        uiState.clazzDetail?.description
-                     )
-                 }*/
+                supportingContent = {
+                    Text(text = uiState.clazz.dataOrNull()?.description ?: "")
+                }
             )
         }
 
@@ -151,9 +149,11 @@ fun ClazzDetailScreen(
                         .clickable { onTogglePendingSection() },
                     headlineContent = {
                         Text(
-                            text = stringResource(
-                                resource = Res.string.pending_requests
-                            )
+                            text = stringResource(Res.string.pending_requests)
+                                    + " (${
+                                pendingTeacherLazyPagingItems.itemCount
+                                        + pendingStudentLazyPagingItems.itemCount
+                            })"
                         )
                     },
                     trailingContent = {
@@ -191,14 +191,20 @@ fun ClazzDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         leadingContent = {
                             RespectPersonAvatar(
-                                name = person?.fullName() ?: ""
+                                name = person?.givenName ?: ""
                             )
                         },
-                        headlineContent = {
-                            Text(text = person?.fullName() ?: "")
-                        },
+                        headlineContent = { Text(
+                            text = "${
+                                person?.givenName.orEmpty()
+                            } (${stringResource(Res.string.teacher)})"
+                        )
+                                          },
                         supportingContent = {
-                            Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                            val gender = person?.gender?.value
+                            val dob = person?.dateOfBirth?.toString()
+
+                            Text(text = "Gender: $gender, DOB: $dob")
                         },
                         trailingContent = {
                             Row {
@@ -239,14 +245,21 @@ fun ClazzDetailScreen(
                             .fillMaxWidth(),
                         leadingContent = {
                             RespectPersonAvatar(
-                                name = person?.fullName() ?: ""
+                                name = person?.givenName ?: ""
                             )
                         },
                         headlineContent = {
-                            Text(text = person?.fullName() ?: "")
+                            Text(
+                                text = "${
+                                    person?.givenName.orEmpty()
+                                } (${stringResource(Res.string.student)})"
+                            )
                         },
                         supportingContent = {
-                            Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                            val gender = person?.gender?.value
+                            val dob = person?.dateOfBirth?.toString()
+
+                            Text(text = "Gender: $gender, DOB: $dob")
                         },
                         trailingContent = {
                             Row {

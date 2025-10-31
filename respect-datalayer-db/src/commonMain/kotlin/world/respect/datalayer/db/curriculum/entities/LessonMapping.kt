@@ -1,13 +1,13 @@
 package world.respect.datalayer.db.curriculum.entities
 
 data class LessonMapping(
-    var uid: Long = 0L,
-    var chapterUid: Long = 0L,
-    var title: String? = null,
-    var subtitle: String? = null,
-    var lessonType: String? = null,
-    var lessonNumber: Int = 0,
-    var description: String? = null,
-    var createdDate: Long = System.currentTimeMillis(),
-    var textbookUid: Long = 0L
+    val uid: Long = 0L,
+    val chapterUid: Long = 0L,
+    val title: String? = null,
+    val subtitle: String? = null,
+    val lessonType: String? = null,
+    val lessonNumber: Int = 0,
+    val description: String? = null,
+    val createdDate: Long = System.currentTimeMillis(),
+    val textbookUid: Long = 0L
 )

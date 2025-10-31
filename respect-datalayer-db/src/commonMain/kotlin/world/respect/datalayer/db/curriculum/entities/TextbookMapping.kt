@@ -1,9 +1,9 @@
 package world.respect.datalayer.db.curriculum.entities
 
 data class TextbookMapping(
-    var uid: Long = 0L,
-    var title: String? = null,
-    var description: String? = null,
-    var coverImageUrl: String? = null,
-    var createdDate: Long = System.currentTimeMillis(),
+    val uid: Long = 0L,
+    val title: String? = null,
+    val description: String? = null,
+    val coverImageUrl: String? = null,
+    val createdDate: Long = System.currentTimeMillis(),
 )

@@ -1,7 +1,5 @@
 package world.respect.app.view.curriculum.mapping.edit
 
-import world.respect.datalayer.db.curriculum.entities.ChapterMapping
-import world.respect.datalayer.db.curriculum.entities.LessonMapping
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,9 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,7 +26,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.stringResource
@@ -51,20 +46,24 @@ import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.to_add_one
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CurriculumMappingEditScreen(
     uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
-    onBookTitleChanged: (String) -> Unit = { },
-    onBookDescriptionChanged: (String) -> Unit = { },
-    onClickAddBookCover: () -> Unit = { },
-    onClickAddChapter: () -> Unit = { },
-    onClickRemoveChapter: (ChapterMapping) -> Unit = { },
-    onClickAddLesson: (ChapterMapping) -> Unit = { },
-    onClickRemoveLesson: (LessonMapping) -> Unit = { },
+    onTitleChanged: (String) -> Unit,
+    onDescriptionChanged: (String) -> Unit,
+    onClickAddBookCover: () -> Unit,
+    onClickAddSection: () -> Unit,
+    onClickRemoveSection: (Int) -> Unit,
+    onSectionTitleChanged: (Int, String) -> Unit,
+    onSectionMoved: (fromIndex: Int, toIndex: Int) -> Unit,
+    onClickAddLesson: (Int) -> Unit,
+    onClickRemoveLesson: (Int, Int) -> Unit,
+    onLessonTitleChanged:(Int , Int , String) -> Unit,
     onClickSave: () -> Unit = { },
-    onChapterMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
 ) {
     var draggedItemIndex by remember { mutableIntStateOf(-1) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -136,16 +135,16 @@ fun CurriculumMappingEditScreen(
                 }
 
                 OutlinedTextField(
-                    value = uiState.bookTitle,
-                    onValueChange = onBookTitleChanged,
+                    value = uiState.title,
+                    onValueChange = onTitleChanged,
                     label = { Text(stringResource(Res.string.book_title)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("book_title_field"),
                     singleLine = true,
-                    isError = uiState.bookTitleError != null ,
+                    isError = uiState.titleError != null ,
                     supportingText = {
-                        if (uiState.bookTitleError != null) {
+                        if (uiState.titleError != null) {
                             Text(stringResource(Res.string.required))
                         } else {
                             Text(stringResource(Res.string.required))
@@ -157,8 +156,8 @@ fun CurriculumMappingEditScreen(
 
             item {
                 OutlinedTextField(
-                    value = uiState.bookDescription,
-                    onValueChange = onBookDescriptionChanged,
+                    value = uiState.description,
+                    onValueChange = onDescriptionChanged,
                     label = { Text(stringResource(Res.string.book_description)) },
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -177,7 +176,7 @@ fun CurriculumMappingEditScreen(
             }
             item {
                 OutlinedButton(
-                    onClick = onClickAddChapter,
+                    onClick = onClickAddSection,
                     modifier = Modifier
                         .fillMaxWidth(),
                     enabled = uiState.fieldsEnabled
@@ -198,7 +197,7 @@ fun CurriculumMappingEditScreen(
                 }
             }
 
-            if (uiState.chapters.isEmpty()) {
+            if (uiState.sections.isEmpty()) {
                 item {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -229,24 +228,22 @@ fun CurriculumMappingEditScreen(
                     }
                 }
             } else {
-                itemsIndexed(
-                    items = uiState.chapters,
-                    key = { _, chapter -> chapter.uid }
-                ) { index, chapter ->
-                    val isDragging = draggedItemIndex == index
+                itemsIndexed(uiState.sections) { sectionIndex, section ->
+                    val isDragging = draggedItemIndex == sectionIndex
 
-                    DraggableChapterItem(
-                        chapter = chapter,
-                        index = index,
+                    DraggableSectionItem(
+                        section = section,
+                        sectionIndex = sectionIndex,
                         isDragging = isDragging,
                         dragOffset = if (isDragging) dragOffset else 0f,
-                        lessons = uiState.getLessonsForChapter(chapter.uid),
-                        onClickRemoveChapter = onClickRemoveChapter,
-                        onClickAddLesson = onClickAddLesson,
-                        onClickRemoveLesson = onClickRemoveLesson,
+                        onSectionTitleChanged = onSectionTitleChanged,
+                        onClickRemoveSection = onClickRemoveSection,
+                        onClickAddLesson = onClickAddLesson ,
+                        onClickRemoveLesson = onClickRemoveLesson ,
+                        onLessonTitleChanged = onLessonTitleChanged,
                         enabled = uiState.fieldsEnabled && !isDragging,
                         onDragStart = {
-                            draggedItemIndex = index
+                            draggedItemIndex = sectionIndex
                             dragOffset = 0f
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         },
@@ -258,17 +255,17 @@ fun CurriculumMappingEditScreen(
                             dragOffset += delta
                             val itemHeight = 120f
                             val swapThreshold = itemHeight / 2
-
                             when {
-                                dragOffset > swapThreshold && index < uiState.chapters.size - 1 -> {
-                                    onChapterMoved(index, index + 1)
-                                    draggedItemIndex = index + 1
+                                dragOffset > swapThreshold && sectionIndex < uiState.sections.size - 1 -> {
+                                    onSectionMoved(sectionIndex, sectionIndex + 1)
+                                    draggedItemIndex = sectionIndex + 1
                                     dragOffset = 0f
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 }
-                                dragOffset < -swapThreshold && index > 0 -> {
-                                    onChapterMoved(index, index - 1)
-                                    draggedItemIndex = index - 1
+
+                                dragOffset < -swapThreshold && sectionIndex > 0 -> {
+                                    onSectionMoved(sectionIndex, sectionIndex - 1)
+                                    draggedItemIndex = sectionIndex - 1
                                     dragOffset = 0f
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 }
@@ -282,15 +279,16 @@ fun CurriculumMappingEditScreen(
 }
 
 @Composable
-private fun DraggableChapterItem(
-    chapter: ChapterMapping,
-    index: Int,
+private fun DraggableSectionItem(
+    section: CurriculumMappingSection,
+    sectionIndex: Int,
     isDragging: Boolean,
     dragOffset: Float,
-    lessons: List<LessonMapping>,
-    onClickRemoveChapter: (ChapterMapping) -> Unit,
-    onClickAddLesson: (ChapterMapping) -> Unit,
-    onClickRemoveLesson: (LessonMapping) -> Unit,
+    onSectionTitleChanged: (Int, String) -> Unit,
+    onClickRemoveSection: (Int) -> Unit,
+    onClickAddLesson: (Int) -> Unit,
+    onClickRemoveLesson: (Int, Int) -> Unit,
+    onLessonTitleChanged: (Int, Int, String) -> Unit,
     enabled: Boolean = true,
     onDragStart: () -> Unit = {},
     onDragEnd: () -> Unit = {},
@@ -329,12 +327,8 @@ private fun DraggableChapterItem(
                             .size(24.dp)
                             .pointerInput(Unit) {
                                 detectDragGesturesAfterLongPress(
-                                    onDragStart = {
-                                        onDragStart()
-                                    },
-                                    onDragEnd = {
-                                        onDragEnd()
-                                    },
+                                    onDragStart = { onDragStart() },
+                                    onDragEnd = { onDragEnd() },
                                     onDrag = { _, dragAmount ->
                                         onDrag(dragAmount.y)
                                     }
@@ -354,18 +348,25 @@ private fun DraggableChapterItem(
                                 shape = RoundedCornerShape(4.dp)
                             )
                     )
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = chapter.title
-                            ?: "${stringResource(Res.string.chapter)} ${chapter.chapterNumber}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+
+                    section.title?.let {
+                        OutlinedTextField(
+                            value = it,
+                            onValueChange = { onSectionTitleChanged(sectionIndex, it) },
+                            placeholder = {
+                                Text("${stringResource(Res.string.chapter)} ${sectionIndex + 1}")
+                            },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            enabled = enabled
+                        )
+                    }
                 }
 
                 IconButton(
-                    onClick = { onClickRemoveChapter(chapter) },
+                    onClick = { onClickRemoveSection(sectionIndex) },
                     modifier = Modifier.size(24.dp),
                     enabled = enabled
                 ) {
@@ -384,8 +385,8 @@ private fun DraggableChapterItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
-                    onClick = { onClickAddLesson(chapter) },
-                    modifier = Modifier.testTag("add_lesson_button_${chapter.uid}"),
+                    onClick = { onClickAddLesson(sectionIndex) },
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = enabled
                 ) {
                     Icon(
@@ -398,12 +399,18 @@ private fun DraggableChapterItem(
                 }
             }
 
-            lessons.forEach { lesson ->
+            section.items.forEachIndexed { linkIndex, link ->
                 LessonItem(
-                    lesson = lesson,
+                    link = link,
+                    sectionIndex = sectionIndex,
+                    linkIndex = linkIndex,
                     onClickRemoveLesson = onClickRemoveLesson,
+                    onLessonTitleChanged = onLessonTitleChanged,
                     enabled = enabled
                 )
+                if (linkIndex < section.items.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }
@@ -411,70 +418,43 @@ private fun DraggableChapterItem(
 
 @Composable
 private fun LessonItem(
-    lesson: LessonMapping,
-    onClickLesson: (LessonMapping) -> Unit = {},
-    onClickRemoveLesson: (LessonMapping) -> Unit,
-    enabled: Boolean = true
+    link: CurriculumMappingSectionLink,
+    sectionIndex: Int,
+    linkIndex: Int,
+    onClickRemoveLesson: (Int, Int) -> Unit,
+    onLessonTitleChanged: (Int, Int, String) -> Unit,
+    enabled: Boolean
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled) { onClickLesson(lesson) }
-            .padding(horizontal = 40.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(start = 40.dp, top = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            val lessonTitle = lesson.title ?: stringResource(Res.string.lesson,lesson.lessonNumber)
-            val initial = lessonTitle.firstOrNull()?.uppercaseChar()?.toString() ?: " "
-            val indicatorColor = MaterialTheme.colorScheme.primary
-
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(
-                        color = indicatorColor,
-                        shape = RoundedCornerShape(12.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = initial,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
                 )
-            }
+        )
 
-            Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
-            Column {
-                Text(
-                    text = lessonTitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                lesson.subtitle?.let { subtitle ->
-                    if (subtitle.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
+        link.title?.let {
+            OutlinedTextField(
+                value = it,
+                onValueChange = { onLessonTitleChanged(sectionIndex, linkIndex, it) },
+                placeholder = { Text("${stringResource(Res.string.lesson)} ${linkIndex + 1}") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                enabled = enabled
+            )
         }
 
         IconButton(
-            onClick = { onClickRemoveLesson(lesson) },
+            onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
             modifier = Modifier.size(24.dp),
             enabled = enabled
         ) {
@@ -492,16 +472,18 @@ fun CurriculumMappingEditScreenForViewModel(
     viewModel: CurriculumMappingEditViewModel
 ) {
     val uiState = viewModel.uiState.collectAsState().value
+
     CurriculumMappingEditScreen(
         uiState = uiState,
-        onBookTitleChanged = viewModel::onBookTitleChanged,
-        onBookDescriptionChanged = viewModel::onBookDescriptionChanged,
+        onTitleChanged = viewModel::onTitleChanged,
+        onDescriptionChanged = viewModel::onDescriptionChanged,
         onClickAddBookCover = viewModel::onClickAddBookCover,
-        onClickAddChapter = viewModel::onClickAddChapter,
-        onClickRemoveChapter = viewModel::onClickRemoveChapter,
+        onClickAddSection = viewModel::onClickAddSection,
+        onClickRemoveSection = viewModel::onClickRemoveSection,
+        onSectionTitleChanged = viewModel::onSectionTitleChanged,
+        onSectionMoved = viewModel::onSectionMoved,
         onClickAddLesson = viewModel::onClickAddLesson,
         onClickRemoveLesson = viewModel::onClickRemoveLesson,
-        onClickSave = viewModel::onClickSave,
-        onChapterMoved = viewModel::onChapterMoved
+        onLessonTitleChanged = viewModel::onLessonTitleChanged,
     )
 }

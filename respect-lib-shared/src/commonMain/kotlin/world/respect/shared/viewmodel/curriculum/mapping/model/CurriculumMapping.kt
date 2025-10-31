@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CurriculumMapping(
     val title: String = "",
+    val description: String = "",
     val sections: List<CurriculumMappingSection> = emptyList()
 )

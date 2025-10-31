@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 class CurriculumMappingSectionLink(
     val href: Url,
-    val title: String = ""
+    val title: String? = ""
 )

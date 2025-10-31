@@ -52,8 +52,11 @@ onFlowComplete:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
-
 # Validate Phone number
+- tapOn:
+     id: "phone_countrycode"
+- eraseText
+- inputText: "+1"
 - tapOn: "Phone number"
 - inputText: "23"
 - hideKeyboard

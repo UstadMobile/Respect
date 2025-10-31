@@ -10,23 +10,32 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "000_000_hello_world"
+        NAME: "001_003_login_using_school_link_test"
 
 onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
 
 - tapOn: "Get Started"
+- tapOn: "Other options"
 
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
+# link field verification
+- tapOn: "Paste the link here"  # Blank link field
+- tapOn: "Next"
+- assertVisible: "Invalid link, try again"
+- tapOn: "Paste the link here"
+- inputText: "Test"  #Entering text instead of link
+- tapOn: "Next"
+- assertVisible: "Invalid app Url"
+
+- tapOn: "Paste the link here"
+- eraseText
+- inputText: ${output.SCHOOL_URL}
+- tapOn: "Next"
 
 - tapOn:
     id: "username"
@@ -40,5 +49,4 @@ onFlowComplete:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
-- tapOn:
-    id: "user_account_icon"
+

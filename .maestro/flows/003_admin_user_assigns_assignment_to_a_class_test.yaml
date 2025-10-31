@@ -1,0 +1,83 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "003_admin_user_assigns_assignment_to_a_class_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/admin_add_app_and_teacher.yaml"
+
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "username"
+- inputText: "teacheruser"
+- tapOn:
+    id : "password"
+- inputText: "testt1"
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "New Class"
+- tapOn: "Assignments"
+- tapOn:
+    id: "floating_action_button"   #  +Assignment button
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Save"
+- assertVisible: "Required field"
+- tapOn: "Name*"
+- inputText: "Homework 1"
+- tapOn: "Class"
+- tapOn: "New Class"
+- tapOn: "Date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.tomorrowDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
+- tapOn: "Lesson/assessment"
+- assertVisible:
+    id: "app_title"
+- tapOn: "My app"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "Lesson 001"
+- back
+- assertVisible: "Homework 1"
+

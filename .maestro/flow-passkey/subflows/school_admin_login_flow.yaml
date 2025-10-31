@@ -1,6 +1,7 @@
 appId: world.respect.app
 
 ---
+- clearState: world.respect.app
 - launchApp:
       arguments:
           respect_directory: ${output.SCHOOL_URL}
@@ -11,6 +12,11 @@ appId: world.respect.app
       file: "get_started_select_school_by_name.yaml"
       env:
           SCHOOL_NAME: ${SCHOOL_NAME}
+
+- runFlow:
+    when:
+      visible: "Choose a saved passkey for Respect"
+    file: "choose_passkey_prompt_cancel.yaml"
 
 - tapOn:
       id: "username"

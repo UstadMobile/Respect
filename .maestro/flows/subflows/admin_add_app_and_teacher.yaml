@@ -1,0 +1,107 @@
+appId: world.respect.app
+
+---
+#  Admin add new app
+- runFlow: "school_admin_login_flow.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add from Link"
+- tapOn: "Link*"
+- inputText: "https://respect.world/respect-ds/case_valid/appmanifest.json"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "App detail"
+- tapOn: "Add App"
+- tapOn: "Apps"
+- assertVisible: "My app"
+
+#  Admin add new class
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn:
+    id: "floating_action_button"   #  +Class button
+- assertVisible:
+    id: "app_title"
+    text: "Add class"
+- tapOn: "Class name*"
+- inputText: "New Class"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "New Class"
+
+# Admin copy invite code to the teacher
+- tapOn: "Add Teacher"
+- tapOn: ".*Copy invite code.*"
+
+# Teacher sign-up via invite code to the class
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- longPressOn: "Invite code"
+- tapOn: "Paste"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "New Class"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "Teacher User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "../scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- extendedWaitUntil:
+    visible: "teacheruser" #username
+    timeout: 10000      # Timeout in milliseconds
+- tapOn: "Next"
+# passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
+- tapOn: "Password*"
+- inputText: "testt1"
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+# Admin approve teacher's request to join the class
+- clearState: world.respect.app
+- runFlow: "school_admin_login_flow.yaml"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn: "New Class"
+- assertVisible: "Pending requests"
+- assertVisible: "Teacher User"
+- tapOn: "Accept Invite"

@@ -1,21 +1,38 @@
 const today = new Date();
-const day = today.getDate().toString().padStart(2, '0');
-const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+
+// Current date parts
+const day = String(today.getDate()).padStart(2, '0');
+const month = String(today.getMonth() + 1).padStart(2, '0');
 const year = today.getFullYear();
-const currentDate = `${day}/${month}/${year}`; // Format: DD/MM/YYYY
-const lastYear = today.getFullYear() - 1;
-const pastYearC = today.getFullYear() - 10;  // C for child
-const pastYearP = today.getFullYear() - 30;  // P for Parent
+const currentDate = `${day}/${month}/${year}`;
 
-const yesterday = (today.getDate() - 1).toString().padStart(2, '0');
-const yesterdayDate = `${yesterday}/${month}/${year}`; // Format: DD/MM/YYYY
-const lastYearDate = `${day}/${month}/${lastYear}`; // Same day and month, but last year
-const pastYearDateC = `${day}/${month}/${pastYearC}`; // Same day and month, but 10 years ago
-const pastYearDateP = `${day}/${month}/${pastYearP}`; // Same day and month, but 30 years ago
+// Past years
+const lastYear = year - 1;
+const pastYearC = year - 10; // Child
+const pastYearP = year - 30; // Parent
 
-const tomorrow = (today.getDate() + 1).toString().padStart(2, '0');
-const tomorrowDate = `${tomorrow}/${month}/${year}`; // Format: DD/MM/YYYY
+// Yesterday
+const yesterdayObj = new Date(today);
+yesterdayObj.setDate(today.getDate() - 1);
+const yesterdayDay = String(yesterdayObj.getDate()).padStart(2, '0');
+const yesterdayMonth = String(yesterdayObj.getMonth() + 1).padStart(2, '0');
+const yesterdayYear = yesterdayObj.getFullYear();
+const yesterdayDate = `${yesterdayDay}/${yesterdayMonth}/${yesterdayYear}`;
 
+// Tomorrow
+const tomorrowObj = new Date(today);
+tomorrowObj.setDate(today.getDate() + 1);
+const tomorrowDay = String(tomorrowObj.getDate()).padStart(2, '0');
+const tomorrowMonth = String(tomorrowObj.getMonth() + 1).padStart(2, '0');
+const tomorrowYear = tomorrowObj.getFullYear();
+const tomorrowDate = `${tomorrowDay}/${tomorrowMonth}/${tomorrowYear}`;
+
+// Past year dates
+const lastYearDate = `${day}/${month}/${lastYear}`;
+const pastYearDateC = `${day}/${month}/${pastYearC}`;
+const pastYearDateP = `${day}/${month}/${pastYearP}`;
+
+// Time calculations
 const hours = String(today.getHours()).padStart(2, '0');
 const minutes = String(today.getMinutes()).padStart(2, '0');
 const minutesPlus3 = String(today.getMinutes() + 3).padStart(2, '0');
@@ -24,12 +41,13 @@ const currentTime = `${hours}:${minutes}`;
 const testTime = `${hours}:${minutesPlus3}`;
 const delayTime = `${hoursMinus1}:${minutes}`;
 
+// Output
 output.yesterdayDate = yesterdayDate;
 output.tomorrowDate = tomorrowDate;
 output.delayTime = delayTime;
 output.currentDate = currentDate;
 output.currentTime = currentTime;
 output.testTime = testTime;
-output.lastYearDate = lastYearDate; // Last year’s date
+output.lastYearDate = lastYearDate;
 output.pastYearDateC = pastYearDateC;
 output.pastYearDateP = pastYearDateP;

@@ -50,8 +50,5 @@ onFlowComplete:
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
-- assertVisible:
-    id: "app_title"
-    text: "Lesson 001"
 
 

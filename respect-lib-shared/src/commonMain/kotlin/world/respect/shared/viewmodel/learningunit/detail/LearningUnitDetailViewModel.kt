@@ -25,6 +25,7 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
@@ -62,22 +63,14 @@ class LearningUnitDetailViewModel(
             ).collect { result ->
                 when (result) {
                     is DataReadyState -> {
-
-                        val lessonData = result.data
-
-                        val resolvedLessonDetail = lessonData.copy(
-                            images = lessonData.images?.map { image ->
-                                image.copy(
-                                    href = route.learningUnitManifestUrl.resolve(image.href).toString()
-                                )
-                            }
-                        )
-
                         _uiState.update {
                             it.copy(
-                                lessonDetail = resolvedLessonDetail
+                                lessonDetail = result.data.resolve(
+                                    route.learningUnitManifestUrl
+                                )
                             )
                         }
+
                         _appUiState.update {
                             it.copy(
                                 title = result.data.metadata.title.getTitle().asUiText()

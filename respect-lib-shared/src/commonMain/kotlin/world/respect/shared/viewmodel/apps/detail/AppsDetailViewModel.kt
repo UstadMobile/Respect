@@ -96,10 +96,9 @@ class AppsDetailViewModel(
                     ).collect { result ->
                         when (result) {
                             is DataReadyState -> {
-
-                                val resolvedFeed = result.data.resolve(route.manifestUrl)
-
                                 _uiState.update {
+                                    val resolvedFeed = result.data.resolve(route.manifestUrl)
+
                                     it.copy(
                                         navigation = resolvedFeed.navigation ?: emptyList(),
                                         publications = resolvedFeed.publications ?: emptyList(),

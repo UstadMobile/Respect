@@ -5,36 +5,34 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.AsyncImage
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import world.respect.datalayer.db.curriculum.entities.TextbookMapping
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListUiState
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_book_cover
-import world.respect.shared.generated.resources.textbooks
-import world.respect.shared.generated.resources.no_textbooks_available
 import world.respect.shared.generated.resources.map
 import world.respect.shared.generated.resources.more_options
+import world.respect.shared.generated.resources.no_textbooks_available
+import world.respect.shared.generated.resources.textbooks
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListUiState
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 
 @Composable
 fun CurriculumMappingListScreen(
     uiState: CurriculumMappingListUiState = CurriculumMappingListUiState(),
-    onClickTextbook: (TextbookMapping) -> Unit = { },
-    onClickMoreOptions: (TextbookMapping) -> Unit = { },
-    onClickMap: () -> Unit = { },
+    onClickMapping: (CurriculumMapping) -> Unit = {},
+    onClickMoreOptions: (CurriculumMapping) -> Unit = {},
+    onClickMap: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -48,7 +46,7 @@ fun CurriculumMappingListScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            if (uiState.textbooks.isEmpty()) {
+            if (uiState.mappings.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -66,10 +64,10 @@ fun CurriculumMappingListScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(uiState.textbooks) { textbook ->
-                        TextbookCard(
-                            textbook = textbook,
-                            onClickTextbook = onClickTextbook,
+                    items(uiState.mappings) { mapping ->
+                        MappingCard(
+                            mapping = mapping,
+                            onClickMapping = onClickMapping,
                             onClickMoreOptions = onClickMoreOptions
                         )
                     }
@@ -93,24 +91,24 @@ fun CurriculumMappingListScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TextbookCard(
-    textbook: TextbookMapping,
-    onClickTextbook: (TextbookMapping) -> Unit,
-    onClickMoreOptions: (TextbookMapping) -> Unit
+private fun MappingCard(
+    mapping: CurriculumMapping,
+    onClickMapping: (CurriculumMapping) -> Unit,
+    onClickMoreOptions: (CurriculumMapping) -> Unit
 ) {
     Card(
-        onClick = { onClickTextbook(textbook) },
+        onClick = { onClickMapping(mapping) },
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(12.dp)
-        )  {
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -119,20 +117,19 @@ private fun TextbookCard(
                 Icon(
                     Icons.Filled.Book,
                     contentDescription = stringResource(Res.string.textbooks),
-                    modifier = Modifier
-                        .size(20.dp)
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = textbook.title ?: "",
+                    text = mapping.title,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                   modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f)
                 )
 
                 IconButton(
-                    onClick = { onClickMoreOptions(textbook) },
+                    onClick = { onClickMoreOptions(mapping) },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
@@ -150,28 +147,18 @@ private fun TextbookCard(
                     .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                if (textbook.coverImageUrl != null) {
-                    AsyncImage(
-                        model = textbook.coverImageUrl,
-                        contentDescription = stringResource(Res.string.add_book_cover),
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = mapping.title.split(" ")
+                            .mapNotNull { it.firstOrNull()?.uppercase() }
+                            .take(2)
+                            .joinToString(""),
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = textbook.title?.split(" ")
-                                ?.mapNotNull { it.firstOrNull()?.uppercase() }
-                                ?.take(2)
-                                ?.joinToString("") ?: "??",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
             }
         }
@@ -182,11 +169,11 @@ private fun TextbookCard(
 fun CurriculumMappingListScreenForViewModel(
     viewModel: CurriculumMappingListViewModel
 ) {
-    val uiState: CurriculumMappingListUiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     CurriculumMappingListScreen(
         uiState = uiState,
-        onClickTextbook = viewModel::onClickTextbook,
+        onClickMapping = viewModel::onClickMapping,
         onClickMoreOptions = viewModel::onClickMoreOptions,
         onClickMap = viewModel::onClickMap
     )

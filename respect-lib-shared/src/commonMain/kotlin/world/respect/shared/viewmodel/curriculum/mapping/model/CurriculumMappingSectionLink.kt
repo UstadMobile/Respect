@@ -4,7 +4,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 
 @Serializable
-class CurriculumMappingSectionLink(
-    val href: Url,
+data class CurriculumMappingSectionLink(
+    val href: String,
     val title: String? = ""
 )

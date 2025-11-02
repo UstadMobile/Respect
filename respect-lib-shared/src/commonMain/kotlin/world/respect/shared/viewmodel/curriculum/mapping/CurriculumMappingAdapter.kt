@@ -6,64 +6,37 @@ package world.respect.shared.viewmodel.curriculum.mapping
 //e.g. have CurriculumMapping.toOpds (convert from CurriculumMapping data class to Opds)
 // and OpdsFeed.toCurriculumMapping (convert from OpdsFeed to CurriculumMapping)
 
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsFeedMetadata
+import world.respect.lib.opds.model.OpdsGroup
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
-import io.ktor.http.Url
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class OpdsFeed(
-    val metadata: OpdsMetadata,
-    val links: List<OpdsLink> = emptyList(),
-    val groups: List<OpdsGroup> = emptyList()
-)
 
-@Serializable
-data class OpdsMetadata(
-    val title: String = ""
-)
-
-@Serializable
-data class OpdsLink(
-    val rel: String,
-    val href: Url,
-    val type: String = "application/opds+json"
-)
-
-@Serializable
-data class OpdsGroup(
-    val metadata: OpdsMetadata,
-    val navigation: List<OpdsNavigationLink> = emptyList()
-)
-
-@Serializable
-data class OpdsNavigationLink(
-    val href: Url,
-    val title: String= "",
-    val type: String = "application/opds+json",
-    val rel: String = "related"
-)
-
-fun CurriculumMapping.toOpds(selfLink: Url = Url("http://example.com/grouped")): OpdsFeed {
+fun CurriculumMapping.toOpds(selfLink: String): OpdsFeed {
     return OpdsFeed(
-        metadata = OpdsMetadata(title = this.title),
+        metadata = OpdsFeedMetadata(
+            title = this.title,
+            description = this.description
+        ),
         links = listOf(
-            OpdsLink(
-                rel = "self",
+            ReadiumLink(
+                rel = listOf("self"),
                 href = selfLink,
-                type = "application/opds+json"
+                type = OpdsFeed.MEDIA_TYPE
             )
         ),
         groups = this.sections.map { section ->
             OpdsGroup(
-                metadata = OpdsMetadata(title = section.title),
+                metadata = OpdsFeedMetadata(title = section.title),
                 navigation = section.items.map { item ->
-                    OpdsNavigationLink(
+                    ReadiumLink(
                         href = item.href,
-                        title = item.title!!,
-                        type = "application/opds+json",
-                        rel = "related"
+                        title = item.title,
+                        type = OpdsFeed.MEDIA_TYPE,
+                        rel = listOf("related")
                     )
                 }
             )
@@ -74,16 +47,17 @@ fun CurriculumMapping.toOpds(selfLink: Url = Url("http://example.com/grouped")):
 fun OpdsFeed.toCurriculumMapping(): CurriculumMapping {
     return CurriculumMapping(
         title = this.metadata.title,
-        sections = this.groups.map { group ->
+        description = this.metadata.description ?: "",
+        sections = this.groups?.map { group ->
             CurriculumMappingSection(
                 title = group.metadata.title,
-                items = group.navigation.map { navLink ->
+                items = group.navigation?.map { navLink ->
                     CurriculumMappingSectionLink(
                         href = navLink.href,
-                        title = navLink.title
+                        title = navLink.title ?: ""
                     )
-                }
+                } ?: emptyList()
             )
-        }
+        } ?: emptyList()
     )
 }

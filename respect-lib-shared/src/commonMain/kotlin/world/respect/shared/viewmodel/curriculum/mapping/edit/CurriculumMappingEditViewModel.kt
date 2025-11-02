@@ -7,19 +7,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.error_unknown
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
-import world.respect.shared.generated.resources.save_failed
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.resources.UiText
-import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
@@ -54,19 +50,20 @@ data class CurriculumMappingEditUiState(
 
 class CurriculumMappingEditViewModel(
     savedStateHandle: SavedStateHandle,
-    private val getCurriculumMappingsUseCase: GetCurriculumMappingsUseCase,
     private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
     private val mappingUid  = route.textbookUid
 
+
     private val _uiState = MutableStateFlow(
-        CurriculumMappingEditUiState(isNew = mappingUid == 0L)
+        CurriculumMappingEditUiState(
+            mapping = savedStateHandle[KEY_MAPPING] ?: CurriculumMapping(),
+            isNew = mappingUid == 0L
+        )
     )
     val uiState = _uiState.asStateFlow()
-
-    private val debouncer = LaunchDebouncer(viewModelScope)
 
     init {
         _appUiState.update { prev ->
@@ -78,305 +75,136 @@ class CurriculumMappingEditViewModel(
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),
-                hideBottomNavigation = true,
+                hideBottomNavigation = true
             )
         }
 
-        loadMappingData()
-
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                val learningUnit = result.result as? LearningUnitSelection ?: return@collect
+                val learningUnit = result.result as?
+                        LearningUnitSelection ?:
+                        return@collect
                 val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex ?: return@collect
-
                 val currentMapping = _uiState.value.mapping ?: return@collect
                 val currentSections = currentMapping.sections.toMutableList()
 
-                if (pendingSectionIndex >= currentSections.size) return@collect
+                val section = currentSections.getOrNull(pendingSectionIndex) ?: return@collect
 
-                val section = currentSections[pendingSectionIndex]
                 val newLink = CurriculumMappingSectionLink(
-                    href = learningUnit.learningUnitManifestUrl,
+                    href = learningUnit.learningUnitManifestUrl.toString(),
                     title = ""
                 )
 
-                currentSections[pendingSectionIndex] = CurriculumMappingSection(
-                    title = section.title,
-                    items = section.items + newLink
-                )
+                currentSections[pendingSectionIndex] =
+                    section.copy(items = section.items + newLink)
 
-                _uiState.update { prev ->
-                    prev.copy(
-                        mapping = currentMapping.copy(sections = currentSections),
-                        pendingLessonSectionIndex = null
-                    )
-                }
+                updateMapping(currentMapping.copy(sections = currentSections), clearPending = true)
             }
         }
     }
 
-    private fun loadMappingData() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, error = null) }
-
-            try {
-                if (mappingUid != 0L) {
-                    val loadedMapping = getCurriculumMappingsUseCase.getMappingByUid(mappingUid)
-                    if (loadedMapping != null) {
-                        _uiState.update { prev ->
-                            prev.copy(
-                                mapping = loadedMapping,
-                                loading = false,
-                                isNew = false,
-                                error = null
-                            )
-                        }
-                    } else {
-                        _uiState.update { prev ->
-                            prev.copy(
-                                loading = false,
-                                error = Res.string.error_unknown.asUiText())
-                        }
-                    }
-                } else {
-                    val newMapping = CurriculumMapping(
-                        title = "",
-                        sections = emptyList()
-                    )
-                    _uiState.update { prev ->
-                        prev.copy(
-                            mapping = newMapping,
-                            loading = false,
-                            error = null
-                        )
-                    }
-                }
-            } catch (e: Throwable) {
-                _uiState.update { prev ->
-                    prev.copy(
-                        loading = false,
-                        error = Res.string.error_unknown.asUiText()
-                    )
-                }
-            }
+    private fun updateMapping(mapping: CurriculumMapping, clearPending: Boolean = false) {
+        _uiState.update { prev ->
+            prev.copy(
+                mapping = mapping,
+                pendingLessonSectionIndex = if (clearPending) null else prev.pendingLessonSectionIndex
+            )
         }
+        savedStateHandle[KEY_MAPPING] = mapping
     }
 
     fun onTitleChanged(title: String) {
         val currentMapping = _uiState.value.mapping ?: return
         val updatedMapping = currentMapping.copy(title = title)
-
-        _uiState.update { prev ->
-            prev.copy(mapping = updatedMapping,
-                titleError = null
-            )
-        }
-
-        debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
-            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = updatedMapping.title
-        }
+        updateMapping(updatedMapping)
+        _uiState.update { it.copy(titleError = null) }
     }
+
     fun onDescriptionChanged(description: String) {
         val currentMapping = _uiState.value.mapping ?: return
-        val updatedMapping = currentMapping.copy(description = description)
-
-        _uiState.update { prev ->
-            prev.copy(mapping = updatedMapping)
-        }
+        updateMapping(currentMapping.copy(description = description))
     }
 
     fun onClickAddSection() {
         val currentMapping = _uiState.value.mapping ?: return
-        val newSection = CurriculumMappingSection(
-            title = "",
-            items = emptyList()
-        )
-        val updatedSections = currentMapping.sections + newSection
-
-        _uiState.update { prev ->
-            prev.copy(
-                mapping = currentMapping.copy(
-                    sections = updatedSections
-                )
-            )
-        }
+        val updatedSections = currentMapping.sections + CurriculumMappingSection(title = "")
+        updateMapping(currentMapping.copy(sections = updatedSections))
     }
+
     fun onSectionTitleChanged(sectionIndex: Int, title: String) {
         val currentMapping = _uiState.value.mapping ?: return
         val currentSections = currentMapping.sections.toMutableList()
-
-        if (sectionIndex >= currentSections.size) return
-
-        val section = currentSections[sectionIndex]
-        currentSections[sectionIndex] = CurriculumMappingSection(
-            title = title,
-            items = section.items
-        )
-
-        _uiState.update { prev ->
-            prev.copy(
-                mapping = currentMapping.copy(sections = currentSections)
-            )
-        }
+        val section = currentSections.getOrNull(sectionIndex) ?: return
+        currentSections[sectionIndex] = section.copy(title = title)
+        updateMapping(currentMapping.copy(sections = currentSections))
     }
 
-    fun onClickAddBookCover() {
-        // TODO:
-    }
-
-    fun onClickRemoveSection(sectionIndex: Int)  {
+    fun onClickRemoveSection(sectionIndex: Int) {
         val currentMapping = _uiState.value.mapping ?: return
         val currentSections = currentMapping.sections.toMutableList()
-        if (sectionIndex >= currentSections.size) return
-
+        if (sectionIndex !in currentSections.indices) return
         currentSections.removeAt(sectionIndex)
-
-
-        _uiState.update { prev ->
-            prev.copy(
-                mapping = currentMapping.copy(sections = currentSections)
-            )
-        }
+        updateMapping(currentMapping.copy(sections = currentSections))
     }
 
-    fun onSectionMoved(fromIndex: Int, toIndex: Int)  {
+    fun onSectionMoved(fromIndex: Int, toIndex: Int) {
         val currentMapping = _uiState.value.mapping ?: return
         val currentSections = currentMapping.sections.toMutableList()
-        if (fromIndex >= currentSections.size || toIndex >= currentSections.size) return
-
+        if (fromIndex !in currentSections.indices || toIndex !in currentSections.indices) return
         val section = currentSections.removeAt(fromIndex)
         currentSections.add(toIndex, section)
-
-        _uiState.update { prev ->
-            prev.copy(
-            mapping = currentMapping.copy(sections = currentSections)
-            )
-        }
+        updateMapping(currentMapping.copy(sections = currentSections))
     }
 
-
-
     fun onClickAddLesson(sectionIndex: Int) {
-        _uiState.update { prev ->
-            prev.copy(pendingLessonSectionIndex = sectionIndex)
-        }
-
+        _uiState.update { it.copy(pendingLessonSectionIndex = sectionIndex) }
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 RespectAppLauncher.create(
                     resultPopUpTo = CurriculumMappingEdit::class,
-                    resultKey = KEY_LEARNING_UNIT,
+                    resultKey = KEY_LEARNING_UNIT
                 )
             )
         )
     }
 
-
-
     fun onClickRemoveLesson(sectionIndex: Int, linkIndex: Int) {
         val currentMapping = _uiState.value.mapping ?: return
         val currentSections = currentMapping.sections.toMutableList()
-
-        if (sectionIndex >= currentSections.size) return
-
-        val section = currentSections[sectionIndex]
+        val section = currentSections.getOrNull(sectionIndex) ?: return
         val updatedItems = section.items.toMutableList()
-
-        if (linkIndex >= updatedItems.size) return
-
+        if (linkIndex !in updatedItems.indices) return
         updatedItems.removeAt(linkIndex)
-
-        currentSections[sectionIndex] = CurriculumMappingSection(
-            title = section.title,
-            items = updatedItems
-        )
-
-        _uiState.update { prev ->
-            prev.copy(
-                mapping = currentMapping.copy(sections = currentSections)
-            )
-        }
+        currentSections[sectionIndex] = section.copy(items = updatedItems)
+        updateMapping(currentMapping.copy(sections = currentSections))
     }
+
     fun onLessonTitleChanged(sectionIndex: Int, linkIndex: Int, title: String) {
         val currentMapping = _uiState.value.mapping ?: return
         val currentSections = currentMapping.sections.toMutableList()
-
-        if (sectionIndex >= currentSections.size) return
-
-        val section = currentSections[sectionIndex]
+        val section = currentSections.getOrNull(sectionIndex) ?: return
         val updatedItems = section.items.toMutableList()
-
-        if (linkIndex >= updatedItems.size) return
-
-        val link = updatedItems[linkIndex]
-        updatedItems[linkIndex] = CurriculumMappingSectionLink(
-            href = link.href,
-            title = title
-        )
-
-        currentSections[sectionIndex] = CurriculumMappingSection(
-            title = section.title,
-            items = updatedItems
-        )
-
-        _uiState.update { prev ->
-            prev.copy(
-                mapping = currentMapping.copy(sections = currentSections)
-            )
-        }
+        val link = updatedItems.getOrNull(linkIndex) ?: return
+        updatedItems[linkIndex] = link.copy(title = title)
+        currentSections[sectionIndex] = section.copy(items = updatedItems)
+        updateMapping(currentMapping.copy(sections = currentSections))
     }
-
-
 
     fun onClickSave() {
         val mapping = _uiState.value.mapping ?: return
-
-
-        mapping.title?.let {
-            if (it.isBlank()) {
-                _uiState.update { prev ->
-                    prev.copy(titleError = Res.string.required.asUiText())
-                }
-                return
-            } else {
-                _uiState.update { prev ->
-                    prev.copy(titleError = null)
-                }
-            }
+        if (mapping.title.isBlank()) {
+            _uiState.update { it.copy(titleError = Res.string.required.asUiText()) }
+            return
         }
-
-        viewModelScope.launch {
-            try {
-                _uiState.update { it.copy(loading = true) }
-
-                getCurriculumMappingsUseCase.saveCurriculumMapping(mapping)
-
-                _uiState.update { it.copy(loading = false) }
-
-                _navCommandFlow.tryEmit(NavCommand.PopUp())
-
-            } catch (e: Throwable) {
-                _uiState.update {
-                    it.copy(
-                        loading = false,
-                        error = Res.string.save_failed.asUiText()
-                    )
-                }
-            }
-        }
+        _navCommandFlow.tryEmit(NavCommand.PopUp())
     }
 
     fun onClearError() {
-        _uiState.update { prev ->
-            prev.copy(
-                titleError = null,
-                error = null
-            )
-        }
+        _uiState.update { it.copy(titleError = null) }
     }
 
-    fun onRetry() {
-        loadMappingData()
-    }
+    companion object {
 
+        private const val KEY_MAPPING = "curriculum_mapping"
+    }
 }

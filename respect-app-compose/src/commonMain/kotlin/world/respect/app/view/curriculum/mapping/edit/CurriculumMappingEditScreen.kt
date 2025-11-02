@@ -36,7 +36,6 @@ import world.respect.shared.generated.resources.book_title
 import world.respect.shared.generated.resources.chapter
 import world.respect.shared.generated.resources.click_plus_button
 import world.respect.shared.generated.resources.drag
-import world.respect.shared.generated.resources.error_unknown
 import world.respect.shared.generated.resources.lesson
 import world.respect.shared.generated.resources.mapping
 import world.respect.shared.generated.resources.no_chapter_added
@@ -53,17 +52,16 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 @Composable
 fun CurriculumMappingEditScreen(
     uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
-    onTitleChanged: (String) -> Unit,
-    onDescriptionChanged: (String) -> Unit,
-    onClickAddBookCover: () -> Unit,
-    onClickAddSection: () -> Unit,
-    onClickRemoveSection: (Int) -> Unit,
-    onSectionTitleChanged: (Int, String) -> Unit,
-    onSectionMoved: (fromIndex: Int, toIndex: Int) -> Unit,
-    onClickAddLesson: (Int) -> Unit,
-    onClickRemoveLesson: (Int, Int) -> Unit,
-    onLessonTitleChanged:(Int , Int , String) -> Unit,
-    onClickSave: () -> Unit = { },
+    onTitleChanged: (String) -> Unit = {},
+    onDescriptionChanged: (String) -> Unit = {},
+    onClickAddBookCover: () -> Unit = {},
+    onClickAddSection: () -> Unit = {},
+    onClickRemoveSection: (Int) -> Unit = {},
+    onSectionTitleChanged: (Int, String) -> Unit = { _, _ -> },
+    onSectionMoved: (Int, Int) -> Unit = { _, _ -> },
+    onClickAddLesson: (Int) -> Unit = {},
+    onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
+    onLessonTitleChanged: (Int, Int, String) -> Unit = { _, _, _ -> },
 ) {
     var draggedItemIndex by remember { mutableIntStateOf(-1) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
@@ -120,19 +118,8 @@ fun CurriculumMappingEditScreen(
                 }
             }
 
-
             item {
                 Spacer(modifier = Modifier.height(2.dp))
-                uiState.error?.let {
-                    Text(
-                        text = stringResource(Res.string.error_unknown),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    )
-                }
 
                 OutlinedTextField(
                     value = uiState.title,
@@ -142,15 +129,12 @@ fun CurriculumMappingEditScreen(
                         .fillMaxWidth()
                         .testTag("book_title_field"),
                     singleLine = true,
-                    isError = uiState.titleError != null ,
+                    isError = uiState.titleError != null,
                     supportingText = {
                         if (uiState.titleError != null) {
                             Text(stringResource(Res.string.required))
-                        } else {
-                            Text(stringResource(Res.string.required))
                         }
-                    },
-                    enabled = uiState.fieldsEnabled
+                    }
                 )
             }
 
@@ -159,14 +143,13 @@ fun CurriculumMappingEditScreen(
                     value = uiState.description,
                     onValueChange = onDescriptionChanged,
                     label = { Text(stringResource(Res.string.book_description)) },
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = false,
                     minLines = 1,
-                    maxLines = Int.MAX_VALUE,
-                    enabled = uiState.fieldsEnabled
+                    maxLines = Int.MAX_VALUE
                 )
             }
+
             item {
                 Text(
                     text = stringResource(Res.string.mapping),
@@ -174,12 +157,11 @@ fun CurriculumMappingEditScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
             item {
                 OutlinedButton(
                     onClick = onClickAddSection,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    enabled = uiState.fieldsEnabled
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -238,10 +220,10 @@ fun CurriculumMappingEditScreen(
                         dragOffset = if (isDragging) dragOffset else 0f,
                         onSectionTitleChanged = onSectionTitleChanged,
                         onClickRemoveSection = onClickRemoveSection,
-                        onClickAddLesson = onClickAddLesson ,
-                        onClickRemoveLesson = onClickRemoveLesson ,
+                        onClickAddLesson = onClickAddLesson,
+                        onClickRemoveLesson = onClickRemoveLesson,
                         onLessonTitleChanged = onLessonTitleChanged,
-                        enabled = uiState.fieldsEnabled && !isDragging,
+                        enabled = !isDragging,
                         onDragStart = {
                             draggedItemIndex = sectionIndex
                             dragOffset = 0f
@@ -351,18 +333,16 @@ private fun DraggableSectionItem(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    section.title?.let {
-                        OutlinedTextField(
-                            value = it,
-                            onValueChange = { onSectionTitleChanged(sectionIndex, it) },
-                            placeholder = {
-                                Text("${stringResource(Res.string.chapter)} ${sectionIndex + 1}")
-                            },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            enabled = enabled
-                        )
-                    }
+                    OutlinedTextField(
+                        value = section.title,
+                        onValueChange = { onSectionTitleChanged(sectionIndex, it) },
+                        placeholder = {
+                            Text("${stringResource(Res.string.chapter)} ${sectionIndex + 1}")
+                        },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        enabled = enabled
+                    )
                 }
 
                 IconButton(
@@ -442,16 +422,15 @@ private fun LessonItem(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        link.title?.let {
-            OutlinedTextField(
-                value = it,
-                onValueChange = { onLessonTitleChanged(sectionIndex, linkIndex, it) },
-                placeholder = { Text("${stringResource(Res.string.lesson)} ${linkIndex + 1}") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                enabled = enabled
-            )
-        }
+        val title = link.title ?: ""
+        OutlinedTextField(
+            value = title,
+            onValueChange = { onLessonTitleChanged(sectionIndex, linkIndex, it) },
+            placeholder = { Text("${stringResource(Res.string.lesson)} ${linkIndex + 1}") },
+            modifier = Modifier.weight(1f),
+            singleLine = true,
+            enabled = enabled
+        )
 
         IconButton(
             onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
@@ -471,13 +450,13 @@ private fun LessonItem(
 fun CurriculumMappingEditScreenForViewModel(
     viewModel: CurriculumMappingEditViewModel
 ) {
-    val uiState = viewModel.uiState.collectAsState().value
+    val uiState by viewModel.uiState.collectAsState()
 
     CurriculumMappingEditScreen(
         uiState = uiState,
         onTitleChanged = viewModel::onTitleChanged,
         onDescriptionChanged = viewModel::onDescriptionChanged,
-        onClickAddBookCover = viewModel::onClickAddBookCover,
+        onClickAddBookCover = {},
         onClickAddSection = viewModel::onClickAddSection,
         onClickRemoveSection = viewModel::onClickRemoveSection,
         onSectionTitleChanged = viewModel::onSectionTitleChanged,

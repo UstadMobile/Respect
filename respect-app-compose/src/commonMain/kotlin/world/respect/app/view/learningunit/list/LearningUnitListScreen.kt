@@ -34,7 +34,6 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.defaultItemPadding
 import world.respect.shared.viewmodel.app.appstate.getTitle
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.util.SortOrderOption
@@ -237,9 +236,7 @@ fun PublicationListItem(
             },
 
         leadingContent = {
-            val iconUrl = publication.images?.find {
-                it.type?.contains(IMAGE) == true
-            }?.href
+            val iconUrl = publication.images?.firstOrNull()?.href
 
             Box(
                 modifier = Modifier

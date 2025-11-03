@@ -1,0 +1,11 @@
+appId: world.respect.app
+---
+
+- tapOn:
+    id: "school_name"
+
+- inputText: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "school_name_text"
+    text: ${SCHOOL_NAME}

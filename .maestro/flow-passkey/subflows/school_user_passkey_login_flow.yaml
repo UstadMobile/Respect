@@ -1,6 +1,7 @@
 appId: world.respect.app
 
 ---
+- clearState
 - launchApp:
       arguments:
           respect_directory: ${output.SCHOOL_URL}
@@ -12,15 +13,10 @@ appId: world.respect.app
       env:
           SCHOOL_NAME: ${SCHOOL_NAME}
 
-- tapOn:
-      id: "username"
-- inputText: "admin"
-- tapOn:
-      id : "password"
-- inputText: ${SCHOOL_ADMIN_PASSWORD}
-- tapOn: "Login"
 - runFlow:
     when:
-      visible: "Save password for Respect?"
-    file: "save_password_prompt_cancel.yaml"
+      visible: "Choose a saved passkey for Respect"
+    file: "choose_passkey_prompt.yaml"
+    env:
+        USERNAME: ${USERNAME}
 - assertVisible: "Apps"

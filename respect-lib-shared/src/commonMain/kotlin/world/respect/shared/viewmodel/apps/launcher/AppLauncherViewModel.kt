@@ -12,13 +12,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app
-import world.respect.shared.generated.resources.apps
-import world.respect.shared.navigation.RespectAppList
-import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.RespectAppDataSource
@@ -33,16 +26,27 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.app
+import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.empty_list_description_admin
+import world.respect.shared.generated.resources.empty_list_description_non_admin
+import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RespectAppList
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class AppLauncherUiState(
     val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
     val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
     val canRemove: Boolean = false,
+    val emptyListDescription: UiText?=null,
 )
 
 class AppLauncherViewModel(
@@ -108,7 +112,15 @@ class AppLauncherViewModel(
                         )
                     )
                 }
-                _uiState.update { it.copy(canRemove = isAdmin) }
+                _uiState.update {
+                    it.copy(
+                        canRemove = isAdmin,
+                        emptyListDescription = if(isAdmin)
+                            Res.string.empty_list_description_admin.asUiText()
+                        else
+                            Res.string.empty_list_description_non_admin.asUiText()
+                    )
+                }
             }
         }
     }

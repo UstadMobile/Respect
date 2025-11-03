@@ -67,8 +67,10 @@ import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
+import world.respect.datalayer.db.school.domain.report.query.InsertReportTestDataUseCase
 import world.respect.datalayer.db.school.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -783,14 +785,29 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
-    }
-    single<RunReportUseCase> {
-        MockRunReportUseCaseClientImpl()
-    }
-    single<GenerateReportQueriesUseCase> {
-        GenerateReportQueriesUseCase()
-    }
-    single<CreateGraphFormatterUseCase> {
-        CreateGraphFormatterUseCase()
+
+        scoped<RunReportUseCase> {
+            try {
+                RunReportUseCaseDatabaseImpl(
+                    schoolDatabase = get(),
+                    generateReportQueriesUseCase = get(),
+                )
+            } catch (e: Exception) {
+                println("ERROR creating RunReportUseCaseDatabaseImpl: ${e.message}")
+                e.printStackTrace()
+                throw e
+            }
+        }
+        scoped<GenerateReportQueriesUseCase> {
+            GenerateReportQueriesUseCase()
+        }
+        scoped<CreateGraphFormatterUseCase> {
+            CreateGraphFormatterUseCase()
+        }
+        scoped<InsertReportTestDataUseCase> {
+            InsertReportTestDataUseCase(
+                schoolDatabase = get()
+            )
+        }
     }
 }

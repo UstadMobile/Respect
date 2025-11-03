@@ -14,6 +14,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.domain.report.query.InsertReportTestDataUseCase
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
@@ -45,15 +46,18 @@ data class ReportListUiState(
 
 class ReportListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val runReportUseCase: RunReportUseCase,
-    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase,
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
     private val _uiState = MutableStateFlow(ReportListUiState())
     val uiState: Flow<ReportListUiState> = _uiState.asStateFlow()
+
     private val schoolDataSource: SchoolDataSource by inject()
+    private val runReportUseCase: RunReportUseCase by inject()
+    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by inject()
+    private val insertReportTestDataUseCase: InsertReportTestDataUseCase by inject()
+
     private val launchDebounced = LaunchDebouncer(viewModelScope)
 
     private val pagingSourceHolder = PagingSourceFactoryHolder {
@@ -64,6 +68,9 @@ class ReportListViewModel(
         )
     }
     init {
+        viewModelScope.launch {
+            insertReportTestDataUseCase()
+        }
         viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(

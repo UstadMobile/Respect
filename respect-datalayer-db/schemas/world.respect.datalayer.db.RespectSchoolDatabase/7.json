@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "e330f078cccf1972ad56d7e92121efa7",
+    "identityHash": "5a1efd097ff42a344a1561c050ae6906",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1027,11 +1027,261 @@
             "wqiQueueItemId"
           ]
         }
+      },
+      {
+        "tableName": "StatementEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextPlatform` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL, `statementClazzUid` INTEGER NOT NULL, `statementCbUid` INTEGER NOT NULL, `statementDoorNode` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
+        "fields": [
+          {
+            "fieldPath": "statementIdHi",
+            "columnName": "statementIdHi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementIdLo",
+            "columnName": "statementIdLo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementActorPersonUid",
+            "columnName": "statementActorPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementVerbUid",
+            "columnName": "statementVerbUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementObjectType",
+            "columnName": "statementObjectType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementObjectUid1",
+            "columnName": "statementObjectUid1",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementObjectUid2",
+            "columnName": "statementObjectUid2",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementActorUid",
+            "columnName": "statementActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorityActorUid",
+            "columnName": "authorityActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "teamUid",
+            "columnName": "teamUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resultCompletion",
+            "columnName": "resultCompletion",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultSuccess",
+            "columnName": "resultSuccess",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultScoreScaled",
+            "columnName": "resultScoreScaled",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "resultScoreRaw",
+            "columnName": "resultScoreRaw",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "resultScoreMin",
+            "columnName": "resultScoreMin",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "resultScoreMax",
+            "columnName": "resultScoreMax",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "resultDuration",
+            "columnName": "resultDuration",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultResponse",
+            "columnName": "resultResponse",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stored",
+            "columnName": "stored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextRegistrationHi",
+            "columnName": "contextRegistrationHi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextRegistrationLo",
+            "columnName": "contextRegistrationLo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextRegistrationHash",
+            "columnName": "contextRegistrationHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextPlatform",
+            "columnName": "contextPlatform",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contextStatementRefIdHi",
+            "columnName": "contextStatementRefIdHi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextStatementRefIdLo",
+            "columnName": "contextStatementRefIdLo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextInstructorActorUid",
+            "columnName": "contextInstructorActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementLct",
+            "columnName": "statementLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "extensionProgress",
+            "columnName": "extensionProgress",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completionOrProgress",
+            "columnName": "completionOrProgress",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementContentEntryUid",
+            "columnName": "statementContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementLearnerGroupUid",
+            "columnName": "statementLearnerGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementClazzUid",
+            "columnName": "statementClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementCbUid",
+            "columnName": "statementCbUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statementDoorNode",
+            "columnName": "statementDoorNode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSubStatement",
+            "columnName": "isSubStatement",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "statementIdHi",
+            "statementIdLo"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_stmt_actor_person",
+            "unique": false,
+            "columnNames": [
+              "statementActorPersonUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_actor_person` ON `${TABLE_NAME}` (`statementActorPersonUid`)"
+          },
+          {
+            "name": "idx_statement_clazz_person",
+            "unique": false,
+            "columnNames": [
+              "statementClazzUid",
+              "statementActorPersonUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_statement_clazz_person` ON `${TABLE_NAME}` (`statementClazzUid`, `statementActorPersonUid`)"
+          },
+          {
+            "name": "idx_statement_cbuid_actor",
+            "unique": false,
+            "columnNames": [
+              "statementCbUid",
+              "statementActorUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_statement_cbuid_actor` ON `${TABLE_NAME}` (`statementCbUid`, `statementActorUid`)"
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e330f078cccf1972ad56d7e92121efa7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5a1efd097ff42a344a1561c050ae6906')"
     ]
   }
 }

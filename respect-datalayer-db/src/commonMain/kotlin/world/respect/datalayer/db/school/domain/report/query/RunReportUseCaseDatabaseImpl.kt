@@ -35,7 +35,6 @@ class RunReportUseCaseDatabaseImpl(
 
         return flow {
             val queries = generateReportQueriesUseCase(request = request)
-
             val queryResults = schoolDatabase.withWriterTransaction {
                 val lastResultIsFresh = schoolDatabase.reportRunResultRowDao().isReportFresh(
                     reportUid = request.reportUid,

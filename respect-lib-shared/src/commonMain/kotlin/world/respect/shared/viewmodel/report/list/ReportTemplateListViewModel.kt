@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -43,8 +44,6 @@ data class ReportTemplateListUiState(
 
 class ReportTemplateListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val runReportUseCase: RunReportUseCase,
-    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase,
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -52,7 +51,9 @@ class ReportTemplateListViewModel(
     private val _uiState = MutableStateFlow(ReportTemplateListUiState())
     val uiState = _uiState.asStateFlow()
     private val activeUserPersonUid: Long = 0
+    private val runReportUseCase: RunReportUseCase by inject()
     private val schoolDataSource: SchoolDataSource by inject()
+    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by inject()
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
     init {

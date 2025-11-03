@@ -2,7 +2,6 @@ package world.respect.datalayer.db.school.domain.report.query
 
 import kotlinx.datetime.offsetAt
 import world.respect.datalayer.ext.DatabaseType
-import world.respect.datalayer.ext.PermissionFlags
 import world.respect.datalayer.school.model.report.ReportXAxis
 import world.respect.libutil.util.time.systemTimeInMillis
 
@@ -62,7 +61,7 @@ class GenerateReportQueriesUseCase {
         field: ReportXAxis,
         dbType: Int,
         request: RunReportUseCase.RunReportRequest,
-    ) : String {
+    ): String {
         val reportOptions = request.reportOptions
         val timeZone = request.timeZone
 
@@ -85,21 +84,22 @@ class GenerateReportQueriesUseCase {
          * See https://www.sqlite.org/lang_datefunc.html
          */
         return buildString {
-            when(field) {
+            when (field) {
                 ReportXAxis.DAY -> {
                     append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch')")
                 }
 
                 ReportXAxis.WEEK -> {
-                            /* Group data as documented on ReportXAxis.WEEK - on SQLite this works
-                             * by :
-                             *  a) When the day of week for the timestamp matches
-                             *     StartOfWeekCte.TimeRangeStartDayOfWeek, just format the timestamp date
-                             *  b) if not, use the weekday modifier which will advance the date
-                             *     forward to when the day of week will match, then adjust backwards
-                             *     7 days, thus grouping data by week commencing date.
-                             */
-                            append("""
+                    /* Group data as documented on ReportXAxis.WEEK - on SQLite this works
+                     * by :
+                     *  a) When the day of week for the timestamp matches
+                     *     StartOfWeekCte.TimeRangeStartDayOfWeek, just format the timestamp date
+                     *  b) if not, use the weekday modifier which will advance the date
+                     *     forward to when the day of week will match, then adjust backwards
+                     *     7 days, thus grouping data by week commencing date.
+                     */
+                    append(
+                        """
                               (CASE strftime('%w', $timeFieldName/1000, 'unixepoch')
                                     WHEN (SELECT StartOfWeekCte.TimeRangeStartDayOfWeek
                                            FROM StartOfWeekCte)
@@ -112,17 +112,18 @@ class GenerateReportQueriesUseCase {
                                                      FROM StartOfWeekCte), 
                                                   '-7 day')
                                  END)
-                            """.trimIndent())
+                            """.trimIndent()
+                    )
                 }
 
                 ReportXAxis.MONTH -> {
-                            append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch', 'start of month') ")
+                    append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch', 'start of month') ")
 
                 }
 
                 ReportXAxis.YEAR -> {
 
-                            append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch', 'start of year') ")
+                    append("strftime('%Y-%m-%d', $timeFieldName/1000, 'unixepoch', 'start of year') ")
                 }
 
                 ReportXAxis.CLASS -> {
@@ -130,33 +131,18 @@ class GenerateReportQueriesUseCase {
                 }
 
                 ReportXAxis.GENDER -> {
-                    append("COALESCE(Person.gender, 0)")
+                    append("COALESCE(PersonEntity.pGender, 0)")
                 }
-
-                ReportXAxis.QUARTER -> TODO()
-                ReportXAxis.TIME_OF_DAY -> TODO()
-                ReportXAxis.SUBJECT -> TODO()
-                ReportXAxis.SCHOOL -> TODO()
-                ReportXAxis.ASSESSMENT_TYPE -> TODO()
-                ReportXAxis.GRADE_LEVEL -> TODO()
-                ReportXAxis.AGE_GROUP -> TODO()
-                ReportXAxis.REGION -> TODO()
-                ReportXAxis.LANGUAGE -> TODO()
-                ReportXAxis.USER_ROLE -> TODO()
-                ReportXAxis.ACTIVITY_VERB -> TODO()
-                ReportXAxis.APPLICATION -> TODO()
-                ReportXAxis.DEVICE_TYPE -> TODO()
-                ReportXAxis.ROLE -> TODO()
             }
         }
     }
 
     operator fun invoke(
         request: RunReportUseCase.RunReportRequest,
-        dbType: Int = DatabaseType.getCurrentDbType(), // Default to SQLite
+        dbType: Int = DatabaseType.getCurrentDbType(),
     ): List<ReportQueryParts2> {
         val reportOptions = request.reportOptions
-        val xAxis = reportOptions.xAxis ?: throw IllegalArgumentException("null x axis")
+        val xAxis = reportOptions.xAxis
 
         val reportFromMs = reportOptions.period.periodStartMillis(request.timeZone)
         val reportToMs = reportOptions.period.periodEndMillis(request.timeZone)
@@ -167,66 +153,27 @@ class GenerateReportQueriesUseCase {
             var sql = ""
             val paramsList = mutableListOf<Any>()
 
-
-            /* Permission check CTEs:
-             * a) AllLearningRecordsPermission: Check if the user as per accountPersonUid has view
-             *    learning records SystemPermission, in which case, no further checks will be
-             *    required.
-             * b) Where the user does not have the SystemPermission, get a list of the clazzUids for
-             *    which the active user has view learning records permission
-             */
             sql += """
-                INSERT INTO ReportQueryResult(rqrReportUid, rqrLastModified,
-                rqrReportSeriesUid, rqrLastValidated, rqrXAxis, rqrYAxis,
-                rqrSubgroup, rqrTimeZone)
-                
-                WITH AllLearningRecordsPermission(hasPermission) AS (
-                     SELECT EXISTS(
-                            SELECT 1
-                              FROM SystemPermission
-                             WHERE SystemPermission.spToPersonUid = ?
-                               AND (SystemPermission.spPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}))
-                            AS hasPermission   
-                ),
-                
-                ClazzesWithPermission(clazzUid) AS(
-                     SELECT Clazz.clazzUid AS clazzUid
-                       FROM Clazz
-                      WHERE NOT (SELECT hasPermission FROM AllLearningRecordsPermission)
-                        AND Clazz.clazzOwnerPersonUid = ?
-                      UNION
-                      SELECT CoursePermission.cpClazzUid AS clazzUid
-                        FROM CoursePermission
-                       WHERE NOT (SELECT hasPermission FROM AllLearningRecordsPermission)
-                         AND (    CoursePermission.cpToPersonUid = ?
-                              OR ((CoursePermission.cpToEnrolmentRole, CoursePermission.cpClazzUid) IN
-                                  (SELECT ClazzEnrolment.clazzEnrolmentRole,
-                                          ClazzEnrolment.clazzEnrolmentClazzUid
-                                     FROM ClazzEnrolment      
-                                    WHERE ClazzEnrolment.clazzEnrolmentPersonUid = ?)))
-                         AND (CoursePermission.cpPermissionsFlag & ${PermissionFlags.COURSE_LEARNINGRECORD_VIEW}) > 0         
-                )
-            """.trimIndent()
-            //All parameters above are the accountPersonUid (4)
-            paramsList.addAll((0 until 4).map { request.accountPersonUid })
+                 INSERT INTO ReportQueryResult(rqrReportUid, rqrLastModified,
+                 rqrReportSeriesUid, rqrLastValidated, rqrXAxis, rqrYAxis,
+                 rqrSubgroup, rqrTimeZone)
+        
+                 WITH 
+                 """.trimIndent()
 
-            /*
-             * Where xAxis or subgrouping is by week and we are using SQLite we need to know the
-             * first day of week; so this is added as a CTE.
-             */
-            if(
-                dbType == DatabaseType.SQLITE &&
-                (xAxis == ReportXAxis.WEEK ||
-                        reportOptions.series.any { it.reportSeriesSubGroup == ReportXAxis.WEEK } )
-            ) {
-                sql += ",StartOfWeekCte(TimeRangeStartDayOfWeek) AS (\n" +
-                        "SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek\n" +
-                        ")\n"
-                paramsList.add(reportFromMs/1000)
+            if (xAxis == ReportXAxis.WEEK || series.reportSeriesSubGroup == ReportXAxis.WEEK) {
+                sql += """
+                  StartOfWeekCte(TimeRangeStartDayOfWeek) AS (
+                  SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek
+                   ),
+                   """.trimIndent()
+                paramsList.add(reportFromMs / 1000)
             }
 
-            sql += ",ResultSourceCte AS (\n "
-            sql += "SELECT "
+            sql += """
+                    ResultSourceCte AS (
+                      SELECT 
+                      """.trimIndent()
 
             // Use the Indicator's SQL
             if (yAxis.sql.isBlank()) {
@@ -236,38 +183,33 @@ class GenerateReportQueriesUseCase {
 
             sql += xAxisOrSubgroupExpression(xAxis, dbType, request) + " AS xAxis,\n"
 
-            when(series.reportSeriesSubGroup) {
+            when (series.reportSeriesSubGroup) {
                 null -> {
                     sql += "'' AS subgroup\n"
                 }
 
                 else -> {
-                    sql += "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup, dbType, request)} AS subgroup\n"
+                    sql += "${
+                        xAxisOrSubgroupExpression(
+                            series.reportSeriesSubGroup!!,
+                            dbType,
+                            request
+                        )
+                    } AS subgroup\n"
                 }
             }
 
             sql += "FROM StatementEntity ResultSource\n"
-            if(reportOptions.xAxis.personJoinRequired ||
+
+            if (reportOptions.xAxis.personJoinRequired ||
                 series.reportSeriesSubGroup?.personJoinRequired == true
             ) {
-                sql += "LEFT JOIN Person\n" +
-                        "ON Person.personUid = ResultSource.statementActorPersonUid\n"
+                sql += "LEFT JOIN PersonEntity ON PersonEntity.pGuidHash = ResultSource.statementActorPersonUid\n"
             }
 
             sql += "WHERE ResultSource.timestamp BETWEEN ? AND ?\n"
             paramsList.add(reportFromMs)
             paramsList.add(reportToMs)
-
-            sql += """
-                AND (     (SELECT AllLearningRecordsPermission.hasPermission
-                             FROM AllLearningRecordsPermission)
-                       OR ResultSource.statementActorPersonUid = ? 
-                       OR ResultSource.statementClazzUid IN 
-                          (SELECT ClazzesWithPermission.clazzUid
-                             FROM ClazzesWithPermission)
-                    )         
-            """.trimIndent()
-            paramsList.add(request.accountPersonUid)
 
             sql += " GROUP BY xAxis"
             series.reportSeriesSubGroup?.also {
@@ -276,20 +218,26 @@ class GenerateReportQueriesUseCase {
 
             sql += "\n)\n"
 
-            //Order must match INSERT clause
             sql += """
-                SELECT ? AS rqrReportUid,
-                       ? AS rqrLastModified,
-                       ? AS rqrReportSeriesUid,
-                       ? AS rqrLastValidated,
-                       ResultSourceCte.xAxis AS rqrXAxis,
-                       ResultSourceCte.yAxis AS rqrYAxis,
-                       ResultSourceCte.subgroup AS rqrSubgroup,
-                       ? AS rqrSubgroup
-                  FROM ResultSourceCte  
-            """.trimIndent()
+        SELECT ? AS rqrReportUid,
+               ? AS rqrLastModified,
+               ? AS rqrReportSeriesUid,
+               ? AS rqrLastValidated,
+               ResultSourceCte.xAxis AS rqrXAxis,
+               ResultSourceCte.yAxis AS rqrYAxis,
+               ResultSourceCte.subgroup AS rqrSubgroup,
+               ? AS rqrTimeZone
+          FROM ResultSourceCte  
+        """.trimIndent()
+
             paramsList.addAll(
-                listOf(request.reportUid, timenow, series.reportSeriesUid, timenow, request.timeZone.id)
+                listOf(
+                    request.reportUid,
+                    timenow,
+                    series.reportSeriesUid,
+                    timenow,
+                    request.timeZone.id
+                )
             )
 
             ReportQueryParts2(sql, paramsList.toTypedArray(), timenow)

@@ -32,7 +32,6 @@ object Templates {
                         reportSeriesTitle = "Students",
                         reportSeriesYAxis = DefaultIndicators.list.find { it.name == "Active days per user" } ?: DefaultIndicators.list.first(),
                         reportSeriesVisualType = ReportSeriesVisualType.LINE_GRAPH,
-                        reportSeriesSubGroup = ReportXAxis.ROLE
                     )
                 )
             ),
@@ -66,7 +65,6 @@ object Templates {
                         reportSeriesTitle = "All users",
                         reportSeriesYAxis = DefaultIndicators.list.find { it.name == "Active days per user" }  ?: DefaultIndicators.list.first(),
                         reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
-                        reportSeriesSubGroup = ReportXAxis.ROLE,
                         reportSeriesFilters = listOf(
                             ReportFilter(
                                 reportFilterField = FilterType.PERSON_GENDER,
@@ -93,7 +91,6 @@ object Templates {
                         reportSeriesTitle = "Students",
                         reportSeriesYAxis = DefaultIndicators.list.find { it.name == "Number of activities" }  ?: DefaultIndicators.list.first(),
                         reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
-                        reportSeriesSubGroup = ReportXAxis.ASSESSMENT_TYPE
                     )
                 )
             ),
@@ -103,7 +100,7 @@ object Templates {
             title = "Top 5 students",
             reportOptions = ReportOptions(
                 title = "Top 5 Students",
-                xAxis = ReportXAxis.ROLE,
+                xAxis = ReportXAxis.GENDER,
                 period = RelativeRangeReportPeriod(
                     ReportTimeRangeUnit.WEEK,
                     rangeQuantity = 1

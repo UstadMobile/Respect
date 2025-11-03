@@ -42,15 +42,15 @@ data class ReportDetailUiState(
 
 class ReportDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val runReportUseCase: RunReportUseCase,
-    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase,
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
     private val route: ReportDetail = savedStateHandle.toRoute()
     private val reportUid = route.reportUid
+    private val runReportUseCase: RunReportUseCase by inject()
     private val schoolDataSource: SchoolDataSource by inject()
+    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by inject()
     private val _uiState = MutableStateFlow(ReportDetailUiState())
     val uiState: Flow<ReportDetailUiState> = _uiState.asStateFlow()
 

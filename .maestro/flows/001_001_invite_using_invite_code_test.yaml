@@ -2,7 +2,7 @@ appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
-      file: "subflows/school_init.js"
+      file: "scripts/school_init.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
@@ -14,7 +14,7 @@ onFlowStart:
 
 onFlowComplete:
   - runScript:
-      file: "subflows/teardown.js"
+      file: "scripts/teardown.js"
 
 ---
 
@@ -88,7 +88,7 @@ onFlowComplete:
 - assertVisible: "Required*" # DOB is mandatory field
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.tomorrowDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
@@ -97,7 +97,7 @@ onFlowComplete:
 - eraseText
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:
@@ -191,7 +191,7 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - tapOn: "Next"
 - assertVisible:
@@ -302,7 +302,7 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:
@@ -325,7 +325,7 @@ onFlowComplete:
 - tapOn: "Male"
 - tapOn: "Child's date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
 - tapOn: "Done"

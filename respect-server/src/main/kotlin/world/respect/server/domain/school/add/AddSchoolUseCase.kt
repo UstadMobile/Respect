@@ -93,7 +93,7 @@ class AddSchoolUseCase(
             )
 
             //insert default SchoolPermissionGrants
-            addDefaultGrantsUseCase(schoolDataSource)
+            addDefaultGrantsUseCase(schoolDataSource).invoke()
         }
     }
 

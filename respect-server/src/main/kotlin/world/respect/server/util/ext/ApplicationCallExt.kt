@@ -108,9 +108,12 @@ suspend inline fun <reified T: Any> ApplicationCall.respondOffsetLimitPaging(
             respond(message = unwrappedList)
         }
 
-        else -> {
-            //TODO: Respond with error code.
-            //nothing yet
+        is PagingSource.LoadResult.Error -> {
+            throw pagingLoadResult.throwable
+        }
+
+        is PagingSource.LoadResult.Invalid<*, *> -> {
+            respond(HttpStatusCode.BadRequest)
         }
     }
 }

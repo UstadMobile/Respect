@@ -59,19 +59,7 @@ import kotlin.time.Clock
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
-data class DataSourceTestClient(
-    val schoolDataSource: SchoolDataSource,
-    val schoolDataSourceLocal: SchoolDataSourceLocal,
-    val schoolDataSourceRemote: SchoolDataSource,
-    val validationHelper: ExtendedDataSourceValidationHelper,
-    val scope: CoroutineScope,
-) {
 
-    fun close() {
-        scope.cancel()
-    }
-
-}
 
 class ClientServerDataSourceTestBuilder internal constructor(
     private val baseDir: File,
@@ -84,6 +72,43 @@ class ClientServerDataSourceTestBuilder internal constructor(
     val adminUserId: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("4242"),
     val useDefaultPermissions: Boolean = true,
 ) {
+
+    private val serverDir = File(baseDir, "server").also { it.mkdirs() }
+
+    val serverSchoolSourceAndDb = newLocalSchoolDatabase(
+        serverDir, stringHasher, adminUserId
+    )
+
+    val serverAdminPerson = Person(
+        guid = adminUserId.guid,
+        givenName = "Admin",
+        familyName = "User",
+        gender = PersonGenderEnum.UNSPECIFIED,
+        roles = listOf(
+            PersonRole(true, PersonRoleEnum.SYSTEM_ADMINISTRATOR)
+        ),
+    )
+
+    inner class DataSourceTestClient(
+        val schoolDataSource: SchoolDataSource,
+        val schoolDataSourceLocal: SchoolDataSourceLocal,
+        val schoolDataSourceRemote: SchoolDataSource,
+        val validationHelper: ExtendedDataSourceValidationHelper,
+        val scope: CoroutineScope,
+    ) {
+
+        suspend fun insertServerAdminAndDefaultGrants() {
+            schoolDataSourceLocal.personDataSource.updateLocal(listOf(serverAdminPerson))
+            if(useDefaultPermissions) {
+                AddDefaultSchoolPermissionGrantsUseCase(schoolDataSourceLocal).invoke()
+            }
+        }
+
+        fun close() {
+            scope.cancel()
+        }
+
+    }
 
     private lateinit var serverRouting: Routing.() -> Unit
 
@@ -108,22 +133,6 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
 
     val port = findFreePort()
-
-    private val serverDir = File(baseDir, "server").also { it.mkdirs() }
-
-    val serverSchoolSourceAndDb = newLocalSchoolDatabase(
-        serverDir, stringHasher, adminUserId
-    )
-
-    val serverAdminPerson = Person(
-        guid = adminUserId.guid,
-        givenName = "Admin",
-        familyName = "User",
-        gender = PersonGenderEnum.UNSPECIFIED,
-        roles = listOf(
-            PersonRole(true, PersonRoleEnum.SYSTEM_ADMINISTRATOR)
-        ),
-    )
 
     val serverSchoolDataSource = serverSchoolSourceAndDb.second.also {
         runBlocking {

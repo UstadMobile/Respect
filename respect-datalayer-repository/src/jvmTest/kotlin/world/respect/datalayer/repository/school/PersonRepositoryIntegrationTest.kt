@@ -160,7 +160,7 @@ class PersonRepositoryIntegrationTest {
                 val dataSince = clients.first().schoolDataSource.personDataSource
                     .list(
                         loadParams = DataLoadParams(),
-                        since = Instant.Companion.fromEpochMilliseconds(answer1ConsistentThrough)
+                        since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
                     )
 
                 val remoteDataState = dataSince.remoteState
@@ -209,7 +209,7 @@ class PersonRepositoryIntegrationTest {
                 val dataSince = clients.first().schoolDataSource.personDataSource
                     .list(
                         loadParams = DataLoadParams(),
-                        since = Instant.Companion.fromEpochMilliseconds(answer1ConsistentThrough)
+                        since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
                     )
 
                 val remoteDataState = dataSince.remoteState
@@ -273,6 +273,8 @@ class PersonRepositoryIntegrationTest {
                 }
 
                 server.start()
+
+                clients.first().insertServerAdminAndDefaultGrants()
 
                 clients.first().schoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)

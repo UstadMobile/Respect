@@ -22,15 +22,19 @@ object PermissionFlags {
      */
     const val PERSON_TEACHER_WRITE = 128L
 
+    //Note: writing an admin always requires admin permission
+    const val PERSON_ADMIN_READ = 256L
+
+
     /**
      * When used as a SchoolPermission, then that role will have permission to add any student user
      * in the school to any class in the school.
      */
-    const val ADD_STUDENT_TO_CLASS = 256L
+    const val ADD_STUDENT_TO_CLASS = 512L
 
-    const val ADD_TEACHER_TO_CLASS = 512L
+    const val ADD_TEACHER_TO_CLASS = 1024L
 
-    const val INVITE_NEW_USER = 1024L
+    const val INVITE_NEW_USER = 2048L
 
     const val SYSTEM_ADMIN = Long.MAX_VALUE
 

@@ -27,6 +27,7 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PermissionCheckPagingSource
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
@@ -66,7 +67,6 @@ class PersonDataSourceDb(
         if(list.isEmpty())
             return
 
-        val now = Clock.System.now()
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach { personToStore ->
@@ -79,7 +79,7 @@ class PersonDataSourceDb(
                         (personInDb.primaryRole() != personToStore.primaryRole() ||
                                 personToStore.roles.size != 1)
                     ) {
-                        throw UnauthorizedException("Role cannot be changed")
+                        throw UnauthorizedException("Role cannot be changed, and must have one role")
                     }
 
                     if(
@@ -164,16 +164,26 @@ class PersonDataSourceDb(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
-        return IPagingSourceFactory {
-            schoolDb.getPersonEntityDao().findAllAsPagingSource(
-                since = params.common.since?.toEpochMilliseconds() ?: 0,
-                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
-                inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
-                filterByName = params.filterByName,
-            ).map(tag = "persondb-mapped") {
-                it.toPersonEntities().toModel()
-            }
+        return IPagingSourceFactory<Int, Person> {
+            PermissionCheckPagingSource(
+                src = schoolDb.getPersonEntityDao().findAllAsPagingSource(
+                    since = params.common.since?.toEpochMilliseconds() ?: 0,
+                    guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                    inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+                    inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+                    filterByName = params.filterByName,
+                ).map(tag = "persondb-mapped") {
+                    it.toPersonEntities().toModel()
+                },
+                onCheckPermission = {
+                    params.common.guid?.let { guid ->
+                        schoolDb.getPersonEntityDao().userCanReadOther(
+                            authenticatedUidNum = uidNumberMapper(authenticatedUser.guid),
+                            uidNum = uidNumberMapper(guid)
+                        )
+                    } ?: true
+                }
+            )
         }
     }
 

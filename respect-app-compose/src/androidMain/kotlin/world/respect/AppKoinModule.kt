@@ -182,33 +182,6 @@ import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewMo
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
-import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
-import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.curriculum.data.MockChapterDataSource
-import world.respect.datalayer.db.curriculum.data.MockLessonDataSource
-import world.respect.datalayer.db.curriculum.data.MockTextbookDataSource
-import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
-import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
-import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
-import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
-import world.respect.datalayer.school.writequeue.RemoteWriteQueue
-import world.respect.datalayer.shared.XXHashUidNumberMapper
-import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
-import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
-import world.respect.shared.domain.account.invite.RedeemInviteUseCase
-import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
-import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
-import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
-import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
-import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
-import world.respect.shared.domain.report.query.RunReportUseCase
-import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
-import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
-import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
-import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
-import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
@@ -226,8 +199,6 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.domain.curriculum.mapping.GetCurriculumMappingsUseCase
-import world.respect.shared.domain.curriculum.mapping.MockGetCurriculumMappingsUseCaseImpl
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
@@ -442,30 +413,6 @@ val appKoinModule = module {
     single<EncodeUserHandleUseCase> {
         EncodeUserHandleUseCaseImpl()
     }
-
-    single { MockTextbookDataSource()}
-    single { MockChapterDataSource()}
-    single { MockLessonDataSource() }
-
-    single< MockGetCurriculumMappingsUseCaseImpl> {
-        MockGetCurriculumMappingsUseCaseImpl(
-            textbookDataSource = get(),
-            chapterDataSource = get(),
-            lessonDataSource = get()
-        )
-    }
-
-    single<GetCurriculumMappingsUseCase> { get<MockGetCurriculumMappingsUseCaseImpl>() }
-
-
-    single {
-        CreatePublicKeyCredentialCreationOptionsJsonUseCase(
-            encodeUserHandleUseCase = get(),
-            appName = Res.string.app_name,
-            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
-            )
-    }
-
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }

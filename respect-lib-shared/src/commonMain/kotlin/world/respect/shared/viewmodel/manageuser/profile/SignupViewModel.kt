@@ -166,7 +166,7 @@ class SignupViewModel(
                     genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
                         Res.string.required) else null,
                     dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {
-                        StringResourceUiText(Res.string.required)
+                        StringResourceUiText(Res.string.required_field)
                     } else if (personInfo.dateOfBirth > today) {
                         StringResourceUiText(Res.string.date_of_birth_in_future)
                     } else null

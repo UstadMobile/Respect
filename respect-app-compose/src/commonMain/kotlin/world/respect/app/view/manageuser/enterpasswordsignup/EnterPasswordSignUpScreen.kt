@@ -18,7 +18,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.password_label
-import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.sign_up
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupUiState
@@ -55,7 +55,7 @@ fun EnterPasswordSignupScreen(
             supportingText = {
                 Text(
                     text = uiTextStringResource(
-                        uiState.passwordError ?: StringResourceUiText(Res.string.required_field)
+                        uiState.passwordError ?: StringResourceUiText(Res.string.required)
                     )
                 )
             },

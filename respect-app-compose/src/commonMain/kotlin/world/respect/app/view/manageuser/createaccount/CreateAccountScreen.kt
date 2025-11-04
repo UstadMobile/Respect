@@ -35,7 +35,7 @@ import world.respect.shared.generated.resources.how_passkey_works
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.other_way_to_sign_in
 import world.respect.shared.generated.resources.passkey_description
-import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.sign_up
 import world.respect.shared.generated.resources.signing_in
 import world.respect.shared.generated.resources.username_label
@@ -83,7 +83,7 @@ fun CreateAccountScreen(
             supportingText = {
                 Text(
                     text = uiTextStringResource(
-                        uiState.usernameError ?: StringResourceUiText(Res.string.required_field)
+                        uiState.usernameError ?: StringResourceUiText(Res.string.required)
                     )
                 )
             },

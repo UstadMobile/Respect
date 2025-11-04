@@ -19,7 +19,7 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.required
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 
@@ -67,7 +67,7 @@ fun ClazzEditScreen(
             },
             singleLine = true,
             supportingText = {
-                Text(stringResource(Res.string.required_field))
+                Text(stringResource(Res.string.required))
             },
             enabled = fieldsEnabled,
             isError = uiState.clazzNameError != null

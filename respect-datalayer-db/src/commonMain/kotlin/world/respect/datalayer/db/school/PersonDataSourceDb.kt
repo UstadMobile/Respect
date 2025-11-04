@@ -186,4 +186,19 @@ class PersonDataSourceDb(
             )
         }
     }
+
+    override fun listChildRelatedFamilyMembersAsFlow(
+        loadParams: DataLoadParams,
+        listParams: PersonDataSource.GetListParams
+    ): Flow<DataLoadState<List<Person>>> {
+        return schoolDb.getPersonEntityDao().findFamilyMembersRelatedToChild(
+            guidHash = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0
+        ).map { list ->
+            DataReadyState(
+                data = list.map {
+                    it.toPersonEntities().toModel()
+                }
+            )
+        }
+    }
 }

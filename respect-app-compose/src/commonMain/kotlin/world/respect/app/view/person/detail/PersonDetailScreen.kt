@@ -122,5 +122,8 @@ fun PersonDetailScreen(
                 value = { Text(it) }
             )
         }
+        if (uiState.familyMembersVisible){
+
+        }
     }
 }

@@ -38,6 +38,7 @@ data class PersonDetailUiState(
     val person: DataLoadState<Person> = DataLoadingState(),
     val manageAccountVisible: Boolean = false,
     val createAccountVisible: Boolean = false,
+    val familyMembersVisible: Boolean = false,
 )
 
 class PersonDetailViewModel(
@@ -97,7 +98,8 @@ class PersonDetailViewModel(
                         manageAccountVisible = hasAccountPermission && personVal?.username != null,
                         createAccountVisible = personVal != null &&
                                 activeAccount?.person?.isAdminOrTeacher() == true &&
-                                personVal.username == null
+                                personVal.username == null,
+                        familyMembersVisible = activeAccount?.person?.isAdminOrTeacher() == true ,
                     )
                 }
             }

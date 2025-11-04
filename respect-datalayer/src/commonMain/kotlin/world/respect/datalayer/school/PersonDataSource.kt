@@ -65,6 +65,12 @@ interface PersonDataSource: WritableDataSource<Person> {
         listParams: GetListParams,
     ): IPagingSourceFactory<Int, PersonListDetails>
 
+
+    fun listChildRelatedFamilyMembersAsFlow(
+        loadParams: DataLoadParams,
+        listParams: GetListParams,
+    ): Flow<DataLoadState<List<Person>>>
+
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on
      * the data. It WILL NOT set the last-modified time (this should be done by the ViewModel or

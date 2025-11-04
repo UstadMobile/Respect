@@ -11,8 +11,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
+import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
@@ -39,6 +41,7 @@ data class PersonDetailUiState(
     val manageAccountVisible: Boolean = false,
     val createAccountVisible: Boolean = false,
     val familyMembersVisible: Boolean = false,
+    val familyMembers: DataLoadState<List<Person>> = DataLoadingState(),
 )
 
 class PersonDetailViewModel(
@@ -103,6 +106,24 @@ class PersonDetailViewModel(
                     )
                 }
             }
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.personDataSource
+                .listChildRelatedFamilyMembersAsFlow(
+                    loadParams = DataLoadParams(),
+                    guid = route.guid
+                )
+                .collect { familyState ->
+                    val isVisible =
+                        (familyState is DataReadyState && (familyState.data.isNotEmpty()))
+                    _uiState.update { prev ->
+                        prev.copy(
+                            familyMembers = familyState,
+                            familyMembersVisible = isVisible
+                        )
+                    }
+                }
         }
     }
 

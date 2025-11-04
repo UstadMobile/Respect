@@ -161,9 +161,19 @@ class PersonDataSourceHttp(
 
     override fun listChildRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
-        listParams: PersonDataSource.GetListParams
+        guid: String
     ): Flow<DataLoadState<List<Person>>> {
-        TODO("Not yet implemented")
+        return httpClient.getDataLoadResultAsFlow<List<Person>>(
+            urlFn = {
+                PersonDataSource.GetListParams(
+                    GetListCommonParams(guid = guid)
+                ).urlWithParams()
+            },
+            dataLoadParams = DataLoadParams()
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }
     }
 
     override suspend fun store(list: List<Person>) {

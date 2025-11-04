@@ -121,9 +121,16 @@ class PersonDataSourceRepository(
 
     override fun listChildRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
-        listParams: PersonDataSource.GetListParams
+        guid: String
     ): Flow<DataLoadState<List<Person>>> {
-        TODO("Not yet implemented")
+        return local.listChildRelatedFamilyMembersAsFlow(loadParams, guid).combineWithRemote(
+            remoteFlow = remote.listChildRelatedFamilyMembersAsFlow(loadParams, guid).onEach { remoteState ->
+                if (remoteState is DataReadyState) {
+                    local.updateLocal(remoteState.data)
+                    validationHelper.updateValidationInfo(remoteState.metaInfo)
+                }
+            }
+        )
     }
 
     override suspend fun store(list: List<Person>) {

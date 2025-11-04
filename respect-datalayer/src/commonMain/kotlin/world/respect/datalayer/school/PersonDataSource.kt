@@ -68,7 +68,7 @@ interface PersonDataSource: WritableDataSource<Person> {
 
     fun listChildRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
-        listParams: GetListParams,
+        guid: String
     ): Flow<DataLoadState<List<Person>>>
 
     /**

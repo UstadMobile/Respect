@@ -189,10 +189,10 @@ class PersonDataSourceDb(
 
     override fun listChildRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
-        listParams: PersonDataSource.GetListParams
+        guid: String
     ): Flow<DataLoadState<List<Person>>> {
         return schoolDb.getPersonEntityDao().findFamilyMembersRelatedToChild(
-            guidHash = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0
+            guidHash = uidNumberMapper(guid)
         ).map { list ->
             DataReadyState(
                 data = list.map {

@@ -155,19 +155,22 @@ interface PersonEntityDao {
             """
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
-
+    @Transaction
     @Query("""
         SELECT * 
-          FROM PersonEntity
-        WHERE EXISTS(
-                   SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
-                     FROM PersonRelatedPersonEntity
-                    WHERE PersonRelatedPersonEntity.prpOtherPersonUidNum = PersonEntity.pGuidHash
+         FROM PersonEntity
+         WHERE EXISTS(
+                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
+                  FROM PersonRelatedPersonEntity
+                 WHERE PersonRelatedPersonEntity.prpOtherPersonUidNum = :guidHash
+                   AND PersonRelatedPersonEntity.prpPersonUidNum = PersonEntity.pGuidHash
               )
+         ORDER BY PersonEntity.pGivenName
     """)
     fun findFamilyMembersRelatedToChild(
-        guidHash: Long = 0,
+        guidHash: Long,
     ): Flow<List<PersonEntityWithRoles>>
+
 
 
 

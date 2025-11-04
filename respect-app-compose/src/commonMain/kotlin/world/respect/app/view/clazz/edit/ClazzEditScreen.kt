@@ -14,12 +14,14 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.required
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 
@@ -67,7 +69,9 @@ fun ClazzEditScreen(
             },
             singleLine = true,
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(
+                    uiState.clazzNameError ?: Res.string.required.asUiText())
+                )
             },
             enabled = fieldsEnabled,
             isError = uiState.clazzNameError != null

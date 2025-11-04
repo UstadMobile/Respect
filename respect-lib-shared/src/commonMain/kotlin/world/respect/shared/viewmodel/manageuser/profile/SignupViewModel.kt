@@ -164,7 +164,7 @@ class SignupViewModel(
                 prev.copy(
                     fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required_field) else null,
                     genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
-                        Res.string.required) else null,
+                        Res.string.required_field) else null,
                     dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {
                         StringResourceUiText(Res.string.required_field)
                     } else if (personInfo.dateOfBirth > today) {

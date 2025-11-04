@@ -11,7 +11,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -65,7 +65,7 @@ class EnterPasswordSignupViewModel(
         _uiState.update {
             it.copy(
                 passwordError = if (password.isBlank())
-                    StringResourceUiText(Res.string.required)
+                    StringResourceUiText(Res.string.required_field)
                 else
                     null
             )

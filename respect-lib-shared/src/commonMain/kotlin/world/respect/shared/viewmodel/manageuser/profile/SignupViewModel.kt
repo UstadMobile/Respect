@@ -25,6 +25,7 @@ import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.your_dob_label
 import world.respect.shared.generated.resources.your_gender_label
 import world.respect.shared.generated.resources.your_name_label
@@ -116,7 +117,7 @@ class SignupViewModel(
             val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(name = value),
-                fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.required)
+                fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.required_field)
             )
         }
     }
@@ -127,7 +128,7 @@ class SignupViewModel(
             val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(gender = value),
-                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.required)
+                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.required_field)
             )
         }
     }
@@ -161,7 +162,7 @@ class SignupViewModel(
 
             _uiState.update { prev ->
                 prev.copy(
-                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required) else null,
+                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required_field) else null,
                     genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
                         Res.string.required) else null,
                     dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {

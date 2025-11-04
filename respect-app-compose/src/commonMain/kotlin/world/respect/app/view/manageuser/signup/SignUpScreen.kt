@@ -24,7 +24,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.viewmodel.manageuser.profile.SignupUiState
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 
@@ -67,7 +67,7 @@ fun SignupScreen(
             modifier = Modifier.fillMaxWidth(),
             supportingText = {
                 Text(uiState.fullNameError?.let { uiTextStringResource(it) }
-                    ?: stringResource(Res.string.required)
+                    ?: stringResource(Res.string.required_field)
                 )
             }
         )
@@ -95,7 +95,7 @@ fun SignupScreen(
             },
             supportingText = {
                 Text(uiState.dateOfBirthError?.let { uiTextStringResource(it) }
-                    ?: stringResource(Res.string.required))
+                    ?: stringResource(Res.string.required_field))
             }
         )
     }

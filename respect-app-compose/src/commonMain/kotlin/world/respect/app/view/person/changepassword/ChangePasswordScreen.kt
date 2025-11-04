@@ -16,7 +16,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.new_password
 import world.respect.shared.generated.resources.old_password
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordUiState
@@ -61,7 +61,7 @@ fun ChangePasswordScreen(
                 supportingText = {
                     Text(
                         uiState.oldPasswordError?.let { uiTextStringResource(it) }
-                            ?: stringResource(Res.string.required)
+                            ?: stringResource(Res.string.required_field)
                     )
                 },
                 isError = uiState.oldPasswordError != null,
@@ -81,7 +81,7 @@ fun ChangePasswordScreen(
             supportingText = {
                 Text(
                     uiState.newPasswordError?.let { uiTextStringResource(it) }
-                        ?: stringResource(Res.string.required)
+                        ?: stringResource(Res.string.required_field)
                 )
             },
             isError = uiState.newPasswordError != null,

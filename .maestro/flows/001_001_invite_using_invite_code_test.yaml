@@ -33,7 +33,7 @@ onFlowComplete:
     id: "app_title"
     text: "Add class"
 - tapOn: "Save"
-- assertVisible: "Required*"
+- assertVisible: "Required field"
 - tapOn: "Class name*"
 - inputText: "New Class"
 - tapOn: "Description"
@@ -77,15 +77,15 @@ onFlowComplete:
     id: "app_title"
     text: "Your profile"
 - tapOn: "Next"
-- assertVisible: "Required*" # Name is mandatory field
+- assertVisible: "Required field" # Name is mandatory field
 - tapOn: "Your name*"
 - inputText: "Teacher User"
 - tapOn: "Next"
-- assertVisible: "Required*" # Gender is mandatory field
+- assertVisible: "Required field" # Gender is mandatory field
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Next"
-- assertVisible: "Required*" # DOB is mandatory field
+- assertVisible: "Required field" # DOB is mandatory field
 - tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
@@ -110,7 +110,7 @@ onFlowComplete:
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
 - assertVisible: "Password*"
 - tapOn: "Sign-up"
-- assertVisible: "Required*" # Password is mandatory field
+- assertVisible: "Required field" # Password is mandatory field
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"

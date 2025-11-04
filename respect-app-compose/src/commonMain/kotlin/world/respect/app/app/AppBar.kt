@@ -62,7 +62,12 @@ fun RespectAppBar(
     onProfileClick: () -> Unit = {},
 ) {
     val currentBackStack by navController.currentBackStack.collectAsState()
-    val canGoBack = appUiState.showBackButton ?: (currentBackStack.size > 1)
+    val currentRoute = currentBackStack.lastOrNull()?.destination?.route
+    val isRootDest = remember(currentRoute) {
+        APP_TOP_LEVEL_NAV_ITEMS.any { it.routeName == currentRoute }
+    }
+
+    val canGoBack = appUiState.showBackButton ?: !isRootDest && currentBackStack.size > 1
 
     val showUserAccountIcon = appUiState.userAccountIconVisible ?: !appUiState.actionBarButtonState.visible
 
@@ -172,40 +177,17 @@ fun RespectAppBar(
                         )
                     }
                 }
-
-            }
-            if (appUiState.settingsIconVisible == true) {
-                IconButton(
-                    onClick = appUiState.onClickSettings ?: {},
-                    modifier = Modifier.testTag("settings_icon_button")
-                ) {
-                    Icon(
-                        Icons.Default.Settings,
-                        contentDescription = stringResource(Res.string.settings)
-                    )
-                }
-            }
-            if(appUiState.actionBarButtonState.visible) {
-                Button(
-                    onClick = appUiState.actionBarButtonState.onClick,
-                    enabled = appUiState.actionBarButtonState.enabled,
-                    modifier = Modifier.testTag("action_bar_button"),
-                ) {
-                    Text(
-                        text = appUiState.actionBarButtonState.text?.let {
-                            uiTextStringResource(it)
-                        } ?: ""
-                    )
-                }
-            }
-            if(showUserAccountIcon) {
-                activeAccount?.also {
+                if (appUiState.settingsIconVisible == true) {
                     IconButton(
-                        onClick = onProfileClick,
-                        modifier = Modifier.testTag("user_account_icon"),
+                        onClick = appUiState.onClickSettings ?: {},
+                        modifier = Modifier.testTag("settings_icon_button")
                     ) {
-                        RespectPersonAvatar(name = it.person.fullName())
-
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = stringResource(Res.string.settings)
+                        )
+                    }
+                }
                 if(showUserAccountIcon) {
                     activeAccount?.also {
                         IconButton(

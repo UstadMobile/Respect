@@ -1,0 +1,178 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "001_002_add_user_direct_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+
+- tapOn: "People"
+- assertVisible:
+    id: "app_title"
+    text: "People"
+- tapOn:
+    id: "floating_action_button"   #  +Person button
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "Save"
+- assertVisible: "Required*"
+- tapOn: "First names*"
+- inputText: "Test"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+
+# Validate DOB field
+- tapOn: "Date of birth"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.tomorrowDate}
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible: "Date of Birth cannot be in the future."
+- longPressOn: "Date of birth"
+- tapOn: "Select all"
+- eraseText
+- tapOn: "Date of birth"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateC}
+- hideKeyboard
+# Validate Phone number
+- tapOn:
+     id: "phone_countrycode"
+- eraseText
+- inputText: "+1"
+- tapOn: "Phone number"
+- inputText: "23"
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible: "Invalid"
+- tapOn: "Phone number"
+- eraseText
+- inputText: "2125554326"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Save" # or any other selector
+    direction: UP
+    timeout: 1000
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Email"
+- inputText: "Testuser@gmail.com"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Save" # or any other selector
+    direction: UP
+    timeout: 1000
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
+- tapOn: "Create account"
+- tapOn: "Username"
+- inputText: "2tes"
+- tapOn: "Password"
+- inputText: "test234"
+- tapOn: "Save"
+- assertVisible: "Username cannot start with a number"
+- tapOn: "Username"
+- eraseText
+- inputText: "test@user"
+- assertVisible: "testuser"
+- tapOn: "Save"
+
+
+# Validate User login
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "username"
+- inputText: "testuser"
+- tapOn:
+    id : "password"
+- inputText: "test234"
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"
+- tapOn: "People"
+- tapOn: "Test User"
+- tapOn: "Manage account"
+- assertVisible: "testuser"
+- tapOn: "Change"
+- tapOn: "Old password*"
+- inputText: "test234"
+- tapOn: "New password*"
+- inputText: "t2"
+- tapOn: "Save"
+- assertVisible: "Password must be at least 6 characters"
+- tapOn: "New password*"
+- eraseText
+- inputText: "test123"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+
+
+# Validate User login after changing password
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+
+- tapOn:
+    id: "username"
+- inputText: "testuser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"

@@ -157,13 +157,12 @@ interface PersonEntityDao {
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
     @Transaction
     @Query("""
-        SELECT * 
-         FROM PersonEntity
-         WHERE EXISTS(
+        SELECT *
+          FROM PersonEntity
+         WHERE PersonEntity.pGuidHash IN (
                 SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
                   FROM PersonRelatedPersonEntity
-                 WHERE PersonRelatedPersonEntity.prpOtherPersonUidNum = :guidHash
-                   AND PersonRelatedPersonEntity.prpPersonUidNum = PersonEntity.pGuidHash
+                 WHERE PersonRelatedPersonEntity.prpPersonUidNum = :guidHash
               )
          ORDER BY PersonEntity.pGivenName
     """)

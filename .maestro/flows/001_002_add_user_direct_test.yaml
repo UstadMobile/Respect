@@ -64,13 +64,20 @@ onFlowComplete:
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
-- inputText: "2125554326"
+- inputText: "21255543268"
 - hideKeyboard
-- scrollUntilVisible:
-    element:
-      text: "Save" # or any other selector
-    direction: UP
-    timeout: 1000
+- tapOn: "Save"
+- assertVisible: "Invalid"
+- longPressOn: "Phone number"
+#- tapOn: "Cut"
+- eraseText
+- inputText: "2125554326"
+#- tapOn: "Done"
+#- scrollUntilVisible:
+#    element:
+#      text: "Save" # or any other selector
+#    direction: UP
+#    timeout: 1000
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -81,6 +88,17 @@ onFlowComplete:
     id: "app_title"
     text: "Edit person"
 - tapOn: "Email"
+- inputText: "Testuser@gm"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Save" # or any other selector
+    direction: UP
+    timeout: 1000
+- tapOn: "Save"
+- assertVisible: "Invalid mail Id"
+- longPressOn: "Email"
+- eraseText
 - inputText: "Testuser@gmail.com"
 - hideKeyboard
 - scrollUntilVisible:

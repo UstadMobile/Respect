@@ -7,12 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.resources.UiText
@@ -31,35 +33,30 @@ data class CurriculumMappingEditUiState(
     val isNew: Boolean = true,
     val titleError: UiText? = null,
     val error: UiText? = null,
-    val pendingLessonSectionIndex: Int? = null ,
+    val pendingLessonSectionIndex: Int? = null,
 ) {
-
     val fieldsEnabled: Boolean
         get() = !loading
-
     val title: String
         get() = mapping?.title ?: ""
-
     val description: String
         get() = mapping?.description ?: ""
-
     val sections: List<CurriculumMappingSection>
-        get() = mapping?.sections ?:emptyList()
-
+        get() = mapping?.sections ?: emptyList()
 }
 
 class CurriculumMappingEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val resultReturner: NavResultReturner,
+    private val json: Json,
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
-    private val mappingUid  = route.textbookUid
-
+    private val mappingUid = route.textbookUid
 
     private val _uiState = MutableStateFlow(
         CurriculumMappingEditUiState(
-            mapping = savedStateHandle[KEY_MAPPING] ?: CurriculumMapping(),
+            mapping = route.mappingData ?: loadMappingFromSavedState(savedStateHandle) ?: CurriculumMapping(uid = mappingUid),
             isNew = mappingUid == 0L
         )
     )
@@ -81,9 +78,7 @@ class CurriculumMappingEditViewModel(
 
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                val learningUnit = result.result as?
-                        LearningUnitSelection ?:
-                        return@collect
+                val learningUnit = result.result as? LearningUnitSelection ?: return@collect
                 val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex ?: return@collect
                 val currentMapping = _uiState.value.mapping ?: return@collect
                 val currentSections = currentMapping.sections.toMutableList()
@@ -103,6 +98,15 @@ class CurriculumMappingEditViewModel(
         }
     }
 
+    private fun loadMappingFromSavedState(savedStateHandle: SavedStateHandle): CurriculumMapping? {
+        val mappingJson = savedStateHandle.get<String>(KEY_MAPPING) ?: return null
+        return try {
+            json.decodeFromString(CurriculumMapping.serializer(), mappingJson)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     private fun updateMapping(mapping: CurriculumMapping, clearPending: Boolean = false) {
         _uiState.update { prev ->
             prev.copy(
@@ -110,7 +114,8 @@ class CurriculumMappingEditViewModel(
                 pendingLessonSectionIndex = if (clearPending) null else prev.pendingLessonSectionIndex
             )
         }
-        savedStateHandle[KEY_MAPPING] = mapping
+        savedStateHandle[KEY_MAPPING] =
+            json.encodeToString(CurriculumMapping.serializer(), mapping)
     }
 
     fun onTitleChanged(title: String) {
@@ -136,7 +141,8 @@ class CurriculumMappingEditViewModel(
         val currentSections = currentMapping.sections.toMutableList()
         val section = currentSections.getOrNull(sectionIndex) ?: return
         currentSections[sectionIndex] = section.copy(title = title)
-        updateMapping(currentMapping.copy(sections = currentSections))
+        updateMapping(currentMapping
+            .copy(sections = currentSections))
     }
 
     fun onClickRemoveSection(sectionIndex: Int) {
@@ -144,7 +150,8 @@ class CurriculumMappingEditViewModel(
         val currentSections = currentMapping.sections.toMutableList()
         if (sectionIndex !in currentSections.indices) return
         currentSections.removeAt(sectionIndex)
-        updateMapping(currentMapping.copy(sections = currentSections))
+        updateMapping(currentMapping
+            .copy(sections = currentSections))
     }
 
     fun onSectionMoved(fromIndex: Int, toIndex: Int) {
@@ -153,7 +160,8 @@ class CurriculumMappingEditViewModel(
         if (fromIndex !in currentSections.indices || toIndex !in currentSections.indices) return
         val section = currentSections.removeAt(fromIndex)
         currentSections.add(toIndex, section)
-        updateMapping(currentMapping.copy(sections = currentSections))
+        updateMapping(currentMapping
+            .copy(sections = currentSections))
     }
 
     fun onClickAddLesson(sectionIndex: Int) {
@@ -175,8 +183,10 @@ class CurriculumMappingEditViewModel(
         val updatedItems = section.items.toMutableList()
         if (linkIndex !in updatedItems.indices) return
         updatedItems.removeAt(linkIndex)
-        currentSections[sectionIndex] = section.copy(items = updatedItems)
-        updateMapping(currentMapping.copy(sections = currentSections))
+        currentSections[sectionIndex] = section
+            .copy(items = updatedItems)
+        updateMapping(currentMapping
+            .copy(sections = currentSections))
     }
 
     fun onLessonTitleChanged(sectionIndex: Int, linkIndex: Int, title: String) {
@@ -196,6 +206,12 @@ class CurriculumMappingEditViewModel(
             _uiState.update { it.copy(titleError = Res.string.required.asUiText()) }
             return
         }
+        resultReturner.sendResult(
+            NavResult(
+                key = KEY_SAVED_MAPPING,
+                result = mapping
+            )
+        )
         _navCommandFlow.tryEmit(NavCommand.PopUp())
     }
 
@@ -204,7 +220,7 @@ class CurriculumMappingEditViewModel(
     }
 
     companion object {
-
         private const val KEY_MAPPING = "curriculum_mapping"
+        const val KEY_SAVED_MAPPING = "saved_curriculum_mapping"
     }
 }

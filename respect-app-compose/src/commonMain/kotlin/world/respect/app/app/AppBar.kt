@@ -180,7 +180,7 @@ fun RespectAppBar(
                 if (appUiState.settingsIconVisible == true) {
                     IconButton(
                         onClick = appUiState.onClickSettings ?: {},
-                        modifier = Modifier.testTag("settings_icon_button")
+                        modifier = Modifier.testTag("Settings")
                     ) {
                         Icon(
                             Icons.Default.Settings,

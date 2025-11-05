@@ -57,7 +57,7 @@ fun <T: Any> DataLoadState<T>.copyLoadState(
 }
 
 fun <T: Any> DataLoadState<T>.dataOrNull(): T? {
-    return (this as? DataReadyState)?.data
+    return (this as? DataReadyState)?.data ?: (this as? DataLoadingState)?.partialData
 }
 
 

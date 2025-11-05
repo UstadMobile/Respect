@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.ext.dataOrNull
@@ -48,13 +50,33 @@ class SchoolDirectoryEntryDataSourceHttp(
 
             emitAll(
                 combine(flows = flows) { dataLoadStates ->
-                    DataReadyState(
-                        data = buildList {
-                            dataLoadStates.forEach {
-                                it.dataOrNull()?.also(::addAll)
-                            }
+                    val data = buildList {
+                        dataLoadStates.forEach {
+                            it.dataOrNull()?.also(::addAll)
                         }
-                    )
+                    }
+
+                    when {
+                        dataLoadStates.all { it is DataReadyState } -> {
+                            DataReadyState(data = data)
+                        }
+
+                        dataLoadStates.any { it is DataLoadingState } -> {
+                            DataLoadingState(partialData = data)
+                        }
+
+                        data.isEmpty() && dataLoadStates.any { it is DataErrorResult } -> {
+                            DataErrorResult(
+                                error = dataLoadStates.firstNotNullOfOrNull {
+                                    (it as? DataErrorResult)?.error
+                                } ?: IllegalStateException()
+                            )
+                        }
+
+                        else -> {
+                            DataReadyState(data = data)
+                        }
+                    }
                 }
             )
         }

@@ -46,13 +46,16 @@ fun CurriculumMapping.toOpds(selfLink: String): OpdsFeed {
 
 fun OpdsFeed.toCurriculumMapping(): CurriculumMapping {
     return CurriculumMapping(
+        uid = System.currentTimeMillis(),
         title = this.metadata.title,
         description = this.metadata.description ?: "",
         sections = this.groups?.map { group ->
             CurriculumMappingSection(
+                uid = System.currentTimeMillis(),
                 title = group.metadata.title,
                 items = group.navigation?.map { navLink ->
                     CurriculumMappingSectionLink(
+                        uid = System.currentTimeMillis(),
                         href = navLink.href,
                         title = navLink.title ?: ""
                     )

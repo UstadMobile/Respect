@@ -64,7 +64,10 @@ fun CurriculumMappingListScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(uiState.mappings) { mapping ->
+                    items(
+                        items = uiState.mappings,
+                        key = { mapping -> mapping.uid }
+                    ) { mapping ->
                         MappingCard(
                             mapping = mapping,
                             onClickMapping = onClickMapping,

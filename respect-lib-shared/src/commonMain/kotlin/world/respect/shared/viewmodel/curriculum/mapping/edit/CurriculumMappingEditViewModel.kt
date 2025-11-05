@@ -14,7 +14,7 @@ import world.respect.shared.generated.resources.error_no_current_mapping
 import world.respect.shared.generated.resources.error_no_pending_section_index
 import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.generated.resources.mapping_edit
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
@@ -90,13 +90,7 @@ class CurriculumMappingEditViewModel(
                         }
                         return@collect
                     }
-                    val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex
-                    if (pendingSectionIndex == null) {
-                        _uiState.update {
-                            it.copy(error = Res.string.error_no_pending_section_index.asUiText())
-                        }
-                        return@collect
-                    }
+                    val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex ?: return@collect
                     val currentMapping = _uiState.value.mapping
                     if (currentMapping == null) {
                         _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
@@ -261,7 +255,7 @@ class CurriculumMappingEditViewModel(
     fun onClickSave() {
         val mapping = _uiState.value.mapping ?: return
         if (mapping.title.isBlank()) {
-            _uiState.update { it.copy(titleError = Res.string.required.asUiText()) }
+            _uiState.update { it.copy(titleError = Res.string.required_field.asUiText()) }
             return
         }
         resultReturner.sendResult(

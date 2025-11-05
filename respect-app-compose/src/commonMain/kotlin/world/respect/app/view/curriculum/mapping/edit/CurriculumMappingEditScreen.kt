@@ -1,12 +1,11 @@
 package world.respect.app.view.curriculum.mapping.edit
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,14 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_book_cover
 import world.respect.shared.generated.resources.book_description
@@ -42,13 +40,13 @@ import world.respect.shared.generated.resources.no_chapter_added
 import world.respect.shared.generated.resources.remove_chapter
 import world.respect.shared.generated.resources.remove_lesson
 import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.to_add_one
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CurriculumMappingEditScreen(
     uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
@@ -63,9 +61,23 @@ fun CurriculumMappingEditScreen(
     onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
     onLessonTitleChanged: (Int, Int, String) -> Unit = { _, _, _ -> },
 ) {
-    var draggedItemIndex by remember { mutableIntStateOf(-1) }
-    var dragOffset by remember { mutableFloatStateOf(0f) }
     val haptic = LocalHapticFeedback.current
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        onMove = { from, to ->
+            val headerItemCount = 5
+            val fromIndex = from.index - headerItemCount
+            val toIndex = to.index - headerItemCount
+
+            if (fromIndex >= 0 && toIndex >= 0 &&
+                fromIndex < uiState.sections.size &&
+                toIndex < uiState.sections.size) {
+                onSectionMoved(fromIndex, toIndex)
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -73,6 +85,7 @@ fun CurriculumMappingEditScreen(
             .padding(12.dp)
     ) {
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -131,8 +144,9 @@ fun CurriculumMappingEditScreen(
                     singleLine = true,
                     isError = uiState.titleError != null,
                     supportingText = {
-                        if (uiState.titleError != null) {
-                            Text(stringResource(Res.string.required))
+                        val titleError = uiState.titleError
+                        if (titleError != null) {
+                            Text(stringResource(Res.string.required_field))
                         }
                     }
                 )
@@ -210,50 +224,35 @@ fun CurriculumMappingEditScreen(
                     }
                 }
             } else {
-                itemsIndexed(uiState.sections) { sectionIndex, section ->
-                    val isDragging = draggedItemIndex == sectionIndex
+                items(
+                    items = uiState.sections,
+                    key = { section -> section.uid }
+                ) { section ->
+                    val sectionIndex = uiState.sections.indexOf(section)
 
-                    DraggableSectionItem(
-                        section = section,
-                        sectionIndex = sectionIndex,
-                        isDragging = isDragging,
-                        dragOffset = if (isDragging) dragOffset else 0f,
-                        onSectionTitleChanged = onSectionTitleChanged,
-                        onClickRemoveSection = onClickRemoveSection,
-                        onClickAddLesson = onClickAddLesson,
-                        onClickRemoveLesson = onClickRemoveLesson,
-                        onLessonTitleChanged = onLessonTitleChanged,
-                        enabled = !isDragging,
-                        onDragStart = {
-                            draggedItemIndex = sectionIndex
-                            dragOffset = 0f
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        },
-                        onDragEnd = {
-                            draggedItemIndex = -1
-                            dragOffset = 0f
-                        },
-                        onDrag = { delta ->
-                            dragOffset += delta
-                            val itemHeight = 120f
-                            val swapThreshold = itemHeight / 2
-                            when {
-                                dragOffset > swapThreshold && sectionIndex < uiState.sections.size - 1 -> {
-                                    onSectionMoved(sectionIndex, sectionIndex + 1)
-                                    draggedItemIndex = sectionIndex + 1
-                                    dragOffset = 0f
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    ReorderableItem(
+                        state = reorderableLazyListState,
+                        key = section.uid
+                    ) { isDragging ->
+                        SectionItem(
+                            section = section,
+                            sectionIndex = sectionIndex,
+                            isDragging = isDragging,
+                            onSectionTitleChanged = onSectionTitleChanged,
+                            onClickRemoveSection = onClickRemoveSection,
+                            onClickAddLesson = onClickAddLesson,
+                            onClickRemoveLesson = onClickRemoveLesson,
+                            onLessonTitleChanged = onLessonTitleChanged,
+                            dragModifier = Modifier.draggableHandle(
+                                onDragStarted = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                },
+                                onDragStopped = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 }
-
-                                dragOffset < -swapThreshold && sectionIndex > 0 -> {
-                                    onSectionMoved(sectionIndex, sectionIndex - 1)
-                                    draggedItemIndex = sectionIndex - 1
-                                    dragOffset = 0f
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                }
-                            }
-                        }
-                    )
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -261,32 +260,22 @@ fun CurriculumMappingEditScreen(
 }
 
 @Composable
-private fun DraggableSectionItem(
+private fun SectionItem(
     section: CurriculumMappingSection,
     sectionIndex: Int,
     isDragging: Boolean,
-    dragOffset: Float,
     onSectionTitleChanged: (Int, String) -> Unit,
     onClickRemoveSection: (Int) -> Unit,
     onClickAddLesson: (Int) -> Unit,
     onClickRemoveLesson: (Int, Int) -> Unit,
     onLessonTitleChanged: (Int, Int, String) -> Unit,
-    enabled: Boolean = true,
-    onDragStart: () -> Unit = {},
-    onDragEnd: () -> Unit = {},
-    onDrag: (Float) -> Unit = {}
+    dragModifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                translationY = dragOffset
-                alpha = if (isDragging) 0.7f else 1f
-                scaleX = if (isDragging) 1.02f else 1f
-                scaleY = if (isDragging) 1.02f else 1f
-            }
-            .zIndex(if (isDragging) 1f else 0f),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isDragging) 8.dp else 2.dp)
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isDragging) 8.dp else 2.dp
+        )
     ) {
         Column(
             modifier = Modifier.padding(8.dp)
@@ -305,17 +294,8 @@ private fun DraggableSectionItem(
                     Icon(
                         Icons.Filled.DragHandle,
                         contentDescription = stringResource(Res.string.drag),
-                        modifier = Modifier
-                            .size(24.dp)
-                            .pointerInput(Unit) {
-                                detectDragGesturesAfterLongPress(
-                                    onDragStart = { onDragStart() },
-                                    onDragEnd = { onDragEnd() },
-                                    onDrag = { _, dragAmount ->
-                                        onDrag(dragAmount.y)
-                                    }
-                                )
-                            },
+                        modifier = dragModifier
+                            .size(24.dp),
                         tint = if (isDragging) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -341,14 +321,14 @@ private fun DraggableSectionItem(
                         },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
-                        enabled = enabled
+                        enabled = !isDragging
                     )
                 }
 
                 IconButton(
                     onClick = { onClickRemoveSection(sectionIndex) },
                     modifier = Modifier.size(24.dp),
-                    enabled = enabled
+                    enabled = !isDragging
                 ) {
                     Icon(
                         Icons.Filled.Close,
@@ -367,7 +347,7 @@ private fun DraggableSectionItem(
                 OutlinedButton(
                     onClick = { onClickAddLesson(sectionIndex) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = enabled
+                    enabled = !isDragging
                 ) {
                     Icon(
                         Icons.Filled.Add,
@@ -386,7 +366,7 @@ private fun DraggableSectionItem(
                     linkIndex = linkIndex,
                     onClickRemoveLesson = onClickRemoveLesson,
                     onLessonTitleChanged = onLessonTitleChanged,
-                    enabled = enabled
+                    enabled = !isDragging
                 )
                 if (linkIndex < section.items.size - 1) {
                     Spacer(modifier = Modifier.height(8.dp))

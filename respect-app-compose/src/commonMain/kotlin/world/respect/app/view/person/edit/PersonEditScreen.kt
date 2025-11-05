@@ -1,8 +1,14 @@
 package world.respect.app.view.person.edit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +22,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectGenderExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
+import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
@@ -27,11 +34,14 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email
+import world.respect.shared.generated.resources.family_member
+import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.first_names
 import world.respect.shared.generated.resources.last_name
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.role
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -45,6 +55,7 @@ fun PersonEditScreen(
         uiState = uiState,
         onEntityChanged = viewModel::onEntityChanged,
         onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
+        onClickAddFamilyMember = viewModel::onClickAddFamilyMember,
     )
 }
 
@@ -53,6 +64,7 @@ fun PersonEditScreen(
     uiState: PersonEditUiState,
     onEntityChanged: (Person) -> Unit,
     onNationalNumberSetChanged: (Boolean) -> Unit,
+    onClickAddFamilyMember: () -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     val fieldsEnabled = uiState.fieldsEnabled
@@ -100,6 +112,34 @@ fun PersonEditScreen(
             },
             isError = uiState.genderError != null,
         )
+        Text(
+            modifier = Modifier.defaultItemPadding(),
+            text = stringResource(Res.string.family_members),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        ListItem(
+            modifier = Modifier.clickable {
+            },
+            headlineContent = {
+                Text(stringResource(Res.string.family_member))
+            },
+            leadingContent = {
+                Icon(Icons.Default.Add, contentDescription = "")
+            }
+        )
+        val familyMembers = uiState.familyMembers.dataOrNull()
+        familyMembers?.forEach { familyPerson->
+            ListItem(
+                modifier = Modifier.clickable {
+                },
+                leadingContent = {
+                    RespectPersonAvatar(familyPerson.fullName())
+                },
+                headlineContent = {
+                    Text(familyPerson.fullName())
+                }
+            )
+        }
 
         if(uiState.showRoleDropdown) {
             val roleEnumVal = person?.roles?.first()?.roleEnum ?: PersonRoleEnum.STUDENT

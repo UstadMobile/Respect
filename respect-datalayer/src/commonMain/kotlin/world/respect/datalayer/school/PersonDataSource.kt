@@ -66,7 +66,7 @@ interface PersonDataSource: WritableDataSource<Person> {
     ): IPagingSourceFactory<Int, PersonListDetails>
 
 
-    fun listChildRelatedFamilyMembersAsFlow(
+    fun listPersonRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
         guid: String
     ): Flow<DataLoadState<List<Person>>>

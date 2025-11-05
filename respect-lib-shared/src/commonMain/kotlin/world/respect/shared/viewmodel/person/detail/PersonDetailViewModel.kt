@@ -110,17 +110,14 @@ class PersonDetailViewModel(
 
         viewModelScope.launch {
             schoolDataSource.personDataSource
-                .listChildRelatedFamilyMembersAsFlow(
+                .listPersonRelatedFamilyMembersAsFlow(
                     loadParams = DataLoadParams(),
                     guid = route.guid
-                )
-                .collect { familyState ->
-                    val isVisible =
-                        (familyState is DataReadyState && (familyState.data.isNotEmpty()))
+                ).collect { familyMembers ->
                     _uiState.update { prev ->
                         prev.copy(
-                            familyMembers = familyState,
-                            familyMembersVisible = isVisible
+                            familyMembers = familyMembers,
+                            familyMembersVisible = familyMembers.dataOrNull()?.isNotEmpty() == true
                         )
                     }
                 }

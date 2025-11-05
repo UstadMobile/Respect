@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
@@ -62,6 +64,7 @@ data class PersonEditUiState(
     val nationalPhoneNumSet: Boolean = false,
     val phoneNumError: UiText? = null,
     val genderError: UiText? = null,
+    val familyMembers: DataLoadState<List<Person>> = DataLoadingState(),
 ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
@@ -171,6 +174,21 @@ class PersonEditViewModel(
                 }
             }
         }
+        viewModelScope.launch {
+            if (route.guid!=null) {
+                schoolDataSource.personDataSource
+                    .listPersonRelatedFamilyMembersAsFlow(
+                        loadParams = DataLoadParams(),
+                        guid = route.guid
+                    ).collect { familyMembers ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                familyMembers = familyMembers
+                            )
+                        }
+                    }
+            }
+        }
     }
 
     fun onEntityChanged(person: Person) {
@@ -197,6 +215,10 @@ class PersonEditViewModel(
         _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
             prev.copy(nationalPhoneNumSet = phoneNumSet)
         }
+    }
+
+    fun onClickAddFamilyMember(){
+
     }
 
     fun onClickSave() {

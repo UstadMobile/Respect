@@ -167,7 +167,7 @@ interface PersonEntityDao {
               )
          ORDER BY PersonEntity.pGivenName
     """)
-    fun findFamilyMembersRelatedToChild(
+    fun findFamilyMembersRelatedToPerson(
         guidHash: Long,
     ): Flow<List<PersonEntityWithRoles>>
 

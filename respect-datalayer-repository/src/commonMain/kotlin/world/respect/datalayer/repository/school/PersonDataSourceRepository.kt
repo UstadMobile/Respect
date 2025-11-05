@@ -119,12 +119,12 @@ class PersonDataSourceRepository(
         )
     }
 
-    override fun listChildRelatedFamilyMembersAsFlow(
+    override fun listPersonRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
         guid: String
     ): Flow<DataLoadState<List<Person>>> {
-        return local.listChildRelatedFamilyMembersAsFlow(loadParams, guid).combineWithRemote(
-            remoteFlow = remote.listChildRelatedFamilyMembersAsFlow(loadParams, guid).onEach { remoteState ->
+        return local.listPersonRelatedFamilyMembersAsFlow(loadParams, guid).combineWithRemote(
+            remoteFlow = remote.listPersonRelatedFamilyMembersAsFlow(loadParams, guid).onEach { remoteState ->
                 if (remoteState is DataReadyState) {
                     local.updateLocal(remoteState.data)
                     validationHelper.updateValidationInfo(remoteState.metaInfo)

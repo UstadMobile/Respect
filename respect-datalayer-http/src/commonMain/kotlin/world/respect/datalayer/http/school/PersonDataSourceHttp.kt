@@ -159,7 +159,7 @@ class PersonDataSourceHttp(
         }
     }
 
-    override fun listChildRelatedFamilyMembersAsFlow(
+    override fun listPersonRelatedFamilyMembersAsFlow(
         loadParams: DataLoadParams,
         guid: String
     ): Flow<DataLoadState<List<Person>>> {

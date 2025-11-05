@@ -418,6 +418,11 @@
     <string name="lesson_assessment">Lesson/assessment</string>
 
     <string name="due_date">Due date</string>
+    <string name="family_members">Family members</string>
+    <string name="family_member">Family member</string>
+    <string name="select_family_person">Select family person</string>
+    <string name="add_new_person">Add new person</string>
+    <string name="invite_person">Invite person</string>
 
     <string name="empty_list_description_admin">You haven't added any apps for your school yet.</string>
     <string name="empty_list_description_non_admin">No apps added for your school yet. Ask your admin to add some.</string>

@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.generated.resources.map
 import world.respect.shared.generated.resources.mapping
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -21,6 +23,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 
 data class CurriculumMappingListUiState(
     val mappings: List<CurriculumMapping> = emptyList(),
+    val error: UiText? = null,
 )
 
 class CurriculumMappingListViewModel(
@@ -53,7 +56,13 @@ class CurriculumMappingListViewModel(
             resultReturner.resultFlowForKey(
                 CurriculumMappingEditViewModel.KEY_SAVED_MAPPING
             ).collect { result ->
-                val savedMapping = result.result as? CurriculumMapping ?: return@collect
+                val savedMapping = result.result as? CurriculumMapping
+                if (savedMapping == null) {
+                    _uiState.update {
+                        it.copy(error = Res.string.error_unexpected_result_type.asUiText())
+                    }
+                    return@collect
+                }
                 addOrUpdateMapping(savedMapping)
             }
         }

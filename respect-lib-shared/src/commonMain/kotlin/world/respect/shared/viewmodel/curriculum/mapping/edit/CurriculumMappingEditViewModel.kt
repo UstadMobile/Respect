@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.error_invalid_section_index
+import world.respect.shared.generated.resources.error_no_current_mapping
+import world.respect.shared.generated.resources.error_no_pending_section_index
+import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
@@ -77,13 +81,34 @@ class CurriculumMappingEditViewModel(
         }
 
         viewModelScope.launch {
-            resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                val learningUnit = result.result as? LearningUnitSelection ?: return@collect
-                val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex ?: return@collect
-                val currentMapping = _uiState.value.mapping ?: return@collect
+            resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT)
+                .collect { result ->
+                    val learningUnit = result.result as? LearningUnitSelection
+                    if (learningUnit == null) {
+                        _uiState.update {
+                            it.copy(error = Res.string.error_unexpected_result_type.asUiText())
+                        }
+                        return@collect
+                    }
+                    val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex
+                    if (pendingSectionIndex == null) {
+                        _uiState.update {
+                            it.copy(error = Res.string.error_no_pending_section_index.asUiText())
+                        }
+                        return@collect
+                    }
+                    val currentMapping = _uiState.value.mapping
+                    if (currentMapping == null) {
+                        _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+                        return@collect
+                    }
                 val currentSections = currentMapping.sections.toMutableList()
 
-                val section = currentSections.getOrNull(pendingSectionIndex) ?: return@collect
+                    val section = currentSections.getOrNull(pendingSectionIndex)
+                    if (section == null) {
+                        _uiState.update { it.copy(error = Res.string.error_invalid_section_index.asUiText()) }
+                        return@collect
+                    }
 
                 val newLink = CurriculumMappingSectionLink(
                     href = learningUnit.learningUnitManifestUrl.toString(),
@@ -119,25 +144,41 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onTitleChanged(title: String) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val updatedMapping = currentMapping.copy(title = title)
         updateMapping(updatedMapping)
         _uiState.update { it.copy(titleError = null) }
     }
 
     fun onDescriptionChanged(description: String) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         updateMapping(currentMapping.copy(description = description))
     }
 
     fun onClickAddSection() {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val updatedSections = currentMapping.sections + CurriculumMappingSection(title = "")
         updateMapping(currentMapping.copy(sections = updatedSections))
     }
 
     fun onSectionTitleChanged(sectionIndex: Int, title: String) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val currentSections = currentMapping.sections.toMutableList()
         val section = currentSections.getOrNull(sectionIndex) ?: return
         currentSections[sectionIndex] = section.copy(title = title)
@@ -146,7 +187,11 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onClickRemoveSection(sectionIndex: Int) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val currentSections = currentMapping.sections.toMutableList()
         if (sectionIndex !in currentSections.indices) return
         currentSections.removeAt(sectionIndex)
@@ -155,7 +200,11 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onSectionMoved(fromIndex: Int, toIndex: Int) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val currentSections = currentMapping.sections.toMutableList()
         if (fromIndex !in currentSections.indices || toIndex !in currentSections.indices) return
         val section = currentSections.removeAt(fromIndex)
@@ -177,7 +226,11 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onClickRemoveLesson(sectionIndex: Int, linkIndex: Int) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val currentSections = currentMapping.sections.toMutableList()
         val section = currentSections.getOrNull(sectionIndex) ?: return
         val updatedItems = section.items.toMutableList()
@@ -190,7 +243,11 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onLessonTitleChanged(sectionIndex: Int, linkIndex: Int, title: String) {
-        val currentMapping = _uiState.value.mapping ?: return
+        val currentMapping = _uiState.value.mapping
+        if (currentMapping == null) {
+            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
+            return
+        }
         val currentSections = currentMapping.sections.toMutableList()
         val section = currentSections.getOrNull(sectionIndex) ?: return
         val updatedItems = section.items.toMutableList()
@@ -199,6 +256,7 @@ class CurriculumMappingEditViewModel(
         currentSections[sectionIndex] = section.copy(items = updatedItems)
         updateMapping(currentMapping.copy(sections = currentSections))
     }
+
 
     fun onClickSave() {
         val mapping = _uiState.value.mapping ?: return

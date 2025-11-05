@@ -385,6 +385,13 @@
     <string name="error_unknown">Not Found</string>
     <string name="save_failed">Failed to save</string>
     <string name="drag">Long press to drag</string>
+    <string name="error_unexpected_result_type">Unexpected result type received</string>
+    <string name="error_no_pending_section_index">No pending section index when learning unit selected</string>
+    <string name="error_no_current_mapping">No current mapping available</string>
+    <string name="error_invalid_section_index">Invalid section index</string>
+    <string name="error_failed_decode_mappings">Failed to decode mappings from saved state</string>
+    <string name="error_failed_decode_mapping">Failed to decode mapping from saved state</string>
+    <string name="error_failed_parse_navigation">Failed to parse mapping data from navigation</string>
 
     <string name="security">Security</string>
 

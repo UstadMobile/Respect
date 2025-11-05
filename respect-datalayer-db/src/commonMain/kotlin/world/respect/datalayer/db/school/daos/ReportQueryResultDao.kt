@@ -60,6 +60,9 @@ interface ReportQueryResultDao {
     ): Boolean
 
     @RawQuery
-    suspend fun executeRawQuery(query: RoomRawQuery): Int
+    suspend fun executeRawQuery(query: RoomRawQuery): Long
+
+    @Query("SELECT COUNT(*) FROM ReportQueryResult WHERE rqrReportUid = :reportUid AND rqrTimeZone = :timeZone")
+    suspend fun getResultCount(reportUid: Long, timeZone: String): Int
 
 }

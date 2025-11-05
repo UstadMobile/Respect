@@ -64,7 +64,7 @@ class RunReportUseCaseClientImpl(
                             appendPathSegments("api/report/run")
                         }
                         contentType(ContentType.Application.Json)
-                        setBody( RunReportUseCase.RunReportRequest.serializer())
+                        setBody(json.encodeToString(RunReportUseCase.RunReportRequest.serializer(), request))
                     }
 
                     if (!response.status.isSuccess()) {
@@ -100,10 +100,7 @@ class RunReportUseCaseClientImpl(
                 }
 
                 val response = try {
-                    json.decodeFromString(
-                        RunReportUseCase.RunReportResult.serializer(),
-                        rowsJsonText
-                    )
+                    json.decodeFromString<RunReportUseCase.RunReportResult>(rowsJsonText)
                 } catch (e: Exception) {
                     emit(
                         RunReportUseCase.RunReportResult(

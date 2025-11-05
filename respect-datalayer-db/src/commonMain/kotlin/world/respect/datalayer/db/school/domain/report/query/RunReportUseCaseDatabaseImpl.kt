@@ -53,7 +53,7 @@ class RunReportUseCaseDatabaseImpl(
                             sql = query.sql,
                             onBindStatement = { statement ->
                                 query.params.forEachIndexed { index, paramVal ->
-                                    val bindIndex = index + 1 // SQLite uses 1-based indexing
+                                    val bindIndex = index + 1
                                     when (paramVal) {
                                         is String -> statement.bindText(bindIndex, paramVal)
                                         is Long -> statement.bindLong(bindIndex, paramVal)

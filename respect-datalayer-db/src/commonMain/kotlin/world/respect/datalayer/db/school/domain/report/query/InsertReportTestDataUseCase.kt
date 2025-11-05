@@ -55,7 +55,7 @@ class InsertReportTestDataUseCase(
             resultSuccess = success,
             statementClazzUid = clazzUid,
             // Add other required fields with default values
-            statementActorPersonUid = 1001L,
+            statementActorPersonUid = -5209518570039057196L,
             statementVerbUid = 1L,
             statementObjectType = 1,
             statementObjectUid1 = 1L,
@@ -73,7 +73,7 @@ class InsertReportTestDataUseCase(
             contextRegistrationHi = 0L,
             contextRegistrationLo = 0L,
             contextRegistrationHash = 0L,
-            contextPlatform = "Test",
+            contextPlatform = "Test 8",
             contextStatementRefIdHi = 0L,
             contextStatementRefIdLo = 0L,
             contextInstructorActorUid = 1L,

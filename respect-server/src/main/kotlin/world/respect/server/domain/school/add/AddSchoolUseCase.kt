@@ -8,6 +8,7 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.db.school.domain.report.query.InsertReportTestDataUseCase
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
@@ -85,6 +86,14 @@ class AddSchoolUseCase(
                     )
                 )
             )
+           try {
+                val insertTestDataUseCase: InsertReportTestDataUseCase = accountScope.get()
+                insertTestDataUseCase()
+                println("Test data inserted successfully for school: ${request.school.name}")
+            } catch (e: Exception) {
+                println("Failed to insert test data for school ${request.school.name}: ${e.message}")
+                e.printStackTrace()
+            }
         }
     }
 

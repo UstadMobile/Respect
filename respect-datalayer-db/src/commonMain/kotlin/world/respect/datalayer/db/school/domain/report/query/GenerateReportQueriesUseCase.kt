@@ -150,84 +150,61 @@ class GenerateReportQueriesUseCase {
 
         return reportOptions.series.map { series ->
             val yAxis = series.reportSeriesYAxis
-            var sql = ""
             val paramsList = mutableListOf<Any>()
 
-            sql += """
-                 INSERT INTO ReportQueryResult(rqrReportUid, rqrLastModified,
-                 rqrReportSeriesUid, rqrLastValidated, rqrXAxis, rqrYAxis,
-                 rqrSubgroup, rqrTimeZone)
-        
-                 WITH 
-                 """.trimIndent()
+            val ctes = mutableListOf<String>()
 
             if (xAxis == ReportXAxis.WEEK || series.reportSeriesSubGroup == ReportXAxis.WEEK) {
-                sql += """
-                  StartOfWeekCte(TimeRangeStartDayOfWeek) AS (
-                  SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek
-                   ),
-                   """.trimIndent()
+                ctes.add("""
+                StartOfWeekCte(TimeRangeStartDayOfWeek) AS (
+                    SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek
+                )
+            """.trimIndent())
                 paramsList.add(reportFromMs / 1000)
             }
 
-            sql += """
-                    ResultSourceCte AS (
-                      SELECT 
-                      """.trimIndent()
-
-            // Use the Indicator's SQL
-            if (yAxis.sql.isBlank()) {
-                throw IllegalArgumentException("Indicator ${yAxis.name} has no SQL defined")
-            }
-            sql += yAxis.sql + " AS yAxis,\n"
-
-            sql += xAxisOrSubgroupExpression(xAxis, dbType, request) + " AS xAxis,\n"
-
-            when (series.reportSeriesSubGroup) {
-                null -> {
-                    sql += "'' AS subgroup\n"
-                }
-
-                else -> {
-                    sql += "${
-                        xAxisOrSubgroupExpression(
-                            series.reportSeriesSubGroup!!,
-                            dbType,
-                            request
-                        )
-                    } AS subgroup\n"
+            ctes.add("""
+            ResultSourceCte AS (
+                SELECT 
+                    ${yAxis.sql} AS yAxis,
+                    ${xAxisOrSubgroupExpression(xAxis, dbType, request)} AS xAxis,
+                    ${
+                when (series.reportSeriesSubGroup) {
+                    null -> "'' AS subgroup"
+                    else -> "${xAxisOrSubgroupExpression(series.reportSeriesSubGroup!!, dbType, request)} AS subgroup"
                 }
             }
-
-            sql += "FROM StatementEntity ResultSource\n"
-
-            if (reportOptions.xAxis.personJoinRequired ||
-                series.reportSeriesSubGroup?.personJoinRequired == true
-            ) {
-                sql += "LEFT JOIN PersonEntity ON PersonEntity.pGuidHash = ResultSource.statementActorPersonUid\n"
+                FROM StatementEntity ResultSource
+                ${
+                if (reportOptions.xAxis.personJoinRequired ||
+                    series.reportSeriesSubGroup?.personJoinRequired == true
+                ) {
+                    "LEFT JOIN PersonEntity ON PersonEntity.pGuidHash = ResultSource.statementActorPersonUid"
+                } else ""
             }
-
-            sql += "WHERE ResultSource.timestamp BETWEEN ? AND ?\n"
+                WHERE ResultSource.timestamp BETWEEN ? AND ?
+                GROUP BY xAxis${series.reportSeriesSubGroup?.let { ", subgroup" } ?: ""}
+            )
+        """.trimIndent())
             paramsList.add(reportFromMs)
             paramsList.add(reportToMs)
 
-            sql += " GROUP BY xAxis"
-            series.reportSeriesSubGroup?.also {
-                sql += ", subgroup"
-            }
-
-            sql += "\n)\n"
-
-            sql += """
-        SELECT ? AS rqrReportUid,
-               ? AS rqrLastModified,
-               ? AS rqrReportSeriesUid,
-               ? AS rqrLastValidated,
-               ResultSourceCte.xAxis AS rqrXAxis,
-               ResultSourceCte.yAxis AS rqrYAxis,
-               ResultSourceCte.subgroup AS rqrSubgroup,
-               ? AS rqrTimeZone
-          FROM ResultSourceCte  
+            val sql = """
+            INSERT INTO ReportQueryResult(
+                rqrReportUid, rqrLastModified, rqrReportSeriesUid, rqrLastValidated, 
+                rqrXAxis, rqrYAxis, rqrSubgroup, rqrTimeZone
+            )
+            WITH ${ctes.joinToString(",\n")}
+            SELECT 
+                ? AS rqrReportUid,
+                ? AS rqrLastModified,
+                ? AS rqrReportSeriesUid,
+                ? AS rqrLastValidated,
+                ResultSourceCte.xAxis AS rqrXAxis,
+                ResultSourceCte.yAxis AS rqrYAxis,
+                ResultSourceCte.subgroup AS rqrSubgroup,
+                ? AS rqrTimeZone
+            FROM ResultSourceCte
         """.trimIndent()
 
             paramsList.addAll(

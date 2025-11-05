@@ -56,7 +56,6 @@ class ReportListViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
     private val runReportUseCase: RunReportUseCase by inject()
     private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by inject()
-    private val insertReportTestDataUseCase: InsertReportTestDataUseCase by inject()
 
     private val launchDebounced = LaunchDebouncer(viewModelScope)
 
@@ -68,9 +67,6 @@ class ReportListViewModel(
         )
     }
     init {
-        viewModelScope.launch {
-            insertReportTestDataUseCase()
-        }
         viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(

@@ -53,9 +53,7 @@ fun ClazzEditScreen(
             modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = clazz?.title ?: "",
             label = {
-                Text(
-                    stringResource(Res.string.class_name)
-                )
+                Text(stringResource(Res.string.class_name) + "*")
             },
             onValueChange = { value ->
                 clazz?.also {

@@ -101,7 +101,7 @@ fun PersonEditScreen(
             isError = uiState.genderError != null,
         )
 
-        if (uiState.showRoleDropdown) {
+        if(uiState.showRoleDropdown) {
             val roleEnumVal = person?.roles?.first()?.roleEnum ?: PersonRoleEnum.STUDENT
             RespectExposedDropDownMenuField(
                 value = roleEnumVal,

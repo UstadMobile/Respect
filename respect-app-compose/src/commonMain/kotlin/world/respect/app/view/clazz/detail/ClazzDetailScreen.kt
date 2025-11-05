@@ -43,13 +43,16 @@ import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
+import world.respect.shared.generated.resources.dob_label
 import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
+import world.respect.shared.generated.resources.gender_literal
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 
@@ -140,7 +143,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -180,7 +183,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if(uiState.showAddTeacher) {
+            if (uiState.showAddTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -191,20 +194,25 @@ fun ClazzDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         leadingContent = {
                             RespectPersonAvatar(
-                                name = person?.givenName ?: ""
+                                name = person?.fullName() ?: ""
                             )
                         },
-                        headlineContent = { Text(
-                            text = "${
-                                person?.givenName.orEmpty()
-                            } (${stringResource(Res.string.teacher)})"
-                        )
-                                          },
+                        headlineContent = {
+                            Text(
+                                text = "${
+                                    person?.fullName().orEmpty()
+                                } (${stringResource(Res.string.teacher)})"
+                            )
+                        },
                         supportingContent = {
                             val gender = person?.gender?.value
                             val dob = person?.dateOfBirth?.toString()
+                            Text(
+                                text =
+                                    "${stringResource(Res.string.gender_literal)}: $gender, " +
+                                            "${stringResource(Res.string.dob_label)}: $dob"
+                            )
 
-                            Text(text = "Gender: $gender, DOB: $dob")
                         },
                         trailingContent = {
                             Row {
@@ -233,7 +241,7 @@ fun ClazzDetailScreen(
             }
 
 
-            if(uiState.showAddStudent) {
+            if (uiState.showAddStudent) {
                 respectPagingItems(
                     items = pendingStudentLazyPagingItems,
                     key = { person, index ->
@@ -245,21 +253,23 @@ fun ClazzDetailScreen(
                             .fillMaxWidth(),
                         leadingContent = {
                             RespectPersonAvatar(
-                                name = person?.givenName ?: ""
+                                name = person?.fullName() ?: ""
                             )
                         },
                         headlineContent = {
                             Text(
                                 text = "${
-                                    person?.givenName.orEmpty()
+                                    person?.fullName().orEmpty()
                                 } (${stringResource(Res.string.student)})"
                             )
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
                             val dob = person?.dateOfBirth?.toString()
-
-                            Text(text = "Gender: $gender, DOB: $dob")
+                            Text(
+                                text = "${stringResource(Res.string.gender_literal)}:" +
+                                        " $gender, ${stringResource(Res.string.dob_label)}: $dob"
+                            )
                         },
                         trailingContent = {
                             Row {
@@ -317,8 +327,8 @@ fun ClazzDetailScreen(
             )
         }
 
-        if(uiState.isTeachersExpanded) {
-            if(uiState.showAddTeacher) {
+        if (uiState.isTeachersExpanded) {
+            if (uiState.showAddTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -351,11 +361,11 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = teacher?.givenName ?: ""
+                            name = teacher?.fullName() ?: ""
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher?.givenName ?: "")
+                        Text(text = teacher?.fullName() ?: "")
                     }
                 )
             }
@@ -393,7 +403,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isStudentsExpanded) {
-            if(uiState.showAddStudent) {
+            if (uiState.showAddStudent) {
                 item("add_student") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -429,13 +439,13 @@ fun ClazzDetailScreen(
 
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = student?.givenName ?: ""
+                            name = student?.fullName() ?: ""
                         )
                     },
 
                     headlineContent = {
                         Text(
-                            text = student?.givenName ?: ""
+                            text = student?.fullName() ?: ""
                         )
                     }
                 )

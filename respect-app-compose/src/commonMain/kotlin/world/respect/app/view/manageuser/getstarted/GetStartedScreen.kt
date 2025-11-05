@@ -87,10 +87,6 @@ fun GetStartedScreen(
             }
         }
 
-        uiState.errorText?.let {
-            Text(it)
-        }
-
         OutlinedTextField(
             value = uiState.schoolName,
             onValueChange = onSchoolNameChanged,
@@ -111,6 +107,10 @@ fun GetStartedScreen(
                 { Text(uiTextStringResource(it)) }
             }
         )
+
+        uiState.errorText?.let {
+            Text(uiTextStringResource(it))
+        }
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth().testTag("schools_list")

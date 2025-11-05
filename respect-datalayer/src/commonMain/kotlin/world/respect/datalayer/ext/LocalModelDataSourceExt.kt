@@ -10,9 +10,13 @@ suspend fun <T: Any> LocalModelDataSource<T>.updateFromRemoteListIfNeeded(
     remoteLoad: DataLoadState<List<T>>,
     validationHelper: ExtendedDataSourceValidationHelper?
 ) {
-    if(remoteLoad is DataReadyState) {
-        updateLocal(remoteLoad.data)
-        validationHelper?.updateValidationInfo(remoteLoad.metaInfo)
+    val data: List<T>? = remoteLoad.dataOrNull()
+
+    if(data != null) {
+        updateLocal(data)
+        validationHelper
+            ?.takeIf { remoteLoad is DataReadyState }
+            ?.updateValidationInfo(remoteLoad.metaInfo)
     }
 }
 
@@ -20,9 +24,13 @@ suspend fun <T: Any> LocalModelDataSource<T>.updateFromRemoteIfNeeded(
     remoteLoad: DataLoadState<T>,
     validationHelper: ExtendedDataSourceValidationHelper?
 ) {
-    if(remoteLoad is DataReadyState) {
-        updateLocal(listOf(remoteLoad.data))
-        validationHelper?.updateValidationInfo(remoteLoad.metaInfo)
+    val data = remoteLoad.dataOrNull()
+
+    if(data != null) {
+        updateLocal(listOf(data))
+        validationHelper
+            ?.takeIf { remoteLoad is DataReadyState }
+            ?.updateValidationInfo(remoteLoad.metaInfo)
     }
 }
 

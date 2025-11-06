@@ -163,6 +163,8 @@ fun PersonEditScreen(
             supportingText = uiState.phoneNumError?.let {
                 { Text(uiTextStringResource(it)) }
             },
+            countryCodeTestTag = "phone_countrycode",
+            numberTextFieldTestTag = "phone_number"
         )
 
         OutlinedTextField(

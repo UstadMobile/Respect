@@ -3,6 +3,11 @@ package world.respect.shared.navigation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+/**
+ * The ResultDest is passed as an argument from a screen which expects a result to be returned
+ * to the screen that will provide the result. It specifies a result key (used by the
+ * NavResultReturner) and a destination (so the back stack can be popped accordingly)
+ */
 @Serializable
 sealed interface ResultDest{
     val resultKey: String
@@ -22,13 +27,13 @@ fun ResultDest?.encodeToJsonStringOrNull() : String? {
 }
 
 @Serializable
-data class ResultDestClass(
+data class KClassResultDest(
     val resultPopUpTo: KClassAsString,
     override val resultKey: String,
 ): ResultDest
 
 @Serializable
-data class ResultDestRoute(
+data class RouteResultDest(
     val resultPopUpTo: RespectAppRoute,
     override val resultKey: String,
 ): ResultDest

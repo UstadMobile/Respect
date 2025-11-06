@@ -522,21 +522,27 @@ object AccountList : RespectAppRoute
 data class PersonList(
     private val filterByRoleStr: String? = null,
     val isTopLevel: Boolean = false,
-) : RespectAppRoute {
+    private val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     val filterByRole: PersonRoleEnum? = filterByRoleStr?.let {
         PersonRoleEnum.fromValue(it)
     }
 
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
     companion object {
 
         fun create(
             filterByRole: PersonRoleEnum? = null,
             isTopLevel: Boolean = false,
+            resultDest: ResultDest? = null,
         ) = PersonList(
             filterByRoleStr = filterByRole?.value,
             isTopLevel = isTopLevel,
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
         )
 
     }
@@ -560,7 +566,24 @@ data class ManageAccount(
 @Serializable
 data class PersonEdit(
     val guid: String?,
-) : RespectAppRoute
+    private val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+        fun create(
+            guid: String?,
+            resultDest: ResultDest? = null,
+        ) = PersonEdit(
+            guid = guid,
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
+        )
+    }
+
+
+}
 
 @Serializable
 data class SetUsernameAndPassword(

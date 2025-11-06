@@ -362,6 +362,7 @@
 
 
     <string name="add_person">Add person</string>
+    <string name="select_person">Select person</string>
     <string name="edit_person">Edit person</string>
 
     <string name="first_names">First names</string>

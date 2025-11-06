@@ -1,5 +1,6 @@
 package world.respect.domain.validateemail
 
+
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -10,36 +11,36 @@ class ValidateEmailUseCaseTest {
     private val validateEmailUseCase = ValidateEmailUseCase()
 
     @Test
-    fun `valid email should return true`() {
+    fun validEmailShouldReturnTrue() {
         assertTrue(validateEmailUseCase("test@example.com"))
         assertTrue(validateEmailUseCase("user.name@domain.co.in"))
         assertTrue(validateEmailUseCase("a@b.io"))
     }
 
     @Test
-    fun `email without at symbol should return false`() {
+    fun emailWithoutAtSymbolShouldReturnFalse() {
         assertFalse(validateEmailUseCase("testexample.com"))
     }
 
     @Test
-    fun `email without dot after at should return false`() {
+    fun emailWithoutDotAfterAtShouldReturnFalse() {
         assertFalse(validateEmailUseCase("test@examplecom"))
     }
 
     @Test
-    fun `email with spaces should return false`() {
+    fun emailWithSpacesShouldReturnFalse() {
         assertFalse(validateEmailUseCase("test @example.com"))
         assertFalse(validateEmailUseCase("test@ example.com"))
     }
 
     @Test
-    fun `email with invalid characters should return false`() {
+    fun emailWithInvalidCharactersShouldReturnFalse() {
         assertFalse(validateEmailUseCase("test@[example].com"))
         assertFalse(validateEmailUseCase("test\\example@example.com"))
     }
 
     @Test
-    fun `email with leading and trailing spaces should be valid`() {
+    fun emailWithLeadingAndTrailingSpacesShouldBeValid() {
         assertTrue(validateEmailUseCase("   test@example.com  "))
     }
 }

@@ -65,12 +65,19 @@ data class PersonEditUiState(
     val phoneNumError: UiText? = null,
     val emailError: UiText? = null,
     val genderError: UiText? = null,
-) {
+    val firstNameError: UiText? = null,
+    val lastNameError: UiText? = null,
+    ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
     val hasErrors: Boolean
-        get() = dateOfBirthError != null || phoneNumError != null || genderError != null || emailError!=null
+        get() = firstNameError!=null ||
+                lastNameError!=null ||
+                genderError != null ||
+                dateOfBirthError != null ||
+                phoneNumError != null ||
+                emailError!=null
 }
 
 class PersonEditViewModel(
@@ -183,6 +190,9 @@ class PersonEditViewModel(
 
             prev.copy(
                 person = DataReadyState(person),
+                firstNameError = prev.firstNameError?.takeIf { prevPerson?.givenName == person.givenName },
+                lastNameError = prev.lastNameError?.takeIf { prevPerson?.familyName == person.familyName },
+                genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender },
                 emailError = prev.emailError?.takeIf {
                     prevPerson?.email == person.email
                 },
@@ -191,7 +201,6 @@ class PersonEditViewModel(
                 }else {
                     null
                 },
-                genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender }
             )
         }.person.dataOrNull() ?: return
 
@@ -217,6 +226,16 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
+                firstNameError = if(person.givenName.isBlank()) {
+                    Res.string.required.asUiText()
+                }else {
+                    null
+                },
+                lastNameError = if(person.familyName.isBlank()) {
+                    Res.string.required.asUiText()
+                }else {
+                    null
+                },
                 dateOfBirthError = if (dob != null && dob > today) {
                     Res.string.date_of_birth_in_future.asUiText()
                 }else {

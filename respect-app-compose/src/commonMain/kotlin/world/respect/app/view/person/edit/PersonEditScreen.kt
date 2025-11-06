@@ -77,6 +77,7 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(givenName = value))
                 }
             },
+            isError = uiState.firstNameError != null,
             singleLine = true,
             enabled = fieldsEnabled,
             supportingText = {
@@ -93,6 +94,7 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(familyName = value))
                 }
             },
+            isError = uiState.lastNameError != null,
             singleLine = true,
             supportingText = {
                 Text(stringResource(Res.string.required))

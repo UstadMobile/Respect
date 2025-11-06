@@ -10,6 +10,7 @@ import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
 import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
+import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
@@ -21,7 +22,10 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
 import world.respect.datalayer.db.school.domain.report.query.InsertReportTestDataUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
@@ -36,6 +40,7 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
+import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
@@ -56,6 +61,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -247,6 +253,9 @@ fun serverKoinModule(
                 schoolDb = get(),
             )
         }
+        scoped<AuthTokenProvider> {
+            get<RespectTokenManager>().providerFor(id)
+        }
 
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
@@ -266,6 +275,18 @@ fun serverKoinModule(
                 getPasskeyProviderInfoUseCase = get(),
                 encryptPersonPasswordUseCase = get(),
             )
+        }
+        scoped<RunReportUseCase> {
+            RunReportUseCaseDatabaseImpl(
+                schoolDatabase = get(),
+                generateReportQueriesUseCase = get(),
+            )
+        }
+        scoped<GenerateReportQueriesUseCase> {
+            GenerateReportQueriesUseCase()
+        }
+        scoped<CreateGraphFormatterUseCase> {
+            CreateGraphFormatterUseCase()
         }
         scoped<InsertReportTestDataUseCase> {
             InsertReportTestDataUseCase(

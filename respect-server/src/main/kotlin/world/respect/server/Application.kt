@@ -45,6 +45,7 @@ import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.ReportRoute
+import world.respect.server.routes.school.respect.RunReportRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
@@ -205,6 +206,12 @@ fun Application.module() {
                         )
                     }
                     authenticate(AUTH_CONFIG_SCHOOL) {
+                        route("report") {
+                            RunReportRoute(
+                                runReportUseCaseProvider = { it.getSchoolKoinScope().get() },
+                                json = json,
+                            )
+                        }
                         SchoolAppRoute()
                         PersonRoute()
                         PersonPasskeyRoute()

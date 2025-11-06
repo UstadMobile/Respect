@@ -70,6 +70,7 @@ import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueri
 import world.respect.datalayer.db.school.domain.report.query.InsertReportTestDataUseCase
 import world.respect.datalayer.db.school.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseClientImpl
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
@@ -787,16 +788,13 @@ val appKoinModule = module {
         }
 
         scoped<RunReportUseCase> {
-            try {
-                RunReportUseCaseDatabaseImpl(
-                    schoolDatabase = get(),
-                    generateReportQueriesUseCase = get(),
-                )
-            } catch (e: Exception) {
-                println("ERROR creating RunReportUseCaseDatabaseImpl: ${e.message}")
-                e.printStackTrace()
-                throw e
-            }
+            RunReportUseCaseClientImpl(
+                db = get(),
+                httpClient = get(),
+                json = get(),
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                tokenProvider = get(),
+            )
         }
         scoped<GenerateReportQueriesUseCase> {
             GenerateReportQueriesUseCase()

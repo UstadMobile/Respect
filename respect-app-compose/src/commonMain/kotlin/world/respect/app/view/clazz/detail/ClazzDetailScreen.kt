@@ -143,7 +143,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if((uiState.showAddTeacher || uiState.showAddStudent) &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -183,7 +183,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if (uiState.showAddTeacher) {
+            if(uiState.showAddTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -327,8 +327,8 @@ fun ClazzDetailScreen(
             )
         }
 
-        if (uiState.isTeachersExpanded) {
-            if (uiState.showAddTeacher) {
+        if(uiState.isTeachersExpanded) {
+            if(uiState.showAddTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -403,7 +403,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isStudentsExpanded) {
-            if (uiState.showAddStudent) {
+            if(uiState.showAddStudent) {
                 item("add_student") {
                     ListItem(
                         modifier = Modifier.clickable {

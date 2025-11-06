@@ -188,7 +188,7 @@ class PersonEditViewModel(
                 },
                 phoneNumError = if (prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
                     prev.phoneNumError
-                } else {
+                }else {
                     null
                 },
                 genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender }
@@ -219,20 +219,19 @@ class PersonEditViewModel(
             prev.copy(
                 dateOfBirthError = if (dob != null && dob > today) {
                     Res.string.date_of_birth_in_future.asUiText()
-                } else {
+                }else {
                     null
                 },
                 phoneNumError = if (uiState.value.nationalPhoneNumSet &&
                     !phoneNumValidatorUseCase.isValid(person.phoneNumber ?: "")
                 ) {
                     Res.string.invalid.asUiText()
-                } else {
+                }else {
                     null
                 },
                 emailError = if (!validateEmailUseCase(person.email.toString())) {
                     Res.string.invalid_email.asUiText()
-                } else null
-                ,
+                } else null,
                 genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {
                     Res.string.required.asUiText()
                 }else {
@@ -242,7 +241,7 @@ class PersonEditViewModel(
         }
 
 
-        if (uiState.value.hasErrors)
+        if(uiState.value.hasErrors)
             return
 
         launchWithLoadingIndicator {

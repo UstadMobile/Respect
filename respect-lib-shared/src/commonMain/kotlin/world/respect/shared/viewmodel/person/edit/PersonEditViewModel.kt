@@ -229,7 +229,7 @@ class PersonEditViewModel(
                 }else {
                     null
                 },
-                emailError = if (!validateEmailUseCase(person.email.toString())) {
+                emailError = if (!person.email.isNullOrBlank() && !validateEmailUseCase(person.email.toString())) {
                     Res.string.invalid_email.asUiText()
                 } else null,
                 genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {

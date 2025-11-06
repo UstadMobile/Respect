@@ -13,21 +13,42 @@ fun NavResultReturner.sendResultIfResultExpected(
     navCommandFlow: MutableSharedFlow<NavCommand>,
     result: Any?
 ): Boolean {
-    val popUpTo = route.resultPopUpTo
-    val resultKey = route.resultKey
-    return if(popUpTo != null && resultKey != null) {
+    val resultDest = route.resultDest
+
+    val resultKey = route.resultDest?.resultKey
+
+    return if(resultKey != null) {
         sendResult(
             NavResult(
                 key = resultKey,
                 result = result,
             )
         )
-        navCommandFlow.tryEmit(
-            NavCommand.PopToRouteClass(
-                destination = popUpTo,
-                inclusive = false,
-            )
-        )
+
+        val command = when (resultDest) {
+            is ResultDestClass -> {
+                NavCommand.PopToRouteClass(
+                    destination = resultDest.resultPopUpTo,
+                    inclusive = false,
+                )
+            }
+
+            is ResultDestRoute -> {
+                NavCommand.PopToRoute(
+                    destination = resultDest.resultPopUpTo,
+                    inclusive = false,
+                )
+            }
+
+            else -> {
+                null
+            }
+        }
+
+        if(command != null) {
+            navCommandFlow.tryEmit(command)
+        }
+
         true
     }else {
         false

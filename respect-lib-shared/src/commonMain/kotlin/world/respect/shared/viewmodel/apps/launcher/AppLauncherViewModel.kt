@@ -89,8 +89,8 @@ class AppLauncherViewModel(
                         )
                     }
                 ),
-                hideBottomNavigation = route.resultKey != null,
-                showBackButton = route.resultKey != null,
+                hideBottomNavigation = route.resultDest != null,
+                showBackButton = route.resultDest != null,
             )
         }
 
@@ -131,18 +131,16 @@ class AppLauncherViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                if(route.resultKey != null) {
+                if(route.resultDest != null) {
                     LearningUnitList.create(
                         opdsFeedUrl = url.resolve(appData.learningUnits.toString()),
                         appManifestUrl = url,
-                        resultPopUpTo = route.resultPopUpTo,
-                        resultKey = route.resultKey,
+                        resultDest = route.resultDest,
                     )
                 }else {
                     AppsDetail.create(
                         manifestUrl = url,
-                        resultPopUpTo = route.resultPopUpTo,
-                        resultKey = route.resultKey,
+                        resultDest = route.resultDest,
                     )
                 }
             )

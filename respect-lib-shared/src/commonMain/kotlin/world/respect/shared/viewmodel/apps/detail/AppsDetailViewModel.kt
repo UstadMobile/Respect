@@ -142,8 +142,7 @@ class AppsDetailViewModel(
                     LearningUnitList.create(
                         opdsFeedUrl = route.manifestUrl.resolve(uri),
                         appManifestUrl = route.manifestUrl,
-                        resultPopUpTo = route.resultPopUpTo,
-                        resultKey = route.resultKey,
+                        resultDest = route.resultDest,
                     )
                 )
             )

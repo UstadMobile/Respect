@@ -35,6 +35,7 @@ import world.respect.shared.generated.resources.last_name
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.role
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -81,7 +82,7 @@ fun PersonEditScreen(
             singleLine = true,
             enabled = fieldsEnabled,
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(uiState.firstNameError ?: Res.string.required.asUiText()))
             }
         )
 
@@ -97,19 +98,20 @@ fun PersonEditScreen(
             isError = uiState.lastNameError != null,
             singleLine = true,
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(uiState.lastNameError ?: Res.string.required.asUiText()))
             }
         )
 
         RespectGenderExposedDropDownMenuField(
-            modifier = Modifier.testTag("gender").fillMaxWidth().defaultItemPadding(),
             value = person?.gender ?: PersonGenderEnum.UNSPECIFIED,
             onValueChanged = { gender ->
                 person?.also {
                     onEntityChanged(it.copy(gender = gender))
                 }
             },
+            modifier = Modifier.testTag("gender").fillMaxWidth().defaultItemPadding(),
             isError = uiState.genderError != null,
+            errorText = uiState.genderError
         )
 
         if(uiState.showRoleDropdown) {

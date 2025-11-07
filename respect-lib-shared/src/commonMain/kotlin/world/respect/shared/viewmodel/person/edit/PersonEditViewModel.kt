@@ -33,7 +33,7 @@ import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
 import world.respect.shared.generated.resources.invalid
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
@@ -68,8 +68,8 @@ data class PersonEditUiState(
     val emailError: UiText? = null,
     val genderError: UiText? = null,
     val firstNameError: UiText? = null,
-    val lastNameError: UiText? = null,
-    ) {
+    val lastNameError: UiText? = null
+) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
@@ -230,12 +230,12 @@ class PersonEditViewModel(
         _uiState.update { prev ->
             prev.copy(
                 firstNameError = if(person.givenName.isBlank()) {
-                    Res.string.required.asUiText()
+                    Res.string.required_field.asUiText()
                 }else {
                     null
                 },
                 lastNameError = if(person.familyName.isBlank()) {
-                    Res.string.required.asUiText()
+                    Res.string.required_field.asUiText()
                 }else {
                     null
                 },
@@ -255,10 +255,10 @@ class PersonEditViewModel(
                     Res.string.invalid_email.asUiText()
                 } else null,
                 genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {
-                    Res.string.required.asUiText()
+                    Res.string.required_field.asUiText()
                 }else {
                     null
-                }
+                },
             )
         }
 

@@ -174,7 +174,7 @@ class ClazzDetailViewModel(
         val classInviteCode = when(roleType){
             EnrollmentRoleEnum.TEACHER -> clazz.teacherInviteCode
             EnrollmentRoleEnum.STUDENT -> clazz.studentInviteCode
-            else -> throw IllegalStateException()
+            else -> null
         }
 
         _navCommandFlow.tryEmit(
@@ -184,7 +184,8 @@ class ClazzDetailViewModel(
                     resultDest = RouteResultDest(
                         resultKey = RESULT_KEY_ADD_STUDENT,
                         resultPopUpTo = route,
-                    )
+                    ),
+                    showInviteCode = classInviteCode,
                 )
             )
         )

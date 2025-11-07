@@ -526,6 +526,7 @@ data class PersonList(
     private val filterByRoleStr: String? = null,
     val isTopLevel: Boolean = false,
     private val resultDestStr: String? = null,
+    val showInviteCode: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -542,10 +543,12 @@ data class PersonList(
             filterByRole: PersonRoleEnum? = null,
             isTopLevel: Boolean = false,
             resultDest: ResultDest? = null,
+            showInviteCode: String? = null,
         ) = PersonList(
             filterByRoleStr = filterByRole?.value,
             isTopLevel = isTopLevel,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            showInviteCode = showInviteCode,
         )
 
     }

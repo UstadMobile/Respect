@@ -137,7 +137,7 @@
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
-    <string name="school_not_found">School not found</string>
+    <string name="school_not_found">School not found: please ask your admin to add your school.</string>
     <string name="add_directory">Add Directory</string>
     <string name="edit_directory">Edit Directory</string>
 
@@ -363,6 +363,7 @@
 
 
     <string name="add_person">Add person</string>
+    <string name="select_person">Select person</string>
     <string name="edit_person">Edit person</string>
 
     <string name="first_names">First names</string>

@@ -158,8 +158,7 @@ class LearningUnitListViewModel(
                         navigationHref
                     ),
                     appManifestUrl = route.appManifestUrl,
-                    resultPopUpTo = route.resultPopUpTo,
-                    resultKey = route.resultKey,
+                    resultDest = route.resultDest,
                 )
             )
         )

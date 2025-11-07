@@ -67,7 +67,7 @@ fun ClazzEditScreen(
             },
             singleLine = true,
             supportingText = {
-                Text(uiTextStringResource(uiState.clazzNameError?:Res.string.required.asUiText()))
+                Text(uiTextStringResource(uiState.clazzNameError ?: Res.string.required.asUiText()))
             },
             enabled = fieldsEnabled,
             isError = uiState.clazzNameError != null

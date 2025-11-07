@@ -29,7 +29,7 @@ fun RespectGenderExposedDropDownMenuField(
         onOptionSelected = onValueChanged,
         modifier = modifier,
         itemText = {
-            if (it == PersonGenderEnum.UNSPECIFIED) {
+            if(it == PersonGenderEnum.UNSPECIFIED) {
                 ""
             } else {
                 stringResource(it.label)

@@ -38,10 +38,10 @@ class EnrollmentDataSourceDb(
                 val entities = enrollments.map {
                     it.copy(stored = timeStored).toEntities(uidNumberMapper).enrollment
                 }.filter {
-                    val lastMod = schoolDb.getEnrollmentEntityDao().getLastModifiedByUidNum(
+                    val lastModInDb = schoolDb.getEnrollmentEntityDao().getLastModifiedByUidNum(
                         it.eUidNum
                     ) ?: 0
-                    forceOverwrite || it.eLastModified.toEpochMilliseconds() > lastMod
+                    forceOverwrite || it.eLastModified.toEpochMilliseconds() > lastModInDb
                 }
                 schoolDb.getEnrollmentEntityDao().upsert(entities)
             }

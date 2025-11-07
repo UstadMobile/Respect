@@ -12,6 +12,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -143,7 +144,7 @@ class PersonListViewModel(
             val personSelected = schoolDataSource.personDataSource.findByGuid(
                 loadParams = DataLoadParams(),
                 guid = person.guid,
-            )
+            ).dataOrNull()
 
             if(
                 !resultReturner.sendResultIfResultExpected(

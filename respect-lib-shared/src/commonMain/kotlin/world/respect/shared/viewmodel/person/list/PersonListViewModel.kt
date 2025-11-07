@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.person.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -26,6 +27,11 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.shared.ext.resultExpected
+import world.respect.shared.generated.resources.select_person
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
@@ -35,11 +41,13 @@ data class PersonListUiState(
     val persons: IPagingSourceFactory<Int, PersonListDetails> = IPagingSourceFactory {
         EmptyPagingSource()
     },
+    val showAddPersonItem: Boolean = false,
 )
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -52,11 +60,14 @@ class PersonListViewModel(
 
     private val launchDebounced = LaunchDebouncer(viewModelScope)
 
+    private val route: PersonList = savedStateHandle.toRoute()
+
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
             DataLoadParams(),
             PersonDataSource.GetListParams(
-                filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() }
+                filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
+                filterByPersonRole = route.filterByRole,
             )
         )
     }
@@ -64,7 +75,11 @@ class PersonListViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.people.asUiText(),
+                title = if(!route.resultExpected) {
+                    Res.string.people.asUiText()
+                }else {
+                    Res.string.select_person.asUiText()
+                },
                 fabState = it.fabState.copy(
                     onClick = ::onClickAdd,
                     text = Res.string.person.asUiText(),
@@ -75,26 +90,31 @@ class PersonListViewModel(
                     searchText = "",
                     onSearchTextChanged = ::onSearchTextChanged
                 ),
-                showBackButton = false,
+                showBackButton = route.resultExpected,
+                hideBottomNavigation = route.resultExpected,
+                userAccountIconVisible = !route.resultExpected,
             )
         }
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
+                val canAddPerson = selectedAcct?.person?.isAdminOrTeacher() == true
                 _appUiState.update { prev ->
                     prev.copy(
                         fabState = prev.fabState.copy(
-                            visible = selectedAcct?.person?.isAdminOrTeacher() == true
+                            visible = canAddPerson && !route.resultExpected
                         )
                     )
+                }
+
+                _uiState.update {
+                    it.copy(showAddPersonItem = canAddPerson && route.resultExpected)
                 }
             }
         }
 
         _uiState.update {
-            it.copy(
-                persons = pagingSourceFactoryHolder
-            )
+            it.copy(persons = pagingSourceFactoryHolder)
         }
     }
 
@@ -113,14 +133,31 @@ class PersonListViewModel(
     }
 
     fun onClickItem(person: PersonListDetails) {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PersonDetail(person.guid))
-        )
+        viewModelScope.launch {
+            val personSelected = schoolDataSource.personDataSource.findByGuid(
+                loadParams = DataLoadParams(),
+                guid = person.guid,
+            )
+
+            if(
+                !resultReturner.sendResultIfResultExpected(
+                    route = route,
+                    navCommandFlow = _navCommandFlow,
+                    result = personSelected,
+                )
+            ) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(PersonDetail(person.guid))
+                )
+            }
+        }
     }
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PersonEdit(null))
+            NavCommand.Navigate(
+                PersonEdit.create(null, resultDest = route.resultDest)
+            )
         )
     }
 

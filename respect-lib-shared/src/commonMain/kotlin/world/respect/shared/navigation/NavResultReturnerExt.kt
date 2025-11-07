@@ -26,14 +26,14 @@ fun NavResultReturner.sendResultIfResultExpected(
         )
 
         val command = when (resultDest) {
-            is ResultDestClass -> {
+            is KClassResultDest -> {
                 NavCommand.PopToRouteClass(
                     destination = resultDest.resultPopUpTo,
                     inclusive = false,
                 )
             }
 
-            is ResultDestRoute -> {
+            is RouteResultDest -> {
                 NavCommand.PopToRoute(
                     destination = resultDest.resultPopUpTo,
                     inclusive = false,

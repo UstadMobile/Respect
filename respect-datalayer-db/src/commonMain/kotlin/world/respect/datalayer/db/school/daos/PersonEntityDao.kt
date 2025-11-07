@@ -89,22 +89,7 @@ interface PersonEntityDao {
     @Query("""
         SELECT * 
          FROM PersonEntity
-        WHERE PersonEntity.pStored > :since 
-          AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
-          AND (:inClazzGuidHash = 0 OR
-               EXISTS(
-                    SELECT EnrollmentEntity.eUid
-                      FROM EnrollmentEntity
-                     WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
-                       AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
-                       AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
-                       AND :timeNow BETWEEN
-                                    COALESCE(EnrollmentEntity.eBeginDate, 0) AND
-                                    COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
-               )
-              ) 
-         AND (:filterByName IS NULL 
-              OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
+              $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
      ORDER BY PersonEntity.pGivenName
     """)
     fun findAllAsPagingSource(
@@ -114,6 +99,7 @@ interface PersonEntityDao {
         inClazzRoleFlag: Int = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
@@ -122,6 +108,30 @@ interface PersonEntityDao {
                PersonEntity.pFamilyName AS familyName, 
                PersonEntity.pUsername AS username
           FROM PersonEntity
+               $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
+      ORDER BY PersonEntity.pGivenName
+    """)
+    fun findAllListDetailsAsPagingSource(
+        since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+    ): PagingSource<Int, PersonListDetails>
+    @Query("""
+            SELECT * 
+            FROM PersonEntity
+            WHERE pGuid = :sourcedId
+            """
+    )
+    suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
+
+
+    companion object {
+
+        const val LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL = """
         WHERE PersonEntity.pStored > :since 
           AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
           AND (:inClazzGuidHash = 0 OR
@@ -138,22 +148,11 @@ interface PersonEntityDao {
               ) 
          AND (:filterByName IS NULL 
               OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
-     ORDER BY PersonEntity.pGivenName
-    """)
-    fun findAllListDetailsAsPagingSource(
-        since: Long = 0,
-        guidHash: Long = 0,
-        inClazzGuidHash: Long = 0,
-        inClazzRoleFlag: Int = 0,
-        filterByName: String? = null,
-        timeNow: Long = systemTimeInMillis(),
-    ): PagingSource<Int, PersonListDetails>
-    @Query("""
-            SELECT * 
-            FROM PersonEntity
-            WHERE pGuid = :sourcedId
-            """
-    )
-    suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
+         AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 
+              (SELECT PersonRoleEntity.prRoleEnum
+                 FROM PersonRoleEntity
+                WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
+        """
 
+    }
 }

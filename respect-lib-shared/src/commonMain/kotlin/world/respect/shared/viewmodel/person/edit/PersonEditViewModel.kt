@@ -37,8 +37,10 @@ import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -86,6 +88,7 @@ class PersonEditViewModel(
     private val json: Json,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -266,15 +269,22 @@ class PersonEditViewModel(
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.personDataSource.store(listOf(person))
-
-                if (route.guid == null) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            PersonDetail(guid), popUpTo = route, popUpToInclusive = true
-                        )
+                if(
+                    !resultReturner.sendResultIfResultExpected(
+                        route = route,
+                        navCommandFlow = _navCommandFlow,
+                        result = person,
                     )
-                } else {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
+                ) {
+                    if (route.guid == null) {
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                PersonDetail(guid), popUpTo = route, popUpToInclusive = true
+                            )
+                        )
+                    } else {
+                        _navCommandFlow.tryEmit(NavCommand.PopUp())
+                    }
                 }
             } catch (_: Throwable) {
                 //needs to display snack bar here

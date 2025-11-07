@@ -522,8 +522,11 @@ object AccountList : RespectAppRoute
 data class PersonList(
     private val filterByRoleStr: String? = null,
     val isTopLevel: Boolean = false,
-) : RespectAppRoute {
+    private val sendResultAndPop: Boolean = false,
+    ) : RespectAppRoute {
 
+    @Transient
+    val sendResultAndPopBoolean = sendResultAndPop
     @Transient
     val filterByRole: PersonRoleEnum? = filterByRoleStr?.let {
         PersonRoleEnum.fromValue(it)
@@ -534,9 +537,11 @@ data class PersonList(
         fun create(
             filterByRole: PersonRoleEnum? = null,
             isTopLevel: Boolean = false,
+            sendResultAndPopBoolean: Boolean=false
         ) = PersonList(
             filterByRoleStr = filterByRole?.value,
             isTopLevel = isTopLevel,
+            sendResultAndPop = sendResultAndPopBoolean
         )
 
     }
@@ -560,6 +565,7 @@ data class ManageAccount(
 @Serializable
 data class PersonEdit(
     val guid: String?,
+    val canAddFamilyMembers: Boolean=true,
 ) : RespectAppRoute
 
 @Serializable

@@ -127,14 +127,15 @@ fun PersonDetailScreen(
                 value = { Text(it) }
             )
         }
-        if (uiState.familyMembersVisible) {
+        val familyMembers = uiState.familyMembers.dataOrNull()
+
+        if (uiState.familyMembersVisible&&!familyMembers.isNullOrEmpty()) {
             Text(
                 modifier = Modifier.defaultItemPadding(),
                 text = stringResource(Res.string.family_members),
                 style = MaterialTheme.typography.bodySmall,
             )
-            val familyMembers = uiState.familyMembers.dataOrNull()
-            familyMembers?.forEach { familyPerson->
+            familyMembers.forEach { familyPerson->
                 ListItem(
                     modifier = Modifier.clickable {
                     },

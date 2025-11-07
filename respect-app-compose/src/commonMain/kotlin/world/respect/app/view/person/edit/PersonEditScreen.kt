@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +57,7 @@ fun PersonEditScreen(
         onEntityChanged = viewModel::onEntityChanged,
         onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
         onClickAddFamilyMember = viewModel::onClickAddFamilyMember,
+        onRemoveFamilyMember = viewModel::onRemoveFamilyMember,
     )
 }
 
@@ -65,6 +67,7 @@ fun PersonEditScreen(
     onEntityChanged: (Person) -> Unit,
     onNationalNumberSetChanged: (Boolean) -> Unit,
     onClickAddFamilyMember: () -> Unit,
+    onRemoveFamilyMember: (Person) -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     val fieldsEnabled = uiState.fieldsEnabled
@@ -112,33 +115,43 @@ fun PersonEditScreen(
             },
             isError = uiState.genderError != null,
         )
-        Text(
-            modifier = Modifier.defaultItemPadding(),
-            text = stringResource(Res.string.family_members),
-            style = MaterialTheme.typography.bodySmall,
-        )
-        ListItem(
-            modifier = Modifier.clickable {
-            },
-            headlineContent = {
-                Text(stringResource(Res.string.family_member))
-            },
-            leadingContent = {
-                Icon(Icons.Default.Add, contentDescription = "")
-            }
-        )
-        val familyMembers = uiState.familyMembers.dataOrNull()
-        familyMembers?.forEach { familyPerson->
+        if (uiState.familyMembersVisible) {
+            Text(
+                modifier = Modifier.defaultItemPadding(),
+                text = stringResource(Res.string.family_members),
+                style = MaterialTheme.typography.bodySmall,
+            )
             ListItem(
                 modifier = Modifier.clickable {
-                },
-                leadingContent = {
-                    RespectPersonAvatar(familyPerson.fullName())
+                    onClickAddFamilyMember()
                 },
                 headlineContent = {
-                    Text(familyPerson.fullName())
+                    Text(stringResource(Res.string.family_member))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Add, contentDescription = "")
                 }
             )
+            val familyMembers = uiState.familyMembers.dataOrNull()
+            familyMembers?.forEach { familyPerson ->
+                ListItem(
+                    leadingContent = {
+                        RespectPersonAvatar(familyPerson.fullName())
+                    },
+                    headlineContent = {
+                        Text(familyPerson.fullName())
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "",
+                            modifier = Modifier.clickable {
+                                onRemoveFamilyMember(familyPerson)
+                            }
+                        )
+                    }
+                )
+            }
         }
 
         if(uiState.showRoleDropdown) {

@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.person.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,8 +12,12 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.adapters.asPerson
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.people
@@ -20,15 +25,14 @@ import world.respect.shared.generated.resources.person
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.shared.navigation.PersonList
 import world.respect.shared.util.LaunchDebouncer
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
+import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.person.edit.PersonEditViewModel.Companion.PERSON_SELECT_RESULT
 
 
 data class PersonListUiState(
@@ -49,6 +53,8 @@ class PersonListViewModel(
     private val _uiState = MutableStateFlow(PersonListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val route: PersonList = savedStateHandle.toRoute()
 
     private val launchDebounced = LaunchDebouncer(viewModelScope)
 
@@ -113,6 +119,13 @@ class PersonListViewModel(
     }
 
     fun onClickItem(person: PersonListDetails) {
+        if (route.sendResultAndPopBoolean){
+            sendResultAndPop(
+                destKey = PERSON_SELECT_RESULT,
+                result = person.asPerson()
+            )
+            return
+        }
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(PersonDetail(person.guid))
         )
@@ -120,7 +133,12 @@ class PersonListViewModel(
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PersonEdit(null))
+            NavCommand.Navigate(
+                PersonEdit(
+                    guid = null,
+                    canAddFamilyMembers = !route.sendResultAndPopBoolean
+                )
+            )
         )
     }
 

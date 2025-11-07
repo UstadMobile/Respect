@@ -117,7 +117,6 @@ class PersonDetailViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             familyMembers = familyMembers,
-                            familyMembersVisible = familyMembers.dataOrNull()?.isNotEmpty() == true
                         )
                     }
                 }

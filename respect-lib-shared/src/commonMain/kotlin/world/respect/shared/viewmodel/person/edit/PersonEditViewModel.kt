@@ -15,7 +15,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
@@ -37,8 +36,10 @@ import world.respect.shared.generated.resources.invalid
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
+import world.respect.shared.navigation.PersonList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -65,7 +66,8 @@ data class PersonEditUiState(
     val phoneNumError: UiText? = null,
     val genderError: UiText? = null,
     val familyMembers: DataLoadState<List<Person>> = DataLoadingState(),
-) {
+    val familyMembersVisible: Boolean = false,
+    ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
@@ -78,6 +80,7 @@ class PersonEditViewModel(
     accountManager: RespectAccountManager,
     private val json: Json,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
+    private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -137,7 +140,9 @@ class PersonEditViewModel(
                             )
                         }
                         else -> emptyList()
-                    }
+                    },
+                    familyMembersVisible = route.canAddFamilyMembers
+
                 )
             }
 
@@ -175,19 +180,30 @@ class PersonEditViewModel(
             }
         }
         viewModelScope.launch {
-            if (route.guid!=null) {
-                schoolDataSource.personDataSource
-                    .listPersonRelatedFamilyMembersAsFlow(
-                        loadParams = DataLoadParams(),
-                        guid = route.guid
-                    ).collect { familyMembers ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                familyMembers = familyMembers
-                            )
-                        }
-                    }
-            }
+            navResultReturner.filteredResultFlowForKey(PERSON_SELECT_RESULT)
+                .collect { navResult ->
+                    val selectedPerson = navResult.result as? Person
+                    selectedPerson?.let { addFamilyMemberLocally(it) }
+                }
+        }
+    }
+
+    private fun addFamilyMemberLocally(person: Person) {
+        _uiState.update { prev ->
+            val currentList = prev.familyMembers.dataOrNull() ?: emptyList()
+            val alreadyExists = currentList.any { it.guid == person.guid }
+            if (alreadyExists) return@update prev
+
+            val updated = currentList + person
+            prev.copy(familyMembers = DataReadyState(updated))
+        }
+    }
+
+    fun onRemoveFamilyMember(person: Person) {
+        _uiState.update { prev ->
+            val current = prev.familyMembers.dataOrNull().orEmpty()
+            val updated = current.filterNot { it.guid == person.guid }
+            prev.copy(familyMembers = DataReadyState(updated))
         }
     }
 
@@ -218,13 +234,25 @@ class PersonEditViewModel(
     }
 
     fun onClickAddFamilyMember(){
-
+        _navCommandFlow.tryEmit(NavCommand.Navigate(PersonList.create(sendResultAndPopBoolean = true)))
     }
 
     fun onClickSave() {
+        val familyPersons = _uiState.value.familyMembers.dataOrNull()?.filter {
+            it.guid!= _uiState.value.person.dataOrNull()?.guid
+        }
+        val familyPersonsUids = _uiState.value.familyMembers.dataOrNull()?.map { it.guid }
         val person = _uiState.value.person.dataOrNull()?.copy(
             lastModified = Clock.System.now(),
+            relatedPersonUids = (_uiState.value.person.dataOrNull()?.relatedPersonUids.orEmpty()
+                    + familyPersonsUids.orEmpty()).distinct()
         ) ?: return
+        val updatedFamilyPersons = familyPersons?.map { familyPerson ->
+            familyPerson.copy(
+                lastModified = Clock.System.now(),
+                relatedPersonUids = (familyPerson.relatedPersonUids + person.guid).distinct()
+            )
+        }.orEmpty()
 
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -258,9 +286,10 @@ class PersonEditViewModel(
 
         launchWithLoadingIndicator {
             try {
-                schoolDataSource.personDataSource.store(listOf(person))
+                val persons = listOf(person) +updatedFamilyPersons
+                schoolDataSource.personDataSource.store(persons)
 
-                if (route.guid == null) {
+                if (route.guid == null && route.canAddFamilyMembers) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             PersonDetail(guid), popUpTo = route, popUpToInclusive = true
@@ -273,5 +302,8 @@ class PersonEditViewModel(
                 //needs to display snack bar here
             }
         }
+    }
+    companion object {
+        const val PERSON_SELECT_RESULT = "person_select_result"
     }
 }

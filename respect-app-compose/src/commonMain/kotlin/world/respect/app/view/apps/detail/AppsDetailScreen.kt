@@ -49,7 +49,6 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.LEARNING_UNIT_LIST
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.LESSON_HEADER
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.SCREENSHOT
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel.Companion.IMAGE
 import world.respect.datalayer.DataReadyState
 
 import world.respect.lib.opds.model.OpdsPublication
@@ -321,9 +320,7 @@ fun PublicationList(
             .width(100.dp)
             .clickable { onClickPublication(publication) }
     ) {
-        val iconUrl = publication.images?.find {
-            it.type?.contains(IMAGE) == true
-        }?.href
+        val iconUrl = publication.images?.firstOrNull()?.href
 
         iconUrl.also { icon ->
             RespectAsyncImage(

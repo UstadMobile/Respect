@@ -27,6 +27,7 @@ import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitListUiState(
@@ -71,6 +72,7 @@ class LearningUnitListViewModel(
                 when (result) {
                     is DataReadyState -> {
 
+                        val resolvedFeed = result.data.resolve(route.opdsFeedUrl)
                         val appBarTitle = result.data.metadata.title
                         val facetOptions = result.data.facets ?: emptyList()
                         val sortOptions = facetOptions.mapIndexed { index, facet ->
@@ -90,9 +92,9 @@ class LearningUnitListViewModel(
 
                         _uiState.update {
                             it.copy(
-                                navigation = result.data.navigation ?: emptyList(),
-                                publications = result.data.publications ?: emptyList(),
-                                group = result.data.groups ?: emptyList(),
+                                navigation = resolvedFeed.navigation ?: emptyList(),
+                                publications = resolvedFeed.publications?: emptyList(),
+                                group = resolvedFeed.groups?: emptyList(),
                                 facetOptions = facetOptions,
                                 sortOptions = sortOptions
                             )
@@ -119,7 +121,7 @@ class LearningUnitListViewModel(
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
         val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
-        if(
+        if (
             !resultReturner.sendResultIfResultExpected(
                 route = route,
                 navCommandFlow = _navCommandFlow,
@@ -156,8 +158,7 @@ class LearningUnitListViewModel(
                         navigationHref
                     ),
                     appManifestUrl = route.appManifestUrl,
-                    resultPopUpTo = route.resultPopUpTo,
-                    resultKey = route.resultKey,
+                    resultDest = route.resultDest,
                 )
             )
         )

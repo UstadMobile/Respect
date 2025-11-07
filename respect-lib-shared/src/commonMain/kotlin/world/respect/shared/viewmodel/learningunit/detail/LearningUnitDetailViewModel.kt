@@ -25,6 +25,7 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
@@ -64,9 +65,12 @@ class LearningUnitDetailViewModel(
                     is DataReadyState -> {
                         _uiState.update {
                             it.copy(
-                                lessonDetail = result.data,
+                                lessonDetail = result.data.resolve(
+                                    route.learningUnitManifestUrl
+                                )
                             )
                         }
+
                         _appUiState.update {
                             it.copy(
                                 title = result.data.metadata.title.getTitle().asUiText()
@@ -151,10 +155,5 @@ class LearningUnitDetailViewModel(
                 )
             )
         )
-    }
-
-
-    companion object{
-        const val IMAGE="image/png"
     }
 }

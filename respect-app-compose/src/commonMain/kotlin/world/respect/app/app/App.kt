@@ -96,7 +96,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         routeName = "$routeNamePrefix.Report"
     ),
     TopNavigationItem(
-        destRoute = PersonList,
+        destRoute = PersonList(isTopLevel = true),
         icon = Icons.Filled.Person,
         label = Res.string.people,
         routeName = "$routeNamePrefix.PersonList",

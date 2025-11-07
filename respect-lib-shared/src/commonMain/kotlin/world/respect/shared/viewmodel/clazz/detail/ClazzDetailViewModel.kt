@@ -32,9 +32,10 @@ import world.respect.shared.generated.resources.all
 import world.respect.shared.generated.resources.active
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.ClazzEdit
-import world.respect.shared.navigation.AddPersonToClazz
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
@@ -178,9 +179,12 @@ class ClazzDetailViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AddPersonToClazz.create(
-                    roleType = roleType,
-                    inviteCode = classInviteCode,
+                PersonList.create(
+                    isTopLevel = false,
+                    resultDest = RouteResultDest(
+                        resultKey = RESULT_KEY_ADD_STUDENT,
+                        resultPopUpTo = route,
+                    )
                 )
             )
         )
@@ -233,6 +237,8 @@ class ClazzDetailViewModel(
 
     companion object {
         const val ALL = "All"
+
+        const val RESULT_KEY_ADD_STUDENT = "student_to_add"
 
     }
 }

@@ -39,7 +39,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -288,15 +288,22 @@ class PersonEditViewModel(
             try {
                 val persons = listOf(person) +updatedFamilyPersons
                 schoolDataSource.personDataSource.store(persons)
-
-                if (route.guid == null && route.canAddFamilyMembers) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            PersonDetail(guid), popUpTo = route, popUpToInclusive = true
-                        )
+                if(
+                    !resultReturner.sendResultIfResultExpected(
+                        route = route,
+                        navCommandFlow = _navCommandFlow,
+                        result = person,
                     )
-                } else {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
+                ) {
+                    if (route.guid == null) {
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                PersonDetail(guid), popUpTo = route, popUpToInclusive = true
+                            )
+                        )
+                    } else {
+                        _navCommandFlow.tryEmit(NavCommand.PopUp())
+                    }
                 }
             } catch (_: Throwable) {
                 //needs to display snack bar here

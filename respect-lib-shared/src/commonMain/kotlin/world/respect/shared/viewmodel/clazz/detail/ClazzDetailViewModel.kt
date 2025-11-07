@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -17,6 +19,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
@@ -24,6 +27,7 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
@@ -32,9 +36,11 @@ import world.respect.shared.generated.resources.all
 import world.respect.shared.generated.resources.active
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.ClazzEdit
-import world.respect.shared.navigation.AddPersonToClazz
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
@@ -43,6 +49,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
 import kotlin.getValue
+import kotlin.time.Clock
 
 data class ClazzDetailUiState(
     val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
@@ -70,6 +77,7 @@ data class ClazzDetailUiState(
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -77,6 +85,8 @@ class ClazzDetailViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
+
+    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
     private val _uiState = MutableStateFlow(ClazzDetailUiState())
 
@@ -165,6 +175,38 @@ class ClazzDetailViewModel(
                 }
             }
         }
+
+
+        listOf(EnrollmentRoleEnum.TEACHER, EnrollmentRoleEnum.STUDENT).forEach { enrolmentRole ->
+            viewModelScope.launch {
+                resultReturner.filteredResultFlowForKey(
+                    "$RESULT_KEY_PREFIX${enrolmentRole.value}"
+                ).collect { navResult ->
+                    val personToEnrol = navResult.result as? Person ?: return@collect
+
+                    try {
+                        schoolDataSource.enrollmentDataSource.store(
+                            listOf(
+                                Enrollment(
+                                    uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                                        Enrollment.TABLE_ID
+                                    ).toString(),
+                                    classUid = route.guid,
+                                    role = enrolmentRole,
+                                    personUid = personToEnrol.guid,
+                                    beginDate = Clock.System.now().toLocalDateTime(
+                                        TimeZone.currentSystemDefault()
+                                    ).date,
+                                )
+                            )
+                        )
+                    }catch(e: Throwable) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+
     }
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
@@ -173,14 +215,18 @@ class ClazzDetailViewModel(
         val classInviteCode = when(roleType){
             EnrollmentRoleEnum.TEACHER -> clazz.teacherInviteCode
             EnrollmentRoleEnum.STUDENT -> clazz.studentInviteCode
-            else -> throw IllegalStateException()
+            else -> null
         }
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AddPersonToClazz.create(
-                    roleType = roleType,
-                    inviteCode = classInviteCode,
+                PersonList.create(
+                    isTopLevel = false,
+                    resultDest = RouteResultDest(
+                        resultKey = "$RESULT_KEY_PREFIX${roleType.value}",
+                        resultPopUpTo = route,
+                    ),
+                    showInviteCode = classInviteCode,
                 )
             )
         )
@@ -233,6 +279,8 @@ class ClazzDetailViewModel(
 
     companion object {
         const val ALL = "All"
+
+        const val RESULT_KEY_PREFIX = "result_"
 
     }
 }

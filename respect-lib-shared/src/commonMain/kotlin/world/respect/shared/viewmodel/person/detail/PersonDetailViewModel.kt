@@ -125,7 +125,7 @@ class PersonDetailViewModel(
 
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PersonEdit(route.guid))
+            NavCommand.Navigate(PersonEdit.create(route.guid))
         )
     }
 

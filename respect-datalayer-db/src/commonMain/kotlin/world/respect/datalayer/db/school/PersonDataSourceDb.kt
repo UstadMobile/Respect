@@ -144,6 +144,7 @@ class PersonDataSourceDb(
                 inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
                 filterByName = params.filterByName,
+                filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
             ).map(tag = "persondb-mapped") {
                 it.toPersonEntities().toModel()
             }
@@ -183,6 +184,7 @@ class PersonDataSourceDb(
                 inClazzGuidHash = listParams.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzRoleFlag = listParams.filterByEnrolmentRole?.flag ?: 0,
                 filterByName = listParams.filterByName,
+                filterByPersonRole = listParams.filterByPersonRole?.flag ?: 0,
             )
         }
     }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "73f1d1acf9e4389a1974303301d49b1a",
+    "identityHash": "bfc8b1289ed3511ab9b9d184366e410f",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -656,7 +656,7 @@
       },
       {
         "tableName": "EnrollmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUidNum` INTEGER NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` INTEGER NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUid` TEXT NOT NULL, `eClassUidNum` INTEGER NOT NULL, `ePersonUid` TEXT NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` INTEGER NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
         "fields": [
           {
             "fieldPath": "eUid",
@@ -694,9 +694,21 @@
             "affinity": "TEXT"
           },
           {
+            "fieldPath": "eClassUid",
+            "columnName": "eClassUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "eClassUidNum",
             "columnName": "eClassUidNum",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ePersonUid",
+            "columnName": "ePersonUid",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -929,7 +941,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73f1d1acf9e4389a1974303301d49b1a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bfc8b1289ed3511ab9b9d184366e410f')"
     ]
   }
 }

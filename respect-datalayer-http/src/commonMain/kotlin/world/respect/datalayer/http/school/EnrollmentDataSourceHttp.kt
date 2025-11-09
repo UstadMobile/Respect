@@ -1,5 +1,6 @@
 package world.respect.datalayer.http.school
 
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -100,12 +101,14 @@ class EnrollmentDataSourceHttp(
     }
 
     override suspend fun store(list: List<Enrollment>) {
-        httpClient.post(
+        val response = httpClient.post(
             url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
             setBody(list)
         }
+
+        Napier.d("EnrollmentDataSourceHttp: sent ${list.size} items (status=${response.status.value}")
     }
 }

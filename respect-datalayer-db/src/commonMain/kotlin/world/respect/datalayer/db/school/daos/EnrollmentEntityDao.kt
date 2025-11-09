@@ -6,32 +6,28 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.school.adapters.EnrollmentEntities
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
 
 @Dao
 interface EnrollmentEntityDao {
 
     @Query("""
-        SELECT EnrollmentEntity.*, 
-               $SELECT_PERSON_AND_CLASS_UID  
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE EnrollmentEntity.eUidNum = :uidNum
     """)
-    suspend fun findByGuid(uidNum: Long): EnrollmentEntities?
+    suspend fun findByGuid(uidNum: Long): EnrollmentEntity?
 
 
     @Query("""
-        SELECT EnrollmentEntity.*, 
-               $SELECT_PERSON_AND_CLASS_UID  
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE EnrollmentEntity.eUidNum = :uidNum
     """)
-    fun findByGuidAsFlow(uidNum: Long): Flow<EnrollmentEntities?>
+    fun findByGuidAsFlow(uidNum: Long): Flow<EnrollmentEntity?>
 
     @Query("""
-        SELECT EnrollmentEntity.*, 
-               $SELECT_PERSON_AND_CLASS_UID  
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE (:since <= 0 OR EnrollmentEntity.eStored > :since)
            AND (:uidNum = 0 OR EnrollmentEntity.eUidNum = :uidNum)
@@ -45,7 +41,7 @@ interface EnrollmentEntityDao {
         classUidNum: Long = 0,
         classUidRoleFlag: Int = 0,
         personUidNum: Long = 0,
-    ): PagingSource<Int, EnrollmentEntities>
+    ): PagingSource<Int, EnrollmentEntity>
 
 
     @Query("""
@@ -59,25 +55,12 @@ interface EnrollmentEntityDao {
     suspend fun upsert(enrolments: List<EnrollmentEntity>)
 
     @Query("""
-        SELECT EnrollmentEntity.*,
-               $SELECT_PERSON_AND_CLASS_UID
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE EnrollmentEntity.eUidNum IN (:uidNums) 
     """)
     suspend fun findByUidNumList(
         uidNums: List<Long>
-    ): List<EnrollmentEntities>
+    ): List<EnrollmentEntity>
 
-    companion object {
-
-        const val SELECT_PERSON_AND_CLASS_UID  = """
-            (SELECT ClassEntity.cGuid 
-               FROM ClassEntity 
-              WHERE ClassEntity.cGuidHash = EnrollmentEntity.eClassUidNum) AS classUid,
-           (SELECT PersonEntity.pGuid
-              FROM PersonEntity
-             WHERE PersonEntity.pGuidHash = EnrollmentEntity.ePersonUidNum) AS personUid
-        """
-
-    }
 }

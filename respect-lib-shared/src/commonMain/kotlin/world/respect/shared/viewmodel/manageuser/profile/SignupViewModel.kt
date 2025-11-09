@@ -24,7 +24,6 @@ import world.respect.shared.generated.resources.child_profile_title
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.next
-import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.your_dob_label
 import world.respect.shared.generated.resources.your_gender_label
@@ -187,23 +186,25 @@ class SignupViewModel(
                 when (route.type) {
                     ProfileType.CHILD -> {
                         viewModelScope.launch {
-                        val scope: Scope = accountManager.requireSelectedAccountScope()
-                        val addChildAccountUseCase: AddChildAccountUseCase by lazy {
-                            scope.get()
-                        }
-                        addChildAccountUseCase(
-                            personInfo = personInfo,
-                            parentUsername = route.respectRedeemInviteRequest.account.username,
-                            classUid = route.respectRedeemInviteRequest.classUid ?: "",
-                            inviteCode = route.respectRedeemInviteRequest.code
-                        )
-                    }
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                destination = WaitingForApproval(),
-                                clearBackStack = true,
+                            val scope: Scope = accountManager.requireSelectedAccountScope()
+                            val addChildAccountUseCase: AddChildAccountUseCase by lazy {
+                                scope.get()
+                            }
+
+                            addChildAccountUseCase(
+                                personInfo = personInfo,
+                                parentUsername = route.respectRedeemInviteRequest.account.username,
+                                classUid = route.respectRedeemInviteRequest.classUid ?: "",
+                                inviteCode = route.respectRedeemInviteRequest.code
                             )
-                        )
+
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = WaitingForApproval(),
+                                    clearBackStack = true,
+                                )
+                            )
+                        }
                     }
 
                     else -> {

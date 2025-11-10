@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
@@ -52,7 +53,7 @@ fun ClazzEditScreen(
             .verticalScroll(rememberScrollState())
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("name"),
             value = clazz?.title ?: "",
             label = {
                 Text(stringResource(Res.string.name) + "*")
@@ -74,7 +75,7 @@ fun ClazzEditScreen(
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag(("description")),
             value = clazz?.description ?: "",
             label = {
                 Text(
@@ -87,7 +88,6 @@ fun ClazzEditScreen(
                 }
             }
         )
-
     }
 }
 

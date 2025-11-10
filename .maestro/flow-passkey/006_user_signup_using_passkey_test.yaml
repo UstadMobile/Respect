@@ -34,7 +34,7 @@ onFlowComplete:
     text: "Add class"
 - tapOn: "Save"
 - assertVisible: "Required*"
-- tapOn: "Class name*"
+- tapOn: "Name*"
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course"

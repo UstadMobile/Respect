@@ -130,6 +130,9 @@ class ClazzDetail(
 class EnrollmentList : RespectAppRoute
 
 @Serializable
+class EnrollmentEdit : RespectAppRoute
+
+@Serializable
 class AddPersonToClazz(
     val roleTypeStr: String,
     val inviteCode: String? = null,

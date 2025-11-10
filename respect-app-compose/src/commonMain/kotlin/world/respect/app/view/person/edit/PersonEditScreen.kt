@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +45,7 @@ import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.role
 import world.respect.shared.util.ext.fullName
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -71,8 +74,13 @@ fun PersonEditScreen(
 ) {
     val person = uiState.person.dataOrNull()
     val fieldsEnabled = uiState.fieldsEnabled
+    val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
         OutlinedTextField(
             modifier = Modifier.testTag("first_names")
                 .fillMaxWidth().defaultItemPadding(top = 16.dp),
@@ -83,10 +91,11 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(givenName = value))
                 }
             },
+            isError = uiState.firstNameError != null,
             singleLine = true,
             enabled = fieldsEnabled,
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(uiState.firstNameError ?: Res.string.required.asUiText()))
             }
         )
 
@@ -99,21 +108,23 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(familyName = value))
                 }
             },
+            isError = uiState.lastNameError != null,
             singleLine = true,
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(uiState.lastNameError ?: Res.string.required.asUiText()))
             }
         )
 
         RespectGenderExposedDropDownMenuField(
-            modifier = Modifier.testTag("gender").fillMaxWidth().defaultItemPadding(),
             value = person?.gender ?: PersonGenderEnum.UNSPECIFIED,
             onValueChanged = { gender ->
                 person?.also {
                     onEntityChanged(it.copy(gender = gender))
                 }
             },
+            modifier = Modifier.testTag("gender").fillMaxWidth().defaultItemPadding(),
             isError = uiState.genderError != null,
+            errorText = uiState.genderError
         )
         if (uiState.filterByRole==null) {
             Text(
@@ -195,6 +206,7 @@ fun PersonEditScreen(
                     onEntityChanged(it.copy(dateOfBirth = date))
                 }
             },
+            isError = uiState.dateOfBirthError != null,
             enabled = uiState.fieldsEnabled,
             supportingText = uiState.dateOfBirthError?.let {
                 { Text(uiTextStringResource(it)) }
@@ -228,6 +240,10 @@ fun PersonEditScreen(
                 person?.also {
                     onEntityChanged(it.copy(email = email))
                 }
+            },
+            isError = uiState.emailError != null,
+            supportingText = uiState.emailError?.let {
+                { Text(uiTextStringResource(it)) }
             },
             enabled = uiState.fieldsEnabled
         )

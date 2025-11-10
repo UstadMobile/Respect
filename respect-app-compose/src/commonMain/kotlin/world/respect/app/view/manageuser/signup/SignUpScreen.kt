@@ -75,10 +75,11 @@ fun SignupScreen(
         Spacer(Modifier.height(16.dp))
 
         RespectGenderExposedDropDownMenuField(
-            modifier = Modifier.testTag("gender").fillMaxWidth(),
             value = uiState.personInfo.gender,
             onValueChanged = onGenderChanged,
+            modifier = Modifier.testTag("gender").fillMaxWidth(),
             isError = uiState.genderError != null,
+            errorText = uiState.genderError
         )
 
         Spacer(Modifier.height(16.dp))

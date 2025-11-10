@@ -120,13 +120,15 @@ fun PersonDetailScreen(
                 value = { Text(it) }
             )
         }
-        person?.email?.also {
-            RespectDetailField(
-                modifier = Modifier.defaultItemPadding(),
-                label = { Text(stringResource(Res.string.email)) },
-                value = { Text(it) }
-            )
-        }
+        person?.email
+            ?.takeIf { it.isNotBlank() }
+            ?.also { email ->
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { Text(stringResource(Res.string.email)) },
+                    value = { Text(email) }
+                )
+            }
         val familyMembers = uiState.familyMembers.dataOrNull()
 
         if (uiState.familyMembersVisible&&!familyMembers.isNullOrEmpty()) {

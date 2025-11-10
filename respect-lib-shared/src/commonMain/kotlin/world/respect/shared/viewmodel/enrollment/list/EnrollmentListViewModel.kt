@@ -52,12 +52,6 @@ class EnrollmentListViewModel(
     }
 
     init {
-
-        _appUiState.update {
-            it.copy(
-                title= (route.role).asUiText()
-            )
-        }
         _uiState.update {
             it.copy(enrollments = pagingSourceHolder)
         }
@@ -70,8 +64,8 @@ class EnrollmentListViewModel(
                     EnrollmentEdit(
                         enrollment.uid,
                         route.role,
-                        route.clazzGuid,
-                        route.personGuid
+                        route.personGuid,
+                        route.clazzGuid
                     )
                 )
             )

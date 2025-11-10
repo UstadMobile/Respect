@@ -43,7 +43,7 @@ import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
-import world.respect.shared.generated.resources.dob_label
+import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
@@ -224,7 +224,7 @@ fun ClazzDetailScreen(
                             Text(
                                 text =
                                     "${stringResource(Res.string.gender_literal)}: $gender, " +
-                                            "${stringResource(Res.string.dob_label)}: $dob"
+                                            "${stringResource(Res.string.date_of_birth)}: $dob"
                             )
 
                         },
@@ -282,7 +282,7 @@ fun ClazzDetailScreen(
                             val dob = person?.dateOfBirth?.toString()
                             Text(
                                 text = "${stringResource(Res.string.gender_literal)}:" +
-                                        " $gender, ${stringResource(Res.string.dob_label)}: $dob"
+                                        " $gender, ${stringResource(Res.string.date_of_birth)}: $dob"
                             )
                         },
                         trailingContent = {

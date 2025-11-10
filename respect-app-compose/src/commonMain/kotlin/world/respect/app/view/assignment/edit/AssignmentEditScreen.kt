@@ -123,6 +123,7 @@ fun AssignmentEditScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth()
                     .defaultItemPadding()
+                    .testTag("class_dropdown_textfield")
                     .menuAnchor(MenuAnchorType.PrimaryEditable),
                 value = uiState.assigneeText,
                 label = {
@@ -188,7 +189,9 @@ fun AssignmentEditScreen(
                         )
                     )
                 }
-            }
+            },
+            dateTestTag = "due_date",
+            timeTestTag = "due_time",
         )
 
         Text(

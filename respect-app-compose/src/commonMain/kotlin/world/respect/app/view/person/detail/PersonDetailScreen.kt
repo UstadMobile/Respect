@@ -117,7 +117,7 @@ fun PersonDetailScreen(
         }
         person?.email
             ?.takeIf { it.isNotBlank() }
-            ?.let { email ->
+            ?.also { email ->
                 RespectDetailField(
                     modifier = Modifier.defaultItemPadding(),
                     label = { Text(stringResource(Res.string.email)) },

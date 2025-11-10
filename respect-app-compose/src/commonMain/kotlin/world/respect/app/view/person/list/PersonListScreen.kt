@@ -1,9 +1,13 @@
 package world.respect.app.view.person.list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -15,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
@@ -87,7 +92,11 @@ fun PersonListScreen(
                         )
                     },
                     headlineContent = {
-                        Text(text = stringResource(Res.string.copy_invite_code) + inviteCode)
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Text(stringResource(Res.string.copy_invite_code))
+                            Spacer(Modifier.width(8.dp))
+                            Text(inviteCode, modifier = Modifier.testTag("invite_code"))
+                        }
                     },
                 )
             }

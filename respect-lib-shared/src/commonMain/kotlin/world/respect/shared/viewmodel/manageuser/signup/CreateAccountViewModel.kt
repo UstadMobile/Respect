@@ -28,7 +28,7 @@ import world.respect.shared.domain.account.username.validateusername.ValidateUse
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.passkey_not_supported
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
@@ -256,7 +256,7 @@ class CreateAccountViewModel(
 
         _uiState.update {
             it.copy(
-                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.required) else null
+                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.required_field) else null
             )
         }
 

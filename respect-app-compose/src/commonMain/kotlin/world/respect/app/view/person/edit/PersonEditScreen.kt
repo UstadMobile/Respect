@@ -3,7 +3,6 @@ package world.respect.app.view.person.edit
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
@@ -66,7 +65,6 @@ fun PersonEditScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(bottom = 16.dp)
     ) {
         OutlinedTextField(
             modifier = Modifier.testTag("first_names")

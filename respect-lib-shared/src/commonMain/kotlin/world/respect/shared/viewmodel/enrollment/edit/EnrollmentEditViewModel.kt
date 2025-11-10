@@ -6,7 +6,7 @@ import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -15,25 +15,34 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.EnrollmentEdit
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
+import kotlin.time.Clock
 
 data class EnrollmentEditUiState(
     val enrollment: DataLoadState<Enrollment> = DataLoadingState(),
-    val startDateError: String? = null,
-    val endDateError: String? = null
+    val beginDateError: UiText? = null,
+    val endDateError: UiText? = null
 ) {
     val fieldsEnabled: Boolean
         get() = enrollment.isReadyAndSettled()
+
+    val hasErrors: Boolean
+        get() = beginDateError != null ||
+                endDateError != null
 }
 
 class EnrollmentEditViewModel(
@@ -45,9 +54,12 @@ class EnrollmentEditViewModel(
     override val scope: Scope = accountManager.requireSelectedAccountScope()
     val route: EnrollmentEdit = savedStateHandle.toRoute()
     private val schoolDataSource: SchoolDataSource by inject()
-
     private val _uiState = MutableStateFlow(EnrollmentEditUiState())
+
     val uiState = _uiState.asStateFlow()
+
+    private val debouncer = LaunchDebouncer(viewModelScope)
+
 
     init {
         _appUiState.update {
@@ -80,9 +92,9 @@ class EnrollmentEditViewModel(
                         enrollment = DataReadyState(
                             Enrollment(
                                 uid = route.uid.toString(),
-                                classUid = route.clazzGuid,
-                                personUid = route.personGuid,
-                                role = EnrollmentRoleEnum.valueOf(route.role),
+                                personUid = "",
+                                classUid = "",
+                                role = EnrollmentRoleEnum.valueOf("")   // ✅ default role
                             )
                         )
                     )
@@ -91,8 +103,60 @@ class EnrollmentEditViewModel(
         }
     }
 
+    fun onEntityChanged(enrollment: Enrollment) {
+        val enrollmentToCommit = _uiState.updateAndGet { prev ->
+            val prevEnrollment = prev.enrollment.dataOrNull()
 
+            prev.copy(
+                enrollment = DataReadyState(enrollment),
+                beginDateError = prev.beginDateError?.takeIf {
+                    enrollment.beginDate == prevEnrollment?.beginDate
+                },
+                endDateError = prev.endDateError?.takeIf {
+                    enrollment.endDate == prevEnrollment?.endDate
+                }
+            )
+        }.enrollment.dataOrNull() ?: return
+
+        debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
+            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(enrollmentToCommit)
+        }
+    }
 
     fun onClickSave() {
+        val currentEnrollment = _uiState.value.enrollment.dataOrNull() ?: return
+
+        val enrollment = currentEnrollment.copy(
+            personUid = currentEnrollment.personUid,
+            classUid = currentEnrollment.classUid,
+            role = EnrollmentRoleEnum.valueOf(currentEnrollment.role.value),
+            lastModified = Clock.System.now()
+        )
+
+        _uiState.update { prev ->
+            prev.copy(
+                beginDateError = if (enrollment.beginDate == null) {
+                    Res.string.required_field.asUiText()
+                } else {
+                    null
+                },
+                endDateError = if (enrollment.endDate == null) {
+                    Res.string.required_field.asUiText()
+                } else {
+                    null
+                }
+            )
+        }
+        if (uiState.value.hasErrors)
+            return
+
+        launchWithLoadingIndicator {
+            try {
+                schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
+            } catch (_: Throwable) {
+
+            }
+        }
     }
+
 }

@@ -45,7 +45,8 @@ onFlowComplete:
 
 # B) Admin copy invite code to the teacher
 - tapOn: "Add Teacher"
-- tapOn: ".*Copy invite code.*"
+- copyTextFrom:
+    id: "invite_code"
 
 # C) Teacher sign-up via invite code to the class
 - clearState: world.respect.app
@@ -61,8 +62,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -160,7 +160,8 @@ onFlowComplete:
 - tapOn: "New Class"
 - assertVisible: "Teacher User"
 - tapOn: "Add Student"
-- tapOn: ".*Copy invite code.*"
+- copyTextFrom:
+    id: "invite_code"
 
 # G) Student sign-up via invite code to the class
 - clearState: world.respect.app
@@ -176,8 +177,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -237,7 +237,8 @@ onFlowComplete:
 - assertVisible: "Student User"
 - tapOn: "Accept Invite"
 - tapOn: "Add Student"
-- tapOn: ".*Copy invite code.*"
+- copyTextFrom:
+    id: "invite_code"
 
 # I) Student login to the class
 - clearState: world.respect.app
@@ -282,8 +283,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"

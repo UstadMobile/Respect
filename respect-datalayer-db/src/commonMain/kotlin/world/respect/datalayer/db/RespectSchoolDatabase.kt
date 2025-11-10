@@ -66,7 +66,7 @@ import world.respect.datalayer.db.shared.SharedConverters
         WriteQueueItemEntity::class,
         StatementEntity::class,
     ],
-    version = 7,
+    version = 8,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

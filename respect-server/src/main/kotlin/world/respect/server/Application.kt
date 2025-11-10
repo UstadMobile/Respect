@@ -35,6 +35,7 @@ import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
@@ -188,10 +189,12 @@ fun Application.module() {
 
             route("school") {
                 route("respect") {
+                    AddChildAccountRoute(
+                        addChildAccountUseCase = { it.getSchoolKoinScope().get() }
+                    )
                     route("auth") {
                         AuthRoute()
                     }
-
                     route("invite") {
                         RedeemInviteRoute(
                             redeemInviteUseCase = { it.getSchoolKoinScope().get() }

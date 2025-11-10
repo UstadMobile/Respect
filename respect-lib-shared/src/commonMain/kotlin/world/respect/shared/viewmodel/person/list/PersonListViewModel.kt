@@ -12,6 +12,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -27,6 +28,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.select_person
 import world.respect.shared.navigation.NavResultReturner
@@ -42,12 +44,14 @@ data class PersonListUiState(
         EmptyPagingSource()
     },
     val showAddPersonItem: Boolean = false,
+    val showInviteCode: String? = null,
 )
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
+    private val setClipboardStringUseCase: SetClipboardStringUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -73,6 +77,9 @@ class PersonListViewModel(
     }
 
     init {
+        _uiState.takeIf { route.showInviteCode!= null }
+            ?.update { it.copy(showInviteCode = route.showInviteCode) }
+
         _appUiState.update {
             it.copy(
                 title = if(!route.resultExpected) {
@@ -137,7 +144,7 @@ class PersonListViewModel(
             val personSelected = schoolDataSource.personDataSource.findByGuid(
                 loadParams = DataLoadParams(),
                 guid = person.guid,
-            )
+            ).dataOrNull()
 
             if(
                 !resultReturner.sendResultIfResultExpected(
@@ -159,6 +166,12 @@ class PersonListViewModel(
                 PersonEdit.create(null, resultDest = route.resultDest)
             )
         )
+    }
+
+    fun onClickInviteCode() {
+        _uiState.value.showInviteCode?.also {
+            setClipboardStringUseCase(it)
+        }
     }
 
 }

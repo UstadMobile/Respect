@@ -23,6 +23,8 @@ fun RespectLocalDateTimeField(
     dateFieldWeight: Float = 0.6f,
     value: LocalDateTime?,
     onValueChanged: (LocalDateTime?) -> Unit,
+    dateTestTag: String? = null,
+    timeTestTag: String? = null,
 ) {
     var dateVar by remember(value) {
         mutableStateOf(value?.date)
@@ -34,7 +36,8 @@ fun RespectLocalDateTimeField(
 
     Row(modifier = modifier) {
         RespectLocalDateField(
-            modifier = Modifier.weight(dateFieldWeight, true),
+            modifier = Modifier.weight(dateFieldWeight, true)
+                .testTagIfNotNull(dateTestTag),
             value = value?.date ?: dateVar,
             onValueChange = { newDate ->
                 dateVar = newDate
@@ -53,7 +56,8 @@ fun RespectLocalDateTimeField(
         Spacer(Modifier.width(16.dp))
 
         RespectLocalTimeField(
-            modifier = Modifier.weight(1f - dateFieldWeight, true),
+            modifier = Modifier.weight(1f - dateFieldWeight, true)
+                .testTagIfNotNull(timeTestTag),
             value = value?.time ?: timeVar,
             onValueChange = { newTime ->
                 timeVar = newTime

@@ -34,7 +34,7 @@ onFlowComplete:
     text: "Add class"
 - tapOn: "Save"
 - assertVisible: "Required field"
-- tapOn: "Class name*"
+- tapOn: "Name*"
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course"
@@ -127,8 +127,8 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
-- assertVisible: "Teacher User"
+- assertVisible: "Pending requests.*"
+- assertVisible: "Teacher User.*"
 - tapOn: "Accept Invite"
 
 # E) Teacher login to the class and share invite code to Student
@@ -158,7 +158,7 @@ onFlowComplete:
     text: "Classes"
 - assertVisible: "New Class"
 - tapOn: "New Class"
-- assertVisible: "Teacher User"
+- assertVisible: "Teacher User.*"
 - tapOn: "Add Student"
 - copyTextFrom:
     id: "invite_code"
@@ -233,8 +233,8 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
-- assertVisible: "Student User"
+- assertVisible: "Pending requests.*"
+- assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
 - tapOn: "Add Student"
 - copyTextFrom:
@@ -267,7 +267,7 @@ onFlowComplete:
     text: "Classes"
 - assertVisible: "New Class"
 - tapOn: "New Class"
-- assertVisible: "Student User"
+- assertVisible: "Student User.*"
 
 # G) Parent sign-up their child to the class using invite code
 - clearState: world.respect.app
@@ -363,8 +363,8 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
-- assertVisible: "Child User"
+- assertVisible: "Pending requests.*"
+- assertVisible: "Child User.*"
 - tapOn: "Accept Invite"
 
 # I) Parent login to the class

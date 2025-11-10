@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_001_invite_using_invite_code_test.yaml"
+        NAME: "001_001_invite_using_invite_code_test"
 
 onFlowComplete:
   - runScript:

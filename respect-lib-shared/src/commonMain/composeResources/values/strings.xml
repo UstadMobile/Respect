@@ -6,6 +6,7 @@
     <string name="app_link_provided_message">Copy/paste the RESPECT app link provided by the app developer</string>
     <string name="error_link_message">"ERROR: Invalid link. Please check the URL and try again."</string>
     <string name="link_label">Link*</string>
+    <string name="class_name_label">Class Name</string>
     <string name="start_date_label">Start date</string>
     <string name="end_date_label">End date</string>
     <string name="example_url_placeholder">e.g. https://</string>
@@ -73,13 +74,15 @@
     <string name="your_gender_label">Your gender</string>
     <string name="your_dob_label">Your date of birth</string>
     <string name="your_note">Please enter your details accurately.</string>
-
+    <string name="date_of_birth_in_future">Date of Birth cannot be in the future.</string>
+    <string name="invalid_email">Enter valid email address.</string>
     <string name="child_profile_title">Child profile</string>
     <string name="child_name_label">Child's name</string>
     <string name="child_gender_label">Child's gender</string>
     <string name="child_dob_label">Child's date of birth</string>
     <string name="child_note">Please enter your child's details.</string>
     <string name="date_of_birth">Date of birth</string>
+    <string name="dob_label">DOB</string>
     <string name="email">Email</string>
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
@@ -87,8 +90,6 @@
     <string name="manage_account">Manage account</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
-    <string name="date_of_birth_in_future">Date of Birth cannot be in the future.</string>
-
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>

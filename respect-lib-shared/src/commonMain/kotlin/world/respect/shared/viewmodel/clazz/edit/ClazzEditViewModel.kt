@@ -21,22 +21,22 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.save
-import world.respect.shared.generated.resources.edit_clazz
 import world.respect.shared.generated.resources.add_clazz
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.edit_clazz
+import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import kotlin.getValue
 import kotlin.time.Clock
 
 data class ClazzEditUiState(
-    val clazzNameError: String? = null,
+    val clazzNameError: UiText? = null,
     val clazz: DataLoadState<Clazz> = DataLoadingState(),
 ) {
     val fieldsEnabled: Boolean
@@ -129,7 +129,7 @@ class ClazzEditViewModel(
 
         if (clazz.title.isBlank()) {
             _uiState.update { prev ->
-                prev.copy(clazzNameError = Res.string.required.asUiText().toString())
+                prev.copy(clazzNameError = Res.string.required_field.asUiText())
             }
             return
         } else {

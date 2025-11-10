@@ -338,11 +338,11 @@ fun ClazzDetailScreen(
                         .fillMaxWidth(),
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = teacher?.givenName ?: ""
+                            name = teacher?.fullName() ?: ""
                         )
                     },
                     headlineContent = {
-                        Text(text = teacher?.givenName ?: "")
+                        Text(text = teacher?.fullName() ?: "")
                     }
                 )
             }
@@ -416,13 +416,13 @@ fun ClazzDetailScreen(
 
                     leadingContent = {
                         RespectPersonAvatar(
-                            name = student?.givenName ?: ""
+                            name = student?.fullName() ?: ""
                         )
                     },
 
                     headlineContent = {
                         Text(
-                            text = student?.givenName ?: ""
+                            text = student?.fullName() ?: ""
                         )
                     }
                 )

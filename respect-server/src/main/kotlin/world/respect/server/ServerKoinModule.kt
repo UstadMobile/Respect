@@ -35,8 +35,10 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
+import world.respect.shared.domain.account.addchild.AddChildAccountUseCaseDb
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -247,6 +249,13 @@ fun serverKoinModule(
             )
         }
 
+        scoped<AddChildAccountUseCase> {
+            AddChildAccountUseCaseDb(
+                schoolDb = get(),
+                schoolPrimaryKeyGenerator = get(),
+                uidNumberMapper = get(),
+            )
+        }
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
 

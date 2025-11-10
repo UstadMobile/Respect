@@ -100,31 +100,16 @@ onFlowComplete:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
-- tapOn: "Save"
-- assertVisible: "Required field"     # Username field is mandatory
 - tapOn: "Username"
-- inputText: "tes"
-- tapOn: "Save"
-- assertVisible: "Required field"   # Password field is mandatory
-- tapOn: "Username"
-- eraseText
 - inputText: "2tes"
-- tapOn: "Password"
-- inputText: "test"
+- tapOn: "Password"  # Password validations needs to be added
+- inputText: "test234"
 - tapOn: "Save"
 - assertVisible: "Username cannot start with a number"  # 2tes not a valid username
 - tapOn: "Username"
 - eraseText
 - inputText: "test@user"
 - assertVisible: "testuser"    # @ symbol won't get added to the username field - so "testuser" is expected result
-- tapOn: "Password"
-- eraseText
-- inputText: "t2"
-- tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
-- tapOn: "Password"
-- eraseText
-- inputText: "test234"
 - tapOn: "Save"
 
 

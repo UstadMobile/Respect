@@ -151,4 +151,14 @@ class PersonDetailViewModel(
         }
     }
 
+    fun onClickFamilyMember(guid:String){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                PersonDetail(
+                    guid = guid
+                )
+            )
+        )
+    }
+
 }

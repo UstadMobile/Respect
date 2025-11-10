@@ -48,6 +48,7 @@ fun PersonDetailScreen(
         onClickManageAccount = viewModel::navigateToManageAccount,
         onClickCreateAccount = viewModel::onClickCreateAccount,
         onClickPhoneNumber = viewModel::onClickPhoneNumber,
+        onClickFamilyMember = viewModel::onClickFamilyMember
     )
 }
 
@@ -57,6 +58,7 @@ fun PersonDetailScreen(
     onClickManageAccount:() -> Unit,
     onClickCreateAccount: () -> Unit,
     onClickPhoneNumber: () -> Unit,
+    onClickFamilyMember: (String) -> Unit,
 ) {
     val person = uiState.person.dataOrNull()
     Column(
@@ -140,6 +142,7 @@ fun PersonDetailScreen(
             familyMembers.forEach { familyPerson->
                 ListItem(
                     modifier = Modifier.clickable {
+                        onClickFamilyMember(familyPerson.guid)
                     },
                     leadingContent = {
                         RespectPersonAvatar(familyPerson.fullName())

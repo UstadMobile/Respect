@@ -50,6 +50,17 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import world.respect.shared.generated.resources.manage_enrollments
+import world.respect.shared.generated.resources.more_options
+import world.respect.shared.generated.resources.remove_from_class
+
 
 @Composable
 fun ClazzDetailScreen(
@@ -333,19 +344,46 @@ fun ClazzDetailScreen(
                     person.key(EnrollmentRoleEnum.TEACHER, index)
                 }
             ) { teacher ->
+                var expanded by remember { mutableStateOf(false) }
+
                 ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     leadingContent = {
-                        RespectPersonAvatar(
-                            name = teacher?.givenName ?: ""
-                        )
+                        RespectPersonAvatar(name = teacher?.fullName() ?: "")
                     },
                     headlineContent = {
-                        Text(text = teacher?.givenName ?: "")
+                        Text(text = teacher?.fullName() ?: "")
+                    },
+                    trailingContent = {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options"
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.remove_from_class)) },
+                                onClick = {
+                                    expanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.manage_enrollments)) },
+                                onClick = {
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 )
             }
+
+
         }
 
         item("student_header") {
@@ -410,20 +448,41 @@ fun ClazzDetailScreen(
                     person.key(EnrollmentRoleEnum.STUDENT, index)
                 }
             ) { student ->
+                var expanded by remember { mutableStateOf(false) }
+
                 ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-
+                    modifier = Modifier.fillMaxWidth(),
                     leadingContent = {
-                        RespectPersonAvatar(
-                            name = student?.givenName ?: ""
-                        )
+                        RespectPersonAvatar(name = student?.fullName() ?: "")
                     },
-
                     headlineContent = {
-                        Text(
-                            text = student?.givenName ?: ""
-                        )
+                        Text(text = student?.fullName() ?: "")
+                    },
+                    trailingContent = {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = stringResource(
+                                    resource = Res.string.more_options
+                            ))
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.remove_from_class)) },
+                                onClick = {
+                                    expanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.manage_enrollments)) },
+                                onClick = {
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 )
             }

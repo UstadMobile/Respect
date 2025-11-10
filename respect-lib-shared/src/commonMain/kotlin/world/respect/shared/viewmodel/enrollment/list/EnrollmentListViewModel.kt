@@ -61,7 +61,10 @@ class EnrollmentListViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     EnrollmentEdit(
-                        enrollment.uid
+                        enrollment.uid,
+                        route.role,
+                        route.clazzGuid,
+                        route.personGuid
                     )
                 )
             )

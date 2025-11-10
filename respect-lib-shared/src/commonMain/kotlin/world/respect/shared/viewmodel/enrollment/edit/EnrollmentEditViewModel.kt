@@ -24,6 +24,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.EnrollmentEdit
+import world.respect.shared.navigation.EnrollmentList
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -92,9 +94,9 @@ class EnrollmentEditViewModel(
                         enrollment = DataReadyState(
                             Enrollment(
                                 uid = route.uid.toString(),
-                                personUid = "",
-                                classUid = "",
-                                role = EnrollmentRoleEnum.valueOf("")   // ✅ default role
+                                personUid = route.personGuid,
+                                classUid = route.clazzGuid,
+                                role = EnrollmentRoleEnum.valueOf(route.role)
                             )
                         )
                     )
@@ -127,9 +129,9 @@ class EnrollmentEditViewModel(
         val currentEnrollment = _uiState.value.enrollment.dataOrNull() ?: return
 
         val enrollment = currentEnrollment.copy(
-            personUid = currentEnrollment.personUid,
-            classUid = currentEnrollment.classUid,
-            role = EnrollmentRoleEnum.valueOf(currentEnrollment.role.value),
+            personUid = route.personGuid,
+            classUid = route.clazzGuid,
+            role = EnrollmentRoleEnum.valueOf(route.role),
             lastModified = Clock.System.now()
         )
 
@@ -149,14 +151,15 @@ class EnrollmentEditViewModel(
         }
         if (uiState.value.hasErrors)
             return
-
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
-            } catch (_: Throwable) {
-
+                _navCommandFlow.tryEmit(NavCommand.PopUp())
+            } catch (e: Throwable) {
+                // Optional: log or show an error state
             }
         }
+
     }
 
 }

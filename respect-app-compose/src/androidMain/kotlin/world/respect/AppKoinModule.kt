@@ -68,7 +68,6 @@ import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
 import world.respect.datalayer.db.school.domain.report.query.InsertReportTestDataUseCase
-import world.respect.datalayer.db.school.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseClientImpl
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl

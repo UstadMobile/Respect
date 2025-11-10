@@ -24,7 +24,6 @@ class InsertReportTestDataUseCase(
                 ).toInstant(TimeZone.UTC).toEpochMilliseconds()
 
                 listOf(
-                    // Different durations for testing
                     createStatement(timestamp, duration = 1000L, clazzUid = 42L, success = true),
                     createStatement(timestamp, duration = 2000L, clazzUid = 43L, success = true),
                     createStatement(timestamp, duration = 3000L, clazzUid = 44L, success = false),
@@ -54,7 +53,6 @@ class InsertReportTestDataUseCase(
             resultDuration = duration,
             resultSuccess = success,
             statementClazzUid = clazzUid,
-            // Add other required fields with default values
             statementActorPersonUid = -5209518570039057196L,
             statementVerbUid = 1L,
             statementObjectType = 1,

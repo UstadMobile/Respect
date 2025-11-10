@@ -549,18 +549,24 @@ data class ManageAccount(
 data class PersonEdit(
     val guid: String?,
     private val resultDestStr: String? = null,
-) : RespectAppRoute, RouteWithResultDest {
+    private val filterByRoleStr: String? = null,
+    ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
-
+    @Transient
+    val filterByRole: PersonRoleEnum? = filterByRoleStr?.let {
+        PersonRoleEnum.fromValue(it)
+    }
     companion object {
         fun create(
             guid: String?,
             resultDest: ResultDest? = null,
-        ) = PersonEdit(
+            filterByRole: PersonRoleEnum? = null,
+            ) = PersonEdit(
             guid = guid,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
+                filterByRoleStr = filterByRole?.value,
         )
     }
 

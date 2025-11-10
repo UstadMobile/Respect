@@ -39,12 +39,15 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
+import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import kotlin.collections.first
 import kotlin.getValue
 import kotlin.time.Clock
 
@@ -66,7 +69,7 @@ data class PersonEditUiState(
     val phoneNumError: UiText? = null,
     val genderError: UiText? = null,
     val familyMembers: DataLoadState<List<Person>> = DataLoadingState(),
-    val familyMembersVisible: Boolean = false,
+    val filterByRole: PersonRoleEnum?=null,
     ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
@@ -123,26 +126,25 @@ class PersonEditViewModel(
 
             _uiState.update { prev ->
                 prev.copy(
-                    roleOptions = when (currentPersonRole) {
-                        PersonRoleEnum.TEACHER -> {
-                            listOf(
+                    roleOptions = if (route.filterByRole != null) {
+                        listOf(route.filterByRole)
+                    } else {
+                        when (currentPersonRole) {
+                            PersonRoleEnum.TEACHER -> listOf(
                                 PersonRoleEnum.STUDENT,
                                 PersonRoleEnum.PARENT,
                                 PersonRoleEnum.TEACHER,
                             )
-                        }
-                        PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> {
-                            listOf(
+                            PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
                                 PersonRoleEnum.STUDENT,
                                 PersonRoleEnum.PARENT,
                                 PersonRoleEnum.TEACHER,
                                 PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                             )
+                            else -> emptyList()
                         }
-                        else -> emptyList()
                     },
-                    familyMembersVisible = route.canAddFamilyMembers
-
+                    filterByRole = route.filterByRole,
                 )
             }
 
@@ -233,8 +235,25 @@ class PersonEditViewModel(
         }
     }
 
-    fun onClickAddFamilyMember(){
-        _navCommandFlow.tryEmit(NavCommand.Navigate(PersonList.create(sendResultAndPopBoolean = true)))
+    fun onClickAddFamilyMember() {
+        val roleEnumVal = uiState.value.person.dataOrNull()?.roles?.firstOrNull()?.roleEnum
+            ?: PersonRoleEnum.STUDENT
+        val filterByRole = when (roleEnumVal) {
+            PersonRoleEnum.STUDENT -> PersonRoleEnum.PARENT
+            PersonRoleEnum.PARENT -> PersonRoleEnum.STUDENT
+            else -> PersonRoleEnum.STUDENT
+        }
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                PersonList.create(
+                    filterByRole = filterByRole,
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = PERSON_SELECT_RESULT
+                    )
+                )
+            )
+        )
     }
 
     fun onClickSave() {
@@ -289,7 +308,7 @@ class PersonEditViewModel(
                 val persons = listOf(person) +updatedFamilyPersons
                 schoolDataSource.personDataSource.store(persons)
                 if(
-                    !resultReturner.sendResultIfResultExpected(
+                    !navResultReturner.sendResultIfResultExpected(
                         route = route,
                         navCommandFlow = _navCommandFlow,
                         result = person,

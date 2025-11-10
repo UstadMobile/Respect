@@ -12,31 +12,23 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.adapters.asPerson
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
+import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.people
 import world.respect.shared.generated.resources.person
+import world.respect.shared.generated.resources.select_person
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.navigation.PersonList
-import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
-import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
-import world.respect.shared.ext.resultExpected
-import world.respect.shared.generated.resources.select_person
-import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.LaunchDebouncer
@@ -45,7 +37,6 @@ import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.shared.viewmodel.person.edit.PersonEditViewModel.Companion.PERSON_SELECT_RESULT
 
 
 data class PersonListUiState(
@@ -170,9 +161,14 @@ class PersonListViewModel(
     }
 
     fun onClickAdd() {
+        print(""+route.filterByRole)
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                PersonEdit.create(null, resultDest = route.resultDest)
+                PersonEdit.create(
+                    null,
+                    resultDest = route.resultDest,
+                    filterByRole = route.filterByRole
+                )
             )
         )
     }

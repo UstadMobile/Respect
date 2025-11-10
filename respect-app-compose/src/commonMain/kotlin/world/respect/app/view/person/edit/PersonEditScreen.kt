@@ -115,7 +115,7 @@ fun PersonEditScreen(
             },
             isError = uiState.genderError != null,
         )
-        if (uiState.familyMembersVisible) {
+        if (uiState.filterByRole==null) {
             Text(
                 modifier = Modifier.defaultItemPadding(),
                 text = stringResource(Res.string.family_members),

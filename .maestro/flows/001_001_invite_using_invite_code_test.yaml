@@ -2,7 +2,7 @@ appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
-      file: "subflows/school_init.js"
+      file: "scripts/school_init.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
@@ -14,7 +14,7 @@ onFlowStart:
 
 onFlowComplete:
   - runScript:
-      file: "subflows/teardown.js"
+      file: "scripts/teardown.js"
 
 ---
 
@@ -33,7 +33,7 @@ onFlowComplete:
     id: "app_title"
     text: "Add class"
 - tapOn: "Save"
-- assertVisible: "Required*"
+- assertVisible: "Required field"
 - tapOn: "Class name*"
 - inputText: "New Class"
 - tapOn: "Description"
@@ -45,7 +45,8 @@ onFlowComplete:
 
 # B) Admin copy invite code to the teacher
 - tapOn: "Add Teacher"
-- tapOn: ".*Copy invite code.*"
+- copyTextFrom:
+    id: "invite_code"
 
 # C) Teacher sign-up via invite code to the class
 - clearState: world.respect.app
@@ -61,8 +62,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -77,18 +77,18 @@ onFlowComplete:
     id: "app_title"
     text: "Your profile"
 - tapOn: "Next"
-- assertVisible: "Required*" # Name is mandatory field
+- assertVisible: "Required field" # Name is mandatory field
 - tapOn: "Your name*"
 - inputText: "Teacher User"
 - tapOn: "Next"
-- assertVisible: "Required*" # Gender is mandatory field
+- assertVisible: "Required field" # Gender is mandatory field
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Next"
-- assertVisible: "Required*" # DOB is mandatory field
+- assertVisible: "Required field" # DOB is mandatory field
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.tomorrowDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
@@ -97,7 +97,7 @@ onFlowComplete:
 - eraseText
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:
@@ -110,7 +110,7 @@ onFlowComplete:
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
 - assertVisible: "Password*"
 - tapOn: "Sign-up"
-- assertVisible: "Required*" # Password is mandatory field
+- assertVisible: "Required field" # Password is mandatory field
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"
@@ -131,7 +131,7 @@ onFlowComplete:
 - assertVisible: "Teacher User"
 - tapOn: "Accept Invite"
 
-# E) Teacher login to the class and share invite code to Student/Parent
+# E) Teacher login to the class and share invite code to Student
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -160,7 +160,8 @@ onFlowComplete:
 - tapOn: "New Class"
 - assertVisible: "Teacher User"
 - tapOn: "Add Student"
-- tapOn: ".*Copy invite code.*"
+- copyTextFrom:
+    id: "invite_code"
 
 # G) Student sign-up via invite code to the class
 - clearState: world.respect.app
@@ -176,8 +177,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -191,7 +191,7 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - tapOn: "Next"
 - assertVisible:
@@ -237,7 +237,8 @@ onFlowComplete:
 - assertVisible: "Student User"
 - tapOn: "Accept Invite"
 - tapOn: "Add Student"
-- tapOn: ".*Copy invite code.*"
+- copyTextFrom:
+    id: "invite_code"
 
 # I) Student login to the class
 - clearState: world.respect.app
@@ -282,8 +283,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -302,7 +302,7 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:
@@ -325,7 +325,7 @@ onFlowComplete:
 - tapOn: "Male"
 - tapOn: "Child's date of birth*"
 - runScript:
-    file: "subflows/setDate.js"
+    file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
 - tapOn: "Done"

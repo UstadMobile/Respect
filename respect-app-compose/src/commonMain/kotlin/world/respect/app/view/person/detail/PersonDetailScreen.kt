@@ -115,12 +115,14 @@ fun PersonDetailScreen(
                 value = { Text(it) }
             )
         }
-        person?.email?.also {
-            RespectDetailField(
-                modifier = Modifier.defaultItemPadding(),
-                label = { Text(stringResource(Res.string.email)) },
-                value = { Text(it) }
-            )
-        }
+        person?.email
+            ?.takeIf { it.isNotBlank() }
+            ?.let { email ->
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { Text(stringResource(Res.string.email)) },
+                    value = { Text(email) }
+                )
+            }
     }
 }

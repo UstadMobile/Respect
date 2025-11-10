@@ -142,6 +142,7 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
@@ -783,6 +784,9 @@ val appKoinModule = module {
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
+    }
+    single<ValidateEmailUseCase>{
+        ValidateEmailUseCase()
     }
     single<CreateGraphFormatterUseCase> {
         CreateGraphFormatterUseCase()

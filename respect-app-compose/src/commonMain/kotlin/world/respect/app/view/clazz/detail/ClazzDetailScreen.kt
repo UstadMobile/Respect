@@ -63,7 +63,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import world.respect.shared.generated.resources.manage_enrollments
-import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.remove_from_class
 
 
@@ -82,8 +81,9 @@ fun ClazzDetailScreen(
         onClickDismissInvite = viewModel::onClickDismissInvite,
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
-        onToggleStudentsSection = viewModel::onToggleStudentsSection
-
+        onToggleStudentsSection = viewModel::onToggleStudentsSection,
+        onClickRemovePerson = viewModel::onClickRemovePerson,
+        onClickManagePerson = viewModel::onClickManagePerson
     )
 }
 
@@ -97,8 +97,10 @@ fun ClazzDetailScreen(
     onClickDismissInvite: (Person) -> Unit,
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
-    onToggleStudentsSection: () -> Unit
-) {
+    onToggleStudentsSection: () -> Unit,
+    onClickRemovePerson: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickManagePerson: (Person, EnrollmentRoleEnum) -> Unit,
+    ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
 
@@ -363,46 +365,13 @@ fun ClazzDetailScreen(
 
             respectPagingItems(
                 items = teacherLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.TEACHER, index)
-                }
+                key = { person, index -> person.key(EnrollmentRoleEnum.TEACHER, index) }
             ) { teacher ->
-                var expanded by remember { mutableStateOf(false) }
-
-                ListItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(name = teacher?.fullName() ?: "")
-                    },
-                    headlineContent = {
-                        Text(text = teacher?.fullName() ?: "")
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { expanded = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More options"
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.remove_from_class)) },
-                                onClick = {
-                                    expanded = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.manage_enrollments)) },
-                                onClick = {
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
+                PersonListItemWithMenu(
+                    person = teacher,
+                    roleLabel = stringResource(Res.string.teacher),
+                    onClickRemove = { onClickRemovePerson(it, EnrollmentRoleEnum.TEACHER) },
+                    onClickManage = { onClickManagePerson(it, EnrollmentRoleEnum.TEACHER) }
                 )
             }
         }
@@ -462,52 +431,65 @@ fun ClazzDetailScreen(
                     )
                 }
             }
-
             respectPagingItems(
                 items = studentLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.STUDENT, index)
-                }
+                key = { person, index -> person.key(EnrollmentRoleEnum.STUDENT, index) }
             ) { student ->
-                var expanded by remember { mutableStateOf(false) }
-
-                ListItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(name = student?.fullName() ?: "")
-                    },
-                    headlineContent = {
-                        Text(text = student?.fullName() ?: "")
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { expanded = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = stringResource(
-                                    resource = Res.string.more_options
-                            ))
-                        }
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.remove_from_class)) },
-                                onClick = {
-                                    expanded = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.manage_enrollments)) },
-                                onClick = {
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
+                PersonListItemWithMenu(
+                    person = student,
+                    roleLabel = stringResource(Res.string.student),
+                    onClickRemove = { onClickRemovePerson(it, EnrollmentRoleEnum.STUDENT) },
+                    onClickManage = { onClickManagePerson(it, EnrollmentRoleEnum.STUDENT) }
                 )
             }
         }
     }
 }
 
+@Composable
+fun PersonListItemWithMenu(
+    person: Person?,
+    roleLabel: String,
+    onClickRemove: (Person) -> Unit,
+    onClickManage: (Person) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        modifier = Modifier.fillMaxWidth(),
+        leadingContent = {
+            RespectPersonAvatar(name = person?.fullName() ?: "")
+        },
+        headlineContent = {
+            Text(text = person?.fullName().orEmpty())
+        },
+        trailingContent = {
+            IconButton(onClick = { expanded = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More options"
+                )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.remove_from_class)) },
+                    onClick = {
+                        expanded = false
+                        person?.also(onClickRemove)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.manage_enrollments)) },
+                    onClick = {
+                        expanded = false
+                        person?.also(onClickManage)
+                    }
+                )
+            }
+        }
+    )
+}

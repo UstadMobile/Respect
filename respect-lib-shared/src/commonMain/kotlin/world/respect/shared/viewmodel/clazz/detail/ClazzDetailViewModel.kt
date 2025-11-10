@@ -277,6 +277,13 @@ class ClazzDetailViewModel(
         )
     }
 
+    fun onClickRemovePerson(person: Person, role: EnrollmentRoleEnum) {
+    }
+
+    fun onClickManagePerson(person: Person, role: EnrollmentRoleEnum) {
+    }
+
+
     companion object {
         const val ALL = "All"
 

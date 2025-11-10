@@ -132,7 +132,7 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
+- assertVisible: "Pending requests.*"
 - assertVisible: "Teacher User"
 - tapOn: "Accept Invite"
 
@@ -238,7 +238,7 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
+- assertVisible: "Pending requests.*"
 - assertVisible: "Student User"
 - tapOn: "Accept Invite"
 - tapOn: "Add Student"
@@ -368,7 +368,7 @@ onFlowComplete:
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
+- assertVisible: "Pending requests.*"
 - assertVisible: "Child User"
 - tapOn: "Accept Invite"
 

@@ -34,7 +34,7 @@ onFlowComplete:
     text: "Add class"
 - tapOn: "Save"
 - assertVisible: "Required field"
-- tapOn: "Class name*"
+- tapOn: "Name*"
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course"
@@ -44,7 +44,11 @@ onFlowComplete:
     text: "New Class"
 
 # B) Admin copy invite code to the teacher
+- tapOn: "Classes"
+- tapOn: "New Class"
 - tapOn: "Add Teacher"
+- tapOn:
+    id: "invite_code"
 - copyTextFrom:
     id: "invite_code"
 
@@ -92,9 +96,10 @@ onFlowComplete:
 - inputText: ${output.tomorrowDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
-- longPressOn: "Your date of birth*"
-- tapOn: "Select all"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text_flow.yaml"
+    env:
+      TEXTID: "date_of_birth"
 - tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"

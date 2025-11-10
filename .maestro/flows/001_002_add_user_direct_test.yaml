@@ -106,6 +106,8 @@ onFlowComplete:
 - inputText: "tes"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Password field is mandatory
+- tapOn: "Username"
+- eraseText
 - inputText: "2tes"
 - tapOn: "Password"
 - inputText: "test"

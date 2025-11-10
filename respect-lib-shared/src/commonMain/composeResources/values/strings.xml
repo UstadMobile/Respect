@@ -26,6 +26,9 @@
     <string name="clazz">Class</string>
     <string name="remove_from_class">Remove from class</string>
     <string name="manage_enrollments">Manage enrollments</string>
+    <string name="enrollments">Enrollments</string>
+    <string name="for_">for</string>
+    <string name="in_">in</string>
     <string name="report">Report</string>
     <string name="reports">Reports</string>
     <string name="select_app">Select app</string>

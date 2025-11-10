@@ -17,8 +17,9 @@ import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
-import world.respect.shared.util.ext.asUiText
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class EnrollmentListUiState(
@@ -50,10 +51,27 @@ class EnrollmentListViewModel(
     }
 
     init {
-        val roleEnum = EnrollmentRoleEnum.valueOf(route.role)
-
         _uiState.update {
             it.copy(enrollments = pagingSourceHolder)
         }
     }
+
+    fun onEditEnrollment(enrollment: Enrollment?) {
+        if(enrollment!=null) {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    EnrollmentEdit(
+                        enrollment.uid,
+                        personGuid = enrollment.personUid,
+                        role = enrollment.role.name,
+                        clazzGuid = enrollment.classUid
+                    )
+                )
+            )
+        }
+    }
+
+    fun onDeleteEnrollment(enrollmentId: String) {
+    }
+
 }

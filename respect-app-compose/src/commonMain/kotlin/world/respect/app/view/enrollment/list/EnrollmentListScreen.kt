@@ -24,6 +24,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.EnrollmentDataSource
+import world.respect.datalayer.school.model.Enrollment
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.edit
@@ -36,12 +37,18 @@ fun EnrollmentListScreen(
     viewModel: EnrollmentListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    EnrollmentListScreen(uiState = uiState)
+
+    EnrollmentListScreen(uiState = uiState,
+        onClickEdit=viewModel::onEditEnrollment,
+        onClickDelete=viewModel::onDeleteEnrollment
+    )
 }
 
 @Composable
 fun EnrollmentListScreen(
-    uiState: EnrollmentListUiState
+    uiState: EnrollmentListUiState,
+    onClickEdit: (Enrollment?) -> Unit,
+    onClickDelete: (String) -> Unit,
 ) {
     val pager = respectRememberPager(uiState.enrollments)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
@@ -58,7 +65,6 @@ fun EnrollmentListScreen(
                 modifier = Modifier.fillMaxWidth(),
                 headlineContent = {
                     Column {
-                        // First line: beginDate - endDate
                         Text(
                             text = "${enrollment?.beginDate ?: ""} - ${enrollment?.endDate ?: ""}"
                         )
@@ -84,19 +90,19 @@ fun EnrollmentListScreen(
                             text = { Text(stringResource(Res.string.edit)) },
                             onClick = {
                                 expanded = false
+                                onClickEdit(enrollment)
                             }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.delete)) },
                             onClick = {
                                 expanded = false
+                                onClickDelete(enrollment?.uid ?: "")
                             }
                         )
                     }
                 }
-
             )
-
         }
     }
 }

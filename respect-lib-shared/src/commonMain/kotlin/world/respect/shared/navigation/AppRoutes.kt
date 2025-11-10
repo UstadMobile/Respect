@@ -134,7 +134,12 @@ data class EnrollmentList(
 ) : RespectAppRoute
 
 @Serializable
-class EnrollmentEdit : RespectAppRoute
+data class EnrollmentEdit(
+    val uid: String?,
+    val personGuid: String,
+    val role: String,
+    val clazzGuid: String
+) : RespectAppRoute
 
 @Serializable
 class AddPersonToClazz(

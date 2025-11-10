@@ -370,7 +370,6 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
-                    roleLabel = stringResource(Res.string.teacher),
                     onClickRemove = { onClickRemovePerson(it, EnrollmentRoleEnum.TEACHER) },
                     onClickManage = { onClickManagePerson(it, EnrollmentRoleEnum.TEACHER) }
                 )
@@ -438,7 +437,6 @@ fun ClazzDetailScreen(
             ) { student ->
                 PersonListItemWithMenu(
                     person = student,
-                    roleLabel = stringResource(Res.string.student),
                     onClickRemove = { onClickRemovePerson(it, EnrollmentRoleEnum.STUDENT) },
                     onClickManage = { onClickManagePerson(it, EnrollmentRoleEnum.STUDENT) }
                 )
@@ -450,7 +448,6 @@ fun ClazzDetailScreen(
 @Composable
 fun PersonListItemWithMenu(
     person: Person?,
-    roleLabel: String,
     onClickRemove: (Person) -> Unit,
     onClickManage: (Person) -> Unit
 ) {

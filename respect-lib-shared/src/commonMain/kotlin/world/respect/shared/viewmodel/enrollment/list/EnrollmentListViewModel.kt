@@ -20,6 +20,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class EnrollmentListUiState(
@@ -51,6 +52,12 @@ class EnrollmentListViewModel(
     }
 
     init {
+
+        _appUiState.update {
+            it.copy(
+                title= (route.role).asUiText()
+            )
+        }
         _uiState.update {
             it.copy(enrollments = pagingSourceHolder)
         }

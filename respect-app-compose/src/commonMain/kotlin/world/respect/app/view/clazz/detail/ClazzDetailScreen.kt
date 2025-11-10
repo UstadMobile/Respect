@@ -220,7 +220,7 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?.toString()
+                            val dob = person?.dateOfBirth?:"-"
                             Text(
                                 text =
                                     "${stringResource(Res.string.gender_literal)}: $gender, " +

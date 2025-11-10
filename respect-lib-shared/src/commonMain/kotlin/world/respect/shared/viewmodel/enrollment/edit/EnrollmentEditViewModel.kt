@@ -155,16 +155,11 @@ class EnrollmentEditViewModel(
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
+
                 if (route.uid == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            destination = EnrollmentList(
-                                route.personGuid,
-                                route.role,
-                                route.clazzGuid
-                            ),
-                            popUpTo = route,
-                            popUpToInclusive = true
+                            EnrollmentList(route.personGuid, route.role,route.clazzGuid), popUpTo = route, popUpToInclusive = true
                         )
                     )
                 } else {

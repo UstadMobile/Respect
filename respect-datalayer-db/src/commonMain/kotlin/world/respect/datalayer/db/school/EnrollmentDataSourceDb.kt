@@ -36,7 +36,7 @@ class EnrollmentDataSourceDb(
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 val timeStored = Clock.System.now()
                 val entities = enrollments.map {
-                    it.copy(stored = timeStored).toEntities(uidNumberMapper).enrollment
+                    it.copy(stored = timeStored).toEntities(uidNumberMapper)
                 }.filter {
                     val lastModInDb = schoolDb.getEnrollmentEntityDao().getLastModifiedByUidNum(
                         it.eUidNum

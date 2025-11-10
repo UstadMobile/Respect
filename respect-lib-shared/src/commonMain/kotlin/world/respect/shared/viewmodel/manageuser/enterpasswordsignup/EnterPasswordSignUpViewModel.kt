@@ -1,12 +1,10 @@
 package world.respect.shared.viewmodel.manageuser.enterpasswordsignup
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -76,7 +74,7 @@ class EnterPasswordSignupViewModel(
         if (password.isBlank())
             return
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             val redeemRequest = route.respectRedeemInviteRequest.copy(
                 account = route.respectRedeemInviteRequest.account.copy(
                     credential = RespectPasswordCredential(

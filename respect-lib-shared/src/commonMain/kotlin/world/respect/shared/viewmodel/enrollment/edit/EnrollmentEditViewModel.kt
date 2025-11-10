@@ -23,6 +23,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.NavCommand
@@ -154,12 +155,25 @@ class EnrollmentEditViewModel(
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
-                _navCommandFlow.tryEmit(NavCommand.PopUp())
+                if (route.uid == null) {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = EnrollmentList(
+                                route.personGuid,
+                                route.role,
+                                route.clazzGuid
+                            ),
+                            popUpTo = route,
+                            popUpToInclusive = true
+                        )
+                    )
+                } else {
+                    _navCommandFlow.tryEmit(NavCommand.PopUp())
+                }
             } catch (e: Throwable) {
-                // Optional: log or show an error state
+                //needs to display snack bar here
+                e.printStackTrace()
             }
         }
-
     }
-
 }

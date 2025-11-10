@@ -46,11 +46,11 @@ fun EnrollmentEditScreen(
     val fieldsEnabled = uiState.fieldsEnabled
 
 
-    Column (
+    Column(
         modifier = Modifier
-        .fillMaxSize()
-        .padding(bottom = 16.dp)
-    ){
+            .fillMaxSize()
+            .padding(bottom = 16.dp)
+    ) {
         RespectLocalDateField(
             modifier = Modifier.testTag("begin_date").fillMaxWidth().defaultItemPadding(),
             value = enrollment?.beginDate,
@@ -85,9 +85,5 @@ fun EnrollmentEditScreen(
                 { Text(uiTextStringResource(it)) }
             }
         )
-
-
-
     }
-
 }

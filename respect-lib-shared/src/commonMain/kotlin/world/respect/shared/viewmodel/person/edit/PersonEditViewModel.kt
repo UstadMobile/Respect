@@ -27,16 +27,20 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.edit_person
 import world.respect.shared.generated.resources.invalid
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -61,13 +65,21 @@ data class PersonEditUiState(
      */
     val nationalPhoneNumSet: Boolean = false,
     val phoneNumError: UiText? = null,
+    val emailError: UiText? = null,
     val genderError: UiText? = null,
+    val firstNameError: UiText? = null,
+    val lastNameError: UiText? = null
 ) {
     val fieldsEnabled : Boolean
         get() = person.isReadyAndSettled()
 
     val hasErrors: Boolean
-        get() = dateOfBirthError != null || phoneNumError != null || genderError != null
+        get() = firstNameError!=null ||
+                lastNameError!=null ||
+                genderError != null ||
+                dateOfBirthError != null ||
+                phoneNumError != null ||
+                emailError!=null
 }
 
 class PersonEditViewModel(
@@ -75,6 +87,8 @@ class PersonEditViewModel(
     accountManager: RespectAccountManager,
     private val json: Json,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
+    private val validateEmailUseCase: ValidateEmailUseCase,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -179,12 +193,17 @@ class PersonEditViewModel(
 
             prev.copy(
                 person = DataReadyState(person),
-                phoneNumError = if(prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
+                firstNameError = prev.firstNameError?.takeIf { prevPerson?.givenName == person.givenName },
+                lastNameError = prev.lastNameError?.takeIf { prevPerson?.familyName == person.familyName },
+                genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender },
+                emailError = prev.emailError?.takeIf {
+                    prevPerson?.email == person.email
+                },
+                phoneNumError = if (prev.phoneNumError != null && prevPerson?.phoneNumber == person.phoneNumber) {
                     prev.phoneNumError
                 }else {
                     null
                 },
-                genderError = prev.genderError?.takeIf { prevPerson?.gender == person.gender }
             )
         }.person.dataOrNull() ?: return
 
@@ -210,23 +229,36 @@ class PersonEditViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                dateOfBirthError = if(dob != null && dob > today) {
+                firstNameError = if(person.givenName.isBlank()) {
+                    Res.string.required_field.asUiText()
+                }else {
+                    null
+                },
+                lastNameError = if(person.familyName.isBlank()) {
+                    Res.string.required_field.asUiText()
+                }else {
+                    null
+                },
+                dateOfBirthError = if (dob != null && dob > today) {
                     Res.string.date_of_birth_in_future.asUiText()
                 }else {
                     null
                 },
-                phoneNumError = if(uiState.value.nationalPhoneNumSet &&
+                phoneNumError = if (uiState.value.nationalPhoneNumSet &&
                     !phoneNumValidatorUseCase.isValid(person.phoneNumber ?: "")
                 ) {
                     Res.string.invalid.asUiText()
                 }else {
                     null
                 },
+                emailError = if (!person.email.isNullOrBlank() && !validateEmailUseCase(person.email.toString())) {
+                    Res.string.invalid_email.asUiText()
+                } else null,
                 genderError = if(person.gender == PersonGenderEnum.UNSPECIFIED) {
-                    Res.string.required.asUiText()
+                    Res.string.required_field.asUiText()
                 }else {
                     null
-                }
+                },
             )
         }
 
@@ -237,15 +269,22 @@ class PersonEditViewModel(
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.personDataSource.store(listOf(person))
-
-                if (route.guid == null) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            PersonDetail(guid), popUpTo = route, popUpToInclusive = true
-                        )
+                if(
+                    !resultReturner.sendResultIfResultExpected(
+                        route = route,
+                        navCommandFlow = _navCommandFlow,
+                        result = person,
                     )
-                } else {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
+                ) {
+                    if (route.guid == null) {
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                PersonDetail(guid), popUpTo = route, popUpToInclusive = true
+                            )
+                        )
+                    } else {
+                        _navCommandFlow.tryEmit(NavCommand.PopUp())
+                    }
                 }
             } catch (_: Throwable) {
                 //needs to display snack bar here

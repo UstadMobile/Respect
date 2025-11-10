@@ -90,7 +90,9 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
+import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -142,6 +144,7 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
@@ -158,7 +161,6 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
-import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -282,7 +284,6 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
-    viewModelOf(::AddPersonToClazzViewModel)
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::JoinClazzWithCodeViewModel)
     viewModelOf(::LoginViewModel)
@@ -788,9 +789,19 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
+        scoped<AddChildAccountUseCase> {
+            AddChildAccountUseCaseDataSource(
+                schoolDataSource = get(),
+                schoolPrimaryKeyGenerator = get(),
+                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            )
+        }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
+    }
+    single<ValidateEmailUseCase>{
+        ValidateEmailUseCase()
     }
     single<CreateGraphFormatterUseCase> {
         CreateGraphFormatterUseCase()

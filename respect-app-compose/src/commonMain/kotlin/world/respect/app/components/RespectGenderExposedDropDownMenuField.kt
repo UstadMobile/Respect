@@ -8,6 +8,10 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.required
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.ext.asUiText
+import world.respect.shared.generated.resources.required_field
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.label
 
 @Composable
@@ -17,6 +21,7 @@ fun RespectGenderExposedDropDownMenuField(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     enabled: Boolean = true,
+    errorText: UiText?,
 ) {
     RespectExposedDropDownMenuField(
         value = value,
@@ -36,7 +41,7 @@ fun RespectGenderExposedDropDownMenuField(
             Text(stringResource(Res.string.gender) + "*")
         },
         supportingText = {
-            Text(stringResource(Res.string.required))
+            Text(uiTextStringResource(errorText ?: Res.string.required.asUiText()))
         },
         isError = isError,
         enabled = enabled,

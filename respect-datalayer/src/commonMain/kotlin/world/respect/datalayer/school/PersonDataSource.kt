@@ -7,6 +7,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -20,6 +21,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByClazzUid: String? = null,
         val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
         val filterByName: String? = null,
+        val filterByPersonRole: PersonRoleEnum? = null,
     ) {
 
         companion object {
@@ -30,7 +32,10 @@ interface PersonDataSource: WritableDataSource<Person> {
                     filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByEnrolmentRole = stringValues[DataLayerParams.FILTER_BY_ENROLLMENT_ROLE]?.let {
                         EnrollmentRoleEnum.fromValue(it)
-                    }
+                    },
+                    filterByPersonRole = stringValues[FILTER_BY_PERSON_ROLE]?.let {
+                        PersonRoleEnum.fromValue(it)
+                    },
                 )
             }
         }
@@ -80,6 +85,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         const val ENDPOINT_NAME = "person"
 
 
+        const val FILTER_BY_PERSON_ROLE = "filterByPersonRole"
 
 
     }

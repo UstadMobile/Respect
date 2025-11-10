@@ -91,11 +91,33 @@ val MIGRATE_6_7 = object: Migration(6, 7) {
 }
 
 
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            CREATE TABLE `PersonRelatedPersonEntity_new` (
+                `prpUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `prpPersonUidNum` INTEGER NOT NULL,
+                `prpOtherPersonUid` TEXT NOT NULL,
+                `prpOtherPersonUidNum` INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+        connection.execSQL("""
+            INSERT INTO `PersonRelatedPersonEntity_new` (prpPersonUidNum, prpOtherPersonUid, prpOtherPersonUidNum)
+            SELECT prpPersonUidNum, prpOtherPersonUid, prpOtherPersonUidNum FROM `PersonRelatedPersonEntity`
+        """.trimIndent())
+
+        connection.execSQL("DROP TABLE `PersonRelatedPersonEntity`")
+        connection.execSQL("ALTER TABLE `PersonRelatedPersonEntity_new` RENAME TO `PersonRelatedPersonEntity`")
+    }
+}
+
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
     return this.addMigrations(
-        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7
+        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7,MIGRATION_7_8
     )
 }
 

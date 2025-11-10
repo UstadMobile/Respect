@@ -17,7 +17,6 @@ import world.respect.app.view.assignment.list.AssignmentListScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
-import world.respect.app.view.clazz.addperson.AddPersonToClazzScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
@@ -62,7 +61,6 @@ import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
 import world.respect.shared.navigation.ClazzEdit
-import world.respect.shared.navigation.AddPersonToClazz
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
@@ -91,7 +89,6 @@ import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
-import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.GetStartedScreen
@@ -400,16 +397,6 @@ fun AppNavHost(
                 navController = respectNavController
             )
             LearningUnitDetailScreen(
-                viewModel = viewModel
-            )
-        }
-
-        composable<AddPersonToClazz> {
-            val viewModel: AddPersonToClazzViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            AddPersonToClazzScreen(
                 viewModel = viewModel
             )
         }

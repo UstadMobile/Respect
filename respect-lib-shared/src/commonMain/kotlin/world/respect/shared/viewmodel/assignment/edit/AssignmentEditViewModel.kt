@@ -41,6 +41,7 @@ import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -236,8 +237,10 @@ class AssignmentEditViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 RespectAppLauncher.create(
-                    resultPopUpTo = AssignmentEdit::class,
-                    resultKey = KEY_LEARNING_UNIT,
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_LEARNING_UNIT,
+                    )
                 )
             )
         )

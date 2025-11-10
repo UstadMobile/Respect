@@ -159,7 +159,6 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
-import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -280,7 +279,6 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
-    viewModelOf(::AddPersonToClazzViewModel)
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::JoinClazzWithCodeViewModel)
     viewModelOf(::LoginViewModel)

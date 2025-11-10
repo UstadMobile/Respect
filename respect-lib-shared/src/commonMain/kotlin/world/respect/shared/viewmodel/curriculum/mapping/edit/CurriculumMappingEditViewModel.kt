@@ -11,7 +11,6 @@ import kotlinx.serialization.json.Json
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_invalid_section_index
 import world.respect.shared.generated.resources.error_no_current_mapping
-import world.respect.shared.generated.resources.error_no_pending_section_index
 import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.generated.resources.mapping_edit
 import world.respect.shared.generated.resources.required_field
@@ -30,6 +29,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.navigation.RouteResultDest
 
 data class CurriculumMappingEditUiState(
     val mapping: CurriculumMapping? = null,
@@ -212,8 +212,10 @@ class CurriculumMappingEditViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 RespectAppLauncher.create(
-                    resultPopUpTo = CurriculumMappingEdit::class,
-                    resultKey = KEY_LEARNING_UNIT
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_LEARNING_UNIT
+                    )
                 )
             )
         )

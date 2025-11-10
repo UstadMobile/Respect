@@ -6,6 +6,5 @@ appId: world.respect.app
     # https://github.com/mobile-dev-inc/Maestro/issues/495#issuecomment-2645859457
 
 - tapOn:
-    id: "{TEXTID}"
-    point: "95%,50%"
+      point: "95%,50%"
 - eraseText

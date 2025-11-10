@@ -96,10 +96,9 @@ onFlowComplete:
 - inputText: ${output.tomorrowDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
+- tapOn: "Date of birth"
 - runFlow:
     file: "subflows/erase_text_flow.yaml"
-    env:
-      TEXTID: "date_of_birth"
 - tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"

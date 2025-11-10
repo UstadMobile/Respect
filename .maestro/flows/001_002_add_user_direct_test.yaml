@@ -48,15 +48,15 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
+- tapOn: "Date of birth"
 - runFlow:
     file: "subflows/erase_text_flow.yaml"
-    env:
-      TEXTID: "date_of_birth"
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
+
 # Validate Phone number
 - tapOn:
      id: "phone_countrycode"
@@ -73,11 +73,11 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
+- tapOn: "Phone number"
 - runFlow:
     file: "subflows/erase_text_flow.yaml"
-    env:
-      TEXTID: "phone_number"
 - inputText: "2125554326"
+- hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -97,13 +97,13 @@ onFlowComplete:
     timeout: 1000
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
+- tapOn: "Email"
 - runFlow:
     file: "subflows/erase_text_flow.yaml"
     env:
-      TEXTID: "email"
+      TEXT: "Email"
 - inputText: "Testuser@gmail.com"
 - assertVisible: "Testuser@gmail.com"
-#- tapOn: "Done"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"

@@ -10,7 +10,6 @@ import kotlin.time.Instant
 data class GetListCommonParams(
     val guid: String? = null,
     val searchQuery: String? = null,
-    val includeRelated: Boolean = false,
     val since: Instant? = null,
 ) {
 
@@ -20,7 +19,6 @@ data class GetListCommonParams(
             return GetListCommonParams(
                 guid = stringValues[DataLayerParams.GUID],
                 searchQuery = stringValues[DataLayerParams.SEARCH_QUERY],
-                includeRelated = stringValues[DataLayerParams.INCLUDE_RELATED].toBoolean(),
                 since = stringValues[DataLayerParams.SINCE]?.let { Instant.parse(it) },
             )
         }

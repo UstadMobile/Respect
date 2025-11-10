@@ -17,5 +17,4 @@ fun ParametersBuilder.appendCommonListParams(
     appendIfNotNull(DataLayerParams.GUID, params.guid)
     appendIfNotNull(DataLayerParams.SINCE, params.since?.toString())
     appendIfNotNull(DataLayerParams.SEARCH_QUERY, params.searchQuery)
-    appendIfNotNull(DataLayerParams.INCLUDE_RELATED, params.includeRelated.toString())
 }

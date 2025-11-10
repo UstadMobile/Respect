@@ -22,7 +22,6 @@ import world.respect.app.components.RespectDetailField
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.date_of_birth
@@ -60,7 +59,8 @@ fun PersonDetailScreen(
     onClickPhoneNumber: () -> Unit,
     onClickFamilyMember: (String) -> Unit,
 ) {
-    val person = uiState.person.dataOrNull()
+    val person = uiState.person
+
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
@@ -103,7 +103,7 @@ fun PersonDetailScreen(
         RespectDetailField(
             modifier = Modifier.defaultItemPadding(),
             label = { Text(stringResource(Res.string.gender)) },
-            value = { Text(uiState.person.dataOrNull()?.gender?.label?.let { stringResource(it) } ?: "")}
+            value = { Text(person?.gender?.label?.let { stringResource(it) } ?: "")}
         )
 
         person?.dateOfBirth?.also {
@@ -131,15 +131,15 @@ fun PersonDetailScreen(
                     value = { Text(email) }
                 )
             }
-        val familyMembers = uiState.familyMembers.dataOrNull()
 
-        if (uiState.familyMembersVisible&&!familyMembers.isNullOrEmpty()) {
+        if (uiState.familyMembers.isNotEmpty()) {
             Text(
                 modifier = Modifier.defaultItemPadding(),
                 text = stringResource(Res.string.family_members),
                 style = MaterialTheme.typography.bodySmall,
             )
-            familyMembers.forEach { familyPerson->
+
+            uiState.familyMembers.forEach { familyPerson->
                 ListItem(
                     modifier = Modifier.clickable {
                         onClickFamilyMember(familyPerson.guid)

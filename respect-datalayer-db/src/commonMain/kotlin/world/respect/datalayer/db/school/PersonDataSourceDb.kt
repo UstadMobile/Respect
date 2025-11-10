@@ -130,6 +130,7 @@ class PersonDataSourceDb(
             inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
             filterByName = params.filterByName,
             filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+            includeRelated = params.includeRelated,
         ).map { list ->
             DataReadyState(
                 data = list.map {
@@ -151,6 +152,7 @@ class PersonDataSourceDb(
                 inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
                 filterByName = params.filterByName,
                 filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+                includeRelated = params.includeRelated,
             ).map(tag = "persondb-mapped") {
                 it.toPersonEntities().toModel()
             }
@@ -169,6 +171,7 @@ class PersonDataSourceDb(
             inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
             filterByName = params.filterByName,
             filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+            includeRelated = params.includeRelated,
         ).map {
             it.toPersonEntities().toModel()
         }
@@ -195,22 +198,9 @@ class PersonDataSourceDb(
                 inClazzRoleFlag = listParams.filterByEnrolmentRole?.flag ?: 0,
                 filterByName = listParams.filterByName,
                 filterByPersonRole = listParams.filterByPersonRole?.flag ?: 0,
+                includeRelated = listParams.includeRelated,
             )
         }
     }
 
-    override fun listPersonRelatedFamilyMembersAsFlow(
-        loadParams: DataLoadParams,
-        guid: String
-    ): Flow<DataLoadState<List<Person>>> {
-        return schoolDb.getPersonEntityDao().findFamilyMembersRelatedToPerson(
-            guidHash = uidNumberMapper(guid)
-        ).map { list ->
-            DataReadyState(
-                data = list.map {
-                    it.toPersonEntities().toModel()
-                }
-            )
-        }
-    }
 }

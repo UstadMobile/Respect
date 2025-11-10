@@ -117,20 +117,6 @@ class PersonDataSourceRepository(
         )
     }
 
-    override fun listPersonRelatedFamilyMembersAsFlow(
-        loadParams: DataLoadParams,
-        guid: String
-    ): Flow<DataLoadState<List<Person>>> {
-        return local.listPersonRelatedFamilyMembersAsFlow(loadParams, guid).combineWithRemote(
-            remoteFlow = remote.listPersonRelatedFamilyMembersAsFlow(loadParams, guid).onEach { remoteState ->
-                if (remoteState is DataReadyState) {
-                    local.updateLocal(remoteState.data)
-                    validationHelper.updateValidationInfo(remoteState.metaInfo)
-                }
-            }
-        )
-    }
-
     override suspend fun store(list: List<Person>) {
         local.store(list)
         val timeNow = systemTimeInMillis()

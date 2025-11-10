@@ -21,6 +21,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
         val filterByName: String? = null,
         val filterByPersonRole: PersonRoleEnum? = null,
+        val includeRelated: Boolean = false,
     ) {
 
         companion object {
@@ -35,6 +36,7 @@ interface PersonDataSource: WritableDataSource<Person> {
                     filterByPersonRole = stringValues[FILTER_BY_PERSON_ROLE]?.let {
                         PersonRoleEnum.fromValue(it)
                     },
+                    includeRelated = stringValues[DataLayerParams.INCLUDE_RELATED]?.toBoolean() ?: false,
                 )
             }
         }
@@ -68,11 +70,6 @@ interface PersonDataSource: WritableDataSource<Person> {
         listParams: GetListParams,
     ): IPagingSourceFactory<Int, PersonListDetails>
 
-
-    fun listPersonRelatedFamilyMembersAsFlow(
-        loadParams: DataLoadParams,
-        guid: String
-    ): Flow<DataLoadState<List<Person>>>
 
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on

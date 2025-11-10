@@ -48,6 +48,7 @@ class PersonDataSourceHttp(
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, filterByClazzUid)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_NAME, filterByName)
+                parameters.appendIfNotNull(DataLayerParams.INCLUDE_RELATED, includeRelated.toString())
             }
             .build()
     }
@@ -145,23 +146,6 @@ class PersonDataSourceHttp(
             ).map { person ->
                 person.asListDetails()
             }
-        }
-    }
-
-    override fun listPersonRelatedFamilyMembersAsFlow(
-        loadParams: DataLoadParams,
-        guid: String
-    ): Flow<DataLoadState<List<Person>>> {
-        return httpClient.getDataLoadResultAsFlow<List<Person>>(
-            urlFn = {
-                PersonDataSource.GetListParams(
-                    GetListCommonParams(guid = guid)
-                ).urlWithParams()
-            },
-            dataLoadParams = DataLoadParams()
-        ) {
-            useTokenProvider(tokenProvider)
-            useValidationCacheControl(validationHelper)
         }
     }
 

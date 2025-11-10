@@ -102,6 +102,6 @@ appId: world.respect.app
     id: "app_title"
     text: "Classes"
 - tapOn: "New Class"
-- assertVisible: "Pending requests"
-- assertVisible: "Teacher User"
+- assertVisible: "Pending requests.*"
+- assertVisible: "Teacher User.*"
 - tapOn: "Accept Invite"

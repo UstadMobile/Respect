@@ -42,11 +42,9 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RouteResultDest
-import world.respect.shared.resources.UiText
 import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -96,8 +94,6 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
-
-    var clazzTitle: String?=null
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -154,8 +150,7 @@ class ClazzDetailViewModel(
         viewModelScope.launch {
             schoolDataSource.classDataSource.findByGuidAsFlow(route.guid).collect { clazz ->
                 _appUiState.update {
-                    clazzTitle = clazz.dataOrNull()?.title
-                    it.copy(title = clazzTitle?.asUiText())
+                    it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
                 _uiState.update { it.copy(clazz = clazz) }
             }
@@ -289,7 +284,7 @@ class ClazzDetailViewModel(
     fun onClickManagePerson(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                EnrollmentList(person.guid,person.fullName(),role.name,clazzTitle))
+                EnrollmentList(person.guid,role.name,route.guid))
             )
     }
 

@@ -129,9 +129,8 @@ class ClazzDetail(
 @Serializable
 data class EnrollmentList(
     val personGuid: String,
-    val personName: String,
     val role: String,
-    val clazzTitle: String? = null,
+    val clazzGuid: String
 ) : RespectAppRoute
 
 @Serializable

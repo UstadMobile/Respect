@@ -41,21 +41,17 @@ class EnrollmentListViewModel(
     private val pagingSourceHolder = PagingSourceFactoryHolder {
         schoolDataSource.enrollmentDataSource.listAsPagingSource(
             loadParams = DataLoadParams(),
-            listParams = EnrollmentDataSource.GetListParams()
+            listParams = EnrollmentDataSource.GetListParams(
+                classUid = route.clazzGuid,
+                personUid = route.personGuid,
+                role = EnrollmentRoleEnum.valueOf(route.role)
+            )
         )
     }
 
     init {
         val roleEnum = EnrollmentRoleEnum.valueOf(route.role)
 
-        // ✅ Update App Bar title
-        _appUiState.update {
-            it.copy(
-                title = "Enrollments for ${route.personName} in ${route.clazzTitle}".asUiText()
-            )
-        }
-
-        // ✅ Update UI state with paging data
         _uiState.update {
             it.copy(enrollments = pagingSourceHolder)
         }

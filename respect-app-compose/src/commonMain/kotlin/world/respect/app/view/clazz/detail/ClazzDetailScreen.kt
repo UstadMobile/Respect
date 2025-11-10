@@ -63,6 +63,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import world.respect.shared.generated.resources.manage_enrollments
+import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.remove_from_class
 
 
@@ -467,7 +468,7 @@ fun PersonListItemWithMenu(
             IconButton(onClick = { expanded = true }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options"
+                    contentDescription = stringResource(resource = Res.string.more_options)
                 )
             }
 

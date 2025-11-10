@@ -26,7 +26,6 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -122,9 +121,16 @@ class PersonDataSourceDb(
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
-        return schoolDb.getPersonEntityDao().findAllAsFlow().map { list ->
+        return schoolDb.getPersonEntityDao().listAsFlow(
+            since = params.common.since?.toEpochMilliseconds() ?: 0,
+            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+            inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+            filterByName = params.filterByName,
+            filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+        ).map { list ->
             DataReadyState(
                 data = list.map {
                     it.toPersonEntities().toModel()
@@ -138,7 +144,7 @@ class PersonDataSourceDb(
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
         return IPagingSourceFactory {
-            schoolDb.getPersonEntityDao().findAllAsPagingSource(
+            schoolDb.getPersonEntityDao().listAsPagingSource(
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
@@ -153,12 +159,16 @@ class PersonDataSourceDb(
 
     override suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
+        params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
         val queryTime = systemTimeInMillis()
-        val data = schoolDb.getPersonEntityDao().findAll(
-            since = since?.toEpochMilliseconds() ?: 0,
+        val data = schoolDb.getPersonEntityDao().list(
+            since = params.common.since?.toEpochMilliseconds() ?: 0,
+            guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+            inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+            filterByName = params.filterByName,
+            filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
         ).map {
             it.toPersonEntities().toModel()
         }

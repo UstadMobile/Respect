@@ -12,7 +12,6 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
-import kotlin.time.Instant
 
 interface PersonDataSource: WritableDataSource<Person> {
 
@@ -50,13 +49,12 @@ interface PersonDataSource: WritableDataSource<Person> {
 
     fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String? = null,
+        params: GetListParams = GetListParams(),
     ): Flow<DataLoadState<List<Person>>>
 
     suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String? = null,
-        since: Instant? = null,
+        params: GetListParams = GetListParams(),
     ): DataLoadState<List<Person>>
 
     fun listAsPagingSource(

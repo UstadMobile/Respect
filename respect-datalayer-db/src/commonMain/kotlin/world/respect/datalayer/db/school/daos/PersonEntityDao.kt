@@ -62,18 +62,35 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-        SELECT * 
+       SELECT PersonEntity.* 
          FROM PersonEntity
+              $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
+     ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllAsFlow(): Flow<List<PersonEntityWithRoles>>
+    fun listAsFlow(
+        since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+    ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
-        SELECT * 
+       SELECT PersonEntity.* 
          FROM PersonEntity
-        WHERE PersonEntity.pStored > :since 
+              $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
+     ORDER BY PersonEntity.pGivenName
     """)
-    suspend fun findAll(
+    suspend fun list(
         since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
     ): List<PersonEntityWithRoles>
 
     @Transaction
@@ -87,12 +104,12 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-        SELECT * 
+       SELECT PersonEntity.* 
          FROM PersonEntity
               $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
      ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllAsPagingSource(
+    fun listAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
@@ -120,6 +137,7 @@ interface PersonEntityDao {
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
     ): PagingSource<Int, PersonListDetails>
+
     @Query("""
             SELECT * 
             FROM PersonEntity

@@ -21,9 +21,9 @@ import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.date_later
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
-import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.NavCommand
@@ -140,6 +140,8 @@ class EnrollmentEditViewModel(
             prev.copy(
                 beginDateError = if (enrollment.beginDate == null) {
                     Res.string.required_field.asUiText()
+                } else if (enrollment.endDate != null && enrollment.beginDate.toString() > enrollment.endDate.toString()) {
+                    Res.string.date_later.asUiText()
                 } else {
                     null
                 },
@@ -159,7 +161,9 @@ class EnrollmentEditViewModel(
                 if (route.uid == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            EnrollmentList(route.personGuid, route.role,route.clazzGuid), popUpTo = route, popUpToInclusive = true
+                            EnrollmentList(route.personGuid, route.role, route.clazzGuid),
+                            popUpTo = route,
+                            popUpToInclusive = true
                         )
                     )
                 } else {

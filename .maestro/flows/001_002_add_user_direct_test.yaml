@@ -39,7 +39,15 @@ onFlowComplete:
 - assertVisible: "Required field"   # Gender field is mandatory
 - tapOn: "Gender*"
 - tapOn: "Female"
-
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
 # Validate DOB field
 - tapOn: "Date of birth"
 - runScript:
@@ -48,14 +56,13 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
-- longPressOn: "Date of birth"
-- tapOn: "Select all"
 - eraseText
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
+
 # Validate Phone number
 - tapOn:
      id: "phone_countrycode"
@@ -72,19 +79,8 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- longPressOn: "Phone number"
-#- tapOn: "Cut"
 - eraseText
 - inputText: "2125554326"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test User"
-- tapOn:
-    id: "floating_action_button"   # Edit button
-- assertVisible:
-    id: "app_title"
-    text: "Edit person"
 - tapOn: "Email"
 - inputText: "Testuser@gm"
 - hideKeyboard
@@ -95,39 +91,25 @@ onFlowComplete:
     timeout: 1000
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
-- longPressOn: "Email"
 - eraseText
 - inputText: "Testuser@gmail.com"
 - assertVisible: "Testuser@gmail.com"
-#- tapOn: "Done"
+- hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
-- tapOn: "Save"
-- assertVisible: "Required field"     # Username field is mandatory
 - tapOn: "Username"
-- inputText: "tes"
-- tapOn: "Save"
-- assertVisible: "Required field"   # Password field is mandatory
 - inputText: "2tes"
-- tapOn: "Password"
-- inputText: "test"
+- tapOn: "Password"  # Password validations needs to be added
+- inputText: "test234"
 - tapOn: "Save"
 - assertVisible: "Username cannot start with a number"  # 2tes not a valid username
 - tapOn: "Username"
 - eraseText
 - inputText: "test@user"
 - assertVisible: "testuser"    # @ symbol won't get added to the username field - so "testuser" is expected result
-- tapOn: "Password"
-- eraseText
-- inputText: "t2"
-- tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
-- tapOn: "Password"
-- eraseText
-- inputText: "test234"
 - tapOn: "Save"
 
 

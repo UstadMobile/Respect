@@ -2,6 +2,7 @@ package world.respect.datalayer.http.shared.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import androidx.paging.log
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
@@ -19,7 +20,10 @@ import world.respect.datalayer.NoDataLoadedState.Reason
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.shared.DataLayerTags
 import world.respect.datalayer.shared.paging.CacheableHttpPagingSource
+import world.respect.datalayer.shared.paging.DelegatedInvalidationPagingSource
+import world.respect.datalayer.shared.paging.LogPrefixFunction
 import world.respect.datalayer.shared.paging.getClippedRefreshKey
 import world.respect.datalayer.shared.paging.getLimit
 import world.respect.datalayer.shared.paging.getOffset
@@ -40,10 +44,12 @@ class OffsetLimitHttpPagingSource<T: Any>(
     private val validationHelper: BaseDataSourceValidationHelper? = null,
     private val typeInfo: TypeInfo,
     private val requestBuilder: HttpRequestBuilder.() -> Unit = { },
-    tag: String? = null,
+    logPrefixExtra: LogPrefixFunction = DelegatedInvalidationPagingSource.NO_TAG,
 ) : PagingSource<Int, T>(), CacheableHttpPagingSource<Int, T> {
 
-    private val logPrefix = "RPaging/OffsetLimitHttpPagingSource(tag = $tag)"
+    private val logPrefix : String by lazy {
+        "RPaging/OffsetLimitHttpPagingSource(extra = ${logPrefixExtra()}"
+    }
 
     private var lastKnownTotalCount = -1
 
@@ -55,7 +61,7 @@ class OffsetLimitHttpPagingSource<T: Any>(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
         return try {
-            Napier.d("$logPrefix load key=${params.key}")
+            Napier.d(tag = DataLayerTags.TAG_DATALAYER) { "$logPrefix load key=${params.key}" }
             val key = params.key ?: 0
             val limit: Int = getLimit(params, key)
 
@@ -88,7 +94,9 @@ class OffsetLimitHttpPagingSource<T: Any>(
                 parameters.append(DataLayerParams.LIMIT, limit.toString())
             }.build()
 
-            Napier.d("$logPrefix: offsetlimit loading from $url")
+            Napier.d(tag = DataLayerTags.TAG_DATALAYER) {
+                "$logPrefix: offsetlimit loading from $url"
+            }
 
             val listLoadState: DataLoadState<List<T>> = httpClient.getAsDataLoadState(
                 url, typeInfo, validationHelper,
@@ -99,10 +107,12 @@ class OffsetLimitHttpPagingSource<T: Any>(
             if(listLoadState !is DataReadyState) {
                 return when {
                     listLoadState is NoDataLoadedState && listLoadState.reason == Reason.NOT_MODIFIED -> {
+                        Napier.d(tag = DataLayerTags.TAG_DATALAYER) { "$logPrefix not modified" }
                         LoadResult.Error(CacheableHttpPagingSource.NotModifiedNonException())
                     }
 
                     listLoadState is NoDataLoadedState && listLoadState.reason == Reason.NOT_FOUND -> {
+                        Napier.d(tag = DataLayerTags.TAG_DATALAYER) { "$logPrefix not found" }
                         LoadResult.Page(
                             data = emptyList(),
                             prevKey = null,
@@ -113,10 +123,17 @@ class OffsetLimitHttpPagingSource<T: Any>(
                     }
 
                     listLoadState is DataErrorResult -> {
+                        Napier.w(tag = DataLayerTags.TAG_DATALAYER, throwable = listLoadState.error) {
+                            "$logPrefix DataErrorResult"
+                        }
                         LoadResult.Error(listLoadState.error)
                     }
 
                     else -> {
+                        Napier.w(tag = DataLayerTags.TAG_DATALAYER) {
+                            "$logPrefix Invalid state: $listLoadState"
+                        }
+
                         LoadResult.Error(
                             IllegalStateException("OffsetLimitPagingSource: Invalid state: $listLoadState")
                         )
@@ -130,7 +147,9 @@ class OffsetLimitHttpPagingSource<T: Any>(
 
             val data: List<T> = listLoadState.data
 
-            Napier.d("$logPrefix offsetlimit loaded ${data.size} items")
+            Napier.d(tag = DataLayerTags.TAG_DATALAYER) {
+                "$logPrefix offsetlimit loaded ${data.size} items totalsize=${lastKnownTotalCount}"
+            }
 
             //This section is largely based on RoomUtil.queryDatabase function
             val nextPosToLoad = offset + data.size

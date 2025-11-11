@@ -118,9 +118,8 @@ class PersonDataSourceHttp(
             }.build(),
             validationHelper = validationHelper,
         ) {
-            val token = tokenProvider.provideToken()
-            println("PersonDataSource: load person list using token $token")
-            headers[HttpHeaders.Authorization] = "Bearer ${token.accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }
     }
 
@@ -138,7 +137,7 @@ class PersonDataSourceHttp(
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)
                 },
-                tag = "Person-HTTP",
+                logPrefixExtra =  { "Person-HTTP-listAsPagingSource(params=$params)" },
             )
         }
     }
@@ -153,7 +152,7 @@ class PersonDataSourceHttp(
                 httpClient = httpClient,
                 validationHelper = validationHelper,
                 typeInfo = typeInfo<List<Person>>(),
-            ).map { person ->
+            ).map(tag = { "PersonHttp-listDetails(params=$listParams)" }) { person ->
                 person.asListDetails()
             }
         }

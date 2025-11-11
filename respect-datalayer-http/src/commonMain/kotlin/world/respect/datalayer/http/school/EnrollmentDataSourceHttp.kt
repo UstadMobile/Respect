@@ -28,6 +28,7 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
@@ -61,6 +62,7 @@ class EnrollmentDataSourceHttp(
             ).urlWithParams()
         ) {
             useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.firstOrNotLoaded()
     }
 
@@ -77,6 +79,7 @@ class EnrollmentDataSourceHttp(
             dataLoadParams = loadParams,
         ) {
             useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.map {
             it.firstOrNotLoaded()
         }
@@ -95,20 +98,22 @@ class EnrollmentDataSourceHttp(
                 requestBuilder = {
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)
-                }
+                },
+                logPrefixExtra = { "EnrollmentDataSource params=$listParams"}
             )
         }
     }
 
     override suspend fun store(list: List<Enrollment>) {
-        val response = httpClient.post(
-            url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
-        ) {
+        val url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
+        val response = httpClient.post(url) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
             setBody(list)
         }
 
-        Napier.d("EnrollmentDataSourceHttp: sent ${list.size} items (status=${response.status.value}")
+        Napier.d(tag = TAG_DATALAYER) {
+            "EnrollmentDataSourceHttp: posted ${list.size} items(${list.joinToString { it.uid }}) to $url (status=${response.status.value}"
+        }
     }
 }

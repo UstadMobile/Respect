@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
@@ -30,6 +32,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
@@ -65,16 +68,31 @@ class EnrollmentEditViewModel(
 
 
     init {
-        _appUiState.update {
-            it.copy(
-                actionBarButtonState = ActionBarButtonUiState(
-                    onClick = ::onClickSave,
-                    text = Res.string.save.asUiText(),
-                    visible = true,
-                )
-            )
+        viewModelScope.launch {
+            val personSelected = schoolDataSource.personDataSource.findByGuid(
+                loadParams = DataLoadParams(),
+                guid = route.personGuid,
+            ).dataOrNull()
 
+            val clazzSelected = schoolDataSource.classDataSource.findByGuid(
+                params = DataLoadParams(),
+                guid = route.clazzGuid,
+            ).dataOrNull()
+
+            val personName = personSelected?.fullName() ?: ""
+            val clazzName = clazzSelected?.title ?: ""
+
+            _appUiState.update {
+                it.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        onClick = ::onClickSave,
+                        text = Res.string.save.asUiText(),
+                        visible = true,
+                    )
+                )
+            }
         }
+
         launchWithLoadingIndicator {
             if (route.uid != null) {
                 loadEntity(

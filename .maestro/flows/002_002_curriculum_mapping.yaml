@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "000_000_hello_world"
+        NAME: "002_002_curriculum_mapping"
 
 onFlowComplete:
   - runScript:

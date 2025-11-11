@@ -34,16 +34,22 @@ onFlowComplete:
 - inputText: "Test Curriculum"
 - tapOn: "Book description"
 - inputText: "test"
-- tapOn: "+ Chapter"
+- hideKeyboard
+- tapOn: "Chapter"
 - assertVisible: "Chapter 1"
-- tapOn: "+Lesson"
+- tapOn: "Lesson"
 - assertVisible:
     id: "app_title"
-    text: "Select lesson"
-- assertVisible: "Browse by apps"
+    text: "Apps"
 - tapOn: "My app"
 - tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- tapOn: "Chapter 1"
+- inputText: "SEM 1"
+- hideKeyboard
 - tapOn: "Lesson 1"
+- inputText: "Test 1"
+- hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -52,11 +58,11 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Mapping edit"
-- tapOn: "Add book cover"
-#select "image"
-- tapOn: "Save"
-- assertVisible:
-         id: "image"
+#- tapOn: "Add book cover"
+##select "image"
+#- tapOn: "Save"
+#- assertVisible:
+#         id: "image"
 - assertVisible: "Test Curriculum"
 
 

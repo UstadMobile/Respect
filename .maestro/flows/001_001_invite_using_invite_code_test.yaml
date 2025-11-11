@@ -92,8 +92,6 @@ onFlowComplete:
 - inputText: ${output.tomorrowDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
-- longPressOn: "Your date of birth*"
-- tapOn: "Select all"
 - eraseText
 - tapOn: "Your date of birth*"
 - runScript:

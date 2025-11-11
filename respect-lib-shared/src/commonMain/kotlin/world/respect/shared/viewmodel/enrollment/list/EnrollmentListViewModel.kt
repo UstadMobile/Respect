@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -23,9 +24,12 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.ext.toLocalizedDate
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.enrollment_for
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -72,14 +76,15 @@ class EnrollmentListViewModel(
 
             val personName = personSelected?.fullName() ?: ""
             val clazzName = clazzSelected?.title ?: ""
-
+            val titleString: String = getString(Res.string.enrollment_for, personName, clazzName)
             _appUiState.update {
                 it.copy(
+                    title = titleString.asUiText()
                 )
             }
         }
         _uiState.update {
-            it.copy(enrollments = pagingSourceHolder,)
+            it.copy(enrollments = pagingSourceHolder)
         }
     }
 

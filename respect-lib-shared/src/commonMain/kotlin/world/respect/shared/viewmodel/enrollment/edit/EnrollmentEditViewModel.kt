@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -24,6 +25,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_later
+import world.respect.shared.generated.resources.enrollment_for
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.EnrollmentEdit
@@ -81,9 +83,11 @@ class EnrollmentEditViewModel(
 
             val personName = personSelected?.fullName() ?: ""
             val clazzName = clazzSelected?.title ?: ""
+            val titleString: String = getString(Res.string.enrollment_for, personName, clazzName)
 
             _appUiState.update {
                 it.copy(
+                    title = titleString.asUiText(),
                     actionBarButtonState = ActionBarButtonUiState(
                         onClick = ::onClickSave,
                         text = Res.string.save.asUiText(),

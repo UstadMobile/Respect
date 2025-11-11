@@ -20,6 +20,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -71,7 +72,10 @@ class PersonDataSourceDb(
                         numStored++
                     }
                 }
-                Napier.d("PersonDataSource: updated $numStored/${persons.size}")
+
+                Napier.d(tag = TAG_DATALAYER) {
+                    "PersonDataSourceDb: upsert $numStored/${persons.size}(${persons.joinToString { it.guid }}) persons"
+                }
             }
         }
     }
@@ -145,7 +149,7 @@ class PersonDataSourceDb(
                 inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
                 filterByName = params.filterByName,
                 filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
-            ).map(tag = "persondb-mapped") {
+            ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
                 it.toPersonEntities().toModel()
             }
         }

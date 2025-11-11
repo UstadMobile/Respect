@@ -14,10 +14,10 @@ import kotlinx.atomicfu.atomic
  */
 abstract class DelegatedInvalidationPagingSource<Key: Any, Value: Any>(
     protected val invalidationDelegate: PagingSource<Key, *>,
-    protected val tag: String? = null,
+    protected val tag: LogPrefixFunction = NO_TAG,
 ): PagingSource<Key, Value>() {
 
-    private val logPrefix = "RPaging/DelegatedInvalidationPagingSource(tag=$tag)"
+    private val logPrefix = "RPaging/DelegatedInvalidationPagingSource(extra=${tag()})"
 
     private val srcInvalidateCallbackRegistered = atomic(false)
 
@@ -45,5 +45,11 @@ abstract class DelegatedInvalidationPagingSource<Key: Any, Value: Any>(
         if(!srcInvalidateCallbackRegistered.getAndSet(true)) {
             invalidationDelegate.registerInvalidatedCallback(srcInvalidatedCallback)
         }
+    }
+
+    companion object {
+
+        val NO_TAG: () -> String = { "" }
+
     }
 }

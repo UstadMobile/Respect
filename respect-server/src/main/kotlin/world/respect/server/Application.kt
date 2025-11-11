@@ -28,7 +28,10 @@ import world.respect.server.routes.getRespectSchoolJson
 import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
+import okio.withLock
+import org.koin.core.qualifier.TypeQualifier
 import org.koin.ktor.ext.inject
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
@@ -48,8 +51,11 @@ import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
+import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
+import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import java.util.concurrent.locks.ReentrantLock
 
 const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
 
@@ -89,6 +95,9 @@ fun Application.module() {
         )
     }
 
+    val scopeLock = ReentrantLock()
+
+
     install(Authentication) {
         basic(AUTH_CONFIG_DIRECTORY_ADMIN_BASIC) {
             realm = "Access realm directory admin"
@@ -117,6 +126,14 @@ fun Application.module() {
                 validateAuthorizationUseCase(
                     ValidateAuthorizationUseCase.BearerTokenCredential(tokenCredential.token)
                 )?.let {
+                    val serverAccountScopeManager: ServerAccountScopeManager = schoolScope.get()
+
+                    //Ensure that the account scope is created and safely linked to the school scope.
+                    //See ServerAccountScopeManager doc for more info.
+                    serverAccountScopeManager.getOrCreateAccountScope(
+                        AuthenticatedUserPrincipalId(it.guid)
+                    )
+
                     UserIdPrincipal(it.guid)
                 }
             }

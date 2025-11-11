@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -16,6 +17,7 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import kotlin.collections.map
@@ -28,6 +30,10 @@ class EnrollmentDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : EnrollmentDataSourceLocal {
 
+    private val logPrefix: String by lazy {
+        "EnrollmentDataSourceDb(${authenticatedUser.guid})"
+    }
+
     private suspend fun upsertEnrollments(
         enrollments: List<Enrollment>,
         forceOverwrite: Boolean
@@ -35,7 +41,7 @@ class EnrollmentDataSourceDb(
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 val timeStored = Clock.System.now()
-                val entities = enrollments.map {
+                val entitiesToStore = enrollments.map {
                     it.copy(stored = timeStored).toEntities(uidNumberMapper)
                 }.filter {
                     val lastModInDb = schoolDb.getEnrollmentEntityDao().getLastModifiedByUidNum(
@@ -43,7 +49,9 @@ class EnrollmentDataSourceDb(
                     ) ?: 0
                     forceOverwrite || it.eLastModified.toEpochMilliseconds() > lastModInDb
                 }
-                schoolDb.getEnrollmentEntityDao().upsert(entities)
+
+                schoolDb.getEnrollmentEntityDao().upsert(entitiesToStore)
+                Napier.d(tag = TAG_DATALAYER) { "$logPrefix: upsert ${entitiesToStore.size}/${enrollments.size} (${enrollments.joinToString { it.uid }}) entities" }
             }
         }
     }
@@ -83,7 +91,9 @@ class EnrollmentDataSourceDb(
                 classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
                 classUidRoleFlag = listParams.role?.flag ?: 0,
                 personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0
-            ).map {
+            ).map(
+                tag = { "EnrollmentDataSourceDb/list params=$listParams" }
+            ) {
                 it.toModel()
             }
         }

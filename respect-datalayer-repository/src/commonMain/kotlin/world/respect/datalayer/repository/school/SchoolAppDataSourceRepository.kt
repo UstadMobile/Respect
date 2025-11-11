@@ -40,7 +40,7 @@ class SchoolAppDataSourceRepository(
                     remoteLoadParams, local::updateLocal
                 )
             },
-            tag = "SchoolAppDataSourceRepository"
+            tag = { "SchoolAppDataSourceRepository" },
         )
     }
 

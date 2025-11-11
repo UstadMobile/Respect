@@ -11,10 +11,10 @@ import io.github.aakira.napier.Napier
 internal class MapPagingSource<T: Any, R: Any>(
     private val src: PagingSource<Int, T>,
     private val transform: (T) -> R,
-    tag: String? = null
+    tag: LogPrefixFunction = NO_TAG,
 ): DelegatedInvalidationPagingSource<Int, R>(src, tag) {
 
-    val logPrefix = "MapPagingSource(tag=$tag)"
+    val logPrefix = "MapPagingSource(tag=${tag()})"
 
     override fun getRefreshKey(state: PagingState<Int, R>): Int? {
         return state.getClippedRefreshKey()
@@ -51,7 +51,7 @@ internal class MapPagingSource<T: Any, R: Any>(
 }
 
 fun <T: Any, R: Any> PagingSource<Int, T>.map(
-    tag: String? = null,
+    tag: LogPrefixFunction = DelegatedInvalidationPagingSource.NO_TAG,
     transform: (T) -> R
 ): PagingSource<Int, R> {
     return MapPagingSource(this, transform, tag)

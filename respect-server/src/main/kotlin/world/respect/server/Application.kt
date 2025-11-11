@@ -126,24 +126,15 @@ fun Application.module() {
                 validateAuthorizationUseCase(
                     ValidateAuthorizationUseCase.BearerTokenCredential(tokenCredential.token)
                 )?.let {
-                    /*
-                     * Create the account scope (if needed) and link to the related School Scope.
-                     * Because all account level DI is done using factory (which can be called
-                     * concurrently), we need to use a lock when creating and linking the scope.
-                     */
-                    scopeLock.withLock {
-                        val authenticatedPrincipal = AuthenticatedUserPrincipalId(it.guid)
-                        val accountScopeId = RespectAccountScopeId(schoolScopeId.schoolUrl, authenticatedPrincipal)
-                        val accountScope = getKoin().getScopeOrNull(accountScopeId.scopeId)
-                        if(accountScope == null) {
-                            val accountScope = getKoin().createScope(
-                                accountScopeId.scopeId, TypeQualifier(RespectAccount::class)
-                            )
-                            accountScope.linkTo(schoolScope)
-                        }
+                    val serverAccountScopeManager: ServerAccountScopeManager = schoolScope.get()
 
-                        UserIdPrincipal(it.guid)
-                    }
+                    //Ensure that the account scope is created and safely linked to the school scope.
+                    //See ServerAccountScopeManager doc for more info.
+                    serverAccountScopeManager.getOrCreateAccountScope(
+                        AuthenticatedUserPrincipalId(it.guid)
+                    )
+
+                    UserIdPrincipal(it.guid)
                 }
             }
         }

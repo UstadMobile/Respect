@@ -101,7 +101,7 @@ fun ClazzDetailScreen(
     onToggleStudentsSection: () -> Unit,
     onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
     onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
-    ) {
+) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
 
@@ -157,7 +157,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -197,7 +197,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if(uiState.showAddTeacher) {
+            if (uiState.showAddTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -220,7 +220,7 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?:""
+                            val dob = person?.dateOfBirth ?: ""
                             Text(
                                 text =
                                     "${stringResource(Res.string.gender_literal)}: $gender, " +
@@ -279,7 +279,7 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?:""
+                            val dob = person?.dateOfBirth ?: ""
                             Text(
                                 text = "${stringResource(Res.string.gender_literal)}:" +
                                         " $gender, ${stringResource(Res.string.date_of_birth)}: $dob"
@@ -341,8 +341,8 @@ fun ClazzDetailScreen(
             )
         }
 
-        if(uiState.isTeachersExpanded) {
-            if(uiState.showAddTeacher) {
+        if (uiState.isTeachersExpanded) {
+            if (uiState.showAddTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -370,7 +370,12 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
-                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
+                    onClickRemove = {
+                        onClickRemovePersonFromClass(
+                            it,
+                            EnrollmentRoleEnum.TEACHER
+                        )
+                    },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) }
                 )
             }
@@ -401,14 +406,14 @@ fun ClazzDetailScreen(
                         modifier = Modifier.size(24.dp)
                             .rotate(
                                 if (uiState.isStudentsExpanded) 0f else -90f
-                            ),
+                            )
                     )
                 }
             )
         }
 
         if (uiState.isStudentsExpanded) {
-            if(uiState.showAddStudent) {
+            if (uiState.showAddStudent) {
                 item("add_student") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -437,7 +442,12 @@ fun ClazzDetailScreen(
             ) { student ->
                 PersonListItemWithMenu(
                     person = student,
-                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT) },
+                    onClickRemove = {
+                        onClickRemovePersonFromClass(
+                            it,
+                            EnrollmentRoleEnum.STUDENT
+                        )
+                    },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) }
                 )
             }

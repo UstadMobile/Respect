@@ -60,14 +60,15 @@ class EnrollmentEditViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+
     val route: EnrollmentEdit = savedStateHandle.toRoute()
+
     private val schoolDataSource: SchoolDataSource by inject()
+
     private val _uiState = MutableStateFlow(EnrollmentEditUiState())
 
     val uiState = _uiState.asStateFlow()
-
     private val debouncer = LaunchDebouncer(viewModelScope)
-
 
     init {
         viewModelScope.launch {

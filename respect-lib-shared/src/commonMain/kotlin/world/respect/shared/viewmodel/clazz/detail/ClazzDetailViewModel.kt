@@ -150,8 +150,7 @@ class ClazzDetailViewModel(
         viewModelScope.launch {
             schoolDataSource.classDataSource.findByGuidAsFlow(route.guid).collect { clazz ->
                 _appUiState.update {
-                    it.copy(title = clazz.dataOrNull()?.title
-                        ?.asUiText())
+                    it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
                 _uiState.update { it.copy(clazz = clazz) }
             }
@@ -279,9 +278,7 @@ class ClazzDetailViewModel(
         )
     }
 
-    fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {
-
-    }
+    fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {}
 
     fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(

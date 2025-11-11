@@ -255,7 +255,7 @@ fun ClazzDetailScreen(
             }
 
 
-            if(uiState.showAddStudent) {
+            if (uiState.showAddStudent) {
                 respectPagingItems(
                     items = pendingStudentLazyPagingItems,
                     key = { person, index ->

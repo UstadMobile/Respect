@@ -279,16 +279,16 @@ class ClazzDetailViewModel(
         )
     }
 
-    fun onClickRemovePerson(person: Person, role: EnrollmentRoleEnum) {
+    fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {
+
     }
 
-    fun onClickManagePerson(person: Person, role: EnrollmentRoleEnum) {
+    fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 EnrollmentList(person.guid,role.name,route.guid))
             )
     }
-
 
     companion object {
         const val ALL = "All"

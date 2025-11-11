@@ -83,8 +83,8 @@ fun ClazzDetailScreen(
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
         onToggleStudentsSection = viewModel::onToggleStudentsSection,
-        onClickRemovePerson = viewModel::onClickRemovePerson,
-        onClickManagePerson = viewModel::onClickManagePerson
+        onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
+        onClickManageEnrollments = viewModel::onClickManageEnrollments
     )
 }
 
@@ -99,8 +99,8 @@ fun ClazzDetailScreen(
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
     onToggleStudentsSection: () -> Unit,
-    onClickRemovePerson: (Person, EnrollmentRoleEnum) -> Unit,
-    onClickManagePerson: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
     ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -370,8 +370,8 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
-                    onClickRemove = { onClickRemovePerson(it, EnrollmentRoleEnum.TEACHER) },
-                    onClickManage = { onClickManagePerson(it, EnrollmentRoleEnum.TEACHER) }
+                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) }
                 )
             }
         }
@@ -437,8 +437,8 @@ fun ClazzDetailScreen(
             ) { student ->
                 PersonListItemWithMenu(
                     person = student,
-                    onClickRemove = { onClickRemovePerson(it, EnrollmentRoleEnum.STUDENT) },
-                    onClickManage = { onClickManagePerson(it, EnrollmentRoleEnum.STUDENT) }
+                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT) },
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) }
                 )
             }
         }

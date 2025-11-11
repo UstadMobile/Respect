@@ -370,12 +370,7 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
-                    onClickRemove = {
-                        onClickRemovePersonFromClass(
-                            it,
-                            EnrollmentRoleEnum.TEACHER
-                        )
-                    },
+                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) }
                 )
             }
@@ -443,10 +438,7 @@ fun ClazzDetailScreen(
                 PersonListItemWithMenu(
                     person = student,
                     onClickRemove = {
-                        onClickRemovePersonFromClass(
-                            it,
-                            EnrollmentRoleEnum.STUDENT
-                        )
+                        onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT)
                     },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) }
                 )

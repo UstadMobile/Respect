@@ -31,6 +31,8 @@ import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.more_options
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListUiState
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
+import kotlinx.datetime.LocalDate
+
 
 @Composable
 fun EnrollmentListScreen(
@@ -40,7 +42,8 @@ fun EnrollmentListScreen(
 
     EnrollmentListScreen(uiState = uiState,
         onClickEdit=viewModel::onEditEnrollment,
-        onClickDelete=viewModel::onDeleteEnrollment
+        onClickDelete=viewModel::onDeleteEnrollment,
+        onDateFormatted=viewModel::onDateFormatted
     )
 }
 
@@ -49,7 +52,9 @@ fun EnrollmentListScreen(
     uiState: EnrollmentListUiState,
     onClickEdit: (Enrollment?) -> Unit,
     onClickDelete: (String) -> Unit,
-) {
+    onDateFormatted: (LocalDate?) -> String,
+
+    ) {
     val pager = respectRememberPager(uiState.enrollments)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
     var expanded by remember { mutableStateOf(false) }
@@ -61,12 +66,16 @@ fun EnrollmentListScreen(
             contentType = { EnrollmentDataSource.ENDPOINT_NAME },
         )
         { enrollment ->
+            val beginDate = onDateFormatted(enrollment?.beginDate)
+            val endDate = onDateFormatted(enrollment?.endDate)
+
+            println("Format date $beginDate $endDate")
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 headlineContent = {
                     Column {
                         Text(
-                            text = "${enrollment?.beginDate ?: ""} - ${enrollment?.endDate ?: ""}"
+                            text = "$beginDate - $endDate"
                         )
                         Text(
                             text = "(${enrollment?.role})",

@@ -57,7 +57,7 @@ fun EnrollmentListScreen(
     ) {
     val pager = respectRememberPager(uiState.enrollments)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-    var expanded by remember { mutableStateOf(false) }
+    var expandedItemUid by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         respectPagingItems(
@@ -68,7 +68,7 @@ fun EnrollmentListScreen(
         { enrollment ->
             val beginDate = onDateFormatted(enrollment?.beginDate)
             val endDate = onDateFormatted(enrollment?.endDate)
-
+            val isExpanded = expandedItemUid == enrollment?.uid
             println("Format date $beginDate $endDate")
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
@@ -84,7 +84,9 @@ fun EnrollmentListScreen(
                     }
                 },
                 trailingContent = {
-                    IconButton(onClick = { expanded = true }) {
+                    IconButton(onClick = {
+                        expandedItemUid = if (isExpanded) null else enrollment?.uid
+                    }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = stringResource(resource = Res.string.more_options)
@@ -92,20 +94,20 @@ fun EnrollmentListScreen(
                     }
 
                     DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = isExpanded,
+                        onDismissRequest = { expandedItemUid = null }
                     ) {
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.edit)) },
                             onClick = {
-                                expanded = false
+                                expandedItemUid = null
                                 onClickEdit(enrollment)
                             }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.delete)) },
                             onClick = {
-                                expanded = false
+                                expandedItemUid = null
                                 onClickDelete(enrollment?.uid ?: "")
                             }
                         )

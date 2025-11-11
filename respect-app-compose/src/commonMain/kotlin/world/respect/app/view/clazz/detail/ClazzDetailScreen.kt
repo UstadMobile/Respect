@@ -220,19 +220,13 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?.toString()
+                            val dob = person?.dateOfBirth?:""
+                            Text(
+                                text =
+                                    "${stringResource(Res.string.gender_literal)}: $gender, " +
+                                            "${stringResource(Res.string.date_of_birth)}: $dob"
+                            )
 
-                            val parts = mutableListOf<String>()
-                            if (!gender.isNullOrBlank()) {
-                                parts.add("${stringResource(Res.string.gender_literal)}: $gender")
-                            }
-                            if (!dob.isNullOrBlank()) {
-                                parts.add("${stringResource(Res.string.date_of_birth)}: $dob")
-                            }
-
-                            if (parts.isNotEmpty()) {
-                                Text(text = parts.joinToString(", "))
-                            }
                         },
                         trailingContent = {
                             Row {
@@ -285,19 +279,11 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?.toString()
-
-                            val parts = mutableListOf<String>()
-                            if (!gender.isNullOrBlank()) {
-                                parts.add("${stringResource(Res.string.gender_literal)}: $gender")
-                            }
-                            if (!dob.isNullOrBlank()) {
-                                parts.add("${stringResource(Res.string.date_of_birth)}: $dob")
-                            }
-
-                            if (parts.isNotEmpty()) {
-                                Text(text = parts.joinToString(", "))
-                            }
+                            val dob = person?.dateOfBirth?:""
+                            Text(
+                                text = "${stringResource(Res.string.gender_literal)}:" +
+                                        " $gender, ${stringResource(Res.string.date_of_birth)}: $dob"
+                            )
                         },
                         trailingContent = {
                             Row {

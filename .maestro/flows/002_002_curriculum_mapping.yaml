@@ -41,15 +41,16 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Apps"
+#- assertNotVisible:
+#        id: "floating_action_button"    # +Apps button should not be there as per design
 - tapOn: "My app"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
-- tapOn: "Chapter 1"
-- inputText: "SEM 1"
-- hideKeyboard
-- tapOn: "Lesson 1"
-- inputText: "Test 1"
-- hideKeyboard
+- assertVisible:
+    id: "app_title"
+    text: "Mapping edit"
+- assertVisible: "Lesson 001"
+- assertVisible: "My app"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"

@@ -154,6 +154,13 @@ fun serverKoinModule(
     scope<SchoolDirectoryEntry> {
         fun Scope.schoolUrl(): Url = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
 
+        scoped<ServerAccountScopeManager> {
+            ServerAccountScopeManager(
+                schoolUrl = schoolUrl(),
+                schoolScope = this,
+            )
+        }
+
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseServer(
                 schoolDb = get(),
@@ -249,16 +256,15 @@ fun serverKoinModule(
 
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
+            val accountScopeManager: ServerAccountScopeManager = get()
 
             RedeemInviteUseCaseDb(
                 schoolDb = get(),
                 schoolUrl = schoolScopeId.schoolUrl,
                 schoolPrimaryKeyGenerator = get(),
                 getTokenAndUserProfileUseCase = get(),
-                schoolDataSource = { schoolUrl, user ->
-                    getKoin().getOrCreateScope<RespectAccount>(
-                        RespectAccountScopeId(schoolUrl, user).scopeId,
-                    ).get()
+                schoolDataSource = { _, user ->
+                    accountScopeManager.getOrCreateAccountScope(user).get()
                 },
                 uidNumberMapper = get(),
                 json = get(),

@@ -128,7 +128,7 @@ class PersonDataSourceHttp(
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)
                 },
-                tag = "Person-HTTP",
+                logPrefixExtra =  { "Person-HTTP-listAsPagingSource(params=$params)" },
             )
         }
     }
@@ -143,7 +143,7 @@ class PersonDataSourceHttp(
                 httpClient = httpClient,
                 validationHelper = validationHelper,
                 typeInfo = typeInfo<List<Person>>(),
-            ).map { person ->
+            ).map(tag = { "PersonHttp-listDetails(params=$listParams)" }) { person ->
                 person.asListDetails()
             }
         }

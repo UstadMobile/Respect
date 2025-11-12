@@ -60,7 +60,8 @@ class EnrollmentDataSourceRepository(
                     loadParams = remoteLoadParams,
                     onUpdateLocalFromRemote = local::updateLocal,
                 )
-            }
+            },
+            tag = { "EnrollmentDataSourceRepo(listParams=$listParams)" }
         )
     }
 

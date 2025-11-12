@@ -27,6 +27,7 @@ import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.manage_account
 import world.respect.shared.navigation.ChangePassword
+import world.respect.shared.navigation.DeleteAccount
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
@@ -215,4 +216,12 @@ class ManageAccountViewModel(
         }
     }
 
+    fun onDeleteAccount() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                DeleteAccount(guid = route.guid)
+            )
+        )
+    }
 }
+

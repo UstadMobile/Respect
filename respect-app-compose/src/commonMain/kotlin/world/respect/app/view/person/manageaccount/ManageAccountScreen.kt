@@ -44,8 +44,8 @@ fun ManageAccountScreen(
         onClickManagePasskey = viewModel::onClickManagePasskey,
         onClickChangePassword = viewModel::onClickChangePassword,
         onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
+        onDeleteAccountClick = viewModel::onDeleteAccount
     )
-
 }
 
 @Composable
@@ -55,6 +55,7 @@ fun ManageAccountScreen(
     onClickHowPasskeysWork: () -> Unit = {},
     onClickManagePasskey: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
+    onDeleteAccountClick:()-> Unit={}
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -156,6 +157,9 @@ fun ManageAccountScreen(
         )
 
         ListItem(
+            modifier = Modifier.clickable {
+                onDeleteAccountClick()
+            },
             leadingContent = {
                 Icon(Icons.Default.Delete, contentDescription = null)
             },

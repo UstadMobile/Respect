@@ -30,9 +30,9 @@ onFlowComplete:
     text: "Mapping edit"
 - tapOn: "Save"
 - assertVisible: "Required field"  #test mandatory field error
-- tapOn: "Book title*"
+- tapOn: "Book Title*"
 - inputText: "Test Curriculum"
-- tapOn: "Book description"
+- tapOn: "Book Description"
 - inputText: "test"
 - hideKeyboard
 - tapOn: "Chapter"

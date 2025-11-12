@@ -65,7 +65,8 @@ interface EnrollmentEntityDao {
 
     @Query("""
         DELETE FROM EnrollmentEntity 
-        WHERE eUid = :uid""")
-     suspend fun deleteEnrollment(uid: String)
+        WHERE eUid = :uid
+    """)
+    suspend fun deleteEnrollment(uid: String)
 
 }

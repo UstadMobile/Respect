@@ -48,6 +48,7 @@ interface ClassDataSource: WritableDataSource<Clazz> {
         list: List<Clazz>,
     )
 
+
     companion object {
 
         const val ENDPOINT_NAME = "class"

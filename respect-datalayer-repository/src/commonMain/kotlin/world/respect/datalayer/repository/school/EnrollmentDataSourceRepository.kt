@@ -78,4 +78,18 @@ class EnrollmentDataSourceRepository(
             }
         )
     }
-}
+
+    override suspend fun deleteEnrollment(uid: String) {
+            local.deleteEnrollment(uid)
+            val timeNow = systemTimeInMillis()
+            remoteWriteQueue.add(
+                listOf(
+                    WriteQueueItem(
+                        model = WriteQueueItem.Model.ENROLLMENT,
+                        uid = uid,
+                        timeQueued = timeNow,
+                    )
+                )
+            )
+        }
+    }

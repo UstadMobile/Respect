@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toJavaLocalDate
 import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -104,6 +103,12 @@ class EnrollmentListViewModel(
     }
 
     fun onDeleteEnrollment(enrollmentId: String) {
+        viewModelScope.launch {
+            schoolDataSource.enrollmentDataSource.deleteEnrollment(
+                uid = enrollmentId
+            )
+            pagingSourceHolder.invalidate()
+        }
     }
 
     fun onDateFormatted(date: LocalDate?): String {

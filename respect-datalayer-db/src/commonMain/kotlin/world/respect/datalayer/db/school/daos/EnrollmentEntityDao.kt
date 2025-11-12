@@ -63,4 +63,9 @@ interface EnrollmentEntityDao {
         uidNums: List<Long>
     ): List<EnrollmentEntity>
 
+    @Query("""
+        DELETE FROM EnrollmentEntity 
+        WHERE eUid = :uid""")
+     suspend fun deleteEnrollment(uid: String)
+
 }

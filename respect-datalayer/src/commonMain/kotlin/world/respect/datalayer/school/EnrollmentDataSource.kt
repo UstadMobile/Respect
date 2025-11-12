@@ -56,6 +56,8 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
         list: List<Enrollment>
     )
 
+    suspend fun deleteEnrollment(uid: String)
+
     companion object {
 
         const val ENDPOINT_NAME = "enrollment"

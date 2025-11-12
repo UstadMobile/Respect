@@ -103,6 +103,14 @@ class EnrollmentDataSourceDb(
         upsertEnrollments(list, false)
     }
 
+    override suspend fun deleteEnrollment(uid: String) {
+            schoolDb.useWriterConnection { con ->
+                con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                    schoolDb.getEnrollmentEntityDao().deleteEnrollment(uid)
+                }
+            }
+        }
+
     override suspend fun updateLocal(
         list: List<Enrollment>,
         forceOverwrite: Boolean
@@ -115,4 +123,6 @@ class EnrollmentDataSourceDb(
             uids.map { uidNumberMapper(it) }
         ).map { it.toModel() }
     }
+
+
 }

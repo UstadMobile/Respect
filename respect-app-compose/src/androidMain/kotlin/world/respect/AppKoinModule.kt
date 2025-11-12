@@ -185,6 +185,7 @@ import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
+import world.respect.shared.viewmodel.person.deleteaccount.DeleteAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
@@ -315,6 +316,7 @@ val appKoinModule = module {
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::DeleteAccountViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

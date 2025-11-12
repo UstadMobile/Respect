@@ -177,7 +177,27 @@ fun App(
                 }
             },
             floatingActionButton = {
-                if (appUiStateVal.fabState.visible) {
+                if (appUiStateVal.expandableFabState.visible) {
+                    ExpandableFab(
+                        state = appUiStateVal.expandableFabState,
+                        onToggle = {
+                            appUiStateVal = appUiStateVal.copy(
+                                expandableFabState = appUiStateVal.expandableFabState.copy(
+                                    expanded = !appUiStateVal.expandableFabState.expanded
+                                )
+                            )
+                        },
+                        onItemClick = { item ->
+                            item.onClick()
+                            appUiStateVal = appUiStateVal.copy(
+                                expandableFabState = appUiStateVal.expandableFabState.copy(
+                                    expanded = false
+                                )
+                            )
+                        }
+                    )
+                }
+                else if (appUiStateVal.fabState.visible) {
                     ExtendedFloatingActionButton(
                         modifier = Modifier.testTag("floating_action_button"),
                         onClick = appUiStateVal.fabState.onClick,

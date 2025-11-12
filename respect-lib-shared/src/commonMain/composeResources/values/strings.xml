@@ -429,4 +429,18 @@
     <string name="empty_list_description_admin">You haven't added any apps for your school yet.</string>
     <string name="empty_list_description_non_admin">No apps added for your school yet. Ask your admin to add some.</string>
 
+    <string name="regenerate_invite_code">Regenerate invite code</string>
+    <string name="copy_link">Copy link</string>
+    <string name="invite_settings">Invite settings</string>
+    <string name="invite_multiple_allowed">Invite multiple people</string>
+    <string name="approval_required">Approval required</string>
+    <string name="allow_multiple_people_to_use_this_invite">Allow multiple people to use this invite</string>
+    <string name="invite_via_sms">Send invite via SMS</string>
+    <string name="invite_via_email">Send invite via Email</string>
+    <string name="invite_via_share">Share link</string>
+    <string name="qr_code">QR code</string>
+    <string name="code">Code</string>
+    <string name="class_name_or_school_name">Class name or school name</string>
+
+
 </resources>

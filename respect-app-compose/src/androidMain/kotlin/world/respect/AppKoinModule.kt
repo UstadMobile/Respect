@@ -184,6 +184,7 @@ import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewMo
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
+import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
@@ -298,6 +299,7 @@ val appKoinModule = module {
     viewModelOf(::AccountListViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
+    viewModelOf(::InvitePersonViewModel)
     viewModelOf(::PersonEditViewModel)
     viewModelOf(::PersonDetailViewModel)
     viewModelOf(::ReportDetailViewModel)

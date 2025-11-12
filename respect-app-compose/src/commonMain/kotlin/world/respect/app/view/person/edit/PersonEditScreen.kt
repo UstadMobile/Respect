@@ -29,7 +29,6 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
@@ -72,7 +71,7 @@ fun PersonEditScreen(
     onClickAddFamilyMember: () -> Unit,
     onRemoveFamilyMember: (Person) -> Unit,
 ) {
-    val person = uiState.person.dataOrNull()
+    val person = uiState.person
     val fieldsEnabled = uiState.fieldsEnabled
     val scrollState = rememberScrollState()
 
@@ -143,8 +142,8 @@ fun PersonEditScreen(
                     Icon(Icons.Default.Add, contentDescription = "")
                 }
             )
-            val familyMembers = uiState.familyMembers.dataOrNull()
-            familyMembers?.forEach { familyPerson ->
+            val familyMembers = uiState.familyMembers
+            familyMembers.forEach { familyPerson ->
                 ListItem(
                     leadingContent = {
                         RespectPersonAvatar(familyPerson.fullName())

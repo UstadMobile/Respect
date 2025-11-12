@@ -15,6 +15,10 @@ import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface PersonDataSource: WritableDataSource<Person> {
 
+    /**
+     * @param includeRelated if true, then include all Persons related (as per
+     *        Person.relatedPersonUids) to those that match the other criteria.
+     */
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val filterByClazzUid: String? = null,

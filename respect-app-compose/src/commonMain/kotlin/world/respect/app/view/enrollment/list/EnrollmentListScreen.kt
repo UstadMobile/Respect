@@ -69,7 +69,6 @@ fun EnrollmentListScreen(
             val beginDate = onDateFormatted(enrollment?.beginDate)
             val endDate = onDateFormatted(enrollment?.endDate)
             val isExpanded = expandedItemUid == enrollment?.uid
-            println("Format date $beginDate $endDate")
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 headlineContent = {

@@ -17,7 +17,8 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-
+- runFlow: "subflows/admin_add_class.yaml"
+- runFlow: "subflows/admin_add_student.yaml"
 - tapOn: "People"
 - assertVisible:
     id: "app_title"
@@ -38,8 +39,103 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Required field"   # Gender field is mandatory
 - tapOn: "Gender*"
-- tapOn: "Female"
+- tapOn: "Male"
+- tapOn:
+    id: "role"
+- tapOn: "Student"
 - tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
+
+# Parent user adding 3 child users as Family members who added to the app in 3 different ways
+- tapOn: "People"
+- assertVisible:
+    id: "app_title"
+    text: "People"
+- tapOn:
+    id: "floating_action_button"   #  +Person button
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: "Parent"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Parent"
+
+# Add Family member - existing user - already added by admin
+- tapOn: "Family member"
+- assertVisible:
+    id: "app_title"
+    text: "Select person"
+- tapOn: "Test User"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- assertVisible: "Test User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Parent User"
+- assertVisible: "Test User"
+
+- tapOn:
+    id: "floating_action_button"   # Edit button
+
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+
+# Add Family member - existing user - already signup to a class using invite code from an admin
+- tapOn: "Family member"
+- assertVisible:
+    id: "app_title"
+    text: "Select person"
+- tapOn: "Student User"
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- assertVisible: "Student User"
+
+# Add Family member - as new person
+- tapOn: "Family member"
+- tapOn: "Add person"
+- tapOn: "First names*"
+- inputText: "Child"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn:
+    id: "role"
+- assertNotVisible: "Parent"
+- assertNotVisible: "Teacher"
+- assertNotVisible: "System administrator"
+- tapOn: "Student"
+
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+
+    # Parent user added 3 child users - verify 3 users are in the list
+- assertVisible: "Child User"
+- assertVisible: "Test User"
+- assertVisible: "Student User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Parent User"
+- assertVisible: "Child User"
+- assertVisible: "Test User"
+- assertVisible: "Student User"
+
+
+- tapOn: "Test User"
 - assertVisible:
     id: "app_title"
     text: "Test User"
@@ -48,6 +144,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Edit person"
+- assertVisible: "Parent User"
+
 # Validate DOB field
 - tapOn: "Date of birth"
 - runScript:
@@ -94,7 +192,7 @@ onFlowComplete:
 - eraseText
 - inputText: "Testuser@gmail.com"
 - assertVisible: "Testuser@gmail.com"
-- hideKeyboard
+#- hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"

@@ -135,19 +135,16 @@ fun CurriculumMappingEditScreen(
                 Spacer(modifier = Modifier.height(2.dp))
 
                 OutlinedTextField(
-                    value = uiState.title,
+                    value = uiState.mapping?.title ?: "",
                     onValueChange = onTitleChanged,
-                    label = { Text(stringResource(Res.string.book_title)) },
+                    label = { Text(stringResource(Res.string.book_title)+ "*") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("book_title_field"),
                     singleLine = true,
                     isError = uiState.titleError != null,
                     supportingText = {
-                        val titleError = uiState.titleError
-                        if (titleError != null) {
-                            Text(stringResource(Res.string.required_field))
-                        }
+                        Text(stringResource(Res.string.required_field))
                     }
                 )
             }

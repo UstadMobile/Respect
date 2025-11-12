@@ -400,13 +400,9 @@ private fun LessonItem(
         Spacer(modifier = Modifier.width(12.dp))
 
         val title = link.title ?: ""
-        OutlinedTextField(
-            value = title,
-            onValueChange = { onLessonTitleChanged(sectionIndex, linkIndex, it) },
-            placeholder = { Text("${stringResource(Res.string.lesson)} ${linkIndex + 1}") },
-            modifier = Modifier.weight(1f),
-            singleLine = true,
-            enabled = enabled
+        Text(
+            text = link.title ?: "${stringResource(Res.string.lesson)} ${linkIndex + 1}",
+            modifier = Modifier.weight(1f)
         )
 
         IconButton(

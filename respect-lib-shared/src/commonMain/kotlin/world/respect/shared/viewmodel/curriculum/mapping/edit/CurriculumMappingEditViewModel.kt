@@ -30,6 +30,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.navigation.RouteResultDest
+import world.respect.shared.viewmodel.app.appstate.getTitle
 
 data class CurriculumMappingEditUiState(
     val mapping: CurriculumMapping? = null,
@@ -106,7 +107,7 @@ class CurriculumMappingEditViewModel(
 
                 val newLink = CurriculumMappingSectionLink(
                     href = learningUnit.learningUnitManifestUrl.toString(),
-                    title = ""
+                    title = learningUnit.selectedPublication.metadata.title.getTitle()
                 )
 
                 currentSections[pendingSectionIndex] =

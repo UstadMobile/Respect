@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.shared.entities
+package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.Index
@@ -29,13 +29,11 @@ import kotlinx.serialization.Serializable
  *        options with a different timezone can produce different results. This is the TimeZone.id .
  */
 @Entity(
-    indices = arrayOf(
-        Index(
-            value = arrayOf("rqrReportUid", "rqrTimeZone"),
-            name = "idx_reportqueryresult_rqrreportuid_rqrtimezone",
-            unique = false
-        )
-    )
+    indices = [Index(
+        value = arrayOf("rqrReportUid", "rqrTimeZone"),
+        name = "idx_reportqueryresult_rqrreportuid_rqrtimezone",
+        unique = false
+    )]
 )
 @Serializable
 data class ReportQueryResult(

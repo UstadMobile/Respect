@@ -5,8 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class ReportEntity (
-    @PrimaryKey
     val rGuid: String,
+    @PrimaryKey
+    val rGuidHash: Long,
     val rOwnerGuid: String,
     val rTitle: String,
     val rOptions: String,

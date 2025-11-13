@@ -47,22 +47,9 @@ val ReportXAxis.label: StringResource
         ReportXAxis.DAY -> Res.string.day
         ReportXAxis.WEEK -> Res.string.weekly
         ReportXAxis.MONTH -> Res.string.monthly
-        ReportXAxis.QUARTER -> Res.string.quarterly
         ReportXAxis.YEAR -> Res.string.yearly
-        ReportXAxis.TIME_OF_DAY -> Res.string.time_of_day
         ReportXAxis.CLASS -> Res.string.class_name
-        ReportXAxis.SUBJECT -> Res.string.subject
-        ReportXAxis.SCHOOL -> Res.string.school
-        ReportXAxis.ASSESSMENT_TYPE -> Res.string.assessment_type
-        ReportXAxis.GRADE_LEVEL -> Res.string.grade_level
         ReportXAxis.GENDER -> Res.string.gender
-        ReportXAxis.AGE_GROUP -> Res.string.age_group
-        ReportXAxis.REGION -> Res.string.region
-        ReportXAxis.LANGUAGE -> Res.string.language
-        ReportXAxis.USER_ROLE -> Res.string.user_role
-        ReportXAxis.ACTIVITY_VERB -> Res.string.activity_verb
-        ReportXAxis.APPLICATION -> Res.string.application
-        ReportXAxis.DEVICE_TYPE -> Res.string.device_type
     }
 
 val FilterType.label: StringResource

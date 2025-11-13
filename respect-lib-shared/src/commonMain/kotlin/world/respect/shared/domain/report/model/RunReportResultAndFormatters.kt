@@ -1,7 +1,7 @@
 package world.respect.shared.domain.report.model
 
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
-import world.respect.shared.domain.report.query.RunReportUseCase
 
 data class RunReportResultAndFormatters(
     val reportResult: RunReportUseCase.RunReportResult,

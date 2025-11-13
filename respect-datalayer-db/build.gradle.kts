@@ -48,6 +48,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.androidx.sqlite.bundled)
+            api(projects.respectLibTest)
         }
 
         val commonTest by getting {

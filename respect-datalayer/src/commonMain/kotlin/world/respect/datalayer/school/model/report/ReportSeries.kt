@@ -30,22 +30,9 @@ enum class ReportXAxis(
     DAY(datePeriod = DatePeriod(days = 1)),
     WEEK(datePeriod = DatePeriod(days = 7)),
     MONTH(datePeriod = DatePeriod(months = 1)),
-    QUARTER(datePeriod = DatePeriod(months = 3)),
     YEAR(datePeriod = DatePeriod(years = 1)),
-    TIME_OF_DAY,
     CLASS,
-    SUBJECT,
-    SCHOOL,
-    ASSESSMENT_TYPE,
-    GRADE_LEVEL,
     GENDER(personJoinRequired = true),
-    AGE_GROUP(personJoinRequired = true),
-    REGION,
-    LANGUAGE(personJoinRequired = true),
-    USER_ROLE(personJoinRequired = true),
-    ACTIVITY_VERB,
-    APPLICATION,
-    DEVICE_TYPE,
 }
 
 enum class FilterType {

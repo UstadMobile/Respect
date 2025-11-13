@@ -1,8 +1,8 @@
 package world.respect.shared.domain.report.formatter
 
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.ext.MS_PER_HOUR
 import world.respect.datalayer.ext.MS_PER_MIN
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import kotlin.math.roundToInt

@@ -1,21 +1,52 @@
 package world.respect.datalayer.school
 
+import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.shared.WritableDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.params.GetListCommonParams
 
-interface IndicatorDataSource {
+interface IndicatorDataSource : WritableDataSource<Indicator> {
+    data class GetListParams(
+        val common: GetListCommonParams = GetListCommonParams(),
+    ) {
+        companion object {
 
-    suspend fun allIndicatorAsFlow(): Flow<DataLoadState<List<Indicator>>>
+            fun fromParams(params: StringValues): IndicatorDataSource.GetListParams {
+                return GetListParams(
+                    common = GetListCommonParams.fromParams(params),
+                )
+            }
+        }
+    }
 
-    suspend fun getIndicatorAsync(loadParams: DataLoadParams, indicatorId: String): DataLoadState<Indicator>
+    fun listAsFlow(
+        loadParams: DataLoadParams,
+        searchQuery: String? = null,
+    ): Flow<DataLoadState<List<Indicator>>>
 
-    suspend fun getIndicatorAsFlow(indicatorId: String): Flow<DataLoadState<Indicator>>
+    suspend fun findByGuid(
+        params: DataLoadParams,
+        guid: String
+    ): DataLoadState<Indicator>
 
-    suspend fun putIndicator(indicator: Indicator)
+    fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: IndicatorDataSource.GetListParams,
+    ): IPagingSourceFactory<Int, Indicator>
 
-    suspend fun updateIndicator(indicator: Indicator)
+    fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Indicator>>
+
+    override suspend fun store(
+        list: List<Indicator>,
+    )
 
     suspend fun initializeDefaultIndicators(idGenerator: () -> String)
+
+    companion object {
+        const val ENDPOINT_NAME = "indicator"
+    }
 }

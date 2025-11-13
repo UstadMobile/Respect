@@ -13,13 +13,13 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
-import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.NavCommand
@@ -42,15 +42,15 @@ data class ReportDetailUiState(
 
 class ReportDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val runReportUseCase: RunReportUseCase,
-    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase,
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
     private val route: ReportDetail = savedStateHandle.toRoute()
     private val reportUid = route.reportUid
+    private val runReportUseCase: RunReportUseCase by inject()
     private val schoolDataSource: SchoolDataSource by inject()
+    private val createGraphFormatterUseCase: CreateGraphFormatterUseCase by inject()
     private val _uiState = MutableStateFlow(ReportDetailUiState())
     val uiState: Flow<ReportDetailUiState> = _uiState.asStateFlow()
 
@@ -74,7 +74,7 @@ class ReportDetailViewModel(
             }
         }
         viewModelScope.launch {
-            schoolDataSource.reportDataSource.getReportAsFlow(
+            schoolDataSource.reportDataSource.findByGuidAsFlow(
                 route.reportUid
             ).collect { report ->
                 _appUiState.update { prev ->

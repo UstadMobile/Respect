@@ -22,7 +22,7 @@ class WriteQueueItem(
         val flag: Int
     ) {
         PERSON(1), CLASS(2), ENROLLMENT(3), PERSON_PASSWORD(4),
-        ASSIGNMENT(5), SCHOOL_APP(6);
+        ASSIGNMENT(5), SCHOOL_APP(6), INVITE(7);
 
         companion object {
 

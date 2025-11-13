@@ -19,7 +19,7 @@ adb install ./respect-app-compose/build/outputs/apk/debug/respect-app-compose-de
 maestro test \
     -e SCHOOL_URL=http://192.168.1.2:8094/ \
     -e SCHOOL_ADMIN_PASSWORD=adminpassword \
-    -e SCHOOL_NAME=TestSchool
+    -e SCHOOL_NAME=TestSchool \
     .maestro/flows/flow_name.yaml
 ```
 

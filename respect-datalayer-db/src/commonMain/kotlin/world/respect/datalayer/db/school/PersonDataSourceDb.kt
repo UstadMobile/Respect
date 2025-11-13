@@ -84,27 +84,6 @@ class PersonDataSourceDb(
         upsertPersons(list)
     }
 
-    override suspend fun deleteByGuid(guid: String): Boolean {
-        val guidHash = uidNumberMapper(guid)
-        return schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-
-                // Delete related roles and relationships first
-                schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(guidHash)
-                schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(guidHash)
-
-                // Delete the person itself
-                val deletedCount = schoolDb.getPersonEntityDao().deleteByPersonGuidHash(guidHash)
-
-                Napier.d(tag = TAG_DATALAYER) {
-                    "PersonDataSourceDb: deleted person with guidHash=$guidHash (deletedCount=$deletedCount)"
-                }
-
-                deletedCount > 0
-            }
-        }
-    }
-
     override suspend fun findByUsername(username: String): Person? {
         return schoolDb.getPersonEntityDao().findByUsername(username)?.toPersonEntities()?.toModel()
     }

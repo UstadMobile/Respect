@@ -160,23 +160,4 @@ class PersonDataSourceHttp(
             setBody(list)
         }
     }
-    override suspend fun deleteByGuid(guid: String): Boolean {
-        return try {
-            httpClient.delete (
-                url = URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
-                    .apply {
-                        parameters.append(DataLayerParams.GUID, guid)
-                    }
-                    .build()
-            ) {
-                useTokenProvider(tokenProvider)
-                contentType(ContentType.Application.Json)
-            }
-            true
-        } catch (e: Exception) {
-            Napier.e("PersonDataSourceHttp: deleteByGuid($guid) failed", e)
-            false
-        }
-    }
-
 }

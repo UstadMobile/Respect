@@ -167,4 +167,8 @@ class PersonDataSourceHttp(
             setBody(list)
         }
     }
+
+    override suspend fun deleteByGuid(guid: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }

@@ -132,4 +132,8 @@ class PersonDataSourceRepository(
             }
         )
     }
+
+    override suspend fun deleteByGuid(guid: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }

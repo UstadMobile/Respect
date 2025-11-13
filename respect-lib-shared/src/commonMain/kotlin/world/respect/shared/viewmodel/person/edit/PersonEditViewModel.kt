@@ -77,7 +77,8 @@ data class PersonEditUiState(
     val genderError: UiText? = null,
     val firstNameError: UiText? = null,
     val lastNameError: UiText? = null,
-    val filterByRole: PersonRoleEnum?=null,
+    val presetRole: PersonRoleEnum? = null,
+    val hasManageFamilyPermission: Boolean = false,
 ) {
     val person: Person?
         get() = persons.dataOrNull()?.firstOrNull { it.guid == uid }
@@ -95,6 +96,11 @@ data class PersonEditUiState(
                 dateOfBirthError != null ||
                 phoneNumError != null ||
                 emailError!=null
+
+    val showFamilyMembers: Boolean
+        get() = hasManageFamilyPermission && person?.roles?.any {
+            it.roleEnum in listOf(PersonRoleEnum.PARENT, PersonRoleEnum.STUDENT)
+        } == true && presetRole == null
 }
 
 class PersonEditViewModel(
@@ -118,7 +124,9 @@ class PersonEditViewModel(
         Person.TABLE_ID
     ).toString()
 
-    private val _uiState = MutableStateFlow(PersonEditUiState(uid = guid))
+    private val _uiState = MutableStateFlow(
+        PersonEditUiState(uid = guid, presetRole = route.presetRole)
+    )
 
     val uiState = _uiState.asStateFlow()
 
@@ -146,8 +154,8 @@ class PersonEditViewModel(
 
             _uiState.update { prev ->
                 prev.copy(
-                    roleOptions = if (route.filterByRole != null) {
-                        listOf(route.filterByRole)
+                    roleOptions = if (route.presetRole != null) {
+                        listOf(route.presetRole)
                     } else {
                         when (currentPersonRole) {
                             PersonRoleEnum.TEACHER -> listOf(
@@ -164,7 +172,9 @@ class PersonEditViewModel(
                             else -> emptyList()
                         }
                     },
-                    filterByRole = route.filterByRole,
+                    hasManageFamilyPermission = currentPersonRole == PersonRoleEnum.TEACHER
+                            || currentPersonRole == PersonRoleEnum.SITE_ADMINISTRATOR
+                            || currentPersonRole == PersonRoleEnum.SYSTEM_ADMINISTRATOR
                 )
             }
 
@@ -200,14 +210,14 @@ class PersonEditViewModel(
                                     roles = listOf(
                                         PersonRole(
                                             isPrimaryRole = true,
-                                            roleEnum = PersonRoleEnum.STUDENT,
+                                            roleEnum = route.presetRole ?: PersonRoleEnum.STUDENT,
                                         )
                                     ),
                                     gender = PersonGenderEnum.UNSPECIFIED
                                 )
                             )
                         ),
-                        showRoleDropdown = true,
+                        showRoleDropdown = route.presetRole == null,
                     )
                 }
             }
@@ -308,6 +318,10 @@ class PersonEditViewModel(
             relatedPersonUids = uiState.value.familyMembers.map { it.guid }
         ) ?: return
 
+        val initialStatePersons = savedStateHandle.get<String>(KEY_INITIAL_STATE)?.let {
+            json.decodeFromString(ListSerializer(Person.serializer()), it)
+        }
+
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
         val dob = personToSave.dateOfBirth
@@ -354,7 +368,7 @@ class PersonEditViewModel(
         launchWithLoadingIndicator {
             try {
                 val modTime = Clock.System.now()
-                val familyMembersToStore = uiState.value.familyMembers.mapNotNull { familyPerson ->
+                val familyMembersAdded = uiState.value.familyMembers.mapNotNull { familyPerson ->
                     if(guid !in familyPerson.relatedPersonUids) {
                         familyPerson.copy(
                             relatedPersonUids = familyPerson.relatedPersonUids + guid,
@@ -365,8 +379,23 @@ class PersonEditViewModel(
                     }
                 }
 
-                val persons = listOf(personToSave.copy(lastModified = modTime)) + familyMembersToStore
-                schoolDataSource.personDataSource.store(persons)
+                val familyMembersRemoved: List<Person> = initialStatePersons?.filter {
+                    it.guid != guid
+                }?.mapNotNull { familyPerson ->
+                    if(familyPerson.guid !in personToSave.relatedPersonUids) {
+                        familyPerson.copy(
+                            relatedPersonUids = familyPerson.relatedPersonUids - guid,
+                            lastModified = modTime,
+                        )
+                    }else {
+                        null
+                    }
+                } ?: emptyList()
+
+                schoolDataSource.personDataSource.store(
+                    familyMembersAdded + familyMembersRemoved + personToSave.copy(lastModified = modTime)
+                )
+
                 if(
                     !navResultReturner.sendResultIfResultExpected(
                         route = route,

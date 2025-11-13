@@ -24,9 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.allow_multiple_people_to_use_this_invite
 import world.respect.shared.generated.resources.approval_required
@@ -38,6 +41,9 @@ import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
 import world.respect.shared.generated.resources.invite_via_sms
 import world.respect.shared.generated.resources.qr_code
+import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.role
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonUiState
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 
@@ -53,7 +59,9 @@ fun InvitePersonScreen(
         onInviteViaEmail = viewModel::onSendLinkViaEmail,
         onInviteViaShare = viewModel::onShareLink,
         onInviteMultipleAllowedChanged = viewModel::setInviteMultipleAllowed,
-        onApprovalRequiredChanged = viewModel::setApprovalRequired
+        onApprovalRequiredChanged = viewModel::setApprovalRequired,
+        onRoleChange = viewModel::onRoleChange,
+        onClickGetCode = viewModel::onClickGetCode
     )
 }
 
@@ -64,20 +72,23 @@ fun InvitePersonScreen(
     onInviteViaSms: () -> Unit,
     onInviteViaEmail: () -> Unit,
     onInviteViaShare: () -> Unit,
+    onClickGetCode: () -> Unit,
     onInviteMultipleAllowedChanged: (Boolean) -> Unit,
-    onApprovalRequiredChanged: (Boolean) -> Unit
+    onApprovalRequiredChanged: (Boolean) -> Unit,
+    onRoleChange: (PersonRoleEnum) -> Unit
 ) {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .defaultItemPadding()
             .verticalScroll(rememberScrollState())
     ) {
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultItemPadding()
+
         ) {
             Text(text = stringResource(Res.string.class_name_or_school_name))
             Text(
@@ -87,6 +98,47 @@ fun InvitePersonScreen(
 
         HorizontalDivider()
 
+        val roleEnumVal = uiState.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.invite_multiple_allowed)) },
+            trailingContent = {
+                Switch(
+                    checked = uiState.inviteMultipleAllowed,
+                    onCheckedChange = { onInviteMultipleAllowedChanged(it) }
+                )
+            },
+            leadingContent = { Icon(Icons.Default.Person4, contentDescription = null) },
+            supportingContent = { Text(stringResource(Res.string.allow_multiple_people_to_use_this_invite)) }
+        )
+
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.approval_required)) },
+            trailingContent = {
+                Switch(
+                    checked = uiState.approvalRequired,
+                    onCheckedChange = { onApprovalRequiredChanged(it) }
+                )
+            },
+            leadingContent = { Icon(Icons.Default.PersonAdd, contentDescription = null) }
+
+        )
+        RespectExposedDropDownMenuField(
+            value = roleEnumVal,
+            modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
+            label = {
+                Text(stringResource(Res.string.role) + "*")
+            },
+            onOptionSelected = { newRole ->
+                onRoleChange(newRole)
+            },
+            options = uiState.roleOptions,
+            itemText = { stringResource(it.label) },
+            enabled = true,
+            supportingText = {
+                Text(stringResource(Res.string.required))
+            }
+        )
+        HorizontalDivider()
 
         ListItem(
             modifier = Modifier.clickable { onCopyCode() },
@@ -118,35 +170,10 @@ fun InvitePersonScreen(
         )
 
         ListItem(
-            modifier = Modifier.clickable { onInviteViaShare() },
+            modifier = Modifier.clickable { onClickGetCode() },
             leadingContent = { Icon(Icons.Default.Code, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.code)) }
         )
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.invite_multiple_allowed)) },
-            trailingContent = {
-                Switch(
-                    checked = uiState.inviteMultipleAllowed,
-                    onCheckedChange = { onInviteMultipleAllowedChanged(it) }
-                )
-            },
-            leadingContent = {Icon(Icons.Default.Person4, contentDescription = null)},
-            supportingContent = {Text(stringResource(Res.string.allow_multiple_people_to_use_this_invite))}
-        )
-
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.approval_required)) },
-            trailingContent = {
-                Switch(
-                    checked = uiState.approvalRequired,
-                    onCheckedChange = { onApprovalRequiredChanged(it) }
-                )
-            },
-            leadingContent = {Icon(Icons.Default.PersonAdd, contentDescription = null)}
-
-        )
-
-
 
 
     }

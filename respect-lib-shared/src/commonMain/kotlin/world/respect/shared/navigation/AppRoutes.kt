@@ -586,3 +586,7 @@ data class ChangePassword(
 
 @Serializable
 object InvitePerson: RespectAppRoute
+
+
+@Serializable
+object CopyCode: RespectAppRoute

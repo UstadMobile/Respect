@@ -440,6 +440,10 @@
     <string name="invite_via_share">Share link</string>
     <string name="qr_code">QR code</string>
     <string name="code">Code</string>
+    <string name="copy">Copy</string>
+    <string name="code_private_info">
+        This code is private. If it is shared with someone, they can enter this code here to join.
+    </string>
     <string name="class_name_or_school_name">Class name or school name</string>
 
 

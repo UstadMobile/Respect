@@ -55,6 +55,17 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import world.respect.shared.generated.resources.manage_enrollments
+import world.respect.shared.generated.resources.more_options
+import world.respect.shared.generated.resources.remove_from_class
+
 
 @Composable
 fun ClazzDetailScreen(
@@ -71,8 +82,9 @@ fun ClazzDetailScreen(
         onClickDismissInvite = viewModel::onClickDismissInvite,
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
-        onToggleStudentsSection = viewModel::onToggleStudentsSection
-
+        onToggleStudentsSection = viewModel::onToggleStudentsSection,
+        onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
+        onClickManageEnrollments = viewModel::onClickManageEnrollments
     )
 }
 
@@ -86,7 +98,9 @@ fun ClazzDetailScreen(
     onClickDismissInvite: (Person) -> Unit,
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
-    onToggleStudentsSection: () -> Unit
+    onToggleStudentsSection: () -> Unit,
+    onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
 ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -143,7 +157,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -183,7 +197,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if(uiState.showAddTeacher) {
+            if (uiState.showAddTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -206,7 +220,7 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?.toString()
+                            val dob = person?.dateOfBirth ?: ""
                             Text(
                                 text =
                                     "${stringResource(Res.string.gender_literal)}: $gender, " +
@@ -265,7 +279,7 @@ fun ClazzDetailScreen(
                         },
                         supportingContent = {
                             val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth?.toString()
+                            val dob = person?.dateOfBirth ?: ""
                             Text(
                                 text = "${stringResource(Res.string.gender_literal)}:" +
                                         " $gender, ${stringResource(Res.string.date_of_birth)}: $dob"
@@ -327,8 +341,8 @@ fun ClazzDetailScreen(
             )
         }
 
-        if(uiState.isTeachersExpanded) {
-            if(uiState.showAddTeacher) {
+        if (uiState.isTeachersExpanded) {
+            if (uiState.showAddTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -352,21 +366,12 @@ fun ClazzDetailScreen(
 
             respectPagingItems(
                 items = teacherLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.TEACHER, index)
-                }
+                key = { person, index -> person.key(EnrollmentRoleEnum.TEACHER, index) }
             ) { teacher ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = teacher?.fullName() ?: ""
-                        )
-                    },
-                    headlineContent = {
-                        Text(text = teacher?.fullName() ?: "")
-                    }
+                PersonListItemWithMenu(
+                    person = teacher,
+                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) }
                 )
             }
         }
@@ -396,7 +401,7 @@ fun ClazzDetailScreen(
                         modifier = Modifier.size(24.dp)
                             .rotate(
                                 if (uiState.isStudentsExpanded) 0f else -90f
-                            ),
+                            )
                     )
                 }
             )
@@ -426,31 +431,65 @@ fun ClazzDetailScreen(
                     )
                 }
             }
-
             respectPagingItems(
                 items = studentLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.STUDENT, index)
-                }
+                key = { person, index -> person.key(EnrollmentRoleEnum.STUDENT, index) }
             ) { student ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = student?.fullName() ?: ""
-                        )
+                PersonListItemWithMenu(
+                    person = student,
+                    onClickRemove = {
+                        onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT)
                     },
-
-                    headlineContent = {
-                        Text(
-                            text = student?.fullName() ?: ""
-                        )
-                    }
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) }
                 )
             }
         }
     }
 }
 
+@Composable
+fun PersonListItemWithMenu(
+    person: Person?,
+    onClickRemove: (Person) -> Unit,
+    onClickManage: (Person) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        modifier = Modifier.fillMaxWidth(),
+        leadingContent = {
+            RespectPersonAvatar(name = person?.fullName() ?: "")
+        },
+        headlineContent = {
+            Text(text = person?.fullName().orEmpty())
+        },
+        trailingContent = {
+            IconButton(onClick = { expanded = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(resource = Res.string.more_options)
+                )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.remove_from_class)) },
+                    onClick = {
+                        expanded = false
+                        person?.also(onClickRemove)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.manage_enrollments)) },
+                    onClick = {
+                        expanded = false
+                        person?.also(onClickManage)
+                    }
+                )
+            }
+        }
+    )
+}

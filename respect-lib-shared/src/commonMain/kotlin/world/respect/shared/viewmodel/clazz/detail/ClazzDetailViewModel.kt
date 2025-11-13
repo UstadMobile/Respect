@@ -37,6 +37,7 @@ import world.respect.shared.generated.resources.active
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzDetail
+import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonList
@@ -275,6 +276,15 @@ class ClazzDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ClazzEdit(route.guid))
         )
+    }
+
+    fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {}
+
+    fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                EnrollmentList(person.guid,role.name,route.guid))
+            )
     }
 
     companion object {

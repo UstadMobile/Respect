@@ -2,6 +2,7 @@ package world.respect.datalayer.http.school
 
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -116,4 +117,17 @@ class EnrollmentDataSourceHttp(
             "EnrollmentDataSourceHttp: posted ${list.size} items(${list.joinToString { it.uid }}) to $url (status=${response.status.value}"
         }
     }
+
+    override suspend fun deleteEnrollment(uid: String) {
+            val url = respectEndpointUrl("${EnrollmentDataSource.ENDPOINT_NAME}/$uid")
+
+            val response = httpClient.delete(url) {
+                useTokenProvider(tokenProvider)
+                useValidationCacheControl(validationHelper)
+            }
+
+            Napier.d(tag = TAG_DATALAYER) {
+                "EnrollmentDataSourceHttp: deleted enrollment uid=$uid (status=${response.status.value}) from $url"
+            }
+        }
 }

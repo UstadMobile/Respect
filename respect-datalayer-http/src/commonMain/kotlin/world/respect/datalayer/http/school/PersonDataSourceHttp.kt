@@ -1,6 +1,8 @@
 package world.respect.datalayer.http.school
 
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -167,8 +169,23 @@ class PersonDataSourceHttp(
             setBody(list)
         }
     }
-
     override suspend fun deleteByGuid(guid: String): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            httpClient.delete (
+                url = URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME))
+                    .apply {
+                        parameters.append(DataLayerParams.GUID, guid)
+                    }
+                    .build()
+            ) {
+                useTokenProvider(tokenProvider)
+                contentType(ContentType.Application.Json)
+            }
+            true
+        } catch (e: Exception) {
+            Napier.e("PersonDataSourceHttp: deleteByGuid($guid) failed", e)
+            false
+        }
     }
+
 }

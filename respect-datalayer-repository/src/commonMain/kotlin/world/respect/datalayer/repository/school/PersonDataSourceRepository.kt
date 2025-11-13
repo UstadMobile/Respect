@@ -134,6 +134,22 @@ class PersonDataSourceRepository(
     }
 
     override suspend fun deleteByGuid(guid: String): Boolean {
-        TODO("Not yet implemented")
+        val deleted = local.deleteByGuid(guid)
+
+        if (deleted) {
+            val timeNow = systemTimeInMillis()
+            remoteWriteQueue.add(
+                listOf(
+                    WriteQueueItem(
+                        model = WriteQueueItem.Model.PERSON,
+                        uid = guid,
+                        timeQueued = timeNow,
+                    )
+                )
+            )
+        }
+
+        return deleted
     }
+
 }

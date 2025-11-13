@@ -10,6 +10,8 @@ object DataLayerParams {
 
     const val GUID = "guid"
 
+    const val INCLUDE_RELATED = "includeRelated"
+
     const val SEARCH_QUERY = "q"
 
     const val FILTER_BY_CLASS_UID = "filterByClassUid"

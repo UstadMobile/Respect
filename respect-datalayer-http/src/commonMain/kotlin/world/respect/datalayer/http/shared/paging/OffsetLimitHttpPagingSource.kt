@@ -2,7 +2,6 @@ package world.respect.datalayer.http.shared.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.paging.log
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder

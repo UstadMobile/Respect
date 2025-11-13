@@ -62,18 +62,45 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-        SELECT * 
-         FROM PersonEntity
+           WITH $LIST_PERSONS_CTES_SQL
+                         
+         SELECT PersonEntity.*
+           FROM PersonEntity
+          WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+          ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllAsFlow(): Flow<List<PersonEntityWithRoles>>
+    fun listAsFlow(
+        since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
+    ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
-        SELECT * 
-         FROM PersonEntity
-        WHERE PersonEntity.pStored > :since 
+           WITH $LIST_PERSONS_CTES_SQL
+                         
+         SELECT PersonEntity.*
+           FROM PersonEntity
+          WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+          ORDER BY PersonEntity.pGivenName
     """)
-    suspend fun findAll(
+    suspend fun list(
         since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
     ): List<PersonEntityWithRoles>
 
     @Transaction
@@ -87,12 +114,16 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-        SELECT * 
-         FROM PersonEntity
-              $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
-     ORDER BY PersonEntity.pGivenName
+           WITH $LIST_PERSONS_CTES_SQL
+                         
+         SELECT PersonEntity.*
+           FROM PersonEntity
+          WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+          ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllAsPagingSource(
+    fun listAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
@@ -100,15 +131,20 @@ interface PersonEntityDao {
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
+         WITH $LIST_PERSONS_CTES_SQL
+        
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
                PersonEntity.pFamilyName AS familyName, 
                PersonEntity.pUsername AS username
           FROM PersonEntity
-               $LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL
+         WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
       ORDER BY PersonEntity.pGivenName
     """)
     fun findAllListDetailsAsPagingSource(
@@ -119,7 +155,9 @@ interface PersonEntityDao {
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
     ): PagingSource<Int, PersonListDetails>
+
     @Query("""
             SELECT * 
             FROM PersonEntity
@@ -127,31 +165,79 @@ interface PersonEntityDao {
             """
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
+    @Transaction
+    @Query("""
+        SELECT *
+          FROM PersonEntity
+         WHERE PersonEntity.pGuidHash IN (
+                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
+                  FROM PersonRelatedPersonEntity
+                 WHERE PersonRelatedPersonEntity.prpPersonUidNum = :guidHash
+              )
+         ORDER BY PersonEntity.pGivenName
+    """)
+    fun findFamilyMembersRelatedToPerson(
+        guidHash: Long,
+    ): Flow<List<PersonEntityWithRoles>>
+
+
+
 
 
     companion object {
 
-        const val LIST_FROM_PERSON_ENTITY_WHERE_CLAUSE_SQL = """
-        WHERE PersonEntity.pStored > :since 
-          AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
-          AND (:inClazzGuidHash = 0 OR
-               EXISTS(
-                    SELECT EnrollmentEntity.eUid
-                      FROM EnrollmentEntity
-                     WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
-                       AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
-                       AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
-                       AND :timeNow BETWEEN
-                                    COALESCE(EnrollmentEntity.eBeginDate, 0) AND
-                                    COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
-               )
-              ) 
-         AND (:filterByName IS NULL 
-              OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
-         AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 
-              (SELECT PersonRoleEntity.prRoleEnum
-                 FROM PersonRoleEntity
-                WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
+        /**
+         * This CTE expression is shared between all functions that return a list. It handles the
+         * includeRelated parameter efficiently. includeRelated is required by PersonDetail/Edit
+         * to load related family members _and_ the ClassDetail screen to load related family
+         * members for pending enrollees where applicable.
+         */
+        const val LIST_PERSONS_CTES_SQL = """
+            Persons(uidNum) AS (
+                   SELECT PersonEntity.pGuidHash 
+                     FROM PersonEntity
+                    WHERE PersonEntity.pStored > :since 
+                      AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
+                      AND (:inClazzGuidHash = 0 OR
+                           EXISTS(
+                                SELECT EnrollmentEntity.eUid
+                                  FROM EnrollmentEntity
+                                 WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
+                                   AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
+                                   AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
+                                   AND :timeNow BETWEEN
+                                                COALESCE(EnrollmentEntity.eBeginDate, 0) AND
+                                                COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
+                           )
+                          ) 
+                      AND (:filterByName IS NULL 
+                           OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
+                      AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 
+                           (SELECT PersonRoleEntity.prRoleEnum
+                              FROM PersonRoleEntity
+                             WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
+            ),
+                
+            RelatedPersons(uidNum) AS (
+                SELECT PersonEntity.pGuidHash
+                  FROM PersonEntity
+                 WHERE :includeRelated 
+                   AND PersonEntity.pGuidHash IN(
+                        SELECT DISTINCT PersonRelatedPersonEntity.prpOtherPersonUidNum
+                          FROM PersonRelatedPersonEntity
+                         WHERE PersonRelatedPersonEntity.prpPersonUidNum IN(
+                               SELECT Persons.uidNum
+                                 FROM Persons)
+                       )
+            ),
+                
+            AllPersons(uidNum) AS (
+                SELECT uidNum 
+                  FROM Persons
+                 UNION
+                 SELECT uidNum 
+                   FROM RelatedPersons
+            )
         """
 
     }

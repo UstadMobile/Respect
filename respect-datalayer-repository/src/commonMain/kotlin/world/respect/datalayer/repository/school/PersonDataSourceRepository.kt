@@ -19,7 +19,6 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import kotlin.time.Instant
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class PersonDataSourceRepository(
@@ -56,23 +55,22 @@ class PersonDataSourceRepository(
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
-        return local.listAsFlow(loadParams, searchQuery)
+        return local.listAsFlow(loadParams, params)
     }
 
     override suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
+        params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
-        val remote = remote.list(loadParams, searchQuery, since)
+        val remote = remote.list(loadParams, params)
         if(remote is DataReadyState) {
             local.updateLocal(remote.data)
             validationHelper.updateValidationInfo(remote.metaInfo)
         }
 
-        return local.list(loadParams, searchQuery, since).combineWithRemote(remote)
+        return local.list(loadParams, params).combineWithRemote(remote)
     }
 
     override fun listAsPagingSource(

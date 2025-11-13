@@ -1,8 +1,6 @@
 package world.respect.datalayer.http.school
 
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType

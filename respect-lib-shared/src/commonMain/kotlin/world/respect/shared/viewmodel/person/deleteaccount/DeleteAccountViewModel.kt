@@ -84,8 +84,8 @@ class DeleteAccountViewModel(
     }
 
     fun onDeleteAccount() {
-
+        viewModelScope.launch {
+            schoolDataSource.personDataSource.deleteByGuid(route.guid)
+        }
     }
-
-
 }

@@ -79,6 +79,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         list: List<Person>
     )
 
+    suspend fun deleteByGuid(guid: String): Boolean
 
     companion object {
 

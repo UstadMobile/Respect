@@ -12,16 +12,20 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
-import kotlin.time.Instant
 
 interface PersonDataSource: WritableDataSource<Person> {
 
+    /**
+     * @param includeRelated if true, then include all Persons related (as per
+     *        Person.relatedPersonUids) to those that match the other criteria.
+     */
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val filterByClazzUid: String? = null,
         val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
         val filterByName: String? = null,
         val filterByPersonRole: PersonRoleEnum? = null,
+        val includeRelated: Boolean = false,
     ) {
 
         companion object {
@@ -36,6 +40,7 @@ interface PersonDataSource: WritableDataSource<Person> {
                     filterByPersonRole = stringValues[FILTER_BY_PERSON_ROLE]?.let {
                         PersonRoleEnum.fromValue(it)
                     },
+                    includeRelated = stringValues[DataLayerParams.INCLUDE_RELATED]?.toBoolean() ?: false,
                 )
             }
         }
@@ -50,13 +55,12 @@ interface PersonDataSource: WritableDataSource<Person> {
 
     fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String? = null,
+        params: GetListParams = GetListParams(),
     ): Flow<DataLoadState<List<Person>>>
 
     suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String? = null,
-        since: Instant? = null,
+        params: GetListParams = GetListParams(),
     ): DataLoadState<List<Person>>
 
     fun listAsPagingSource(
@@ -69,6 +73,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         loadParams: DataLoadParams,
         listParams: GetListParams,
     ): IPagingSourceFactory<Int, PersonListDetails>
+
 
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on

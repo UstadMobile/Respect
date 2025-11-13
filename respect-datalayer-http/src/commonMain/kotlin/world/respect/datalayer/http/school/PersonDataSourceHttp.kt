@@ -6,7 +6,6 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
@@ -35,7 +34,6 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.datalayer.shared.params.GetListCommonParams
-import kotlin.time.Instant
 
 class PersonDataSourceHttp(
     override val schoolUrl: Url,
@@ -52,11 +50,12 @@ class PersonDataSourceHttp(
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, filterByClazzUid)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_NAME, filterByName)
+                parameters.appendIfNotNull(DataLayerParams.INCLUDE_RELATED, includeRelated.toString())
             }
             .build()
     }
 
-    override suspend fun findByUsername(username: String): Person? {
+    override suspend fun findByUsername(username: String): Person {
         TODO("Not yet implemented")
     }
 
@@ -92,32 +91,24 @@ class PersonDataSourceHttp(
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
         return httpClient.getDataLoadResultAsFlow<List<Person>>(
-            urlFn = {
-                PersonDataSource.GetListParams(
-                    GetListCommonParams(searchQuery = searchQuery)
-                ).urlWithParams()
-            },
+            urlFn = { params.urlWithParams() },
             dataLoadParams = loadParams,
             validationHelper = validationHelper,
         ) {
-            headers[HttpHeaders.Authorization] = "Bearer ${tokenProvider.provideToken().accessToken}"
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }
     }
 
     override suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
+        params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
         return httpClient.getAsDataLoadState<List<Person>>(
-            url = URLBuilder(respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)).apply {
-                since?.also {
-                    parameters.append(DataLayerParams.SINCE, it.toString())
-                }
-            }.build(),
+            url = params.urlWithParams(),
             validationHelper = validationHelper,
         ) {
             useTokenProvider(tokenProvider)

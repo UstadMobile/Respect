@@ -11,12 +11,15 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.generated.resources.Res
@@ -35,10 +38,19 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 
 data class PersonDetailUiState(
-    val person: DataLoadState<Person> = DataLoadingState(),
+    val guid: String = "",
+    val persons: DataLoadState<List<Person>> = DataLoadingState(),
     val manageAccountVisible: Boolean = false,
     val createAccountVisible: Boolean = false,
-)
+) {
+
+    val person: Person?
+        get() = persons.dataOrNull()?.firstOrNull { it.guid == guid }
+
+    val familyMembers: List<Person>
+        get() = persons.dataOrNull()?.filter { it.guid != guid } ?: emptyList()
+
+}
 
 class PersonDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -52,7 +64,7 @@ class PersonDetailViewModel(
 
     private val route: PersonDetail = savedStateHandle.toRoute()
 
-    private val _uiState = MutableStateFlow(PersonDetailUiState())
+    private val _uiState = MutableStateFlow(PersonDetailUiState(guid = route.guid))
 
     val uiState = _uiState.asStateFlow()
 
@@ -68,14 +80,26 @@ class PersonDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.personDataSource.findByGuidAsFlow(
-                route.guid
+            schoolDataSource.personDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                params = PersonDataSource.GetListParams(
+                    common = GetListCommonParams(
+                        guid = route.guid
+                    ),
+                    includeRelated = true,
+                )
             ).combine(accountManager.selectedAccountAndPersonFlow) { person, activeAccount ->
                 Pair(person, activeAccount)
-            }.collect { (person, activeAccount) ->
-                val personVal = person.dataOrNull()
+            }.collect { (persons, activeAccount) ->
+                val personsVal = persons.dataOrNull()
+                if(personsVal != null) {
+                    println(personsVal.joinToString())
+                }
+
+
+                val personVal = personsVal?.firstOrNull { it.guid == route.guid }
                 val hasAccountPermission = activeAccount?.person?.isAdmin() == true
-                        || activeAccount?.person?.guid == person.dataOrNull()?.guid
+                        || activeAccount?.person?.guid == personVal?.guid
                 val personRole = personVal?.roles?.firstOrNull()?.roleEnum
 
                 val canEdit = hasAccountPermission ||
@@ -84,7 +108,7 @@ class PersonDetailViewModel(
 
                 _appUiState.update { prev ->
                     prev.copy(
-                        title = person.dataOrNull()?.fullName()?.asUiText(),
+                        title = personVal?.fullName()?.asUiText(),
                         fabState = prev.fabState.copy(
                             visible = canEdit,
                         )
@@ -93,11 +117,11 @@ class PersonDetailViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        person = person,
+                        persons = persons,
                         manageAccountVisible = hasAccountPermission && personVal?.username != null,
                         createAccountVisible = personVal != null &&
                                 activeAccount?.person?.isAdminOrTeacher() == true &&
-                                personVal.username == null
+                                personVal.username == null,
                     )
                 }
             }
@@ -117,7 +141,7 @@ class PersonDetailViewModel(
     }
 
     fun navigateToManageAccount() {
-        uiState.value.person.dataOrNull().let {
+        uiState.value.persons.dataOrNull().let {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     ManageAccount(guid = route.guid)
@@ -127,9 +151,19 @@ class PersonDetailViewModel(
     }
 
     fun onClickPhoneNumber() {
-        uiState.value.person.dataOrNull()?.phoneNumber?.also { phoneNum ->
+        uiState.value.person?.phoneNumber?.also { phoneNum ->
             onClickPhoneNumUseCase?.invoke(phoneNum)
         }
+    }
+
+    fun onClickFamilyMember(guid:String){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                PersonDetail(
+                    guid = guid
+                )
+            )
+        )
     }
 
 }

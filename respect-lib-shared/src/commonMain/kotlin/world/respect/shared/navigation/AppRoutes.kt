@@ -585,18 +585,26 @@ data class ManageAccount(
 data class PersonEdit(
     val guid: String?,
     private val resultDestStr: String? = null,
+    private val presetRoleStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
+    @Transient
+    val presetRole: PersonRoleEnum? = presetRoleStr?.let {
+        PersonRoleEnum.fromValue(it)
+    }
+
     companion object {
         fun create(
             guid: String?,
             resultDest: ResultDest? = null,
+            presetRole: PersonRoleEnum? = null,
         ) = PersonEdit(
             guid = guid,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            presetRoleStr = presetRole?.value,
         )
     }
 

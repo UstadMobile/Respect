@@ -1,18 +1,36 @@
 package world.respect.shared.viewmodel.person.deleteaccount
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.delete_account
+import world.respect.shared.generated.resources.error_name_mismatched
+import world.respect.shared.generated.resources.required
 import world.respect.shared.navigation.DeleteAccount
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.RespectViewModel
+import kotlin.getValue
 
 data class DeleteAccountUiState(
-    val accountGuid: String = "",
+    val userName: String? = null,
+    val enteredName: String = "",
+    val userNameError: UiText? = null
 )
+
 class DeleteAccountViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
@@ -25,7 +43,47 @@ class DeleteAccountViewModel(
     private val _uiState = MutableStateFlow(DeleteAccountUiState())
 
     val uiState = _uiState.asStateFlow()
-    fun onDeleteAccount(){
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
+    init {
+        viewModelScope.launch {
+            val personSelected = schoolDataSource.personDataSource.findByGuid(
+                loadParams = DataLoadParams(),
+                guid = route.guid,
+            ).dataOrNull()
+
+            _uiState.update {
+                it.copy(
+                    userName = personSelected?.fullName(),
+                    enteredName = personSelected?.fullName().orEmpty()
+                )
+            }
+        }
+        _appUiState.update {
+            it.copy(
+                title = Res.string.delete_account.asUiText()
+            )
+        }
+    }
+
+    fun onEntityChanged(username: String) {
+        _uiState.update { current ->
+            val actualName = current.userName.orEmpty()
+            val isMismatch = username != actualName
+
+            current.copy(
+                enteredName = username,
+                userNameError = when {
+                    username.isBlank() -> Res.string.required.asUiText()
+                    isMismatch -> Res.string.error_name_mismatched.asUiText()
+                    else -> null
+                }
+            )
+        }
+    }
+
+    fun onDeleteAccount() {
 
     }
 

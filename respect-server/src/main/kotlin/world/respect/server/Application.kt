@@ -1,5 +1,6 @@
 package world.respect.server
 
+import io.github.aakira.napier.Napier
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -28,13 +29,12 @@ import world.respect.server.routes.getRespectSchoolJson
 import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
-import okio.withLock
-import org.koin.core.qualifier.TypeQualifier
 import org.koin.ktor.ext.inject
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
@@ -51,16 +51,15 @@ import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
-import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
-import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
-import java.util.concurrent.locks.ReentrantLock
 
 const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
 
 @Suppress("unused") // Used via application.conf
 fun Application.module() {
+    Napier.takeLogarithm()
+    Napier.base(LogbackAntiLog())
 
     val serverProperties = Properties().apply {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
@@ -94,8 +93,6 @@ fun Application.module() {
             contentType = ContentType.Application.Json
         )
     }
-
-    val scopeLock = ReentrantLock()
 
 
     install(Authentication) {

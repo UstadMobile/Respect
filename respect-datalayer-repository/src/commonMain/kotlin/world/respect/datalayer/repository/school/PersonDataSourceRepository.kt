@@ -98,7 +98,7 @@ class PersonDataSourceRepository(
                 )
             },
             local = local.listAsPagingSource(loadParams, params),
-            tag = "Repo.listAsPaging"
+            tag = { "Repo.listAsPaging(params=$params)" },
         )
     }
 
@@ -113,7 +113,7 @@ class PersonDataSourceRepository(
                 )
             },
             local = local.listDetailsAsPagingSource(loadParams, listParams),
-            tag = "Repo.listDetailsAsPaging"
+            tag = { "Repo.listDetailsAsPaging(params=$listParams)" },
         )
     }
 

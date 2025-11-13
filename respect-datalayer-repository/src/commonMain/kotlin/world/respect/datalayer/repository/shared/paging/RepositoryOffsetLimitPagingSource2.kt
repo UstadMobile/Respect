@@ -3,6 +3,7 @@ package world.respect.datalayer.repository.shared.paging
 import androidx.paging.PagingSource
 import world.respect.datalayer.shared.paging.FilterPagingSource
 import io.github.aakira.napier.Napier
+import world.respect.datalayer.shared.paging.LogPrefixFunction
 
 /**
  * PagingSource that uses a remote mediator
@@ -13,13 +14,15 @@ import io.github.aakira.napier.Napier
 class RepositoryOffsetLimitPagingSource2<Local: Any>(
     internal val local: PagingSource<Int, Local>,
     val remoteMediator: RemoteMediator2,
-    tag: String? = null,
+    tag: LogPrefixFunction = NO_TAG,
 ) : FilterPagingSource<Int, Local>(
     src = local,
     tag = tag,
 ){
 
-    private val logPrefix = "RPaging/RepositoryOffsetLimitPagingSource2(tag = $tag):"
+    private val logPrefix: String by lazy {
+        "RPaging/RepositoryOffsetLimitPagingSource2(tag = ${tag()}):"
+    }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Local> {
         Napier.d("$logPrefix load key=${params.key}")

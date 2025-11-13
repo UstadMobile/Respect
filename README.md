@@ -1,5 +1,10 @@
 # RESPECT
 
+
+[<img src="https://devserver3.ustadmobile.com/jenkins/job/RESPECT-Primary/badge/icon?subject=Build">](https://devserver3.ustadmobile.com/jenkins/job/RESPECT-Primary)
+
+[<img src="https://devserver3.ustadmobile.com/jenkins/job/RESPECT-end-to-end//badge/icon?subject=End-To-End-Tests">](https://devserver3.ustadmobile.com/jenkins/job/RESPECT-end-to-end)
+
 ## Development environment setup:
 
 These instructions are intended for developers who wish to build/run from source code. Development

@@ -48,6 +48,8 @@ import world.respect.app.view.report.indicator.edit.IndictorEditScreen
 import world.respect.app.view.report.indicator.list.IndicatorListScreen
 import world.respect.app.view.report.list.ReportListScreen
 import world.respect.app.view.report.list.ReportTemplateListScreen
+import world.respect.app.view.school.AddSchoolScreen
+import world.respect.app.view.school.HostSelectionScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -60,6 +62,7 @@ import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewMode
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
+import world.respect.shared.navigation.AddSchool
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentDetail
@@ -92,6 +95,7 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.HostSelectionList
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.Onboarding
@@ -128,6 +132,8 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
+import world.respect.shared.viewmodel.school.AddSchoolViewModel
+import world.respect.shared.viewmodel.school.HostSelectionViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
@@ -501,6 +507,23 @@ fun AppNavHost(
             )
 
             SchoolDirectoryListScreen(viewModel)
+        }
+
+        composable<HostSelectionList> {
+            val viewModel: HostSelectionViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            HostSelectionScreen(viewModel)
+        }
+        composable<AddSchool> {
+            val viewModel: AddSchoolViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+
+            AddSchoolScreen(viewModel)
         }
 
         composable<SchoolDirectoryEdit>{

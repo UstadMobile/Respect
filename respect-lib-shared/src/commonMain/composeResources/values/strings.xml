@@ -424,4 +424,6 @@
     <string name="empty_list_description_admin">You haven't added any apps for your school yet.</string>
     <string name="empty_list_description_non_admin">No apps added for your school yet. Ask your admin to add some.</string>
 
+    <string name="select_host">Select Host</string>
+
 </resources>

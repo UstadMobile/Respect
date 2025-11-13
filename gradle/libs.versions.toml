@@ -42,6 +42,7 @@ androidx-credentials =  "1.5.0"
 androidx-work = "2.10.4"
 jvm-toolchain = "17"
 acra = "5.13.1"
+custom-tab = "1.9.0"
 
 # Compose material3 as per https://developer.android.com/jetpack/androidx/releases/compose-material3
 # Required to use material3 window sizes
@@ -153,6 +154,7 @@ swagger-ui = { module = "org.webjars:swagger-ui", version.ref = "swagger-ui" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 
+androidx-browser = { module = "androidx.browser:browser", version.ref = "custom-tab" }
 acra-http = { module = "ch.acra:acra-http", version.ref = "acra" }
 acra-core = { module = "ch.acra:acra-core", version.ref = "acra" }
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "bfc8b1289ed3511ab9b9d184366e410f",
+    "identityHash": "3ee486682e6c06f59b56e14cd30f3de6",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -937,11 +937,94 @@
             "wqiQueueItemId"
           ]
         }
+      },
+      {
+        "tableName": "InviteEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iNewRole` INTEGER, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, `iInviteMultipleAllowed` INTEGER NOT NULL, `iApprovalRequired` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iExpiration` INTEGER, PRIMARY KEY(`iGuidHash`))",
+        "fields": [
+          {
+            "fieldPath": "iGuid",
+            "columnName": "iGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iGuidHash",
+            "columnName": "iGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iCode",
+            "columnName": "iCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iNewRole",
+            "columnName": "iNewRole",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForFamilyOfGuid",
+            "columnName": "iForFamilyOfGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForFamilyOfGuidHash",
+            "columnName": "iForFamilyOfGuidHash",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForClassGuid",
+            "columnName": "iForClassGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForClassGuidHash",
+            "columnName": "iForClassGuidHash",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForClassRole",
+            "columnName": "iForClassRole",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iInviteMultipleAllowed",
+            "columnName": "iInviteMultipleAllowed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iApprovalRequired",
+            "columnName": "iApprovalRequired",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iLastModified",
+            "columnName": "iLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iExpiration",
+            "columnName": "iExpiration",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "iGuidHash"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bfc8b1289ed3511ab9b9d184366e410f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3ee486682e6c06f59b56e14cd30f3de6')"
     ]
   }
 }

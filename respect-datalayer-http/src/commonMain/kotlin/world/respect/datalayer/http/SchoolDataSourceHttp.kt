@@ -7,15 +7,17 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.http.school.AssignmentDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
+import world.respect.datalayer.http.school.InviteDataSourceHttp
 import world.respect.datalayer.http.school.PersonDataSourceHttp
 import world.respect.datalayer.http.school.PersonPasskeyDataSourceHttp
 import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.AssignmentDataSource
-import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
+import world.respect.datalayer.school.IndicatorDataSource
+import world.respect.datalayer.school.InviteDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
@@ -104,6 +106,15 @@ class SchoolDataSourceHttp(
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
+        )
+    }
+
+    override val inviteDataSource: InviteDataSource by lazy {
+        InviteDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
         )
     }
 }

@@ -586,3 +586,9 @@ data class ChangePassword(
     val guid: String,
 ): RespectAppRoute
 
+@Serializable
+object InvitePerson: RespectAppRoute
+
+
+@Serializable
+object CopyCode: RespectAppRoute

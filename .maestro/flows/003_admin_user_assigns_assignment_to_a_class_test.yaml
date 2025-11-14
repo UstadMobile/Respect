@@ -16,8 +16,8 @@ onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/admin_add_app_and_teacher.yaml"
-
+- runFlow: "subflows/admin_add_app_flow.yaml"
+- runFlow: "subflows/admin_add_teacher_flow.yaml"
 - clearState: world.respect.app
 - launchApp:
     arguments:

@@ -1,0 +1,441 @@
+package world.respect.app.view.curriculum.mapping.edit
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_book_cover
+import world.respect.shared.generated.resources.book_description
+import world.respect.shared.generated.resources.book_title
+import world.respect.shared.generated.resources.chapter
+import world.respect.shared.generated.resources.click_plus_button
+import world.respect.shared.generated.resources.drag
+import world.respect.shared.generated.resources.lesson
+import world.respect.shared.generated.resources.mapping
+import world.respect.shared.generated.resources.no_chapter_added
+import world.respect.shared.generated.resources.remove_chapter
+import world.respect.shared.generated.resources.remove_lesson
+import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.to_add_one
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+
+@Composable
+fun CurriculumMappingEditScreen(
+    uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
+    onTitleChanged: (String) -> Unit = {},
+    onDescriptionChanged: (String) -> Unit = {},
+    onClickAddBookCover: () -> Unit = {},
+    onClickAddSection: () -> Unit = {},
+    onClickRemoveSection: (Int) -> Unit = {},
+    onSectionTitleChanged: (Int, String) -> Unit = { _, _ -> },
+    onSectionMoved: (Int, Int) -> Unit = { _, _ -> },
+    onClickAddLesson: (Int) -> Unit = {},
+    onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
+    onLessonTitleChanged: (Int, Int, String) -> Unit = { _, _, _ -> },
+) {
+    val haptic = LocalHapticFeedback.current
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        onMove = { from, to ->
+            val headerItemCount = 5
+            val fromIndex = from.index - headerItemCount
+            val toIndex = to.index - headerItemCount
+
+            if (fromIndex >= 0 && toIndex >= 0 &&
+                fromIndex < uiState.sections.size &&
+                toIndex < uiState.sections.size) {
+                onSectionMoved(fromIndex, toIndex)
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+        }
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp)
+    ) {
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(vertical = 20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .background(
+                                    color = Color.Gray.copy(alpha = 0.6f),
+                                    shape = CircleShape
+                                )
+                                .clickable(onClick = onClickAddBookCover),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.AddAPhoto,
+                                contentDescription = stringResource(Res.string.add_book_cover),
+                                modifier = Modifier.size(48.dp),
+                                tint = Color.Gray
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(Res.string.add_book_cover),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(2.dp))
+
+                OutlinedTextField(
+                    value = uiState.mapping?.title ?: "",
+                    onValueChange = onTitleChanged,
+                    label = { Text(stringResource(Res.string.book_title)+ "*") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("book_title_field"),
+                    singleLine = true,
+                    isError = uiState.titleError != null,
+                    supportingText = {
+                        Text(stringResource(Res.string.required_field))
+                    }
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = uiState.description,
+                    onValueChange = onDescriptionChanged,
+                    label = { Text(stringResource(Res.string.book_description)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = false,
+                    minLines = 1,
+                    maxLines = Int.MAX_VALUE
+                )
+            }
+
+            item {
+                Text(
+                    text = stringResource(Res.string.mapping),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = onClickAddSection,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(Res.string.chapter))
+                    }
+                }
+            }
+
+            if (uiState.sections.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Outlined.ContentPaste,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(Res.string.no_chapter_added),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(Res.string.click_plus_button),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(Res.string.to_add_one),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                items(
+                    items = uiState.sections,
+                    key = { section -> section.uid }
+                ) { section ->
+                    val sectionIndex = uiState.sections.indexOf(section)
+
+                    ReorderableItem(
+                        state = reorderableLazyListState,
+                        key = section.uid
+                    ) { isDragging ->
+                        SectionItem(
+                            section = section,
+                            sectionIndex = sectionIndex,
+                            isDragging = isDragging,
+                            onSectionTitleChanged = onSectionTitleChanged,
+                            onClickRemoveSection = onClickRemoveSection,
+                            onClickAddLesson = onClickAddLesson,
+                            onClickRemoveLesson = onClickRemoveLesson,
+                            onLessonTitleChanged = onLessonTitleChanged,
+                            dragModifier = Modifier.draggableHandle(
+                                onDragStarted = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                },
+                                onDragStopped = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionItem(
+    section: CurriculumMappingSection,
+    sectionIndex: Int,
+    isDragging: Boolean,
+    onSectionTitleChanged: (Int, String) -> Unit,
+    onClickRemoveSection: (Int) -> Unit,
+    onClickAddLesson: (Int) -> Unit,
+    onClickRemoveLesson: (Int, Int) -> Unit,
+    onLessonTitleChanged: (Int, Int, String) -> Unit,
+    dragModifier: Modifier = Modifier
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isDragging) 8.dp else 2.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        Icons.Filled.DragHandle,
+                        contentDescription = stringResource(Res.string.drag),
+                        modifier = dragModifier
+                            .size(24.dp),
+                        tint = if (isDragging) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    OutlinedTextField(
+                        value = section.title,
+                        onValueChange = { onSectionTitleChanged(sectionIndex, it) },
+                        placeholder = {
+                            Text("${stringResource(Res.string.chapter)} ${sectionIndex + 1}")
+                        },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        enabled = !isDragging
+                    )
+                }
+
+                IconButton(
+                    onClick = { onClickRemoveSection(sectionIndex) },
+                    modifier = Modifier.size(24.dp),
+                    enabled = !isDragging
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.remove_chapter),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 40.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = { onClickAddLesson(sectionIndex) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isDragging
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(Res.string.lesson))
+                }
+            }
+
+            section.items.forEachIndexed { linkIndex, link ->
+                LessonItem(
+                    link = link,
+                    sectionIndex = sectionIndex,
+                    linkIndex = linkIndex,
+                    onClickRemoveLesson = onClickRemoveLesson,
+                    onLessonTitleChanged = onLessonTitleChanged,
+                    enabled = !isDragging
+                )
+                if (linkIndex < section.items.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LessonItem(
+    link: CurriculumMappingSectionLink,
+    sectionIndex: Int,
+    linkIndex: Int,
+    onClickRemoveLesson: (Int, Int) -> Unit,
+    onLessonTitleChanged: (Int, Int, String) -> Unit,
+    enabled: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 40.dp, top = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                )
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        val title = link.title ?: ""
+        Text(
+            text = link.title ?: "${stringResource(Res.string.lesson)} ${linkIndex + 1}",
+            modifier = Modifier.weight(1f)
+        )
+
+        IconButton(
+            onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
+            modifier = Modifier.size(24.dp),
+            enabled = enabled
+        ) {
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = stringResource(Res.string.remove_lesson),
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun CurriculumMappingEditScreenForViewModel(
+    viewModel: CurriculumMappingEditViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    CurriculumMappingEditScreen(
+        uiState = uiState,
+        onTitleChanged = viewModel::onTitleChanged,
+        onDescriptionChanged = viewModel::onDescriptionChanged,
+        onClickAddBookCover = {},
+        onClickAddSection = viewModel::onClickAddSection,
+        onClickRemoveSection = viewModel::onClickRemoveSection,
+        onSectionTitleChanged = viewModel::onSectionTitleChanged,
+        onSectionMoved = viewModel::onSectionMoved,
+        onClickAddLesson = viewModel::onClickAddLesson,
+        onClickRemoveLesson = viewModel::onClickRemoveLesson,
+        onLessonTitleChanged = viewModel::onLessonTitleChanged,
+    )
+}

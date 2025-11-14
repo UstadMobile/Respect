@@ -433,6 +433,10 @@
     <string name="empty_list_description_admin">You haven't added any apps for your school yet.</string>
     <string name="empty_list_description_non_admin">No apps added for your school yet. Ask your admin to add some.</string>
 
-    <string name="enrollment_for">Enrollment for %1$s in %2$s</string>
+    <string name="enrollment_for">Enrollments for: </string>
+
+    <string name="pending_student">Pending student</string>
+    <string name="pending_teacher">Pending teacher</string>
+
 
 </resources>

@@ -128,10 +128,29 @@ class ClazzDetail(
 
 @Serializable
 data class EnrollmentList(
-    val personGuid: String,
-    val role: String,
-    val clazzGuid: String
-) : RespectAppRoute
+    val filterByPersonUid: String,
+    val roleStr: String,
+    val filterByClassUid: String
+) : RespectAppRoute {
+
+    @Transient
+    val role = EnrollmentRoleEnum.fromValue(roleStr)
+
+    companion object  {
+        fun create(
+            filterByPersonUid: String,
+            role: EnrollmentRoleEnum,
+            filterByClassUid: String
+        ) : EnrollmentList {
+            return EnrollmentList(
+                filterByPersonUid = filterByPersonUid,
+                roleStr = role.value,
+                filterByClassUid = filterByClassUid
+            )
+        }
+    }
+
+}
 
 @Serializable
 data class EnrollmentEdit(

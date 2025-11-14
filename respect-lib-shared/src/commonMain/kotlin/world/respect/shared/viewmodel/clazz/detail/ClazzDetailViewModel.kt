@@ -283,8 +283,13 @@ class ClazzDetailViewModel(
     fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                EnrollmentList(person.guid,role.name,route.guid))
+                EnrollmentList.create(
+                    filterByPersonUid = person.guid,
+                    role = role,
+                    filterByClassUid = route.guid
+                )
             )
+        )
     }
 
     companion object {

@@ -141,14 +141,6 @@ fun ClazzDetailScreen(
         }
 
         item {
-
-//            RespectFilterChipsHeader(
-//                options = uiState.chipOptions.map { it.option },
-//                selectedOption = uiState.selectedChip,
-//                onOptionSelected = { onSelectChip(it) },
-//                optionLabel = { it }
-//            )
-
             RespectListSortHeader(
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 sortOptions = uiState.sortOptions,

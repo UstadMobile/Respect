@@ -1,6 +1,5 @@
 package world.respect.app.view.enrollment.list
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,17 +20,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.edit
+import world.respect.shared.generated.resources.enrollment_for
 import world.respect.shared.generated.resources.more_options
+import world.respect.shared.util.ext.fullName
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListUiState
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
-import kotlinx.datetime.LocalDate
+import world.respect.shared.util.rememberFormattedDate
 
 
 @Composable
@@ -40,10 +44,10 @@ fun EnrollmentListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    EnrollmentListScreen(uiState = uiState,
+    EnrollmentListScreen(
+        uiState = uiState,
         onClickEdit=viewModel::onEditEnrollment,
-        onClickDelete=viewModel::onDeleteEnrollment,
-        onDateFormatted=viewModel::onDateFormatted
+        onClickDelete=viewModel::onDeleteEnrollment
     )
 }
 
@@ -52,40 +56,47 @@ fun EnrollmentListScreen(
     uiState: EnrollmentListUiState,
     onClickEdit: (Enrollment?) -> Unit,
     onClickDelete: (String) -> Unit,
-    onDateFormatted: (LocalDate?) -> String,
-
-    ) {
+) {
     val pager = respectRememberPager(uiState.enrollments)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    //Ensure that there is not more than one expanded item at a time
     var expandedItemUid by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item("header") {
+            val personName = uiState.forPerson.dataOrNull()?.fullName() ?: ""
+            Text(
+                text = stringResource(Res.string.enrollment_for) + personName,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            )
+        }
+
         respectPagingItems(
             items = lazyPagingItems,
             key = { item, index -> item?.uid ?: index.toString() },
             contentType = { EnrollmentDataSource.ENDPOINT_NAME },
-        )
-        { enrollment ->
-            val beginDate = onDateFormatted(enrollment?.beginDate)
-            val endDate = onDateFormatted(enrollment?.endDate)
+        ) { enrollment ->
+            val beginDate = enrollment?.beginDate?.let { rememberFormattedDate(it) } ?: ""
+            val endDate = enrollment?.endDate?.let { rememberFormattedDate(it) } ?: ""
+
             val isExpanded = expandedItemUid == enrollment?.uid
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 headlineContent = {
-                    Column {
-                        Text(
-                            text = "$beginDate - $endDate"
-                        )
-                        Text(
-                            text = "(${enrollment?.role})",
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall
-                        )
-                    }
+                    Text("$beginDate - $endDate")
+                },
+                supportingContent = {
+                    Text(
+                        text = enrollment?.role?.label?.let { stringResource(it) } ?: "",
+                    )
                 },
                 trailingContent = {
-                    IconButton(onClick = {
-                        expandedItemUid = if (isExpanded) null else enrollment?.uid
-                    }) {
+                    IconButton(
+                        onClick = {
+                            expandedItemUid = if (isExpanded) null else enrollment?.uid
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = stringResource(resource = Res.string.more_options)

@@ -8,10 +8,10 @@ All videos and test names are saved locally inside `cypress/downloads/`.
 
 ---
 
-## 📌 1. Purpose
+## 1. Purpose
 
 ### **A. saveTestNames.cy.js**
-Scrapes all Maestro test/flow names from the project page and stores them in:
+Extract all Maestro test/flow names from the project page and stores them in:
 
 ```
 
@@ -33,9 +33,32 @@ cypress/downloads/videos/
 ## 2. Prerequisites
 
 - Node.js (>= 16)
+
+Check if installed:
+
+```bash
+node -v
+npm -v
+````
+If not installed:
+
+```bash
+sudo apt install nodejs npm
+````
 - Cypress (>= 13)
+  
+Navigate to the project folder:
+
+```bash
+cd ~/StudioProjects/Respect
+````
+Install Cypress:
+
+```bash
+npm install cypress --save-dev
+````
 - Maestro account + login email
-- Valid Maestro project URL (usually from Jenkins)
+- Valid Maestro project URL (from Jenkins)
 
 ---
 
@@ -103,13 +126,13 @@ These tasks must be defined inside `setupNodeEvents`.
 ### **Step 1 – Save test names**
 
 ```bash
-cypress open --env projectUrl="YOUR_URL"
+npx cypress open --env projectUrl="MAESTRO_PROJECT_URL"
 ```
 
 ### **Step 2 – Download videos**
 
 ```bash
-cypress open --env projectUrl="YOUR_URL"
+npx cypress open --env projectUrl="MAESTRO_PROJECT_URL"
 ```
 
 ---

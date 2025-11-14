@@ -1,0 +1,23 @@
+{
+  "name": "respect",
+  "version": "1.0.0",
+  "description": "## Development environment setup:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UstadMobile/Respect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UstadMobile/Respect/issues"
+  },
+  "homepage": "https://github.com/UstadMobile/Respect#readme",
+  "devDependencies": {
+    "cypress": "^15.6.0"
+  }
+}

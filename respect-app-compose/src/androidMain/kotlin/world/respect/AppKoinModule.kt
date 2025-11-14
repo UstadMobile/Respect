@@ -121,6 +121,7 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroi
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.country.GetCountryForUrlUseCase
+import world.respect.shared.domain.country.GetCountryForUrlUseCaseImpl
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
@@ -271,10 +272,9 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
-    single {
-        GetCountryForUrlUseCase(
-            httpClient = get()
-        )
+    single<GetCountryForUrlUseCase> {
+        GetCountryForUrlUseCaseImpl(httpClient = get())
+
     }
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)

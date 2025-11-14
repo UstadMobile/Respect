@@ -1,6 +1,6 @@
 # Maestro Test Video Automation – Cypress Suite
 
-This repository contains two Cypress tests that automate:
+This cypress folder contains two Cypress tests that automate:
 1. Extracting Maestro test names.
 2. Downloading screen-recording videos for each test.
 

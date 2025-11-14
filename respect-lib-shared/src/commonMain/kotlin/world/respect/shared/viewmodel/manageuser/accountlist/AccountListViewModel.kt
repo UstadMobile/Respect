@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.manageuser.accountlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -16,6 +17,7 @@ import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.country.GetCountryForUrlUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.GetStartedScreen
@@ -24,6 +26,7 @@ import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
+import world.respect.shared.util.getFlagEmoji
 import world.respect.shared.viewmodel.RespectViewModel
 
 /**
@@ -38,14 +41,32 @@ data class AccountListUiState(
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
+    private val getCountryForUrlUseCase: GetCountryForUrlUseCase,
     savedStateHandle: SavedStateHandle
 ) : RespectViewModel(savedStateHandle){
 
     private val _uiState = MutableStateFlow(AccountListUiState())
+    private val _countryFlags = MutableStateFlow<Map<String, String>>(emptyMap())
 
     val uiState = _uiState.asStateFlow()
+    val countryFlags = _countryFlags.asStateFlow()
 
     private var emittedNavToGetStartedCommand = false
+
+    fun onFetchCountryForSchool(schoolUrl: String) {
+        viewModelScope.launch {
+            try {
+                val countryCode = getCountryForUrlUseCase(schoolUrl)
+                val flagEmoji = getFlagEmoji(countryCode) ?: ""
+
+                _countryFlags.update { currentFlags ->
+                    currentFlags + (schoolUrl to flagEmoji)
+                }
+            } catch (e: Exception) {
+                Napier.w("Failed to fetch country for $schoolUrl: ${e.message}")
+            }
+        }
+    }
 
     init {
         _appUiState.update {

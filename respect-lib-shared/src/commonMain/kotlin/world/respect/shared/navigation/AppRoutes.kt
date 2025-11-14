@@ -554,24 +554,26 @@ data class DeleteAccount(
 data class PersonEdit(
     val guid: String?,
     private val resultDestStr: String? = null,
-    private val filterByRoleStr: String? = null,
-    ) : RespectAppRoute, RouteWithResultDest {
+    private val presetRoleStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
     @Transient
-    val filterByRole: PersonRoleEnum? = filterByRoleStr?.let {
+    val presetRole: PersonRoleEnum? = presetRoleStr?.let {
         PersonRoleEnum.fromValue(it)
     }
+
     companion object {
         fun create(
             guid: String?,
             resultDest: ResultDest? = null,
-            filterByRole: PersonRoleEnum? = null,
-            ) = PersonEdit(
+            presetRole: PersonRoleEnum? = null,
+        ) = PersonEdit(
             guid = guid,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
-                filterByRoleStr = filterByRole?.value,
+            presetRoleStr = presetRole?.value,
         )
     }
 

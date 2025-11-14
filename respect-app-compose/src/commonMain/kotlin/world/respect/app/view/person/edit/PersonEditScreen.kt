@@ -41,6 +41,7 @@ import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.first_names
 import world.respect.shared.generated.resources.last_name
 import world.respect.shared.generated.resources.phone_number
+import world.respect.shared.generated.resources.remove
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.role
 import world.respect.shared.util.ext.fullName
@@ -125,44 +126,6 @@ fun PersonEditScreen(
             isError = uiState.genderError != null,
             errorText = uiState.genderError
         )
-        if (uiState.filterByRole==null) {
-            Text(
-                modifier = Modifier.defaultItemPadding(),
-                text = stringResource(Res.string.family_members),
-                style = MaterialTheme.typography.bodySmall,
-            )
-            ListItem(
-                modifier = Modifier.clickable {
-                    onClickAddFamilyMember()
-                },
-                headlineContent = {
-                    Text(stringResource(Res.string.family_member))
-                },
-                leadingContent = {
-                    Icon(Icons.Default.Add, contentDescription = "")
-                }
-            )
-            val familyMembers = uiState.familyMembers
-            familyMembers.forEach { familyPerson ->
-                ListItem(
-                    leadingContent = {
-                        RespectPersonAvatar(familyPerson.fullName())
-                    },
-                    headlineContent = {
-                        Text(familyPerson.fullName())
-                    },
-                    trailingContent = {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = "",
-                            modifier = Modifier.clickable {
-                                onRemoveFamilyMember(familyPerson)
-                            }
-                        )
-                    }
-                )
-            }
-        }
 
         if(uiState.showRoleDropdown) {
             val roleEnumVal = person?.roles?.first()?.roleEnum ?: PersonRoleEnum.STUDENT
@@ -193,7 +156,45 @@ fun PersonEditScreen(
                     Text(stringResource(Res.string.required))
                 }
             )
+        }
 
+        if (uiState.showFamilyMembers) {
+            Text(
+                modifier = Modifier.defaultItemPadding(),
+                text = stringResource(Res.string.family_members),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddFamilyMember()
+                },
+                headlineContent = {
+                    Text(stringResource(Res.string.family_member))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Add, contentDescription = "")
+                }
+            )
+            val familyMembers = uiState.familyMembers
+            familyMembers.forEach { familyPerson ->
+                ListItem(
+                    leadingContent = {
+                        RespectPersonAvatar(familyPerson.fullName())
+                    },
+                    headlineContent = {
+                        Text(familyPerson.fullName())
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(Res.string.remove),
+                            modifier = Modifier.clickable {
+                                onRemoveFamilyMember(familyPerson)
+                            }
+                        )
+                    }
+                )
+            }
         }
 
         RespectLocalDateField(

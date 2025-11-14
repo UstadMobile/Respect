@@ -21,6 +21,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
 import world.respect.shared.generated.resources.school_not_found
 import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.HostSelectionList
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
@@ -38,6 +39,7 @@ data class GetStartedUiState(
     val errorMessage: UiText? = null,
     val suggestions: List<SchoolDirectoryEntry> = emptyList(),
     val warning: UiText? = null,
+    val showAddMySchool: Boolean = false
 )
 
 
@@ -87,12 +89,14 @@ class GetStartedViewModel(
 
             flow.collect { dataState ->
                 dataState.dataOrNull()?.also { dataLoaded ->
+                    val hasSchoolNotFoundError =
+                        nameIsNotBlank && dataLoaded.isEmpty() && dataState.isReadyAndSettled()
                     _uiState.update {
                         it.copy(
                             suggestions = dataLoaded,
-                            errorText = Res.string.school_not_found.asUiText().takeIf {
-                                nameIsNotBlank && dataLoaded.isEmpty() && dataState.isReadyAndSettled()
-                            }
+                            errorText = Res.string.school_not_found.asUiText()
+                                .takeIf { hasSchoolNotFoundError },
+                            showAddMySchool = hasSchoolNotFoundError
                         )
                     }
                 }
@@ -115,6 +119,14 @@ class GetStartedViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LoginScreen.create(school.self)
+            )
+        )
+    }
+
+    fun onAddMySchool() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                HostSelectionList
             )
         )
     }

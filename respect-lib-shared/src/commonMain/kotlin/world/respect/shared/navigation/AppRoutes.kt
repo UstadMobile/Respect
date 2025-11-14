@@ -49,6 +49,19 @@ object Onboarding : RespectAppRoute
 object SchoolDirectoryList : RespectAppRoute
 
 @Serializable
+object HostSelectionList : RespectAppRoute
+
+@Serializable
+data class AddSchool(
+    val schoolUrlStr: String,
+) : RespectAppRoute {
+
+    companion object {
+        fun create(url: Url) = AddSchool(url.toString())
+    }
+}
+
+@Serializable
 object SchoolDirectoryEdit : RespectAppRoute
 
 @Serializable

@@ -14,6 +14,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.deleteaccount.DeleteAccountUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete_account
 import world.respect.shared.generated.resources.error_name_mismatched
@@ -39,6 +40,8 @@ class DeleteAccountViewModel(
     override val scope: Scope = accountManager.requireSelectedAccountScope()
 
     private val route: DeleteAccount = savedStateHandle.toRoute()
+
+    private val deleteAccountUseCase: DeleteAccountUseCase = scope.get()
 
     private val _uiState = MutableStateFlow(DeleteAccountUiState())
 
@@ -85,7 +88,13 @@ class DeleteAccountViewModel(
 
     fun onDeleteAccount() {
         viewModelScope.launch {
-
+            try {
+                val deleteStatus = deleteAccountUseCase(route.guid)
+                println("Delete Status $deleteStatus")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                println("Delete failed due to exception: ${e.message}")
+            }
         }
     }
 }

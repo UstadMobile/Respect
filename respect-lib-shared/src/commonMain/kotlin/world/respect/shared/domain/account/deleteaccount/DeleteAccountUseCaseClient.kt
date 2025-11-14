@@ -24,11 +24,13 @@ class DeleteAccountUseCaseClient(
         return try {
 
             val response: HttpResponse = httpClient.post(
-                URLBuilder(respectEndpointUrl("person/delete")).apply
-                {
-                    tokenProvider.provideToken()
-                    parameters.append("guid", guid)
-                }.build()
+                URLBuilder(
+                    respectEndpointUrl("person/delete")
+                ).apply
+                    {
+                        tokenProvider.provideToken()
+                        parameters.append("guid", guid)
+                    }.build()
             ).body()
 
             val success = response.status == HttpStatusCode.OK ||

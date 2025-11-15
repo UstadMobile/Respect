@@ -29,12 +29,12 @@ import kotlin.getValue
 data class DeleteAccountUiState(
     val userName: String? = null,
     val enteredName: String = "",
-    val userNameError: UiText? = null
-)
+    val userNameError: UiText? = null,
+    )
 
 class DeleteAccountViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -89,8 +89,10 @@ class DeleteAccountViewModel(
     fun onDeleteAccount() {
         viewModelScope.launch {
             try {
-                val deleteStatus = deleteAccountUseCase(route.guid)
-                println("Delete Status $deleteStatus")
+                deleteAccountUseCase(route.guid)
+                accountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
+                    accountAndPerson?.let { accountManager.endSession(it.account) }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 println("Delete failed due to exception: ${e.message}")

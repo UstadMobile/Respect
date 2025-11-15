@@ -33,9 +33,11 @@ class DeleteAccountUseCaseClient(
                     }.build()
             ).body()
 
+
             val success = response.status == HttpStatusCode.OK ||
                     response.status == HttpStatusCode.NoContent
-            success
+
+            return success
 
         } catch (e: Exception) {
             Napier.e("DeleteAccountUseCase: deleteByGuid($guid) failed: ${e.message}", e)

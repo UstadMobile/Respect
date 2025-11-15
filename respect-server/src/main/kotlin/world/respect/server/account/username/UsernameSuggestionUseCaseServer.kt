@@ -1,4 +1,4 @@
-package world.respect.server.account.invite.username
+package world.respect.server.account.username
 
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -9,7 +9,7 @@ import world.respect.shared.domain.account.username.filterusername.FilterUsernam
 class UsernameSuggestionUseCaseServer(
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val schoolDb: RespectSchoolDatabase,
-    ): UsernameSuggestionUseCase, KoinComponent  {
+    ): UsernameSuggestionUseCase, KoinComponent {
 
     companion object {
         private const val MAX_ATTEMPTS = 1000

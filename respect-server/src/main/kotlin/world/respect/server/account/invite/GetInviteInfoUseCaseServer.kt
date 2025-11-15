@@ -20,9 +20,9 @@ class GetInviteInfoUseCaseServer(
             code = code,
             classGuid = clazz.cGuid,
             className = clazz.cTitle,
-            userInviteType = if(code == clazz.cTeacherInviteCode) {
+            userInviteType = if (code == clazz.cTeacherInviteCode) {
                 RespectInviteInfo.UserInviteType.TEACHER
-            }else {
+            } else {
                 RespectInviteInfo.UserInviteType.STUDENT_OR_PARENT
             }
         )

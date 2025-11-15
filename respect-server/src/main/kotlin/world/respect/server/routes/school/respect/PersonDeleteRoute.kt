@@ -1,5 +1,6 @@
 package world.respect.server.routes.school.respect
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -11,12 +12,12 @@ fun Route.PersonDeleteRoute(
     deleteAccountUseCase: (ApplicationCall) -> DeleteAccountUseCase,
 ) {
     post("delete") {
+        
         val guid = call.request.queryParameters["guid"]
-            ?: throw IllegalStateException("No person found").withHttpStatus(400)
+            ?: return@post call.respond(HttpStatusCode.BadRequest, "Missing guid")
 
-        val response = deleteAccountUseCase(call).invoke(
-            guid = guid
-        )
-        call.respond(response)
-
-    }}
+        // pass both redeemRequest and guid to the use case
+        call.respond(deleteAccountUseCase(call).invoke (guid))
+        
+    }
+}

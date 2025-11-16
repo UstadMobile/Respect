@@ -84,7 +84,8 @@ fun ClazzDetailScreen(
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
         onToggleStudentsSection = viewModel::onToggleStudentsSection,
         onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
-        onClickManageEnrollments = viewModel::onClickManageEnrollments
+        onClickManageEnrollments = viewModel::onClickManageEnrollments,
+        onClickPerson = viewModel::onClickPerson,
     )
 }
 
@@ -101,6 +102,7 @@ fun ClazzDetailScreen(
     onToggleStudentsSection: () -> Unit,
     onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
     onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickPerson: (Person) -> Unit,
 ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -342,6 +344,7 @@ fun ClazzDetailScreen(
                         },
                         leadingContent = {
                             Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = stringResource(resource = Res.string.add_teacher)
                             )
@@ -362,8 +365,10 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
+                    showMenu = uiState.showAddTeacher,
                     onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
-                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) }
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) },
+                    onClick = onClickPerson,
                 )
             }
         }
@@ -409,6 +414,7 @@ fun ClazzDetailScreen(
 
                         leadingContent = {
                             Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = stringResource(resource = Res.string.add_student)
                             )
@@ -432,7 +438,9 @@ fun ClazzDetailScreen(
                     onClickRemove = {
                         onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT)
                     },
-                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) }
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) },
+                    showMenu = uiState.showAddStudent,
+                    onClick = onClickPerson,
                 )
             }
         }
@@ -442,46 +450,54 @@ fun ClazzDetailScreen(
 @Composable
 fun PersonListItemWithMenu(
     person: Person?,
+    showMenu: Boolean = false,
     onClickRemove: (Person) -> Unit,
-    onClickManage: (Person) -> Unit
+    onClickManage: (Person) -> Unit,
+    onClick: (Person) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     ListItem(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable {
+            person?.also(onClick)
+        },
         leadingContent = {
             RespectPersonAvatar(name = person?.fullName() ?: "")
         },
         headlineContent = {
             Text(text = person?.fullName().orEmpty())
         },
-        trailingContent = {
-            IconButton(onClick = { expanded = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(resource = Res.string.more_options)
-                )
-            }
+        trailingContent = if(showMenu) {
+            {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(resource = Res.string.more_options)
+                    )
+                }
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.remove_from_class)) },
-                    onClick = {
-                        expanded = false
-                        person?.also(onClickRemove)
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.manage_enrollments)) },
-                    onClick = {
-                        expanded = false
-                        person?.also(onClickManage)
-                    }
-                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.remove_from_class)) },
+                        onClick = {
+                            expanded = false
+                            person?.also(onClickRemove)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.manage_enrollments)) },
+                        onClick = {
+                            expanded = false
+                            person?.also(onClickManage)
+                        }
+                    )
+                }
             }
+        }else {
+            null
         }
     )
 }

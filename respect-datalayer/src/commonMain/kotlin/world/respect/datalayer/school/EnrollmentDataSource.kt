@@ -60,6 +60,11 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
         listParams: GetListParams,
     ): IPagingSourceFactory<Int, Enrollment>
 
+    suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: GetListParams,
+    ): DataLoadState<List<Enrollment>>
+
     override suspend fun store(
         list: List<Enrollment>
     )

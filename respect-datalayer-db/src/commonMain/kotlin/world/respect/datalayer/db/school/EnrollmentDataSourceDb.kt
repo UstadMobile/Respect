@@ -20,6 +20,7 @@ import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import world.respect.libutil.util.time.atStartOfDayInMillisUtc
 import kotlin.collections.map
 import kotlin.time.Clock
 
@@ -82,6 +83,24 @@ class EnrollmentDataSourceDb(
         }
     }
 
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: EnrollmentDataSource.GetListParams
+    ): DataLoadState<List<Enrollment>> {
+        return DataReadyState(
+            data = schoolDb.getEnrollmentEntityDao().list(
+                since = listParams.common.since?.toEpochMilliseconds() ?: 0,
+                uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
+                classUidRoleFlag = listParams.role?.flag ?: 0,
+                personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0,
+                includeDeleted = listParams.common.includeDeleted ?: false,
+                activeOnDayInUtcMs = listParams.activeOnDay?.atStartOfDayInMillisUtc() ?: 0,
+                notRemovedBefore = 0,
+            ).map { it.toModel() }
+        )
+    }
+
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
@@ -94,6 +113,8 @@ class EnrollmentDataSourceDb(
                 classUidRoleFlag = listParams.role?.flag ?: 0,
                 personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0,
                 includeDeleted = listParams.common.includeDeleted ?: false,
+                activeOnDayInUtcMs = listParams.activeOnDay?.atStartOfDayInMillisUtc() ?: 0,
+                notRemovedBefore = 0,
             ).map(
                 tag = { "EnrollmentDataSourceDb/list params=$listParams" }
             ) {

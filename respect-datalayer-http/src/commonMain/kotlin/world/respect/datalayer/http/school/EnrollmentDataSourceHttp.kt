@@ -107,6 +107,19 @@ class EnrollmentDataSourceHttp(
         }
     }
 
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: EnrollmentDataSource.GetListParams
+    ): DataLoadState<List<Enrollment>> {
+        return httpClient.getAsDataLoadState<List<Enrollment>>(
+            url = listParams.urlWithParams(),
+            validationHelper = validationHelper
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }
+    }
+
     override suspend fun store(list: List<Enrollment>) {
         val url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
         val response = httpClient.post(url) {

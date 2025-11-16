@@ -19,6 +19,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -138,12 +139,18 @@ class EnrollmentEditViewModel(
     fun onClickSave() {
         val currentEnrollment = _uiState.value.enrollment.dataOrNull() ?: return
 
+        val endDate = currentEnrollment.endDate
+
         val enrollment = currentEnrollment.copy(
-            lastModified = Clock.System.now()
+            lastModified = Clock.System.now(),
+            removedAt = if(endDate == null || endDate > localDateInCurrentTimeZone()) {
+                null
+            }else {
+                currentEnrollment.removedAt
+            }
         )
 
         val beginDate = enrollment.beginDate
-        val endDate = enrollment.endDate
 
         _uiState.update { prev ->
             prev.copy(

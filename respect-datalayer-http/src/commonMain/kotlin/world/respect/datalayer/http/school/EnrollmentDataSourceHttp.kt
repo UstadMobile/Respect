@@ -2,6 +2,7 @@ package world.respect.datalayer.http.school
 
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -49,6 +50,8 @@ class EnrollmentDataSourceHttp(
                     role?.value)
                 parameters.appendIfNotNull(EnrollmentDataSource.FILTER_BY_PERSON_UID,
                     personUid)
+                parameters.appendIfNotNull(DataLayerParams.ACTIVE_ON_DAY,
+                    activeOnDay?.toString())
             }.build()
     }
 
@@ -101,6 +104,19 @@ class EnrollmentDataSourceHttp(
                 },
                 logPrefixExtra = { "EnrollmentDataSource params=$listParams"}
             )
+        }
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: EnrollmentDataSource.GetListParams
+    ): DataLoadState<List<Enrollment>> {
+        return httpClient.getAsDataLoadState<List<Enrollment>>(
+            url = listParams.urlWithParams(),
+            validationHelper = validationHelper
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }
     }
 

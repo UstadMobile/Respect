@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
@@ -124,6 +125,60 @@ object ClazzList : RespectAppRoute
 class ClazzDetail(
     val guid: String,
 ) : RespectAppRoute
+
+@Serializable
+data class EnrollmentList(
+    val filterByPersonUid: String,
+    val roleStr: String,
+    val filterByClassUid: String
+) : RespectAppRoute {
+
+    @Transient
+    val role = EnrollmentRoleEnum.fromValue(roleStr)
+
+    companion object  {
+        fun create(
+            filterByPersonUid: String,
+            role: EnrollmentRoleEnum,
+            filterByClassUid: String
+        ) : EnrollmentList {
+            return EnrollmentList(
+                filterByPersonUid = filterByPersonUid,
+                roleStr = role.value,
+                filterByClassUid = filterByClassUid
+            )
+        }
+    }
+
+}
+
+@Serializable
+data class EnrollmentEdit(
+    val uid: String?,
+    val role: String,
+    val personGuid: String,
+    val clazzGuid: String,
+) : RespectAppRoute
+
+@Serializable
+class AddPersonToClazz(
+    val roleTypeStr: String,
+    val inviteCode: String? = null,
+) : RespectAppRoute {
+
+    @Transient
+    val roleType = EnrollmentRoleEnum.fromValue(roleTypeStr)
+
+    companion object {
+        fun create(
+            roleType: EnrollmentRoleEnum,
+            inviteCode: String?,
+        ) = AddPersonToClazz(
+            roleTypeStr = roleType.value,
+            inviteCode = inviteCode,
+        )
+    }
+}
 
 
 @Serializable

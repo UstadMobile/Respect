@@ -1,11 +1,13 @@
 package world.respect.datalayer.repository.school
 
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
+import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
@@ -14,6 +16,7 @@ import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
+import world.respect.datalayer.shared.DataLayerTags
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -52,7 +55,10 @@ class EnrollmentDataSourceRepository(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
     ): IPagingSourceFactory<Int, Enrollment> {
-        val remote = remote.listAsPagingSource(loadParams, listParams).invoke()
+        val remote = remote.listAsPagingSource(
+            loadParams = loadParams,
+            listParams = listParams.copy(common = listParams.common.copy(includeDeleted = true))
+        ).invoke()
         return RepositoryPagingSourceFactory(
             local = local.listAsPagingSource(loadParams, listParams),
             onRemoteLoad = { remoteLoadParams ->
@@ -63,6 +69,24 @@ class EnrollmentDataSourceRepository(
             },
             tag = { "EnrollmentDataSourceRepo(listParams=$listParams)" }
         )
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: EnrollmentDataSource.GetListParams
+    ): DataLoadState<List<Enrollment>> {
+        try {
+            val remote = remote.list(loadParams, listParams)
+            local.updateFromRemoteListIfNeeded(remote, validationHelper)
+        }catch(e: Throwable) {
+            Napier.w(
+                message = "EnrollmentDataSourceRepository.list() failed:",
+                throwable = e,
+                tag = DataLayerTags.TAG_DATALAYER
+            )
+        }
+
+        return local.list(loadParams, listParams)
     }
 
     override suspend fun store(list: List<Enrollment>) {
@@ -78,4 +102,5 @@ class EnrollmentDataSourceRepository(
             }
         )
     }
+
 }

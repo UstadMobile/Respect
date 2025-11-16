@@ -12,6 +12,12 @@ object DataLayerParams {
 
     const val INCLUDE_RELATED = "includeRelated"
 
+    const val INCLUDE_DELETED = "includeDeleted"
+
+    const val IN_CLASS_ON_DAY = "inClassOnDay"
+
+    const val ACTIVE_ON_DAY = "activeOnDay"
+
     const val SEARCH_QUERY = "q"
 
     const val FILTER_BY_CLASS_UID = "filterByClassUid"

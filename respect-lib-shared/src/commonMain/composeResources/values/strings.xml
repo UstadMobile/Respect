@@ -438,5 +438,6 @@
     <string name="pending_student">Pending student</string>
     <string name="pending_teacher">Pending teacher</string>
 
+    <string name="edit_enrollment">Edit enrollment</string>
 
 </resources>

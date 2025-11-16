@@ -157,7 +157,7 @@ data class EnrollmentEdit(
     val uid: String?,
     val role: String,
     val personGuid: String,
-    val clazzGuid: String
+    val clazzGuid: String,
 ) : RespectAppRoute
 
 @Serializable

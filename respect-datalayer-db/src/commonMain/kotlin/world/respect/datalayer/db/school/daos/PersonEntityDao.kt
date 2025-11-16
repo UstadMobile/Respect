@@ -79,9 +79,9 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
-        startOfTodaysDateInMillisAtUtc: Long = startOfTodaysDateInMillisAtUtc(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
@@ -102,9 +102,9 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
-        startOfTodaysDateInMillisAtUtc: Long = startOfTodaysDateInMillisAtUtc(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
@@ -120,10 +120,10 @@ interface PersonEntityDao {
 
 
     /**
-     * @param startOfTodaysDateInMillisAtUtc we need to know the start of today as per the query
-     *        (eg todays date as per the users timezone) in millis since epoch until 00:00 UTC to
-     *        compare against start date and end date for enrollment if specified. See docs for
-     *        startOfTodaysDateInMillisAtUtc function.
+     * @param inClassOnDayInUtcMs if filtering by clazzUid, and we want only those who have an active
+     *        enrollment on a given day (e.g. today as per the users timezone), then we need to know
+     *        what day that should be. LocalDate is stored as millis since epoch until 00:00 UTC for
+     *        the given date. See the docs for startOfTodaysDateInMillisAtUtc function.
      */
     @Transaction
     @Query("""
@@ -140,9 +140,9 @@ interface PersonEntityDao {
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
+        inClassOnDayInUtcMs: Long = 0,
         inClazzRoleFlag: Int = 0,
         filterByName: String? = null,
-        startOfTodaysDateInMillisAtUtc: Long = startOfTodaysDateInMillisAtUtc(),
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
@@ -167,9 +167,9 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
-        startOfTodaysDateInMillisAtUtc: Long = startOfTodaysDateInMillisAtUtc(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
@@ -205,9 +205,9 @@ interface PersonEntityDao {
                                  WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
                                    AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
                                    AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
-                                   AND (:includeDeleted 
-                                        OR (     (:startOfTodaysDateInMillisAtUtc >= COALESCE(EnrollmentEntity.eBeginDate, 0))
-                                            AND ((:startOfTodaysDateInMillisAtUtc - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))
+                                   AND ((:includeDeleted OR :inClassOnDayInUtcMs = 0) 
+                                        OR (     (:inClassOnDayInUtcMs >= COALESCE(EnrollmentEntity.eBeginDate, 0))
+                                            AND ((:inClassOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))
                                             AND (:timeNow <= COALESCE(EnrollmentEntity.eRemovedAt, ${Long.MAX_VALUE}))
                                             AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT} ))         
                            ) 

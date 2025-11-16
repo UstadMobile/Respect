@@ -26,7 +26,6 @@ import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
-import world.respect.libutil.util.time.startOfTodaysDateInMillisAtUtc
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
 
@@ -134,12 +133,11 @@ class PersonDataSourceDb(
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
             inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+            inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
             filterByName = params.filterByName,
             filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
             includeRelated = params.includeRelated,
             includeDeleted = params.common.includeDeleted ?: false,
-            startOfTodaysDateInMillisAtUtc = params.today?.atStartOfDayInMillisUtc()
-                ?: startOfTodaysDateInMillisAtUtc(),
         ).map { list ->
             DataReadyState(
                 data = list.map {
@@ -159,12 +157,11 @@ class PersonDataSourceDb(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+                inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
                 filterByName = params.filterByName,
                 filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
                 includeRelated = params.includeRelated,
                 includeDeleted = params.common.includeDeleted ?: false,
-                startOfTodaysDateInMillisAtUtc = params.today?.atStartOfDayInMillisUtc()
-                    ?: startOfTodaysDateInMillisAtUtc(),
             ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
                 it.toPersonEntities().toModel()
             }
@@ -181,12 +178,11 @@ class PersonDataSourceDb(
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
             inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+            inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
             filterByName = params.filterByName,
             filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
             includeRelated = params.includeRelated,
             includeDeleted = params.common.includeDeleted ?: false,
-            startOfTodaysDateInMillisAtUtc = params.today?.atStartOfDayInMillisUtc()
-                ?: startOfTodaysDateInMillisAtUtc(),
         ).map {
             it.toPersonEntities().toModel()
         }

@@ -81,7 +81,8 @@ class PersonDataSourceRepository(
         val remoteSource = remote.listAsPagingSource(
             loadParams = loadParams,
             params = params.copy(
-                common = params.common.copy(includeDeleted = true)
+                common = params.common.copy(includeDeleted = true),
+                inClassOnDay = null,
             )
         ).invoke()
 

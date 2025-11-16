@@ -49,7 +49,7 @@ class PersonDataSourceHttp(
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_NAME, filterByName)
                 parameters.appendIfNotNull(DataLayerParams.INCLUDE_RELATED, includeRelated.toString())
-                parameters.appendIfNotNull(DataLayerParams.TODAY, today?.toString())
+                parameters.appendIfNotNull(DataLayerParams.IN_CLASS_ON_DAY, inClassOnDay?.toString())
             }
             .build()
     }

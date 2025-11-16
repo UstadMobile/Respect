@@ -25,6 +25,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -102,6 +103,7 @@ class ClazzDetailViewModel(
                 params = PersonDataSource.GetListParams(
                     filterByClazzUid = route.guid,
                     filterByEnrolmentRole = role,
+                    inClassOnDay = localDateInCurrentTimeZone(),
                 )
             )
         }

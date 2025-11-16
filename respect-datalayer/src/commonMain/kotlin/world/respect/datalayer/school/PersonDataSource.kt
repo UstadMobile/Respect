@@ -20,9 +20,9 @@ interface PersonDataSource: WritableDataSource<Person> {
     /**
      * @param includeRelated if true, then include all Persons related (as per
      *        Person.relatedPersonUids) to those that match the other criteria.
-     * @param today: when using filterByClazzUid, we need to determine if an enrollment is active or
-     *        not, thus we need to know the current date as per the users timezone. The enrollment
-     *        will be deemed active if:
+     * @param inClassOnDay: when using filterByClazzUid, we often want to limit this to only those
+     *        that have an active enrollment (e.g. are currently members of the class).
+     *
      *        a) the startDate is null, today, or any earlier date
      *        and b) the endDate is null, today, or any later date
      *        and c) the removedAt is null or an instant > Clock.System.now().
@@ -37,7 +37,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByName: String? = null,
         val filterByPersonRole: PersonRoleEnum? = null,
         val includeRelated: Boolean = false,
-        val today: LocalDate? = localDateInCurrentTimeZone(),
+        val inClassOnDay: LocalDate? = null,
     ) {
 
         companion object {
@@ -45,15 +45,18 @@ interface PersonDataSource: WritableDataSource<Person> {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(stringValues),
                     filterByClazzUid = stringValues[DataLayerParams.FILTER_BY_CLASS_UID],
-                    filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByEnrolmentRole = stringValues[DataLayerParams.FILTER_BY_ENROLLMENT_ROLE]?.let {
                         EnrollmentRoleEnum.fromValue(it)
                     },
+                    inClassOnDay = stringValues[DataLayerParams.IN_CLASS_ON_DAY]?.let {
+                        LocalDate.parse(it)
+                    },
+                    filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByPersonRole = stringValues[FILTER_BY_PERSON_ROLE]?.let {
                         PersonRoleEnum.fromValue(it)
                     },
                     includeRelated = stringValues[DataLayerParams.INCLUDE_RELATED]?.toBoolean() ?: false,
-                    today = stringValues[DataLayerParams.TODAY]?.let { LocalDate.parse(it) }
+
                 )
             }
         }

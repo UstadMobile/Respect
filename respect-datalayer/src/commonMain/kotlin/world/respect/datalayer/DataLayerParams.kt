@@ -14,7 +14,7 @@ object DataLayerParams {
 
     const val INCLUDE_DELETED = "includeDeleted"
 
-    const val TODAY = "today"
+    const val IN_CLASS_ON_DAY = "inClassOnDay"
 
     const val ACTIVE_ON_DAY = "activeOnDay"
 

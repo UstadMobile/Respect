@@ -2,7 +2,9 @@ package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 import world.respect.datalayer.DataLayerParams
+import world.respect.datalayer.DataLayerParams.ACTIVE_ON_DAY
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Enrollment
@@ -13,11 +15,17 @@ import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface EnrollmentDataSource: WritableDataSource<Enrollment> {
 
+    /**
+     * @property activeOnDay if not null, then include only enrollments that would be active on the
+     *           given day (between beginDate and endDate, inclusive). If beginDate or endDate is
+     *           not specified it defaults to being included.
+     */
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val classUid: String? = null,
         val role: EnrollmentRoleEnum? = null,
         val personUid: String? = null,
+        val activeOnDay: LocalDate? = null,
     ) {
 
         companion object {
@@ -30,9 +38,9 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
                         EnrollmentRoleEnum.fromValue(it)
                     },
                     personUid = params[FILTER_BY_PERSON_UID],
+                    activeOnDay = params[ACTIVE_ON_DAY]?.let { LocalDate.parse(it) },
                 )
             }
-
         }
 
     }
@@ -55,8 +63,6 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
     override suspend fun store(
         list: List<Enrollment>
     )
-
-    suspend fun deleteEnrollment(uid: String)
 
     companion object {
 

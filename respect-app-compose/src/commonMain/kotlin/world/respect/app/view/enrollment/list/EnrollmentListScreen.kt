@@ -46,8 +46,8 @@ fun EnrollmentListScreen(
 
     EnrollmentListScreen(
         uiState = uiState,
-        onClickEdit=viewModel::onEditEnrollment,
-        onClickDelete=viewModel::onDeleteEnrollment
+        onClickEdit = viewModel::onEditEnrollment,
+        onClickDelete = viewModel::onDeleteEnrollment
     )
 }
 
@@ -55,7 +55,7 @@ fun EnrollmentListScreen(
 fun EnrollmentListScreen(
     uiState: EnrollmentListUiState,
     onClickEdit: (Enrollment?) -> Unit,
-    onClickDelete: (String) -> Unit,
+    onClickDelete: (Enrollment) -> Unit,
 ) {
     val pager = respectRememberPager(uiState.enrollments)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
@@ -118,7 +118,7 @@ fun EnrollmentListScreen(
                             text = { Text(stringResource(Res.string.delete)) },
                             onClick = {
                                 expandedItemUid = null
-                                onClickDelete(enrollment?.uid ?: "")
+                                enrollment?.also(onClickDelete)
                             }
                         )
                     }

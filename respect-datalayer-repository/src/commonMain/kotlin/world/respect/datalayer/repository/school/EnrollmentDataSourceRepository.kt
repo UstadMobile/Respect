@@ -52,7 +52,10 @@ class EnrollmentDataSourceRepository(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
     ): IPagingSourceFactory<Int, Enrollment> {
-        val remote = remote.listAsPagingSource(loadParams, listParams).invoke()
+        val remote = remote.listAsPagingSource(
+            loadParams = loadParams,
+            listParams = listParams.copy(common = listParams.common.copy(includeDeleted = true))
+        ).invoke()
         return RepositoryPagingSourceFactory(
             local = local.listAsPagingSource(loadParams, listParams),
             onRemoteLoad = { remoteLoadParams ->
@@ -79,17 +82,4 @@ class EnrollmentDataSourceRepository(
         )
     }
 
-    override suspend fun deleteEnrollment(uid: String) {
-            local.deleteEnrollment(uid)
-            val timeNow = systemTimeInMillis()
-            remoteWriteQueue.add(
-                listOf(
-                    WriteQueueItem(
-                        model = WriteQueueItem.Model.ENROLLMENT,
-                        uid = uid,
-                        timeQueued = timeNow,
-                    )
-                )
-            )
-        }
-    }
+}

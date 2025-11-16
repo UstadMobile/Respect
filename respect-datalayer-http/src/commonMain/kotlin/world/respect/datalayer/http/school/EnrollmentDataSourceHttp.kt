@@ -50,6 +50,8 @@ class EnrollmentDataSourceHttp(
                     role?.value)
                 parameters.appendIfNotNull(EnrollmentDataSource.FILTER_BY_PERSON_UID,
                     personUid)
+                parameters.appendIfNotNull(DataLayerParams.ACTIVE_ON_DAY,
+                    activeOnDay?.toString())
             }.build()
     }
 
@@ -117,17 +119,4 @@ class EnrollmentDataSourceHttp(
             "EnrollmentDataSourceHttp: posted ${list.size} items(${list.joinToString { it.uid }}) to $url (status=${response.status.value}"
         }
     }
-
-    override suspend fun deleteEnrollment(uid: String) {
-            val url = respectEndpointUrl("${EnrollmentDataSource.ENDPOINT_NAME}/$uid")
-
-            val response = httpClient.delete(url) {
-                useTokenProvider(tokenProvider)
-                useValidationCacheControl(validationHelper)
-            }
-
-            Napier.d(tag = TAG_DATALAYER) {
-                "EnrollmentDataSourceHttp: deleted enrollment uid=$uid (status=${response.status.value}) from $url"
-            }
-        }
 }

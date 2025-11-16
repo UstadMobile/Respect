@@ -7,6 +7,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.school.model.StatusEnum
+import world.respect.libutil.util.time.TimeConstants
 
 @Dao
 interface EnrollmentEntityDao {
@@ -34,6 +36,11 @@ interface EnrollmentEntityDao {
            AND (:classUidNum = 0 OR EnrollmentEntity.eClassUidNum = :classUidNum)
            AND (:classUidRoleFlag = 0 OR EnrollmentEntity.eRole = :classUidRoleFlag)
            AND (:personUidNum = 0 OR EnrollmentEntity.ePersonUidNum = :personUidNum)
+           AND (:includeDeleted OR EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT})
+           AND (:activeOnDayInUtcMs = 0 
+                OR (     (:activeOnDayInUtcMs >= COALESCE(EnrollmentEntity.eBeginDate, 0))
+                    AND ((:activeOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))))
+           AND (:notRemovedBefore = 0 OR EnrollmentEntity.eRemovedAt > :notRemovedBefore)         
     """)
     fun listAsPagingSource(
         since: Long = 0,
@@ -41,6 +48,9 @@ interface EnrollmentEntityDao {
         classUidNum: Long = 0,
         classUidRoleFlag: Int = 0,
         personUidNum: Long = 0,
+        activeOnDayInUtcMs: Long = 0,
+        notRemovedBefore: Long = 0,
+        includeDeleted: Boolean = false,
     ): PagingSource<Int, EnrollmentEntity>
 
 

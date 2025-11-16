@@ -2,6 +2,7 @@ package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
@@ -12,12 +13,22 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.libutil.util.time.localDateInCurrentTimeZone
 
 interface PersonDataSource: WritableDataSource<Person> {
 
     /**
      * @param includeRelated if true, then include all Persons related (as per
      *        Person.relatedPersonUids) to those that match the other criteria.
+     * @param today: when using filterByClazzUid, we need to determine if an enrollment is active or
+     *        not, thus we need to know the current date as per the users timezone. The enrollment
+     *        will be deemed active if:
+     *        a) the startDate is null, today, or any earlier date
+     *        and b) the endDate is null, today, or any later date
+     *        and c) the removedAt is null or an instant > Clock.System.now().
+     *
+     *        If common.includeDeleted is true, then the dates will be ignored (ensuring that repo
+     *        queries fetch all updated data).
      */
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
@@ -26,6 +37,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByName: String? = null,
         val filterByPersonRole: PersonRoleEnum? = null,
         val includeRelated: Boolean = false,
+        val today: LocalDate? = localDateInCurrentTimeZone(),
     ) {
 
         companion object {
@@ -41,6 +53,7 @@ interface PersonDataSource: WritableDataSource<Person> {
                         PersonRoleEnum.fromValue(it)
                     },
                     includeRelated = stringValues[DataLayerParams.INCLUDE_RELATED]?.toBoolean() ?: false,
+                    today = stringValues[DataLayerParams.TODAY]?.let { LocalDate.parse(it) }
                 )
             }
         }

@@ -51,7 +51,9 @@ class EnrollmentDataSourceDb(
                 }
 
                 schoolDb.getEnrollmentEntityDao().upsert(entitiesToStore)
-                Napier.d(tag = TAG_DATALAYER) { "$logPrefix: upsert ${entitiesToStore.size}/${enrollments.size} (${enrollments.joinToString { it.uid }}) entities" }
+                Napier.d(tag = TAG_DATALAYER) {
+                    "$logPrefix: upsert ${entitiesToStore.size}/${enrollments.size} (${enrollments.joinToString { it.uid }}) entities"
+                }
             }
         }
     }
@@ -90,7 +92,8 @@ class EnrollmentDataSourceDb(
                 uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
                 classUidRoleFlag = listParams.role?.flag ?: 0,
-                personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0
+                personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0,
+                includeDeleted = listParams.common.includeDeleted ?: false,
             ).map(
                 tag = { "EnrollmentDataSourceDb/list params=$listParams" }
             ) {
@@ -102,14 +105,6 @@ class EnrollmentDataSourceDb(
     override suspend fun store(list: List<Enrollment>) {
         upsertEnrollments(list, false)
     }
-
-    override suspend fun deleteEnrollment(uid: String) {
-            schoolDb.useWriterConnection { con ->
-                con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                    schoolDb.getEnrollmentEntityDao().deleteEnrollment(uid)
-                }
-            }
-        }
 
     override suspend fun updateLocal(
         list: List<Enrollment>,

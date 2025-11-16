@@ -18,6 +18,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
@@ -27,6 +28,7 @@ import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import kotlin.time.Clock
 
 data class EnrollmentListUiState(
     val enrollments: IPagingSourceFactory<Int, Enrollment> = EmptyPagingSourceFactory(),
@@ -98,7 +100,17 @@ class EnrollmentListViewModel(
         }
     }
 
-    fun onDeleteEnrollment(enrollmentId: String) {
+    fun onDeleteEnrollment(enrollment: Enrollment) {
+        viewModelScope.launch {
+            schoolDataSource.enrollmentDataSource.store(
+                listOf(
+                    enrollment.copy(
+                        status = StatusEnum.TO_BE_DELETED,
+                        lastModified = Clock.System.now(),
+                    )
+                )
+            )
+        }
     }
 
 }

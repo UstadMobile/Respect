@@ -1,4 +1,4 @@
-package world.respect.server.account.username
+package world.respect.server.account.invite.username
 
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.db.RespectSchoolDatabase

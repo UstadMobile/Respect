@@ -9,10 +9,10 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.libutil.util.time.TimeConstants
-import world.respect.libutil.util.time.startOfTodaysDateInMillisAtUtc
 import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
@@ -218,7 +218,7 @@ interface PersonEntityDao {
                            (SELECT PersonRoleEntity.prRoleEnum
                               FROM PersonRoleEntity
                              WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
-                      AND (:includeDeleted OR PersonEntity.pStatus = ${StatusEnum.ACTIVE_INT})       
+                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT})       
             ),
                 
             RelatedPersons(uidNum) AS (

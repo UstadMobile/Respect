@@ -725,7 +725,7 @@ val appKoinModule = module {
             get<RespectTokenManager>().providerFor(id)
         }
 
-        scoped<DeleteAccountUseCase> {
+        factory<DeleteAccountUseCase> {
             DeleteAccountUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,

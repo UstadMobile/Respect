@@ -12,12 +12,9 @@ fun Route.PersonDeleteRoute(
     deleteAccountUseCase: (ApplicationCall) -> DeleteAccountUseCase,
 ) {
     post("delete") {
-        
-        val guid = call.request.queryParameters["guid"]
-            ?: return@post call.respond(HttpStatusCode.BadRequest, "Missing guid")
 
-        // pass both redeemRequest and guid to the use case
-        call.respond(deleteAccountUseCase(call).invoke (guid))
+        val result = deleteAccountUseCase(call).invoke(guid = "")
+        call.respond(result)
         
     }
 }

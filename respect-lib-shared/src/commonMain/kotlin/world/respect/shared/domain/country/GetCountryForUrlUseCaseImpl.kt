@@ -4,7 +4,11 @@ package world.respect.shared.domain.country
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.http.ContentType
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
+import io.ktor.http.path
 import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
@@ -25,28 +29,35 @@ class GetCountryForUrlUseCaseImpl(
 
         return try {
             val url = Url(schoolUrl)
-            val host = url.host
-            val response = httpClient.get("$GEOLOCATION_API_ENDPOINT/$host")
+
+            val endpointUrl = URLBuilder(GEOLOCATION_API_ENDPOINT)
+                .apply { path(url.host) }
+                .build()
+
+            val response = httpClient.get(endpointUrl) {
+                contentType(ContentType.Application.Json)
+            }
+
             val apiResponse: GeolocationApiResponse = response.body()
 
             val countryCode = if (apiResponse.status == "success") {
-                apiResponse.countryCode
+                apiResponse.countryCode ?: "Unknown"
             } else {
-                null
+                "Unknown"
             }
+
             countryCache[schoolUrl] = countryCode
 
             countryCode
         } catch (e: Exception) {
-            countryCache[schoolUrl] = null
-            null
+            countryCache[schoolUrl] = "unknown"
+            "unknown"
         }
     }
 
     @Serializable
     private data class GeolocationApiResponse(
         val status: String,
-        val country: String? = null,
         val countryCode: String? = null,
         val message: String? = null
     )

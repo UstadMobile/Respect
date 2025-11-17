@@ -2,6 +2,7 @@ package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
@@ -12,12 +13,22 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.libutil.util.time.localDateInCurrentTimeZone
 
 interface PersonDataSource: WritableDataSource<Person> {
 
     /**
      * @param includeRelated if true, then include all Persons related (as per
      *        Person.relatedPersonUids) to those that match the other criteria.
+     * @param inClassOnDay: when using filterByClazzUid, we often want to limit this to only those
+     *        that have an active enrollment (e.g. are currently members of the class).
+     *
+     *        a) the startDate is null, today, or any earlier date
+     *        and b) the endDate is null, today, or any later date
+     *        and c) the removedAt is null or an instant > Clock.System.now().
+     *
+     *        If common.includeDeleted is true, then the dates will be ignored (ensuring that repo
+     *        queries fetch all updated data).
      */
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
@@ -26,6 +37,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByName: String? = null,
         val filterByPersonRole: PersonRoleEnum? = null,
         val includeRelated: Boolean = false,
+        val inClassOnDay: LocalDate? = null,
     ) {
 
         companion object {
@@ -33,14 +45,18 @@ interface PersonDataSource: WritableDataSource<Person> {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(stringValues),
                     filterByClazzUid = stringValues[DataLayerParams.FILTER_BY_CLASS_UID],
-                    filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByEnrolmentRole = stringValues[DataLayerParams.FILTER_BY_ENROLLMENT_ROLE]?.let {
                         EnrollmentRoleEnum.fromValue(it)
                     },
+                    inClassOnDay = stringValues[DataLayerParams.IN_CLASS_ON_DAY]?.let {
+                        LocalDate.parse(it)
+                    },
+                    filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByPersonRole = stringValues[FILTER_BY_PERSON_ROLE]?.let {
                         PersonRoleEnum.fromValue(it)
                     },
                     includeRelated = stringValues[DataLayerParams.INCLUDE_RELATED]?.toBoolean() ?: false,
+
                 )
             }
         }

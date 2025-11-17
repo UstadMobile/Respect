@@ -18,7 +18,7 @@ class GetCountryForUrlUseCaseImpl(
 
     companion object {
         // For local testing: "http://localhost:8080/country"
-        private const val GEOLOCATION_API_ENDPOINT = "http://localhost:8080/country"
+        private const val GEOLOCATION_API_ENDPOINT = "http://192.168.1.5:8080/country"
     }
 
     override suspend operator fun invoke(schoolUrl: String): String? {

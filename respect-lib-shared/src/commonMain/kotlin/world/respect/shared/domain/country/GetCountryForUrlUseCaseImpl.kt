@@ -1,14 +1,12 @@
 package world.respect.shared.domain.country
 
-
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import io.ktor.http.path
 import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,7 +17,8 @@ class GetCountryForUrlUseCaseImpl(
     private val countryCache = ConcurrentHashMap<String, String?>()
 
     companion object {
-        private const val GEOLOCATION_API_ENDPOINT = "http://ip-api.com/json"
+        // For local testing: "http://localhost:8080/country"
+        private const val GEOLOCATION_API_ENDPOINT = "http://localhost:8080/country"
     }
 
     override suspend operator fun invoke(schoolUrl: String): String? {
@@ -29,22 +28,15 @@ class GetCountryForUrlUseCaseImpl(
 
         return try {
             val url = Url(schoolUrl)
+            val host = url.host
 
-            val endpointUrl = URLBuilder(GEOLOCATION_API_ENDPOINT)
-                .apply { path(url.host) }
-                .build()
-
-            val response = httpClient.get(endpointUrl) {
+            val response = httpClient.get(GEOLOCATION_API_ENDPOINT) {
+                header("X-Forwarded-For", host)
                 contentType(ContentType.Application.Json)
             }
 
             val apiResponse: GeolocationApiResponse = response.body()
-
-            val countryCode = if (apiResponse.status == "success") {
-                apiResponse.countryCode ?: "Unknown"
-            } else {
-                "Unknown"
-            }
+            val countryCode = apiResponse.country
 
             countryCache[schoolUrl] = countryCode
 
@@ -57,8 +49,6 @@ class GetCountryForUrlUseCaseImpl(
 
     @Serializable
     private data class GeolocationApiResponse(
-        val status: String,
-        val countryCode: String? = null,
-        val message: String? = null
+        val country: String
     )
 }

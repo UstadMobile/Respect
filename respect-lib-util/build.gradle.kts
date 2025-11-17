@@ -13,6 +13,10 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+
     jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
 
     jvm()

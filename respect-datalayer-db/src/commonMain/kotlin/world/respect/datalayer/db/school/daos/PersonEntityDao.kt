@@ -183,12 +183,6 @@ interface PersonEntityDao {
 
 
 
-    @Query("""
-        DELETE FROM PersonEntity
-         WHERE pGuidHash = :personGuidHash
-    """)
-    suspend fun deleteByPersonGuidHash(personGuidHash: Long): Int
-
 
     companion object {
 

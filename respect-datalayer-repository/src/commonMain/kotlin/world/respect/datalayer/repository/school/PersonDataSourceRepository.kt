@@ -19,7 +19,7 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import kotlin.time.Instant
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class PersonDataSourceRepository(
@@ -56,36 +56,43 @@ class PersonDataSourceRepository(
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
-        return local.listAsFlow(loadParams, searchQuery)
+        return local.listAsFlow(loadParams, params)
     }
 
     override suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
+        params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
-        val remote = remote.list(loadParams, searchQuery, since)
+        val remote = remote.list(loadParams, params)
         if(remote is DataReadyState) {
             local.updateLocal(remote.data)
             validationHelper.updateValidationInfo(remote.metaInfo)
         }
 
-        return local.list(loadParams, searchQuery, since).combineWithRemote(remote)
+        return local.list(loadParams, params).combineWithRemote(remote)
     }
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
-        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
+        val remoteSource = remote.listAsPagingSource(
+            loadParams = loadParams,
+            params = params.copy(
+                common = params.common.copy(includeDeleted = true),
+                inClassOnDay = null,
+            )
+        ).invoke()
+
         val enrollmentRemoteSource = enrollmentDataSourceRepository.remote
             .takeIf { params.filterByClazzUid != null }
             ?.listAsPagingSource(
                 loadParams,
                 EnrollmentDataSource.GetListParams(
-                    classUid = params.filterByClazzUid
+                    classUid = params.filterByClazzUid,
+                    common = GetListCommonParams(includeDeleted = true),
                 )
             )?.invoke()
 

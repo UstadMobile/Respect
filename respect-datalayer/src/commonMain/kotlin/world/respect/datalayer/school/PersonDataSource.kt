@@ -84,6 +84,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         list: List<Person>
     )
 
+
     companion object {
 
         const val ENDPOINT_NAME = "person"

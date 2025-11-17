@@ -159,7 +159,7 @@ onFlowComplete:
 - eraseText
 - inputText: "Testuser@gmail.com"
 - assertVisible: "Testuser@gmail.com"
-#- hideKeyboard
+- hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -224,21 +224,16 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Manage account"
-
-
 # Validate User login after changing password
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "testuser"

@@ -3,10 +3,8 @@ package world.respect.shared.domain.country
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.http.ContentType
 import io.ktor.http.Url
-import io.ktor.http.contentType
+import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
@@ -17,8 +15,7 @@ class GetCountryForUrlUseCaseImpl(
     private val countryCache = ConcurrentHashMap<String, String?>()
 
     companion object {
-        // For local testing: "http://localhost:8080/country"
-        private const val GEOLOCATION_API_ENDPOINT = "http://192.168.1.5:8080/country"
+        private const val GEOLOCATION_API_ENDPOINT = "http://192.168.1.5:8080"
     }
 
     override suspend operator fun invoke(schoolUrl: String): String? {
@@ -30,25 +27,32 @@ class GetCountryForUrlUseCaseImpl(
             val url = Url(schoolUrl)
             val host = url.host
 
-            val response = httpClient.get(GEOLOCATION_API_ENDPOINT) {
-                header("X-Forwarded-For", host)
-                contentType(ContentType.Application.Json)
+            val encodedHost = host.encodeURLParameter()
+            val endpointUrl = "$GEOLOCATION_API_ENDPOINT/json/$encodedHost"
+
+            val response = httpClient.get(endpointUrl)
+            val apiResponse: CountryResponse = response.body()
+
+            val countryCode = if (apiResponse.status == "success") {
+                apiResponse.countryCode ?: "Unknown"
+            } else {
+                "Unknown"
             }
 
-            val apiResponse: GeolocationApiResponse = response.body()
-            val countryCode = apiResponse.country
-
             countryCache[schoolUrl] = countryCode
-
             countryCode
+
         } catch (e: Exception) {
             countryCache[schoolUrl] = "unknown"
             "unknown"
         }
     }
-
     @Serializable
-    private data class GeolocationApiResponse(
-        val country: String
+    private data class CountryResponse(
+        val status: String,
+        val countryCode: String? = null,
+        val country: String? = null,
+        val message: String? = null,
+        val query: String? = null
     )
 }

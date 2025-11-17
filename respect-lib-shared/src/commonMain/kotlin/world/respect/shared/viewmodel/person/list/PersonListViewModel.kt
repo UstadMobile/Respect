@@ -93,13 +93,8 @@ class PersonListViewModel(
                 }else {
                     Res.string.select_person.asUiText()
                 },
-                fabState = it.fabState.copy(
-                    onClick = ::onClickAdd,
-                    text = Res.string.person.asUiText(),
-                    icon = FabUiState.FabIcon.ADD,
-                ),
                 expandableFabState = ExpandableFabUiState(
-                    visible = route.resultExpected,
+                    visible = true,
                     items = listOf(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
@@ -109,7 +104,7 @@ class PersonListViewModel(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.ADD,
                             text = Res.string.add_new_person.asUiText(),
-                            onClick = { }
+                            onClick = { onClickAdd() }
                         )
                     )
                 ),
@@ -202,7 +197,7 @@ class PersonListViewModel(
     fun onClickInvitePerson() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                InvitePerson
+                InvitePerson()
             )
         )
     }

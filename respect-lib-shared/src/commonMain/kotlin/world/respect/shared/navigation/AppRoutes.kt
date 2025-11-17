@@ -585,8 +585,13 @@ data class ChangePassword(
 ): RespectAppRoute
 
 @Serializable
-object InvitePerson: RespectAppRoute
+data class InvitePerson(
+    val familyPersonGuid: String? = null,
+    val classGuid: String? = null,
+) : RespectAppRoute
 
 
 @Serializable
-object CopyCode: RespectAppRoute
+data class CopyCode(
+    val inviteCode:String?=null
+): RespectAppRoute

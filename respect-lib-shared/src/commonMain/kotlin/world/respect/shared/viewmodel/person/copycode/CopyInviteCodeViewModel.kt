@@ -1,6 +1,7 @@
 package world.respect.shared.viewmodel.person.copycode
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -10,13 +11,13 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.code
+import world.respect.shared.navigation.CopyCode
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 
 data class CopyInviteCodeUiState(
     val code: String? = null,
-    val shareLink: String? = null,
 )
 
 class CopyInviteCodeViewModel(
@@ -26,17 +27,17 @@ class CopyInviteCodeViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
+    private val route: CopyCode = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(CopyInviteCodeUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
 
-        val initial =  "000-000"
+
         _uiState.update {
             it.copy(
-                code = initial,
-                shareLink = "https://example.com/invite/$initial"
+                code = route.inviteCode,
             )
         }
 
@@ -55,8 +56,4 @@ class CopyInviteCodeViewModel(
         _uiState.value.code?.also { setClipboardStringUseCase(it) }
     }
 
-
-    fun updateShareLink(link: String) {
-        _uiState.update { it.copy(shareLink = link) }
-    }
 }

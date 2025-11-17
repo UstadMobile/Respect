@@ -9,7 +9,7 @@ import world.respect.shared.domain.account.username.filterusername.FilterUsernam
 class UsernameSuggestionUseCaseServer(
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val schoolDb: RespectSchoolDatabase,
-    ): UsernameSuggestionUseCase, KoinComponent{
+    ): UsernameSuggestionUseCase, KoinComponent  {
 
     companion object {
         private const val MAX_ATTEMPTS = 1000

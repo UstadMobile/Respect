@@ -4,13 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.outlined.ContentPaste
@@ -18,30 +16,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_book_cover
-import world.respect.shared.generated.resources.book_description
-import world.respect.shared.generated.resources.book_title
 import world.respect.shared.generated.resources.chapter
-import world.respect.shared.generated.resources.click_plus_button
+import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.drag
 import world.respect.shared.generated.resources.lesson
-import world.respect.shared.generated.resources.mapping
-import world.respect.shared.generated.resources.no_chapter_added
+import world.respect.shared.generated.resources.no_sections_yet
 import world.respect.shared.generated.resources.remove_chapter
 import world.respect.shared.generated.resources.remove_lesson
 import world.respect.shared.generated.resources.required
-import world.respect.shared.generated.resources.required_field
-import world.respect.shared.generated.resources.to_add_one
+import world.respect.shared.generated.resources.section
+import world.respect.shared.generated.resources.sections
+import world.respect.shared.generated.resources.title
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
@@ -52,7 +49,6 @@ fun CurriculumMappingEditScreen(
     uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
     onTitleChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
-    onClickAddBookCover: () -> Unit = {},
     onClickAddSection: () -> Unit = {},
     onClickRemoveSection: (Int) -> Unit = {},
     onSectionTitleChanged: (Int, String) -> Unit = { _, _ -> },
@@ -66,7 +62,7 @@ fun CurriculumMappingEditScreen(
     val reorderableLazyListState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         onMove = { from, to ->
-            val headerItemCount = 5
+            val headerItemCount = 4 //TODO: This MUST be explained
             val fromIndex = from.index - headerItemCount
             val toIndex = to.index - headerItemCount
 
@@ -79,182 +75,121 @@ fun CurriculumMappingEditScreen(
         }
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp)
+
+    LazyColumn(
+        state = lazyListState,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(vertical = 20.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(70.dp)
-                                .background(
-                                    color = Color.Gray.copy(alpha = 0.6f),
-                                    shape = CircleShape
-                                )
-                                .clickable(onClick = onClickAddBookCover),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Filled.AddAPhoto,
-                                contentDescription = stringResource(Res.string.add_book_cover),
-                                modifier = Modifier.size(48.dp),
-                                tint = Color.Gray
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = stringResource(Res.string.add_book_cover),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface
+        item("title") {
+            OutlinedTextField(
+                value = uiState.mapping?.title ?: "",
+                onValueChange = onTitleChanged,
+                label = { Text(stringResource(Res.string.title)+ "*") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("name"),
+                singleLine = true,
+                isError = uiState.titleError != null,
+                supportingText = {
+                    Text(
+                        uiTextStringResource(
+                            uiState.titleError ?: Res.string.required.asUiText()
                         )
-                    }
+                    )
                 }
-            }
+            )
+        }
 
-            item {
-                Spacer(modifier = Modifier.height(2.dp))
+        item("description") {
+            OutlinedTextField(
+                value = uiState.description,
+                onValueChange = onDescriptionChanged,
+                label = { Text(stringResource(Res.string.description)) },
+                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                singleLine = false,
+                minLines = 1,
+                maxLines = Int.MAX_VALUE
+            )
+        }
 
-                OutlinedTextField(
-                    value = uiState.mapping?.title ?: "",
-                    onValueChange = onTitleChanged,
-                    label = { Text(stringResource(Res.string.book_title)+ "*") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("book_title_field"),
-                    singleLine = true,
-                    isError = uiState.titleError != null,
-                    supportingText = {
-                        Text(stringResource(Res.string.required_field))
-                    }
-                )
-            }
+        item("mapping_title") {
+            Text(
+                modifier = Modifier.defaultItemPadding(),
+                text = stringResource(Res.string.sections),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
-            item {
-                OutlinedTextField(
-                    value = uiState.description,
-                    onValueChange = onDescriptionChanged,
-                    label = { Text(stringResource(Res.string.book_description)) },
+        item("add_section_button") {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddSection()
+                },
+                headlineContent = {
+                    Text(stringResource(Res.string.section))
+                },
+                leadingContent = {
+                    Icon(Icons.Filled.Add, contentDescription = null)
+                },
+            )
+        }
+
+        if (uiState.sections.isEmpty()) {
+            item("empty_sections") {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = false,
-                    minLines = 1,
-                    maxLines = Int.MAX_VALUE
-                )
-            }
-
-            item {
-                Text(
-                    text = stringResource(Res.string.mapping),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            item {
-                OutlinedButton(
-                    onClick = onClickAddSection,
-                    modifier = Modifier.fillMaxWidth()
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            Icons.Filled.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(Res.string.chapter))
-                    }
+                    Icon(
+                        Icons.Outlined.ContentPaste,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(Res.string.no_sections_yet),
+                        modifier = Modifier.sizeIn(maxWidth = 160.dp),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
-
-            if (uiState.sections.isEmpty()) {
-                item {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            Icons.Outlined.ContentPaste,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+        } else {
+            itemsIndexed(
+                items = uiState.sections,
+                key = { _, section -> section.uid }
+            ) { sectionIndex, section ->
+                ReorderableItem(
+                    state = reorderableLazyListState,
+                    key = section.uid
+                ) { isDragging ->
+                    SectionItem(
+                        section = section,
+                        sectionIndex = sectionIndex,
+                        isDragging = isDragging,
+                        onSectionTitleChanged = onSectionTitleChanged,
+                        onClickRemoveSection = onClickRemoveSection,
+                        onClickAddLesson = onClickAddLesson,
+                        onClickRemoveLesson = onClickRemoveLesson,
+                        onLessonTitleChanged = onLessonTitleChanged,
+                        dragModifier = Modifier.draggableHandle(
+                            onDragStarted = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            },
+                            onDragStopped = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(Res.string.no_chapter_added),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(Res.string.click_plus_button),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(Res.string.to_add_one),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            } else {
-                items(
-                    items = uiState.sections,
-                    key = { section -> section.uid }
-                ) { section ->
-                    val sectionIndex = uiState.sections.indexOf(section)
-
-                    ReorderableItem(
-                        state = reorderableLazyListState,
-                        key = section.uid
-                    ) { isDragging ->
-                        SectionItem(
-                            section = section,
-                            sectionIndex = sectionIndex,
-                            isDragging = isDragging,
-                            onSectionTitleChanged = onSectionTitleChanged,
-                            onClickRemoveSection = onClickRemoveSection,
-                            onClickAddLesson = onClickAddLesson,
-                            onClickRemoveLesson = onClickRemoveLesson,
-                            onLessonTitleChanged = onLessonTitleChanged,
-                            dragModifier = Modifier.draggableHandle(
-                                onDragStarted = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                },
-                                onDragStopped = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                }
-                            )
-                        )
-                    }
+                    )
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun SectionItem(
@@ -269,7 +204,7 @@ private fun SectionItem(
     dragModifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().defaultItemPadding(),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isDragging) 8.dp else 2.dp
         )
@@ -299,17 +234,6 @@ private fun SectionItem(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
                     OutlinedTextField(
                         value = section.title,
                         onValueChange = { onSectionTitleChanged(sectionIndex, it) },
@@ -338,7 +262,7 @@ private fun SectionItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 40.dp),
+                    .padding(start = 32.dp, end = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
@@ -385,7 +309,7 @@ private fun LessonItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 40.dp, top = 8.dp),
+            .padding(start = 32.dp, top = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -429,7 +353,6 @@ fun CurriculumMappingEditScreenForViewModel(
         uiState = uiState,
         onTitleChanged = viewModel::onTitleChanged,
         onDescriptionChanged = viewModel::onDescriptionChanged,
-        onClickAddBookCover = {},
         onClickAddSection = viewModel::onClickAddSection,
         onClickRemoveSection = viewModel::onClickRemoveSection,
         onSectionTitleChanged = viewModel::onSectionTitleChanged,

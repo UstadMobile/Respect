@@ -9,8 +9,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_unexpected_result_type
-import world.respect.shared.generated.resources.map
 import world.respect.shared.generated.resources.mapping
+import world.respect.shared.generated.resources.mappings
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
@@ -42,12 +42,13 @@ class CurriculumMappingListViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = Res.string.mapping.asUiText(),
+                title = Res.string.mappings.asUiText(),
                 userAccountIconVisible = true,
                 fabState = FabUiState(
                     visible = true,
-                    text = Res.string.map.asUiText(),
-                    onClick = ::onClickMap
+                    icon = FabUiState.FabIcon.ADD,
+                    text = Res.string.mapping.asUiText(),
+                    onClick = ::onClickMap,
                 ),
                 hideBottomNavigation = false,
             )

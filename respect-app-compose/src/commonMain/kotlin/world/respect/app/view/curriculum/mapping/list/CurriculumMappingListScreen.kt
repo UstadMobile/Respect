@@ -40,12 +40,6 @@ fun CurriculumMappingListScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.textbooks),
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
             if (uiState.mappings.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),

@@ -28,7 +28,7 @@ class GetCountryForUrlUseCaseImpl(
             val host = url.host
 
             val encodedHost = host.encodeURLParameter()
-            val endpointUrl = "$GEOLOCATION_API_ENDPOINT/json/$encodedHost"
+            val endpointUrl = "$GEOLOCATION_API_ENDPOINT/api/country/$encodedHost"
 
             val response = httpClient.get(endpointUrl)
             val apiResponse: CountryResponse = response.body()

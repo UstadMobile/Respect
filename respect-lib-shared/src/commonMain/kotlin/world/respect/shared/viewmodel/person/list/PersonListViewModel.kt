@@ -180,7 +180,7 @@ class PersonListViewModel(
                 PersonEdit.create(
                     null,
                     resultDest = route.resultDest,
-                    filterByRole = route.filterByRole
+                    presetRole = route.filterByRole
                 )
             )
         )

@@ -19,6 +19,7 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class PersonDataSourceRepository(
@@ -77,13 +78,21 @@ class PersonDataSourceRepository(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
-        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
+        val remoteSource = remote.listAsPagingSource(
+            loadParams = loadParams,
+            params = params.copy(
+                common = params.common.copy(includeDeleted = true),
+                inClassOnDay = null,
+            )
+        ).invoke()
+
         val enrollmentRemoteSource = enrollmentDataSourceRepository.remote
             .takeIf { params.filterByClazzUid != null }
             ?.listAsPagingSource(
                 loadParams,
                 EnrollmentDataSource.GetListParams(
-                    classUid = params.filterByClazzUid
+                    classUid = params.filterByClazzUid,
+                    common = GetListCommonParams(includeDeleted = true),
                 )
             )?.invoke()
 

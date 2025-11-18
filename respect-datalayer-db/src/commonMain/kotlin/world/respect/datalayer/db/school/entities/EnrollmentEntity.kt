@@ -34,6 +34,7 @@ data class EnrollmentEntity(
     val eRole: EnrollmentRoleEnum,
     val eBeginDate: LocalDate? = null,
     val eEndDate: LocalDate? = null,
+    val eRemovedAt: Instant? = null,
     val eInviteCode: String? = null,
     val eApprovedByPersonUidNum: Long = 0,
     val eApprovedByPersonUid: String? = null,

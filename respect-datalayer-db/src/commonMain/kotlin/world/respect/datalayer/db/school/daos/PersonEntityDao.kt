@@ -9,7 +9,10 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.libutil.util.time.TimeConstants
 import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
@@ -76,10 +79,12 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
@@ -97,10 +102,12 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): List<PersonEntityWithRoles>
 
     @Transaction
@@ -112,6 +119,12 @@ interface PersonEntityDao {
     suspend fun findByUidList(uidNums: List<Long>): List<PersonEntityWithRoles>
 
 
+    /**
+     * @param inClassOnDayInUtcMs if filtering by clazzUid, and we want only those who have an active
+     *        enrollment on a given day (e.g. today as per the users timezone), then we need to know
+     *        what day that should be. LocalDate is stored as millis since epoch until 00:00 UTC for
+     *        the given date. See the docs for startOfTodaysDateInMillisAtUtc function.
+     */
     @Transaction
     @Query("""
            WITH $LIST_PERSONS_CTES_SQL
@@ -127,15 +140,17 @@ interface PersonEntityDao {
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
+        inClassOnDayInUtcMs: Long = 0,
         inClazzRoleFlag: Int = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
-         WITH $LIST_PERSONS_CTES_SQL
+         WITH $LIST_PERSONS_CTES_SQL 
         
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
@@ -152,10 +167,12 @@ interface PersonEntityDao {
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
         includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): PagingSource<Int, PersonListDetails>
 
     @Query("""
@@ -165,23 +182,6 @@ interface PersonEntityDao {
             """
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
-    @Transaction
-    @Query("""
-        SELECT *
-          FROM PersonEntity
-         WHERE PersonEntity.pGuidHash IN (
-                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
-                  FROM PersonRelatedPersonEntity
-                 WHERE PersonRelatedPersonEntity.prpPersonUidNum = :guidHash
-              )
-         ORDER BY PersonEntity.pGivenName
-    """)
-    fun findFamilyMembersRelatedToPerson(
-        guidHash: Long,
-    ): Flow<List<PersonEntityWithRoles>>
-
-
-
 
 
     companion object {
@@ -205,10 +205,12 @@ interface PersonEntityDao {
                                  WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
                                    AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
                                    AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
-                                   AND :timeNow BETWEEN
-                                                COALESCE(EnrollmentEntity.eBeginDate, 0) AND
-                                                COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
-                           )
+                                   AND ((:includeDeleted OR :inClassOnDayInUtcMs = 0) 
+                                        OR (     (:inClassOnDayInUtcMs >= COALESCE(EnrollmentEntity.eBeginDate, 0))
+                                            AND ((:inClassOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))
+                                            AND (:timeNow <= COALESCE(EnrollmentEntity.eRemovedAt, ${Long.MAX_VALUE}))
+                                            AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT} ))         
+                           ) 
                           ) 
                       AND (:filterByName IS NULL 
                            OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
@@ -216,6 +218,7 @@ interface PersonEntityDao {
                            (SELECT PersonRoleEntity.prRoleEnum
                               FROM PersonRoleEntity
                              WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
+                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT})       
             ),
                 
             RelatedPersons(uidNum) AS (

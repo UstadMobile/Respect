@@ -1,0 +1,27 @@
+appId: world.respect.app
+
+---
+- tapOn: "Classes"
+- tapOn: "New Class"
+- tapOn: ${CLASSMEMBER}
+- tapOn: "Add person"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: ${FIRSTNAME}
+- tapOn: "Last name*"
+- inputText: ${LASTNAME}
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Save"
+- assertVisible:
+      id: "app_title"
+      text: "New Class"
+- tapOn: ${FIRSTNAME} ${LASTNAME}
+- tapOn: "Create account"
+- tapOn: "Username"
+- inputText: "teacheruser"
+- tapOn: "Password"  # Password validations needs to be added
+- inputText: "testt1"
+- tapOn: "Save"

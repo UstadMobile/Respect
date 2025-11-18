@@ -16,8 +16,39 @@ onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/admin_add_app_and_teacher.yaml"
-
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow: "subflows/admin_add_app.yaml"
+- runFlow: "subflows/admin_add_class.yaml"
+- runFlow:
+      file: "subflows/admin_add_class_member.yaml"
+      env:
+        CLASSMEMBER: "Add Teacher"
+        FIRSTNAME: "Teacher"
+        LASTNAME: "User"
+- back
+- tapOn: "More Options"
+- tapOn: "Manage enrollments"
+- assertVisible:
+    id: "app_title"
+    text: "New class"
+- tapOn: "More Options"
+- tapOn: "Edit"
+- tapOn: "End date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.yesterdayDate}
+- tapOn: "Save"
+- assertVisible: "Start date cannot be later than end date*"
+- eraseText
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.tomorrowDate}
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "New class"
+- back
+- assertVisible: ${FIRSTNAME} ${LASTNAME}
 - clearState: world.respect.app
 - launchApp:
     arguments:

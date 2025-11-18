@@ -227,6 +227,9 @@ class ClazzDetailViewModel(
                         resultPopUpTo = route,
                     ),
                     showInviteCode = classInviteCode,
+                    classUid = clazz.guid,
+                    className = clazz.title,
+                    role = roleType
                 )
             )
         )

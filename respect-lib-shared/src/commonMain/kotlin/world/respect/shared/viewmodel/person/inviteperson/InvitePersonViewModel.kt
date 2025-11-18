@@ -16,6 +16,7 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
@@ -30,6 +31,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import kotlin.random.Random
 import kotlin.time.Clock
 
@@ -40,6 +42,9 @@ data class InvitePersonUiState(
     val selectedRole: PersonRoleEnum? = null,
     val shareLink: String? = null,
     val classGuid: String? = null,
+    val className: String? = null,
+    val classRole: EnrollmentRoleEnum? = null,
+    val schoolName: String? = null,
     val familyPersonGuid: String? = null,
     val roleOptions: List<PersonRoleEnum> = emptyList(),
     val invite: Invite? = null
@@ -77,7 +82,10 @@ class InvitePersonViewModel(
         _uiState.update { prev ->
             prev.copy(
                 classGuid = route.classGuid,
-                familyPersonGuid = route.familyPersonGuid
+                familyPersonGuid = route.familyPersonGuid,
+                className = route.className,
+                classRole = route.role,
+                schoolName = accountManager.selectedAccount?.school?.name?.getTitle()
             )
         }
         _appUiState.update {
@@ -92,7 +100,24 @@ class InvitePersonViewModel(
         launchWithLoadingIndicator {
             val currentPersonRole = accountManager.selectedAccountAndPersonFlow.first()
                 ?.person?.roles?.first()?.roleEnum
+            _uiState.value.classRole?.let { classRole ->
+                val role =
+                    when (classRole) {
+                        EnrollmentRoleEnum.TEACHER -> PersonRoleEnum.TEACHER
+                        EnrollmentRoleEnum.STUDENT -> PersonRoleEnum.STUDENT
+                        else -> null
+                    }
 
+                role?.let { role ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            selectedRole = role,
+                            roleOptions = listOf(role)
+                        )
+                    }
+                    return@launchWithLoadingIndicator
+                }
+            }
             _uiState.update { prev ->
                 prev.copy(
                     roleOptions =
@@ -206,6 +231,7 @@ class InvitePersonViewModel(
                 guid = guid,
                 code = code,
                 newRole = uiState.value.selectedRole,
+                forClassRole = uiState.value.classRole,
                 inviteMultipleAllowed = uiState.value.inviteMultipleAllowed,
                 approvalRequired = uiState.value.approvalRequired,
                 forClassGuid = uiState.value.classGuid,

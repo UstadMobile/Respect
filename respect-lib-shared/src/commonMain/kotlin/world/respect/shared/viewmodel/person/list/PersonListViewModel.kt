@@ -25,7 +25,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_new_person
 import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.generated.resources.people
-import world.respect.shared.generated.resources.person
 import world.respect.shared.generated.resources.select_person
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
@@ -42,7 +41,6 @@ import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
-import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 
 data class PersonListUiState(
@@ -197,7 +195,11 @@ class PersonListViewModel(
     fun onClickInvitePerson() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                InvitePerson()
+                InvitePerson.create(
+                    classUid = route.classUidStr,
+                    className = route.classNameStr,
+                    role = route.role
+                )
             )
         )
     }

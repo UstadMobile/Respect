@@ -33,9 +33,10 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.allow_multiple_people_to_use_this_invite
 import world.respect.shared.generated.resources.approval_required
-import world.respect.shared.generated.resources.class_name_or_school_name
+import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.code
 import world.respect.shared.generated.resources.copy_link
+import world.respect.shared.generated.resources.enter_school_name
 import world.respect.shared.generated.resources.invite_multiple_allowed
 import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
@@ -90,9 +91,14 @@ fun InvitePersonScreen(
                 .defaultItemPadding()
 
         ) {
-            Text(text = stringResource(Res.string.class_name_or_school_name))
+           val res =  if (uiState.className!=null){
+               Res.string.class_name
+            }else{
+               Res.string.enter_school_name
+           }
+            Text(text = stringResource(res))
             Text(
-                text = uiState.shareLink ?: "",
+                text = uiState.className ?: uiState.schoolName?: "",
             )
         }
 

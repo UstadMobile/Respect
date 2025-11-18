@@ -8,10 +8,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_host
-import world.respect.shared.navigation.AddSchool
-import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -22,6 +21,7 @@ data class HostSelectionListUiState(
 class HostSelectionViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
+    private val launchCustomTabUseCase: LaunchCustomTabUseCase,
 ) : RespectViewModel(savedStateHandle) {
     private val _uiState = MutableStateFlow(HostSelectionListUiState())
 
@@ -44,10 +44,7 @@ class HostSelectionViewModel(
     }
 
     fun onClickNext(directory: RespectSchoolDirectory) {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                AddSchool.create(directory.baseUrl)
-            )
-        )
+        val registrationUrl = "${directory.baseUrl}register-school"
+        launchCustomTabUseCase(url = registrationUrl)
     }
 }

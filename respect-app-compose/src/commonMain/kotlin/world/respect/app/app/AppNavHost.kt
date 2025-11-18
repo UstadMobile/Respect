@@ -1,11 +1,14 @@
 package world.respect.app.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import world.respect.app.view.acknowledgement.AcknowledgementScreen
 import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
@@ -48,7 +51,6 @@ import world.respect.app.view.report.indicator.edit.IndictorEditScreen
 import world.respect.app.view.report.indicator.list.IndicatorListScreen
 import world.respect.app.view.report.list.ReportListScreen
 import world.respect.app.view.report.list.ReportTemplateListScreen
-import world.respect.app.view.school.AddSchoolScreen
 import world.respect.app.view.school.HostSelectionScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
@@ -62,7 +64,6 @@ import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewMode
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
-import world.respect.shared.navigation.AddSchool
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentDetail
@@ -107,6 +108,7 @@ import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
+import world.respect.shared.navigation.SchoolRegistrationComplete
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -132,7 +134,6 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
-import world.respect.shared.viewmodel.school.AddSchoolViewModel
 import world.respect.shared.viewmodel.school.HostSelectionViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
@@ -153,6 +154,23 @@ fun AppNavHost(
         modifier = modifier,
     ) {
 
+        composable<SchoolRegistrationComplete>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "world.respect.app://school-registered?schoolUrl={schoolUrl}"
+                }
+            )
+        ) { backStackEntry ->
+            val route: SchoolRegistrationComplete = backStackEntry.toRoute()
+            LaunchedEffect(route.schoolUrl) {
+                if (route.schoolUrl.isNotEmpty()) {
+                    println("DEBUG: Navigating to signup screen with school: ${route.schoolUrl}")
+                    navController.navigate(GetStartedScreen()) {
+                        popUpTo(0)
+                    } // TODO  want to take them through the signup flow for the admin user
+                }
+            }
+        }
         composable<Acknowledgement> {
             val viewModel: AcknowledgementViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -516,14 +534,6 @@ fun AppNavHost(
             )
 
             HostSelectionScreen(viewModel)
-        }
-        composable<AddSchool> {
-            val viewModel: AddSchoolViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-
-            AddSchoolScreen(viewModel)
         }
 
         composable<SchoolDirectoryEdit>{

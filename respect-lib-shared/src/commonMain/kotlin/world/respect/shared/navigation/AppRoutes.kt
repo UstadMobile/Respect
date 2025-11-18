@@ -52,16 +52,6 @@ object SchoolDirectoryList : RespectAppRoute
 object HostSelectionList : RespectAppRoute
 
 @Serializable
-data class AddSchool(
-    val schoolUrlStr: String,
-) : RespectAppRoute {
-
-    companion object {
-        fun create(url: Url) = AddSchool(url.toString())
-    }
-}
-
-@Serializable
 object SchoolDirectoryEdit : RespectAppRoute
 
 @Serializable
@@ -408,6 +398,12 @@ class TermsAndCondition(
         }
     }
 }
+
+@Serializable
+data class SchoolRegistrationComplete(
+    val schoolUrl: String = "",
+    val authToken: String? = null
+) : RespectAppRoute
 
 @Serializable
 class CreateAccount(

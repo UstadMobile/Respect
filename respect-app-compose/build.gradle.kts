@@ -90,8 +90,6 @@ kotlin {
             implementation(libs.acra.http)
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
-            implementation(libs.androidx.browser)
-
         }
 
         commonMain.dependencies {

@@ -11,6 +11,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
+import world.respect.server.SchoolConfig
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -23,6 +24,7 @@ class AddSchoolUseCase(
     private val directoryDataSource: SchoolDirectoryDataSourceLocal,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal,
     private val encryptPasswordUseCase: EncryptPersonPasswordUseCase,
+    private val schoolConfig: SchoolConfig
 ): KoinComponent {
 
     @Serializable
@@ -36,6 +38,24 @@ class AddSchoolUseCase(
     suspend operator fun invoke(
         requests: List<AddSchoolRequest>
     ) {
+
+        // Check if school registration is enabled
+        if (!schoolConfig.registration.enabled) {
+            throw SchoolRegistrationDisabledException("New school registration is disabled")
+        }
+
+        // For subdomain mode, validate the domain matches the configured top-level domain
+        if (schoolConfig.registration.mode == SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN) {
+            requests.forEach { request ->
+                val schoolHost = request.school.self.host
+                if (!schoolHost.endsWith(".${schoolConfig.registration.topLevelDomain}")) {
+                    throw InvalidSchoolDomainException(
+                        "School domain '$schoolHost' must end with '${schoolConfig.registration.topLevelDomain}'"
+                    )
+                }
+            }
+        }
+
         requests.forEach { request ->
             schoolDirectoryEntryDataSource.updateLocal(listOf(request.school))
 
@@ -93,3 +113,6 @@ class AddSchoolUseCase(
     }
 
 }
+
+class SchoolRegistrationDisabledException(message: String) : Exception(message)
+class InvalidSchoolDomainException(message: String) : Exception(message)

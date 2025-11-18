@@ -15,6 +15,7 @@ import world.respect.shared.resources.UiText
  */
 data class AppUiState(
     val fabState: FabUiState = FabUiState(),
+    val expandableFabState: ExpandableFabUiState = ExpandableFabUiState(),
     val title: UiText? = null,
     val navigationVisible: Boolean = true,
     val hideBottomNavigation: Boolean = false,

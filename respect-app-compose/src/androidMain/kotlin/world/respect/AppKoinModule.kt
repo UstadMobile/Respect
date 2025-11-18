@@ -120,6 +120,7 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.createlink.CreateLinkUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
@@ -183,9 +184,11 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
+import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
+import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
@@ -202,7 +205,12 @@ import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePa
 import java.io.File
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-
+import com.ustadmobile.libcache.sharelink.EmailLinkLauncher
+import com.ustadmobile.libcache.sharelink.ShareLinkLauncher
+import com.ustadmobile.libcache.sharelink.SmsLinkLauncher
+import com.ustadmobile.libcache.sendinvite.SmsLinkLauncherAndroid
+import com.ustadmobile.libcache.sendinvite.EmailLinkLauncherAndroid
+import com.ustadmobile.libcache.sendinvite.ShareLinkLauncherAndroid
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -229,7 +237,15 @@ val appKoinModule = module {
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
     }
-
+    single<SmsLinkLauncher> {
+        SmsLinkLauncherAndroid(androidContext())
+    }
+    single<EmailLinkLauncher> {
+        EmailLinkLauncherAndroid(androidContext())
+    }
+    single<ShareLinkLauncher> {
+        ShareLinkLauncherAndroid(androidContext())
+    }
     single<UidNumberMapper> {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
@@ -300,6 +316,8 @@ val appKoinModule = module {
     viewModelOf(::AccountListViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
+    viewModelOf(::InvitePersonViewModel)
+    viewModelOf(::CopyInviteCodeViewModel)
     viewModelOf(::PersonEditViewModel)
     viewModelOf(::PersonDetailViewModel)
     viewModelOf(::ReportDetailViewModel)
@@ -644,7 +662,11 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
+        scoped<CreateLinkUseCase> {
+            CreateLinkUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+            )
+        }
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,

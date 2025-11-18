@@ -7,6 +7,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -558,13 +559,19 @@ data class PersonList(
     val isTopLevel: Boolean = false,
     private val resultDestStr: String? = null,
     val showInviteCode: String? = null,
+    val classNameStr: String? = null,
+    val classUidStr: String? = null,
+    val roleStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     val filterByRole: PersonRoleEnum? = filterByRoleStr?.let {
         PersonRoleEnum.fromValue(it)
     }
-
+    @Transient
+    val role: EnrollmentRoleEnum? = roleStr?.let {
+        EnrollmentRoleEnum.fromValue(it)
+    }
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
@@ -575,11 +582,17 @@ data class PersonList(
             isTopLevel: Boolean = false,
             resultDest: ResultDest? = null,
             showInviteCode: String? = null,
+            className: String? = null,
+            classUid: String? = null,
+            role: EnrollmentRoleEnum? = null,
         ) = PersonList(
             filterByRoleStr = filterByRole?.value,
             isTopLevel = isTopLevel,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
             showInviteCode = showInviteCode,
+            classUidStr = classUid,
+            classNameStr = className,
+            roleStr = role?.value,
         )
 
     }
@@ -641,3 +654,35 @@ data class ChangePassword(
     val guid: String,
 ): RespectAppRoute
 
+@Serializable
+data class InvitePerson(
+    val familyPersonGuid: String? = null,
+    val classGuid: String? = null,
+    val className:String?=null,
+    val roleStr: String? = null,
+) : RespectAppRoute {
+    @Transient
+    val role: EnrollmentRoleEnum? = roleStr?.let {
+        EnrollmentRoleEnum.fromValue(it)
+    }
+    companion object {
+
+        fun create(
+            className: String? = null,
+            classUid: String? = null,
+            familyPersonGuid: String? = null,
+            role: EnrollmentRoleEnum? = null,
+        ) = InvitePerson(
+            familyPersonGuid = familyPersonGuid,
+            classGuid = classUid,
+            className = className,
+            roleStr = role?.value,
+        )
+
+    }
+}
+
+@Serializable
+data class CopyCode(
+    val inviteCode:String?=null
+): RespectAppRoute

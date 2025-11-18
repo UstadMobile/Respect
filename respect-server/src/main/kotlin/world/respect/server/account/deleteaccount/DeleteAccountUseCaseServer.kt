@@ -10,7 +10,7 @@ class DeleteAccountUseCaseServer(
 
     override suspend fun invoke(guid: String): Boolean {
         return try {
-            val guidHash = guid.toLong()   // DB expects Long hash
+            val guidHash = guid.toLong()
             val rows = schoolDb
                 .getPersonEntityDao()
                 .deleteByPersonGuidHash(guidHash)

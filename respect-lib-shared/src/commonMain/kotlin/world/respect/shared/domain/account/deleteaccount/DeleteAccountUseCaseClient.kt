@@ -19,7 +19,7 @@ class DeleteAccountUseCaseClient(
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource
 ) : DeleteAccountUseCase, SchoolUrlBasedDataSource {
 
-    override suspend fun invoke(guid: String): Boolean {
+    override suspend fun invoke(): Boolean {
         return try {
             val response: HttpResponse = httpClient.post(
                 respectEndpointUrl("person/delete")
@@ -33,7 +33,7 @@ class DeleteAccountUseCaseClient(
             return success
 
         } catch (e: Exception) {
-            Napier.e("DeleteAccountUseCase: deleteByGuid($guid) failed: ${e.message}", e)
+            Napier.e("DeleteAccountUseCase: ${e.message}", e)
             false
         }
     }

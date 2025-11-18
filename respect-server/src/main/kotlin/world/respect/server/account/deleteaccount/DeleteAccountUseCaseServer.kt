@@ -1,24 +1,19 @@
 package world.respect.server.account.deleteaccount
 
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.deleteaccount.DeleteAccountUseCase
 
 class DeleteAccountUseCaseServer(
-    private val schoolDb: RespectSchoolDatabase
+    private val schoolDb: RespectSchoolDatabase,
+    private val authenticatedUser: AuthenticatedUserPrincipalId
 ) : DeleteAccountUseCase {
 
-    override suspend fun invoke(guid: String): Boolean {
-        return try {
-            val guidHash = guid.toLong()
-            val rows = schoolDb
-                .getPersonEntityDao()
-                .deleteByPersonGuidHash(guidHash)
+    override suspend fun invoke(): Boolean {
 
-            rows > 0
-        } catch (e: Exception) {
-            throw IllegalStateException("DeleteAccountUseCase failed for guid=$guid: ${e.message}")
-                .withHttpStatus(500)
-        }
+        val dao = schoolDb.getPersonEntityDao()
+        dao.deletePerson(authenticatedUser.guid)
+
+        return true
     }
 }

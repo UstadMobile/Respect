@@ -230,11 +230,7 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
             )
         }
-        scoped<DeleteAccountUseCase> {
-            DeleteAccountUseCaseServer(
-                schoolDb = get()
-            )
-        }
+
         scoped<GetActivePersonPasskeysUseCase> {
             GetActivePersonPasskeysDbImpl(
                 schoolDb = get(),
@@ -301,6 +297,16 @@ fun serverKoinModule(
             SchoolDataSourceDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId
+            )
+        }
+
+        factory<DeleteAccountUseCase> {
+
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            DeleteAccountUseCaseServer(
+                schoolDb = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId
             )
         }

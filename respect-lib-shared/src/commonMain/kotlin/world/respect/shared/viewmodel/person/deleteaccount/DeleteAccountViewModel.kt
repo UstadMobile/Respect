@@ -89,7 +89,7 @@ class DeleteAccountViewModel(
     fun onDeleteAccount() {
         viewModelScope.launch {
             try {
-                deleteAccountUseCase(route.guid)
+                deleteAccountUseCase()
                 accountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                     accountAndPerson?.let { accountManager.endSession(it.account) }
                 }

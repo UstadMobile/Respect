@@ -220,11 +220,7 @@ fun Application.module() {
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
-                    route("person") {
-                        PersonDeleteRoute(
-                            deleteAccountUseCase = { it.getSchoolKoinScope().get() },
-                        )
-                    }
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
                         PersonRoute()
@@ -233,6 +229,12 @@ fun Application.module() {
                         ClassRoute()
                         EnrollmentRoute()
                         AssignmentRoute()
+
+                        route("person") {
+                            PersonDeleteRoute(
+                                deleteAccountUseCase = { it.getSchoolKoinScope().get() },
+                            )
+                        }
                     }
                 }
             }

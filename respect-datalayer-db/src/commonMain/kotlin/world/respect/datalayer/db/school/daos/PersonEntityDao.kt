@@ -198,13 +198,11 @@ interface PersonEntityDao {
     ): Flow<List<PersonEntityWithRoles>>
 
 
-
-
     @Query("""
         DELETE FROM PersonEntity
-         WHERE pGuidHash = :personGuidHash
+        WHERE pGuid = :id
     """)
-    suspend fun deleteByPersonGuidHash(personGuidHash: Long): Int
+    suspend fun deletePerson(id: String)
 
 
     companion object {

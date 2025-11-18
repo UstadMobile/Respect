@@ -13,7 +13,7 @@ fun Route.PersonDeleteRoute(
 ) {
     post("delete") {
 
-        val result = deleteAccountUseCase(call).invoke(guid = "")
+        val result = deleteAccountUseCase(call).invoke()
         call.respond(result)
         
     }

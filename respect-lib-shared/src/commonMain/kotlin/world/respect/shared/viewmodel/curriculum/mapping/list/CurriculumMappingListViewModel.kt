@@ -2,8 +2,11 @@ package world.respect.shared.viewmodel.curriculum.mapping.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -20,10 +23,16 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 
 data class CurriculumMappingListUiState(
     val mappings: List<CurriculumMapping> = emptyList(),
     val error: UiText? = null,
+    val sectionUiState: (CurriculumMappingSection) -> Flow<CurriculumMappingSectionUiState> = { emptyFlow() },
+)
+
+data class CurriculumMappingSectionUiState(
+    val icon: Url? = null,
 )
 
 class CurriculumMappingListViewModel(

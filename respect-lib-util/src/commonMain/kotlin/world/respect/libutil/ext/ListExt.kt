@@ -33,3 +33,21 @@ inline fun <T, K> List<T>.lastDistinctBy(
     }
     return map.values.toList()
 }
+
+inline fun <T> List<T>.updateAtIndex(
+    index: Int,
+    newValue: (T) -> T,
+): List<T> = mapIndexed { mapIndex, item ->
+    if(mapIndex == index) newValue(item) else item
+}
+
+//Move an item (e.g. when handling a reorderable list)
+//As per https://github.com/Calvin-LL/Reorderable?tab=readme-ov-file#complete-example-with-haptic-feedback
+fun <T> List<T>.moveItem(
+    from: Int,
+    to: Int
+): List<T> {
+    return toMutableList().apply {
+        add(index = to, element = removeAt(from))
+    }.toList()
+}

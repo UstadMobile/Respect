@@ -64,6 +64,7 @@ kotlin {
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
+            implementation(libs.androidx.browser)
         }
 
         jvmMain.dependencies {

@@ -50,6 +50,9 @@ object Onboarding : RespectAppRoute
 object SchoolDirectoryList : RespectAppRoute
 
 @Serializable
+object HostSelectionList : RespectAppRoute
+
+@Serializable
 object SchoolDirectoryEdit : RespectAppRoute
 
 @Serializable
@@ -450,6 +453,12 @@ class TermsAndCondition(
         }
     }
 }
+
+@Serializable
+data class SchoolRegistrationComplete(
+    val schoolUrl: String = "",
+    val authToken: String? = null
+) : RespectAppRoute
 
 @Serializable
 class CreateAccount(

@@ -1,6 +1,7 @@
 package world.respect.app.view.manageuser.getstarted
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,13 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -36,6 +40,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_my_school
 import world.respect.shared.generated.resources.enter_school_name
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.school_name_placeholder
@@ -53,7 +58,8 @@ fun GetStartedScreen(
         uiState = uiState,
         onSchoolNameChanged = viewModel::onSchoolNameChanged,
         onClickOtherOptions = viewModel::onClickOtherOptions,
-        onSchoolSelected = viewModel::onSchoolSelected
+        onSchoolSelected = viewModel::onSchoolSelected,
+        onAddMySchool = viewModel::onAddMySchool
     )
 }
 
@@ -62,7 +68,8 @@ fun GetStartedScreen(
     uiState: GetStartedUiState,
     onSchoolNameChanged: (String) -> Unit,
     onSchoolSelected: (SchoolDirectoryEntry) -> Unit,
-    onClickOtherOptions: () -> Unit
+    onClickOtherOptions: () -> Unit,
+    onAddMySchool: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -137,6 +144,27 @@ fun GetStartedScreen(
                             maxLines = 1
                         )
                     },
+                )
+            }
+        }
+        if (uiState.showAddMySchool) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAddMySchool() }
+                    .testTag("add_my_school"),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(Res.string.add_my_school),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(Res.string.add_my_school),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

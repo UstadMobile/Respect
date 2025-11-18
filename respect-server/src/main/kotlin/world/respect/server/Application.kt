@@ -48,6 +48,7 @@ import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.schoolRegistrationWebRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
@@ -163,8 +164,10 @@ fun Application.module() {
 
     routing {
         get("/") {
-            call.respondText("Ktor: ${Greeting().greet()}")
+            call.respondRedirect("/register-school")
         }
+        // school registration
+        schoolRegistrationWebRoute()
 
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")

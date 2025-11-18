@@ -84,6 +84,10 @@ fun serverKoinModule(
         }
     }
 
+    single<SchoolConfig> {
+        SchoolConfig.fromConfig(config)
+    }
+
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
     }
@@ -124,6 +128,7 @@ fun serverKoinModule(
             directoryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryDataSource,
             schoolDirectoryEntryDataSource = get<RespectAppDataSourceLocal>().schoolDirectoryEntryDataSource,
             encryptPasswordUseCase = get(),
+            schoolConfig = get()
         )
     }
 

@@ -37,7 +37,10 @@ fun Route.schoolRegistrationWebRoute() {
     get("/register-school") {
         // Check if registration is enabled
         if (!schoolConfig.registration.enabled) {
-            call.respondText("School registration is disabled", status = io.ktor.http.HttpStatusCode.Forbidden)
+            call.respondText(
+                "School registration is disabled",
+                status = io.ktor.http.HttpStatusCode.Forbidden
+            )
             return@get
         }
 
@@ -78,9 +81,11 @@ fun Route.schoolRegistrationWebRoute() {
                             // Hidden field for full URL
                             input(type = InputType.hidden, name = "schoolUrl") {
                                 id = "schoolUrl"
-                                value = "https://school-name.${schoolConfig.registration.topLevelDomain}"
+                                value =
+                                    "https://school-name.${schoolConfig.registration.topLevelDomain}"
                             }
                         }
+
                         SchoolConfig.RegistrationConfig.RegistrationMode.ANY_URL -> {
                             div("form-group") {
                                 label {
@@ -90,13 +95,10 @@ fun Route.schoolRegistrationWebRoute() {
                                 input(type = InputType.text, name = "schoolUrl") {
                                     id = "schoolUrl"
                                     required = true
-                                    placeholder = "https://your-school-domain.org"
-                                }
-                                div("domain-hint") {
-                                    +"Enter the full URL where your school will be hosted"
                                 }
                             }
                         }
+
                         else -> {
                             // Should not reach here since registration is disabled
                         }
@@ -104,7 +106,8 @@ fun Route.schoolRegistrationWebRoute() {
 
                     // Hidden redirect field for deep linking to app
                     input(type = InputType.hidden, name = "redirect") {
-                        value = call.request.queryParameters["redirect"] ?: "world.respect.app://school-registered"
+                        value = call.request.queryParameters["redirect"]
+                            ?: "world.respect.app://school-registered"
                     }
 
                     button(type = ButtonType.submit, classes = "submit-btn") {
@@ -119,7 +122,10 @@ fun Route.schoolRegistrationWebRoute() {
     post("/register-school") {
         // Check if registration is enabled
         if (!schoolConfig.registration.enabled) {
-            call.respondText("School registration is disabled", status = io.ktor.http.HttpStatusCode.Forbidden)
+            call.respondText(
+                "School registration is disabled",
+                status = io.ktor.http.HttpStatusCode.Forbidden
+            )
             return@post
         }
 
@@ -131,7 +137,10 @@ fun Route.schoolRegistrationWebRoute() {
         try {
             // Validate inputs
             if (schoolName.isBlank() || schoolUrl.isBlank()) {
-                call.respondText("School name and URL are required", status = io.ktor.http.HttpStatusCode.BadRequest)
+                call.respondText(
+                    "School name and URL are required",
+                    status = io.ktor.http.HttpStatusCode.BadRequest
+                )
                 return@post
             }
 
@@ -139,7 +148,10 @@ fun Route.schoolRegistrationWebRoute() {
             val parsedUrl = try {
                 io.ktor.http.Url(schoolUrl)
             } catch (e: Exception) {
-                call.respondText("Invalid URL format", status = io.ktor.http.HttpStatusCode.BadRequest)
+                call.respondText(
+                    "Invalid URL format",
+                    status = io.ktor.http.HttpStatusCode.BadRequest
+                )
                 return@post
             }
 
@@ -155,12 +167,13 @@ fun Route.schoolRegistrationWebRoute() {
             }
 
             // Extract subdomain from URL for use as dbUrl and rpId
-            val schoolSubdomain = if (schoolConfig.registration.mode == SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN) {
-                parsedUrl.host.removeSuffix(".${schoolConfig.registration.topLevelDomain}")
-            } else {
-                // For any-url mode, use a sanitized version of the host as subdomain
-                parsedUrl.host.replace("[^a-zA-Z0-9]".toRegex(), "-").lowercase()
-            }
+            val schoolSubdomain =
+                if (schoolConfig.registration.mode == SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN) {
+                    parsedUrl.host.removeSuffix(".${schoolConfig.registration.topLevelDomain}")
+                } else {
+                    // For any-url mode, use a sanitized version of the host as subdomain
+                    parsedUrl.host.replace("[^a-zA-Z0-9]".toRegex(), "-").lowercase()
+                }
 
             // Create school using AddSchoolUseCase
             addSchoolUseCase(

@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
+import world.respect.app.util.DeepLinkConstants
 import world.respect.app.view.acknowledgement.AcknowledgementScreen
 import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
@@ -163,7 +164,8 @@ fun AppNavHost(
         composable<SchoolRegistrationComplete>(
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "world.respect.app://school-registered?schoolUrl={schoolUrl}"
+                    uriPattern = DeepLinkConstants.URI_PATTERN
+
                 }
             )
         ) { backStackEntry ->

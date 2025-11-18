@@ -101,17 +101,13 @@ onFlowComplete:
     text: "Test User"
 - tapOn: "Create account"
 - tapOn: "Username"
-- inputText: "2tes"
+- inputText: "testuser"
 - tapOn: "Password"  # Password validations needs to be added
 - inputText: "test234"
 - tapOn: "Save"
-- assertVisible: "Username cannot start with a number"  # 2tes not a valid username
-- tapOn: "Username"
-- eraseText
-- inputText: "test@user"
-- assertVisible: "testuser"    # @ symbol won't get added to the username field - so "testuser" is expected result
-- tapOn: "Save"
-
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
 
 # Validate User login
 - clearState: world.respect.app

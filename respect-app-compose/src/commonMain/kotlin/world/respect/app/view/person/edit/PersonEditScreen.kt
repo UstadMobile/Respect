@@ -1,8 +1,15 @@
 package world.respect.app.view.person.edit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
@@ -18,10 +25,10 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectGenderExposedDropDownMenuField
 import world.respect.app.components.RespectLocalDateField
+import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
@@ -29,11 +36,15 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email
+import world.respect.shared.generated.resources.family_member
+import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.first_names
 import world.respect.shared.generated.resources.last_name
 import world.respect.shared.generated.resources.phone_number
+import world.respect.shared.generated.resources.remove
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.role
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState
@@ -48,6 +59,8 @@ fun PersonEditScreen(
         uiState = uiState,
         onEntityChanged = viewModel::onEntityChanged,
         onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
+        onClickAddFamilyMember = viewModel::onClickAddFamilyMember,
+        onRemoveFamilyMember = viewModel::onRemoveFamilyMember,
     )
 }
 
@@ -56,8 +69,10 @@ fun PersonEditScreen(
     uiState: PersonEditUiState,
     onEntityChanged: (Person) -> Unit,
     onNationalNumberSetChanged: (Boolean) -> Unit,
+    onClickAddFamilyMember: () -> Unit,
+    onRemoveFamilyMember: (Person) -> Unit,
 ) {
-    val person = uiState.person.dataOrNull()
+    val person = uiState.person
     val fieldsEnabled = uiState.fieldsEnabled
     val scrollState = rememberScrollState()
 
@@ -141,7 +156,45 @@ fun PersonEditScreen(
                     Text(stringResource(Res.string.required))
                 }
             )
+        }
 
+        if (uiState.showFamilyMembers) {
+            Text(
+                modifier = Modifier.defaultItemPadding(),
+                text = stringResource(Res.string.family_members),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddFamilyMember()
+                },
+                headlineContent = {
+                    Text(stringResource(Res.string.family_member))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Add, contentDescription = "")
+                }
+            )
+            val familyMembers = uiState.familyMembers
+            familyMembers.forEach { familyPerson ->
+                ListItem(
+                    leadingContent = {
+                        RespectPersonAvatar(familyPerson.fullName())
+                    },
+                    headlineContent = {
+                        Text(familyPerson.fullName())
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(Res.string.remove),
+                            modifier = Modifier.clickable {
+                                onRemoveFamilyMember(familyPerson)
+                            }
+                        )
+                    }
+                )
+            }
         }
 
         RespectLocalDateField(

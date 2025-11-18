@@ -163,6 +163,8 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
+import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
+import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -319,6 +321,9 @@ val appKoinModule = module {
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::EnrollmentListViewModel)
+    viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::HostSelectionViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {

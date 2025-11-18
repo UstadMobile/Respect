@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -17,15 +16,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.chapter
 import world.respect.shared.generated.resources.description
@@ -41,12 +46,36 @@ import world.respect.shared.generated.resources.title
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+
+
+@Composable
+fun CurriculumMappingEditScreenForViewModel(
+    viewModel: CurriculumMappingEditViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    CurriculumMappingEditScreen(
+        uiState = uiState,
+        sectionLinkUiState = viewModel::sectionLinkUiStateFor,
+        onTitleChanged = viewModel::onTitleChanged,
+        onDescriptionChanged = viewModel::onDescriptionChanged,
+        onClickAddSection = viewModel::onClickAddSection,
+        onClickRemoveSection = viewModel::onClickRemoveSection,
+        onSectionTitleChanged = viewModel::onSectionTitleChanged,
+        onSectionMoved = viewModel::onSectionMoved,
+        onClickAddLesson = viewModel::onClickAddLesson,
+        onClickRemoveLesson = viewModel::onClickRemoveLesson,
+        onLessonTitleChanged = viewModel::onLessonTitleChanged,
+    )
+}
 
 @Composable
 fun CurriculumMappingEditScreen(
     uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
+    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
     onTitleChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onClickAddSection: () -> Unit = {},
@@ -168,6 +197,7 @@ fun CurriculumMappingEditScreen(
                 ) { isDragging ->
                     SectionItem(
                         section = section,
+                        sectionLinkUiState = sectionLinkUiState,
                         sectionIndex = sectionIndex,
                         isDragging = isDragging,
                         onSectionTitleChanged = onSectionTitleChanged,
@@ -194,6 +224,7 @@ fun CurriculumMappingEditScreen(
 @Composable
 private fun SectionItem(
     section: CurriculumMappingSection,
+    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
     sectionIndex: Int,
     isDragging: Boolean,
     onSectionTitleChanged: (Int, String) -> Unit,
@@ -283,6 +314,7 @@ private fun SectionItem(
             section.items.forEachIndexed { linkIndex, link ->
                 LessonItem(
                     link = link,
+                    sectionLinkUiState = sectionLinkUiState,
                     sectionIndex = sectionIndex,
                     linkIndex = linkIndex,
                     onClickRemoveLesson = onClickRemoveLesson,
@@ -300,34 +332,44 @@ private fun SectionItem(
 @Composable
 private fun LessonItem(
     link: CurriculumMappingSectionLink,
+    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
     sectionIndex: Int,
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
     onLessonTitleChanged: (Int, Int, String) -> Unit,
     enabled: Boolean
 ) {
+
+    val stateFlow = remember(link.href) {
+        sectionLinkUiState(link)
+    }
+
+    val linkUiState by stateFlow.collectAsState(initial = DataLoadingState())
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 32.dp, top = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape
-                )
-        )
+        linkUiState.dataOrNull()?.icon?.also { iconUrl ->
+            RespectAsyncImage(
+                uri = iconUrl.toString(),
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(36.dp)
+            )
+        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(Modifier.width(16.dp))
 
-        val title = link.title ?: ""
         Text(
             text = link.title ?: "${stringResource(Res.string.lesson)} ${linkIndex + 1}",
             modifier = Modifier.weight(1f)
         )
+
+        Spacer(Modifier.width(16.dp))
 
         IconButton(
             onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
@@ -341,24 +383,4 @@ private fun LessonItem(
             )
         }
     }
-}
-
-@Composable
-fun CurriculumMappingEditScreenForViewModel(
-    viewModel: CurriculumMappingEditViewModel
-) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    CurriculumMappingEditScreen(
-        uiState = uiState,
-        onTitleChanged = viewModel::onTitleChanged,
-        onDescriptionChanged = viewModel::onDescriptionChanged,
-        onClickAddSection = viewModel::onClickAddSection,
-        onClickRemoveSection = viewModel::onClickRemoveSection,
-        onSectionTitleChanged = viewModel::onSectionTitleChanged,
-        onSectionMoved = viewModel::onSectionMoved,
-        onClickAddLesson = viewModel::onClickAddLesson,
-        onClickRemoveLesson = viewModel::onClickRemoveLesson,
-        onLessonTitleChanged = viewModel::onLessonTitleChanged,
-    )
 }

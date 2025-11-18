@@ -3,11 +3,21 @@ package world.respect.shared.viewmodel.curriculum.mapping.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.map
+import world.respect.lib.opds.model.findIcons
+import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_invalid_section_index
 import world.respect.shared.generated.resources.error_no_current_mapping
@@ -40,21 +50,30 @@ data class CurriculumMappingEditUiState(
     val titleError: UiText? = null,
     val error: UiText? = null,
     val pendingLessonSectionIndex: Int? = null,
+    val sectionUiState: (CurriculumMappingSection) -> Flow<CurriculumMappingSectionUiState> = { emptyFlow() },
 ) {
     val fieldsEnabled: Boolean
         get() = !loading
+
     val title: String
         get() = mapping?.title ?: ""
+
     val description: String
         get() = mapping?.description ?: ""
+
     val sections: List<CurriculumMappingSection>
         get() = mapping?.sections ?: emptyList()
 }
+
+data class CurriculumMappingSectionUiState(
+    val icon: Url? = null,
+)
 
 class CurriculumMappingEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val resultReturner: NavResultReturner,
     private val json: Json,
+    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
@@ -255,6 +274,28 @@ class CurriculumMappingEditViewModel(
         updateMapping(currentMapping.copy(sections = currentSections))
     }
 
+    /**
+     * Provide a flow that creates the SectionLinkUiState .
+     */
+    fun sectionLinkUiStateFor(
+        link: CurriculumMappingSectionLink
+    ): Flow<DataLoadState<CurriculumMappingSectionUiState>> {
+        val publicationUrl = Url(link.href)
+        return respectAppDataSource.opdsDataSource.loadOpdsPublication(
+            url = Url(link.href),
+            params = DataLoadParams(),
+            referrerUrl = null,
+            expectedPublicationId = null,
+        ).map { opdsLoadState ->
+            opdsLoadState.map { publication ->
+                CurriculumMappingSectionUiState(
+                    icon = publication.findIcons().firstOrNull()?.let {
+                        publicationUrl.resolve(it.href)
+                    }
+                )
+            }
+        }
+    }
 
     fun onClickSave() {
         val mapping = _uiState.value.mapping ?: return

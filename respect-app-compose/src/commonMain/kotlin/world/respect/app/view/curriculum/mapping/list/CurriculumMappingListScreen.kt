@@ -71,18 +71,6 @@ fun CurriculumMappingListScreen(
                 }
             }
         }
-
-        FloatingActionButton(
-            onClick = onClickMap,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.map),
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
     }
 }
 

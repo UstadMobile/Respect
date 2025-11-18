@@ -23,16 +23,10 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 
 data class CurriculumMappingListUiState(
     val mappings: List<CurriculumMapping> = emptyList(),
     val error: UiText? = null,
-    val sectionUiState: (CurriculumMappingSection) -> Flow<CurriculumMappingSectionUiState> = { emptyFlow() },
-)
-
-data class CurriculumMappingSectionUiState(
-    val icon: Url? = null,
 )
 
 class CurriculumMappingListViewModel(

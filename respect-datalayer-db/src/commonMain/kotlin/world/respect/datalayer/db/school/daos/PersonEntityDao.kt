@@ -202,7 +202,7 @@ interface PersonEntityDao {
         DELETE FROM PersonEntity
         WHERE pGuid = :id
     """)
-    suspend fun deletePerson(id: String)
+    suspend fun deletePerson(id: String): Int
 
 
     companion object {

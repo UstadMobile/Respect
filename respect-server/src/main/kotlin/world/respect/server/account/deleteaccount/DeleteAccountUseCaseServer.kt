@@ -11,9 +11,9 @@ class DeleteAccountUseCaseServer(
 
     override suspend fun invoke(): Boolean {
 
-        val dao = schoolDb.getPersonEntityDao()
-        dao.deletePerson(authenticatedUser.guid)
+        val personDao = schoolDb.getPersonEntityDao()
+        val rowsDeleted = personDao.deletePerson(authenticatedUser.guid)
+        return rowsDeleted > 0
 
-        return true
     }
 }

@@ -10,6 +10,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class DeleteAccountUseCaseClient(
@@ -22,7 +23,7 @@ class DeleteAccountUseCaseClient(
     override suspend fun invoke(): Boolean {
         return try {
             val response: HttpResponse = httpClient.post(
-                respectEndpointUrl("person/delete")
+                respectEndpointUrl("${PersonDataSource.ENDPOINT_NAME}/delete")
             ) {
                 useTokenProvider(tokenProvider)
             }

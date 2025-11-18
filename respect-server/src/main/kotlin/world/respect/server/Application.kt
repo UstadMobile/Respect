@@ -43,7 +43,6 @@ import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
-import world.respect.server.routes.school.respect.PersonDeleteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
@@ -229,12 +228,6 @@ fun Application.module() {
                         ClassRoute()
                         EnrollmentRoute()
                         AssignmentRoute()
-
-                        route("person") {
-                            PersonDeleteRoute(
-                                deleteAccountUseCase = { it.getSchoolKoinScope().get() },
-                            )
-                        }
                     }
                 }
             }

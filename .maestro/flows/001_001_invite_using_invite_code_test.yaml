@@ -437,17 +437,18 @@ onFlowComplete:
 - assertVisible: "New Class"
 - tapOn: "New Class"
 - assertVisible: "Child User"
+
 # Adding Family member test
-- tapOn:
-    id: "user_account_icon"
-- tapOn: "Profile"
-- tapOn:
-    id: "floating_action_button"  #Edit button
-- tapOn: "Family member"
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn: "Classes"
+- tapOn: "New Class"
 - tapOn: "Student User"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Family member"
+- tapOn: "Parent User"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Parent User"
-- assertVisible: "Student User"
-- assertVisible: "Child User"
+    text: "Student User"
+- assertVisible: "Parent User"

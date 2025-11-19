@@ -230,10 +230,15 @@ Admin can invite teacher, teacher can invite student and parent using invite cod
 12. Click on class name
 13. On class detail screen verify user able to see members list.
 14. Verify user able to see their child's name under Student's list.
-15. Click on "Accounts" icon
-16. Click on Profile button
-17. Click on Edit button to edit the parent user profile
-18. Click on "+ Family member" button
-19. Click on Student user
-20. Click on Save button
-21. Verify user able to see their 2 children's name under Family member's list.
+
+### M) Admin Add Parent user as Family member to Student User
+
+1. Admin login to app.
+2. Click on "Classes" tab.
+3. Clicks on Class name.
+4. Clicks on "Student User".
+5. Clicks on Edit button to edit the Student user.
+6. Clicks on "+ Family member" button
+7. Click on "Parent User" name in select person screen
+8. Click on Save button
+9. Verify user able to see their Parent User name under Family member's list.

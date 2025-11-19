@@ -161,6 +161,8 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
+import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
+import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -198,6 +200,9 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
+import world.respect.shared.viewmodel.settings.SettingsViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
@@ -308,6 +313,9 @@ val appKoinModule = module {
     viewModelOf(::ReportFilterEditViewModel)
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::CurriculumMappingListViewModel)
+    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
@@ -315,6 +323,10 @@ val appKoinModule = module {
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::EnrollmentListViewModel)
+    viewModelOf(::EnrollmentEditViewModel)
+
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -407,7 +419,6 @@ val appKoinModule = module {
     single<EncodeUserHandleUseCase> {
         EncodeUserHandleUseCaseImpl()
     }
-
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }

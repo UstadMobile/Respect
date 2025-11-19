@@ -50,7 +50,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Edit person"
-
 # Add Family member - as new person
 - tapOn: "Family member"
 - tapOn: "Add person"
@@ -178,7 +177,6 @@ onFlowComplete:
 - assertVisible: "Enter valid email address."
 - eraseText
 - inputText: "Testuser@gmail.com"
-- assertVisible: "Testuser@gmail.com"
 - runFlow:
     when:
       notVisible: "Save"
@@ -188,6 +186,9 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Test User"
+- assertVisible: "ParentA User"
+- assertVisible: "+12125554326"
+- assertVisible: "Testuser@gmail.com"
 - tapOn: "Create account"
 - tapOn: "Username"
 - inputText: "2t"

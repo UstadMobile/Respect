@@ -2,8 +2,9 @@
  <resources>
     <string name="asset_statements" translatable="false">
     [{
-      \"include\": \"https://ustadtesting.ustadmobile.com/.well-known/assetlinks.json\",
-      \"include\": \"https://onrespect.app/.well-known/assetlinks.json\"
+       \"include\": \"https://ustadtesting.ustadmobile.com/.well-known/assetlinks.json\",
+       \"include\": \"https://onrespect.app/.well-known/assetlinks.json\",
+       \"include\": \"https://onrespectstaging.app/.well-known/assetlinks.json\"
     }]
     </string>
 </resources>

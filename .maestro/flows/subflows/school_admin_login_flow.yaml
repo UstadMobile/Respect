@@ -1,7 +1,6 @@
 appId: world.respect.app
 
 ---
-- clearState: world.respect.app
 - launchApp:
       arguments:
           respect_directory: ${output.SCHOOL_URL}

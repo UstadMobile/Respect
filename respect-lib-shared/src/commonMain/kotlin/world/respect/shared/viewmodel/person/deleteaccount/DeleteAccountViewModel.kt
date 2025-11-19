@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
@@ -32,7 +31,7 @@ data class DeleteAccountUiState(
     val userName: String? = null,
     val enteredName: String = "",
     val userNameError: UiText? = null,
-    )
+)
 
 class DeleteAccountViewModel(
     savedStateHandle: SavedStateHandle,
@@ -53,17 +52,21 @@ class DeleteAccountViewModel(
 
     init {
         viewModelScope.launch {
-            val personSelected = schoolDataSource.personDataSource.findByGuid(
-                loadParams = DataLoadParams(),
-                guid = route.guid,
-            ).dataOrNull()
 
-            _uiState.update {
-                it.copy(
-                    userName = personSelected?.fullName(),
-                    enteredName = personSelected?.fullName().orEmpty()
-                )
+            schoolDataSource.personDataSource.findByGuidAsFlow(
+                guid = route.guid,
+            ).collect { person ->
+                val personSelected = person.dataOrNull()
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        userName = personSelected?.fullName(),
+                        enteredName = personSelected?.fullName().orEmpty()
+                    )
+                }
             }
+
+
         }
         _appUiState.update {
             it.copy(

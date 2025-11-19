@@ -182,28 +182,12 @@ interface PersonEntityDao {
             """
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
-    @Transaction
-    @Query("""
-        SELECT *
-          FROM PersonEntity
-         WHERE PersonEntity.pGuidHash IN (
-                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
-                  FROM PersonRelatedPersonEntity
-                 WHERE PersonRelatedPersonEntity.prpPersonUidNum = :guidHash
-              )
-         ORDER BY PersonEntity.pGivenName
-    """)
-    fun findFamilyMembersRelatedToPerson(
-        guidHash: Long,
-    ): Flow<List<PersonEntityWithRoles>>
-
 
     @Query("""
-        DELETE FROM PersonEntity
-        WHERE pGuid = :id
-    """)
+      DELETE FROM PersonEntity
+      WHERE pGuid = :id
+  """)
     suspend fun deletePerson(id: String): Int
-
 
     companion object {
 

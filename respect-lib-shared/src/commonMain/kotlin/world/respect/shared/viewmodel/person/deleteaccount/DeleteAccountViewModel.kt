@@ -60,8 +60,7 @@ class DeleteAccountViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        userName = personSelected?.fullName(),
-                        enteredName = personSelected?.fullName().orEmpty()
+                        userName = personSelected?.fullName()
                     )
                 }
             }

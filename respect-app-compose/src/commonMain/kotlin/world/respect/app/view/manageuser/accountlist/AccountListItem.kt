@@ -16,10 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import world.respect.app.components.CountryFlag
 import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.flagSizeMedium
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.util.ext.fullName
@@ -30,7 +30,7 @@ fun AccountListItem(
     account: RespectAccountAndPerson,
     onClickAccount: ((RespectAccount) -> Unit)?,
     onFetchCountryForSchool: (String) -> Unit,
-    countryFlagEmoji: String?,
+    countryCode: String?,
     extras: @Composable () -> Unit = { },
 ){
         val schoolUrl = remember(account.account.school.self) {
@@ -75,14 +75,10 @@ fun AccountListItem(
                         maxLines = 1,
                         modifier = Modifier.padding(start = 8.dp)
                     )
-                    if (countryFlagEmoji != null) {
-                        Text(
-                            text = countryFlagEmoji,
-                            fontSize = 18.sp,
-                            fontFamily = FontFamily.Default,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
+                    CountryFlag(
+                        countryCode = countryCode,
+                        modifier = Modifier.flagSizeMedium()
+                    )
                 }
 
                 extras()

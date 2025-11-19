@@ -120,6 +120,8 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
+import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
@@ -588,6 +590,14 @@ val appKoinModule = module {
             db = get(),
             httpCache = get(),
         )
+    }
+
+    single<GetDevModeEnabledUseCase> {
+        GetDevModeEnabledUseCase(settings = get())
+    }
+
+    single<SetDevModeEnabledUseCase> {
+        SetDevModeEnabledUseCase(settings = get())
     }
 
     /**

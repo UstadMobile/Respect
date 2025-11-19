@@ -20,6 +20,8 @@ import world.respect.shared.generated.resources.delete_account
 import world.respect.shared.generated.resources.error_name_mismatched
 import world.respect.shared.generated.resources.required
 import world.respect.shared.navigation.DeleteAccount
+import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.fullName
@@ -90,9 +92,19 @@ class DeleteAccountViewModel(
         viewModelScope.launch {
             try {
                 deleteAccountUseCase()
-                accountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
-                    accountAndPerson?.let { accountManager.endSession(it.account) }
+
+                val account = accountManager.selectedAccount
+                if (account != null) {
+                    accountManager.endSession(account)
                 }
+
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = GetStartedScreen(),
+                        clearBackStack = true
+                    )
+                )
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 println("Delete failed due to exception: ${e.message}")

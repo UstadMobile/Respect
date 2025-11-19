@@ -1,0 +1,29 @@
+appId: world.respect.app
+
+---
+- tapOn: "Classes"
+- tapOn: "New Class"
+- tapOn: "Add Teacher"
+- tapOn: "Add person"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: ${FIRSTNAME}
+- tapOn: "Last name*"
+- inputText: ${LASTNAME}
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Role*"
+- tapOn: "Teacher"
+- tapOn: "Save"
+- assertVisible:
+      id: "app_title"
+      text: "New Class"
+- tapOn: ${FIRSTNAME} ${LASTNAME}
+- tapOn: "Create account"
+- tapOn: "Username"
+- inputText: ${USERNAME}
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- tapOn: "Save"

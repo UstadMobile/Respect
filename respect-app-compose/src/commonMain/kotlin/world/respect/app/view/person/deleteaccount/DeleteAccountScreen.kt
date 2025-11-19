@@ -19,8 +19,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete_headline
-import world.respect.shared.generated.resources.delete_supporting_content
-import world.respect.shared.generated.resources.enter_username
+import world.respect.shared.generated.resources.delete_account_message
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.permanently_delete
 import world.respect.shared.viewmodel.person.deleteaccount.DeleteAccountUiState
@@ -63,12 +62,15 @@ fun DeleteAccountScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "${stringResource(Res.string.enter_username)} " +
-                    "(${uiState.userName}) " +
-                    stringResource(Res.string.delete_supporting_content),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        uiState.userName?.let {
+            Text(
+                text = stringResource(
+                    Res.string.delete_account_message,
+                    it
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

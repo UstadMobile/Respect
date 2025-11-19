@@ -99,6 +99,12 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
+- runFlow:
+    when:
+      notVisible:
+        text: "Lesson/assessment"
+    commands:
+      - hideKeyboard
 - tapOn: "Lesson/assessment"
 - assertVisible:
     id: "app_title"

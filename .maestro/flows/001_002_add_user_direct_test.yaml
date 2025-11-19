@@ -168,11 +168,6 @@ onFlowComplete:
       notVisible: "Save"
     commands:
       - hideKeyboard
-- scrollUntilVisible:
-    element:
-      text: "Save" # or any other selector
-    direction: UP
-    timeout: 1000
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
 - eraseText

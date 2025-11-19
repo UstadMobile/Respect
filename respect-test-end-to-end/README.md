@@ -16,9 +16,7 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ### 2 : Apps
 
-2.1 [User Can Browse Apps and lessons ](test-description/002_001_browse_lessons_test_description.md)
-
-2.2 [Admin adds mapping by linking lessons from integrated edtech apps](test-description/002_002_adding_curriculum_mapping_test_description.md) 
+2.1 [User Can Browse Apps and lessons ](test-description/002_browse_lessons_test_description.md)
 
 ### 3 : Assignments
 

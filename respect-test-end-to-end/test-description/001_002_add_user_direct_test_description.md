@@ -2,7 +2,7 @@
 
 ## Description:
 
-Admin create a person and validate user login and credentials
+Admin create a person, add details ,add family members and create account. The user then verifies the credentials by logging into the application.
 
 ## Step-by-step procedure:
 

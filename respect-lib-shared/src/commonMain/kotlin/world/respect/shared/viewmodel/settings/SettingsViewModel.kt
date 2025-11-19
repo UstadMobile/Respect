@@ -32,7 +32,7 @@ class SettingsViewModel(
                 navigationVisible = true,
                 hideAppBar = false,
                 userAccountIconVisible = true,
-                hideBottomNavigation = false,
+                hideBottomNavigation = true,
             )
         }
     }

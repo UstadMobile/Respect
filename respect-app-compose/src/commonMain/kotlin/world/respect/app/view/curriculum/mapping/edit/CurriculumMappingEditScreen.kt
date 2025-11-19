@@ -1,6 +1,5 @@
 package world.respect.app.view.curriculum.mapping.edit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,7 +31,6 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.chapter
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.drag
 import world.respect.shared.generated.resources.lesson
@@ -43,6 +41,7 @@ import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.section
 import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
+import world.respect.shared.generated.resources.section_name
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
@@ -68,7 +67,6 @@ fun CurriculumMappingEditScreenForViewModel(
         onSectionMoved = viewModel::onSectionMoved,
         onClickAddLesson = viewModel::onClickAddLesson,
         onClickRemoveLesson = viewModel::onClickRemoveLesson,
-        onLessonTitleChanged = viewModel::onLessonTitleChanged,
     )
 }
 
@@ -84,7 +82,6 @@ fun CurriculumMappingEditScreen(
     onSectionMoved: (Int, Int) -> Unit = { _, _ -> },
     onClickAddLesson: (Int) -> Unit = {},
     onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
-    onLessonTitleChanged: (Int, Int, String) -> Unit = { _, _, _ -> },
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
@@ -204,7 +201,6 @@ fun CurriculumMappingEditScreen(
                         onClickRemoveSection = onClickRemoveSection,
                         onClickAddLesson = onClickAddLesson,
                         onClickRemoveLesson = onClickRemoveLesson,
-                        onLessonTitleChanged = onLessonTitleChanged,
                         dragModifier = Modifier.draggableHandle(
                             onDragStarted = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -231,7 +227,6 @@ private fun SectionItem(
     onClickRemoveSection: (Int) -> Unit,
     onClickAddLesson: (Int) -> Unit,
     onClickRemoveLesson: (Int, Int) -> Unit,
-    onLessonTitleChanged: (Int, Int, String) -> Unit,
     dragModifier: Modifier = Modifier
 ) {
     Card(
@@ -267,10 +262,10 @@ private fun SectionItem(
 
                     OutlinedTextField(
                         value = section.title,
-                        onValueChange = { onSectionTitleChanged(sectionIndex, it) },
-                        placeholder = {
-                            Text("${stringResource(Res.string.chapter)} ${sectionIndex + 1}")
+                        label = {
+                            Text(stringResource(Res.string.section_name))
                         },
+                        onValueChange = { onSectionTitleChanged(sectionIndex, it) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         enabled = !isDragging
@@ -318,7 +313,6 @@ private fun SectionItem(
                     sectionIndex = sectionIndex,
                     linkIndex = linkIndex,
                     onClickRemoveLesson = onClickRemoveLesson,
-                    onLessonTitleChanged = onLessonTitleChanged,
                     enabled = !isDragging
                 )
                 if (linkIndex < section.items.size - 1) {
@@ -336,7 +330,6 @@ private fun LessonItem(
     sectionIndex: Int,
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
-    onLessonTitleChanged: (Int, Int, String) -> Unit,
     enabled: Boolean
 ) {
 

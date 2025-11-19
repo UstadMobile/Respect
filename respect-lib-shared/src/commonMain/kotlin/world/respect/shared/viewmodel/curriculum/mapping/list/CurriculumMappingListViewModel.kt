@@ -53,7 +53,7 @@ class CurriculumMappingListViewModel(
                     text = Res.string.mapping.asUiText(),
                     onClick = ::onClickMap,
                 ),
-                hideBottomNavigation = false,
+                hideBottomNavigation = true,
             )
         }
         viewModelScope.launch {

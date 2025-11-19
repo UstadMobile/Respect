@@ -22,7 +22,6 @@ import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.error_no_current_mapping
 import world.respect.shared.generated.resources.edit_mapping
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
@@ -95,7 +94,7 @@ class CurriculumMappingEditViewModel(
                 title = Res.string.edit_mapping.asUiText(),
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
+                    visible = false,
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),
@@ -137,17 +136,6 @@ class CurriculumMappingEditViewModel(
         )
     }
 
-
-    private fun updateMapping(mapping: CurriculumMapping, clearPending: Boolean = false) {
-        _uiState.update { prev ->
-            prev.copy(
-                mapping = mapping,
-                pendingLessonSectionIndex = if (clearPending) null else prev.pendingLessonSectionIndex
-            )
-        }
-        savedStateHandle[KEY_MAPPING] =
-            json.encodeToString(CurriculumMapping.serializer(), mapping)
-    }
 
     fun onTitleChanged(title: String) {
         updateUiStateAndCommit { prev ->
@@ -225,35 +213,17 @@ class CurriculumMappingEditViewModel(
     }
 
     fun onClickRemoveLesson(sectionIndex: Int, linkIndex: Int) {
-        val currentMapping = _uiState.value.mapping
-        if (currentMapping == null) {
-            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
-            return
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(
+                    sections = prev.mapping.sections.updateAtIndex(sectionIndex) { section ->
+                        section.copy(
+                            items = section.items.filterIndexed { index, _ ->  index != linkIndex }
+                        )
+                    }
+                )
+            )
         }
-        val currentSections = currentMapping.sections.toMutableList()
-        val section = currentSections.getOrNull(sectionIndex) ?: return
-        val updatedItems = section.items.toMutableList()
-        if (linkIndex !in updatedItems.indices) return
-        updatedItems.removeAt(linkIndex)
-        currentSections[sectionIndex] = section
-            .copy(items = updatedItems)
-        updateMapping(currentMapping
-            .copy(sections = currentSections))
-    }
-
-    fun onLessonTitleChanged(sectionIndex: Int, linkIndex: Int, title: String) {
-        val currentMapping = _uiState.value.mapping
-        if (currentMapping == null) {
-            _uiState.update { it.copy(error = Res.string.error_no_current_mapping.asUiText()) }
-            return
-        }
-        val currentSections = currentMapping.sections.toMutableList()
-        val section = currentSections.getOrNull(sectionIndex) ?: return
-        val updatedItems = section.items.toMutableList()
-        val link = updatedItems.getOrNull(linkIndex) ?: return
-        updatedItems[linkIndex] = link.copy(title = title)
-        currentSections[sectionIndex] = section.copy(items = updatedItems)
-        updateMapping(currentMapping.copy(sections = currentSections))
     }
 
     /**

@@ -390,9 +390,6 @@
     <string name="save_failed">Failed to save</string>
     <string name="drag">Long press to drag</string>
     <string name="error_unexpected_result_type">Unexpected result type received</string>
-    <string name="error_no_pending_section_index">No pending section index when learning unit selected</string>
-    <string name="error_no_current_mapping">No current mapping available</string>
-    <string name="error_invalid_section_index">Invalid section index</string>
 
     <string name="security">Security</string>
 
@@ -462,5 +459,7 @@
     <string name="pending_teacher">Pending teacher</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
+
+    <string name="section_name">Section name</string>
 
 </resources>

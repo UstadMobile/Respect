@@ -6,11 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -22,14 +18,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.loading
-import world.respect.shared.generated.resources.mapping
+import world.respect.shared.generated.resources.mappings
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
-    onNavigateToLanguage: () -> Unit = {},
     onNavigateToMapping: () -> Unit = {},
 ) {
     LazyColumn(
@@ -39,18 +33,8 @@ fun SettingsScreen(
     ) {
         item {
             SettingsListItem(
-                icon = Icons.Filled.Language,
-                title = stringResource(Res.string.language),
-                onClick = onNavigateToLanguage,
-                testTag = "language_setting_item"
-            )
-
-        }
-
-        item {
-            SettingsListItem(
                 icon = Icons.Filled.Map,
-                title = stringResource(Res.string.mapping),
+                title = stringResource(Res.string.mappings),
                 onClick = onNavigateToMapping,
                 testTag = "mapping_setting_item"
             )
@@ -58,7 +42,6 @@ fun SettingsScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsListItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -96,7 +79,6 @@ fun SettingsScreenForViewModel(
     viewModel: SettingsViewModel
 ) {
     SettingsScreen(
-        onNavigateToLanguage = viewModel::onNavigateToLanguage,
         onNavigateToMapping = viewModel::onNavigateToMapping
     )
 }

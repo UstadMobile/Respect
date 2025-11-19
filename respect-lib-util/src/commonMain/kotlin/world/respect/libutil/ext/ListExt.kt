@@ -34,6 +34,10 @@ inline fun <T, K> List<T>.lastDistinctBy(
     return map.values.toList()
 }
 
+/**
+ * Update an items in the list at a given index. Other items in the list remain unchanged. This is
+ * useful for ViewModels which have list based user editable fields
+ */
 inline fun <T> List<T>.updateAtIndex(
     index: Int,
     newValue: (T) -> T,

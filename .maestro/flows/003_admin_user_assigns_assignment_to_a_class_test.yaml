@@ -20,11 +20,12 @@ onFlowComplete:
 - runFlow: "subflows/admin_add_app.yaml"
 - runFlow: "subflows/admin_add_class.yaml"
 - runFlow:
-      file: "subflows/admin_add_class_member.yaml"
+      file: "subflows/admin_add_class_teacher.yaml"
       env:
-        CLASSMEMBER: "Add Teacher"
-        FIRSTNAME: "Teacher"
+        FIRSTNAME: "TeacherA"
         LASTNAME: "User"
+        USERNAME: "teacherauser"
+        PASSWORD: "testt1"
 - back
 - tapOn: "More Options"
 - tapOn: "Manage enrollments"
@@ -63,7 +64,7 @@ onFlowComplete:
 
 - tapOn:
     id: "username"
-- inputText: "teacheruser"
+- inputText: "teacherauser"
 - tapOn:
     id : "password"
 - inputText: "testt1"

@@ -1,0 +1,63 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "002_002_curriculum_mapping"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow: "subflows/admin_add_app.yaml"
+- tapOn:
+    id: "Settings"
+- tapOn: "Mappings"
+- assertVisible:
+    id: "app_title"
+    text: "Mappings"
+- tapOn:
+    id: "floating_action_button"   #  +Mapping button
+- assertVisible:
+    id: "app_title"
+    text: "Edit mapping"
+- tapOn: "Save"
+- assertVisible: "Required field"  #test mandatory field error
+- tapOn: "Title*"
+- inputText: "Test Curriculum"
+- tapOn: "Description"
+- inputText: "test"
+- hideKeyboard
+- tapOn: "Section"
+- tapOn: "Section name"
+- inputText: "MODULE 1"
+- tapOn: "Lesson"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "My app"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- assertVisible:
+    id: "app_title"
+    text: "Mapping edit"
+- assertVisible: "Lesson 001"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Mappings"
+- tapOn: "Test Curriculum"
+- assertVisible:
+    id: "app_title"
+    text: "Edit mapping"
+- assertVisible: "Test Curriculum"
+
+

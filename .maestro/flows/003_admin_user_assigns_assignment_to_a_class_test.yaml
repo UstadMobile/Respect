@@ -49,7 +49,7 @@ onFlowComplete:
     id: "app_title"
     text: "New class"
 - back
-- assertVisible: "Teacher User"
+- assertVisible: "TeacherA User"
 - clearState: world.respect.app
 - launchApp:
     arguments:

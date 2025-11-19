@@ -371,6 +371,26 @@
     <string name="edit_person">Edit person</string>
 
     <string name="first_names">First names</string>
+    <string name="mappings">Mappings</string>
+    <string name="mapping">Mapping</string>
+    <string name="sections">Sections</string>
+    <string name="section">Section</string>
+    <string name="edit_mapping">Edit mapping</string>
+    <string name="textbooks">Textbooks</string>
+    <string name="chapter">Chapter</string>
+    <string name="lesson">Lesson</string>
+    <string name="add_book_cover">Add book cover</string>
+    <string name="no_sections_yet">No sections have been added yet. Click + Section to add one.</string>
+    <string name="map">Map</string>
+    <string name="simple_learning">learning</string>
+    <string name="no_textbooks_available">No textbooks available</string>
+    <string name="remove_chapter">Remove chapter</string>
+    <string name="remove_lesson">Remove lesson</string>
+    <string name="error_unknown">Not Found</string>
+    <string name="save_failed">Failed to save</string>
+    <string name="drag">Long press to drag</string>
+    <string name="error_unexpected_result_type">Unexpected result type received</string>
+
     <string name="security">Security</string>
 
     <string name="passkeys">Passkeys</string>
@@ -439,5 +459,7 @@
     <string name="pending_teacher">Pending teacher</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
+
+    <string name="section_name">Section name</string>
 
 </resources>

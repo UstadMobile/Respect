@@ -34,6 +34,7 @@ import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
@@ -78,6 +79,8 @@ class AppLauncherViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.apps.asUiText(),
+                settingsIconVisible = true,
+                onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
@@ -144,6 +147,11 @@ class AppLauncherViewModel(
                     )
                 }
             )
+        )
+    }
+    fun onClickSettings() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(Settings)
         )
     }
 

@@ -15,18 +15,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import world.respect.app.components.CountryFlag
 import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.flagSizeMedium
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.util.ext.fullName
+
 
 @Composable
 fun AccountListItem(
     account: RespectAccountAndPerson,
     onClickAccount: ((RespectAccount) -> Unit)?,
     extras: @Composable () -> Unit = { },
-) {
-    ListItem(
+){
+   ListItem(
         modifier = Modifier.clickable {
             onClickAccount?.also {
                 onClickAccount(account.account)
@@ -61,8 +64,11 @@ fun AccountListItem(
                         maxLines = 1,
                         modifier = Modifier.padding(start = 8.dp)
                     )
+                    CountryFlag(
+                        schoolUrl = account.account.school.self.toString(),
+                        modifier = Modifier.flagSizeMedium()
+                    )
                 }
-
                 extras()
             }
         }

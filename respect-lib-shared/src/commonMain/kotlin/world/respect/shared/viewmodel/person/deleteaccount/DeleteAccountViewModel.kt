@@ -23,7 +23,6 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.getValue
 
@@ -60,7 +59,7 @@ class DeleteAccountViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        userName = personSelected?.fullName()
+                        userName = personSelected?.username
                     )
                 }
             }

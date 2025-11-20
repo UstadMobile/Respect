@@ -63,8 +63,6 @@ class DeleteAccountViewModel(
                     )
                 }
             }
-
-
         }
         _appUiState.update {
             it.copy(
@@ -107,7 +105,6 @@ class DeleteAccountViewModel(
                 )
 
             } catch (e: Exception) {
-                e.printStackTrace()
                 println("Delete failed due to exception: ${e.message}")
             }
         }

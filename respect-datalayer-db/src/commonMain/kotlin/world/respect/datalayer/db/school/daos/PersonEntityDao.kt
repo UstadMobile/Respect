@@ -186,7 +186,7 @@ interface PersonEntityDao {
     @Query("""
       DELETE FROM PersonEntity
       WHERE pGuid = :id
-  """)
+      """)
     suspend fun deletePerson(id: String): Int
 
     companion object {

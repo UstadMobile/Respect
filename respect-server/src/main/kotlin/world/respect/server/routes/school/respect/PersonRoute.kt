@@ -53,6 +53,4 @@ fun Route.PersonRoute(
         val result = deleteUseCase.invoke()
         call.respond(result)
     }
-
-
 }

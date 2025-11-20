@@ -30,7 +30,6 @@ import world.respect.shared.viewmodel.person.deleteaccount.DeleteAccountViewMode
 fun DeleteAccountScreen(
     viewModel: DeleteAccountViewModel
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
 
     DeleteAccountScreen(
@@ -38,7 +37,6 @@ fun DeleteAccountScreen(
         onDeleteAccount = viewModel::onDeleteAccount,
         onEntityChanged = viewModel::onEntityChanged
     )
-
 }
 
 @Composable

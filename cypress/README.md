@@ -1,8 +1,6 @@
 # Maestro Test Video Automation – Cypress Suite
 
-This cypress folder contains two Cypress tests that automate:
-1. Extracting Maestro test names.
-2. Downloading screen-recording videos for each test.
+This cypress folder contains Cypress test that automate: Downloading screen-recording videos for each test.
 
 All videos and test names are saved locally inside `cypress/downloads/`.
 
@@ -10,21 +8,13 @@ All videos and test names are saved locally inside `cypress/downloads/`.
 
 ## 1. Purpose
 
-### **A. saveTestNames.cy.js**
-Extract all Maestro test/flow names from the project page and stores them in:
 
-```
-
-cypress/downloads/testnames.txt
-
-```
-
-### **B. downloadTestVideos.cy.js**
+### **downloadTestVideos.cy.js**
 Reads `testnames.txt` and downloads the corresponding video for every test into:
 
 ```
 
-cypress/downloads/videos/
+cypress/downloads/
 
 ```
 
@@ -69,50 +59,33 @@ You must pass the **project URL** when running Cypress:
 ### Manual:
 
 ```bash
-cypress open --env projectUrl="https://app.maestro.dev/project/..."
+npx --prefix cypress cypress run --env \
+projectUrl=$MAESTRO_CLOUD_PROJECTID,\
+recivoApiKey=$API_KEY,\
+recivoOrgId=$RECIVO_ORG_ID
 ````
 
-### Jenkins:
-
-```bash
---env projectUrl=${MAESTRO_PROJECT_URL}
-```
-
-Inside tests, Cypress reads it as:
-
-```js
-const projectUrl = Cypress.env('projectUrl');
-```
-
----
-
 ## 4. How the Tests Work
-
-### **saveTestNames.cy.js**
-
-1. Login to Maestro.
-2. Navigate to the project page.
-3. Collect all visible test names.
-4. Save them into `testnames.txt` using `cy.task('saveFile')`.
-
----
 
 ### **downloadTestVideos.cy.js**
 
 1. Login to Maestro.
-2. Load test names using `cy.task('readFile')`.
-3. Use `cy.origin()` for cross-domain navigation.
-4. For each test name:
+2. Navigate to the project page.
+3. Collect all visible test names.
+4. Save them into `testnames.txt` using `cy.task('saveFile')`. 
+5. Load test names using `cy.task('readFile')`. 
+6. Use `cy.origin()` for cross-domain navigation. 
+7. For each test name:
 
     * Open the test details page.
     * Get `<video src="...">`
     * Call `cy.task('downloadVideo')` to download the mp4.
-5. Save files into `cypress/downloads/videos/`.
+8. Save files into `cypress/downloads/`.
 
 ---
 
 ## 5. Cypress Tasks in `cypress.config.js`
-
+* **getMaestroOtp** → Fetches the latest OTP for Maestro login.
 * **readFile** → Reads `testnames.txt`
 * **saveFile** → Writes text files
 * **downloadVideo** → Downloads mp4 using HTTPS stream
@@ -123,16 +96,13 @@ These tasks must be defined inside `setupNodeEvents`.
 
 ## 6. Running the Tests
 
-### **Step 1 – Save test names**
+### **Download videos**
 
 ```bash
-npx cypress open --env projectUrl="MAESTRO_PROJECT_URL"
-```
-
-### **Step 2 – Download videos**
-
-```bash
-npx cypress open --env projectUrl="MAESTRO_PROJECT_URL"
+npx --prefix cypress cypress run --env \
+projectUrl=$MAESTRO_CLOUD_PROJECTID,\
+recivoApiKey=$API_KEY,\
+recivoOrgId=$RECIVO_ORG_ID
 ```
 
 ---

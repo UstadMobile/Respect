@@ -26,6 +26,7 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
 import world.respect.shared.generated.resources.apps
@@ -54,6 +55,7 @@ class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
+    private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -79,7 +81,6 @@ class AppLauncherViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.apps.asUiText(),
-                settingsIconVisible = true,
                 onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
@@ -108,11 +109,13 @@ class AppLauncherViewModel(
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
+                val devModeEnabled = getDevModeEnabledUseCase()
                 _appUiState.update {
                     it.copy(
                         fabState = it.fabState.copy(
                             visible = isAdmin
-                        )
+                        ),
+                        settingsIconVisible = isAdmin && devModeEnabled,
                     )
                 }
                 _uiState.update {

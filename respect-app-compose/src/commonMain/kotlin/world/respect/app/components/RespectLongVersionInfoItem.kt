@@ -11,12 +11,13 @@ import world.respect.shared.generated.resources.app_version
 @Composable
 fun RespectLongVersionInfoItem(
     modifier: Modifier = Modifier,
+    onDevModeEnabled: () -> Unit = { },
 ) {
     val versionInfo = rememberAppVersionInfo()
 
     if(versionInfo != null) {
         ListItem(
-            modifier = modifier,
+            modifier = modifier.clickableToEnableDevMode(onDevModeEnabled = onDevModeEnabled),
             headlineContent = {
                 Text("${stringResource(Res.string.app_version)}: ${versionInfo.version} (#${versionInfo.versionCode})")
             },

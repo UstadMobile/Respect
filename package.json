@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/UstadMobile/Respect#readme",
   "devDependencies": {
-    "cypress": "^15.6.0"
+    "cypress": "15.6.0"
   }
 }

@@ -3,7 +3,7 @@
 
 describe('Login, collect tests & download videos', () => {
 
-  const email = 'ustad-tester@recivo.email';
+  const email = 'respecttester@recivo.email';
   const projectUrl = Cypress.env('projectUrl');
 
   it('Login, collect test names, download videos', {

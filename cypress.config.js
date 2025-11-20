@@ -41,21 +41,29 @@ module.exports = defineConfig({
            const now = Date.now();
            const emails = await fetchEmails();
 
-           const freshEmails = emails
-             .filter(m => m.subject.includes("Sign in to Maestro Cloud"))
-             .filter(m => now - new Date(m.createdAt).getTime() <= 10000) // <= 10 sec old
+           // Ensure emails is an array
+           const emailArray = Array.isArray(emails) ? emails : [];
+
+           const freshEmails = emailArray
+             .filter(m => m.subject && m.subject.includes("Sign in to Maestro Cloud"))
+             .filter(m => m.createdAt && (now - new Date(m.createdAt).getTime() <= 10000)) // <= 10 sec old
              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
            if (freshEmails.length) {
              const latest = freshEmails[0];
-             const otp = latest.text.match(/\b\d{6}\b/)[0];
-             return resolve(otp);
+
+             // Make sure latest.text exists and has OTP
+             const match = latest.text?.match(/\b\d{6}\b/);
+             if (match) {
+               const otp = match[0];
+               return resolve(otp);
+             }
            }
 
-           await new Promise(r => setTimeout(r, 2000)); // retry after 2 sec
+           // small delay to avoid busy loop
+           await new Promise(r => setTimeout(r, 500));
          }
-
-         reject(new Error("No fresh OTP email found in 30 seconds"));
+         return reject(new Error("No fresh OTP found within timeout"));
        });
      },
 

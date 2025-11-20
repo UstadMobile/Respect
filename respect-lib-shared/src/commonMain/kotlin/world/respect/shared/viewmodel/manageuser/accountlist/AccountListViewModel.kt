@@ -2,7 +2,6 @@ package world.respect.shared.viewmodel.manageuser.accountlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -17,7 +16,6 @@ import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.country.GetCountryForUrlUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.GetStartedScreen
@@ -40,40 +38,14 @@ data class AccountListUiState(
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
-    private val getCountryForUrlUseCase: GetCountryForUrlUseCase,
     savedStateHandle: SavedStateHandle
 ) : RespectViewModel(savedStateHandle){
 
     private val _uiState = MutableStateFlow(AccountListUiState())
-    private val _countryCodes = MutableStateFlow<Map<String, String?>>(emptyMap())
-
-    private val fetchingSchools = mutableSetOf<String>()
 
     val uiState = _uiState.asStateFlow()
-    val countryCodes = _countryCodes.asStateFlow()
 
     private var emittedNavToGetStartedCommand = false
-
-    fun onFetchCountryForSchool(schoolUrl: String) {
-        viewModelScope.launch {
-            try {
-                val countryCode = getCountryForUrlUseCase(schoolUrl)
-                _countryCodes.update { current ->
-                    current + (schoolUrl to countryCode)
-                }
-
-                Napier.d("Fetched country code '$countryCode' for $schoolUrl")
-            } catch (e: Exception) {
-                Napier.w("Failed to fetch country for $schoolUrl: ${e.message}")
-
-                _countryCodes.update { current ->
-                    (current + (schoolUrl to null))
-                }
-            } finally {
-                fetchingSchools.remove(schoolUrl)
-            }
-        }
-    }
     init {
         _appUiState.update {
             it.copy(

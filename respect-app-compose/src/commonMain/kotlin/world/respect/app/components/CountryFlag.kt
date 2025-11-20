@@ -3,19 +3,36 @@ package world.respect.app.components
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.koin.compose.koinInject
+import world.respect.shared.domain.country.GetCountryForUrlUseCase
 import world.respect.shared.util.getFlagEmoji
 
 @Composable
 fun CountryFlag(
-    countryCode: String?,
+    schoolUrl: String,
     modifier: Modifier = Modifier,
     size: Dp = 20.dp,
+    getCountryForUrlUseCase: GetCountryForUrlUseCase = koinInject(),
 ) {
+    var countryCode by remember(schoolUrl) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(schoolUrl) {
+        countryCode = try {
+            getCountryForUrlUseCase(schoolUrl)
+        } catch (e: Exception) {
+            null
+        }
+    }
     val flagEmoji = getFlagEmoji(countryCode)
 
     val displayEmoji = if (flagEmoji.isEmpty()) "" else flagEmoji

@@ -13,8 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import world.respect.app.components.CountryFlag
@@ -29,17 +27,8 @@ import world.respect.shared.util.ext.fullName
 fun AccountListItem(
     account: RespectAccountAndPerson,
     onClickAccount: ((RespectAccount) -> Unit)?,
-    onFetchCountryForSchool: (String) -> Unit,
-    countryCode: String?,
     extras: @Composable () -> Unit = { },
 ){
-        val schoolUrl = remember(account.account.school.self) {
-            account.account.school.self.toString()
-        }
-
-        LaunchedEffect(schoolUrl) {
-            onFetchCountryForSchool(schoolUrl)
-        }
    ListItem(
         modifier = Modifier.clickable {
             onClickAccount?.also {
@@ -76,11 +65,10 @@ fun AccountListItem(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     CountryFlag(
-                        countryCode = countryCode,
+                        schoolUrl = account.account.school.self.toString(),
                         modifier = Modifier.flagSizeMedium()
                     )
                 }
-
                 extras()
             }
         }

@@ -34,27 +34,23 @@ fun AccountListScreen(
     viewModel: AccountListViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val countryCodes by viewModel.countryCodes.collectAsState()
+
     AccountListScreen(
         uiState = uiState,
-        countryCodes = countryCodes,
         onClickAccount = viewModel::onClickAccount,
         onClickAddAccount = viewModel::onClickAddAccount,
         onClickLogout = viewModel::onClickLogout,
         onClickProfile = viewModel::onClickProfile,
-        onFetchCountryForSchool = viewModel::onFetchCountryForSchool,
     )
 }
 
 @Composable
 fun AccountListScreen(
     uiState: AccountListUiState,
-    countryCodes: Map<String, String?>,
     onClickAccount: (RespectAccount) -> Unit,
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
-    onFetchCountryForSchool: (String) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize())
       {
@@ -63,8 +59,6 @@ fun AccountListScreen(
                 AccountListItem(
                     account = activeAccount,
                     onClickAccount = null,
-                    onFetchCountryForSchool = onFetchCountryForSchool,
-                    countryCode = countryCodes[activeAccount.account.school.self.toString()],
                     extras = {
                         Row {
                             OutlinedButton(
@@ -91,8 +85,6 @@ fun AccountListScreen(
                 AccountListItem(
                     account = account,
                     onClickAccount = onClickAccount,
-                    onFetchCountryForSchool = onFetchCountryForSchool,
-                    countryCode = countryCodes[account.account.school.self.toString()],
                 )
             }
         }

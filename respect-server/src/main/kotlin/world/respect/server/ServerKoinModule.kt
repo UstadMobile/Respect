@@ -34,6 +34,7 @@ import world.respect.server.account.invite.username.UsernameSuggestionUseCaseSer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
+import world.respect.server.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
@@ -131,7 +132,9 @@ fun serverKoinModule(
             schoolConfig = get()
         )
     }
-
+    single<RegisterSchoolUseCase> {
+        RegisterSchoolUseCase()
+    }
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
     }

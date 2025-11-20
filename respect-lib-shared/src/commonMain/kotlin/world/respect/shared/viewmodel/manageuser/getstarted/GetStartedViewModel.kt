@@ -21,10 +21,11 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.lets_get_started
 import world.respect.shared.generated.resources.school_not_found
 import world.respect.shared.navigation.GetStartedScreen
-import world.respect.shared.navigation.HostSelectionList
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
+import world.respect.shared.navigation.SchoolDirectoryList
+import world.respect.shared.navigation.SchoolDirectoryMode
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -123,10 +124,10 @@ class GetStartedViewModel(
         )
     }
 
-    fun onAddMySchool() {
+    fun onClickAddMySchool() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                HostSelectionList
+                SchoolDirectoryList(SchoolDirectoryMode.SELECT)
             )
         )
     }

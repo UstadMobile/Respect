@@ -204,7 +204,6 @@ import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePa
 import java.io.File
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.school.HostSelectionViewModel
 
 
 
@@ -324,7 +323,6 @@ val appKoinModule = module {
     viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
-    viewModelOf(::HostSelectionViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

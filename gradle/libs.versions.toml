@@ -35,7 +35,6 @@ koalaplot-version = "0.6.4"
 androidx-webkit = "1.14.0"
 kotlinx-io = "0.8.0"
 nanohttpd =  "2.3.1"
-ktor-server-html-builder = "3.3.2"
 napier = "2.7.1"
 mockwebserver =  "5.1.0"
 mockito-kotlin =  "6.0.0"
@@ -43,7 +42,7 @@ androidx-credentials =  "1.5.0"
 androidx-work = "2.10.4"
 jvm-toolchain = "17"
 acra = "5.13.1"
-custom-tab = "1.9.0"
+androidx-browser = "1.9.0"
 
 # Compose material3 as per https://developer.android.com/jetpack/androidx/releases/compose-material3
 # Required to use material3 window sizes
@@ -115,7 +114,7 @@ androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 koalaplot = {module = "io.github.koalaplot:koalaplot-core",version.ref = "koalaplot-version"}
-ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor-server-html-builder" }
+ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
@@ -156,7 +155,7 @@ swagger-ui = { module = "org.webjars:swagger-ui", version.ref = "swagger-ui" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 
-androidx-browser = { module = "androidx.browser:browser", version.ref = "custom-tab" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 acra-http = { module = "ch.acra:acra-http", version.ref = "acra" }
 acra-core = { module = "ch.acra:acra-core", version.ref = "acra" }
 

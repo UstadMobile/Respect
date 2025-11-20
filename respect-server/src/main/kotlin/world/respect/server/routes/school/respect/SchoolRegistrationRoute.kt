@@ -20,17 +20,16 @@ import kotlinx.html.head
 import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
-import kotlinx.html.onInput
 import kotlinx.html.p
 import kotlinx.html.title
 import org.koin.ktor.ext.inject
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.server.SchoolConfig
-import world.respect.server.domain.school.add.AddSchoolUseCase
+import world.respect.server.domain.school.add.RegisterSchoolUseCase
+import world.respect.server.util.ext.getStatusCode
+import java.net.URLEncoder
 
-fun Route.schoolRegistrationWebRoute() {
-    val addSchoolUseCase: AddSchoolUseCase by inject()
+fun Route.SchoolRegistrationRoute() {
+    val registerSchoolUseCase: RegisterSchoolUseCase by inject()
     val schoolConfig: SchoolConfig by inject()
 
     // Show registration form
@@ -71,18 +70,15 @@ fun Route.schoolRegistrationWebRoute() {
                                     htmlFor = "schoolSubdomain"
                                     +"School Link"
                                 }
-                                input(type = InputType.text, name = "schoolSubdomain") {
-                                    id = "schoolSubdomain"
-                                    required = true
-                                    placeholder = "school-name"
-                                    onInput = "updateFullUrl()"
+                                div {
+                                    input(type = InputType.text, name = "schoolSubdomain") {
+                                        id = "schoolSubdomain"
+                                        required = true
+                                        placeholder = "schoolSubdomain"
+                                    }
+                                    // Show the suffix to the user
+                                    +".${schoolConfig.registration.topLevelDomain}"
                                 }
-                            }
-                            // Hidden field for full URL
-                            input(type = InputType.hidden, name = "schoolUrl") {
-                                id = "schoolUrl"
-                                value =
-                                    "https://school-name.${schoolConfig.registration.topLevelDomain}"
                             }
                         }
 
@@ -95,6 +91,7 @@ fun Route.schoolRegistrationWebRoute() {
                                 input(type = InputType.text, name = "schoolUrl") {
                                     id = "schoolUrl"
                                     required = true
+                                    placeholder = "https://your-school.com"
                                 }
                             }
                         }
@@ -118,96 +115,76 @@ fun Route.schoolRegistrationWebRoute() {
         }
     }
 
-// Handle form submission
+    // Handle form submission - now minimal logic
     post("/register-school") {
-        // Check if registration is enabled
-        if (!schoolConfig.registration.enabled) {
-            call.respondText(
-                "School registration is disabled",
-                status = io.ktor.http.HttpStatusCode.Forbidden
-            )
-            return@post
-        }
-
         val parameters = call.receiveParameters()
+
+        // Get input parameters
         val schoolName = parameters["schoolName"] ?: ""
-        val schoolUrl = parameters["schoolUrl"] ?: ""
         val redirectUrl = parameters["redirect"] ?: "world.respect.app://school-registered"
 
         try {
-            // Validate inputs
-            if (schoolName.isBlank() || schoolUrl.isBlank()) {
-                call.respondText(
-                    "School name and URL are required",
-                    status = io.ktor.http.HttpStatusCode.BadRequest
-                )
-                return@post
-            }
+            // Determine the school URL based on registration mode
+            val schoolUrl = when (schoolConfig.registration.mode) {
+                SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
+                    val schoolSubdomain = parameters["schoolName"] ?: ""
+                    if (schoolSubdomain.isBlank()) {
+                        call.respondText(
+                            "School subdomain is required",
+                            status = io.ktor.http.HttpStatusCode.BadRequest
+                        )
+                        return@post
+                    }
+                    // Construct the URL on the server side
+                    "https://$schoolSubdomain.${schoolConfig.registration.topLevelDomain}"
+                }
 
-            // Parse and validate URL
-            val parsedUrl = try {
-                io.ktor.http.Url(schoolUrl)
-            } catch (e: Exception) {
-                call.respondText(
-                    "Invalid URL format",
-                    status = io.ktor.http.HttpStatusCode.BadRequest
-                )
-                return@post
-            }
+                SchoolConfig.RegistrationConfig.RegistrationMode.ANY_URL -> {
+                    parameters["schoolUrl"] ?: ""
+                }
 
-            // For subdomain mode, validate the domain matches the configured top-level domain
-            if (schoolConfig.registration.mode == SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN) {
-                if (!parsedUrl.host.endsWith(".${schoolConfig.registration.topLevelDomain}")) {
+                else -> {
                     call.respondText(
-                        "School URL must be a subdomain of ${schoolConfig.registration.topLevelDomain}",
+                        "Registration mode not supported",
                         status = io.ktor.http.HttpStatusCode.BadRequest
                     )
                     return@post
                 }
             }
 
-            // Extract subdomain from URL for use as dbUrl and rpId
-            val schoolSubdomain =
-                if (schoolConfig.registration.mode == SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN) {
-                    parsedUrl.host.removeSuffix(".${schoolConfig.registration.topLevelDomain}")
-                } else {
-                    // For any-url mode, use a sanitized version of the host as subdomain
-                    parsedUrl.host.replace("[^a-zA-Z0-9]".toRegex(), "-").lowercase()
-                }
+            // Validate that we have a school URL
+            if (schoolUrl.isBlank()) {
+                call.respondText(
+                    "School URL is required",
+                    status = io.ktor.http.HttpStatusCode.BadRequest
+                )
+                return@post
+            }
 
-            // Create school using AddSchoolUseCase
-            addSchoolUseCase(
-                listOf(
-                    AddSchoolUseCase.AddSchoolRequest(
-                        school = SchoolDirectoryEntry(
-                            name = LangMapStringValue(schoolName),
-                            self = parsedUrl,
-                            xapi = io.ktor.http.Url("$schoolUrl/api/school/xapi"),
-                            oneRoster = io.ktor.http.Url("$schoolUrl/api/school/oneroster"),
-                            respectExt = io.ktor.http.Url("$schoolUrl/api/school/respect"),
-                            rpId = schoolSubdomain,
-                            lastModified = kotlin.time.Clock.System.now(),
-                            stored = kotlin.time.Clock.System.now(),
-                        ),
-                        dbUrl = schoolSubdomain,
-                        adminUsername = "admin",
-                        adminPassword = "changeme123"
-                    )
+            // Invoke the use case with all the logic
+            val response = registerSchoolUseCase(
+                RegisterSchoolUseCase.RegisterSchoolRequest(
+                    schoolName = schoolName,
+                    schoolUrl = schoolUrl,
+                    redirectUrl = redirectUrl
                 )
             )
 
-            val redirectWithParams = if (redirectUrl.contains("?")) {
-                "$redirectUrl&schoolUrl=${java.net.URLEncoder.encode(schoolUrl, "UTF-8")}"
+            // Build redirect URL with schoolUrl parameter
+            val encodedSchoolUrl = URLEncoder.encode(response.schoolUrl, "UTF-8")
+            val redirectWithParams = if (response.redirectUrl.contains("?")) {
+                "${response.redirectUrl}&schoolUrl=$encodedSchoolUrl"
             } else {
-                "$redirectUrl?schoolUrl=${java.net.URLEncoder.encode(schoolUrl, "UTF-8")}"
+                "${response.redirectUrl}?schoolUrl=$encodedSchoolUrl"
             }
-
-            println("DEBUG: Redirecting to: $redirectWithParams")
 
             call.respondRedirect(redirectWithParams)
 
         } catch (e: Exception) {
-            call.respondHtml {
+
+            val statusCode = e.getStatusCode() ?: io.ktor.http.HttpStatusCode.InternalServerError
+
+            call.respondHtml(statusCode) {
                 head {
                     title { +"Registration Error" }
                 }

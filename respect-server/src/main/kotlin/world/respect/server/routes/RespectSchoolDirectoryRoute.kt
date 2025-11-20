@@ -12,7 +12,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.server.domain.school.add.AddSchoolUseCase
-import world.respect.server.domain.school.add.InvalidSchoolDomainException
+import world.respect.server.domain.school.add.InvalidSchoolRegistrationRequestException
 import world.respect.server.domain.school.add.SchoolRegistrationDisabledException
 import world.respect.server.util.ext.respondDataLoadState
 
@@ -42,7 +42,7 @@ fun Route.RespectSchoolDirectoryRoute(
                 call.respond(HttpStatusCode.NoContent)
             } catch (e: SchoolRegistrationDisabledException) {
                 call.respond(HttpStatusCode.Forbidden, "School registration is disabled")
-            } catch (e: InvalidSchoolDomainException) {
+            } catch (e: InvalidSchoolRegistrationRequestException) {
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Invalid school domain")
             }
         }

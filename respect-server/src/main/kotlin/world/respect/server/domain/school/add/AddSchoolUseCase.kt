@@ -31,80 +31,62 @@ class AddSchoolUseCase(
     data class AddSchoolRequest(
         val school: SchoolDirectoryEntry,
         val dbUrl: String,
-        val adminUsername: String,
-        val adminPassword: String,
+        val adminUsername: String? = null,
+        val adminPassword: String? = null,
     )
 
     suspend operator fun invoke(
         requests: List<AddSchoolRequest>
     ) {
-
-        // Check if school registration is enabled
-        if (!schoolConfig.registration.enabled) {
-            throw SchoolRegistrationDisabledException("New school registration is disabled")
-        }
-
-        // For subdomain mode, validate the domain matches the configured top-level domain
-        if (schoolConfig.registration.mode == SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN) {
-            requests.forEach { request ->
-                val schoolHost = request.school.self.host
-                if (!schoolHost.endsWith(".${schoolConfig.registration.topLevelDomain}")) {
-                    throw InvalidSchoolDomainException(
-                        "School domain '$schoolHost' must end with '${schoolConfig.registration.topLevelDomain}'"
-                    )
-                }
-            }
-        }
-
         requests.forEach { request ->
             schoolDirectoryEntryDataSource.updateLocal(listOf(request.school))
 
             directoryDataSource.setServerManagedSchoolConfig(
                 request.school,  request.dbUrl
             )
-
-            val adminGuid = "1"
-            val schoolScope = getKoin().createScope<SchoolDirectoryEntry>(
-                SchoolDirectoryEntryScopeId(
-                    request.school.self, null
-                ).scopeId
-            )
-
-            val accountScope = getKoin().createScope<RespectAccount>(
-                RespectAccountScopeId(
-                    request.school.self, AuthenticatedUserPrincipalId(adminGuid)
-                ).scopeId
-            )
-
-            accountScope.linkTo(schoolScope)
-
-            val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
-
-            val adminPerson = Person(
-                guid = "1",
-                username = request.adminUsername,
-                givenName = "Admin",
-                familyName = "Admin",
-                gender = PersonGenderEnum.UNSPECIFIED,
-                roles = listOf(
-                    PersonRole(
-                        isPrimaryRole = true,
-                        roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-                    )
+            if (request.adminUsername != null && request.adminPassword != null) {
+                val adminGuid = "1"
+                val schoolScope = getKoin().createScope<SchoolDirectoryEntry>(
+                    SchoolDirectoryEntryScopeId(
+                        request.school.self, null
+                    ).scopeId
                 )
-            )
 
-            schoolDataSource.personDataSource.store(listOf(adminPerson))
-            schoolDataSource.personPasswordDataSource.store(
-                listOf(
-                    encryptPasswordUseCase(
-                        EncryptPersonPasswordUseCase.Request(
-                            personGuid = adminPerson.guid,
-                            password = request.adminPassword,
+                val accountScope = getKoin().createScope<RespectAccount>(
+                    RespectAccountScopeId(
+                        request.school.self, AuthenticatedUserPrincipalId(adminGuid)
+                    ).scopeId
+                )
+
+                accountScope.linkTo(schoolScope)
+
+                val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
+                val adminPerson = Person(
+                    guid = "1",
+                    username = request.adminUsername,
+                    givenName = "Admin",
+                    familyName = "Admin",
+                    gender = PersonGenderEnum.UNSPECIFIED,
+                    roles = listOf(
+                        PersonRole(
+                            isPrimaryRole = true,
+                            roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                         )
                     )
                 )
-            )
+
+                schoolDataSource.personDataSource.store(listOf(adminPerson))
+                schoolDataSource.personPasswordDataSource.store(
+                    listOf(
+                        encryptPasswordUseCase(
+                            EncryptPersonPasswordUseCase.Request(
+                                personGuid = adminPerson.guid,
+                                password = request.adminPassword,
+                            )
+                        )
+                    )
+                )
+            }
         }
     }
 
@@ -113,6 +95,3 @@ class AddSchoolUseCase(
     }
 
 }
-
-class SchoolRegistrationDisabledException(message: String) : Exception(message)
-class InvalidSchoolDomainException(message: String) : Exception(message)

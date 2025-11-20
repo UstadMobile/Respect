@@ -59,7 +59,7 @@ fun GetStartedScreen(
         onSchoolNameChanged = viewModel::onSchoolNameChanged,
         onClickOtherOptions = viewModel::onClickOtherOptions,
         onSchoolSelected = viewModel::onSchoolSelected,
-        onAddMySchool = viewModel::onAddMySchool
+        onAddMySchool = viewModel::onClickAddMySchool
     )
 }
 

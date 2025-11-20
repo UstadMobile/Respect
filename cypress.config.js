@@ -8,6 +8,58 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
 
       on('task', {
+
+    // ---- Fetch Maestro OTP via Recivo Mail API ----
+     getMaestroOtp() {
+       const orgId = process.env.RECIVO_ORG_ID || config.env.recivoOrgId;
+       const apiKey = process.env.RECIVO_API_KEY || config.env.recivoApiKey;
+
+       const fetchEmails = () => {
+         return new Promise((resolve, reject) => {
+           const url = `https://recivo.email/api/v1/organizations/${orgId}/inbox`;
+
+           https.get(url, {
+             headers: { Authorization: `Bearer ${apiKey}` }
+           }, (res) => {
+             let data = "";
+             res.on("data", chunk => (data += chunk));
+             res.on("end", () => {
+               try {
+                 resolve(JSON.parse(data));
+               } catch (err) {
+                 reject(err);
+               }
+             });
+           }).on("error", reject);
+         });
+       };
+
+       return new Promise(async (resolve, reject) => {
+         const timeout = Date.now() + 30000; // retry up to 30 seconds
+
+         while (Date.now() < timeout) {
+           const now = Date.now();
+           const emails = await fetchEmails();
+
+           const freshEmails = emails
+             .filter(m => m.subject.includes("Sign in to Maestro Cloud"))
+             .filter(m => now - new Date(m.createdAt).getTime() <= 10000) // <= 10 sec old
+             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+           if (freshEmails.length) {
+             const latest = freshEmails[0];
+             const otp = latest.text.match(/\b\d{6}\b/)[0];
+             return resolve(otp);
+           }
+
+           await new Promise(r => setTimeout(r, 2000)); // retry after 2 sec
+         }
+
+         reject(new Error("No fresh OTP email found in 30 seconds"));
+       });
+     },
+
+
         // ---- Save any text file ----
         saveFile({ filePath, content }) {
           try {

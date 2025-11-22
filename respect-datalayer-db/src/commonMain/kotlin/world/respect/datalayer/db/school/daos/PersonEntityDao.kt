@@ -183,6 +183,11 @@ interface PersonEntityDao {
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
 
+    @Query("""
+      DELETE FROM PersonEntity
+      WHERE pGuid = :id
+      """)
+    suspend fun deletePerson(id: String): Int
 
     companion object {
 

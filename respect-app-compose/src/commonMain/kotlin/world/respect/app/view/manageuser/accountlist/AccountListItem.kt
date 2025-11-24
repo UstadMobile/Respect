@@ -65,7 +65,7 @@ fun AccountListItem(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     CountryFlag(
-                        schoolUrl = account.account.school.self.toString(),
+                        schoolUrl = account.account.school.self,
                         modifier = Modifier.flagSizeMedium()
                     )
                 }

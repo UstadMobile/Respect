@@ -13,13 +13,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.ktor.http.Url
 import org.koin.compose.koinInject
 import world.respect.shared.domain.country.GetCountryForUrlUseCase
 import world.respect.shared.util.getFlagEmoji
 
 @Composable
 fun CountryFlag(
-    schoolUrl: String,
+    schoolUrl: Url,
     modifier: Modifier = Modifier,
     size: Dp = 20.dp,
     getCountryForUrlUseCase: GetCountryForUrlUseCase = koinInject(),

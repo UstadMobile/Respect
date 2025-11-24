@@ -18,14 +18,14 @@ class GetCountryForUrlUseCaseImpl(
         private const val GEOLOCATION_API_ENDPOINT = "http://192.168.1.5:8080"
     }
 
-    override suspend operator fun invoke(schoolUrl: String): String? {
-        countryCache[schoolUrl]?.let {
+    override suspend operator fun invoke(schoolUrl: Url): String? {
+        val schoolUrlStr = schoolUrl.toString()
+        countryCache[schoolUrlStr]?.let {
             return it
         }
 
         return try {
-            val url = Url(schoolUrl)
-            val host = url.host
+            val host = schoolUrl.host
 
             val encodedHost = host.encodeURLParameter()
             val endpointUrl = "$GEOLOCATION_API_ENDPOINT/api/country/$encodedHost"
@@ -39,11 +39,11 @@ class GetCountryForUrlUseCaseImpl(
                 "Unknown"
             }
 
-            countryCache[schoolUrl] = countryCode
+            countryCache[schoolUrlStr] = countryCode
             countryCode
 
         } catch (e: Exception) {
-            countryCache[schoolUrl] = "unknown"
+            countryCache[schoolUrlStr] = "unknown"
             "unknown"
         }
     }

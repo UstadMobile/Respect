@@ -1,22 +1,16 @@
 {
-  "name": "respect",
+  "name": "maestro-video-downloader",
   "version": "1.0.0",
-  "description": "## Development environment setup:",
+  "private": true,
+  "description": "Cypress helper to download Maestro Cloud test videos automatically.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cypress run"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/UstadMobile/Respect.git"
+    "url": "https://github.com/UstadMobile/Respect.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/UstadMobile/Respect/issues"
-  },
-  "homepage": "https://github.com/UstadMobile/Respect#readme",
   "devDependencies": {
     "cypress": "14.0.0"
   }

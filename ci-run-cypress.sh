@@ -16,9 +16,9 @@ maestroEmail="${maestroEmail:-respecttester@recivo.email}"
 RECIVO_API_KEY="${RECIVO_API_KEY:-rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT}"
 RECIVO_ORG_ID="${RECIVO_ORG_ID:-88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7}"
 
-
+cd .maestro/video-downloader
 # Run Cypress with all environment variables
-npx --prefix cypress cypress run --env \
+npx cypress run --env \
 maestroEmail=$maestroEmail,\
 projectUrl="$MAESTRO_CLOUD_CONSOLE_URL",\
 recivoApiKey="$RECIVO_API_KEY",\

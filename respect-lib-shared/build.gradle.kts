@@ -108,3 +108,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }
+dependencies {
+    implementation(project(":respect-datalayer-repository"))
+    implementation(project(":respect-datalayer-repository"))
+}

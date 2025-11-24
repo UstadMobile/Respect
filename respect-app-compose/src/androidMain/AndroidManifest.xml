@@ -57,6 +57,9 @@
 
                 <data android:host="*.onrespect.app" />
                 <data android:host="onrespect.app" />
+
+                <data android:host="*.onrespectstaging.app" />
+                <data android:host="onrespectstaging.app" />
             </intent-filter>
         </activity>
 

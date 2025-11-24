@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_code
 import world.respect.shared.generated.resources.invalid_url
@@ -20,9 +21,17 @@ import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
+
+data class OtherOptionsUiState(
+    val link: String = "",
+    val errorMessage: StringResourceUiText? = null,
+    val manageDirectoriesVisible: Boolean = false,
+)
+
 class OtherOptionsViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
+    private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OtherOptionsUiState())
@@ -44,7 +53,8 @@ class OtherOptionsViewModel(
         _uiState.update {
             it.copy(
                 link = link,
-                errorMessage = null
+                errorMessage = null,
+                manageDirectoriesVisible= getDevModeEnabledUseCase(),
             )
         }
     }
@@ -85,8 +95,3 @@ class OtherOptionsViewModel(
     }
 
 }
-
-data class OtherOptionsUiState(
-    val link: String = "",
-    val errorMessage: StringResourceUiText? = null
-)

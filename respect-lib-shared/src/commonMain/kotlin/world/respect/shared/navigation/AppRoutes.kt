@@ -3,14 +3,12 @@
 
 package world.respect.shared.navigation
 
-import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
@@ -30,8 +28,20 @@ import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 sealed interface RespectAppRoute
 
 @Serializable
-object Acknowledgement : RespectAppRoute
+data class Acknowledgement (
+    val schoolUrlStr: String?=null,
+    val inviteCode: String? = null
+    ) : RespectAppRoute {
 
+    @Transient
+    val schoolUrl =  schoolUrlStr?.let { Url(it) }
+
+    companion object {
+        fun create(schoolUrl: Url? = null,inviteCode: String?=null) =
+            Acknowledgement(schoolUrl.toString(),inviteCode)
+    }
+
+}
 @Serializable
 data class JoinClazzWithCode(
     val schoolUrlStr: String
@@ -372,6 +382,7 @@ class OtherOptionsSignup private constructor(
 class ConfirmationScreen(
     val schoolUrlStr: String,
     val code: String,
+    val inviteType: Int?=null,
 ) : RespectAppRoute {
 
     @Transient
@@ -381,9 +392,11 @@ class ConfirmationScreen(
         fun create(
             schoolUrl: Url,
             code: String,
+            type: Int?=null
         ) = ConfirmationScreen(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
+            inviteType = type
         )
     }
 }

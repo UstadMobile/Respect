@@ -24,6 +24,13 @@ interface InviteEntityDao {
     @Query("""
         SELECT * 
           FROM InviteEntity
+         WHERE iCode = :code
+         LIMIT 1
+    """)
+    suspend fun getInviteByInviteCode(code:String): InviteEntity?
+    @Query("""
+        SELECT * 
+          FROM InviteEntity
          WHERE iGuidHash = :guidHash
          LIMIT 1
     """)

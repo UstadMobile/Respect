@@ -2,14 +2,15 @@ package world.respect.shared.viewmodel.person.inviteperson
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.ustadmobile.libcache.sharelink.EmailLinkLauncher
-import com.ustadmobile.libcache.sharelink.ShareLinkLauncher
-import com.ustadmobile.libcache.sharelink.SmsLinkLauncher
+import world.respect.shared.domain.sharelink.EmailLinkLauncher
+import world.respect.shared.domain.sharelink.ShareLinkLauncher
+import world.respect.shared.domain.sharelink.SmsLinkLauncher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -24,6 +25,7 @@ import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateLinkUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.InvitePerson
@@ -32,6 +34,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.getTitle
+import java.lang.System.currentTimeMillis
 import kotlin.random.Random
 import kotlin.time.Clock
 
@@ -187,7 +190,7 @@ class InvitePersonViewModel(
     fun onSendLinkViaEmail() {
         viewModelScope.launch {
             val link =  createOrEditInvite()
-            emailLinkLauncher.launch(link)
+            emailLinkLauncher.sendEmail(getString(Res.string.invitation) ,link)
         }
     }
 
@@ -236,6 +239,7 @@ class InvitePersonViewModel(
                 approvalRequired = uiState.value.approvalRequired,
                 forClassGuid = uiState.value.classGuid,
                 forFamilyOfGuid = uiState.value.familyPersonGuid,
+                expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
             )
             return storeInvite(invite)
         } else {

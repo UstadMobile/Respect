@@ -70,7 +70,7 @@ class ConfirmationViewModel(
         }
 
         viewModelScope.launch {
-            val inviteInfo = getInviteInfoUseCase(route.code)
+            val inviteInfo = getInviteInfoUseCase(route.code,route.inviteType)
 
             try {
                 _uiState.update {

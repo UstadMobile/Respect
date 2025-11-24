@@ -42,6 +42,7 @@ import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
+import world.respect.server.routes.school.respect.InviteCreateRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
 import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
@@ -213,6 +214,9 @@ fun Application.module() {
                         )
                         InviteInfoRoute(
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
+                        )
+                        InviteCreateRoute(
+                            createInviteUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
                     route("username"){

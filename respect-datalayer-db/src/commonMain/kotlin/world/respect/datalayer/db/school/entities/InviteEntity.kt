@@ -21,5 +21,12 @@ data class InviteEntity(
     val iInviteMultipleAllowed: Boolean = false,
     val iApprovalRequired: Boolean = false,
     val iLastModified: Long = systemTimeInMillis(),
-    val iExpiration: Long? = null,
-)
+    val iExpiration: Long = 0,
+    var iInviteStatus: Int = STATUS_PENDING,
+){
+    companion object {
+        const val STATUS_PENDING = 0
+        const val STATUS_ACCEPTED = 1
+        const val STATUS_REVOKED = 2
+    }
+}

@@ -1,7 +1,7 @@
-package com.ustadmobile.libcache.sharelink
+package world.respect.shared.domain.sharelink
 
 interface ShareLinkLauncher {
-    suspend fun launch(link: String)
+    suspend fun launch(body: String)
 
     companion object {
         const val MIME_TYPE = "text/plain"

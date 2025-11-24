@@ -29,6 +29,7 @@ import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.account.invite.CreateInviteUseCaseServer
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
@@ -38,6 +39,7 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
@@ -251,6 +253,15 @@ fun serverKoinModule(
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseServer(
                 schoolDb = get(),
+            )
+        }
+
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseServer(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                schoolUrl = schoolUrl()
+
             )
         }
 

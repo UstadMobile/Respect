@@ -212,12 +212,14 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import com.ustadmobile.libcache.sharelink.EmailLinkLauncher
-import com.ustadmobile.libcache.sharelink.ShareLinkLauncher
-import com.ustadmobile.libcache.sharelink.SmsLinkLauncher
-import com.ustadmobile.libcache.sendinvite.SmsLinkLauncherAndroid
-import com.ustadmobile.libcache.sendinvite.EmailLinkLauncherAndroid
-import com.ustadmobile.libcache.sendinvite.ShareLinkLauncherAndroid
+import world.respect.shared.domain.sharelink.EmailLinkLauncher
+import world.respect.shared.domain.sharelink.ShareLinkLauncher
+import world.respect.shared.domain.sharelink.SmsLinkLauncher
+import world.respect.shared.domain.sendinvite.SmsLinkLauncherAndroid
+import world.respect.shared.domain.sendinvite.EmailLinkLauncherAndroid
+import world.respect.shared.domain.sendinvite.ShareLinkLauncherAndroid
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -684,6 +686,13 @@ val appKoinModule = module {
 
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                 httpClient = get(),

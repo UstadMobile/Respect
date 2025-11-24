@@ -163,7 +163,7 @@ fun AppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Acknowledgement,
+        startDestination = Acknowledgement(),
         modifier = modifier,
     ) {
 

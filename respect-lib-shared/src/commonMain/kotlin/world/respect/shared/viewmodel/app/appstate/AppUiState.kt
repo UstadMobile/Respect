@@ -27,5 +27,7 @@ data class AppUiState(
     val loadingState: LoadingUiState = LoadingUiState(),
     val showBackButton: Boolean? = null,
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),
-    val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState()
+    val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
+    val settingsIconVisible: Boolean? = null,
+    val onClickSettings: (() -> Unit)? = null,
 )

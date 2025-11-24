@@ -130,6 +130,7 @@ kotlin {
             implementation(libs.koalaplot)
             implementation(libs.kotlinx.io.core)
             implementation(libs.androidx.paging.compose)
+            implementation(libs.reorderable)
         }
 
         desktopMain.dependencies {
@@ -165,8 +166,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 12
-        versionName = "1.0.11"
+        versionCode = 112
+        versionName = "1.0.12"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

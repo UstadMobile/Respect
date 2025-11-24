@@ -3,6 +3,7 @@
 
 package world.respect.shared.navigation
 
+import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -12,6 +13,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
@@ -643,6 +645,43 @@ data class PersonEdit(
 
 }
 
+@Serializable
+data object Settings : RespectAppRoute
+
+@Serializable
+data object CurriculumMappingList : RespectAppRoute
+
+@Serializable
+data class CurriculumMappingEdit(
+    val textbookUid: Long = 0L,
+    private val mappingDataJson: String? = null
+) : RespectAppRoute {
+
+    @Transient
+    val mappingData: CurriculumMapping? = mappingDataJson?.let { jsonString ->
+        try {
+            Json.decodeFromString(CurriculumMapping.serializer(), jsonString)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    companion object {
+        fun create(
+            uid: Long,
+            mappingData: CurriculumMapping? = null
+        ) = CurriculumMappingEdit(
+            textbookUid = uid,
+            mappingDataJson = mappingData?.let { mapping ->
+                try {
+                    Json.encodeToString(CurriculumMapping.serializer(), mapping)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        )
+    }
+}
 @Serializable
 data class SetUsernameAndPassword(
     val guid: String

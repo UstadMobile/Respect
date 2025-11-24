@@ -11,15 +11,15 @@ module.exports = defineConfig({
 
     // ---- Fetch Maestro OTP via Recivo Mail API ----
      getMaestroOtp() {
-       const orgId = process.env.RECIVO_ORG_ID || config.env.recivoOrgId;
-       const apiKey = process.env.RECIVO_API_KEY || config.env.recivoApiKey;
+       const recivoorgId = process.env.RECIVO_ORG_ID || config.env.recivoOrgId;
+       const recivoapiKey = process.env.RECIVO_API_KEY || config.env.recivoApiKey;
 
        const fetchEmails = () => {
          return new Promise((resolve, reject) => {
-           const url = `https://recivo.email/api/v1/organizations/${orgId}/inbox`;
+           const url = `https://recivo.email/api/v1/organizations/${recivoorgId}/inbox`;
 
            https.get(url, {
-             headers: { Authorization: `Bearer ${apiKey}` }
+             headers: { Authorization: `Bearer ${recivoapiKey}` }
            }, (res) => {
              let data = "";
              res.on("data", chunk => (data += chunk));
@@ -126,8 +126,6 @@ module.exports = defineConfig({
     // Base settings
     baseUrl: 'https://signin.maestro.dev',
     video: true,
-    videoCompression: 32,
-    videoUploadOnPasses: false,
     defaultCommandTimeout: 30000,
     taskTimeout: 600000, // 10 minutes for big video downloads
   },

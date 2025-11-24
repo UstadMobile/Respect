@@ -1,6 +1,6 @@
 describe('Login, collect tests & download videos', () => {
 
-  const email = 'respecttester@recivo.email';
+  const email = Cypress.env('maestroEmail');
   const projectUrl = Cypress.env('projectUrl');
 
   it('Login, collect test names, download videos', {

@@ -52,19 +52,6 @@ npm install cypress --save-dev
 
 ---
 
-## 3. Passing Project URL (Manual or Jenkins)
-
-You must pass the **project URL** when running Cypress:
-
-### Manual:
-
-```bash
-npx --prefix cypress cypress run --env \
-projectUrl=$MAESTRO_CLOUD_PROJECTID,\
-recivoApiKey=$API_KEY,\
-recivoOrgId=$RECIVO_ORG_ID
-````
-
 ## 4. How the Tests Work
 
 ### **downloadTestVideos.cy.js**
@@ -96,15 +83,27 @@ These tasks must be defined inside `setupNodeEvents`.
 
 ## 6. Running the Tests
 
-### **Download videos**
+### **On Jenkins**
 
 ```bash
-npx --prefix cypress cypress run --env \
-projectUrl=$MAESTRO_CLOUD_PROJECTID,\
-recivoApiKey=$API_KEY,\
-recivoOrgId=$RECIVO_ORG_ID
-```
 
+./ci-run-cypress.sh
+
+```
+### **Manually - headless mode**
+
+```bash
+
+npx cypress run --env maestroEmail=respecttester@recivo.email,projectUrl="https://app.robintest.com/project/proj_01k6wzp0pwf75vpcw8vw1gh0y8/maestro-test/app/app_01k6x3hyf9exztk0022nehadkk/upload/mupload_01kas5dx97eq7b4bc0d16w47z0",recivoApiKey="rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT",recivoOrgId="88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7"
+
+```
+### **Manually - UI**
+
+```bash
+
+npx cypress open --env maestroEmail=respecttester@recivo.email,projectUrl="https://app.robintest.com/project/proj_01k6wzp0pwf75vpcw8vw1gh0y8/maestro-test/app/app_01k6x3hyf9exztk0022nehadkk/upload/mupload_01kas5dx97eq7b4bc0d16w47z0",recivoApiKey="rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT",recivoOrgId="88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7"
+
+```
 ---
 
 ## 7. Notes

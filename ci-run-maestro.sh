@@ -153,7 +153,6 @@ if [ "$1" == "cloud" ]; then
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
         2>&1 | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log
-
     MAESTRO_STATUS=$?
 else
     maestro test \

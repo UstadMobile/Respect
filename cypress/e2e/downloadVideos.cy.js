@@ -1,6 +1,3 @@
-// cypress/e2e/maestroDownload.cy.js
-/// <reference types="cypress" />
-
 describe('Login, collect tests & download videos', () => {
 
   const email = 'respecttester@recivo.email';

@@ -24,3 +24,5 @@ respect-server/log/
 .maestro/video-downloader/node_modules/
 .maestro/video-downloader/cypress/downloads/
 .maestro/video-downloader/cypress/videos/
+/respect-datalayer-repository/log/respect-server.log
+/respect-lib-shared/log/respect-server.log

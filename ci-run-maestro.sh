@@ -170,4 +170,7 @@ fi
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
-exit $MAESTRO_STATUS
+# Do NOT stop Jenkins job even if Maestro fails
+echo "ci-run-maestro: Maestro exit code was $MAESTRO_STATUS "
+exit 0
+

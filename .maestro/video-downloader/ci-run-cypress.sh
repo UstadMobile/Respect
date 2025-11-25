@@ -2,15 +2,15 @@
 set -e  # Exit immediately if any command fails
 
 # Capture the Maestro Cloud URL from previous Maestro run logs
-export MAESTRO_CLOUD_CONSOLE_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log | tail -1)
+export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log | tail -1)
 
 # Fail if URL is not found
-if [ -z "$MAESTRO_CLOUD_CONSOLE_URL" ]; then
+if [ -z "$MAESTRO_CLOUD_URL" ]; then
     echo "Error: Could not find Maestro Cloud URL from previous Maestro run."
     exit 1
 fi
 
-echo "Detected Maestro Cloud URL: $MAESTRO_CLOUD_CONSOLE_URL"
+echo "Detected Maestro Cloud URL: $MAESTRO_CLOUD_URL"
 
 maestroEmail="${maestroEmail:-respecttester@recivo.email}"
 RECIVO_API_KEY="${RECIVO_API_KEY:-rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT}"
@@ -20,7 +20,7 @@ cd .maestro/video-downloader
 # Run Cypress with all environment variables
 npx cypress run --env \
 maestroEmail=$maestroEmail,\
-projectUrl="$MAESTRO_CLOUD_CONSOLE_URL",\
+projectUrl="$MAESTRO_CLOUD_URL",\
 recivoApiKey="$RECIVO_API_KEY",\
 recivoOrgId="$RECIVO_ORG_ID"
 

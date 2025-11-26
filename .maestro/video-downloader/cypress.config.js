@@ -77,7 +77,7 @@ module.exports = defineConfig({
             console.log(`✅ Saved: ${filePath}`);
             return null;
           } catch (err) {
-            console.error('❌ Error saving file:', err);
+            console.error('Error saving file:', err);
             throw err;
           }
         },
@@ -89,7 +89,7 @@ module.exports = defineConfig({
             const content = fs.readFileSync(filePath, 'utf8');
             return content;
           } catch (err) {
-            console.error('❌ Error reading file:', err);
+            console.error('Error reading file:', err);
             throw err;
           }
         },

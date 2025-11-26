@@ -9,9 +9,7 @@ describe('Login, collect tests & download videos', () => {
     taskTimeout: 600000
   }, () => {
 
-    //
     // --- Step 1: Login ---
-    //
     cy.visit('https://signin.maestro.dev');
     cy.get('input[name="email"]').type(email);
     cy.get('button[type="submit"]').click();
@@ -22,22 +20,19 @@ describe('Login, collect tests & download videos', () => {
       cy.get('input[data-test="otp-input"]').first().type(otp, { delay: 100 });
     });
 
-    //
     // --- Step 2: Enter Maestro Dashboard ---
-    //
     cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {
 
-      cy.wait(6000);
+     // cy.wait(6000);
       cy.log('Entering project…');
       cy.visit(projectUrl);
 
       // keep Cypress alive
-      cy.wait(2000);
+     // cy.wait(2000);
       cy.log('Initial page loaded');
 
-      //
       // --- Step 3: Collect list of tests ---
-      //
+
       cy.get('a[href*="/flow/run_"]').then(($links) => {
         const tests = [];
 
@@ -54,18 +49,16 @@ describe('Login, collect tests & download videos', () => {
           content: tests.map(t => t.name).join('\n')
         });
 
-        //
         // --- Step 4: Download Each Test Video ---
-        //
         cy.wrap(tests).each((test, index) => {
 
           // keep-alive ping every iteration
-          cy.wait(2000);
+         // cy.wait(2000);
           cy.log(`Processing test ${index + 1}/${tests.length}: ${test.name}`);
 
           cy.visit(test.url);
 
-          cy.wait(4000);
+         // cy.wait(4000);
           cy.log(`Opened test page: ${test.name}`);
 
           // get video url
@@ -86,7 +79,7 @@ describe('Login, collect tests & download videos', () => {
               });
 
               // keep Cypress alive
-              cy.wait(2000);
+              //cy.wait(2000);
               cy.log('Download task triggered');
             });
 

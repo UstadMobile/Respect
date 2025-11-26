@@ -74,7 +74,7 @@ module.exports = defineConfig({
             const folder = path.dirname(filePath);
             if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
             fs.writeFileSync(filePath, content, 'utf8');
-            console.log(`✅ Saved: ${filePath}`);
+            console.log(`Saved: ${filePath}`);
             return null;
           } catch (err) {
             console.error('Error saving file:', err);

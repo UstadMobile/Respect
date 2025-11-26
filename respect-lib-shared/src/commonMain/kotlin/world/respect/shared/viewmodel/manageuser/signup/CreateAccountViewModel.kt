@@ -106,7 +106,7 @@ class CreateAccountViewModel(
                 Napier.w("Failed to get username suggestion", t)
             }
 
-            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
+            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code, type = route.inviteType)
             respectAppDataSource.schoolDirectoryEntryDataSource
                 .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {
                     schoolDirectoryEntry.complete(it)

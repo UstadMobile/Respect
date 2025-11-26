@@ -1,8 +1,7 @@
 package world.respect.datalayer.respect.model.invite
 
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.Invite
 
 /**
  * @property code the invite code (as provided by the user). An invite code includes a
@@ -14,14 +13,10 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 @Serializable
 class RespectInviteInfo(
     val code: String,
-    val classGuid: String?,
-    val className: String?,
+    val classGuid: String?=null,
+    val className: String?=null,
     val userInviteType: UserInviteType?=null,
-    val role : PersonRoleEnum? = null,
-    val familyPersonGuid: String? = null,
-    val classRole: EnrollmentRoleEnum? = null,
-    val inviteMultipleAllowed: Boolean = false,
-    val approvalRequired: Boolean = false,
+    val invite: Invite?=null
 ) {
 
     @Suppress("unused")

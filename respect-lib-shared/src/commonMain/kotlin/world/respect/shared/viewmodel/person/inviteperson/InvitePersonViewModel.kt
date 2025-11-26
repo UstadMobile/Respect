@@ -123,22 +123,23 @@ class InvitePersonViewModel(
             }
             _uiState.update { prev ->
                 prev.copy(
-                    roleOptions =
-                        when (currentPersonRole) {
-                            PersonRoleEnum.TEACHER -> listOf(
-                                PersonRoleEnum.STUDENT,
-                                PersonRoleEnum.PARENT,
-                                PersonRoleEnum.TEACHER,
-                            )
-
-                            PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
-                                PersonRoleEnum.STUDENT,
-                                PersonRoleEnum.PARENT,
-                                PersonRoleEnum.TEACHER,
-                                PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-                            )
-
-                            else -> emptyList()
+                    roleOptions = if (route.presetRole != null) {
+                            listOf(route.presetRole)
+                        } else {
+                            when (currentPersonRole) {
+                                PersonRoleEnum.TEACHER -> listOf(
+                                    PersonRoleEnum.STUDENT,
+                                    PersonRoleEnum.PARENT,
+                                    PersonRoleEnum.TEACHER,
+                                )
+                                PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
+                                    PersonRoleEnum.STUDENT,
+                                    PersonRoleEnum.PARENT,
+                                    PersonRoleEnum.TEACHER,
+                                    PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                                )
+                                else -> emptyList()
+                            }
                         }
                 )
             }
@@ -238,6 +239,8 @@ class InvitePersonViewModel(
                 inviteMultipleAllowed = uiState.value.inviteMultipleAllowed,
                 approvalRequired = uiState.value.approvalRequired,
                 forClassGuid = uiState.value.classGuid,
+                schoolName = uiState.value.schoolName,
+                forClassName = uiState.value.className,
                 forFamilyOfGuid = uiState.value.familyPersonGuid,
                 expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
             )

@@ -57,6 +57,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -65,6 +66,7 @@ import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePa
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
+const val CUSTOM_PROTO = "world.respect.app"
 
 fun serverKoinModule(
     config: ApplicationConfig,
@@ -132,7 +134,9 @@ fun serverKoinModule(
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
     }
-
+    single<UrlToCustomDeepLinkUseCase> {
+        UrlToCustomDeepLinkUseCase(customProtocol = CUSTOM_PROTO)
+    }
     single<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseJvm(
             json = get(),
@@ -260,8 +264,8 @@ fun serverKoinModule(
             CreateInviteUseCaseServer(
                 schoolDb = get(),
                 uidNumberMapper = get(),
-                schoolUrl = schoolUrl()
-
+                schoolUrl = schoolUrl(),
+                urlToCustomDeepLinkUseCase = get()
             )
         }
 

@@ -26,9 +26,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import org.koin.android.ext.android.getKoin
 import world.respect.app.app.App
 import world.respect.app.app.SizeClass
-import world.respect.shared.domain.createlink.CreateLinkUseCase.Companion.QUERY_PARAM
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
-import world.respect.shared.navigation.Acknowledgement
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectComposeNavController
 
@@ -36,6 +35,7 @@ import world.respect.shared.navigation.RespectComposeNavController
 abstract class AbstractAppActivity : AppCompatActivity() {
 
     private val customDeepLinkToUrlUseCase = getKoin().get<CustomDeepLinkToUrlUseCase>()
+    private val resolveUrlToNavCommandUseCase = getKoin().get<ResolveUrlToNavCommandUseCase>()
 
     val WindowWidthSizeClass.multiplatformSizeClass: SizeClass
         get() = when (this) {
@@ -70,12 +70,19 @@ abstract class AbstractAppActivity : AppCompatActivity() {
 
 
             intent.data?.let { uri ->
-                val url = try {
+                val deeplinkUrl = try {
                     Url(uri.toString())
                 } catch (_: Exception) {
                     null
                 }
-                navigateToAcknowledgeScreen(url)
+                if (deeplinkUrl == null) return@let
+                val url = customDeepLinkToUrlUseCase(deeplinkUrl)
+                val navCommand = resolveUrlToNavCommandUseCase(url)
+                navCommand?.let {
+                    _navCommandFlow.tryEmit(
+                        it
+                    )
+                }
             }
             RespectAppTheme {
                 Surface(
@@ -98,32 +105,23 @@ abstract class AbstractAppActivity : AppCompatActivity() {
             }
         }
     }
-    fun navigateToAcknowledgeScreen(url: Url?){
-        url?.let {
-            val inviteCode = url.parameters[QUERY_PARAM]
-
-            val navCommand = customDeepLinkToUrlUseCase(url)
-            navCommand.let {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        destination = Acknowledgement.create(
-                            schoolUrl = url,
-                            inviteCode = inviteCode
-                        ),clearBackStack = false
-                    )
-                )
-            }
-        }
-    }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.data?.let { uri ->
-            val url = try {
+            val deeplinkUrl = try {
                 Url(uri.toString())
             } catch (_: Exception) {
                 null
             }
-            navigateToAcknowledgeScreen(url)
+            if (deeplinkUrl == null) return@let
+            val url = customDeepLinkToUrlUseCase(deeplinkUrl)
+            val navCommand = resolveUrlToNavCommandUseCase(url)
+            navCommand?.let {
+                _navCommandFlow.tryEmit(
+                    it
+                )
+            }
+
         }
     }
 }

@@ -220,6 +220,7 @@ import world.respect.shared.domain.sendinvite.EmailLinkLauncherAndroid
 import world.respect.shared.domain.sendinvite.ShareLinkLauncherAndroid
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 
 @Suppress("unused")
 const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
@@ -583,6 +584,10 @@ val appKoinModule = module {
 
     single<SnackBarDispatcher> {
         get<SnackBarFlowDispatcher>()
+    }
+
+    single<ResolveUrlToNavCommandUseCase> {
+        ResolveUrlToNavCommandUseCase()
     }
 
     single<PhoneNumValidatorUseCase> {

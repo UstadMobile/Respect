@@ -22,6 +22,8 @@ data class Invite(
     val newRole: PersonRoleEnum? = null,
     val forFamilyOfGuid: String? = null,
     val forClassGuid: String? = null,
+    val forClassName: String? = null,
+    val schoolName: String? = null,
     val forClassRole: EnrollmentRoleEnum? = null,
     val inviteMultipleAllowed: Boolean = false,
     val approvalRequired: Boolean = false,

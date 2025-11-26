@@ -104,7 +104,7 @@ fun InvitePersonScreen(
 
         HorizontalDivider()
 
-        val roleEnumVal = uiState.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT
+        val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT
         ListItem(
             headlineContent = { Text(stringResource(Res.string.invite_multiple_allowed)) },
             trailingContent = {
@@ -129,7 +129,7 @@ fun InvitePersonScreen(
 
         )
         RespectExposedDropDownMenuField(
-            value = roleEnumVal,
+            value = selectedRole,
             modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
             label = {
                 Text(stringResource(Res.string.role) + "*")

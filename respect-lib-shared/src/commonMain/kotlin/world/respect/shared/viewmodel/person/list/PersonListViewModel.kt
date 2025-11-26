@@ -198,7 +198,8 @@ class PersonListViewModel(
                 InvitePerson.create(
                     classUid = route.classUidStr,
                     className = route.classNameStr,
-                    role = route.role
+                    role = route.role,
+                    presetRole = route.filterByRole
                 )
             )
         )

@@ -409,7 +409,8 @@ class SignupScreen(
     private val schoolUrlStr: String,
     private val profileType: ProfileType,
     private val inviteRedeemRequestStr: String,
-) : RespectAppRoute {
+    val inviteType: Int?=null,
+    ) : RespectAppRoute {
 
     @Transient
     val type = profileType
@@ -425,11 +426,13 @@ class SignupScreen(
             schoolUrl: Url,
             profileType: ProfileType,
             inviteRequest: RespectRedeemInviteRequest,
+            type: Int?=null
         ): SignupScreen {
             return SignupScreen(
                 schoolUrlStr = schoolUrl.toString(),
                 profileType = profileType,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
+                inviteType = type
             )
         }
     }
@@ -440,7 +443,8 @@ class TermsAndCondition(
     private val schoolUrlStr: String,
     private val profileType: ProfileType,
     private val inviteRedeemRequestStr: String,
-) : RespectAppRoute {
+    val inviteType: Int?=null,
+    ) : RespectAppRoute {
 
     @Transient
     val type = profileType
@@ -457,11 +461,13 @@ class TermsAndCondition(
             schoolUrl: Url,
             profileType: ProfileType,
             inviteRequest: RespectRedeemInviteRequest,
+            type: Int?=null
         ): TermsAndCondition {
             return TermsAndCondition(
                 schoolUrlStr = schoolUrl.toString(),
                 profileType = profileType,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
+                inviteType = type
             )
         }
     }
@@ -472,7 +478,8 @@ class CreateAccount(
     private val schoolUrlStr: String,
     private val profileType: ProfileType,
     private val inviteRedeemRequestStr: String,
-) : RespectAppRoute {
+    val inviteType: Int?=null,
+    ) : RespectAppRoute {
 
     @Transient
     val type = profileType
@@ -490,11 +497,13 @@ class CreateAccount(
             schoolUrl: Url,
             profileType: ProfileType,
             inviteRequest: RespectRedeemInviteRequest,
+            type: Int?=null
         ): CreateAccount {
             return CreateAccount(
                 schoolUrlStr = schoolUrl.toString(),
                 profileType = profileType,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
+                inviteType = type
             )
         }
     }
@@ -712,10 +721,15 @@ data class InvitePerson(
     val classGuid: String? = null,
     val className:String?=null,
     val roleStr: String? = null,
+    private val presetRoleStr: String? = null,
 ) : RespectAppRoute {
     @Transient
     val role: EnrollmentRoleEnum? = roleStr?.let {
         EnrollmentRoleEnum.fromValue(it)
+    }
+    @Transient
+    val presetRole: PersonRoleEnum? = presetRoleStr?.let {
+        PersonRoleEnum.fromValue(it)
     }
     companion object {
 
@@ -724,11 +738,13 @@ data class InvitePerson(
             classUid: String? = null,
             familyPersonGuid: String? = null,
             role: EnrollmentRoleEnum? = null,
-        ) = InvitePerson(
+            presetRole: PersonRoleEnum? = null,
+            ) = InvitePerson(
             familyPersonGuid = familyPersonGuid,
             classGuid = classUid,
             className = className,
             roleStr = role?.value,
+            presetRoleStr = presetRole?.value,
         )
 
     }

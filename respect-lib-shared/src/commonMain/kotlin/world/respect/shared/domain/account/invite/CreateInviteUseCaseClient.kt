@@ -19,8 +19,7 @@ class CreateInviteUseCaseClient(
 
     override suspend fun invoke(invite: Invite): String {
         return httpClient.post(
-            URLBuilder(respectEndpointUrl("invite/create"))
-                .build()
+            URLBuilder(respectEndpointUrl("invite/create")).build()
         ) {
             setBody(invite)
         }.body()

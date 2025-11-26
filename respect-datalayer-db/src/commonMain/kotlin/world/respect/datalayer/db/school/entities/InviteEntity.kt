@@ -16,6 +16,8 @@ data class InviteEntity(
     val iForFamilyOfGuid: String? = null,
     val iForFamilyOfGuidHash: Long? = null,
     val iForClassGuid: String? = null,
+    val iForClassName: String? = null,
+    val iSchoolName: String? = null,
     val iForClassGuidHash: Long? = null,
     val iForClassRole: EnrollmentRoleEnum ?=null,
     val iInviteMultipleAllowed: Boolean = false,

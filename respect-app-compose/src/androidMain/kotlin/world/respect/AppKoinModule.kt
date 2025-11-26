@@ -130,6 +130,8 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
@@ -603,6 +605,15 @@ val appKoinModule = module {
     single<SetDevModeEnabledUseCase> {
         SetDevModeEnabledUseCase(settings = get())
     }
+
+    single<UrlToCustomDeepLinkUseCase> {
+        UrlToCustomDeepLinkUseCase(customProtocol = androidApplication().packageName)
+    }
+
+    single<CustomDeepLinkToUrlUseCase> {
+        CustomDeepLinkToUrlUseCase(customProtocol = androidApplication().packageName)
+    }
+
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account

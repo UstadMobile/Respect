@@ -91,7 +91,7 @@ cd .maestro/video-downloader
 ```bash
 cd .maestro/video-downloader
 
-npx cypress run --env maestroEmail=respecttester@recivo.email,projectUrl="https://app.robintest.com/project/proj_01k6wzp0pwf75vpcw8vw1gh0y8/maestro-test/app/app_01k6x3hyf9exztk0022nehadkk/upload/mupload_01kas5dx97eq7b4bc0d16w47z0",recivoApiKey="rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT",recivoOrgId="88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7"
+npx cypress run --env maestroEmail=<emailid>,projectUrl=<maestro_Url>,recivoApiKey=<recivo_Api_Key>,recivoOrgId=<recivo_Org_Id>
 
 ```
 ---

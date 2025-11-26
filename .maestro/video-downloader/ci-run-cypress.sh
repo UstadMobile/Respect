@@ -12,14 +12,14 @@ fi
 
 echo "Detected Maestro Cloud URL: $MAESTRO_CLOUD_URL"
 
-maestroEmail="${maestroEmail:-respecttester@recivo.email}"
+MAESTRO_EMAIL="${MAESTRO_EMAIL:-respecttester@recivo.email}"
 RECIVO_API_KEY="${RECIVO_API_KEY:-rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT}"
 RECIVO_ORG_ID="${RECIVO_ORG_ID:-88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7}"
 
 
 # Run Cypress with all environment variables
 npx cypress run --env \
-maestroEmail=$maestroEmail,\
+maestroEmail=$MAESTRO_EMAIL,\
 projectUrl="$MAESTRO_CLOUD_URL",\
 recivoApiKey="$RECIVO_API_KEY",\
 recivoOrgId="$RECIVO_ORG_ID"

@@ -2,7 +2,7 @@
 
 This cypress folder contains Cypress test that automate: Downloading screen-recording videos for each test.
 
-All videos and test names are saved locally inside `cypress/downloads/`.
+All videos and test names are saved locally inside `.maestro/video-downloader/cypress/downloads/`.
 
 ---
 
@@ -14,7 +14,7 @@ Reads `testnames.txt` and downloads the corresponding video for every test into:
 
 ```
 
-cypress/downloads/
+.maestro/video-downloader/cypress/downloads/
 
 ```
 
@@ -36,12 +36,7 @@ If not installed:
 sudo apt install nodejs npm
 ````
 - Cypress (>= 13)
-  
-Navigate to the project folder:
 
-```bash
-cd ~/StudioProjects/Respect
-````
 Install Cypress:
 
 ```bash
@@ -52,7 +47,7 @@ npm install cypress --save-dev
 
 ---
 
-## 4. How the Tests Work
+## 3. How the Tests Work
 
 ### **downloadTestVideos.cy.js**
 
@@ -71,7 +66,7 @@ npm install cypress --save-dev
 
 ---
 
-## 5. Cypress Tasks in `cypress.config.js`
+## 4. Cypress Tasks in `cypress.config.js`
 * **getMaestroOtp** → Fetches the latest OTP for Maestro login.
 * **readFile** → Reads `testnames.txt`
 * **saveFile** → Writes text files
@@ -81,32 +76,27 @@ These tasks must be defined inside `setupNodeEvents`.
 
 ---
 
-## 6. Running the Tests
+## 5. Running the Tests
 
 ### **On Jenkins**
 
 ```bash
+cd .maestro/video-downloader
 
 ./ci-run-cypress.sh
 
 ```
-### **Manually - headless mode**
+### **Manual - headless mode**
 
 ```bash
+cd .maestro/video-downloader
 
 npx cypress run --env maestroEmail=respecttester@recivo.email,projectUrl="https://app.robintest.com/project/proj_01k6wzp0pwf75vpcw8vw1gh0y8/maestro-test/app/app_01k6x3hyf9exztk0022nehadkk/upload/mupload_01kas5dx97eq7b4bc0d16w47z0",recivoApiKey="rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT",recivoOrgId="88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7"
 
 ```
-### **Manually - UI**
-
-```bash
-
-npx cypress open --env maestroEmail=respecttester@recivo.email,projectUrl="https://app.robintest.com/project/proj_01k6wzp0pwf75vpcw8vw1gh0y8/maestro-test/app/app_01k6x3hyf9exztk0022nehadkk/upload/mupload_01kas5dx97eq7b4bc0d16w47z0",recivoApiKey="rcv_JjijkepFCRgVcYJchzwTMMCVWduBuAmmpWtETyEpnznBKZrXvcirDxgxaRvpuUHT",recivoOrgId="88bu4IyUYf1LTtr1igZTeFT0s3Q4F2p7"
-
-```
 ---
 
-## 7. Notes
+## 6. Notes
 
 * `cy.origin()` is required because Maestro uses different domains:
 

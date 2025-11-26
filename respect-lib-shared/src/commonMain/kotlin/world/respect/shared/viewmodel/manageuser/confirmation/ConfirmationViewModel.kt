@@ -14,6 +14,7 @@ import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -70,7 +71,7 @@ class ConfirmationViewModel(
         }
 
         viewModelScope.launch {
-            val inviteInfo = getInviteInfoUseCase(route.code)
+            val inviteInfo = getInviteInfoUseCase(route.code,route.inviteType)
 
             try {
                 _uiState.update {
@@ -109,7 +110,7 @@ class ConfirmationViewModel(
         }
 
         val redeemRequest = makeBlankRedeemInviteRequest(
-            route.code, profileType, inviteInfo.classGuid
+            route.code, profileType, inviteInfo.classGuid?:inviteInfo.invite?.forClassGuid,inviteInfo.invite
         )
 
         if (profileType == ProfileType.STUDENT) {
@@ -123,7 +124,7 @@ class ConfirmationViewModel(
         }else {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    TermsAndCondition.create(route.schoolUrl, profileType,redeemRequest
+                    TermsAndCondition.create(route.schoolUrl, profileType,redeemRequest,route.inviteType
                     )
                 )
             )
@@ -133,6 +134,7 @@ class ConfirmationViewModel(
         inviteCode: String,
         profileType: ProfileType,
         classUid: String?,
+        invite: Invite?,
     ): RespectRedeemInviteRequest {
         val role = when(profileType) {
             ProfileType.STUDENT -> PersonRoleEnum.STUDENT
@@ -156,6 +158,7 @@ class ConfirmationViewModel(
             account = blankAccount,
             deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
             deviceInfo = getDeviceInfoUseCase(),
+            invite = invite
         )
     }
 }

@@ -17,6 +17,6 @@ import world.respect.datalayer.respect.model.invite.RespectInviteInfo
  */
 interface GetInviteInfoUseCase {
 
-    suspend operator fun invoke(code: String): RespectInviteInfo
+    suspend operator fun invoke(code: String,type:Int?= RespectInviteInfo.INVITE_TYPE_CLASS_CODE): RespectInviteInfo
 
 }

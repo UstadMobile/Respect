@@ -49,6 +49,9 @@ class RedeemInviteUseCaseDb(
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
     ): AuthResponse {
+        if (redeemRequest.invite!=null){
+
+        }
         val classUid = redeemRequest.classUid
             ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
         val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))

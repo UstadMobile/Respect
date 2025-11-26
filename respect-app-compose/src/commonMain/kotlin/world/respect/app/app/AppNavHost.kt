@@ -40,8 +40,10 @@ import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScr
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.onboarding.OnboardingScreen
 import world.respect.app.view.person.changepassword.ChangePasswordScreen
+import world.respect.app.view.person.copycode.CopyInviteCodeScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
+import world.respect.app.view.person.inviteperson.InvitePersonScreen
 import world.respect.app.view.person.list.PersonListScreen
 import world.respect.app.view.person.manageaccount.ManageAccountScreen
 import world.respect.app.view.person.passkeyList.PasskeyListScreen
@@ -75,6 +77,7 @@ import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.IndicatorDetail
 import world.respect.shared.navigation.IndicatorList
@@ -101,6 +104,7 @@ import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.HowPasskeyWorks
+import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.OtherOption
@@ -164,7 +168,7 @@ fun AppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Acknowledgement,
+        startDestination = Acknowledgement(),
         modifier = modifier,
     ) {
 
@@ -617,6 +621,23 @@ fun AppNavHost(
             )
         }
 
+        composable<InvitePerson> {
+            InvitePersonScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<CopyCode> {
+            CopyInviteCodeScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
     }
 }
 

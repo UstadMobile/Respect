@@ -3,16 +3,18 @@
 
 package world.respect.shared.navigation
 
+import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
-import kotlin.reflect.KClass
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -68,20 +70,17 @@ data class LoginScreen(
 
 @Serializable
 data class RespectAppLauncher(
-    val resultPopUpToStr: String? = null,
-    override val resultKey: String? = null,
+    val resultDestStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest{
 
-    override val resultPopUpTo: KClass<*>?
-        get() = resultPopUpToStr?.let { Class.forName(it).kotlin }
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
     companion object {
         fun create(
-            resultPopUpTo: KClass<*>? = null,
-            resultKey: String? = null,
+            resultDest: ResultDest? = null,
         ) = RespectAppLauncher(
-            resultPopUpToStr = resultPopUpTo?.qualifiedName,
-            resultKey = resultKey,
+            resultDestStr = resultDest.encodeToJsonStringOrNull()
         )
     }
 }
@@ -127,6 +126,40 @@ object ClazzList : RespectAppRoute
 @Serializable
 class ClazzDetail(
     val guid: String,
+) : RespectAppRoute
+
+@Serializable
+data class EnrollmentList(
+    val filterByPersonUid: String,
+    val roleStr: String,
+    val filterByClassUid: String
+) : RespectAppRoute {
+
+    @Transient
+    val role = EnrollmentRoleEnum.fromValue(roleStr)
+
+    companion object  {
+        fun create(
+            filterByPersonUid: String,
+            role: EnrollmentRoleEnum,
+            filterByClassUid: String
+        ) : EnrollmentList {
+            return EnrollmentList(
+                filterByPersonUid = filterByPersonUid,
+                roleStr = role.value,
+                filterByClassUid = filterByClassUid
+            )
+        }
+    }
+
+}
+
+@Serializable
+data class EnrollmentEdit(
+    val uid: String?,
+    val role: String,
+    val personGuid: String,
+    val clazzGuid: String,
 ) : RespectAppRoute
 
 @Serializable
@@ -216,27 +249,24 @@ object HowPasskeyWorks : RespectAppRoute
 @Serializable
 class AppsDetail private constructor(
     private val manifestUrlStr: String,
-    val resultPopUpToStr: String? = null,
-    override val resultKey: String? = null,
+    private val resultDestStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     val manifestUrl = Url(manifestUrlStr)
 
-    override val resultPopUpTo: KClass<*>?
-        get() = resultPopUpToStr?.let { Class.forName(it).kotlin }
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
     companion object {
 
         fun create(
             manifestUrl: Url,
-            resultPopUpTo: KClass<*>? = null,
-            resultKey: String? = null,
+            resultDest: ResultDest? = null,
         ): AppsDetail {
             return AppsDetail(
                 manifestUrlStr = manifestUrl.toString(),
-                resultPopUpToStr = resultPopUpTo?.qualifiedName,
-                resultKey = resultKey,
+                resultDestStr = resultDest?.encodeToJsonStringOrNull()
             )
         }
 
@@ -252,8 +282,7 @@ class AppsDetail private constructor(
 class LearningUnitList(
     private val opdsFeedUrlStr: String,
     private val appManifestUrlStr: String,
-    private val resultPopUpToStr: String? = null,
-    override val resultKey: String? = null,
+    private val resultDestStr: String?,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -262,22 +291,20 @@ class LearningUnitList(
     @Transient
     val appManifestUrl = Url(appManifestUrlStr)
 
-    override val resultPopUpTo: KClass<*>?
-        get() = resultPopUpToStr?.let { Class.forName(it).kotlin }
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
     companion object {
 
         fun create(
             opdsFeedUrl: Url,
             appManifestUrl: Url,
-            resultPopUpTo: KClass<*>? = null,
-            resultKey: String? = null,
+            resultDest: ResultDest? = null,
         ): LearningUnitList {
             return LearningUnitList(
                 opdsFeedUrlStr = opdsFeedUrl.toString(),
                 appManifestUrlStr = appManifestUrl.toString(),
-                resultPopUpToStr = resultPopUpTo?.qualifiedName,
-                resultKey = resultKey,
+                resultDestStr = resultDest.encodeToJsonStringOrNull()
             )
         }
 
@@ -528,7 +555,37 @@ object AccountList : RespectAppRoute
 
 
 @Serializable
-object PersonList : RespectAppRoute
+data class PersonList(
+    private val filterByRoleStr: String? = null,
+    val isTopLevel: Boolean = false,
+    private val resultDestStr: String? = null,
+    val showInviteCode: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    val filterByRole: PersonRoleEnum? = filterByRoleStr?.let {
+        PersonRoleEnum.fromValue(it)
+    }
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+
+        fun create(
+            filterByRole: PersonRoleEnum? = null,
+            isTopLevel: Boolean = false,
+            resultDest: ResultDest? = null,
+            showInviteCode: String? = null,
+        ) = PersonList(
+            filterByRoleStr = filterByRole?.value,
+            isTopLevel = isTopLevel,
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            showInviteCode = showInviteCode,
+        )
+
+    }
+}
 
 @Serializable
 data class PersonDetail(
@@ -548,8 +605,70 @@ data class ManageAccount(
 @Serializable
 data class PersonEdit(
     val guid: String?,
-) : RespectAppRoute
+    private val resultDestStr: String? = null,
+    private val presetRoleStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
 
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    @Transient
+    val presetRole: PersonRoleEnum? = presetRoleStr?.let {
+        PersonRoleEnum.fromValue(it)
+    }
+
+    companion object {
+        fun create(
+            guid: String?,
+            resultDest: ResultDest? = null,
+            presetRole: PersonRoleEnum? = null,
+        ) = PersonEdit(
+            guid = guid,
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            presetRoleStr = presetRole?.value,
+        )
+    }
+
+
+}
+
+@Serializable
+data object Settings : RespectAppRoute
+
+@Serializable
+data object CurriculumMappingList : RespectAppRoute
+
+@Serializable
+data class CurriculumMappingEdit(
+    val textbookUid: Long = 0L,
+    private val mappingDataJson: String? = null
+) : RespectAppRoute {
+
+    @Transient
+    val mappingData: CurriculumMapping? = mappingDataJson?.let { jsonString ->
+        try {
+            Json.decodeFromString(CurriculumMapping.serializer(), jsonString)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    companion object {
+        fun create(
+            uid: Long,
+            mappingData: CurriculumMapping? = null
+        ) = CurriculumMappingEdit(
+            textbookUid = uid,
+            mappingDataJson = mappingData?.let { mapping ->
+                try {
+                    Json.encodeToString(CurriculumMapping.serializer(), mapping)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        )
+    }
+}
 @Serializable
 data class SetUsernameAndPassword(
     val guid: String

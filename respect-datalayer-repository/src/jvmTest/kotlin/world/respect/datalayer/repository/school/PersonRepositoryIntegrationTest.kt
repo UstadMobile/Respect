@@ -17,6 +17,7 @@ import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -66,10 +67,10 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .list(DataLoadParams(), null)
+                    .list(DataLoadParams())
 
                 val validatedData = clients.first().schoolDataSource.personDataSource
-                    .list(DataLoadParams(), null)
+                    .list(DataLoadParams())
 
                 assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
 
@@ -100,7 +101,7 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .list(DataLoadParams(), null)
+                    .list(DataLoadParams())
 
                 val updatedName = "updated"
                 //DataSource will need to reject same-second changes and respond with a wait message.
@@ -116,7 +117,7 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 val newData = clients.first().schoolDataSource.personDataSource
-                    .list(DataLoadParams(), null)
+                    .list(DataLoadParams())
 
                 assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
 
@@ -152,7 +153,7 @@ class PersonRepositoryIntegrationTest {
 
                 val startTime = systemTimeInMillis()
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .list(DataLoadParams(), null)
+                    .list(DataLoadParams())
                 println(initData)
                 val answer1ConsistentThrough = initData.remoteState?.metaInfo?.consistentThrough!!
                 assertTrue(initData.remoteState?.metaInfo?.consistentThrough!! >= startTime)
@@ -160,7 +161,11 @@ class PersonRepositoryIntegrationTest {
                 val dataSince = clients.first().schoolDataSource.personDataSource
                     .list(
                         loadParams = DataLoadParams(),
-                        since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                        PersonDataSource.GetListParams(
+                            common = GetListCommonParams(
+                                since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                            )
+                        )
                     )
 
                 val remoteDataState = dataSince.remoteState
@@ -191,7 +196,7 @@ class PersonRepositoryIntegrationTest {
 
                 val startTime = systemTimeInMillis()
                 val initData = clients.first().schoolDataSource.personDataSource
-                    .list(DataLoadParams(), null)
+                    .list(DataLoadParams())
                 println(initData)
                 val answer1ConsistentThrough = initData.remoteState?.metaInfo?.consistentThrough!!
                 assertTrue(initData.remoteState?.metaInfo?.consistentThrough!! >= startTime)
@@ -209,7 +214,11 @@ class PersonRepositoryIntegrationTest {
                 val dataSince = clients.first().schoolDataSource.personDataSource
                     .list(
                         loadParams = DataLoadParams(),
-                        since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                        params = PersonDataSource.GetListParams(
+                            common = GetListCommonParams(
+                                since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                            )
+                        )
                     )
 
                 val remoteDataState = dataSince.remoteState
@@ -248,7 +257,7 @@ class PersonRepositoryIntegrationTest {
                 )
 
                 clients.first().schoolDataSource.personDataSource.listAsFlow(
-                    DataLoadParams()
+                    DataLoadParams(), PersonDataSource.GetListParams()
                 ).filter { it is DataReadyState && it.data.isNotEmpty() }.test(
                     timeout = 10.seconds
                 ) {

@@ -8,16 +8,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.koin.core.scope.Scope
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.child.AddChildAccountUseCase
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest.Companion.DATE_OF_BIRTH_EPOCH
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.child_dob_label
 import world.respect.shared.generated.resources.child_gender_label
 import world.respect.shared.generated.resources.child_name_label
 import world.respect.shared.generated.resources.child_profile_title
+import world.respect.shared.generated.resources.date_of_birth_in_future
 import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.next
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.your_dob_label
 import world.respect.shared.generated.resources.your_gender_label
 import world.respect.shared.generated.resources.your_name_label
@@ -25,11 +32,13 @@ import world.respect.shared.generated.resources.your_profile_title
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import kotlin.time.Clock
 
 data class SignupUiState(
     val screenTitle: UiText? = null,
@@ -49,8 +58,9 @@ data class SignupUiState(
 
 
 class SignupViewModel(
-    savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle) {
+    savedStateHandle: SavedStateHandle,
+   private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle)  {
 
     private val route: SignupScreen = savedStateHandle.toRoute()
 
@@ -106,7 +116,7 @@ class SignupViewModel(
             val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(name = value),
-                fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.required)
+                fullNameError = if (value.isNotBlank()) null else StringResourceUiText(Res.string.required_field)
             )
         }
     }
@@ -117,7 +127,7 @@ class SignupViewModel(
             val currentPerson = prev.personInfo
             prev.copy(
                 personInfo = currentPerson.copy(gender = value),
-                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.required)
+                genderError = if (value != PersonGenderEnum.UNSPECIFIED) null else StringResourceUiText(Res.string.required_field)
             )
         }
     }
@@ -145,29 +155,56 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             val personInfo = _uiState.value.personInfo
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
             _uiState.update { prev ->
                 prev.copy(
-                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required) else null,
-                    genderError = if (personInfo.gender.value.isEmpty()) StringResourceUiText(
-                        Res.string.required
-                    ) else null
+                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required_field) else null,
+                    genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
+                        Res.string.required_field) else null,
+                    dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {
+                        StringResourceUiText(Res.string.required_field)
+                    } else if (personInfo.dateOfBirth > today) {
+                        StringResourceUiText(Res.string.date_of_birth_in_future)
+                    } else null
+
                 )
             }
 
             val hasError = listOf(
                 personInfo.name.isBlank(),
-                //personInfo?.gender == PersonGenderEnum.UNSPECIFIED,
-                //personInfo?.dateOfBirth == null
+                personInfo.dateOfBirth > today,
+                personInfo.gender == PersonGenderEnum.UNSPECIFIED,
+                personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH
             ).any { it }
 
             if (hasError) {
-                return@launch
+                return@launchWithLoadingIndicator
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {
-                        TODO("Add child account support")
+                        viewModelScope.launch {
+                            val scope: Scope = accountManager.requireSelectedAccountScope()
+                            val addChildAccountUseCase: AddChildAccountUseCase by lazy {
+                                scope.get()
+                            }
+
+                            addChildAccountUseCase(
+                                personInfo = personInfo,
+                                parentUsername = route.respectRedeemInviteRequest.account.username,
+                                classUid = route.respectRedeemInviteRequest.classUid ?: "",
+                                inviteCode = route.respectRedeemInviteRequest.code
+                            )
+
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = WaitingForApproval(),
+                                    clearBackStack = true,
+                                )
+                            )
+                        }
                     }
 
                     else -> {

@@ -56,7 +56,7 @@ class AssignmentDataSourceRepository(
                     remoteLoadParams, local::updateLocal
                 )
             },
-            tag = "AssignmentRepo.listAsPagingSource"
+            tag = { "AssignmentRepo.listAsPagingSource" }
         )
     }
 

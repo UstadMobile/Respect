@@ -11,7 +11,10 @@ import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.libutil.util.time.TimeConstants
 import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
@@ -64,18 +67,49 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-        SELECT * 
-         FROM PersonEntity
+           WITH $LIST_PERSONS_CTES_SQL
+                         
+         SELECT PersonEntity.*
+           FROM PersonEntity
+          WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+          ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllAsFlow(): Flow<List<PersonEntityWithRoles>>
+    fun listAsFlow(
+        since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
+    ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
-        SELECT * 
-         FROM PersonEntity
-        WHERE PersonEntity.pStored > :since 
+           WITH $LIST_PERSONS_CTES_SQL
+                         
+         SELECT PersonEntity.*
+           FROM PersonEntity
+          WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+          ORDER BY PersonEntity.pGivenName
     """)
-    suspend fun findAll(
+    suspend fun list(
         since: Long = 0,
+        guidHash: Long = 0,
+        inClazzGuidHash: Long = 0,
+        inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
+        filterByName: String? = null,
+        timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): List<PersonEntityWithRoles>
 
     @Transaction
@@ -87,68 +121,60 @@ interface PersonEntityDao {
     suspend fun findByUidList(uidNums: List<Long>): List<PersonEntityWithRoles>
 
 
+    /**
+     * @param inClassOnDayInUtcMs if filtering by clazzUid, and we want only those who have an active
+     *        enrollment on a given day (e.g. today as per the users timezone), then we need to know
+     *        what day that should be. LocalDate is stored as millis since epoch until 00:00 UTC for
+     *        the given date. See the docs for startOfTodaysDateInMillisAtUtc function.
+     */
     @Transaction
     @Query("""
-        SELECT * 
-         FROM PersonEntity
-        WHERE PersonEntity.pStored > :since 
-          AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
-          AND (:inClazzGuidHash = 0 OR
-               EXISTS(
-                    SELECT EnrollmentEntity.eUid
-                      FROM EnrollmentEntity
-                     WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
-                       AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
-                       AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
-                       AND :timeNow BETWEEN
-                                    COALESCE(EnrollmentEntity.eBeginDate, 0) AND
-                                    COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
-               )
-              ) 
-         AND (:filterByName IS NULL 
-              OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
-     ORDER BY PersonEntity.pGivenName
+           WITH $LIST_PERSONS_CTES_SQL
+                         
+         SELECT PersonEntity.*
+           FROM PersonEntity
+          WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+          ORDER BY PersonEntity.pGivenName
     """)
-    fun findAllAsPagingSource(
+    fun listAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
+        inClassOnDayInUtcMs: Long = 0,
         inClazzRoleFlag: Int = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
+         WITH $LIST_PERSONS_CTES_SQL 
+        
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
                PersonEntity.pFamilyName AS familyName, 
                PersonEntity.pUsername AS username
           FROM PersonEntity
-        WHERE PersonEntity.pStored > :since 
-          AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
-          AND (:inClazzGuidHash = 0 OR
-               EXISTS(
-                    SELECT EnrollmentEntity.eUid
-                      FROM EnrollmentEntity
-                     WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
-                       AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
-                       AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
-                       AND :timeNow BETWEEN
-                                    COALESCE(EnrollmentEntity.eBeginDate, 0) AND
-                                    COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE})         
-               )
-              ) 
-         AND (:filterByName IS NULL 
-              OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
-     ORDER BY PersonEntity.pGivenName
+         WHERE PersonEntity.pGuidHash IN (
+                SELECT DISTINCT uidNum
+                  FROM AllPersons)
+      ORDER BY PersonEntity.pGivenName
     """)
     fun findAllListDetailsAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
         inClazzRoleFlag: Int = 0,
+        inClassOnDayInUtcMs: Long = 0,
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
+        filterByPersonRole: Int = 0,
+        includeRelated: Boolean = false,
+        includeDeleted: Boolean = false,
     ): PagingSource<Int, PersonListDetails>
 
     @Query("""
@@ -203,4 +229,65 @@ interface PersonEntityDao {
     ): Boolean
 
 
+
+    companion object {
+
+        /**
+         * This CTE expression is shared between all functions that return a list. It handles the
+         * includeRelated parameter efficiently. includeRelated is required by PersonDetail/Edit
+         * to load related family members _and_ the ClassDetail screen to load related family
+         * members for pending enrollees where applicable.
+         */
+        const val LIST_PERSONS_CTES_SQL = """
+            Persons(uidNum) AS (
+                   SELECT PersonEntity.pGuidHash 
+                     FROM PersonEntity
+                    WHERE PersonEntity.pStored > :since 
+                      AND (:guidHash = 0 OR PersonEntity.pGuidHash = :guidHash)
+                      AND (:inClazzGuidHash = 0 OR
+                           EXISTS(
+                                SELECT EnrollmentEntity.eUid
+                                  FROM EnrollmentEntity
+                                 WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash
+                                   AND EnrollmentEntity.eClassUidNum = :inClazzGuidHash
+                                   AND (:inClazzRoleFlag = 0 OR EnrollmentEntity.eRole = :inClazzRoleFlag)
+                                   AND ((:includeDeleted OR :inClassOnDayInUtcMs = 0) 
+                                        OR (     (:inClassOnDayInUtcMs >= COALESCE(EnrollmentEntity.eBeginDate, 0))
+                                            AND ((:inClassOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))
+                                            AND (:timeNow <= COALESCE(EnrollmentEntity.eRemovedAt, ${Long.MAX_VALUE}))
+                                            AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT} ))         
+                           ) 
+                          ) 
+                      AND (:filterByName IS NULL 
+                           OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
+                      AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 
+                           (SELECT PersonRoleEntity.prRoleEnum
+                              FROM PersonRoleEntity
+                             WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
+                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT})       
+            ),
+                
+            RelatedPersons(uidNum) AS (
+                SELECT PersonEntity.pGuidHash
+                  FROM PersonEntity
+                 WHERE :includeRelated 
+                   AND PersonEntity.pGuidHash IN(
+                        SELECT DISTINCT PersonRelatedPersonEntity.prpOtherPersonUidNum
+                          FROM PersonRelatedPersonEntity
+                         WHERE PersonRelatedPersonEntity.prpPersonUidNum IN(
+                               SELECT Persons.uidNum
+                                 FROM Persons)
+                       )
+            ),
+                
+            AllPersons(uidNum) AS (
+                SELECT uidNum 
+                  FROM Persons
+                 UNION
+                 SELECT uidNum 
+                   FROM RelatedPersons
+            )
+        """
+
+    }
 }

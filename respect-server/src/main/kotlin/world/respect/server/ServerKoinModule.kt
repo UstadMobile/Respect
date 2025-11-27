@@ -154,6 +154,13 @@ fun serverKoinModule(
     scope<SchoolDirectoryEntry> {
         fun Scope.schoolUrl(): Url = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
 
+        scoped<ServerAccountScopeManager> {
+            ServerAccountScopeManager(
+                schoolUrl = schoolUrl(),
+                schoolScope = this,
+            )
+        }
+
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseServer(
                 schoolDb = get(),
@@ -249,16 +256,15 @@ fun serverKoinModule(
 
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
+            val accountScopeManager: ServerAccountScopeManager = get()
 
             RedeemInviteUseCaseDb(
                 schoolDb = get(),
                 schoolUrl = schoolScopeId.schoolUrl,
                 schoolPrimaryKeyGenerator = get(),
                 getTokenAndUserProfileUseCase = get(),
-                schoolDataSource = { schoolUrl, user ->
-                    getKoin().getOrCreateScope<RespectAccount>(
-                        RespectAccountScopeId(schoolUrl, user).scopeId,
-                    ).get()
+                schoolDataSource = { _, user ->
+                    accountScopeManager.getOrCreateAccountScope(user).get()
                 },
                 uidNumberMapper = get(),
                 json = get(),
@@ -271,24 +277,19 @@ fun serverKoinModule(
     /*
      * AccountScope: as per the client, the Account Scope is linked to a parent School scope.
      *
-     * All server-side dependencies in the account scope are cheap wrappers e.g. the
+     * All server-side dependencies in the account scope are "cheap" wrappers e.g. the
      * SchoolDataSource wrapper (which is tied to a specific account guid) is kept in the AccountScope,
      * but the RespectSchoolDatabase which has the actual DB connection is kept in the school scope.
      *
      * Dependencies in the account scope use factory so they are not retained in memory
+     *
+     * The account scope is created and then linked to the related school scope in the
+     * authentication plugin in Application.kt. Scope creation and linking using factories must
+     * be done in a way that is thread safe.
      */
     scope<RespectAccount> {
         factory<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
-            val directoryEntryScopeId = SchoolDirectoryEntryScopeId(
-                accountScopeId.schoolUrl, null
-            )
-
-            linkTo(
-                getKoin().getOrCreateScope<SchoolDirectoryEntry>(
-                    directoryEntryScopeId.scopeId
-                )
-            )
 
             SchoolDataSourceDb(
                 schoolDb = get(),

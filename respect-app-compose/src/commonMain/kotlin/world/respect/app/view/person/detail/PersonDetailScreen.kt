@@ -10,6 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,21 +19,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
+import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.shared.viewmodel.person.detail.PersonDetailUiState
-import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email
+import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.gender
-import world.respect.shared.generated.resources.phone_number
-import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.role
+import world.respect.shared.generated.resources.username_label
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.label
+import world.respect.shared.viewmodel.person.detail.PersonDetailUiState
+import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 
 @Composable
 fun PersonDetailScreen(
@@ -43,6 +47,7 @@ fun PersonDetailScreen(
         onClickManageAccount = viewModel::navigateToManageAccount,
         onClickCreateAccount = viewModel::onClickCreateAccount,
         onClickPhoneNumber = viewModel::onClickPhoneNumber,
+        onClickFamilyMember = viewModel::onClickFamilyMember
     )
 }
 
@@ -52,8 +57,10 @@ fun PersonDetailScreen(
     onClickManageAccount:() -> Unit,
     onClickCreateAccount: () -> Unit,
     onClickPhoneNumber: () -> Unit,
+    onClickFamilyMember: (String) -> Unit,
 ) {
-    val person = uiState.person.dataOrNull()
+    val person = uiState.person
+
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
@@ -96,7 +103,7 @@ fun PersonDetailScreen(
         RespectDetailField(
             modifier = Modifier.defaultItemPadding(),
             label = { Text(stringResource(Res.string.gender)) },
-            value = { Text(uiState.person.dataOrNull()?.gender?.label?.let { stringResource(it) } ?: "")}
+            value = { Text(person?.gender?.label?.let { stringResource(it) } ?: "")}
         )
 
         person?.dateOfBirth?.also {
@@ -115,12 +122,36 @@ fun PersonDetailScreen(
                 value = { Text(it) }
             )
         }
-        person?.email?.also {
-            RespectDetailField(
+        person?.email
+            ?.takeIf { it.isNotBlank() }
+            ?.also { email ->
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { Text(stringResource(Res.string.email)) },
+                    value = { Text(email) }
+                )
+            }
+
+        if (uiState.familyMembers.isNotEmpty()) {
+            Text(
                 modifier = Modifier.defaultItemPadding(),
-                label = { Text(stringResource(Res.string.email)) },
-                value = { Text(it) }
+                text = stringResource(Res.string.family_members),
+                style = MaterialTheme.typography.bodySmall,
             )
+
+            uiState.familyMembers.forEach { familyPerson->
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickFamilyMember(familyPerson.guid)
+                    },
+                    leadingContent = {
+                        RespectPersonAvatar(familyPerson.fullName())
+                    },
+                    headlineContent = {
+                        Text(familyPerson.fullName())
+                    }
+                )
+            }
         }
     }
 }

@@ -93,7 +93,9 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
+import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -121,12 +123,16 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
+import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
@@ -145,6 +151,7 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
@@ -161,7 +168,8 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
-import world.respect.shared.viewmodel.clazz.addperson.AddPersonToClazzViewModel
+import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
+import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -199,6 +207,9 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
+import world.respect.shared.viewmodel.settings.SettingsViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
@@ -282,7 +293,6 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitListViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
-    viewModelOf(::AddPersonToClazzViewModel)
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::JoinClazzWithCodeViewModel)
     viewModelOf(::LoginViewModel)
@@ -310,6 +320,9 @@ val appKoinModule = module {
     viewModelOf(::ReportFilterEditViewModel)
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::CurriculumMappingListViewModel)
+    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
@@ -317,6 +330,10 @@ val appKoinModule = module {
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::AssignmentDetailViewModel)
+    viewModelOf(::EnrollmentListViewModel)
+    viewModelOf(::EnrollmentEditViewModel)
+
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -409,7 +426,6 @@ val appKoinModule = module {
     single<EncodeUserHandleUseCase> {
         EncodeUserHandleUseCaseImpl()
     }
-
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }
@@ -580,6 +596,23 @@ val appKoinModule = module {
             httpCache = get(),
         )
     }
+
+    single<GetDevModeEnabledUseCase> {
+        GetDevModeEnabledUseCase(settings = get())
+    }
+
+    single<SetDevModeEnabledUseCase> {
+        SetDevModeEnabledUseCase(settings = get())
+    }
+
+    single<UrlToCustomDeepLinkUseCase> {
+        UrlToCustomDeepLinkUseCase(customProtocol = androidApplication().packageName)
+    }
+
+    single<CustomDeepLinkToUrlUseCase> {
+        CustomDeepLinkToUrlUseCase(customProtocol = androidApplication().packageName)
+    }
+
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
@@ -785,6 +818,13 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
+        scoped<AddChildAccountUseCase> {
+            AddChildAccountUseCaseDataSource(
+                schoolDataSource = get(),
+                schoolPrimaryKeyGenerator = get(),
+                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            )
+        }
 
         scoped<GetAuthenticatedPersonUseCase> {
             val accountScopeId = RespectAccountScopeId.parse(id)
@@ -808,6 +848,9 @@ val appKoinModule = module {
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
+    }
+    single<ValidateEmailUseCase>{
+        ValidateEmailUseCase()
     }
     single<CreateGraphFormatterUseCase> {
         CreateGraphFormatterUseCase()

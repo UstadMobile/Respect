@@ -2,7 +2,10 @@ package world.respect.datalayer.repository.shared.paging
 
 import androidx.paging.PagingSource
 import io.github.aakira.napier.Napier
+import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
+import world.respect.datalayer.shared.paging.DelegatedInvalidationPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.LogPrefixFunction
 
 /**
  * RepositoryPagingSourceFactory serves two purposes:
@@ -16,15 +19,17 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 class RepositoryPagingSourceFactory<T: Any>(
     val onRemoteLoad: suspend (PagingSource.LoadParams<Int>) -> Unit,
     val local: IPagingSourceFactory<Int, T>,
-    val tag: String? = null,
+    val tag: LogPrefixFunction = DelegatedInvalidationPagingSource.NO_TAG,
 ) : IPagingSourceFactory<Int, T> {
 
     private val remoteMediator = RemoteMediator2(onRemoteLoad)
 
-    private val logPrefix = "RPaging/RepositoryPagingSourceFactory(tag = $tag):"
+    private val logPrefix: String by lazy {
+        "RPaging/RepositoryPagingSourceFactory(tag = $tag):"
+    }
 
     override fun invoke(): PagingSource<Int, T> {
-        Napier.v("$logPrefix invoke()")
+        Napier.d(tag = TAG_DATALAYER) { "$logPrefix invoke()" }
         return RepositoryOffsetLimitPagingSource2(
             local = local(),
             remoteMediator = remoteMediator,

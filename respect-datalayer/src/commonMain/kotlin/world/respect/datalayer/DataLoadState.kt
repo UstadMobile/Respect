@@ -51,12 +51,20 @@ sealed interface DataLoadState<T: Any> {
 
 /**
  * Data loading is in progress
+ *
+ * @param partialData this can be used to provide partial data results. This is only rarely needed,
+ *        intended to be used for APIs where the HTTP implementation connects to multiple servers
+ *        concurrently where we want to be able to show the user the results received so far,
+ *        indicate that loading is still in progress, and avoid waiting for all servers to respond
+ *        in the meantime (which could take a while if one or more servers are down or slow).
+ *
  */
 @Serializable
 data class DataLoadingState<T: Any>(
     override val metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
     override val localState: DataLoadState<T>? = null,
     override val remoteState: DataLoadState<*>? = null,
+    val partialData: T? = null,
 ): DataLoadState<T>
 
 /**

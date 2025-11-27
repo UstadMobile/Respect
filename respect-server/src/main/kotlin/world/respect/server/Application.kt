@@ -1,5 +1,6 @@
 package world.respect.server
 
+import io.github.aakira.napier.Napier
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -29,12 +30,15 @@ import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
 import org.koin.ktor.ext.inject
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
@@ -55,6 +59,8 @@ const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
 
 @Suppress("unused") // Used via application.conf
 fun Application.module() {
+    Napier.takeLogarithm()
+    Napier.base(LogbackAntiLog())
 
     val serverProperties = Properties().apply {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
@@ -89,6 +95,7 @@ fun Application.module() {
         )
     }
 
+
     install(Authentication) {
         basic(AUTH_CONFIG_DIRECTORY_ADMIN_BASIC) {
             realm = "Access realm directory admin"
@@ -117,6 +124,14 @@ fun Application.module() {
                 validateAuthorizationUseCase(
                     ValidateAuthorizationUseCase.BearerTokenCredential(tokenCredential.token)
                 )?.let {
+                    val serverAccountScopeManager: ServerAccountScopeManager = schoolScope.get()
+
+                    //Ensure that the account scope is created and safely linked to the school scope.
+                    //See ServerAccountScopeManager doc for more info.
+                    serverAccountScopeManager.getOrCreateAccountScope(
+                        AuthenticatedUserPrincipalId(it.guid)
+                    )
+
                     UserIdPrincipal(it.guid)
                 }
             }
@@ -186,10 +201,12 @@ fun Application.module() {
 
             route("school") {
                 route("respect") {
+                    AddChildAccountRoute(
+                        addChildAccountUseCase = { it.getSchoolKoinScope().get() }
+                    )
                     route("auth") {
                         AuthRoute()
                     }
-
                     route("invite") {
                         RedeemInviteRoute(
                             redeemInviteUseCase = { it.getSchoolKoinScope().get() }

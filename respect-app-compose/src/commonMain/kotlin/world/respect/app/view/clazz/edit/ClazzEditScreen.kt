@@ -7,21 +7,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
-import world.respect.shared.generated.resources.class_name
+import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.description
+import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.required
+import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
+import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 
 @Composable
 fun ClazzEditScreen(
@@ -50,12 +53,10 @@ fun ClazzEditScreen(
             .verticalScroll(rememberScrollState())
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("name"),
             value = clazz?.title ?: "",
             label = {
-                Text(
-                    stringResource(Res.string.class_name) + "*"
-                )
+                Text(stringResource(Res.string.name) + "*")
             },
             onValueChange = { value ->
                 clazz?.also {
@@ -67,14 +68,14 @@ fun ClazzEditScreen(
             },
             singleLine = true,
             supportingText = {
-                Text(stringResource(Res.string.required))
+                Text(uiTextStringResource(uiState.clazzNameError ?: Res.string.required.asUiText()))
             },
             enabled = fieldsEnabled,
             isError = uiState.clazzNameError != null
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag(("description")),
             value = clazz?.description ?: "",
             label = {
                 Text(
@@ -87,7 +88,6 @@ fun ClazzEditScreen(
                 }
             }
         )
-
     }
 }
 

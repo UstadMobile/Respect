@@ -28,14 +28,26 @@ onFlowComplete:
     id: "app_title"
     text: "Add person"
 - tapOn: "Save"
-- assertVisible: "Required*"
+- assertVisible: "Required field"   # First names* field is mandatory
 - tapOn: "First names*"
 - inputText: "Test"
+- tapOn: "Save"
+- assertVisible: "Required field"   # Last name* field is mandatory
 - tapOn: "Last name*"
 - inputText: "User"
+- tapOn: "Save"
+- assertVisible: "Required field"   # Gender field is mandatory
 - tapOn: "Gender*"
 - tapOn: "Female"
-
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
 # Validate DOB field
 - tapOn: "Date of birth"
 - runScript:
@@ -44,14 +56,13 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
-- longPressOn: "Date of birth"
-- tapOn: "Select all"
 - eraseText
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
+
 # Validate Phone number
 - tapOn:
      id: "phone_countrycode"
@@ -64,7 +75,14 @@ onFlowComplete:
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
+- inputText: "21255543268"
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible: "Invalid"
+- eraseText
 - inputText: "2125554326"
+- tapOn: "Email"
+- inputText: "Testuser@gm"
 - hideKeyboard
 - scrollUntilVisible:
     element:
@@ -72,39 +90,24 @@ onFlowComplete:
     direction: UP
     timeout: 1000
 - tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test User"
-- tapOn:
-    id: "floating_action_button"   # Edit button
-- assertVisible:
-    id: "app_title"
-    text: "Edit person"
-- tapOn: "Email"
+- assertVisible: "Enter valid email address."
+- eraseText
 - inputText: "Testuser@gmail.com"
+- assertVisible: "Testuser@gmail.com"
 - hideKeyboard
-- scrollUntilVisible:
-    element:
-      text: "Save" # or any other selector
-    direction: UP
-    timeout: 1000
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
 - tapOn: "Username"
-- inputText: "2tes"
-- tapOn: "Password"
+- inputText: "testuser"
+- tapOn: "Password"  # Password validations needs to be added
 - inputText: "test234"
 - tapOn: "Save"
-- assertVisible: "Username cannot start with a number"
-- tapOn: "Username"
-- eraseText
-- inputText: "test@user"
-- assertVisible: "testuser"
-- tapOn: "Save"
-
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
 
 # Validate User login
 - clearState: world.respect.app

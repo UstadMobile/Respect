@@ -1,6 +1,8 @@
 package world.respect.datalayer.http.school
 
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -27,6 +29,7 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
@@ -47,6 +50,8 @@ class EnrollmentDataSourceHttp(
                     role?.value)
                 parameters.appendIfNotNull(EnrollmentDataSource.FILTER_BY_PERSON_UID,
                     personUid)
+                parameters.appendIfNotNull(DataLayerParams.ACTIVE_ON_DAY,
+                    activeOnDay?.toString())
             }.build()
     }
 
@@ -60,6 +65,7 @@ class EnrollmentDataSourceHttp(
             ).urlWithParams()
         ) {
             useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.firstOrNotLoaded()
     }
 
@@ -76,6 +82,7 @@ class EnrollmentDataSourceHttp(
             dataLoadParams = loadParams,
         ) {
             useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }.map {
             it.firstOrNotLoaded()
         }
@@ -94,18 +101,35 @@ class EnrollmentDataSourceHttp(
                 requestBuilder = {
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)
-                }
+                },
+                logPrefixExtra = { "EnrollmentDataSource params=$listParams"}
             )
         }
     }
 
-    override suspend fun store(list: List<Enrollment>) {
-        httpClient.post(
-            url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: EnrollmentDataSource.GetListParams
+    ): DataLoadState<List<Enrollment>> {
+        return httpClient.getAsDataLoadState<List<Enrollment>>(
+            url = listParams.urlWithParams(),
+            validationHelper = validationHelper
         ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }
+    }
+
+    override suspend fun store(list: List<Enrollment>) {
+        val url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
+        val response = httpClient.post(url) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
             setBody(list)
+        }
+
+        Napier.d(tag = TAG_DATALAYER) {
+            "EnrollmentDataSourceHttp: posted ${list.size} items(${list.joinToString { it.uid }}) to $url (status=${response.status.value}"
         }
     }
 }

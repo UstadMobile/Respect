@@ -26,6 +26,7 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
 import world.respect.shared.generated.resources.apps
@@ -34,6 +35,7 @@ import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
@@ -53,6 +55,7 @@ class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
+    private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireSelectedAccountScope()
@@ -78,6 +81,7 @@ class AppLauncherViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.apps.asUiText(),
+                onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
@@ -89,8 +93,8 @@ class AppLauncherViewModel(
                         )
                     }
                 ),
-                hideBottomNavigation = route.resultKey != null,
-                showBackButton = route.resultKey != null,
+                hideBottomNavigation = route.resultDest != null,
+                showBackButton = route.resultDest != null,
             )
         }
 
@@ -105,11 +109,13 @@ class AppLauncherViewModel(
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
+                val devModeEnabled = getDevModeEnabledUseCase()
                 _appUiState.update {
                     it.copy(
                         fabState = it.fabState.copy(
                             visible = isAdmin
-                        )
+                        ),
+                        settingsIconVisible = isAdmin && devModeEnabled,
                     )
                 }
                 _uiState.update {
@@ -131,21 +137,24 @@ class AppLauncherViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                if(route.resultKey != null) {
+                if(route.resultDest != null) {
                     LearningUnitList.create(
                         opdsFeedUrl = url.resolve(appData.learningUnits.toString()),
                         appManifestUrl = url,
-                        resultPopUpTo = route.resultPopUpTo,
-                        resultKey = route.resultKey,
+                        resultDest = route.resultDest,
                     )
                 }else {
                     AppsDetail.create(
                         manifestUrl = url,
-                        resultPopUpTo = route.resultPopUpTo,
-                        resultKey = route.resultKey,
+                        resultDest = route.resultDest,
                     )
                 }
             )
+        )
+    }
+    fun onClickSettings() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(Settings)
         )
     }
 

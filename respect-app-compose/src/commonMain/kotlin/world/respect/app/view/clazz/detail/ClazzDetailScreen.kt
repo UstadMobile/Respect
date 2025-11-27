@@ -29,9 +29,12 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.teacher
+import world.respect.shared.generated.resources.student
 import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.description
@@ -40,16 +43,29 @@ import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
+import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
+import world.respect.shared.generated.resources.gender_literal
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import world.respect.shared.generated.resources.manage_enrollments
+import world.respect.shared.generated.resources.more_options
+import world.respect.shared.generated.resources.remove_from_class
+
 
 @Composable
 fun ClazzDetailScreen(
@@ -66,8 +82,10 @@ fun ClazzDetailScreen(
         onClickDismissInvite = viewModel::onClickDismissInvite,
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
-        onToggleStudentsSection = viewModel::onToggleStudentsSection
-
+        onToggleStudentsSection = viewModel::onToggleStudentsSection,
+        onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
+        onClickManageEnrollments = viewModel::onClickManageEnrollments,
+        onClickPerson = viewModel::onClickPerson,
     )
 }
 
@@ -81,7 +99,10 @@ fun ClazzDetailScreen(
     onClickDismissInvite: (Person) -> Unit,
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
-    onToggleStudentsSection: () -> Unit
+    onToggleStudentsSection: () -> Unit,
+    onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
+    onClickPerson: (Person) -> Unit,
 ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -94,7 +115,7 @@ fun ClazzDetailScreen(
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
-    fun Person?.key(role: EnrollmentRoleEnum, index: Int) : Any {
+    fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
             Pair(it, role)
         } ?: "${role}_$index"
@@ -115,25 +136,13 @@ fun ClazzDetailScreen(
                     )
                 },
 
-                /**Description field needed**/
-
-                /* supportingContent = {
-                     Text(
-                        uiState.clazzDetail?.description
-                     )
-                 }*/
+                supportingContent = {
+                    Text(text = uiState.clazz.dataOrNull()?.description ?: "")
+                }
             )
         }
 
         item {
-
-//            RespectFilterChipsHeader(
-//                options = uiState.chipOptions.map { it.option },
-//                selectedOption = uiState.selectedChip,
-//                onOptionSelected = { onSelectChip(it) },
-//                optionLabel = { it }
-//            )
-
             RespectListSortHeader(
                 activeSortOrderOption = uiState.activeSortOrderOption,
                 sortOptions = uiState.sortOptions,
@@ -142,7 +151,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -151,9 +160,11 @@ fun ClazzDetailScreen(
                         .clickable { onTogglePendingSection() },
                     headlineContent = {
                         Text(
-                            text = stringResource(
-                                resource = Res.string.pending_requests
-                            )
+                            text = stringResource(Res.string.pending_requests)
+                                    + " (${
+                                pendingTeacherLazyPagingItems.itemCount
+                                        + pendingStudentLazyPagingItems.itemCount
+                            })"
                         )
                     },
                     trailingContent = {
@@ -180,7 +191,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if(uiState.showAddTeacher) {
+            if (uiState.showAddTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -195,10 +206,21 @@ fun ClazzDetailScreen(
                             )
                         },
                         headlineContent = {
-                            Text(text = person?.fullName() ?: "")
+                            Text(
+                                text = "${
+                                    person?.fullName().orEmpty()
+                                } (${stringResource(Res.string.teacher)})"
+                            )
                         },
                         supportingContent = {
-                            Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                            val gender = person?.gender?.value
+                            val dob = person?.dateOfBirth ?: ""
+                            Text(
+                                text =
+                                    "${stringResource(Res.string.gender_literal)}: $gender, " +
+                                            "${stringResource(Res.string.date_of_birth)}: $dob"
+                            )
+
                         },
                         trailingContent = {
                             Row {
@@ -227,7 +249,7 @@ fun ClazzDetailScreen(
             }
 
 
-            if(uiState.showAddStudent) {
+            if (uiState.showAddStudent) {
                 respectPagingItems(
                     items = pendingStudentLazyPagingItems,
                     key = { person, index ->
@@ -243,10 +265,19 @@ fun ClazzDetailScreen(
                             )
                         },
                         headlineContent = {
-                            Text(text = person?.fullName() ?: "")
+                            Text(
+                                text = "${
+                                    person?.fullName().orEmpty()
+                                } (${stringResource(Res.string.student)})"
+                            )
                         },
                         supportingContent = {
-                            Text(person?.roles?.firstOrNull()?.roleEnum?.value ?: "")
+                            val gender = person?.gender?.value
+                            val dob = person?.dateOfBirth ?: ""
+                            Text(
+                                text = "${stringResource(Res.string.gender_literal)}:" +
+                                        " $gender, ${stringResource(Res.string.date_of_birth)}: $dob"
+                            )
                         },
                         trailingContent = {
                             Row {
@@ -304,8 +335,8 @@ fun ClazzDetailScreen(
             )
         }
 
-        if(uiState.isTeachersExpanded) {
-            if(uiState.showAddTeacher) {
+        if (uiState.isTeachersExpanded) {
+            if (uiState.showAddTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -313,6 +344,7 @@ fun ClazzDetailScreen(
                         },
                         leadingContent = {
                             Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = stringResource(resource = Res.string.add_teacher)
                             )
@@ -329,21 +361,14 @@ fun ClazzDetailScreen(
 
             respectPagingItems(
                 items = teacherLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.TEACHER, index)
-                }
+                key = { person, index -> person.key(EnrollmentRoleEnum.TEACHER, index) }
             ) { teacher ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = teacher?.givenName ?: ""
-                        )
-                    },
-                    headlineContent = {
-                        Text(text = teacher?.givenName ?: "")
-                    }
+                PersonListItemWithMenu(
+                    person = teacher,
+                    showMenu = uiState.showAddTeacher,
+                    onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) },
+                    onClick = onClickPerson,
                 )
             }
         }
@@ -373,7 +398,7 @@ fun ClazzDetailScreen(
                         modifier = Modifier.size(24.dp)
                             .rotate(
                                 if (uiState.isStudentsExpanded) 0f else -90f
-                            ),
+                            )
                     )
                 }
             )
@@ -389,6 +414,7 @@ fun ClazzDetailScreen(
 
                         leadingContent = {
                             Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = stringResource(resource = Res.string.add_student)
                             )
@@ -403,31 +429,75 @@ fun ClazzDetailScreen(
                     )
                 }
             }
-
             respectPagingItems(
                 items = studentLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.STUDENT, index)
-                }
+                key = { person, index -> person.key(EnrollmentRoleEnum.STUDENT, index) }
             ) { student ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = student?.givenName ?: ""
-                        )
+                PersonListItemWithMenu(
+                    person = student,
+                    onClickRemove = {
+                        onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT)
                     },
-
-                    headlineContent = {
-                        Text(
-                            text = student?.givenName ?: ""
-                        )
-                    }
+                    onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) },
+                    showMenu = uiState.showAddStudent,
+                    onClick = onClickPerson,
                 )
             }
         }
     }
 }
 
+@Composable
+fun PersonListItemWithMenu(
+    person: Person?,
+    showMenu: Boolean = false,
+    onClickRemove: (Person) -> Unit,
+    onClickManage: (Person) -> Unit,
+    onClick: (Person) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        modifier = Modifier.fillMaxWidth().clickable {
+            person?.also(onClick)
+        },
+        leadingContent = {
+            RespectPersonAvatar(name = person?.fullName() ?: "")
+        },
+        headlineContent = {
+            Text(text = person?.fullName().orEmpty())
+        },
+        trailingContent = if(showMenu) {
+            {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(resource = Res.string.more_options)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.remove_from_class)) },
+                        onClick = {
+                            expanded = false
+                            person?.also(onClickRemove)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.manage_enrollments)) },
+                        onClick = {
+                            expanded = false
+                            person?.also(onClickManage)
+                        }
+                    )
+                }
+            }
+        }else {
+            null
+        }
+    )
+}

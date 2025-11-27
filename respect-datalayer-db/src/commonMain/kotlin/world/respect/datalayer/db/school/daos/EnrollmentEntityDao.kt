@@ -6,47 +6,51 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.school.adapters.EnrollmentEntities
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.school.model.StatusEnum
+import world.respect.libutil.util.time.TimeConstants
 
 @Dao
 interface EnrollmentEntityDao {
 
     @Query("""
-        SELECT EnrollmentEntity.*, 
-               $SELECT_PERSON_AND_CLASS_UID  
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE EnrollmentEntity.eUidNum = :uidNum
     """)
-    suspend fun findByGuid(uidNum: Long): EnrollmentEntities?
+    suspend fun findByGuid(uidNum: Long): EnrollmentEntity?
 
 
     @Query("""
-        SELECT EnrollmentEntity.*, 
-               $SELECT_PERSON_AND_CLASS_UID  
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE EnrollmentEntity.eUidNum = :uidNum
     """)
-    fun findByGuidAsFlow(uidNum: Long): Flow<EnrollmentEntities?>
+    fun findByGuidAsFlow(uidNum: Long): Flow<EnrollmentEntity?>
 
-    @Query("""
-        SELECT EnrollmentEntity.*, 
-               $SELECT_PERSON_AND_CLASS_UID  
-          FROM EnrollmentEntity
-         WHERE (:since <= 0 OR EnrollmentEntity.eStored > :since)
-           AND (:uidNum = 0 OR EnrollmentEntity.eUidNum = :uidNum)
-           AND (:classUidNum = 0 OR EnrollmentEntity.eClassUidNum = :classUidNum)
-           AND (:classUidRoleFlag = 0 OR EnrollmentEntity.eRole = :classUidRoleFlag)
-           AND (:personUidNum = 0 OR EnrollmentEntity.ePersonUidNum = :personUidNum)
-    """)
+    @Query(LIST_SQL)
     fun listAsPagingSource(
         since: Long = 0,
         uidNum: Long = 0,
         classUidNum: Long = 0,
         classUidRoleFlag: Int = 0,
         personUidNum: Long = 0,
-    ): PagingSource<Int, EnrollmentEntities>
+        activeOnDayInUtcMs: Long = 0,
+        notRemovedBefore: Long = 0,
+        includeDeleted: Boolean = false,
+    ): PagingSource<Int, EnrollmentEntity>
 
+    @Query(LIST_SQL)
+    suspend fun list(
+        since: Long = 0,
+        uidNum: Long = 0,
+        classUidNum: Long = 0,
+        classUidRoleFlag: Int = 0,
+        personUidNum: Long = 0,
+        activeOnDayInUtcMs: Long = 0,
+        notRemovedBefore: Long = 0,
+        includeDeleted: Boolean = false,
+    ): List<EnrollmentEntity>
 
     @Query("""
         SELECT EnrollmentEntity.eLastModified
@@ -59,24 +63,30 @@ interface EnrollmentEntityDao {
     suspend fun upsert(enrolments: List<EnrollmentEntity>)
 
     @Query("""
-        SELECT EnrollmentEntity.*,
-               $SELECT_PERSON_AND_CLASS_UID
+        SELECT EnrollmentEntity.*
           FROM EnrollmentEntity
          WHERE EnrollmentEntity.eUidNum IN (:uidNums) 
     """)
     suspend fun findByUidNumList(
         uidNums: List<Long>
-    ): List<EnrollmentEntities>
+    ): List<EnrollmentEntity>
+
 
     companion object {
 
-        const val SELECT_PERSON_AND_CLASS_UID  = """
-            (SELECT ClassEntity.cGuid 
-               FROM ClassEntity 
-              WHERE ClassEntity.cGuidHash = EnrollmentEntity.eClassUidNum) AS classUid,
-           (SELECT PersonEntity.pGuid
-              FROM PersonEntity
-             WHERE PersonEntity.pGuidHash = EnrollmentEntity.ePersonUidNum) AS personUid
+        const val LIST_SQL = """
+        SELECT EnrollmentEntity.*
+          FROM EnrollmentEntity
+         WHERE (:since <= 0 OR EnrollmentEntity.eStored > :since)
+           AND (:uidNum = 0 OR EnrollmentEntity.eUidNum = :uidNum)
+           AND (:classUidNum = 0 OR EnrollmentEntity.eClassUidNum = :classUidNum)
+           AND (:classUidRoleFlag = 0 OR EnrollmentEntity.eRole = :classUidRoleFlag)
+           AND (:personUidNum = 0 OR EnrollmentEntity.ePersonUidNum = :personUidNum)
+           AND (:includeDeleted OR EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT})
+           AND (:activeOnDayInUtcMs = 0 
+                OR (     (:activeOnDayInUtcMs >= COALESCE(EnrollmentEntity.eBeginDate, 0))
+                    AND ((:activeOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))))
+           AND (:notRemovedBefore = 0 OR EnrollmentEntity.eRemovedAt > :notRemovedBefore)         
         """
 
     }

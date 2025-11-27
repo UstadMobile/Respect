@@ -175,29 +175,31 @@ class PersonDataSourceDb(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
-        return PermissionCheckPagingSource(
-            src = schoolDb.getPersonEntityDao().listAsPagingSource(
-                since = params.common.since?.toEpochMilliseconds() ?: 0,
-                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
-                inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
-                inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
-                filterByName = params.filterByName,
-                filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
-                includeRelated = params.includeRelated,
-                includeDeleted = params.common.includeDeleted ?: false,
-            ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
-                it.toPersonEntities().toModel()
-            },
-            onCheckPermission = {
-                params.common.guid?.let { guid ->
-                    schoolDb.getPersonEntityDao().userCanReadOther(
-                        authenticatedUidNum = uidNumberMapper(authenticatedUser.guid),
-                        uidNum = uidNumberMapper(guid)
-                    )
-                } ?: true
-            }
-        )
+        return IPagingSourceFactory {
+            PermissionCheckPagingSource(
+                src = schoolDb.getPersonEntityDao().listAsPagingSource(
+                    since = params.common.since?.toEpochMilliseconds() ?: 0,
+                    guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                    inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+                    inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+                    inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
+                    filterByName = params.filterByName,
+                    filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+                    includeRelated = params.includeRelated,
+                    includeDeleted = params.common.includeDeleted ?: false,
+                ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
+                    it.toPersonEntities().toModel()
+                },
+                onCheckPermission = {
+                    params.common.guid?.let { guid ->
+                        schoolDb.getPersonEntityDao().userCanReadOther(
+                            authenticatedUidNum = uidNumberMapper(authenticatedUser.guid),
+                            uidNum = uidNumberMapper(guid)
+                        )
+                    } ?: true
+                }
+            )
+        }
     }
 
     override suspend fun list(

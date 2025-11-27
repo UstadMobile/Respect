@@ -104,7 +104,7 @@ class PersonDetailViewModel(
 
                 val personVal = personsVal?.firstOrNull { it.guid == route.guid }
                 val hasAccountPermission = activeAccount?.person?.isAdmin() == true
-                        || activeAccount?.person?.guid == person.dataOrNull()?.guid
+                        || activeAccount?.person?.guid == personVal?.guid
 
                 val canEdit = personVal?.let {
                     checkPersonPermissionUseCase(

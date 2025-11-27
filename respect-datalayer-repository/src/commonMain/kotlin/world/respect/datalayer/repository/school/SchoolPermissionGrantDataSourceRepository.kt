@@ -56,7 +56,7 @@ class SchoolPermissionGrantDataSourceRepository(
                     remoteLoadParams, local::updateLocal
                 )
             },
-            tag = "SchoolPermissionGrantRepo.listAsPagingSource"
+            tag = { "SchoolPermissionGrantRepo.listAsPagingSource" }
         )
     }
 

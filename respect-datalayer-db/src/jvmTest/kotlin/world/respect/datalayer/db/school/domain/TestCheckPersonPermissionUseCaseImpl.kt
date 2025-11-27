@@ -29,7 +29,7 @@ class TestCheckPersonPermissionUseCaseImpl {
     @Test
     fun givenAuthenticatedUserIsStudent_whenCheckWritePermissionForTeacher_thenReturnsFalse() {
         runBlocking {
-            testSchoolDb(File("/home/mike/tmp/school-permission.db")) { db ->
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
                 val adminUid = "1"
                 val studentUid = "2"
                 val adminSchoolDs = db.toDataSource(adminUid)

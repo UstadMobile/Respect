@@ -10,7 +10,7 @@ import world.respect.datalayer.exceptions.ForbiddenException
  */
 class PermissionCheckPagingSource<Key: Any, Value: Any>(
     private val src: PagingSource<Key, Value>,
-    tag: String? = null,
+    tag: LogPrefixFunction = NO_TAG,
     private val onCheckPermission: suspend () -> Boolean,
 ): DelegatedInvalidationPagingSource<Key, Value>(
     invalidationDelegate = src,

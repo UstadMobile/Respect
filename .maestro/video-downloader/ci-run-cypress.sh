@@ -18,7 +18,7 @@ RECIVO_ORG_ID="${RECIVO_ORG_ID}"
 
 
 # Run Cypress with all environment variables
-npx cypress run --env \
+npx cypress run --browser chrome --env \
 maestroEmail=$MAESTRO_EMAIL,\
 projectUrl="$MAESTRO_CLOUD_URL",\
 recivoApiKey="$RECIVO_API_KEY",\

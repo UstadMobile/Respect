@@ -55,8 +55,10 @@ if [ -f "$URL_FILE" ]; then
         # Extract Name (everything before the : http part)
         clean_name=$(echo "$line" | sed "s/: http.*//")
 
-
         echo "Downloading: $clean_name"
+
+        #Define Output Filename
+         outfile="$DOWNLOAD_DIR/${clean_name}.mp4"
 
         # Download (Use || true to prevent script exit if one video fails)
         wget -q -O "$outfile" "$url" || echo "Warning: Failed to download $clean_name"

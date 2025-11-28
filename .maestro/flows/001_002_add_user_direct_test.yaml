@@ -17,7 +17,6 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-
 - tapOn: "People"
 - assertVisible:
     id: "app_title"
@@ -30,7 +29,7 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Required field"   # First names* field is mandatory
 - tapOn: "First names*"
-- inputText: "Test"
+- inputText: "ParentA"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Last name* field is mandatory
 - tapOn: "Last name*"
@@ -38,22 +37,91 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Required field"   # Gender field is mandatory
 - tapOn: "Gender*"
-- tapOn: "Female"
+- tapOn: "Male"
+- tapOn:
+    id: "role"
+- tapOn: "Parent"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Test User"
+    text: "ParentA User"
 - tapOn:
     id: "floating_action_button"   # Edit button
 - assertVisible:
     id: "app_title"
     text: "Edit person"
+# Add Family member - as new person
+- tapOn: "Family member"
+- tapOn: "Add person"
+- tapOn: "First names*"
+- inputText: "Child"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "Save"
+- assertVisible: "Child User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+- tapOn: "Child User"
+- assertVisible:
+    id: "app_title"
+    text: "Child User"
+- assertVisible: "Student"
+- assertVisible: "ParentA User"
+- tapOn: "People"
+- assertVisible:
+    id: "app_title"
+    text: "People"
+- tapOn:
+    id: "floating_action_button"   #  +Person button
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: "Test"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Teacher"
+- assertNotVisible: "Family member"
+- tapOn:
+    id: "role"
+- tapOn: "Student"
+- tapOn: "Family member"
+- assertVisible:
+    id: "app_title"
+    text: "Select person"
+- tapOn: "ParentA User"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- assertVisible: "ParentA User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test User"
+- assertVisible: "ParentA User"
+- tapOn:
+    id: "floating_action_button"   # Edit button
 # Validate DOB field
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.tomorrowDate}
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
 - eraseText
@@ -61,53 +129,77 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- hideKeyboard
-
+- runFlow:
+    when:
+      notVisible:
+        id: "phone_countrycode"
+    commands:
+      - hideKeyboard
 # Validate Phone number
 - tapOn:
-     id: "phone_countrycode"
+    id: "phone_countrycode"
 - eraseText
 - inputText: "+1"
 - tapOn: "Phone number"
 - inputText: "23"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
 - inputText: "21255543268"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - eraseText
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "Testuser@gm"
-- hideKeyboard
-- scrollUntilVisible:
-    element:
-      text: "Save" # or any other selector
-    direction: UP
-    timeout: 1000
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
 - eraseText
 - inputText: "Testuser@gmail.com"
-- assertVisible: "Testuser@gmail.com"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
+- assertVisible: "ParentA User"
+- assertVisible: "+12125554326"
+- assertVisible: "Testuser@gmail.com"
 - tapOn: "Create account"
 - tapOn: "Username"
-- inputText: "testuser"
+- inputText: "2t"
 - tapOn: "Password"  # Password validations needs to be added
 - inputText: "test234"
 - tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test User"
+- assertVisible: "Username must be at least 3 characters"
+- tapOn: "Username"
+- inputText: "est"
+- tapOn: "Save"
+- assertVisible: "Username cannot start with a number"  # 2tes not a valid username
+- eraseText
+- inputText: "test@user"
+- assertVisible: "testuser"    # @ symbol won't get added to the username field - so "testuser" is expected result
+- tapOn: "Save"
+
 
 # Validate User login
 - clearState: world.respect.app
@@ -152,21 +244,16 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Manage account"
-
-
 # Validate User login after changing password
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "testuser"

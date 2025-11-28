@@ -1,30 +1,37 @@
-describe('Login, collect tests & Save Video URLs', {
-  testIsolation: false,
-}, () => {
+describe('Login, collect tests & Save Video URLs', {}, () => {
 
   const email = Cypress.env('maestroEmail');
   const projectUrl = Cypress.env('projectUrl');
   const recivoOrgId = Cypress.env('recivoOrgId');
   const recivoApiKey = Cypress.env('recivoApiKey');
 
-  const waitForOtp = (attempts = 0) => {
-    if (attempts > 60) throw new Error('OTP not received within 30 seconds');
-    return cy.request({
-      method: 'GET',
-      url: `https://recivo.email/api/v1/organizations/${recivoOrgId}/inbox`,
-      headers: { Authorization: `Bearer ${recivoApiKey}` },
-      failOnStatusCode: false
-    }).then((res) => {
-      const now = Date.now();
-      const emails = Array.isArray(res.body) ? res.body : [];
-      const freshEmail = emails.find(m =>
-        m.subject?.includes("Sign in to Maestro Cloud") &&
-        m.createdAt && (now - new Date(m.createdAt).getTime() <= 15000)
-      );
-      const match = freshEmail?.text?.match(/\b\d{6}\b/);
-      return match ? match[0] : waitForOtp(attempts + 1);
-    });
-  };
+    const waitForOtp = (attempts = 0) => {
+      if (attempts > 60) throw new Error('OTP not received within 60 seconds');
+
+      return cy.request({
+        method: 'GET',
+        url: `https://recivo.email/api/v1/organizations/${recivoOrgId}/inbox`,
+        headers: { Authorization: `Bearer ${recivoApiKey}` },
+        failOnStatusCode: false
+      }).then((res) => {
+        const now = Date.now();
+        const emails = Array.isArray(res.body) ? res.body : [];
+
+        const freshEmail = emails.find(m =>
+          m.subject && m.subject.includes("Sign in to Maestro Cloud") &&
+          m.createdAt && (now - new Date(m.createdAt).getTime() <= 15000)
+        );
+
+        if (freshEmail) {
+          const match = freshEmail.text?.match(/\b\d{6}\b/);
+          if (match) return match[0];
+        }
+
+        // --- PAUSE ADDED HERE ---
+        cy.wait(1000); // Wait 1 second before trying again
+        return waitForOtp(attempts + 1);
+      });
+    };
 
   it('Login and save video URLs to text file', {
     defaultCommandTimeout: 30000,
@@ -47,7 +54,7 @@ describe('Login, collect tests & Save Video URLs', {
     });
 
     // --- Step 2: Enter App Domain ---
-    cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {
+    cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {   //To use the projectUrl variable inside the cy.origin block we explicitly pass it in via the args object
 
       cy.get('body', { timeout: 60000 }).should('be.visible');
       cy.log('Navigating to Project URL...');

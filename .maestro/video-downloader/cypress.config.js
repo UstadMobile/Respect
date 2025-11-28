@@ -7,7 +7,6 @@ module.exports = defineConfig({
     },
 
     baseUrl: 'https://signin.maestro.dev',
-    chromeWebSecurity: false,
     defaultCommandTimeout: 30000,
   },
 });

@@ -156,6 +156,46 @@ if [ "$1" == "cloud" ]; then
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
     MAESTRO_STATUS=${PIPESTATUS[0]}
+
+        # --- START MODIFICATION: Run Video Downloader ---
+        echo "ci-run-maestro: Cloud run finished. Attempting to retrieve video artifacts..."
+
+        if [ -z "$MAESTRO_CLOUD_CONSOLE_URL" ]; then
+                MAESTRO_LOG_FILE="$WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log"
+                if [ -f "$MAESTRO_LOG_FILE" ]; then
+                    # Note: We assign the found URL to the variable name you requested
+                    MAESTRO_CLOUD_CONSOLE_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
+                    echo "ci-run-maestro: Extracted URL from logs: $MAESTRO_CLOUD_CONSOLE_URL"
+                else
+                    echo "ci-run-maestro: Warning - Log file not found, cannot extract URL."
+                fi
+            else
+                echo "ci-run-maestro: MAESTRO_CLOUD_CONSOLE_URL was already set by environment."
+            fi
+
+
+        # Run the downloader if we have a URL
+        if [ -n "$MAESTRO_CLOUD_CONSOLE_URL" ]; then
+            # Export credentials so the child script inherits them
+            export MAESTRO_EMAIL="$MAESTRO_EMAIL"
+            export RECIVO_API_KEY="$RECIVO_API_KEY"
+            export RECIVO_ORG_ID="$RECIVO_ORG_ID"
+
+            echo "ci-run-maestro: Navigating to downloader script..."
+            cd "$WORKSPACE/.maestro/video-downloader"
+
+            # Ensure executable
+            chmod +x ci-run-cypress.sh
+
+            # Execute the script
+            ./ci-run-cypress.sh || echo "ci-run-maestro: Video downloader script encountered an error (ignoring to preserve test results)"
+
+            # Return to original directory
+            cd "$WORKSPACE"
+        else
+            echo "ci-run-maestro: Skipping video download (No Cloud URL found)."
+        fi
+
 else
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
@@ -173,7 +213,5 @@ fi
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
-# Do NOT stop Jenkins job even if Maestro fails
-echo "ci-run-maestro: Maestro exit code was $MAESTRO_STATUS "
-exit 0
+exit $MAESTRO_STATUS
 

@@ -2,7 +2,7 @@
 set -e  # Exit immediately if any command fails
 
 # Capture the Maestro Cloud URL from logs
-export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log | tail -1)
+export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log | tail -1)  #tail -1 grabs only the last url of the output
 
 # Fail if URL is not found
 if [ -z "$MAESTRO_CLOUD_URL" ]; then
@@ -49,22 +49,17 @@ if [ -f "$URL_FILE" ]; then
         # Skip empty lines
         [ -z "$line" ] && continue
 
-        # 1. Extract URL (matches http...)
+        # Extract URL (matches http...)
         url=$(echo "$line" | grep -o 'http.*')
 
-        # 2. Extract Name (everything before the : http part)
-        raw_name=$(echo "$line" | sed "s/: http.*//")
+        # Extract Name (everything before the : http part)
+        clean_name=$(echo "$line" | sed "s/: http.*//")
 
-        # 3. Sanitize Name (Replace spaces/special chars with underscores for safe filename)
-        clean_name=$(echo "$raw_name" | sed 's/[^a-zA-Z0-9]/_/g' | tr -s '_')
-
-        # 4. Define Output Filename
-        outfile="$DOWNLOAD_DIR/${clean_name}.mp4"
 
         echo "Downloading: $clean_name"
 
-        # 5. Download (Use || true to prevent script exit if one video fails)
-        wget -q --show-progress -O "$outfile" "$url" || echo "Warning: Failed to download $clean_name"
+        # Download (Use || true to prevent script exit if one video fails)
+        wget -q -O "$outfile" "$url" || echo "Warning: Failed to download $clean_name"
 
     done < "$URL_FILE"
 

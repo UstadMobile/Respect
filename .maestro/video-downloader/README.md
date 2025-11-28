@@ -13,8 +13,7 @@ Automates Maestro platform login, test execution collection, and video playback 
 ## Installation
 
 ```bash
-git clone [repository]
-cd [project]
+cd .maestro/video-downloader
 npm install
 npx cypress install
 ```

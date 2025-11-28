@@ -1,4 +1,4 @@
-describe('Login, collect tests & Play Videos', {
+describe('Login, collect tests & Save Video URLs', {
   testIsolation: false,
 }, () => {
 
@@ -6,7 +6,6 @@ describe('Login, collect tests & Play Videos', {
   const projectUrl = Cypress.env('projectUrl');
   const recivoOrgId = Cypress.env('recivoOrgId');
   const recivoApiKey = Cypress.env('recivoApiKey');
-  const stopwatchStart = Date.now();
 
   const waitForOtp = (attempts = 0) => {
     if (attempts > 60) throw new Error('OTP not received within 30 seconds');
@@ -19,87 +18,88 @@ describe('Login, collect tests & Play Videos', {
       const now = Date.now();
       const emails = Array.isArray(res.body) ? res.body : [];
       const freshEmail = emails.find(m =>
-        m.subject && m.subject.includes("Sign in to Maestro Cloud") &&
-        m.createdAt && (now - new Date(m.createdAt).getTime() <= 10000)
+        m.subject?.includes("Sign in to Maestro Cloud") &&
+        m.createdAt && (now - new Date(m.createdAt).getTime() <= 15000)
       );
-      if (freshEmail) {
-        const match = freshEmail.text?.match(/\b\d{6}\b/);
-        if (match) return match[0];
-      }
-      return waitForOtp(attempts + 1);
+      const match = freshEmail?.text?.match(/\b\d{6}\b/);
+      return match ? match[0] : waitForOtp(attempts + 1);
     });
   };
 
-  it('Login, find tests, and play videos', {
+  it('Login and save video URLs to text file', {
     defaultCommandTimeout: 30000,
     pageLoadTimeout: 60000,
   }, () => {
 
-    cy.writeFile('cypress/test_start_times.txt', `Video Timestamps\n----------------\n`);
+    // Clear file
+    cy.writeFile('cypress/downloads/video_urls.txt', '');
 
     // --- Step 1: Login ---
     cy.visit('https://signin.maestro.dev');
     cy.get('input[name="email"]').type(email);
     cy.get('button[type="submit"]').click();
 
-    cy.log('Polling Recivo API for OTP...');
     waitForOtp().then((otp) => {
-      cy.log(`OTP Received: ${otp}`);
-      cy.get('input[data-test="otp-input"]').first().type(otp, { delay: 100 });
+      cy.get('input[data-test="otp-input"]').first().type(otp, { delay: 50 });
+
+      // Wait for domain change to app.maestro.dev
+      cy.url({ timeout: 30000 }).should('include', 'app.maestro.dev');
     });
 
-    // --- Step 2: Enter Maestro Dashboard ---
-    cy.origin('https://app.maestro.dev', { args: { projectUrl, stopwatchStart } }, ({ projectUrl, stopwatchStart }) => {
+    // --- Step 2: Enter App Domain ---
+    cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {
 
-       cy.visit(projectUrl);
-       cy.get('body', { timeout: 30000 }).should('be.visible');
+      // FIX: Wait for the default dashboard to fully load/settle first.
+      // If we visit too fast, the app's post-login redirect overrides our visit.
+      cy.get('body', { timeout: 30000 }).should('be.visible');
+      //cy.wait(3000); // Give app time to finish internal routing
 
-       // --- Step 3: Collect list of tests ---
-       cy.log('Looking for test links...');
-       cy.get('a[href*="/flow/run_"]').then(($links) => {
+      // Now visit the specific project URL
+      cy.log('Navigating to Project URL...');
+      cy.visit(projectUrl);
+
+      // Verify we are on the correct page (Project view) before looking for links
+      cy.url({ timeout: 20000 }).should('include', '/project/');
+
+      // Wait for the list of runs to appear
+      cy.get('a[href*="/flow/run_"]', { timeout: 30000 }).should('have.length.gt', 0);
+
+      // --- Step 3: Collect list of tests ---
+      cy.get('a[href*="/flow/run_"]').then(($links) => {
         const tests = [];
         $links.each((_, el) => {
-          const name = el.querySelector('p')?.textContent.trim();
-          const url = el.href;
-          if (name && url) tests.push({ name, url });
+          const name = el.querySelector('p')?.textContent || el.innerText || 'Unknown Test';
+          tests.push({
+            name: name.trim().replace(/\n/g, ' '),
+            url: el.href
+          });
         });
 
         cy.log(`Found ${tests.length} tests`);
 
+        // --- Step 4: Iterate and Save ---
         cy.wrap(tests).each((test, index) => {
-          cy.then(() => {
-              const timePassed = Date.now() - stopwatchStart;
-              const minutes = Math.floor(timePassed / 60000);
-              const seconds = Math.floor((timePassed % 60000) / 1000);
-              const timestamp = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-              const logEntry = `Test ${index + 1} - ${test.name} timestamp ${timestamp}\n`;
-              cy.writeFile('cypress/test_start_times.txt', logEntry, { flag: 'a+' });
-              cy.log(`Starting test at: ${timestamp}`);
-          });
-
+          cy.log(`Processing ${index + 1}: ${test.name}`);
           cy.visit(test.url);
 
+          // Handle video overlay/play button
           cy.get('body').then(($body) => {
-            const $playBtn = $body.find('button[class*="play"], div[class*="play"], svg[data-icon="play"]');
-            if ($playBtn.length > 0 && $playBtn.is(':visible')) {
-              cy.wrap($playBtn).first().click({force: true});
+            const $playBtn = $body.find('button[class*="play"], svg[data-icon="play"]');
+            if ($playBtn.length && $playBtn.is(':visible')) {
+              cy.wrap($playBtn).first().click({ force: true });
+            } else {
+              // Fallback click center screen
+              cy.get('body').click('center', { force: true });
             }
           });
 
-          cy.get('video', { timeout: 60000 })
-            .should('be.visible')
-            .should(($video) => {
-              expect($video[0].readyState).to.be.greaterThan(0);
-            })
-            .then(($video) => {
-              const vid = $video[0];
-              const durationSeconds = vid.duration;
-              vid.muted = true;
-              vid.currentTime = 0;
-              vid.play().catch(() => {});
-
-              const waitTimeMs = (durationSeconds * 1000) + 10000;
-              cy.wait(waitTimeMs); // This wait is mandatory one to play the video complete
+          // Extract URL
+          cy.get('video', { timeout: 20000 })
+            .should('have.prop', 'src')
+            .then((videoUrl) => {
+              if (videoUrl) {
+                cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
+              }
             });
         });
       });

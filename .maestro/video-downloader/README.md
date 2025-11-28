@@ -1,34 +1,49 @@
-# Maestro Video Test Automation
+# Video Downloader
 
-## Overview
+This utility automates the extraction and downloading of video run artifacts from **Maestro Cloud** using **Cypress** and a supporting shell script (`ci-run-cypress.sh`).
 
-Automates Maestro platform login, test execution collection, and video playback with timestamp logging.
+---
+
+## What It Does
+
+1. **Reads the Maestro Cloud run URL**.
+2. Launches a **Cypress script** that:
+    - Logs into Maestro Cloud using OTP email flow.
+    - Opens the project run page.
+    - Extracts all test run **video URLs**.
+    - Saves them to `cypress/downloads/video_urls.txt`.
+3. The script then **downloads all videos** locally in `.mp4` format via `wget`.
 
 ## Prerequisites
 
-- Node.js v16+
-- npm/yarn
-- Cypress v14+
+- Node.js + npm installed
+- Cypress installed
+- bash + wget
+- Access to:
+    - Maestro Cloud
+    - A working Cypress test script
+    - A email address to use for Maestro Cloud login.
 
-## Installation
+---
+
+## How to Run
+
+### CLI
 
 ```bash
 cd .maestro/video-downloader
-npm install
-npx cypress install
+
+./ci-run-cypress.sh --env \
+  maestroEmail=<emailId>,\
+  projectUrl=<Project_Url>,\
+  recivoApiKey=<Recivo_Api_Key>,\
+  recivoOrgId=<Recivo_Org_Id>
 ```
+---
 
-## Execution
+## Outputs
 
-```bash
-npx cypress run --browser chrome \
---env maestroEmail=your@email.com \
---env projectUrl="your_project_url" \
---env recivoApiKey="your_key" \
---env recivoOrgId="your_org_id"
-```
-## Outputs:
+Successfull execution generates video files in:
+./cypress/downloads/
 
-- test_start_times.txt (timestamps in MM:SS format)
-- Video recordings in cypress/videos/
-- Screenshots on failure in cypress/screenshots/
+---

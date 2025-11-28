@@ -5,6 +5,7 @@ import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.IndicatorDataSource
+import world.respect.datalayer.school.InviteDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
@@ -35,5 +36,7 @@ interface SchoolDataSource {
     val enrollmentDataSource: EnrollmentDataSource
 
     val assignmentDataSource: AssignmentDataSource
+
+    val inviteDataSource: InviteDataSource
 
 }

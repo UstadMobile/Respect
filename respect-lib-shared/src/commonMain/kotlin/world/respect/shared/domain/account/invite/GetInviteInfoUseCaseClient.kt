@@ -16,11 +16,12 @@ class GetInviteInfoUseCaseClient(
     private val httpClient: HttpClient,
 ): GetInviteInfoUseCase, SchoolUrlBasedDataSource {
 
-    override suspend fun invoke(code: String): RespectInviteInfo {
+    override suspend fun invoke(code: String,type:Int?): RespectInviteInfo {
         return httpClient.get(
             URLBuilder(respectEndpointUrl("invite/info"))
                 .apply {
                     parameters.append("code", code)
+                    parameters.append("type", type.toString())
                 }.build()
         ).body()
     }

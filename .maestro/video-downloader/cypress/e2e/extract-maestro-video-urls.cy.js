@@ -43,18 +43,13 @@ describe('Login, collect tests & Save Video URLs', {
       cy.get('input[data-test="otp-input"]').first().type(otp, { delay: 50 });
 
       // Wait for domain change to app.maestro.dev
-      cy.url({ timeout: 30000 }).should('include', 'app.maestro.dev');
+      cy.url({ timeout: 60000 }).should('include', 'app.maestro.dev');
     });
 
     // --- Step 2: Enter App Domain ---
     cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {
 
-      // FIX: Wait for the default dashboard to fully load/settle first.
-      // If we visit too fast, the app's post-login redirect overrides our visit.
-      cy.get('body', { timeout: 30000 }).should('be.visible');
-      //cy.wait(3000); // Give app time to finish internal routing
-
-      // Now visit the specific project URL
+      cy.get('body', { timeout: 60000 }).should('be.visible');
       cy.log('Navigating to Project URL...');
       cy.visit(projectUrl);
 
@@ -81,17 +76,6 @@ describe('Login, collect tests & Save Video URLs', {
         cy.wrap(tests).each((test, index) => {
           cy.log(`Processing ${index + 1}: ${test.name}`);
           cy.visit(test.url);
-
-          // Handle video overlay/play button
-          cy.get('body').then(($body) => {
-            const $playBtn = $body.find('button[class*="play"], svg[data-icon="play"]');
-            if ($playBtn.length && $playBtn.is(':visible')) {
-              cy.wrap($playBtn).first().click({ force: true });
-            } else {
-              // Fallback click center screen
-              cy.get('body').click('center', { force: true });
-            }
-          });
 
           // Extract URL
           cy.get('video', { timeout: 20000 })

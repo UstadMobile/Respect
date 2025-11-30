@@ -49,7 +49,15 @@ data class JoinClazzWithCode(
 object Onboarding : RespectAppRoute
 
 @Serializable
-object SchoolDirectoryList : RespectAppRoute
+data class SchoolDirectoryList(
+    val mode: SchoolDirectoryMode = SchoolDirectoryMode.MANAGE
+) : RespectAppRoute
+
+@Serializable
+enum class SchoolDirectoryMode {
+    MANAGE,  // Shows edit/delete buttons
+    SELECT   // Shows clickable items for selection
+}
 
 @Serializable
 object SchoolDirectoryEdit : RespectAppRoute
@@ -452,6 +460,12 @@ class TermsAndCondition(
         }
     }
 }
+
+@Serializable
+data class SchoolRegistrationComplete(
+    val schoolUrl: String = "",
+    val authToken: String? = null
+) : RespectAppRoute
 
 @Serializable
 class CreateAccount(

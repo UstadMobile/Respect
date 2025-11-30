@@ -462,4 +462,6 @@
 
     <string name="section_name">Section name</string>
 
+    <string name="select_host">Select Host</string>
+
 </resources>

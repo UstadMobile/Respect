@@ -1,5 +1,9 @@
 package world.respect.server.routes.school.respect
 
+import io.ktor.client.HttpClient
+import io.ktor.client.request.head
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.respondHtml
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respondRedirect
@@ -7,6 +11,9 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.html.ButtonType
 import kotlinx.html.FormMethod
 import kotlinx.html.InputType
@@ -21,27 +28,32 @@ import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
 import kotlinx.html.p
+import kotlinx.html.style
 import kotlinx.html.title
 import org.koin.ktor.ext.inject
 import world.respect.server.SchoolConfig
 import world.respect.server.domain.school.add.RegisterSchoolUseCase
 import world.respect.server.util.ext.getStatusCode
 import java.net.URLEncoder
+import kotlin.time.Duration.Companion.seconds
 
 fun Route.SchoolRegistrationRoute() {
     val registerSchoolUseCase: RegisterSchoolUseCase by inject()
     val schoolConfig: SchoolConfig by inject()
+    val httpClient = HttpClient()
 
     // Show registration form
     get("/register-school") {
-        // Check if registration is enabled
+
         if (!schoolConfig.registration.enabled) {
             call.respondText(
                 "School registration is disabled",
-                status = io.ktor.http.HttpStatusCode.Forbidden
+                status = HttpStatusCode.Forbidden
             )
             return@get
         }
+
+        val packageName = call.request.queryParameters["packageName"]
 
         call.respondHtml {
             head {
@@ -101,6 +113,13 @@ fun Route.SchoolRegistrationRoute() {
                         }
                     }
 
+                    // Hidden package name field
+                    packageName?.let { pkg ->
+                        input(type = InputType.hidden, name = "packageName") {
+                            value = pkg
+                        }
+                    }
+
                     // Hidden redirect field for deep linking to app
                     input(type = InputType.hidden, name = "redirect") {
                         value = call.request.queryParameters["redirect"]
@@ -115,74 +134,137 @@ fun Route.SchoolRegistrationRoute() {
         }
     }
 
-    // Handle form submission - now minimal logic
     post("/register-school") {
         val parameters = call.receiveParameters()
 
-        // Get input parameters
         val schoolName = parameters["schoolName"] ?: ""
-        val redirectUrl = parameters["redirect"] ?: "world.respect.app://school-registered"
+        val packageName = parameters["packageName"]
 
         try {
-            // Determine the school URL based on registration mode
             val schoolUrl = when (schoolConfig.registration.mode) {
                 SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
-                    val schoolSubdomain = parameters["schoolName"] ?: ""
+                    val schoolSubdomain = parameters["schoolSubdomain"] ?: ""
                     if (schoolSubdomain.isBlank()) {
                         call.respondText(
                             "School subdomain is required",
-                            status = io.ktor.http.HttpStatusCode.BadRequest
+                            status = HttpStatusCode.BadRequest
                         )
                         return@post
                     }
+
+                    // Validate subdomain format
+                    if (!isValidSubdomain(schoolSubdomain)) {
+                        call.respondText(
+                            "Invalid subdomain. Use only letters, numbers, and hyphens.",
+                            status = HttpStatusCode.BadRequest
+                        )
+                        return@post
+                    }
+
                     // Construct the URL on the server side
-                    "https://$schoolSubdomain.${schoolConfig.registration.topLevelDomain}"
+                    val fullUrl =
+                        "https://$schoolSubdomain.${schoolConfig.registration.topLevelDomain}"
+
+                    try {
+                        val isDomainAccessible =
+                            validateDomainAccessibility(schoolConfig.registration.topLevelDomain)
+                        if (!isDomainAccessible) {
+                            throw DomainNotAccessibleException("The main domain is not accessible")
+                        }
+                    } catch (e: DomainNotAccessibleException) {
+                        call.respondHtml(HttpStatusCode.ServiceUnavailable) {
+                            head {
+                                title { +"Service Unavailable" }
+                            }
+                            body {
+                                h1 { +"Something Went Wrong" }
+                                div {
+                                    style =
+                                        "color: red; padding: 20px; background-color: #ffe6e6; border-radius: 5px;"
+                                    +"We're unable to register new schools at the moment. "
+                                    +"The required service (${schoolConfig.registration.topLevelDomain}) is not accessible."
+                                }
+                                p { +"Please try again later or contact support if the problem persists." }
+
+                                a(
+                                    href = "/register-school?packageName=${
+                                        packageName?.let {
+                                            URLEncoder.encode(
+                                                it,
+                                                "UTF-8"
+                                            )
+                                        } ?: ""
+                                    }") {
+                                    +"Try Again"
+                                }
+                            }
+                        }
+                        return@post
+                    }
+
+                    fullUrl
                 }
 
                 SchoolConfig.RegistrationConfig.RegistrationMode.ANY_URL -> {
-                    parameters["schoolUrl"] ?: ""
+                    val schoolUrlParam = parameters["schoolUrl"] ?: ""
+                    if (schoolUrlParam.isBlank()) {
+                        call.respondText(
+                            "School URL is required",
+                            status = HttpStatusCode.BadRequest
+                        )
+                        return@post
+                    }
+
+                    schoolUrlParam
                 }
 
                 else -> {
                     call.respondText(
                         "Registration mode not supported",
-                        status = io.ktor.http.HttpStatusCode.BadRequest
+                        status = HttpStatusCode.BadRequest
                     )
                     return@post
                 }
             }
 
-            // Validate that we have a school URL
             if (schoolUrl.isBlank()) {
                 call.respondText(
                     "School URL is required",
-                    status = io.ktor.http.HttpStatusCode.BadRequest
+                    status = HttpStatusCode.BadRequest
                 )
                 return@post
             }
 
-            // Invoke the use case with all the logic
+            if (schoolName.isBlank()) {
+                call.respondText(
+                    "School name is required",
+                    status = HttpStatusCode.BadRequest
+                )
+                return@post
+            }
+
             val response = registerSchoolUseCase(
                 RegisterSchoolUseCase.RegisterSchoolRequest(
                     schoolName = schoolName,
                     schoolUrl = schoolUrl,
-                    redirectUrl = redirectUrl
                 )
             )
 
-            // Build redirect URL with schoolUrl parameter
-            val encodedSchoolUrl = URLEncoder.encode(response.schoolUrl, "UTF-8")
-            val redirectWithParams = if (response.redirectUrl.contains("?")) {
-                "${response.redirectUrl}&schoolUrl=$encodedSchoolUrl"
-            } else {
-                "${response.redirectUrl}?schoolUrl=$encodedSchoolUrl"
-            }
-
-            call.respondRedirect(redirectWithParams)
+            call.respondRedirect(response.redirectUrl)
 
         } catch (e: Exception) {
+            val statusCode = e.getStatusCode() ?: HttpStatusCode.InternalServerError
 
-            val statusCode = e.getStatusCode() ?: io.ktor.http.HttpStatusCode.InternalServerError
+            val errorMessage = if (e.message?.contains("domain is not accessible") == true ||
+                e.message?.contains("Service Unavailable") == true
+            ) {
+                """
+                Registration failed because the main domain (${schoolConfig.registration.topLevelDomain}) is not accessible.
+            
+                """.trimIndent()
+            } else {
+                "Error: ${e.message}"
+            }
 
             call.respondHtml(statusCode) {
                 head {
@@ -190,10 +272,54 @@ fun Route.SchoolRegistrationRoute() {
                 }
                 body {
                     h1 { +"Registration Failed" }
-                    p { +"Error: ${e.message}" }
-                    a(href = "/register-school") { +"Try Again" }
+                    div {
+                        style =
+                            "color: red; padding: 20px; background-color: #ffe6e6; border-radius: 5px;"
+                        +errorMessage
+                    }
+                    a(
+                        href = "/register-school?packageName=${
+                            packageName?.let {
+                                URLEncoder.encode(
+                                    it,
+                                    "UTF-8"
+                                )
+                            } ?: ""
+                        }") {
+                        +"Try Again"
+                    }
                 }
             }
         }
     }
+    httpClient.close()
 }
+
+private fun isValidSubdomain(subdomain: String): Boolean {
+    val pattern = "^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\$".toRegex()
+    return pattern.matches(subdomain) && subdomain.length in 1..63
+}
+
+// Helper function to check if domain is accessible
+private suspend fun validateDomainAccessibility(domain: String): Boolean {
+    return try {
+        withContext(Dispatchers.IO) {
+            withTimeout(5.seconds) {
+                val url = "https://$domain"
+                val client = HttpClient()
+                try {
+                    val response: HttpResponse = client.head(url)
+                    response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Found
+                } catch (e: Exception) {
+                    false
+                } finally {
+                    client.close()
+                }
+            }
+        }
+    } catch (e: Exception) {
+        false
+    }
+}
+
+class DomainNotAccessibleException(message: String) : Exception(message)

@@ -6,9 +6,14 @@ import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.server.SchoolConfig
 import world.respect.server.util.ext.HttpStatusException
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
+import java.util.UUID
 import kotlin.time.Clock
 
 class RegisterSchoolUseCase : KoinComponent {
@@ -17,7 +22,6 @@ class RegisterSchoolUseCase : KoinComponent {
     data class RegisterSchoolRequest(
         val schoolName: String,
         val schoolUrl: String,
-        val redirectUrl: String = "world.respect.app://school-registered"
     )
 
     @Serializable
@@ -59,7 +63,7 @@ class RegisterSchoolUseCase : KoinComponent {
 
             else -> {
                 // For any-url mode, use a sanitized version of the host as subdomain
-                parsedUrl.host.replace("[^a-zA-Z0-9]".toRegex(), "-").lowercase()
+                parsedUrl.host
             }
         }
 
@@ -85,10 +89,40 @@ class RegisterSchoolUseCase : KoinComponent {
             )
         )
 
+        val schoolScopeId = SchoolDirectoryEntryScopeId(parsedUrl, null)
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
+
+        val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
+
+        // Create an invite for the new school admin
+        val invite = Invite(
+            guid = UUID.randomUUID().toString(),
+            code = generateInviteCode(),
+            newRole = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+            forClassGuid = null,
+            forFamilyOfGuid = null,
+            forClassRole = null,
+            inviteMultipleAllowed = false,
+            approvalRequired = false,
+            expiration = Clock.System.now().toEpochMilliseconds() + Invite.EXPIRATION_TIME,
+            lastModified = Clock.System.now(),
+            stored = Clock.System.now(),
+            inviteStatus = Invite.STATUS_PENDING
+        )
+        val properInviteUrl = createInviteUseCase(invite)
+
         return RegisterSchoolResponse(
             schoolUrl = request.schoolUrl,
-            redirectUrl = request.redirectUrl
+            redirectUrl = properInviteUrl
         )
+    }
+
+    private fun generateInviteCode(): String {
+        // Generate a random 8-character invite code
+        val allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..8)
+            .map { allowedChars.random() }
+            .joinToString("")
     }
 }
 

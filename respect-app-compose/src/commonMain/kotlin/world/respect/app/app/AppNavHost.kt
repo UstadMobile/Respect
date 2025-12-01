@@ -1,15 +1,11 @@
 package world.respect.app.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import androidx.navigation.toRoute
-import world.respect.app.util.DeepLinkConstants
 import world.respect.app.view.acknowledgement.AcknowledgementScreen
 import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
@@ -150,7 +146,6 @@ import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingE
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
-import world.respect.shared.navigation.SchoolRegistrationComplete
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
@@ -171,25 +166,6 @@ fun AppNavHost(
         startDestination = Acknowledgement(),
         modifier = modifier,
     ) {
-
-        composable<SchoolRegistrationComplete>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = DeepLinkConstants.URI_PATTERN
-
-                }
-            )
-        ) { backStackEntry ->
-            val route: SchoolRegistrationComplete = backStackEntry.toRoute()
-            LaunchedEffect(route.schoolUrl) {
-                if (route.schoolUrl.isNotEmpty()) {
-                    println("DEBUG: Navigating to signup screen with school: ${route.schoolUrl}")
-                    navController.navigate(GetStartedScreen()) {
-                        popUpTo(0)
-                    } // TODO  want to take them through the signup flow for the admin user
-                }
-            }
-        }
         composable<Acknowledgement> {
             val viewModel: AcknowledgementViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

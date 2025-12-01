@@ -11,7 +11,6 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
-import world.respect.server.SchoolConfig
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -24,7 +23,6 @@ class AddSchoolUseCase(
     private val directoryDataSource: SchoolDirectoryDataSourceLocal,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal,
     private val encryptPasswordUseCase: EncryptPersonPasswordUseCase,
-    private val schoolConfig: SchoolConfig
 ): KoinComponent {
 
     @Serializable

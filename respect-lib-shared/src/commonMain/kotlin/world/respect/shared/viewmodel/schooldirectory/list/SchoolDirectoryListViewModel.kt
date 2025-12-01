@@ -21,6 +21,7 @@ import world.respect.shared.navigation.SchoolDirectoryMode
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import java.net.URLEncoder
 
 data class SchoolDirectoryListUiState(
     val schoolDirectory: List<RespectSchoolDirectory> = emptyList(),
@@ -85,8 +86,10 @@ class SchoolDirectoryListViewModel(
 
     fun onSelectDirectory(directory: RespectSchoolDirectory) {
         when (route.mode) {
-           SchoolDirectoryMode.SELECT -> {
-                val registrationUrl = "${directory.baseUrl}register-school"
+            SchoolDirectoryMode.SELECT -> {
+                val encodedPackageName = URLEncoder.encode("world.respect.app", "UTF-8") //TODO Need to use package name from build config
+                val registrationUrl = "${directory.baseUrl}register-school?packageName=$encodedPackageName"
+
                 launchCustomTabUseCase(url = registrationUrl)
             }
 

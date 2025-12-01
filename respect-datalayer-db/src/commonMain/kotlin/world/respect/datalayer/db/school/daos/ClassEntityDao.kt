@@ -45,18 +45,22 @@ interface ClassEntityDao {
         code: String? = null,
     ): PagingSource<Int, ClassEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
           FROM ClassEntity 
-        WHERE cTeacherInviteCode = :inviteCode
-    """)
+        WHERE cTeacherInviteGuid = :inviteCode
+    """
+    )
     suspend fun findByTeacherInviteCode(inviteCode: String): ClassEntity?
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
           FROM ClassEntity 
-        WHERE cStudentInviteCode = :inviteCode
-    """)
+        WHERE cStudentInviteGuid = :inviteCode
+    """
+    )
     suspend fun findByStudentInviteCode(inviteCode: String): ClassEntity?
 
 
@@ -75,12 +79,14 @@ interface ClassEntityDao {
     """)
     suspend fun findByUidList(uids: List<Long>) : List<ClassEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT ClassEntity.*
           FROM ClassEntity
-         WHERE ClassEntity.cStudentInviteCode = :code
-            OR ClassEntity.cTeacherInviteCode = :code
-    """)
+         WHERE ClassEntity.cStudentInviteGuid = :code
+            OR ClassEntity.cTeacherInviteGuid = :code
+    """
+    )
     suspend fun findByInviteCode(code: String): ClassEntity?
 
 
@@ -92,8 +98,8 @@ interface ClassEntityDao {
         WHERE ClassEntity.cStored > :since 
           AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
           AND (:code IS NULL 
-                OR ClassEntity.cStudentInviteCode = :code
-                OR ClassEntity.cTeacherInviteCode = :code)
+                OR ClassEntity.cStudentInviteGuid = :code
+                OR ClassEntity.cTeacherInviteGuid = :code)
      ORDER BY ClassEntity.cTitle
         """
 

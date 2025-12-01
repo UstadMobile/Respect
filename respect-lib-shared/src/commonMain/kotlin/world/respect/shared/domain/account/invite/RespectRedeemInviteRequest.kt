@@ -21,7 +21,7 @@ data class RespectRedeemInviteRequest(
     val account: Account,
     val deviceName: String? = null,
     val deviceInfo: DeviceInfo? = null,
-    val invite: Invite? = null,
+    val invite: Invite,
 ) {
 
     @Serializable

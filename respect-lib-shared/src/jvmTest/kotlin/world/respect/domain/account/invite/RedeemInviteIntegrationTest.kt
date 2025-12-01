@@ -6,10 +6,10 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.mockito.kotlin.mock
 import world.respect.credentials.passkey.RespectPasswordCredential
-import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
@@ -17,8 +17,10 @@ import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
+import java.lang.System.currentTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -66,14 +68,24 @@ class RedeemInviteIntegrationTest {
                 val clazz = Clazz(
                     guid = "42",
                     title = "Test class",
-                    teacherInviteCode = "67890",
-                    studentInviteCode = "91000",
+                    teacherInviteGuid = "12345",
+                    studentInviteGuid = "91000",
                 )
-
+                val invite = Invite(
+                    forClassGuid = clazz.guid,
+                    forFamilyOfGuid = null,
+                    code = "123-456",
+                    newRole = PersonRoleEnum.TEACHER,
+                    guid = "12345",
+                    inviteMultipleAllowed = false,
+                    approvalRequired = false,
+                    expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
+                )
                 serverSchoolDataSource.classDataSource.store(listOf(clazz))
+                serverSchoolDataSource.inviteDataSource.store(listOf(invite))
 
                 val request = RespectRedeemInviteRequest(
-                    code = "123-456-${clazz.teacherInviteCode}",
+                    code = "123-456",
                     classUid = clazz.guid,
                     accountPersonInfo = RespectRedeemInviteRequest.PersonInfo(
                         name = "Edna Kr",
@@ -88,7 +100,8 @@ class RedeemInviteIntegrationTest {
                         credential = RespectPasswordCredential(
                             "username", "bart"
                         ),
-                    )
+                    ),
+                    invite =  invite
                 )
 
                 val result = redeemInviteUseCaseServer(request)

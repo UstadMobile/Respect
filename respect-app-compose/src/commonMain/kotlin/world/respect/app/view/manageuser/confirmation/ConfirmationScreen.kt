@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.i_am_parent
 import world.respect.shared.generated.resources.i_am_student
@@ -71,7 +72,9 @@ fun ConfirmationScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        if (!uiState.isTeacherInvite) {
+        if (!uiState.isTeacherInvite&&
+            uiState.inviteInfo?.invite?.newRole== PersonRoleEnum.STUDENT) {
+
             OutlinedButton(
                 onClick = onClickStudent,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding()
@@ -89,7 +92,7 @@ fun ConfirmationScreen(
             }
         }
 
-        if (uiState.isTeacherInvite) {
+        if (uiState.inviteInfo?.invite?.newRole!= PersonRoleEnum.STUDENT) {
             Button(
                 onClick = onClickNext,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding()

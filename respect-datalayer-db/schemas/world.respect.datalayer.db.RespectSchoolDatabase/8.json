@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "d85a12ef57faa232bfd34edfbaffc8a5",
+    "identityHash": "314a5eaeda4478151b00a9b32bc87e29",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -593,7 +593,7 @@
       },
       {
         "tableName": "ClassEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteCode` TEXT, `cStudentInviteCode` TEXT, PRIMARY KEY(`cGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteGuid` TEXT, `cStudentInviteGuid` TEXT, PRIMARY KEY(`cGuidHash`))",
         "fields": [
           {
             "fieldPath": "cGuid",
@@ -637,13 +637,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "cTeacherInviteCode",
-            "columnName": "cTeacherInviteCode",
+            "fieldPath": "cTeacherInviteGuid",
+            "columnName": "cTeacherInviteGuid",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "cStudentInviteCode",
-            "columnName": "cStudentInviteCode",
+            "fieldPath": "cStudentInviteGuid",
+            "columnName": "cStudentInviteGuid",
             "affinity": "TEXT"
           }
         ],
@@ -1046,7 +1046,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd85a12ef57faa232bfd34edfbaffc8a5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '314a5eaeda4478151b00a9b32bc87e29')"
     ]
   }
 }

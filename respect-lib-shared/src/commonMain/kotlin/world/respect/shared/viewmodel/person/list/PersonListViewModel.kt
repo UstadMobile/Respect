@@ -49,6 +49,7 @@ data class PersonListUiState(
     },
     val showAddPersonItem: Boolean = false,
     val showInviteCode: String? = null,
+    val showInviteButton: Boolean = false,
 )
 
 class PersonListViewModel(
@@ -92,7 +93,7 @@ class PersonListViewModel(
                     Res.string.select_person.asUiText()
                 },
                 expandableFabState = ExpandableFabUiState(
-                    visible = true,
+                    visible = !(route.filterByRole != null||route.classUidStr!=null),
                     items = listOf(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
@@ -135,7 +136,10 @@ class PersonListViewModel(
         }
 
         _uiState.update {
-            it.copy(persons = pagingSourceFactoryHolder)
+            it.copy(
+                persons = pagingSourceFactoryHolder,
+                showInviteButton = route.filterByRole != null||route.classUidStr!=null
+            )
         }
     }
 
@@ -199,7 +203,8 @@ class PersonListViewModel(
                     classUid = route.classUidStr,
                     className = route.classNameStr,
                     role = route.role,
-                    presetRole = route.filterByRole
+                    presetRole = route.filterByRole,
+                    inviteCode = route.showInviteCode
                 )
             )
         )

@@ -15,12 +15,14 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateLinkUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -69,7 +71,9 @@ class InvitePersonViewModel(
     private val createLinkUseCase: CreateLinkUseCase by lazy {
         scope.get()
     }
-
+    private val createInviteUseCase: CreateInviteUseCase by lazy {
+        scope.get()
+    }
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
     private val guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
@@ -112,10 +116,21 @@ class InvitePersonViewModel(
                     }
 
                 role?.let { role ->
+                 val invite=
+                     schoolDataSource.inviteDataSource.findByCode(route.inviteCodeStr.toString()).dataOrNull()
                     _uiState.update { prev ->
                         prev.copy(
                             selectedRole = role,
-                            roleOptions = listOf(role)
+                            roleOptions = listOf(role),
+                            invite = invite,
+                            inviteCode = invite?.code,
+                            inviteMultipleAllowed = invite?.inviteMultipleAllowed == true,
+                            approvalRequired = invite?.approvalRequired == true,
+                            classGuid = invite?.forClassGuid,
+                            className = invite?.forClassName,
+                            classRole = invite?.forClassRole,
+                            schoolName = invite?.schoolName,
+                            familyPersonGuid = invite?.forFamilyOfGuid
                         )
                     }
                     return@launchWithLoadingIndicator
@@ -143,6 +158,8 @@ class InvitePersonViewModel(
                         }
                 )
             }
+            onRoleChange(uiState.value.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT)
+
         }
     }
 

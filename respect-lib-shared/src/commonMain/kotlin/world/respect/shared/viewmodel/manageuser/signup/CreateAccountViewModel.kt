@@ -35,6 +35,7 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
@@ -106,7 +107,7 @@ class CreateAccountViewModel(
                 Napier.w("Failed to get username suggestion", t)
             }
 
-            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code, type = route.inviteType)
+            val inviteInfo = inviteInfoUseCase(route.respectRedeemInviteRequest.code)
             respectAppDataSource.schoolDirectoryEntryDataSource
                 .getSchoolDirectoryEntryByUrl(route.schoolUrl).dataOrNull()?.also {
                     schoolDirectoryEntry.complete(it)
@@ -145,10 +146,6 @@ class CreateAccountViewModel(
 
     fun onClickSignupWithPasskey() {
         viewModelScope.launch {
-            val inviteInfo = uiState.value.inviteInfo
-
-            if (inviteInfo == null)
-                throw IllegalStateException("inviteInfo is null")
 
             val usernameVal = _uiState.value.username
             val validationResult = validateUsernameUseCase(usernameVal)
@@ -200,7 +197,13 @@ class CreateAccountViewModel(
                                             inviteRequest = redeemRequest
                                         )
                                     }else {
-                                        WaitingForApproval()
+                                        if (redeemRequest.invite.forClassGuid == null &&
+                                            redeemRequest.invite.forFamilyOfGuid == null){
+                                            RespectAppLauncher()
+                                        }else{
+                                            WaitingForApproval()
+
+                                        }
                                     },
                                     clearBackStack = true,
                                 )

@@ -195,7 +195,7 @@ class SignupViewModel(
                             addChildAccountUseCase(
                                 personInfo = personInfo,
                                 parentUsername = route.respectRedeemInviteRequest.account.username,
-                                classUid = route.respectRedeemInviteRequest.classUid ?: "",
+                                classUid = route.respectRedeemInviteRequest.classUid,
                                 inviteCode = route.respectRedeemInviteRequest.code
                             )
                            val destination = if ( route.respectRedeemInviteRequest.invite.forClassGuid == null &&

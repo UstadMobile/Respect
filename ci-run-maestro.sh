@@ -151,8 +151,45 @@ if [ "$1" == "cloud" ]; then
         --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
-        --env SCHOOL_NAME=TestSchool
-    MAESTRO_STATUS=$?
+        --env SCHOOL_NAME=TestSchool \
+       | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
+
+    # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
+    MAESTRO_STATUS=${PIPESTATUS[0]}
+
+    echo "ci-run-maestro: Cloud run finished. Extracting URL from log file..."
+
+    MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
+
+    if [ -f "$MAESTRO_LOG_FILE" ]; then
+         # Grep the URL directly from the file
+         export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
+
+         if [ -n "$MAESTRO_CLOUD_URL" ]; then
+            echo "ci-run-maestro: Found URL: $MAESTRO_CLOUD_URL"
+
+            export MAESTRO_EMAIL="$MAESTRO_EMAIL"
+            export RECIVO_API_KEY="$RECIVO_API_KEY"
+            export RECIVO_ORG_ID="$RECIVO_ORG_ID"
+
+            echo "ci-run-maestro: Navigating to downloader script..."
+            cd "$WORKSPACE/.maestro/video-downloader"
+
+            # Ensure executable
+            chmod +x ci-run-cypress.sh
+
+            # Execute the script
+            ./ci-run-cypress.sh || echo "ci-run-maestro: Video downloader script encountered an error (ignoring)"
+
+            # Return to original directory
+            cd "$WORKSPACE"
+         else
+            echo "ci-run-maestro: Skipping video download (No Cloud URL found in logs)."
+         fi
+    else
+         echo "ci-run-maestro: Log file not found. Skipping download."
+    fi
+
 else
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \

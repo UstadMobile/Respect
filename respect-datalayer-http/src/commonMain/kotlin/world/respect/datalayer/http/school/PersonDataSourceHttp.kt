@@ -150,6 +150,10 @@ class PersonDataSourceHttp(
         }
     }
 
+    override suspend fun delete(guid: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun store(list: List<Person>) {
         httpClient.post(
             url = respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)

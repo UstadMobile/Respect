@@ -21,6 +21,8 @@ data class InviteEntity(
     val iForClassGuidHash: Long? = null,
     val iForClassRole: EnrollmentRoleEnum ?=null,
     val iInviteMultipleAllowed: Boolean = false,
+
+    val iIsFirstUser: Boolean = false,
     val iApprovalRequired: Boolean = false,
     val iLastModified: Long = systemTimeInMillis(),
     val iExpiration: Long = 0,

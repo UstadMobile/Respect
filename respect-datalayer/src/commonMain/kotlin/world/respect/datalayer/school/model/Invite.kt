@@ -27,6 +27,7 @@ data class Invite(
     val forClassRole: EnrollmentRoleEnum? = null,
     val inviteMultipleAllowed: Boolean = false,
     val approvalRequired: Boolean = false,
+    val firstUser: Boolean = false,
     val expiration: Long = 0,
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),

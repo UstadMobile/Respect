@@ -91,6 +91,8 @@ interface PersonDataSource: WritableDataSource<Person> {
     ): IPagingSourceFactory<Int, PersonListDetails>
 
 
+    suspend fun delete(guid: String): Boolean
+
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on
      * the data. It WILL NOT set the last-modified time (this should be done by the ViewModel or

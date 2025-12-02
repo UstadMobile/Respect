@@ -88,7 +88,12 @@
     <string name="email">Email</string>
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="permanently_delete">Permanently Delete</string>
+    <string name="delete_headline">This would delete your personal data permanently from our system. You will lose your learning data. Once completed this action cannot be undone.</string>
+    <string name="delete_account_message">Enter your username (%1$s) below and then tap on 'Permanently delete' button to delete your account.</string>
     <string name="username_label">Username</string>
+    <string name="error_name_mismatched">Error: name mismatched</string>
     <string name="manage_account">Manage account</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>

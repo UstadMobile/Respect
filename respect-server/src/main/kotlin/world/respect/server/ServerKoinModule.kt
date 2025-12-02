@@ -306,7 +306,7 @@ fun serverKoinModule(
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             DeleteAccountUseCaseServer(
-                schoolDb = get(),
+                schoolDataSource = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId
             )
         }

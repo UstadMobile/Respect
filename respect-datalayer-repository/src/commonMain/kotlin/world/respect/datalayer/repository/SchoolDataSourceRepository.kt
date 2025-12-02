@@ -99,6 +99,7 @@ class SchoolDataSourceRepository(
             local = local.inviteDataSource,
             remote = remote.inviteDataSource,
             remoteWriteQueue = remoteWriteQueue,
+            validationHelper = validationHelper
         )
     }
 }

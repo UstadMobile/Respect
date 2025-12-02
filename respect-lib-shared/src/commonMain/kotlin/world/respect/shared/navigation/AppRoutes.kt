@@ -735,6 +735,7 @@ data class InvitePerson(
     val classGuid: String? = null,
     val className:String?=null,
     val roleStr: String? = null,
+    val inviteCodeStr: String? = null,
     private val presetRoleStr: String? = null,
 ) : RespectAppRoute {
     @Transient
@@ -753,12 +754,14 @@ data class InvitePerson(
             familyPersonGuid: String? = null,
             role: EnrollmentRoleEnum? = null,
             presetRole: PersonRoleEnum? = null,
+            inviteCode: String?
             ) = InvitePerson(
             familyPersonGuid = familyPersonGuid,
             classGuid = classUid,
             className = className,
             roleStr = role?.value,
             presetRoleStr = presetRole?.value,
+            inviteCodeStr = inviteCode
         )
 
     }

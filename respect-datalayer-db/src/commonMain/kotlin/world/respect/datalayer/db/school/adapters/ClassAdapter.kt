@@ -16,8 +16,8 @@ fun ClassEntities.toModel(): Clazz {
         description = clazz.cDescription,
         lastModified = clazz.cLastModified,
         stored = clazz.cStored,
-        teacherInviteCode = clazz.cTeacherInviteCode,
-        studentInviteCode = clazz.cStudentInviteCode,
+        teacherInviteGuid = clazz.cTeacherInviteGuid,
+        studentInviteGuid = clazz.cStudentInviteGuid,
     )
 }
 
@@ -34,8 +34,8 @@ fun Clazz.toEntities(
             cDescription = description,
             cLastModified = lastModified,
             cStored = stored,
-            cStudentInviteCode = studentInviteCode,
-            cTeacherInviteCode = teacherInviteCode,
+            cStudentInviteGuid = studentInviteGuid,
+            cTeacherInviteGuid = teacherInviteGuid,
         )
     )
 }

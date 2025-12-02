@@ -16,12 +16,11 @@ import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
@@ -49,22 +48,56 @@ class RedeemInviteUseCaseDb(
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
     ): AuthResponse {
-        if (redeemRequest.invite!=null){
-
+        val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(redeemRequest.code)
+            ?: throw IllegalArgumentException("invite not found for code: ${redeemRequest.code}")
+                .withHttpStatus(404)
+        if (invite.iInviteStatus == Invite.STATUS_REVOKED) {
+            throw IllegalArgumentException("invite is revoked")
+                .withHttpStatus(400)
         }
-        val classUid = redeemRequest.classUid
-            ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
-        val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
-            ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
-        val expectedInviteCode = when(redeemRequest.role) {
-            PersonRoleEnum.TEACHER -> clazz.cTeacherInviteCode
-            else -> clazz.cStudentInviteCode
-        } ?: throw IllegalArgumentException("No invite code for requested role")
-            .withHttpStatus(400)
-
-        if(!redeemRequest.code.endsWith(expectedInviteCode)) {
-            throw IllegalArgumentException("Bad code").withHttpStatus(400)
+        if (invite.iInviteStatus != Invite.STATUS_PENDING) {
+            throw IllegalArgumentException("invite is already used")
+                .withHttpStatus(400)
         }
+        if (invite.iExpiration < systemTimeInMillis()) {
+            throw IllegalArgumentException("invite is expired")
+                .withHttpStatus(400)
+        }
+
+        val isDirectJoin = invite.iForClassGuid == null &&
+                invite.iForFamilyOfGuid == null
+
+        val isClassInvite = invite.iForClassGuid != null
+
+        val isFamilyInvite = invite.iForFamilyOfGuid != null
+
+        when {
+            isDirectJoin -> {
+            }
+
+            isClassInvite -> {
+                val classUid = redeemRequest.invite.forClassGuid
+                    ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
+                val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
+                    ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
+                val expectedInviteGuid = when (redeemRequest.role) {
+                    PersonRoleEnum.TEACHER -> clazz.cTeacherInviteGuid
+                    else -> clazz.cStudentInviteGuid
+                } ?: throw IllegalArgumentException("No invite code for requested role")
+                    .withHttpStatus(400)
+                val clazzInvite = schoolDb.getInviteEntityDao().findByGuid(expectedInviteGuid)
+                    ?: throw IllegalArgumentException("No invite found")
+                        .withHttpStatus(400)
+                if (!redeemRequest.code.endsWith(clazzInvite.iCode)) {
+                    throw IllegalArgumentException("Bad code").withHttpStatus(400)
+                }
+            }
+
+            isFamilyInvite -> {
+
+            }
+        }
+
 
         val accountGuid = redeemRequest.account.guid
 
@@ -142,24 +175,36 @@ class RedeemInviteUseCaseDb(
         }
 
         //If a teacher/student, make the pending enrollment now
-        if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-            schoolDataSourceVal.enrollmentDataSource.store(
-                listOf(
-                    Enrollment(
-                        uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                            Enrollment.TABLE_ID
-                        ).toString(),
-                        classUid = classUid,
-                        personUid = accountPerson.guid,
-                        role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
-                            EnrollmentRoleEnum.PENDING_TEACHER
-                        } else {
-                            EnrollmentRoleEnum.PENDING_STUDENT
-                        },
-                        inviteCode = redeemRequest.code,
+        if(isClassInvite){
+
+            val classUid = redeemRequest.invite.forClassGuid
+                ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
+
+            if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
+                schoolDataSourceVal.enrollmentDataSource.store(
+                    listOf(
+                        Enrollment(
+                            uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                                Enrollment.TABLE_ID
+                            ).toString(),
+                            classUid = classUid,
+                            personUid = accountPerson.guid,
+                            role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
+                              if (invite.iApprovalRequired)  EnrollmentRoleEnum.PENDING_TEACHER
+                              else EnrollmentRoleEnum.TEACHER
+                            } else {
+                                if (invite.iApprovalRequired)  EnrollmentRoleEnum.PENDING_STUDENT
+                                else
+                                EnrollmentRoleEnum.STUDENT
+                            },
+                            inviteCode = redeemRequest.code,
+                        )
                     )
                 )
-            )
+            }
+        }
+        if (!invite.iInviteMultipleAllowed){
+            schoolDb.getInviteEntityDao().updateInviteStatus(invite.iGuid)
         }
         return authResponse
     }

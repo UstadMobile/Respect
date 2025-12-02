@@ -22,7 +22,7 @@ class AddChildAccountUseCaseDataSource(
     override suspend operator fun invoke(
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
-        classUid: String,
+        classUid: String?,
         inviteCode: String
     ) {
         val parentPerson = schoolDataSource.personDataSource.findByGuid(
@@ -45,19 +45,20 @@ class AddChildAccountUseCaseDataSource(
             relatedPersonUids = listOf(authenticatedUser.guid)
         )
 
-        val enrollment = Enrollment(
-            uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Enrollment.TABLE_ID)
-                .toString(),
-            classUid = classUid,
-            personUid = childUid,
-            role = EnrollmentRoleEnum.PENDING_STUDENT,
-            inviteCode = inviteCode,
-        )
-
         schoolDataSource.personDataSource.store(
             listOf(parentWithRel, childPerson)
         )
+        if (classUid!=null){
+            val enrollment = Enrollment(
+                uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Enrollment.TABLE_ID)
+                    .toString(),
+                classUid = classUid,
+                personUid = childUid,
+                role = EnrollmentRoleEnum.PENDING_STUDENT,
+                inviteCode = inviteCode,
+            )
 
-        schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
+            schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
+        }
     }
 }

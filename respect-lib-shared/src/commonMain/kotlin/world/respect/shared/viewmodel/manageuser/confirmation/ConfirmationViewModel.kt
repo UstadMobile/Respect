@@ -71,7 +71,7 @@ class ConfirmationViewModel(
         }
 
         viewModelScope.launch {
-            val inviteInfo = getInviteInfoUseCase(route.code,route.inviteType)
+            val inviteInfo = getInviteInfoUseCase(route.code)
 
             try {
                 _uiState.update {
@@ -136,19 +136,20 @@ class ConfirmationViewModel(
         classUid: String?,
         invite: Invite?,
     ): RespectRedeemInviteRequest {
-        val role = when(profileType) {
-            ProfileType.STUDENT -> PersonRoleEnum.STUDENT
-            ProfileType.PARENT  -> PersonRoleEnum.PARENT
-            ProfileType.TEACHER -> PersonRoleEnum.TEACHER
-            else -> throw IllegalArgumentException("Cannot use CHILD here")
-        }
+        val role = when (profileType) {
+                ProfileType.STUDENT -> PersonRoleEnum.STUDENT
+                ProfileType.PARENT -> PersonRoleEnum.PARENT
+                ProfileType.TEACHER -> invite?.newRole ?: PersonRoleEnum.STUDENT
+                else -> throw IllegalArgumentException("Cannot use CHILD here")
+            }
+
 
         val blankAccount = RespectRedeemInviteRequest.Account(
             guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID).toString(),
             username = "",
             credential = RespectPasswordCredential(username = "", password = ""),
         )
-
+        if (invite==null) throw IllegalStateException("invite is null")
         return RespectRedeemInviteRequest(
             code = inviteCode,
             classUid = classUid,

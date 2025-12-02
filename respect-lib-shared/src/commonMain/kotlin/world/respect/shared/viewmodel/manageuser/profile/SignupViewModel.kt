@@ -31,6 +31,7 @@ import world.respect.shared.generated.resources.your_name_label
 import world.respect.shared.generated.resources.your_profile_title
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
@@ -194,13 +195,18 @@ class SignupViewModel(
                             addChildAccountUseCase(
                                 personInfo = personInfo,
                                 parentUsername = route.respectRedeemInviteRequest.account.username,
-                                classUid = route.respectRedeemInviteRequest.classUid ?: "",
+                                classUid = route.respectRedeemInviteRequest.classUid,
                                 inviteCode = route.respectRedeemInviteRequest.code
                             )
-
+                           val destination = if ( route.respectRedeemInviteRequest.invite.forClassGuid == null &&
+                                route.respectRedeemInviteRequest.invite.forFamilyOfGuid == null){
+                                RespectAppLauncher()
+                            }else{
+                                WaitingForApproval()
+                            }
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
-                                    destination = WaitingForApproval(),
+                                    destination = destination,
                                     clearBackStack = true,
                                 )
                             )

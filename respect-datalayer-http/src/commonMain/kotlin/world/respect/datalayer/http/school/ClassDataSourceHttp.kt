@@ -42,7 +42,7 @@ class ClassDataSourceHttp(
         return URLBuilder(respectEndpointUrl(ClassDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                parameters.appendIfNotNull(PARAM_NAME_INVITE_CODE, inviteCode)
+                parameters.appendIfNotNull(PARAM_NAME_INVITE_CODE, inviteGuid)
             }
             .build()
     }

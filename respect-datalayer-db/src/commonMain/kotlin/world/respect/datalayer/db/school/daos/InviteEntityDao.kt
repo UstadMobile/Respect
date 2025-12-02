@@ -1,8 +1,10 @@
 package world.respect.datalayer.db.school.daos
 
+import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.InviteEntity
+import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
 interface InviteEntityDao {
@@ -20,7 +22,17 @@ interface InviteEntityDao {
          LIMIT 1
     """)
     suspend fun getLastModifiedByGuid(guidHash: Long): Long?
-
+    @Query("""
+        UPDATE InviteEntity
+        SET iInviteStatus = :status,
+            iLastModified = :lastModified
+        WHERE iGuid = :guid
+    """)
+    suspend fun updateInviteStatus(
+        guid: String,
+        status: Int = InviteEntity.STATUS_ACCEPTED,
+        lastModified: Long = systemTimeInMillis()
+    )
     @Query("""
         SELECT * 
           FROM InviteEntity
@@ -39,10 +51,30 @@ interface InviteEntityDao {
     @Query("""
         SELECT * 
           FROM InviteEntity
+         WHERE iGuid = :guid
+         LIMIT 1
+    """)
+    suspend fun findByGuid(guid: String): InviteEntity?
+
+    @Query("""
+        SELECT * 
+          FROM InviteEntity
          WHERE iGuidHash = :guidHash
          LIMIT 1
     """)
     fun findByGuidHashAsFlow(guidHash: Long): Flow<InviteEntity?>
+
+    @Query("""  
+        SELECT InviteEntity.* 
+         FROM InviteEntity
+        WHERE (:guidHash = 0 OR InviteEntity.iGuidHash = :guidHash)
+          AND (:code IS NULL 
+                OR InviteEntity.iCode = :code)
+          """)
+    fun findAllAsPagingSource(
+        guidHash: Long = 0,
+        code: String? = null,
+    ): PagingSource<Int, InviteEntity>
 
     @Query("""
         SELECT * 

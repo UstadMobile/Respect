@@ -115,6 +115,7 @@ class SchoolDataSourceHttp(
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
             tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
         )
     }
 }

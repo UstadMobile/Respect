@@ -67,6 +67,8 @@
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
+    <string name="congratulation">Congratulations</string>
+    <string name="successfully_registered_school">You have successfully registered the school</string>
     <string name="i_am_student">I’m a Student</string>
     <string name="i_am_parent">I’m a Parent</string>
     <string name="accept">Accept</string>

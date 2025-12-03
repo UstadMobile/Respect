@@ -304,6 +304,7 @@ class PersonEditViewModel(
             NavCommand.Navigate(
                 PersonList.create(
                     filterByRole = filterByRole,
+                    personGuid = route.guid,
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = PERSON_SELECT_RESULT

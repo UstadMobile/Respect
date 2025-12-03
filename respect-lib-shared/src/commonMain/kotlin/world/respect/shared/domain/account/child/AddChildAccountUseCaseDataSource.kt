@@ -23,11 +23,12 @@ class AddChildAccountUseCaseDataSource(
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
         classUid: String?,
-        inviteCode: String
+        inviteCode: String,
+        familyPersonGuid: String?,
     ) {
         val parentPerson = schoolDataSource.personDataSource.findByGuid(
             loadParams = DataLoadParams(),
-            guid = authenticatedUser.guid,
+            guid = familyPersonGuid?:authenticatedUser.guid,
         ).dataOrNull() ?: throw IllegalStateException("Parent person not found: $authenticatedUser")
 
         val childUid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(

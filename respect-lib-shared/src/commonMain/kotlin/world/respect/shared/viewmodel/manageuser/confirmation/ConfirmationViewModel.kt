@@ -24,6 +24,7 @@ import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
+import world.respect.shared.generated.resources.congratulation
 import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -37,7 +38,7 @@ import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 data class ConfirmationUiState(
     val inviteInfo: RespectInviteInfo? = null,
     val inviteInfoError: StringResourceUiText? = null,
-    val isTeacherInvite: Boolean = false
+    val isTeacherInvite: Boolean = false,
 )
 
 class ConfirmationViewModel(
@@ -62,13 +63,6 @@ class ConfirmationViewModel(
 
 
     init {
-        _appUiState.update {
-            it.copy(
-                title = Res.string.invitation.asUiText(),
-                hideBottomNavigation = true,
-                userAccountIconVisible = false
-            )
-        }
 
         viewModelScope.launch {
             val inviteInfo = getInviteInfoUseCase(route.code)
@@ -83,6 +77,17 @@ class ConfirmationViewModel(
             } catch (e: Exception) {
                 println(e)
             }
+        }
+
+        _appUiState.update {
+            it.copy(
+                title =if (uiState.value.inviteInfo?.invite?.firstUser == true)
+                    Res.string.congratulation.asUiText()
+                else
+                    Res.string.invitation.asUiText(),
+                hideBottomNavigation = true,
+                userAccountIconVisible = false
+            )
         }
     }
 
@@ -114,14 +119,13 @@ class ConfirmationViewModel(
         )
 
         if (profileType == ProfileType.STUDENT) {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    SignupScreen.create(
-                        route.schoolUrl, profileType,redeemRequest
-                    )
-                )
-            )
+
+           gotToSignUpScreen(profileType,redeemRequest)
         }else {
+            if (redeemRequest.invite.forFamilyOfGuid!=null &&redeemRequest.invite.newRole== PersonRoleEnum.STUDENT){
+                gotToSignUpScreen(ProfileType.CHILD,redeemRequest)
+                return
+            }
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     TermsAndCondition.create(route.schoolUrl, profileType,redeemRequest,route.inviteType
@@ -129,6 +133,15 @@ class ConfirmationViewModel(
                 )
             )
         }
+    }
+    fun gotToSignUpScreen(profileType: ProfileType, redeemRequest: RespectRedeemInviteRequest) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                SignupScreen.create(
+                    route.schoolUrl, profileType,redeemRequest
+                )
+            )
+        )
     }
     fun makeBlankRedeemInviteRequest(
         inviteCode: String,

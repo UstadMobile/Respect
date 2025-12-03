@@ -191,15 +191,15 @@ class SignupViewModel(
                             val addChildAccountUseCase: AddChildAccountUseCase by lazy {
                                 scope.get()
                             }
-
                             addChildAccountUseCase(
                                 personInfo = personInfo,
                                 parentUsername = route.respectRedeemInviteRequest.account.username,
                                 classUid = route.respectRedeemInviteRequest.classUid,
-                                inviteCode = route.respectRedeemInviteRequest.code
+                                inviteCode = route.respectRedeemInviteRequest.code,
+                                familyPersonGuid = route.respectRedeemInviteRequest.invite.forFamilyOfGuid,
                             )
                            val destination = if ( route.respectRedeemInviteRequest.invite.forClassGuid == null &&
-                                route.respectRedeemInviteRequest.invite.forFamilyOfGuid == null){
+                                route.respectRedeemInviteRequest.invite.forFamilyOfGuid != null){
                                 RespectAppLauncher()
                             }else{
                                 WaitingForApproval()

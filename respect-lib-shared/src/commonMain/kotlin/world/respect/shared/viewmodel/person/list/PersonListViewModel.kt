@@ -203,6 +203,7 @@ class PersonListViewModel(
                     classUid = route.classUidStr,
                     className = route.classNameStr,
                     role = route.role,
+                    familyPersonGuid = route.personGuidStr,
                     presetRole = route.filterByRole,
                     inviteCode = route.showInviteCode
                 )

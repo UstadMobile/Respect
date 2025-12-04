@@ -219,7 +219,7 @@ import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDevice
 import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectStudentViewModel
 
 
-const val SHARED_PREF_SETTINGS_NAME = "respect_settings2_"
+const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
 val appKoinModule = module {
@@ -462,7 +462,7 @@ val appKoinModule = module {
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
-            appContext, appContext.getDatabasePath("respect__app.db").absolutePath
+            appContext, appContext.getDatabasePath("respect_3_app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
             .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
@@ -661,7 +661,7 @@ val appKoinModule = module {
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                "school__" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
                 .addMigrations(MIGRATION_2_3(true))

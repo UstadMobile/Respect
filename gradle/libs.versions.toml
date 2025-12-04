@@ -61,6 +61,7 @@ androidx-paging-compose = "3.4.0-alpha04" # Different as per https://developer.a
 webauthn4j-core =  "0.25.0.RELEASE"
 
 androidx-preference = "1.2.1"
+buildconfig-plugin = "6.0.6"
 
 [libraries]
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
@@ -177,3 +178,4 @@ room = { id = "androidx.room", version.ref = "room" }
 atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 swagger-generator = { id= "org.hidetake.swagger.generator", version.ref = "swagger-generator" }
+buildconfigPlugin = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig-plugin"}

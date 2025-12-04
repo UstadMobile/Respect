@@ -70,6 +70,14 @@ list (default or local)
 
 Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3h04mk3r6-SO1hBLbn0yj5kczPS7q2eg).
 
+## Build environment variables
+
+The following environment variables can be set:
+
+```
+RESPECT_DEFAULT_APPLIST - the default list of RESPECT Compatible app manifest URLs e.g. https://respect.world/respect-ds/manifestlist.json
+```
+
 ## Legal and license
 
 Copyright 2024-2025 UstadMobile FZ-LLC. This code is substantially derived from [UstadMobile](https://www.github.com/UstadMobile/UstadMobile/).

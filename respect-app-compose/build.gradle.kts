@@ -39,12 +39,20 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.buildconfigPlugin)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 compose.resources {
     publicResClass = true
     packageOfResClass = "world.respect.app.generated.resources"
+}
+
+buildConfig {
+    packageName("world.respect.app.config")
+    className("RespectBuildConfig")
+
+    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", "https://respect.world/respect-ds/manifestlist.json")
 }
 
 kotlin {

@@ -38,6 +38,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import world.respect.app.config.RespectBuildConfig
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
@@ -210,9 +211,6 @@ import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingE
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
-
-@Suppress("unused")
-const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings2_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -475,7 +473,7 @@ val appKoinModule = module {
                     primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
                 ),
                 httpClient = get(),
-                defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
+                defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         )
     }

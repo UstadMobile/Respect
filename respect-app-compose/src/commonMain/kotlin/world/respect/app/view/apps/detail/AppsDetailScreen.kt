@@ -127,6 +127,7 @@ fun AppsDetailScreen(
                 horizontalArrangement =
                     Arrangement.spacedBy(12.dp)
             ) {
+                /* Mike: Temporarily disabled until we detect what is installed/launchable directly.
                 Button(
                     onClick = {
                         onClickTry()
@@ -134,7 +135,7 @@ fun AppsDetailScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = stringResource(Res.string.try_it))
-                }
+                }*/
 
                 if(!uiState.isAdded && uiState.showAddRemoveButton) {
                     OutlinedButton(

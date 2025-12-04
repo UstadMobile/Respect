@@ -26,6 +26,9 @@ val acraPropertiesFile = System.getenv("ACRA")?.let {
 acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
+// The applist list - see main README
+val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
+
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
 ACRA_PROP_NAMES.forEach { propName ->
@@ -52,7 +55,7 @@ buildConfig {
     packageName("world.respect.app.config")
     className("RespectBuildConfig")
 
-    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", "https://respect.world/respect-ds/manifestlist.json")
+    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
 }
 
 kotlin {
@@ -176,8 +179,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 114
-        versionName = "1.0.14"
+        versionCode = 115
+        versionName = "1.0.15"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

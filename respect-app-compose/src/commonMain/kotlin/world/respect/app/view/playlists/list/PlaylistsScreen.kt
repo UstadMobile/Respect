@@ -24,12 +24,14 @@ import world.respect.shared.generated.resources.my_playlists
 import world.respect.shared.generated.resources.add_playlist
 import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.add_from_link
-import world.respect.shared.generated.resources.sections
-import world.respect.shared.generated.resources.items
+import world.respect.shared.generated.resources.all_sections_items
 import world.respect.shared.generated.resources.created_by
-import world.respect.shared.viewmodel.playlists.PlaylistsUiState
+import world.respect.shared.generated.resources.unknown_error
+import world.respect.shared.viewmodel.playlists.list.MainTab
 import world.respect.shared.viewmodel.playlists.list.PlaylistsViewModel
-import world.respect.shared.viewmodel.playlists.PlaylistTab
+import world.respect.shared.viewmodel.playlists.list.PlaylistTab
+import world.respect.shared.viewmodel.playlists.list.PlaylistUiModel
+import world.respect.shared.viewmodel.playlists.list.PlaylistsUiState
 
 @Composable
 fun PlaylistsScreenForViewModel(
@@ -42,6 +44,7 @@ fun PlaylistsScreenForViewModel(
 
     PlaylistsScreen(
         uiState = uiState,
+        onMainTabSelected = viewModel::onMainTabSelected,
         onTabSelected = viewModel::onTabSelected,
         onPlaylistClick = onPlaylistClick,
         onCreatePlaylist = onCreatePlaylist,
@@ -52,6 +55,7 @@ fun PlaylistsScreenForViewModel(
 @Composable
 fun PlaylistsScreen(
     uiState: PlaylistsUiState = PlaylistsUiState(),
+    onMainTabSelected: (MainTab) -> Unit = {},
     onTabSelected: (PlaylistTab) -> Unit = {},
     onPlaylistClick: (String) -> Unit = {},
     onCreatePlaylist: () -> Unit = {},
@@ -62,7 +66,9 @@ fun PlaylistsScreen(
     Scaffold(
         topBar = {
             PlaylistsTopBar(
+                selectedMainTab = uiState.selectedMainTab,
                 selectedTab = uiState.selectedTab,
+                onMainTabSelected = onMainTabSelected,
                 onTabSelected = onTabSelected
             )
         },
@@ -110,7 +116,9 @@ fun PlaylistsScreen(
 
 @Composable
 private fun PlaylistsTopBar(
+    selectedMainTab: MainTab,
     selectedTab: PlaylistTab,
+    onMainTabSelected: (MainTab) -> Unit,
     onTabSelected: (PlaylistTab) -> Unit
 ) {
     Column(
@@ -125,13 +133,16 @@ private fun PlaylistsTopBar(
             Text(
                 text = stringResource(Res.string.apps),
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                fontWeight = if (selectedMainTab == MainTab.APPS) FontWeight.Bold else FontWeight.Normal,
+                modifier = Modifier.clickable { onMainTabSelected(MainTab.APPS) }
             )
             Text(
                 text = stringResource(Res.string.playlists),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = if (selectedMainTab == MainTab.PLAYLISTS) FontWeight.Bold else FontWeight.Normal,
+                modifier = Modifier.clickable { onMainTabSelected(MainTab.PLAYLISTS) }
             )
         }
 
@@ -162,7 +173,7 @@ private fun PlaylistsTopBar(
 
 @Composable
 private fun PlaylistsList(
-    playlists: List<world.respect.shared.viewmodel.playlists.PlaylistUiModel>,
+    playlists: List<PlaylistUiModel>,
     onPlaylistClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -185,7 +196,7 @@ private fun PlaylistsList(
 
 @Composable
 private fun PlaylistItem(
-    playlist: world.respect.shared.viewmodel.playlists.PlaylistUiModel,
+    playlist: PlaylistUiModel,
     onClick: () -> Unit
 ) {
     Card(
@@ -226,13 +237,13 @@ private fun PlaylistItem(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = stringResource(Res.string.sections_items_count, playlist.sectionCount, playlist.itemCount),
+                    text = stringResource(Res.string.all_sections_items, playlist.sectionCount, playlist.itemCount),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = stringResource(Res.string.created_by_format, playlist.createdBy),
+                    text = stringResource(Res.string.created_by, playlist.createdBy),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -255,16 +266,23 @@ private fun FloatingActionButtonWithOptions(
         if (showOptions) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 16.dp, end = 16.dp)
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.padding(bottom = 12.dp)
             ) {
                 AddOptionButton(
                     text = stringResource(Res.string.add_new),
-                    onClick = onCreatePlaylist
+                    onClick = {
+                        onCreatePlaylist()
+                        onToggleOptions()
+                    }
                 )
 
                 AddOptionButton(
                     text = stringResource(Res.string.add_from_link),
-                    onClick = onAddFromLink
+                    onClick = {
+                        onAddFromLink()
+                        onToggleOptions()
+                    }
                 )
             }
         }
@@ -274,17 +292,19 @@ private fun FloatingActionButtonWithOptions(
             containerColor = MaterialTheme.colorScheme.primary
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(Res.string.add_playlist)
+                    contentDescription = stringResource(Res.string.add_playlist),
+                    modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = stringResource(Res.string.playlist),
-                    fontSize = 14.sp
+                    text = stringResource(Res.string.playlists),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
@@ -299,22 +319,25 @@ private fun AddOptionButton(
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 4.dp,
+        tonalElevation = 2.dp,
         modifier = Modifier.clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Icon(
                 Icons.Filled.Add,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = text,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

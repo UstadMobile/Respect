@@ -636,6 +636,21 @@ data class PersonEdit(
 data object Settings : RespectAppRoute
 
 @Serializable
+data object SharedDeviceSettings : RespectAppRoute
+
+@Serializable
+data object SelectClass : RespectAppRoute
+
+@Serializable
+data class SelectStudent(val guid: String) : RespectAppRoute
+
+@Serializable
+data object EnterRollNumber : RespectAppRoute
+
+@Serializable
+data object ScanQRCode : RespectAppRoute
+
+@Serializable
 data object CurriculumMappingList : RespectAppRoute
 
 @Serializable

@@ -133,18 +133,33 @@ import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewMode
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
-import world.respect.app.view.settings.SettingsScreenForViewModel
+import world.respect.app.view.settings.SettingsScreen
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.settings.SharedDeviceSettingsScreen
+import world.respect.app.view.shareddevicelogin.EnterRollNumberScreen
+import world.respect.app.view.shareddevicelogin.ScanQRCodeScreen
+import world.respect.app.view.shareddevicelogin.SelectClassScreen
+import world.respect.app.view.shareddevicelogin.SelectStudentScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.EnterRollNumber
+import world.respect.shared.navigation.ScanQRCode
+import world.respect.shared.navigation.SelectClass
+import world.respect.shared.navigation.SelectStudent
+import world.respect.shared.navigation.SharedDeviceSettings
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.viewmodel.settings.SharedDeviceSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.EnterRollNumberViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectClassViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectStudentViewModel
 
 
 @Composable
@@ -534,7 +549,52 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            SettingsScreenForViewModel(
+            SettingsScreen(
+                viewModel = viewModel
+            )
+        }
+        composable<SharedDeviceSettings> {
+            val viewModel: SharedDeviceSettingsViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            SharedDeviceSettingsScreen(
+                viewModel = viewModel
+            )
+        }
+        composable<SelectStudent> {
+            val viewModel: SharedSchoolDeviceLoginSelectStudentViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            SelectStudentScreen(
+                viewModel = viewModel
+            )
+        }
+        composable<SelectClass> {
+            val viewModel: SharedSchoolDeviceLoginSelectClassViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            SelectClassScreen(
+                viewModel = viewModel
+            )
+        }
+        composable<EnterRollNumber> {
+            val viewModel: EnterRollNumberViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            EnterRollNumberScreen(
+                viewModel = viewModel
+            )
+        }
+        composable<ScanQRCode> {
+            val viewModel: ScanQRCodeViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ScanQRCodeScreen(
                 viewModel = viewModel
             )
         }

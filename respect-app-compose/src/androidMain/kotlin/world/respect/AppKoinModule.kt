@@ -209,6 +209,11 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.viewmodel.settings.SharedDeviceSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.EnterRollNumberViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectClassViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectStudentViewModel
 
 
 @Suppress("unused")
@@ -318,6 +323,11 @@ val appKoinModule = module {
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::SharedDeviceSettingsViewModel)
+    viewModelOf(::SharedSchoolDeviceLoginSelectClassViewModel)
+    viewModelOf(::SharedSchoolDeviceLoginSelectStudentViewModel)
+    viewModelOf(::EnterRollNumberViewModel)
+    viewModelOf(::ScanQRCodeViewModel)
     viewModelOf(::CurriculumMappingListViewModel)
     viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)

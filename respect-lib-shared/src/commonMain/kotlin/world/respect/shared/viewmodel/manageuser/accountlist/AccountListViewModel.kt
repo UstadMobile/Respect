@@ -8,10 +8,16 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
@@ -34,16 +40,21 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectAccountAndPerson? = null,
     val accounts: List<RespectAccountAndPerson> = emptyList(),
+    val familyPersons: List<Person> = emptyList(),
 )
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle){
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = respectAccountManager.requireSelectedAccountScope()
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private var emittedNavToGetStartedCommand = false
 
@@ -85,7 +96,21 @@ class AccountListViewModel(
 
                     return@collectLatest
                 }
-
+                val personList = schoolDataSource.personDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        common = GetListCommonParams(
+                            guid = activeAccount?.userGuid
+                        ),
+                        includeRelated = true
+                    )
+                )
+                _uiState.update { prev ->
+                    prev.copy(familyPersons = personList.dataOrNull()?.filter
+                    {
+                        it.guid != activeAccount?.userGuid
+                    } ?: emptyList())
+                }
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {

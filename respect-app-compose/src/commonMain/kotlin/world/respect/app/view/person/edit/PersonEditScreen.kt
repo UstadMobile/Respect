@@ -63,7 +63,6 @@ fun PersonEditScreen(
         onRemoveFamilyMember = viewModel::onRemoveFamilyMember,
     )
 }
-
 @Composable
 fun PersonEditScreen(
     uiState: PersonEditUiState,

@@ -198,6 +198,58 @@ class CurriculumMappingEditViewModel(
         }
     }
 
+    fun onLessonMovedBetweenSections(
+        fromSectionIndex: Int,
+        fromLinkIndex: Int,
+        toSectionIndex: Int,
+        toLinkIndex: Int
+    ) {
+        updateUiStateAndCommit { prev ->
+            val mapping = prev.mapping
+            if (mapping == null) {
+                prev
+            } else if (fromSectionIndex == toSectionIndex) {
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.updateAtIndex(fromSectionIndex) { section ->
+                            section.copy(
+                                items = section.items.moveItem(from = fromLinkIndex, to = toLinkIndex)
+                            )
+                        }
+                    )
+                )
+            } else {
+                val fromSection = mapping.sections[fromSectionIndex]
+                val lessonToMove = fromSection.items[fromLinkIndex]
+
+                val updatedFromSection = fromSection.copy(
+                    items = fromSection.items.filterIndexed { index, _ -> index != fromLinkIndex }
+                )
+
+                val toSection = mapping.sections[toSectionIndex]
+                val updatedToSection = toSection.copy(
+                    items = buildList {
+                        addAll(toSection.items.take(toLinkIndex))
+                        add(lessonToMove)
+                        addAll(toSection.items.drop(toLinkIndex))
+                    }
+                )
+
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.mapIndexed { index, section ->
+                            when (index) {
+                                fromSectionIndex -> updatedFromSection
+                                toSectionIndex -> updatedToSection
+                                else -> section
+                            }
+                        }
+                    )
+                )
+            }
+        }
+    }
+
     fun onClickAddLesson(sectionIndex: Int) {
         _uiState.update { it.copy(pendingLessonSectionIndex = sectionIndex) }
         _navCommandFlow.tryEmit(

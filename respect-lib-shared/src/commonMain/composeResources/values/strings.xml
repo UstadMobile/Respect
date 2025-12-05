@@ -461,5 +461,16 @@
     <string name="edit_enrollment">Edit enrollment</string>
 
     <string name="section_name">Section name</string>
+    <string name="playlists">Playlists</string>
+    <string name="school_playlists">School Playlists</string>
+    <string name="my_playlists">My Playlists</string>
+    <string name="no_playlists_yet">No playlists yet</string>
+    <string name="create_first_playlist">Create your first playlist to get started</string>
+    <string name="create_playlist">Create Playlist</string>
+    <string name="error_loading_playlists">Error loading playlists</string>
+    <string name="add_new">Add new</string>
+    <string name="add_playlist">Add playlist</string>
+    <string name="all_sections_items">All sections,  items</string>
+    <string name="created_by">Created by: </string>
 
 </resources>

@@ -5,8 +5,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.ClassEntity
+import world.respect.datalayer.db.school.entities.ClassEntityWithPermissions
 
 @Dao
 interface ClassEntityDao {
@@ -14,19 +16,20 @@ interface ClassEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(classEntity: ClassEntity)
 
+    @Transaction
     @Query("""
         SELECT * 
          FROM ClassEntity
         WHERE ClassEntity.cGuidHash = :guidHash
     """)
-    fun findByGuidHashAsFlow(guidHash: Long): Flow<ClassEntity?>
+    fun findByGuidHashAsFlow(guidHash: Long): Flow<ClassEntityWithPermissions?>
 
     @Query("""
         SELECT * 
          FROM ClassEntity
         WHERE ClassEntity.cGuidHash = :guidHash
     """)
-    suspend fun findByGuid(guidHash: Long): ClassEntity?
+    suspend fun findByGuid(guidHash: Long): ClassEntityWithPermissions?
 
 
     @Query("""
@@ -39,49 +42,28 @@ interface ClassEntityDao {
     ): Long?
 
     @Query(LIST_SQL)
+    @Transaction
     fun findAllAsPagingSource(
         since: Long = 0,
         guidHash: Long = 0,
         code: String? = null,
-    ): PagingSource<Int, ClassEntity>
-
-    @Query("""
-        SELECT * 
-          FROM ClassEntity 
-        WHERE cTeacherInviteCode = :inviteCode
-    """)
-    suspend fun findByTeacherInviteCode(inviteCode: String): ClassEntity?
-
-    @Query("""
-        SELECT * 
-          FROM ClassEntity 
-        WHERE cStudentInviteCode = :inviteCode
-    """)
-    suspend fun findByStudentInviteCode(inviteCode: String): ClassEntity?
-
+    ): PagingSource<Int, ClassEntityWithPermissions>
 
 
     @Query(LIST_SQL)
+    @Transaction
     suspend fun list(
         since: Long = 0,
         guidHash: Long = 0,
         code: String? = null,
-    ): List<ClassEntity>
+    ): List<ClassEntityWithPermissions>
 
     @Query("""
         SELECT ClassEntity.*
           FROM ClassEntity
          WHERE ClassEntity.cGuidHash in (:uids) 
     """)
-    suspend fun findByUidList(uids: List<Long>) : List<ClassEntity>
-
-    @Query("""
-        SELECT ClassEntity.*
-          FROM ClassEntity
-         WHERE ClassEntity.cStudentInviteCode = :code
-            OR ClassEntity.cTeacherInviteCode = :code
-    """)
-    suspend fun findByInviteCode(code: String): ClassEntity?
+    suspend fun findByUidList(uids: List<Long>) : List<ClassEntityWithPermissions>
 
 
     companion object {

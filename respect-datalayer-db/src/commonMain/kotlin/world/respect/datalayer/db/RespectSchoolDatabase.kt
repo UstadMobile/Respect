@@ -23,6 +23,7 @@ import world.respect.datalayer.db.school.daos.AssignmentAssigneeRefEntityDao
 import world.respect.datalayer.db.school.daos.AssignmentEntityDao
 import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntityDao
 import world.respect.datalayer.db.school.daos.ClassEntityDao
+import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
@@ -38,6 +39,7 @@ import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
+import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 
 
@@ -56,6 +58,7 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
         ReportEntity::class,
         IndicatorEntity::class,
         ClassEntity::class,
+        ClassPermissionEntity::class,
         EnrollmentEntity::class,
         AssignmentEntity::class,
         AssignmentAssigneeRefEntity::class,
@@ -63,7 +66,7 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
         WriteQueueItemEntity::class,
         SchoolPermissionGrantEntity::class,
     ],
-    version = 8,
+    version = 9,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -88,6 +91,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getIndicatorEntityDao(): IndicatorEntityDao
 
     abstract fun getClassEntityDao(): ClassEntityDao
+
+    abstract fun getClassPermissionEntityDao(): ClassPermissionEntityDao
 
     abstract fun getEnrollmentEntityDao(): EnrollmentEntityDao
 

@@ -38,7 +38,7 @@ class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
+    private val checkPersonPermissionUseCase    : CheckPersonPermissionUseCase,
 ): PersonDataSourceLocal {
 
 

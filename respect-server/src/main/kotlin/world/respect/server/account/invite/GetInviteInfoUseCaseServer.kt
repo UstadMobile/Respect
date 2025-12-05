@@ -18,9 +18,9 @@ class GetInviteInfoUseCaseServer(
 
         return RespectInviteInfo(
             code = code,
-            classGuid = clazz.cGuid,
-            className = clazz.cTitle,
-            userInviteType = if(code == clazz.cTeacherInviteCode) {
+            classGuid = clazz.clazz.cGuid,
+            className = clazz.clazz.cTitle,
+            userInviteType = if(code == clazz.clazz.cTeacherInviteCode) {
                 RespectInviteInfo.UserInviteType.TEACHER
             }else {
                 RespectInviteInfo.UserInviteType.STUDENT_OR_PARENT

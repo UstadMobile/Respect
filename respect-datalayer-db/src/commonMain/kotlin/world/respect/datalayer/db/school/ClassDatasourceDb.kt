@@ -12,7 +12,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.ClassEntities
+import world.respect.datalayer.db.school.adapters.toClassEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ClassDataSource
@@ -49,7 +49,14 @@ class ClassDatasourceDb(
 
                     if(forceOverwrite ||
                             entities.clazz.cLastModified.toEpochMilliseconds() > lastModifiedInDb) {
+                        schoolDb.getClassPermissionEntityDao().deleteByClassUidNum(
+                            classUidNum = entities.clazz.cGuidHash
+                        )
                         schoolDb.getClassEntityDao().upsert(entities.clazz)
+                        schoolDb.getClassPermissionEntityDao().upsertList(
+                            permissionsList = entities.permissionEntities
+                        )
+
                         numUpdated++
                     }
                 }
@@ -63,7 +70,7 @@ class ClassDatasourceDb(
         return schoolDb.getClassEntityDao().findByGuidHashAsFlow(
             uidNumberMapper(guid)
         ).map { classEntity ->
-            classEntity?.let { ClassEntities(it) }?.toModel()?.let {
+            classEntity?.toClassEntities()?.toModel()?.let {
                 DataReadyState(it)
             } ?: NoDataLoadedState.notFound()
         }
@@ -76,7 +83,7 @@ class ClassDatasourceDb(
         return schoolDb.getClassEntityDao().findByGuid(
             uidNumberMapper(guid)
         )?.let {
-            DataReadyState(ClassEntities(it).toModel())
+            DataReadyState(it.toClassEntities().toModel())
         } ?: NoDataLoadedState.notFound()
     }
 
@@ -90,7 +97,7 @@ class ClassDatasourceDb(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,
             ).map {
-                ClassEntities(it).toModel()
+                it.toClassEntities().toModel()
             }
         }
     }
@@ -105,7 +112,7 @@ class ClassDatasourceDb(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,
             ).map {
-                ClassEntities(it).toModel()
+                it.toClassEntities().toModel()
             }
         )
     }
@@ -125,7 +132,7 @@ class ClassDatasourceDb(
         return schoolDb.getClassEntityDao().findByUidList(
             uids.map { uidNumberMapper(it) }
         ).map {
-            ClassEntities(it).toModel()
+            it.toClassEntities().toModel()
         }
     }
 }

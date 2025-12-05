@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import org.koin.android.ext.android.inject
@@ -29,6 +31,16 @@ class WebViewActivity : AppCompatActivity() {
             this@WebViewActivity.title = title ?: ""
         }
 
+        override fun onProgressChanged(view: WebView?, newProgress: Int) {
+            val progressBar = findViewById<ProgressBar>(R.id.progress_bar) ?: return
+
+            if(newProgress < 100) {
+                progressBar.progress = newProgress
+                progressBar.takeIf { it.visibility != View.VISIBLE }?.visibility = View.VISIBLE
+            }else {
+                progressBar.takeIf { it.visibility != View.GONE }?.visibility = View.GONE
+            }
+        }
     }
 
     private val webViewClient: OkHttpWebViewClient by inject()

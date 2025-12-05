@@ -6,7 +6,8 @@ interface AddChildAccountUseCase{
      suspend operator fun invoke(
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
-        classUid: String,
-        inviteCode: String
+        classUid: String?,
+        inviteCode: String,
+        familyPersonGuid:String?
     )
 }

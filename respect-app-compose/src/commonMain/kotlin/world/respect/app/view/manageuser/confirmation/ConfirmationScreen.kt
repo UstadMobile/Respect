@@ -18,11 +18,13 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.i_am_parent
 import world.respect.shared.generated.resources.i_am_student
 import world.respect.shared.generated.resources.invitation_for
 import world.respect.shared.generated.resources.next
+import world.respect.shared.generated.resources.successfully_registered_school
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationUiState
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
 
@@ -52,13 +54,16 @@ fun ConfirmationScreen(
             .defaultScreenPadding()
     ) {
         Text(
-            text = stringResource(Res.string.invitation_for),
+            text = if (uiState.inviteInfo?.invite?.firstUser == true)
+                stringResource(Res.string.successfully_registered_school)
+            else
+                stringResource(Res.string.invitation_for),
             Modifier.defaultItemPadding()
         )
 
         ListItem(
             headlineContent = {
-                Text(text = uiState.inviteInfo?.className ?: "")
+                Text(text = uiState.inviteInfo?.className ?: uiState.inviteInfo?.invite?.schoolName?:"")
             },
             supportingContent = {
                 Column(
@@ -71,7 +76,10 @@ fun ConfirmationScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        if (!uiState.isTeacherInvite) {
+        if (!uiState.isTeacherInvite&&
+            uiState.inviteInfo?.invite?.newRole== PersonRoleEnum.STUDENT&&
+            uiState.inviteInfo?.invite?.forFamilyOfGuid==null) {
+
             OutlinedButton(
                 onClick = onClickStudent,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding()
@@ -88,8 +96,8 @@ fun ConfirmationScreen(
                 Text(stringResource(Res.string.i_am_parent))
             }
         }
-
-        if (uiState.isTeacherInvite) {
+        if (uiState.inviteInfo?.invite?.newRole!= PersonRoleEnum.STUDENT||
+            uiState.inviteInfo?.invite?.forFamilyOfGuid!=null) {
             Button(
                 onClick = onClickNext,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding()

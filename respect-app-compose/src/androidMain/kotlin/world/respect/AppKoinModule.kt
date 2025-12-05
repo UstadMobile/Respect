@@ -121,6 +121,7 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.createlink.CreateLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -188,9 +189,11 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
+import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
+import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
@@ -210,7 +213,15 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-
+import world.respect.shared.domain.sharelink.EmailLinkLauncher
+import world.respect.shared.domain.sharelink.ShareLinkLauncher
+import world.respect.shared.domain.sharelink.SmsLinkLauncher
+import world.respect.shared.domain.sendinvite.SmsLinkLauncherAndroid
+import world.respect.shared.domain.sendinvite.EmailLinkLauncherAndroid
+import world.respect.shared.domain.sendinvite.ShareLinkLauncherAndroid
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -234,7 +245,15 @@ val appKoinModule = module {
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
     }
-
+    single<SmsLinkLauncher> {
+        SmsLinkLauncherAndroid(androidContext())
+    }
+    single<EmailLinkLauncher> {
+        EmailLinkLauncherAndroid(androidContext())
+    }
+    single<ShareLinkLauncher> {
+        ShareLinkLauncherAndroid(androidContext())
+    }
     single<UidNumberMapper> {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
@@ -305,6 +324,8 @@ val appKoinModule = module {
     viewModelOf(::AccountListViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
+    viewModelOf(::InvitePersonViewModel)
+    viewModelOf(::CopyInviteCodeViewModel)
     viewModelOf(::PersonEditViewModel)
     viewModelOf(::PersonDetailViewModel)
     viewModelOf(::ReportDetailViewModel)
@@ -563,6 +584,10 @@ val appKoinModule = module {
         get<SnackBarFlowDispatcher>()
     }
 
+    single<ResolveUrlToNavCommandUseCase> {
+        ResolveUrlToNavCommandUseCase()
+    }
+
     single<PhoneNumValidatorUseCase> {
         PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
     }
@@ -669,7 +694,18 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+        scoped<CreateLinkUseCase> {
+            CreateLinkUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+            )
+        }
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,

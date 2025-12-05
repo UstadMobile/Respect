@@ -58,26 +58,17 @@ fun LearningUnitListScreen(
 @Composable
 fun LearningUnitListScreen(
     uiState: LearningUnitListUiState,
-    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+    @Suppress("unused") onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickPublication: (OpdsPublication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit
 
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        RespectListSortHeader(
-            modifier = Modifier.defaultItemPadding(),
-            activeSortOrderOption = uiState.activeSortOrderOption,
-            sortOptions = uiState.sortOptions,
-            enabled = uiState.fieldsEnabled,
-            onClickSortOption = onSortOrderChanged,
-        )
-
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             itemsIndexed(
                 items = uiState.navigation,
                 key = { index, navigation ->

@@ -136,6 +136,15 @@ fun CurriculumMappingEditScreen(
                         )
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     }
+                    fromLessonIndex >= 0 && toLessonIndex == -1 && toSectionIndex >= 0 -> {
+                        onLessonMovedBetweenSections(
+                            fromSectionIndex,
+                            fromLessonIndex,
+                            toSectionIndex,
+                            0
+                        )
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
                     fromLessonIndex == -1 && toLessonIndex == -1 &&
                             fromSectionIndex >= 0 && toSectionIndex >= 0 -> {
                         onSectionMoved(fromSectionIndex, toSectionIndex)

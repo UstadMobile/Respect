@@ -1,7 +1,6 @@
 package world.respect.app.view.manageuser.accountlist
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,11 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLongVersionInfoItem
+import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.defaultItemPadding
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
+import world.respect.shared.generated.resources.connected_family
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
+import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 
@@ -76,6 +79,28 @@ fun AccountListScreen(
                 )
             }
         }
+          if (uiState.familyPersons.isNotEmpty()) {
+              item {
+                  Text(
+                      modifier = Modifier.defaultItemPadding(),
+                     text =  stringResource(Res.string.connected_family)
+                  )
+              }
+              uiState.familyPersons.forEach { account ->
+                  item {
+                      ListItem(
+                          modifier = Modifier.clickable {
+                          },
+                          leadingContent = {
+                              RespectPersonAvatar(name = account.fullName())
+                          },
+                          headlineContent = {
+                              Text(account.fullName())
+                          }
+                      )
+                  }
+              }
+          }
           item {
               HorizontalDivider()
           }

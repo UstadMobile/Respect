@@ -38,6 +38,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import world.respect.app.config.RespectBuildConfig
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
@@ -211,10 +212,7 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
 
-@Suppress("unused")
-const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
-
-const val SHARED_PREF_SETTINGS_NAME = "respect_settings2_"
+const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
 val appKoinModule = module {
@@ -452,7 +450,7 @@ val appKoinModule = module {
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
-            appContext, appContext.getDatabasePath("respect__app.db").absolutePath
+            appContext, appContext.getDatabasePath("respect_3_app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
             .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
@@ -475,7 +473,7 @@ val appKoinModule = module {
                     primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
                 ),
                 httpClient = get(),
-                defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
+                defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         )
     }
@@ -643,7 +641,7 @@ val appKoinModule = module {
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                "school__" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
                 .addMigrations(MIGRATION_2_3(true))

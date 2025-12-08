@@ -65,7 +65,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
 
       // Wait for the list of runs to appear
       cy.get('a[href*="/flow/run_"]', { timeout: 60000 }).should('have.length.gt', 0);
-      cy.screenshot('00_Main_Dashboard', { capture: 'fullPage' });
+      cy.screenshot('00_Main_Dashboard', { capture: 'fullPage', timeout: 120000 });
       // --- Step 3: Collect list of tests ---
       cy.get('a[href*="/flow/run_"]').then(($links) => {
         const tests = [];

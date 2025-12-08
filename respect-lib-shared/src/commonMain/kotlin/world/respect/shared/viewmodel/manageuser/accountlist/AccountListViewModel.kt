@@ -114,7 +114,7 @@ class AccountListViewModel(
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {
-                    activeAccount?.isSameAccount(it) == true
+                    activeAccount?.isSameAccount(it) == true && !it.startedViaParent
                 }
 
                 _uiState.update { prev ->
@@ -173,6 +173,14 @@ class AccountListViewModel(
         )
     }
 
+    fun onClickFamilyPerson(person: Person) {
+        val parentGuid = uiState.value.selectedAccount?.account?.userGuid
+        if (parentGuid!=null){
+            viewModelScope.launch {
+                respectAccountManager.startChildSessionWithParentGuid(person, parentGuid)
+            }
+        }
+    }
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(GetStartedScreen(canGoBack = true))

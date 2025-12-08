@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLongVersionInfoItem
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
@@ -42,6 +43,7 @@ fun AccountListScreen(
         onClickAccount = viewModel::onClickAccount,
         onClickAddAccount = viewModel::onClickAddAccount,
         onClickLogout = viewModel::onClickLogout,
+        onClickFamilyPerson = viewModel::onClickFamilyPerson,
         onClickProfile = viewModel::onClickProfile,
     )
 }
@@ -50,6 +52,7 @@ fun AccountListScreen(
 fun AccountListScreen(
     uiState: AccountListUiState,
     onClickAccount: (RespectAccount) -> Unit,
+    onClickFamilyPerson: (Person) -> Unit,
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
@@ -90,6 +93,7 @@ fun AccountListScreen(
                   item {
                       ListItem(
                           modifier = Modifier.clickable {
+                              onClickFamilyPerson(account)
                           },
                           leadingContent = {
                               RespectPersonAvatar(name = account.fullName())

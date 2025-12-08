@@ -37,6 +37,7 @@ import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.deleteaccount.DeleteAccountUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -58,6 +59,7 @@ import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUse
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
+import world.respect.server.account.deleteaccount.DeleteAccountUseCaseServer
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
@@ -167,6 +169,7 @@ fun serverKoinModule(
                 filterUsernameUseCase = get(),
             )
         }
+
         scoped<VerifySignInWithPasskeyUseCase> {
             VerifySignInWithPasskeyUseCase(
                 schoolDb = get(),
@@ -294,6 +297,16 @@ fun serverKoinModule(
             SchoolDataSourceDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId
+            )
+        }
+
+        factory<DeleteAccountUseCase> {
+
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            DeleteAccountUseCaseServer(
+                schoolDataSource = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId
             )
         }

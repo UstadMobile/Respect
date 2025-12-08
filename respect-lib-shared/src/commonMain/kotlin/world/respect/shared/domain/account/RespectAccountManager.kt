@@ -3,12 +3,17 @@ package world.respect.shared.domain.account
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import io.ktor.http.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -54,6 +59,8 @@ class RespectAccountManager(
     private val _selectedAccountGuid = MutableStateFlow(
         settings.getStringOrNull(SETTINGS_KEY_ACTIVE_ACCOUNT)
     )
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + Job())
 
     var selectedAccount: RespectAccount?
         get() = _storedAccounts.value.firstOrNull {
@@ -101,7 +108,7 @@ class RespectAccountManager(
                 send(null)
             }
         }
-    }
+    }.shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
 
     init {
         putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
@@ -218,14 +225,17 @@ class RespectAccountManager(
 
         if(accountsOnRealmScope == 0) {
             //close it
-            val realmScope = getKoin().getScope(account.school.self.toString())
-            realmScope.close()
+            val schoolScopeId = SchoolDirectoryEntryScopeId(
+                schoolUrl = account.school.self, accountPrincipalId = null
+            )
+            val schoolScope = getKoin().getScopeOrNull(schoolScopeId.scopeId)
+            schoolScope?.close()
         }
 
     }
 
     /**
-     * When the RespectAccount scope is created it MUST be linked to the parent Realm scope.
+     * When the RespectAccount scope is created it MUST be linked to the parent school scope.
      */
     fun getOrCreateAccountScope(account: RespectAccount): Scope {
         return getKoin().getOrCreateScope<RespectAccount>(account.scopeId)

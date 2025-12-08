@@ -53,6 +53,8 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
       cy.url({ timeout: 60000 }).should('include', 'app.maestro.dev');
     });
 
+      cy.log(`Navigating to: ${projectUrl}`);
+      cy.visit(projectUrl);
     // --- Step 2: Enter App Domain ---
     cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {   //To use the projectUrl variable inside the cy.origin block we explicitly pass it in via the args object
 
@@ -90,7 +92,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
             .then((videoUrl) => {
               if (videoUrl) {
                 cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
-                cy.screenshot(test.name, { capture: 'fullPage' });
+                cy.screenshot(test.name, { capture: 'fullPage', timeout: 120000 });
               }
             });
         });

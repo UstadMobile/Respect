@@ -65,7 +65,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
 
       // Wait for the list of runs to appear
       cy.get('a[href*="/flow/run_"]', { timeout: 30000 }).should('have.length.gt', 0);
-
+      cy.screenshot('00_Main_Dashboard', { capture: 'fullPage' });
       // --- Step 3: Collect list of tests ---
       cy.get('a[href*="/flow/run_"]').then(($links) => {
         const tests = [];
@@ -81,8 +81,10 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
 
         // --- Step 4: Iterate and Save ---
         cy.wrap(tests).each((test, index) => {
-          cy.log(`Processing ${index + 1}: ${test.name}`);
-          cy.visit(test.url);
+        cy.log(`Processing ${index + 1}: ${test.name}`);
+        cy.visit(test.url);
+
+        const fileName = `Test_${String(index + 1).padStart(2, '0')}_${test.name}`;
 
           // Extract URL
           cy.get('video', { timeout: 20000 })
@@ -90,6 +92,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
             .then((videoUrl) => {
               if (videoUrl) {
                 cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
+                cy.screenshot(fileName, { capture: 'fullPage' });
               }
             });
         });

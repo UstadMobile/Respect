@@ -48,6 +48,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingE
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import androidx.compose.ui.draw.alpha
 
 
 @Composable
@@ -87,6 +88,8 @@ fun CurriculumMappingEditScreen(
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
+    var draggingSectionIndex by remember { mutableStateOf<Int?>(null) }
+    var isDraggingAnySection by remember { mutableStateOf(false) }
     val reorderableLazyListState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         onMove = { from, to ->
@@ -244,6 +247,16 @@ fun CurriculumMappingEditScreen(
                         state = reorderableLazyListState,
                         key = "section_header_${section.uid}"
                     ) { isDragging ->
+                        LaunchedEffect(isDragging) {
+                            if (isDragging) {
+                                draggingSectionIndex = sectionIndex
+                                isDraggingAnySection = true
+                            } else {
+                                draggingSectionIndex = null
+                                isDraggingAnySection = false
+                            }
+                        }
+
                         SectionItem(
                             section = section,
                             sectionIndex = sectionIndex,
@@ -267,8 +280,10 @@ fun CurriculumMappingEditScreen(
                     item(key = "lesson_${section.uid}_${link.href}_$linkIndex") {
                         ReorderableItem(
                             state = reorderableLazyListState,
-                            key = "lesson_${section.uid}_${link.href}_$linkIndex"
+                            key = "lesson_${section.uid}_${link.href}_$linkIndex",
+                            enabled = !isDraggingAnySection
                         ) { isDragging ->
+                            val isParentSectionDragging = draggingSectionIndex == sectionIndex
                             LessonItem(
                                 link = link,
                                 sectionLinkUiState = sectionLinkUiState,
@@ -276,7 +291,9 @@ fun CurriculumMappingEditScreen(
                                 linkIndex = linkIndex,
                                 onClickRemoveLesson = onClickRemoveLesson,
                                 isDragging = isDragging,
+                                isParentSectionDragging = isParentSectionDragging,
                                 dragModifier = Modifier.draggableHandle(
+                                    enabled = !isDraggingAnySection,
                                     onDragStarted = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     },
@@ -392,6 +409,7 @@ private fun LessonItem(
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
     isDragging: Boolean,
+    isParentSectionDragging: Boolean = false,
     dragModifier: Modifier = Modifier
 ) {
 
@@ -404,7 +422,14 @@ private fun LessonItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 48.dp, end = 16.dp, bottom = 8.dp),
+            .padding(start = 48.dp, end = 16.dp, bottom = 8.dp)
+            .then(
+                if (isParentSectionDragging) {
+                    Modifier.alpha(0.5f)
+                } else {
+                    Modifier
+                }
+            ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isDragging) 8.dp else 1.dp
         )
@@ -420,6 +445,7 @@ private fun LessonItem(
                 contentDescription = stringResource(Res.string.drag),
                 modifier = dragModifier.size(20.dp),
                 tint = if (isDragging) MaterialTheme.colorScheme.primary
+                else if (isParentSectionDragging) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -439,7 +465,12 @@ private fun LessonItem(
 
             Text(
                 text = link.title ?: "${stringResource(Res.string.lesson)} ${linkIndex + 1}",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                color = if (isParentSectionDragging) {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
 
             Spacer(Modifier.width(16.dp))
@@ -447,7 +478,7 @@ private fun LessonItem(
             IconButton(
                 onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
                 modifier = Modifier.size(24.dp),
-                enabled = !isDragging
+                enabled = !isDragging && !isParentSectionDragging
             ) {
                 Icon(
                     Icons.Filled.Close,

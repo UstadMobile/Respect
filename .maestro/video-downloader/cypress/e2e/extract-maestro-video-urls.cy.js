@@ -84,15 +84,13 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
         cy.log(`Processing ${index + 1}: ${test.name}`);
         cy.visit(test.url);
 
-        const fileName = `Test_${String(index + 1).padStart(2, '0')}_${test.name}`;
-
           // Extract URL
           cy.get('video', { timeout: 20000 })
             .should('have.prop', 'src')
             .then((videoUrl) => {
               if (videoUrl) {
                 cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
-                cy.screenshot(fileName, { capture: 'fullPage' });
+                cy.screenshot(test.name, { capture: 'fullPage' });
               }
             });
         });

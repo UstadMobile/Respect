@@ -112,6 +112,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -149,6 +153,10 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -200,6 +208,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "tests1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -225,6 +237,10 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -258,6 +274,10 @@ onFlowComplete:
     id : "password"
 - inputText: "tests1"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -314,6 +334,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "testp1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Child Profile"
@@ -327,6 +351,10 @@ onFlowComplete:
 - inputText: ${output.pastYearDateC}
 - hideKeyboard
 - tapOn: "Done"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -352,6 +380,14 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "People"
 - assertVisible: "Parent User"
@@ -385,6 +421,14 @@ onFlowComplete:
     id : "password"
 - inputText: "testp1"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -393,3 +437,18 @@ onFlowComplete:
 - assertVisible: "New Class"
 - tapOn: "New Class"
 - assertVisible: "Child User"
+
+# Adding Family member test
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn: "Classes"
+- tapOn: "New Class"
+- tapOn: "Student User"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Family member"
+- tapOn: "Parent User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Student User"
+- assertVisible: "Parent User"

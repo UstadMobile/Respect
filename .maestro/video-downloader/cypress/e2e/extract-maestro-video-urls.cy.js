@@ -88,9 +88,11 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
           cy.get('video', { timeout: 60000 })
             .should('have.prop', 'src')
             .then((videoUrl) => {
+
+               cy.screenshot(test.name, { capture: 'fullPage', timeout: 120000 });
+
               if (videoUrl) {
                 cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
-                cy.screenshot(test.name, { capture: 'fullPage', timeout: 120000 });
               }
             });
         });

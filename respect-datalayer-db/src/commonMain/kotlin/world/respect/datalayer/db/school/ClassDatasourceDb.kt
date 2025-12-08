@@ -88,7 +88,7 @@ class ClassDatasourceDb(
             schoolDb.getClassEntityDao().findAllAsPagingSource(
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                code = params.inviteCode,
+                code = params.inviteGuid,
             ).map {
                 ClassEntities(it).toModel()
             }
@@ -103,7 +103,7 @@ class ClassDatasourceDb(
             data = schoolDb.getClassEntityDao().list(
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                code = params.inviteCode,
+                code = params.inviteGuid,
             ).map {
                 ClassEntities(it).toModel()
             }

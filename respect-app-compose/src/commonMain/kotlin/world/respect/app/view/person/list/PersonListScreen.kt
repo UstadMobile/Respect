@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CopyAll
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.copy_invite_code
+import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.person.list.PersonListUiState
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
@@ -45,6 +47,7 @@ fun PersonListScreen(
         onClickItem = viewModel::onClickItem,
         onClickAddPerson = viewModel::onClickAdd,
         onClickInviteCode = viewModel::onClickInviteCode,
+        onClickInvitePerson = viewModel::onClickInvitePerson,
     )
 }
 
@@ -54,6 +57,7 @@ fun PersonListScreen(
     onClickItem: (PersonListDetails) -> Unit,
     onClickAddPerson: () -> Unit,
     onClickInviteCode: () -> Unit,
+    onClickInvitePerson: () -> Unit,
 ) {
     val pager = respectRememberPager(uiState.persons)
 
@@ -77,27 +81,20 @@ fun PersonListScreen(
                 )
             }
         }
-
-        uiState.showInviteCode?.also { inviteCode ->
-            item("invite_code") {
+        if(uiState.showInviteButton) {
+            item("invite_person") {
                 ListItem(
                     modifier = Modifier.clickable {
-                        onClickInviteCode()
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Filled.CopyAll,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp).padding(8.dp),
-                        )
+                        onClickInvitePerson()
                     },
                     headlineContent = {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(Res.string.copy_invite_code))
-                            Spacer(Modifier.width(8.dp))
-                            Text(inviteCode, modifier = Modifier.testTag("invite_code"))
-                        }
+                        Text(stringResource(Res.string.invite_person))
                     },
+                    leadingContent = {
+                        Icon(Icons.Default.Share,
+                            modifier = Modifier.size(40.dp).padding(8.dp),
+                            contentDescription = null)
+                    }
                 )
             }
         }

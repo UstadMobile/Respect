@@ -22,12 +22,13 @@ class AddChildAccountUseCaseDataSource(
     override suspend operator fun invoke(
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
-        classUid: String,
-        inviteCode: String
+        classUid: String?,
+        inviteCode: String,
+        familyPersonGuid: String?,
     ) {
         val parentPerson = schoolDataSource.personDataSource.findByGuid(
             loadParams = DataLoadParams(),
-            guid = authenticatedUser.guid,
+            guid = familyPersonGuid?:authenticatedUser.guid,
         ).dataOrNull() ?: throw IllegalStateException("Parent person not found: $authenticatedUser")
 
         val childUid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
@@ -45,19 +46,20 @@ class AddChildAccountUseCaseDataSource(
             relatedPersonUids = listOf(authenticatedUser.guid)
         )
 
-        val enrollment = Enrollment(
-            uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Enrollment.TABLE_ID)
-                .toString(),
-            classUid = classUid,
-            personUid = childUid,
-            role = EnrollmentRoleEnum.PENDING_STUDENT,
-            inviteCode = inviteCode,
-        )
-
         schoolDataSource.personDataSource.store(
             listOf(parentWithRel, childPerson)
         )
+        if (classUid!=null){
+            val enrollment = Enrollment(
+                uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Enrollment.TABLE_ID)
+                    .toString(),
+                classUid = classUid,
+                personUid = childUid,
+                role = EnrollmentRoleEnum.PENDING_STUDENT,
+                inviteCode = inviteCode,
+            )
 
-        schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
+            schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
+        }
     }
 }

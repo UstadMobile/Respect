@@ -149,7 +149,7 @@ import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.EnterRollNumber
 import world.respect.shared.navigation.ScanQRCode
-import world.respect.shared.navigation.SelectClass
+import world.respect.shared.navigation.SelectClassScreen
 import world.respect.shared.navigation.SelectStudent
 import world.respect.shared.navigation.SharedDeviceSettings
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
@@ -571,7 +571,7 @@ fun AppNavHost(
                 viewModel = viewModel
             )
         }
-        composable<SelectClass> {
+        composable<SelectClassScreen> {
             val viewModel: SharedSchoolDeviceLoginSelectClassViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController

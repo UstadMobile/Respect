@@ -3,7 +3,6 @@
 
 package world.respect.shared.navigation
 
-import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -639,7 +638,7 @@ data object Settings : RespectAppRoute
 data object SharedDeviceSettings : RespectAppRoute
 
 @Serializable
-data object SelectClass : RespectAppRoute
+data object SelectClassScreen : RespectAppRoute
 
 @Serializable
 data class SelectStudent(val guid: String) : RespectAppRoute

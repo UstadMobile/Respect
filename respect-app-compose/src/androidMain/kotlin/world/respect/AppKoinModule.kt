@@ -140,6 +140,8 @@ import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.sharedschooldevicelogin.GetSharedDeviceEnabledUseCase
+import world.respect.shared.domain.sharedschooldevicelogin.SetSharedDeviceEnabledUseCase
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
@@ -610,6 +612,14 @@ val appKoinModule = module {
 
     single<SetDevModeEnabledUseCase> {
         SetDevModeEnabledUseCase(settings = get())
+    }
+
+    single<GetSharedDeviceEnabledUseCase> {
+        GetSharedDeviceEnabledUseCase(settings = get())
+    }
+
+    single<SetSharedDeviceEnabledUseCase> {
+        SetSharedDeviceEnabledUseCase(settings = get())
     }
 
     single<UrlToCustomDeepLinkUseCase> {

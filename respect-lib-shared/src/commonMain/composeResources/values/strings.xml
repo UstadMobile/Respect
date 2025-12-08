@@ -127,6 +127,8 @@
     <string name="remove_picture">Remove picture</string>
     <string name="select_date">Select date</string>
     <string name="first_name">First name</string>"
+    <string name="next_button">Next</string>
+    <string name="shared_device_login_title">Enter Roll Number</string>
     <string name="last_name">Last name</string>"
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
@@ -140,6 +142,7 @@
     <string name="enter_roll_number">Enter Roll Number</string>
     <string name="shared_device_setting">Shared device setting</string>
     <string name="scan_qr_code">Scan QR code</string>
+    <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>
@@ -149,6 +152,20 @@
     <string name="school_not_found">School not found: please ask your admin to add your school.</string>
     <string name="add_directory">Add Directory</string>
     <string name="edit_directory">Edit Directory</string>
+
+    <string name="school_wise_setting">School-wise setting</string>
+    <string name="allow_students_select_account">Allow students to select their account on a shared device</string>
+    <string name="allow_students_select_description">This will allow students to select their account</string>
+    <string name="require_roll_number">Require students to enter their roll number</string>
+    <string name="require_roll_number_description">This will make students to enter their roll number after selecting their name</string>
+    <string name="shared_device_settings">Shared device settings</string>
+
+    <string name="shared_school_device">Shared school device</string>
+    <string name="shared_school_device_description">Mark to make a device a shared school mode</string>
+    <string name="shared_device_warning">This device will change to shared device once this setting is on</string>
+    <string name="shared_device_confirm_dialog">Are you sure to make this device as a shared school device?</string>
+    <string name="close_button">Close</string>
+    <string name="device_settings">Device settings</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>

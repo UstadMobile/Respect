@@ -1,4 +1,3 @@
-// SelectClassViewModel.kt
 package world.respect.shared.viewmodel.sharedschooldevicelogin
 
 import androidx.lifecycle.SavedStateHandle
@@ -19,6 +18,7 @@ import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_class
+import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SelectStudent
@@ -75,7 +75,8 @@ class SharedSchoolDeviceLoginSelectClassViewModel(
     }
 
     fun onTeacherAdminLogin() {
-        // TODO: Navigate to teacher/admin login screen
-        println("Teacher/Admin login clicked")
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(GetStartedScreen())
+        )
     }
 }

@@ -7,18 +7,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Devices
-import androidx.compose.material.icons.filled.DevicesFold
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,11 +31,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.mappings
+import world.respect.shared.generated.resources.ok
+import world.respect.shared.generated.resources.shared_device_confirm_dialog
+import world.respect.shared.generated.resources.shared_device_warning
+import world.respect.shared.generated.resources.shared_school_device
+import world.respect.shared.generated.resources.shared_school_device_description
 import world.respect.shared.viewmodel.settings.SettingsUiState
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
@@ -50,7 +55,8 @@ fun SettingsScreen(
         uiState = uiState,
         onNavigateToMapping = viewModel::onNavigateToMapping,
         onToggleSharedDevice = viewModel::onToggleSharedDevice,
-        onDismissSharedDeviceDialog = viewModel::onClickOkay
+        onDismissSharedDeviceDialog = viewModel::onDismissSharedDeviceDialog,
+        onClickOkay = viewModel::onClickOkay
     )
 }
 
@@ -60,6 +66,7 @@ fun SettingsScreen(
     onNavigateToMapping: () -> Unit = {},
     onToggleSharedDevice: (Boolean) -> Unit = {},
     onDismissSharedDeviceDialog: () -> Unit = {},
+    onClickOkay: () -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -81,33 +88,53 @@ fun SettingsScreen(
             )
         }
     }
-    // Show the dialog when needed
     if (uiState.showSharedDeviceDialog) {
         AlertDialog(
             containerColor = MaterialTheme.colorScheme.background,
             onDismissRequest = onDismissSharedDeviceDialog,
             confirmButton = {
                 Button(
-                    onClick = onDismissSharedDeviceDialog,
+                    onClick = onClickOkay,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("shared_device_ok_button"),
+                        .fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                     )
                 ) {
                     Text(
-                        text = "Okay",
+                        text = stringResource(Res.string.ok),
                     )
                 }
             },
             text = {
-                Text(
-                    text = "This device will change to shared device once this setting is on",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(
+                            onClick = onDismissSharedDeviceDialog,
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "close",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                    Text(
+                        text = stringResource(Res.string.shared_device_confirm_dialog),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             },
             modifier = Modifier.testTag("shared_device_dialog")
         )
@@ -140,7 +167,7 @@ fun SharedSchoolDevice(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Shared school device",
+                    text = stringResource(Res.string.shared_school_device),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Medium
                     ),
@@ -148,7 +175,7 @@ fun SharedSchoolDevice(
                 )
 
                 Text(
-                    text = "Mark to make a device a shared school mode",
+                    text = stringResource(Res.string.shared_school_device_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp)
@@ -160,7 +187,6 @@ fun SharedSchoolDevice(
                 checked = isSharedDevice,
                 onCheckedChange = onToggleSharedDevice,
                 modifier = Modifier
-                    .testTag("shared_device_toggle")
                     .scale(0.6f),
 
                 )
@@ -168,11 +194,11 @@ fun SharedSchoolDevice(
 
         if (isSharedDevice) {
             Text(
-                text = "This device will change to shared device once this setting is on",
+                text = stringResource(Res.string.shared_device_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp, start = 32.dp  )
                     .fillMaxWidth()
             )
         }

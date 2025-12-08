@@ -28,11 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
+import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Clazz
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.scan_qr_code
+import world.respect.shared.generated.resources.teacher_admin_login
 import world.respect.shared.viewmodel.sharedschooldevicelogin.SelectClassUiState
 import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectClassViewModel
 
@@ -67,7 +71,6 @@ fun SelectClassScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Class list
         LazyColumn(
             modifier = Modifier.weight(1f)
         ) {
@@ -112,7 +115,7 @@ fun SelectClassScreen(
                 ),
             ) {
                 Text(
-                    text = "Scan QR code",
+                    text = stringResource(Res.string.scan_qr_code),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
                         fontSize = 16.sp
@@ -135,7 +138,7 @@ fun SelectClassScreen(
                 ),
             ) {
                 Text(
-                    text = "Teacher/admin login",
+                    text = stringResource(Res.string.teacher_admin_login),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
                         fontSize = 16.sp

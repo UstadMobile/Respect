@@ -15,6 +15,10 @@ import world.respect.shared.viewmodel.RespectViewModel
 
 data class EnterRollNumberUiState(
     val loading: Boolean = false,
+    val rollNumber: String = "",
+    val studentName: String? = null,
+    val isValid: Boolean = false,
+    val errorMessage: String? = null,
     )
 class EnterRollNumberViewModel (
     savedStateHandle: SavedStateHandle,
@@ -31,6 +35,27 @@ class EnterRollNumberViewModel (
                 hideBottomNavigation = true,
                 settingsIconVisible = false
             )
+        }
+    }
+
+    fun onRollNumberChange(rollNumber: String) {
+        _uiState.update { state ->
+            state.copy(
+                rollNumber = rollNumber,
+                isValid = rollNumber.isNotBlank(),
+                errorMessage = if (rollNumber.isBlank()) "Roll number is required" else null
+            )
+        }
+    }
+
+    fun onNextClick() {
+        // Validate and navigate
+        if (_uiState.value.isValid) {
+            // Proceed with login
+        } else {
+            _uiState.update { it.copy(
+                errorMessage = "Please enter a valid roll number"
+            ) }
         }
     }
 }

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
+import world.respect.shared.domain.sharedschooldevicelogin.SetSharedDeviceEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.navigation.CurriculumMappingList
@@ -23,6 +24,7 @@ data class SettingsUiState(
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
     private val json: Json,
+    private val setSharedDeviceEnabledUseCase: SetSharedDeviceEnabledUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -52,7 +54,13 @@ class SettingsViewModel(
     fun onToggleSharedDevice(checked: Boolean) {
         _uiState.update { it.copy(isSharedDevice = checked) }
 
-        // Show dialog when user enables shared device
+        if (checked) {
+            setSharedDeviceEnabledUseCase(true)
+        }else{
+            setSharedDeviceEnabledUseCase(false)
+
+        }
+
         if (checked) {
             _uiState.update { it.copy(showSharedDeviceDialog = true) }
         }
@@ -63,5 +71,13 @@ class SettingsViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(SharedDeviceSettings)
         )
+    }
+    fun onDismissSharedDeviceDialog() {
+        _uiState.update {
+            it.copy(
+                showSharedDeviceDialog = false,
+                isSharedDevice = false
+            )
+        }
     }
 }

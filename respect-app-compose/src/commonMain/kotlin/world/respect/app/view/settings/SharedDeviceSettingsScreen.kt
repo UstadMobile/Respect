@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -27,6 +24,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.allow_students_select_account
+import world.respect.shared.generated.resources.allow_students_select_description
+import world.respect.shared.generated.resources.require_roll_number
+import world.respect.shared.generated.resources.require_roll_number_description
+import world.respect.shared.generated.resources.school_wise_setting
 import world.respect.shared.viewmodel.settings.SharedDeviceSettingsUiState
 import world.respect.shared.viewmodel.settings.SharedDeviceSettingsViewModel
 
@@ -40,82 +44,99 @@ fun SharedDeviceSettingsScreen(
 
     SharedDeviceSettingsScreen(
         uiState = uiState,
+        onToggleAllowStudentSelect = viewModel::toggleAllowStudentSelect,
         onToggleRequireRollNumber = viewModel::toggleRequireRollNumber,
-        onClickNext = viewModel::onClickNext
     )
 }
 
 @Composable
 fun SharedDeviceSettingsScreen(
     uiState: SharedDeviceSettingsUiState,
+    onToggleAllowStudentSelect: (Boolean) -> Unit = {},
     onToggleRequireRollNumber: (Boolean) -> Unit = {},
-    onClickNext: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Toggle Row Section
-        Column(
-            modifier = Modifier.weight(1f)
+        Text(
+            text = stringResource(Res.string.school_wise_setting),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Medium
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+        SettingToggleItem(
+            title = stringResource(Res.string.allow_students_select_account),
+            description = stringResource(Res.string.allow_students_select_description),
+            isChecked = uiState.allowStudentSelect,
+            onCheckedChange = onToggleAllowStudentSelect,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        SettingToggleItem(
+            title = stringResource(Res.string.require_roll_number),
+            description = stringResource(Res.string.require_roll_number_description),
+            isChecked = uiState.requireRollNumber,
+            onCheckedChange = onToggleRequireRollNumber,
+        )
+    }
+}
+
+@Composable
+fun SettingToggleItem(
+    title: String,
+    description: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PhoneAndroid,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 16.dp),
-                )
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Require students to enter their roll number",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Text(
-                        text = "This will make students to enter their roll number after selecting their name",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-
-                Switch(
-                    checked = uiState.requireRollNumber,
-                    onCheckedChange = onToggleRequireRollNumber,
-                    modifier = Modifier.scale(0.6f)
-                )
-            }
-
-            // Next Button
-            Button(
-                onClick = onClickNext,
+            Icon(
+                imageVector = Icons.Default.PhoneAndroid,
+                contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
+                    .padding(end = 16.dp)
+                    .size(24.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Next",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    )
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 16.sp
                 )
             }
         }
+
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.scale(0.9f)
+        )
     }
 }

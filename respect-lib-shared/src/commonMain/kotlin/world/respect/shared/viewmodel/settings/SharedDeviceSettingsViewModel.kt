@@ -6,17 +6,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.shared_device_setting
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.SelectClass
-import world.respect.shared.navigation.SharedDeviceSettings
+import world.respect.shared.navigation.SelectClassScreen
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 
 data class SharedDeviceSettingsUiState(
     val requireRollNumber: Boolean = false,
+    val allowStudentSelect: Boolean = false,
 )
-class SharedDeviceSettingsViewModel (
+
+class SharedDeviceSettingsViewModel(
     savedStateHandle: SavedStateHandle,
 ) : RespectViewModel(savedStateHandle) {
 
@@ -29,7 +32,12 @@ class SharedDeviceSettingsViewModel (
                 title = Res.string.shared_device_setting.asUiText(),
                 navigationVisible = true,
                 hideBottomNavigation = true,
-                settingsIconVisible = false
+                settingsIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = Res.string.save.asUiText(),
+                    onClick = ::onClickSave
+                ),
             )
         }
     }
@@ -38,10 +46,13 @@ class SharedDeviceSettingsViewModel (
         _uiState.update { it.copy(requireRollNumber = checked) }
     }
 
-    fun onClickNext(){
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(SelectClass)
-        )
+    fun toggleAllowStudentSelect(checked: Boolean) {
+        _uiState.update { it.copy(allowStudentSelect = checked) }
     }
 
+    fun onClickSave() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(SelectClassScreen)
+        )
+    }
 }

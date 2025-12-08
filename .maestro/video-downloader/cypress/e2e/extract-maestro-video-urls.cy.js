@@ -34,8 +34,8 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
     };
 
   it('Login and save video URLs to text file', {
-    defaultCommandTimeout: 30000,
-    pageLoadTimeout: 60000,
+    defaultCommandTimeout: 120000,
+    pageLoadTimeout: 120000,
   }, () => {
 
     // Clear file

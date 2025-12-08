@@ -61,10 +61,10 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
       cy.visit(projectUrl);
 
       // Verify we are on the correct page (Project view) before looking for links
-      cy.url({ timeout: 20000 }).should('include', '/project/');
+      cy.url({ timeout: 60000 }).should('include', '/project/');
 
       // Wait for the list of runs to appear
-      cy.get('a[href*="/flow/run_"]', { timeout: 30000 }).should('have.length.gt', 0);
+      cy.get('a[href*="/flow/run_"]', { timeout: 60000 }).should('have.length.gt', 0);
       cy.screenshot('00_Main_Dashboard', { capture: 'fullPage' });
       // --- Step 3: Collect list of tests ---
       cy.get('a[href*="/flow/run_"]').then(($links) => {
@@ -85,7 +85,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
         cy.visit(test.url);
 
           // Extract URL
-          cy.get('video', { timeout: 20000 })
+          cy.get('video', { timeout: 60000 })
             .should('have.prop', 'src')
             .then((videoUrl) => {
               if (videoUrl) {

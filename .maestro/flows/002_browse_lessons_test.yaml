@@ -50,4 +50,36 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 
-
+- tapOn:
+    id: "search_icon"
+- assertVisible: "Language"
+- assertVisible: "Grade"
+- assertVisible: "Subjet"
+- assertVisible: "Type"
+- tapOn: "Language"
+- assertVisible:
+    id: "english"
+- tapOn: "English"
+- assertNotVisible: "Language"
+- assertVisible: "English"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 1000
+- tapOn: "Grade"
+- assertVisible: "Grade 1"
+- tapOn: "Subject"
+- assertVisible: "English"
+- assertVisible: "Math"
+- tapOn: "Type"
+- assertVisible: "Game"
+- assertVisible: "Book"
+- tapOn: "Clear all"
+- assertNotVisible: "English"
+- tapOn:
+    id: "search_icon"
+- inputText: "Lesson_001"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+- tapOn:
+    id: "delete_icon"   #Clear the search field
+- assertNotVisible: "Lesson_001"

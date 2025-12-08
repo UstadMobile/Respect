@@ -62,7 +62,7 @@ interface SchoolPermissionGrantDao {
 
     @Query("""
         SELECT EXISTS(
-               SELECT SchoolPermissionGrantEntity.spgUidNum
+               SELECT 1
                  FROM SchoolPermissionGrantEntity
                 WHERE SchoolPermissionGrantEntity.spgToRole IN (
                       SELECT PersonRoleEntity.prRoleEnum

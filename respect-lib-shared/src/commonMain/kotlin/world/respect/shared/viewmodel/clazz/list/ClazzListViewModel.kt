@@ -28,6 +28,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -100,6 +101,15 @@ class ClazzListViewModel(
                         )
                     )
                 }
+
+                schoolDataSource.enrollmentDataSource.takeIf {
+                    selectedAcct?.account?.userGuid != null
+                }?.list(
+                    loadParams = DataLoadParams(),
+                    listParams = EnrollmentDataSource.GetListParams(
+                        personUid = selectedAcct?.person?.guid
+                    )
+                )
             }
         }
     }

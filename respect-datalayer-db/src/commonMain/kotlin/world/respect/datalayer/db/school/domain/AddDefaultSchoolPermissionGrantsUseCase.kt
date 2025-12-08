@@ -21,16 +21,16 @@ class AddDefaultSchoolPermissionGrantsUseCase(
         dataSource.schoolPermissionGrantDataSource.store(
             listOf(
                 PersonRoleEnum.SYSTEM_ADMINISTRATOR.newInitialGrant(
-                    PermissionFlags.SYSADMIN_DEFAULT_PERMISSIONS
+                    PermissionFlags.SYSADMIN_DEFAULT_SCHOOL_PERMISSIONS
                 ),
                 PersonRoleEnum.TEACHER.newInitialGrant(
-                    PermissionFlags.TEACHER_DEFAULT_PERMISSIONS
+                    PermissionFlags.TEACHER_DEFAULT_SCHOOL_PERMISSIONS
                 ),
                 PersonRoleEnum.STUDENT.newInitialGrant(
-                    PermissionFlags.STUDENT_DEFAULT_PERMISSIONS
+                    PermissionFlags.STUDENT_DEFAULT_SCHOOL_PERMISSIONS
                 ),
                 PersonRoleEnum.PARENT.newInitialGrant(
-                    PermissionFlags.PARENT_DEFAULT_PERMISSIONS
+                    PermissionFlags.PARENT_DEFAULT_SCHOOL_PERMISSIONS
                 ),
             )
         )

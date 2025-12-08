@@ -92,7 +92,8 @@ class ClassDatasourceDb(
         params: ClassDataSource.GetListParams
     ): IPagingSourceFactory<Int, Clazz> {
         return IPagingSourceFactory {
-            schoolDb.getClassEntityDao().findAllAsPagingSource(
+            schoolDb.getClassEntityDao().listAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,
@@ -108,6 +109,7 @@ class ClassDatasourceDb(
     ): DataLoadState<List<Clazz>> {
         return DataReadyState(
             data = schoolDb.getClassEntityDao().list(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,

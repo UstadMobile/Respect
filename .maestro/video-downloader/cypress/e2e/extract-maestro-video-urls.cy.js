@@ -53,8 +53,6 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
       cy.url({ timeout: 60000 }).should('include', 'app.maestro.dev');
     });
 
-      cy.log(`Navigating to: ${projectUrl}`);
-      cy.visit(projectUrl);
     // --- Step 2: Enter App Domain ---
     cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {   //To use the projectUrl variable inside the cy.origin block we explicitly pass it in via the args object
 

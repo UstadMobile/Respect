@@ -50,4 +50,27 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "My app"
+- tapOn:
+    id: "floating_action_button"  # EDIT button
+- tapOn: "My app"
+- eraseText
+- inputText: "Test App"
+- tapOn: "short learning app description.*"
+- eraseText
+- inputText: "This app is for testing purpose"
+- tapOn: "Subject"
+- tapOn: "Foundational"
+- tapOn: "Grade"
+- tapOn: "Grade 1-3"
+- tapOn: "Save"
+- tapOn:
+     id: "search_icon"
+- inputText: "Test App"
+- assertVisible:
+      id: "test_app"
 

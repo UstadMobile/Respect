@@ -36,4 +36,20 @@ A user can add app via link and browse available lessons across multiple integra
 29. Click on Open button.
 30. Verify user able to see lesson content.
 31. Click on Close icon.
-32. Verify user directed back to the Lesson detail screen.
+32. Go to Apps screen and verify the screen title is "Apps".
+33. Tap on the Search icon.
+34. Verify that filter options are visible for Language, Grade, Subject, and Type.
+35. Tap on the Language filter chip.
+36. Select English from the dropdown.
+37. Verify the "Language" chip text has updated to English.
+38. Verify the lesson list refreshes and displays "Lesson 001".
+39. Tap on the Grade filter chip and verify options (e.g., "Grade 1") are visible.
+40. Tap on the Subject filter chip and verify options (e.g., "Math", "English") are visible.
+41. Tap on the Type filter chip and verify options (e.g., "Game", "Book") are visible.
+42. Tap on Clear all to reset filters.
+43. Verify the "English" chip reverts to "Language".
+44. Tap on the Search Input field.
+45. Enter the text "Lesson 001".
+46. Verify that the search results update to show "Lesson 001".
+47. Tap on the Delete icon (X) in the search bar.
+48. Verify the search text is cleared and "Lesson 001" is no longer isolated in the view (list resets).

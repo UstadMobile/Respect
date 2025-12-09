@@ -1,0 +1,68 @@
+{
+  "answerArea": {
+    "calculator": false,
+    "options": {
+      "content": "",
+      "images": {},
+      "widgets": {}
+    },
+    "type": "multiple"
+  },
+  "hints": [
+    {
+      "content": "This is not true because $8$ is not the same as $1$.",
+      "images": {},
+      "widgets": {}
+    },
+    {
+      "content": "This is not true because $9$ is not the same as $8$.",
+      "images": {},
+      "widgets": {}
+    },
+    {
+      "content": "This is true because $8$ is the same as $8$.",
+      "images": {},
+      "widgets": {}
+    }
+  ],
+  "itemDataVersion": {
+    "major": 0,
+    "minor": 1
+  },
+  "question": {
+    "content": "**Find the true equation.",
+    "images": {},
+    "widgets": {
+      "radio 1": {
+        "graded": true,
+        "options": {
+          "choices": [
+            {
+              "content": "$\\blue{8=5-4}$",
+              "correct": false
+            },
+            {
+              "content": "$\\purple{9=4+4}$",
+              "correct": false
+            },
+            {
+              "content": "$\\pink{8=6+2}$",
+              "correct": true
+            }
+          ],
+          "deselectEnabled": false,
+          "displayCount": null,
+          "multipleSelect": false,
+          "noneOfTheAbove": false,
+          "onePerLine": true,
+          "randomize": false
+        },
+        "type": "radio",
+        "version": {
+          "major": 0,
+          "minor": 0
+        }
+      }
+    }
+  }
+}

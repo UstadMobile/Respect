@@ -36,4 +36,19 @@ A user can add app via link and browse available lessons across multiple integra
 29. Click on Open button.
 30. Verify user able to see lesson content.
 31. Click on Close icon.
-32. Verify user directed back to the Lesson detail screen.
+32. Go to Apps screen and verify user directed back to the Apps screen.
+33. Tap on the Edit button on the App Detail screen. 
+34. Verify the Edit App screen is displayed. 
+35. Tap on the Title field and enter a test title.
+36. Tap on the Description field and append a unique keyword.
+37. Tap on the Subject dropdown and change the selection. 
+38. Tap on the Grade dropdown and change the selection to "Grade 4-6".
+39. Tap on the Save button to save changes. 
+40. Verify the user is returned to the Lesson Detail screen. 
+41. Verify Curriculum Alignment: Assert that the new Subject (Science) and Grade (Grade 4-6) are now visible on the screen. 
+42. Navigate back to the Apps home screen. 
+43. Tap on the Search icon. 
+44. Enter the keyword added in title 
+45. Verify Search Results: Assert that the modified lesson appears in the search results.
+46. Enter the unique keyword added in title 
+47. Verify Search Results: Assert that the modified lesson appears in the search results list, confirming the new metadata is indexed.

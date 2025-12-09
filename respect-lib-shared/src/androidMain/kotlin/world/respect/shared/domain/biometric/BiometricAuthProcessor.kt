@@ -18,7 +18,7 @@ class BiometricAuthProcessor(
                 try {
                     if (!biometricManager.canAuthenticate()) {
                         job.response.complete(
-                            BiometricAuthUseCase.BiometricResult.Error(-1, "not available")
+                            BiometricAuthUseCase.BiometricResult.Error(0, "not available")
                         )
                         return@launch
                     }
@@ -54,7 +54,7 @@ class BiometricAuthProcessor(
                 } catch (t: Throwable) {
                     job.response.complete(
                         BiometricAuthUseCase.BiometricResult.Error(
-                            -99,
+                            0,
                             t.message ?: ""
                         )
                     )

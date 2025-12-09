@@ -3,6 +3,7 @@
 package world.respect
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
@@ -189,6 +190,11 @@ import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForAp
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
+import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidChannelHost
+import world.respect.shared.domain.biometric.BiometricAuthManager
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
+import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.biometric.BiometricAuthProcessor
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
@@ -608,6 +614,9 @@ val appKoinModule = module {
         CustomDeepLinkToUrlUseCase(customProtocol = androidApplication().packageName)
     }
 
+    single<BiometricAuthUseCaseAndroidChannelHost> {
+        BiometricAuthUseCaseAndroidChannelHost()
+    }
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
@@ -626,7 +635,11 @@ val appKoinModule = module {
                 getDeviceInfoUseCase = get(),
             )
         }
-
+        scoped<BiometricAuthUseCase> {
+            BiometricAuthUseCaseAndroidImpl(
+                sender = get()
+            )
+        }
         scoped<RespectSchoolPath> {
             RespectSchoolPath(
                 path = Path(

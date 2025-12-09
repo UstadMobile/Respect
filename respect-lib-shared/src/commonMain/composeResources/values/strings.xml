@@ -351,6 +351,8 @@
     <string name="delete">Delete</string>
 
     <string name="accounts">Accounts</string>
+    <string name="biometric_login">Biometric login for my app</string>
+    <string name="login_using_biometric_credentials">Login using your biometric credentials</string>
 
     <string name="people">People</string>
     <string name="person">Person</string>

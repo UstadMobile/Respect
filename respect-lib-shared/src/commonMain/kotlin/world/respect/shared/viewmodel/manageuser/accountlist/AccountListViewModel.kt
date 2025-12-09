@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -22,8 +23,12 @@ import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
+import world.respect.shared.generated.resources.biometric_login
+import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.login_using_biometric_credentials
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -55,7 +60,9 @@ class AccountListViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val schoolDataSource: SchoolDataSource by inject()
-
+    private val biometricUseCase: BiometricAuthUseCase? by lazy {
+        scope.getOrNull()
+    }
     private var emittedNavToGetStartedCommand = false
 
     init {
@@ -68,6 +75,14 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
+            val result = biometricUseCase?.invoke(
+                BiometricAuthUseCase.BiometricPromptData(
+                    title = getString(Res.string.biometric_login),
+                    subtitle = getString(Res.string.login_using_biometric_credentials),
+                    useDeviceCredential = false,
+                    negativeButtonText =  getString(Res.string.cancel),
+                )
+            )
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
                     prev.copy(selectedAccount = accountAndPerson)
@@ -114,7 +129,7 @@ class AccountListViewModel(
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {
-                    activeAccount?.isSameAccount(it) == true && !it.startedViaParent
+                    activeAccount?.isSameAccount(it) == true || it.startedViaParent
                 }
 
                 _uiState.update { prev ->
@@ -178,6 +193,12 @@ class AccountListViewModel(
         if (parentGuid!=null){
             viewModelScope.launch {
                 respectAccountManager.startChildSessionWithParentGuid(person, parentGuid)
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        RespectAppLauncher(),
+                        clearBackStack = true
+                    )
+                )
             }
         }
     }

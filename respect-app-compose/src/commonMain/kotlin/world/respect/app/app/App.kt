@@ -29,14 +29,17 @@ import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.getKoin
+import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
@@ -111,6 +114,9 @@ fun App(
 
     val navController = rememberNavController()
 
+    val accountManager: RespectAccountManager = koinInject()
+    val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
+
     NavControllerLogEffect(navController)
 
     var appUiStateVal by appUiState
@@ -155,8 +161,19 @@ fun App(
                 var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
                 if (useBottomBar) {
                     if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
+
+                        val visibleNavItems = remember(activeAccount) {
+                            if (activeAccount?.account?.startedViaParent == true) {
+                                APP_TOP_LEVEL_NAV_ITEMS.filter {
+                                    it.destRoute is RespectAppLauncher || it.destRoute === AssignmentList
+                                }
+                            } else {
+                                APP_TOP_LEVEL_NAV_ITEMS
+                            }
+                        }
+
                         NavigationBar {
-                            APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
+                            visibleNavItems.forEachIndexed { index, item ->
                                 val label = stringResource(item.label)
                                 NavigationBarItem(
                                     icon = {

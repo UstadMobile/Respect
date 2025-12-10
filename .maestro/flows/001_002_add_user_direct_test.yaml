@@ -102,12 +102,75 @@ onFlowComplete:
 - tapOn: "Create account"
 - tapOn: "Username"
 - inputText: "testuser"
-- tapOn: "Password"  # Password validations needs to be added
+- assertVisible: "Quick and easy sign-in for students"
+- assertVisible: "Assign QR code badge"
+- tapOn: "Set password"
+- assertVisible: "Password*"
+- tapOn: "Save"
+- assertVisible: "Required field" # Password is mandatory field
+- tapOn: "Password*"
 - inputText: "test234"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Test User"
+    text: "Manage account"
+- assertVisible: "Last updated:.*"
+- assertVisible:
+       id: "password_change_btn"  # Change password button
+- tapOn: "Assign QR code badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn:
+     id: "more_options"
+- tapOn: "Paste URL"
+- tapOn:
+   id: "url"
+- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
+- tapOn: "OK"
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+- tapOn:
+    id: "qr_change_btn"
+- assertVisible: "Assign new badge (replace)"
+- assertVisible: "Revoke badge"
+
+
+- tapOn: "Assign new badge (replace)"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn:
+    id: "more_options"
+- tapOn: "Paste URL"
+- tapOn:
+    id: "url"
+- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
+- tapOn: "OK"
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+- tapOn:
+    id: "qr_change_btn"
+- tapOn: "Revoke badge"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "Assign QR code badge"
+
+- tapOn: "Assign QR code badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn:
+    id: "more_options"
+- tapOn: "Paste URL"
+- tapOn:
+    id: "url"
+- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
+- tapOn: "OK"
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+
 
 # Validate User login
 - clearState: world.respect.app

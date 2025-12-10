@@ -17,13 +17,18 @@ import org.acra.sender.HttpSender
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import qrgenerator.AppContext
 import world.respect.app.BuildConfig
 
 class RespectApp : Application(), SingletonImageLoader.Factory {
 
-
+    companion object {
+        lateinit var INSTANCE: RespectApp
+    }
     override fun onCreate() {
         super.onCreate()
+        INSTANCE = this
+        AppContext.set(applicationContext) // Important for QR kit
         Napier.base(DebugAntilog())
 
         //See https://stackoverflow.com/questions/23844667/how-do-i-detect-if-i-am-in-release-or-debug-mode

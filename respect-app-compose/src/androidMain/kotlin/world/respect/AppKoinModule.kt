@@ -141,6 +141,8 @@ import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.sharedschooldevicelogin.GetSharedDeviceEnabledUseCase
+import world.respect.shared.domain.sharedschooldevicelogin.SetSharedDeviceEnabledUseCase
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
@@ -210,6 +212,11 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.viewmodel.settings.SharedDeviceSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.EnterRollNumberViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectClassViewModel
+import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectStudentViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -316,6 +323,11 @@ val appKoinModule = module {
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::SharedDeviceSettingsViewModel)
+    viewModelOf(::SharedSchoolDeviceLoginSelectClassViewModel)
+    viewModelOf(::SharedSchoolDeviceLoginSelectStudentViewModel)
+    viewModelOf(::EnterRollNumberViewModel)
+    viewModelOf(::ScanQRCodeViewModel)
     viewModelOf(::CurriculumMappingListViewModel)
     viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)
@@ -598,6 +610,14 @@ val appKoinModule = module {
 
     single<SetDevModeEnabledUseCase> {
         SetDevModeEnabledUseCase(settings = get())
+    }
+
+    single<GetSharedDeviceEnabledUseCase> {
+        GetSharedDeviceEnabledUseCase(settings = get())
+    }
+
+    single<SetSharedDeviceEnabledUseCase> {
+        SetSharedDeviceEnabledUseCase(settings = get())
     }
 
     single<UrlToCustomDeepLinkUseCase> {

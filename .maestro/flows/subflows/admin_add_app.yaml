@@ -1,6 +1,7 @@
 appId: world.respect.app
 
 ---
+- tapOn: "Apps"
 - assertVisible:
     id: "app_title"
     text: "Apps"

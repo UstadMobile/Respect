@@ -4,28 +4,30 @@ appId: world.respect.app
 - tapOn: "Classes"
 - tapOn: "New Class"
 # Admin copy invite code to add student
-- tapOn: "Add Student"
+- tapOn: "Add Teacher"
 - tapOn: "Add person"
 - assertVisible:
     id: "app_title"
     text: "Add person"
 - tapOn: "First names*"
-- inputText: ${STUDENT_FIRSTNAME}
+- inputText: ${TEACHER_FIRSTNAME}
 - tapOn: "Last name*"
-- inputText: ${STUDENT_LASTNAME}
+- inputText: ${TEACHER_LASTNAME}
 - tapOn: "Gender*"
 - tapOn: "Female"
+- tapOn: "Role*"
+- tapOn: "Teacher"
 - tapOn: "Save"
-- tapOn: ${STUDENT_FIRSTNAME} ${STUDENT_LASTNAME}
+- tapOn: ${TEACHER_FIRSTNAME} ${TEACHER_LASTNAME}
 - assertVisible:
     id: "app_title"
-    text: ${STUDENT_FIRSTNAME} ${STUDENT_LASTNAME}
+    text: ${TEACHER_FIRSTNAME} ${TEACHER_LASTNAME}
 - tapOn: "Create account"
 - tapOn:  "Username"
-- inputText: ${STUDENT_USERNAME}
+- inputText: ${TEACHER_USERNAME}
 - tapOn: "Password*"
-- inputText: ${STUDENT_PASSWORD}
+- inputText: ${TEACHER_PASSWORD}
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: ${STUDENT_FIRSTNAME} ${STUDENT_LASTNAME}
+    text: ${TEACHER_FIRSTNAME} ${TEACHER_LASTNAME}

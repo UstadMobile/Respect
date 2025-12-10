@@ -16,37 +16,43 @@ onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/admin_add_app_and_teacher.yaml"
-
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-
-- tapOn: "Get Started"
-
+# Admin login to the Respect app
+- runFlow: "subflows/school_admin_login_flow.yaml"
+# Admin add a new class to the Respect app
+- runFlow: "subflows/admin_add_class.yaml"
+# Admin add a new app to the Apps screen
+- runFlow: "subflows/admin_add_app.yaml"
+# Admin add a teacher to the class
 - runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
+    file: "subflows/admin_add_teacher.yaml"
     env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-
-- tapOn:
-    id: "username"
-- inputText: "teacheruser"
-- tapOn:
-    id : "password"
-- inputText: "testt1"
-- tapOn: "Login"
+      TEACHER_FIRSTNAME: "TeacherA"
+      TEACHER_LASTNAME: "User"
+      TEACHER_USERNAME: "teachera"
+      TEACHER_PASSWORD: "testta"
+# Admin add 2 students to the class
 - runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
-- tapOn: "Classes"
-- assertVisible:
-    id: "app_title"
-    text: "Classes"
-- assertVisible: "New Class"
+    file: "subflows/admin_add_student.yaml"
+    env:
+      STUDENT_FIRSTNAME: "StudentA"
+      STUDENT_LASTNAME: "User"
+      STUDENT_USERNAME: "studenta"
+      STUDENT_PASSWORD: "testsa"
+- runFlow:
+    file: "subflows/admin_add_student.yaml"
+    env:
+      STUDENT_FIRSTNAME: "StudentB"
+      STUDENT_LASTNAME: "User"
+      STUDENT_USERNAME: "studentb"
+      STUDENT_PASSWORD: "testsb"
+
+# Teacher add a new assignment and assign to the class
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USER_USERNAME: "teachera"
+      USER_PASSWORD: "testta"
+
 - tapOn: "Assignments"
 - tapOn:
     id: "floating_action_button"   #  +Assignment button
@@ -59,6 +65,8 @@ onFlowComplete:
 - inputText: "Homework 1"
 - tapOn: "Class"
 - tapOn: "New Class"
+- tapOn: "Description"
+- inputText: "Test text"
 - tapOn: "Date"
 - runScript:
     file: "scripts/setDate.js"
@@ -67,6 +75,8 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
+- tapOn: "Class comments"
+- inputText: "Hi Students, please do complete this assignment before the deadline"
 - tapOn: "Lesson/assessment"
 - assertVisible:
     id: "app_title"
@@ -81,3 +91,34 @@ onFlowComplete:
 - back
 - assertVisible: "Homework 1"
 
+# Student A complete the assignment
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USER_USERNAME: "studenta"
+      USER_PASSWORD: "testsa"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- tapOn: "Lesson_001"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 1000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+
+# Teacher able to see the assignment progress
+- runFlow:
+      file: "subflows/school_user_login_flow.yaml"
+      env:
+        USER_USERNAME: "teachera"
+        USER_PASSWORD: "testta"
+- tapOn: "Login"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible: "Completed"
+- assertVisible: "1/2"
+- assertVisible: "StudentA User"
+- assertVisible: "Lesson_001"
+- assertVisible: "100%"
+- assertVisible: "StudentB User"

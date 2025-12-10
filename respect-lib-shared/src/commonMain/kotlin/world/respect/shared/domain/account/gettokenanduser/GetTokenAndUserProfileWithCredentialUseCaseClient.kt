@@ -31,7 +31,7 @@ class GetTokenAndUserProfileWithCredentialUseCaseClient(
                 appendPathSegments("api/school/respect/auth/auth-with-password")
             }
             header(
-                key = DeviceInfo.Companion.HEADER_NAME,
+                key = DeviceInfo.HEADER_NAME,
                 value = (deviceInfo ?: getDeviceInfoUseCase()).toHeaderLine(),
             )
 

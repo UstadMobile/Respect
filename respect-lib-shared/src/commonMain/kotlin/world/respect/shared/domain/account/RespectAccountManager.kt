@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -25,6 +26,8 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
@@ -37,9 +40,6 @@ import world.respect.shared.util.ext.isSameAccount
  *
  * @property accounts all the accounts that the user has signed in. The user can use the account
  *           switcher to switch between them.
- * @property selectedAccount The selected account is the stored account that the user has currently
- *           selected (eg the one normally displayed in the top right). The selectedAccount is null
- *           if the user has not signed in yet.
  */
 class RespectAccountManager(
     private val settings: Settings,
@@ -56,54 +56,66 @@ class RespectAccountManager(
 
     val accounts = _storedAccounts.asStateFlow()
 
-    private val _selectedAccountGuid = MutableStateFlow(
-        settings.getStringOrNull(SETTINGS_KEY_ACTIVE_ACCOUNT)
+    private val _activeSession = MutableStateFlow(
+        settings.getStringOrNull(SETTINGS_KEY_ACTIVE_SESSION)?.let {
+            json.decodeFromString(RespectSession.serializer(), it)
+        }
     )
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default + Job())
 
-    var selectedAccount: RespectAccount?
-        get() = _storedAccounts.value.firstOrNull {
-            it.userGuid == _selectedAccountGuid.value
-        }
-
-        set(value) {
-            if(value == null) {
-                _selectedAccountGuid.value = null
-                settings.remove(SETTINGS_KEY_ACTIVE_ACCOUNT)
-            }else {
-                if(!_storedAccounts.value.any { it.userGuid == value.userGuid }) {
-                    val newValue = _storedAccounts.updateAndGet { prev ->
-                        listOf(value) + prev
-                    }
-                    settings[SETTINGS_KEY_STORED_ACCOUNTS] = json.encodeToString(newValue)
-                }
-
-                _selectedAccountGuid.value = value.userGuid
-                settings.set(SETTINGS_KEY_ACTIVE_ACCOUNT, value.userGuid)
+    /**
+     * The active account is the stored account that the user has currently
+     * selected (eg the one normally displayed in the top right). The active account is null
+     * if the user is not currently signed in.
+     */
+    val activeAccount: RespectAccount?
+        get() {
+            val activeSessionVal = _activeSession.value ?: return null
+            return _storedAccounts.value.firstOrNull {
+                it.isSameAccount(activeSessionVal.account)
             }
         }
 
     val selectedAccountFlow: Flow<RespectAccount?> = _storedAccounts.combine(
-        _selectedAccountGuid
-    ) { accountList, activeAccountSourcedId ->
-        accountList.firstOrNull { it.userGuid == activeAccountSourcedId }
+        _activeSession
+    ) { accountList, activeSession ->
+        if(activeSession == null) {
+            null
+        } else {
+            accountList.firstOrNull { activeSession.account.isSameAccount(it) }
+        }
     }
 
-    val selectedAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
-        selectedAccountFlow.collectLatest { account ->
-            val person = if(account != null) {
-                val accountScope = getOrCreateAccountScope(account)
+    val selectedAccountAndPersonFlow: Flow<RespectSessionAndPerson?> =channelFlow {
+        _activeSession.collectLatest { session ->
+            if(session != null) {
+                val accountScope = getOrCreateAccountScope(session.account)
                 val schoolDataSource: SchoolDataSource = accountScope.get()
-                schoolDataSource.personDataSource.findByGuid(
-                    DataLoadParams(onlyIfCached = true), account.userGuid
-                ).dataOrNull()
-            }else {
-                null
-            }
+                val activePersonUid = (session.profilePersonUid ?: session.account.userGuid)
 
-            if(account != null && person != null) {
-                send(RespectAccountAndPerson(account, person))
+                schoolDataSource.personDataSource.listAsFlow(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        common = GetListCommonParams(
+                            guid = session.account.userGuid
+                        ),
+                        includeRelated = true,
+                    )
+                ).collect { persons ->
+                    val personsVal = persons.dataOrNull()
+                    send(
+                        element = personsVal?.firstOrNull {
+                            it.guid == activePersonUid
+                        }?.let { activeProfilePerson ->
+                            RespectSessionAndPerson(
+                                session = session,
+                                person = activeProfilePerson,
+                                relatedPersons = personsVal.filterNot { it.guid == activePersonUid },
+                            )
+                        }
+                    )
+                }
             }else {
                 send(null)
             }
@@ -111,7 +123,7 @@ class RespectAccountManager(
     }.shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
 
     init {
-        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
+        putDebugCrashCustomData("SelectedAccount", activeAccount.toString())
     }
 
     /**
@@ -138,7 +150,7 @@ class RespectAccountManager(
             school = schoolDirectoryEntry,
         )
 
-        initSession(authResponse, respectAccount)
+        initSession(authResponse, RespectSession(respectAccount, null))
     }
 
     @Suppress("unused")
@@ -162,28 +174,39 @@ class RespectAccountManager(
 
         initSession(
             authResponse = authResponse,
-            respectAccount = RespectAccount(
-                authResponse.person.guid, schoolDirectoryEntry
+            session = RespectSession(
+                account = RespectAccount(
+                    authResponse.person.guid, schoolDirectoryEntry
+                ),
+                profilePersonUid = null,
             )
         )
     }
 
     private suspend fun initSession(
         authResponse: AuthResponse,
-        respectAccount: RespectAccount,
+        session: RespectSession,
     ) {
         val schoolScope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
-            SchoolDirectoryEntryScopeId(respectAccount.school.self, null).scopeId
+            SchoolDirectoryEntryScopeId(
+                schoolUrl = session.account.school.self, accountPrincipalId = null,
+            ).scopeId
         )
-        tokenManager.storeToken(respectAccount.scopeId, authResponse.token)
+        tokenManager.storeToken(session.account.scopeId, authResponse.token)
 
-        val accountScope = getOrCreateAccountScope(respectAccount)
+        val accountScope = getOrCreateAccountScope(session.account)
 
         val schoolDataSource: SchoolDataSource = accountScope.get()
 
         //Ensure the active user is loaded into the database
-        schoolDataSource.personDataSource.findByGuid(
-            DataLoadParams(), authResponse.person.guid
+        schoolDataSource.personDataSource.list(
+            loadParams = DataLoadParams(),
+            params = PersonDataSource.GetListParams(
+                common = GetListCommonParams(
+                    guid = authResponse.person.guid
+                ),
+                includeRelated = true,
+            )
         )
 
         //Load school permission grants (rules)
@@ -195,15 +218,34 @@ class RespectAccountManager(
         val mkDirUseCase: MakeSchoolPathDirUseCase? = schoolScope.getOrNull()
         mkDirUseCase?.invoke()
 
-        selectedAccount = respectAccount
-        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
+        _activeSession.value = session
+
+        if(!_storedAccounts.value.any { it.isSameAccount(session.account) }) {
+            val newValue = _storedAccounts.updateAndGet { prev ->
+                listOf(session.account) + prev
+            }
+
+            settings[SETTINGS_KEY_STORED_ACCOUNTS] = json.encodeToString(newValue)
+        }
+
+        settings[SETTINGS_KEY_ACTIVE_SESSION] = json.encodeToString(session)
+
+        putDebugCrashCustomData("SelectedAccount", activeAccount.toString())
     }
 
 
+    /**
+     * Remove the given account from the list of stored accounts. If the given account is also the
+     * used for the active session, the session is ended and the active session will be null (e.g.
+     * when the user logs out).
+     */
     @Suppress("RedundantSuspendModifier") //Likely needs to be suspended to communicate to server
-    suspend fun endSession(account: RespectAccount) {
-        if(selectedAccount?.isSameAccount(account) == true) {
-            selectedAccount = null
+    suspend fun removeAccount(account: RespectAccount) {
+        _activeSession.update { prev ->
+            if(prev?.account?.isSameAccount(account) == true )
+                null
+            else
+                prev
         }
 
         val accountScope = getOrCreateAccountScope(account)
@@ -234,6 +276,14 @@ class RespectAccountManager(
 
     }
 
+    fun switchAccount(account: RespectAccount) {
+        if(!_storedAccounts.value.any { it.isSameAccount(account) }) {
+            throw IllegalArgumentException("switchAccount: account not stored/available")
+        }
+
+        _activeSession.value = RespectSession(account, null)
+    }
+
     /**
      * When the RespectAccount scope is created it MUST be linked to the parent school scope.
      */
@@ -241,8 +291,8 @@ class RespectAccountManager(
         return getKoin().getOrCreateScope<RespectAccount>(account.scopeId)
     }
 
-    fun requireSelectedAccountScope(): Scope {
-        return selectedAccount?.let { getOrCreateAccountScope(it) }
+    fun requireActiveAccountScope(): Scope {
+        return activeAccount?.let { getOrCreateAccountScope(it) }
             ?: throw IllegalStateException("require scope for selected account: no account selected")
     }
 
@@ -252,6 +302,6 @@ class RespectAccountManager(
 
         const val SETTINGS_KEY_STORED_ACCOUNTS = "accountmanager-storedaccounts"
 
-        const val SETTINGS_KEY_ACTIVE_ACCOUNT = "accountmanager-activeaccount"
+        const val SETTINGS_KEY_ACTIVE_SESSION = "accountmanager-activesession"
     }
 }

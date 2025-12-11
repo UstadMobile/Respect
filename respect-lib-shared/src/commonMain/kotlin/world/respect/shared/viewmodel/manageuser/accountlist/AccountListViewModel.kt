@@ -8,16 +8,27 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
+import world.respect.shared.generated.resources.biometric_login
+import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.login_using_biometric_credentials
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -34,16 +45,21 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectAccountAndPerson? = null,
     val accounts: List<RespectAccountAndPerson> = emptyList(),
+    val familyPersons: List<Person> = emptyList(),
 )
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle){
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = respectAccountManager.requireSelectedAccountScope()
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private var emittedNavToGetStartedCommand = false
 
@@ -85,11 +101,25 @@ class AccountListViewModel(
 
                     return@collectLatest
                 }
-
+                val personList = schoolDataSource.personDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        common = GetListCommonParams(
+                            guid = activeAccount?.userGuid
+                        ),
+                        includeRelated = true
+                    )
+                )
+                _uiState.update { prev ->
+                    prev.copy(familyPersons = personList.dataOrNull()?.filter
+                    {
+                        it.guid != activeAccount?.userGuid
+                    } ?: emptyList())
+                }
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {
-                    activeAccount?.isSameAccount(it) == true
+                    activeAccount?.isSameAccount(it) == true || it.startedViaParent
                 }
 
                 _uiState.update { prev ->
@@ -148,6 +178,20 @@ class AccountListViewModel(
         )
     }
 
+    fun onClickFamilyPerson(person: Person) {
+        val parentGuid = uiState.value.selectedAccount?.account?.userGuid
+        if (parentGuid!=null){
+            viewModelScope.launch {
+                respectAccountManager.startChildSessionWithParentGuid(person, parentGuid)
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        RespectAppLauncher(),
+                        clearBackStack = true
+                    )
+                )
+            }
+        }
+    }
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(GetStartedScreen(canGoBack = true))

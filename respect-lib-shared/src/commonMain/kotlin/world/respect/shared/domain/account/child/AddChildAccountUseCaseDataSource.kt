@@ -34,9 +34,6 @@ class AddChildAccountUseCaseDataSource(
             Person.TABLE_ID
         ).toString()
 
-        val parentWithRel = parentPerson.copy(
-            relatedPersonUids = parentPerson.relatedPersonUids + childUid
-        )
 
         val childPerson = personInfo.toPerson(
             role = PersonRoleEnum.STUDENT,
@@ -53,10 +50,18 @@ class AddChildAccountUseCaseDataSource(
             role = EnrollmentRoleEnum.PENDING_STUDENT,
             inviteCode = inviteCode,
         )
-
         schoolDataSource.personDataSource.store(
-            listOf(parentWithRel, childPerson)
+            listOf( childPerson)
         )
+
+
+        val parentWithRel = parentPerson.copy(
+            relatedPersonUids = parentPerson.relatedPersonUids + childUid
+        )
+        schoolDataSource.personDataSource.store(
+            listOf( parentWithRel)
+        )
+
 
         schoolDataSource.enrollmentDataSource.store(listOf(enrollment))
     }

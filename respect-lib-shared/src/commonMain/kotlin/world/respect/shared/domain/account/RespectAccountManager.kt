@@ -20,6 +20,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.model.Person
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -229,7 +230,46 @@ class RespectAccountManager(
         return selectedAccount?.let { getOrCreateAccountScope(it) }
             ?: throw IllegalStateException("require scope for selected account: no account selected")
     }
+    suspend fun startChildSessionWithParentToken(
+        child: RespectAccount,
+        parent: RespectAccount
+    ) {
+        val parentToken = tokenManager.providerFor(parent.scopeId).provideToken()
 
+        tokenManager.storeToken(child.scopeId, parentToken)
+
+        val childAccountScope = getOrCreateAccountScope(child)
+
+        val schoolDataSource: SchoolDataSource = childAccountScope.get()
+        schoolDataSource.personDataSource.findByGuid(
+            DataLoadParams(),
+            child.userGuid
+        )
+
+        val schoolScope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(child.school.self, null).scopeId
+        )
+        val mkDirUseCase: MakeSchoolPathDirUseCase? = schoolScope.getOrNull()
+        mkDirUseCase?.invoke()
+
+        selectedAccount = child
+        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
+    }
+
+    suspend fun startChildSessionWithParentGuid(
+        child: Person,
+        parentUserGuid: String
+    ) {
+
+        val parent = _storedAccounts.value.firstOrNull { it.userGuid == parentUserGuid }
+            ?: throw IllegalStateException("Parent account not found for userGuid=$parentUserGuid")
+       val childAccount = RespectAccount(
+            userGuid = child.guid,
+            school = parent.school,
+            startedViaParent = true
+        )
+        startChildSessionWithParentToken(childAccount, parent)
+    }
 
 
     companion object {

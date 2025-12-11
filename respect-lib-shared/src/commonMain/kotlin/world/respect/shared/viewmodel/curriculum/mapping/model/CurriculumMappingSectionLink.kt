@@ -9,5 +9,6 @@ import kotlinx.serialization.Serializable
 data class CurriculumMappingSectionLink(
     val uid: Long = System.currentTimeMillis(),
     val href: String,
-    val title: String? = ""
+    val title: String? = "",
+    val description: String? = null
 )

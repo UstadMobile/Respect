@@ -79,10 +79,11 @@ class CurriculumMappingEditViewModel(
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
 
     private val mappingUid = route.textbookUid
+    private val mappingData = route.mappingData
 
     private val _uiState = MutableStateFlow(
         CurriculumMappingEditUiState(
-            mapping = CurriculumMapping(uid = mappingUid),
+            mapping = mappingData ?: CurriculumMapping(uid = mappingUid),
             isNew = mappingUid == 0L
         )
     )

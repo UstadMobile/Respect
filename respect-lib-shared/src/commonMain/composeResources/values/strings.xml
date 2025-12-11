@@ -469,8 +469,11 @@
     <string name="create_playlist">Create Playlist</string>
     <string name="error_loading_playlists">Error loading playlists</string>
     <string name="add_new">Add new</string>
-    <string name="add_playlist">Add playlist</string>
+    <string name="add_from_a_link">Add from a link</string>
+    <string name="add_playlist">Playlist</string>
+    <string name="copy_playlist">Copy playlist</string>
     <string name="all_sections_items">All sections,  items</string>
     <string name="created_by">Created by: </string>
+    <string name="edit_playlist">Edit playlist</string>
 
 </resources>

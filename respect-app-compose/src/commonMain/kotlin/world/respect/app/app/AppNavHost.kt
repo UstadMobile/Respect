@@ -17,6 +17,7 @@ import world.respect.app.view.assignment.list.AssignmentListScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
+import world.respect.app.view.curriculum.mapping.detail.CurriculumMappingDetailScreenForViewModel
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
@@ -136,12 +137,14 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.shared.navigation.CurriculumMappingDetail
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.viewmodel.curriculum.mapping.detail.CurriculumMappingDetailViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
@@ -555,6 +558,15 @@ fun AppNavHost(
                 navController = respectNavController
             )
             CurriculumMappingEditScreenForViewModel(
+                viewModel = viewModel
+            )
+        }
+        composable<CurriculumMappingDetail> {
+            val viewModel: CurriculumMappingDetailViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            CurriculumMappingDetailScreenForViewModel(
                 viewModel = viewModel
             )
         }

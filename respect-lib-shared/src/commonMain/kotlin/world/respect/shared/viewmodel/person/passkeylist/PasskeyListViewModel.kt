@@ -47,7 +47,7 @@ class PasskeyListViewModel(
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by lazy {
         scope.getOrNull()

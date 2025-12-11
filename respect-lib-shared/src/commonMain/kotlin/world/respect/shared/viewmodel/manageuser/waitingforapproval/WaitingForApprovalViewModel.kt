@@ -33,7 +33,7 @@ class WaitingForApprovalViewModel(
     private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(WaitingForApprovalUiState())
 
@@ -52,7 +52,7 @@ class WaitingForApprovalViewModel(
         }
 
         viewModelScope.launch {
-            val activeUserUid = accountManager.selectedAccount?.userGuid ?: return@launch
+            val activeUserUid = accountManager.activeAccount?.userGuid ?: return@launch
 
             while(true) {
                 val personLoaded = schoolDataSource.personDataSource

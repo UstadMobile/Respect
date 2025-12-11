@@ -142,7 +142,7 @@ class AccountListViewModel(
     }
 
     fun onClickAccount(account: RespectAccount) {
-        respectAccountManager.selectedAccount = account
+        respectAccountManager.switchAccount(account)
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
         )
@@ -169,7 +169,7 @@ class AccountListViewModel(
     fun onClickLogout() {
         uiState.value.selectedAccount?.also {
             viewModelScope.launch {
-                respectAccountManager.endSession(it.account)
+                respectAccountManager.removeAccount(it.account)
             }
         }
     }

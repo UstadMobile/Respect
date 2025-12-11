@@ -62,7 +62,7 @@ class ManageAccountViewModel(
     private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase by lazy {
         scope.get()
@@ -145,7 +145,7 @@ class ManageAccountViewModel(
         _uiState.update { prev ->
             prev.copy(
                 passkeySupported = (createPasskeyUseCase != null &&
-                        accountManager.selectedAccount?.userGuid == personGuid),
+                        accountManager.activeAccount?.userGuid == personGuid),
             )
         }
     }

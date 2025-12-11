@@ -100,10 +100,12 @@ onFlowComplete:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
-- tapOn: "Username"
-- inputText: "testuser"
+- assertVisible: "Username"
+- assertVisible: "testuser" #Automatically generated
 - assertVisible: "Quick and easy sign-in for students"
 - assertVisible: "Assign QR code badge"
+
+  # Set password for the user
 - tapOn: "Set password"
 - assertVisible: "Password*"
 - tapOn: "Save"
@@ -114,9 +116,11 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Manage account"
-- assertVisible: "Last updated:.*"
 - assertVisible:
-       id: "password_change_btn"  # Change password button
+    id: "password_change_btn"  # Change password button
+- assertVisible: "Last updated:.*"
+
+ # Assign QR code badge for the user
 - tapOn: "Assign QR code badge"
 - assertVisible:
     id: "app_title"
@@ -126,6 +130,10 @@ onFlowComplete:
 - tapOn: "Paste URL"
 - tapOn:
    id: "url"
+- inputText: "https://school.example.org"  #Invalid url
+- tapOn: "OK"
+- assertVisible: "Invalid url, please try again"
+- eraseText
 - inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
 - tapOn: "OK"
 - assertVisible: "QR code badge"
@@ -135,20 +143,15 @@ onFlowComplete:
 - assertVisible: "Assign new badge (replace)"
 - assertVisible: "Revoke badge"
 
-
+# Verify the button Assign new badge (replace) takes user to Scan QR code screen
 - tapOn: "Assign new badge (replace)"
 - assertVisible:
     id: "app_title"
     text: "Scan QR code badge"
-- tapOn:
-    id: "more_options"
-- tapOn: "Paste URL"
-- tapOn:
-    id: "url"
-- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
-- tapOn: "OK"
+- back
 - assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
+
+# Verify the button - Revoke badge, it should remove the assigned badge
 - tapOn:
     id: "qr_change_btn"
 - tapOn: "Revoke badge"
@@ -171,27 +174,24 @@ onFlowComplete:
 - assertVisible: "QR code badge"
 - assertVisible: "Badge.*"
 
+# Validate User QR Login using Scan QR/badge
 
-# Validate User login
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-
+- tapOn: "Scan QR/badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR/badge"
 - tapOn:
-    id: "username"
-- inputText: "testuser"
+    id: "more_options"
+- tapOn: "Paste URL"
 - tapOn:
-    id : "password"
-- inputText: "test234"
-- tapOn: "Login"
+    id: "url"
+- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
+- tapOn: "OK"
 - runFlow:
     when:
       visible: "Save password for Respect?"

@@ -45,7 +45,7 @@ class ReportListViewModel(
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val _uiState = MutableStateFlow(ReportListUiState())
     val uiState: Flow<ReportListUiState> = _uiState.asStateFlow()
     private val schoolDataSource: SchoolDataSource by inject()

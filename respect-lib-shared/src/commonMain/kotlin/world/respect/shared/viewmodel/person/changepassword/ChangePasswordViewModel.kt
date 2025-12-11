@@ -52,7 +52,7 @@ class ChangePasswordViewModel(
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource : SchoolDataSource by inject()
 

@@ -103,7 +103,7 @@ class ClazzListViewModel(
                 }
 
                 schoolDataSource.enrollmentDataSource.takeIf {
-                    selectedAcct?.account?.userGuid != null
+                    selectedAcct?.session?.account?.userGuid != null
                 }?.list(
                     loadParams = DataLoadParams(),
                     listParams = EnrollmentDataSource.GetListParams(

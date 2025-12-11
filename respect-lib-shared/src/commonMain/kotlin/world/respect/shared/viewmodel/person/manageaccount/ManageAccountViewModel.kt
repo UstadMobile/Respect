@@ -20,7 +20,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
 import world.respect.datalayer.school.model.PersonPassword
-import world.respect.shared.domain.account.RespectAccountAndPerson
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
@@ -43,7 +43,7 @@ data class ManageAccountUiState(
     val personUsername: String = "",
     val personPassword: DataLoadState<PersonPassword> = DataLoadingState(),
     val errorText: UiText? = null,
-    val selectedAccount: RespectAccountAndPerson? = null,
+    val selectedAccount: RespectSessionAndPerson? = null,
 ) {
 
     val showCreatePasskey: Boolean
@@ -180,7 +180,7 @@ class ManageAccountViewModel(
                 CreatePasskeyUseCase.Request(
                     personUid = uiState.value.selectedAccount?.person?.guid ?: return@launch,
                     username = uiState.value.selectedAccount?.person?.username ?: return@launch,
-                    rpId = uiState.value.selectedAccount?.account?.school?.rpId ?: return@launch
+                    rpId = uiState.value.selectedAccount?.session?.account?.school?.rpId ?: return@launch
                 )
             )
 

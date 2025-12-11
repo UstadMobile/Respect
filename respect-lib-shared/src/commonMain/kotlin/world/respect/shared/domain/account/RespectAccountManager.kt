@@ -3,12 +3,17 @@ package world.respect.shared.domain.account
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import io.ktor.http.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
@@ -54,6 +59,8 @@ class RespectAccountManager(
         }
     )
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + Job())
+
     /**
      * The active account is the stored account that the user has currently
      * selected (eg the one normally displayed in the top right). The active account is null
@@ -77,25 +84,21 @@ class RespectAccountManager(
         }
     }
 
-    val selectedAccountAndPersonFlow: Flow<RespectAccountAndPerson?> = channelFlow {
-        selectedAccountFlow.collectLatest { account ->
-            val person = if(account != null) {
-                val accountScope = getOrCreateAccountScope(account)
-                val schoolDataSource: SchoolDataSource = accountScope.get()
-                schoolDataSource.personDataSource.findByGuid(
-                    DataLoadParams(onlyIfCached = true), account.userGuid
-                ).dataOrNull()
-            }else {
-                null
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val selectedAccountAndPersonFlow: Flow<RespectSessionAndPerson?> =_activeSession.mapLatest { session  ->
+        if(session != null) {
+            val accountScope = getOrCreateAccountScope(session.account)
+            val schoolDataSource: SchoolDataSource = accountScope.get()
+            schoolDataSource.personDataSource.findByGuid(
+                loadParams = DataLoadParams(onlyIfCached = true),
+                guid = session.profilePersonUid ?: session.account.userGuid
+            ).dataOrNull()?.let {
+                RespectSessionAndPerson(session, it)
             }
-
-            if(account != null && person != null) {
-                send(RespectAccountAndPerson(account, person))
-            }else {
-                send(null)
-            }
+        }else {
+            null
         }
-    }
+    }.shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
 
     init {
         putDebugCrashCustomData("SelectedAccount", activeAccount.toString())

@@ -116,7 +116,7 @@ class PasskeyListViewModel(
             try {
                 val accountAndPerson = accountManager.selectedAccountAndPersonFlow.first()
                 val username = accountAndPerson?.person?.username ?: return@launch
-                val rpId = accountAndPerson.account.school.rpId ?: return@launch
+                val rpId = accountAndPerson.session.account.school.rpId ?: return@launch
                 val passkeyResult = createPasskeyUseCase?.invoke(
                     request = CreatePasskeyUseCase.Request(
                         personUid = accountAndPerson.person.guid,

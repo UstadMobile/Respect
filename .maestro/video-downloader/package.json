@@ -1,5 +1,5 @@
 {
-  "name": "maestro-video-downloader",
+  "name": "respect",
   "version": "1.0.0",
   "private": true,
   "description": "Cypress helper to download Maestro Cloud test videos automatically.",

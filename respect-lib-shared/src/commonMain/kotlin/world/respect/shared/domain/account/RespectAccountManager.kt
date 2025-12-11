@@ -5,14 +5,14 @@ import com.russhwolf.settings.set
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -26,6 +26,8 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -84,19 +86,38 @@ class RespectAccountManager(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val selectedAccountAndPersonFlow: Flow<RespectSessionAndPerson?> =_activeSession.mapLatest { session  ->
-        if(session != null) {
-            val accountScope = getOrCreateAccountScope(session.account)
-            val schoolDataSource: SchoolDataSource = accountScope.get()
-            schoolDataSource.personDataSource.findByGuid(
-                loadParams = DataLoadParams(onlyIfCached = true),
-                guid = session.profilePersonUid ?: session.account.userGuid
-            ).dataOrNull()?.let {
-                RespectSessionAndPerson(session, it)
+    val selectedAccountAndPersonFlow: Flow<RespectSessionAndPerson?> =channelFlow {
+        _activeSession.collectLatest { session ->
+            if(session != null) {
+                val accountScope = getOrCreateAccountScope(session.account)
+                val schoolDataSource: SchoolDataSource = accountScope.get()
+                val activePersonUid = (session.profilePersonUid ?: session.account.userGuid)
+
+                schoolDataSource.personDataSource.listAsFlow(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        common = GetListCommonParams(
+                            guid = session.account.userGuid
+                        ),
+                        includeRelated = true,
+                    )
+                ).collect { persons ->
+                    val personsVal = persons.dataOrNull()
+                    send(
+                        element = personsVal?.firstOrNull {
+                            it.guid == activePersonUid
+                        }?.let { activeProfilePerson ->
+                            RespectSessionAndPerson(
+                                session = session,
+                                person = activeProfilePerson,
+                                relatedPersons = personsVal.filterNot { it.guid == activePersonUid },
+                            )
+                        }
+                    )
+                }
+            }else {
+                send(null)
             }
-        }else {
-            null
         }
     }.shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
 
@@ -177,8 +198,14 @@ class RespectAccountManager(
         val schoolDataSource: SchoolDataSource = accountScope.get()
 
         //Ensure the active user is loaded into the database
-        schoolDataSource.personDataSource.findByGuid(
-            DataLoadParams(), authResponse.person.guid
+        schoolDataSource.personDataSource.list(
+            loadParams = DataLoadParams(),
+            params = PersonDataSource.GetListParams(
+                common = GetListCommonParams(
+                    guid = authResponse.person.guid
+                ),
+                includeRelated = true,
+            )
         )
 
         //now we can get the datalayer by creating a RespectAccount scope

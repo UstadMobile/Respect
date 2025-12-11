@@ -10,7 +10,9 @@ import kotlinx.serialization.Serializable
  *
  * @param account the account associated with credentials that were used to get a token and actually
  *        run the session
- * @param profilePersonUid where the
+ * @param profilePersonUid where the active user of the session is not the account holder, this
+ *        will be the personuid of the active user (e.g. the child's personUid when the session
+ *        was started through the parent's account).
  */
 @Serializable
 data class RespectSession(

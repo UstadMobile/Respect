@@ -14,6 +14,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.generated.resources.mapping
 import world.respect.shared.generated.resources.mappings
+import world.respect.shared.navigation.CurriculumMappingDetail
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
@@ -47,13 +48,15 @@ class CurriculumMappingListViewModel(
             prev.copy(
                 title = Res.string.mappings.asUiText(),
                 userAccountIconVisible = true,
+               /*
                 fabState = FabUiState(
                     visible = true,
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.mapping.asUiText(),
                     onClick = ::onClickMap,
                 ),
-                hideBottomNavigation = true,
+                */
+                hideBottomNavigation = false,
             )
         }
         viewModelScope.launch {
@@ -109,7 +112,7 @@ class CurriculumMappingListViewModel(
     fun onClickMapping(mapping: CurriculumMapping) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                CurriculumMappingEdit.create(
+                CurriculumMappingDetail.create(
                     uid = mapping.uid,
                     mappingData = mapping
                 )
@@ -124,7 +127,9 @@ class CurriculumMappingListViewModel(
             )
         )
     }
-
+    fun onClickAddFromLink() {
+        // TODO: Implement add from link functionality
+    }
     fun onClickMoreOptions(mapping: CurriculumMapping) {
         // TODO
     }
@@ -140,6 +145,6 @@ class CurriculumMappingListViewModel(
     }
 
     companion object {
-        private const val KEY_MAPPINGS_LIST = "mappings_list"
+        const val KEY_MAPPINGS_LIST = "mappings_list"
     }
 }

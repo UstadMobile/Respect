@@ -23,6 +23,7 @@ import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit_mapping
+import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.CurriculumMappingEdit
@@ -91,10 +92,10 @@ class CurriculumMappingEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = Res.string.edit_mapping.asUiText(),
+                title = Res.string.edit_playlist.asUiText(),
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = false,
+                    visible = true,
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),

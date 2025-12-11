@@ -9,7 +9,9 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.ClassEntityWithPermissions
+import world.respect.datalayer.db.school.entities.LastModifiedAndPermission
 import world.respect.datalayer.school.model.PermissionFlags
+import world.respect.datalayer.school.model.StatusEnum
 
 @Dao
 interface ClassEntityDao {
@@ -49,6 +51,7 @@ interface ClassEntityDao {
         since: Long = 0,
         guidHash: Long = 0,
         code: String? = null,
+        requiredPermission: Long = PermissionFlags.CLASS_READ,
     ): PagingSource<Int, ClassEntityWithPermissions>
 
 
@@ -59,6 +62,7 @@ interface ClassEntityDao {
         since: Long = 0,
         guidHash: Long = 0,
         code: String? = null,
+        requiredPermission: Long = PermissionFlags.CLASS_READ
     ): List<ClassEntityWithPermissions>
 
     @Query("""
@@ -76,31 +80,54 @@ interface ClassEntityDao {
     """)
     suspend fun findByInviteCode(code: String): List<ClassEntityWithPermissions>
 
-
+    @Query("""
+          WITH $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
+        SELECT ClassEntity.cGuidHash AS uidNum,
+               ClassEntity.cLastModified AS lastModified,
+               ($PERMISSION_CHECK_SQL) AS hasPermission
+          FROM ClassEntity
+        WHERE ClassEntity.cGuidHash = :classUidNum
+    """)
+    suspend fun getLastModifiedAndHasPermission(
+        authenticatedPersonUidNum: Long,
+        classUidNum: Long,
+        requiredPermission: Long,
+    ): LastModifiedAndPermission?
 
     companion object {
 
-        const val LIST_SQL = """
-        WITH AuthenticatedUserEnrollments AS (
+        /**
+         * CTE SQL to get a list of enrollments for the authenticated user (needed for permission
+         * checks).
+         */
+        const val AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL = """
+        AuthenticatedUserEnrollments AS (
              SELECT EnrollmentEntity.*
                FROM EnrollmentEntity
               WHERE EnrollmentEntity.ePersonUidNum = :authenticatedPersonUidNum 
+                AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT}
         )
-            
-            
-       SELECT ClassEntity.* 
-         FROM ClassEntity
-        WHERE ClassEntity.cStored > :since 
-          AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
-          -- begin permission check
-          AND (    EXISTS(
+        """
+
+        /**
+         * Permission check SQL to see if the authenticated user has the required permission for
+         * an existing class (where Class is already in the query as ClassEntity).
+         *
+         * Parameters:
+         *  :authenticatedPersonUidNum - the uid number for the authenticated user
+         *  :requiredPermission - the PermissionFlags constant for the permission required
+         *
+         */
+        const val PERMISSION_CHECK_SQL = """
+                EXISTS(
                    SELECT 1
                      FROM SchoolPermissionGrantEntity
                     WHERE SchoolPermissionGrantEntity.spgToRole IN (
                           SELECT PersonRoleEntity.prRoleEnum
                             FROM PersonRoleEntity
                            WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum) 
-                      AND (SchoolPermissionGrantEntity.spgPermissions & ${PermissionFlags.CLASS_READ}) = ${PermissionFlags.CLASS_READ})
+                      AND (SchoolPermissionGrantEntity.spgPermissions & :requiredPermission) = :requiredPermission
+                      AND SchoolPermissionGrantEntity.spgStatusEnum = ${StatusEnum.ACTIVE_INT})
                 OR EXISTS(
                    SELECT 1
                      FROM ClassPermissionEntity
@@ -109,8 +136,18 @@ interface ClassEntityDao {
                           (SELECT AuthenticatedUserEnrollments.eRole
                              FROM AuthenticatedUserEnrollments
                             WHERE AuthenticatedUserEnrollments.eClassUidNum = ClassEntity.cGuidHash)
-                      AND (ClassPermissionEntity.cpePermissions & ${PermissionFlags.CLASS_READ}) = ${PermissionFlags.CLASS_READ})
-          )
+                      AND (ClassPermissionEntity.cpePermissions & :requiredPermission) = :requiredPermission)
+        """
+
+        const val LIST_SQL = """
+        WITH $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
+            
+       SELECT ClassEntity.* 
+         FROM ClassEntity
+        WHERE ClassEntity.cStored > :since 
+          AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
+          -- begin permission check
+          AND ($PERMISSION_CHECK_SQL)
           -- end permission check
           
           AND (:code IS NULL 

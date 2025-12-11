@@ -4,6 +4,7 @@ import io.ktor.http.Url
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
@@ -69,6 +70,10 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
                 schoolDb.getPersonEntityDao().findByGuidNum(
                     personPasskey.ppPersonUidNum
                 )?.toPersonEntities()?.toModel() ?: throw ForbiddenException("Person not found")
+            }
+
+            is RespectQRBadgeCredential -> {
+                throw IllegalStateException("QRBadge authentication here: STUB")
             }
         }
 

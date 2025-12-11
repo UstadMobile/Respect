@@ -1,5 +1,6 @@
 package world.respect.credentials.passkey
 
+import io.ktor.http.Url
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
@@ -24,14 +25,20 @@ data class RespectPasskeyCredential(
     val passkeyWebAuthNResponse: AuthenticationResponseJSON
 ): RespectCredential()
 
+@Serializable
+data class RespectQRBadgeCredential(
+    val qrCodeUrl: Url
+): RespectCredential()
+
 object RespectCredentialSerializer: JsonContentPolymorphicSerializer<RespectCredential>(
     RespectCredential::class
 ) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<RespectCredential> {
-        return if(element.jsonObject.containsKey("username")) {
-            RespectPasswordCredential.serializer()
-        }else {
-            RespectPasskeyCredential.serializer()
+        val jsonObject = element.jsonObject
+        return when {
+            jsonObject.containsKey("username") -> RespectPasswordCredential.serializer()
+            jsonObject.containsKey("qrCodeUrl") -> RespectQRBadgeCredential.serializer()
+            else -> RespectPasskeyCredential.serializer()
         }
     }
 }

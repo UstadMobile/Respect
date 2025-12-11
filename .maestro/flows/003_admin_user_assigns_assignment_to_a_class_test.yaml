@@ -37,6 +37,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- hideKeyboard
 - runFlow:
     when:
       visible: "Save password for Respect?"

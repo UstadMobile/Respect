@@ -149,6 +149,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- hideKeyboard
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -225,6 +226,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- hideKeyboard
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -258,6 +260,7 @@ onFlowComplete:
     id : "password"
 - inputText: "tests1"
 - tapOn: "Login"
+- hideKeyboard
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -352,6 +355,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
+- hideKeyboard
 - assertVisible: "Apps"
 - tapOn: "People"
 - assertVisible: "Parent User"
@@ -385,6 +389,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testp1"
 - tapOn: "Login"
+- hideKeyboard
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:

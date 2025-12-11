@@ -60,9 +60,7 @@ class AccountListViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val schoolDataSource: SchoolDataSource by inject()
-    private val biometricUseCase: BiometricAuthUseCase? by lazy {
-        scope.getOrNull()
-    }
+
     private var emittedNavToGetStartedCommand = false
 
     init {
@@ -75,14 +73,6 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
-            val result = biometricUseCase?.invoke(
-                BiometricAuthUseCase.BiometricPromptData(
-                    title = getString(Res.string.biometric_login),
-                    subtitle = getString(Res.string.login_using_biometric_credentials),
-                    useDeviceCredential = false,
-                    negativeButtonText =  getString(Res.string.cancel),
-                )
-            )
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
                     prev.copy(selectedAccount = accountAndPerson)

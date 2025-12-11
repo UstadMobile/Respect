@@ -30,8 +30,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -40,10 +42,14 @@ import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
+import world.respect.shared.generated.resources.biometric_login
+import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.login_using_biometric_credentials
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
@@ -113,8 +119,10 @@ fun App(
     }
 
     val navController = rememberNavController()
+    val coroutineScope = rememberCoroutineScope()
 
     val accountManager: RespectAccountManager = koinInject()
+    val biometricAuthUseCase : BiometricAuthUseCase = koinInject()
     val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
 
     NavControllerLogEffect(navController)
@@ -152,7 +160,29 @@ fun App(
                         appUiState = appUiStateVal,
                         navController = navController,
                         onProfileClick = {
-                            navController.navigate(AccountList)
+                            if (activeAccount?.account?.startedViaParent == false) {
+                                navController.navigate(AccountList)
+                                return@RespectAppBar
+                            }
+                            coroutineScope.launch {
+                                val result = biometricAuthUseCase.invoke(
+                                    BiometricAuthUseCase.BiometricPromptData(
+                                        title = getString(Res.string.biometric_login),
+                                        subtitle = getString(Res.string.login_using_biometric_credentials),
+                                        useDeviceCredential = false,
+                                        negativeButtonText = getString(Res.string.cancel),
+                                    )
+                                )
+                                when(result){
+                                    BiometricAuthUseCase.BiometricResult.Canceled -> {}
+                                    is BiometricAuthUseCase.BiometricResult.Error -> {}
+                                    is BiometricAuthUseCase.BiometricResult.Failure -> {}
+                                    BiometricAuthUseCase.BiometricResult.Success -> {
+                                        navController.navigate(AccountList)
+                                    }
+                                }
+
+                            }
                         }
                     )
                 }

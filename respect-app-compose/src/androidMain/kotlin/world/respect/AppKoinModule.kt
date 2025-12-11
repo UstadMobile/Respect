@@ -617,7 +617,11 @@ val appKoinModule = module {
     single<BiometricAuthUseCaseAndroidChannelHost> {
         BiometricAuthUseCaseAndroidChannelHost()
     }
-
+    single<BiometricAuthUseCase> {
+        BiometricAuthUseCaseAndroidImpl(
+            sender = get()
+        )
+    }
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -635,11 +639,7 @@ val appKoinModule = module {
                 getDeviceInfoUseCase = get(),
             )
         }
-        scoped<BiometricAuthUseCase> {
-            BiometricAuthUseCaseAndroidImpl(
-                sender = get()
-            )
-        }
+
         scoped<RespectSchoolPath> {
             RespectSchoolPath(
                 path = Path(

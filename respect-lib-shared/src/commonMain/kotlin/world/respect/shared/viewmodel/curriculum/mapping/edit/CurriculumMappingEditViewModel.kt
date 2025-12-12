@@ -23,6 +23,7 @@ import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit_mapping
+import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.CurriculumMappingEdit
@@ -78,10 +79,11 @@ class CurriculumMappingEditViewModel(
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
 
     private val mappingUid = route.textbookUid
+    private val mappingData = route.mappingData
 
     private val _uiState = MutableStateFlow(
         CurriculumMappingEditUiState(
-            mapping = CurriculumMapping(uid = mappingUid),
+            mapping = mappingData ?: CurriculumMapping(uid = mappingUid),
             isNew = mappingUid == 0L
         )
     )
@@ -91,10 +93,10 @@ class CurriculumMappingEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = Res.string.edit_mapping.asUiText(),
+                title = Res.string.edit_playlist.asUiText(),
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = false,
+                    visible = true,
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),
@@ -195,6 +197,58 @@ class CurriculumMappingEditViewModel(
                     sections = prev.sections.moveItem(from = fromIndex, to = toIndex)
                 )
             )
+        }
+    }
+
+    fun onLessonMovedBetweenSections(
+        fromSectionIndex: Int,
+        fromLinkIndex: Int,
+        toSectionIndex: Int,
+        toLinkIndex: Int
+    ) {
+        updateUiStateAndCommit { prev ->
+            val mapping = prev.mapping
+            if (mapping == null) {
+                prev
+            } else if (fromSectionIndex == toSectionIndex) {
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.updateAtIndex(fromSectionIndex) { section ->
+                            section.copy(
+                                items = section.items.moveItem(from = fromLinkIndex, to = toLinkIndex)
+                            )
+                        }
+                    )
+                )
+            } else {
+                val fromSection = mapping.sections[fromSectionIndex]
+                val lessonToMove = fromSection.items[fromLinkIndex]
+
+                val updatedFromSection = fromSection.copy(
+                    items = fromSection.items.filterIndexed { index, _ -> index != fromLinkIndex }
+                )
+
+                val toSection = mapping.sections[toSectionIndex]
+                val updatedToSection = toSection.copy(
+                    items = buildList {
+                        addAll(toSection.items.take(toLinkIndex))
+                        add(lessonToMove)
+                        addAll(toSection.items.drop(toLinkIndex))
+                    }
+                )
+
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.mapIndexed { index, section ->
+                            when (index) {
+                                fromSectionIndex -> updatedFromSection
+                                toSectionIndex -> updatedToSection
+                                else -> section
+                            }
+                        }
+                    )
+                )
+            }
         }
     }
 

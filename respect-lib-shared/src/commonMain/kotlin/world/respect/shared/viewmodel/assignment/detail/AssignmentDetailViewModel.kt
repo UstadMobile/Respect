@@ -56,7 +56,7 @@ class AssignmentDetailViewModel(
     private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val route: AssignmentDetail = savedStateHandle.toRoute()
 

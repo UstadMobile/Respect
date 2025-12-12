@@ -38,7 +38,7 @@ class AcknowledgementViewModel(
 
             delay(2000)
 
-            val hasAccount = accountManager.selectedAccount != null
+            val hasAccount = accountManager.activeAccount != null
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(

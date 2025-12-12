@@ -45,7 +45,7 @@ class ReportTemplateListViewModel(
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val _uiState = MutableStateFlow(ReportTemplateListUiState())
     val uiState = _uiState.asStateFlow()
     private val activeUserPersonUid: Long = 0

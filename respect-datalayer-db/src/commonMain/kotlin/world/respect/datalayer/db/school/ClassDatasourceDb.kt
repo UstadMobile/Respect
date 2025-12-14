@@ -108,6 +108,9 @@ class ClassDatasourceDb(
             var numUpdated = 0
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach { clazz ->
+                    //Permission check: if class already exists then check permission including
+                    //class permissions granted by role. Otherwise, look for the system permission
+                    //to insert a new class.
                     val lastModAndPermissionInDb = schoolDb.getClassEntityDao()
                         .getLastModifiedAndHasPermission(
                             authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),

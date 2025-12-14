@@ -67,7 +67,10 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-           WITH $LIST_PERSONS_CTES_SQL
+           WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+                $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
+                $LIST_PERSONS_CTES_SQL
+                
                          
          SELECT PersonEntity.*
            FROM PersonEntity
@@ -77,6 +80,7 @@ interface PersonEntityDao {
           ORDER BY PersonEntity.pGivenName
     """)
     fun listAsFlow(
+        authenticatedPersonUidNum: Long,
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
@@ -90,7 +94,9 @@ interface PersonEntityDao {
     ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
-           WITH $LIST_PERSONS_CTES_SQL
+           WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+                $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
+                $LIST_PERSONS_CTES_SQL
                          
          SELECT PersonEntity.*
            FROM PersonEntity
@@ -100,6 +106,7 @@ interface PersonEntityDao {
           ORDER BY PersonEntity.pGivenName
     """)
     suspend fun list(
+        authenticatedPersonUidNum: Long,
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
@@ -129,7 +136,9 @@ interface PersonEntityDao {
      */
     @Transaction
     @Query("""
-           WITH $LIST_PERSONS_CTES_SQL
+           WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+                $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
+                $LIST_PERSONS_CTES_SQL
                          
          SELECT PersonEntity.*
            FROM PersonEntity
@@ -139,6 +148,7 @@ interface PersonEntityDao {
           ORDER BY PersonEntity.pGivenName
     """)
     fun listAsPagingSource(
+        authenticatedPersonUidNum: Long,
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
@@ -152,7 +162,9 @@ interface PersonEntityDao {
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
-         WITH $LIST_PERSONS_CTES_SQL 
+         WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+                $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
+                $LIST_PERSONS_CTES_SQL
         
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
@@ -165,6 +177,7 @@ interface PersonEntityDao {
       ORDER BY PersonEntity.pGivenName
     """)
     fun findAllListDetailsAsPagingSource(
+        authenticatedPersonUidNum: Long,
         since: Long = 0,
         guidHash: Long = 0,
         inClazzGuidHash: Long = 0,
@@ -232,6 +245,47 @@ interface PersonEntityDao {
 
     companion object {
 
+
+        /**
+         * When expression that will evaluate to the permission flag required to read PersonEntity
+         * based on the person's role.
+         */
+        const val READ_WHEN_CLAUSE_SQL = """
+            CASE(SELECT PersonRoleEntity.prRoleEnum
+                   FROM PersonRoleEntity
+                  WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                  LIMIT 1)
+                             
+                 WHEN ${PersonRoleEnum.SITE_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
+                 WHEN ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
+                 WHEN ${PersonRoleEnum.TEACHER_INT} THEN ${PermissionFlags.PERSON_TEACHER_READ}
+                 WHEN ${PersonRoleEnum.STUDENT_INT} THEN ${PermissionFlags.PERSON_STUDENT_READ}
+                 WHEN ${PersonRoleEnum.PARENT_INT} THEN ${PermissionFlags.PERSON_PARENT_READ}
+                 ELSE ${Long.MAX_VALUE}
+            END     
+        """
+
+        const val AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL = """
+            AuthenticatedPersonRelatedPersonUids(relatedPersonUidNum) AS (
+                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
+                  FROM PersonRelatedPersonEntity
+                 WHERE PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)
+        """
+
+        const val AUTHENTICATED_PERSON_CLASS_PERMISSIONS = """
+            AuthenticatedPersonClassPermissions AS (
+                SELECT ClassPermissionEntity.*
+                  FROM ClassPermissionEntity
+                 WHERE (ClassPermissionEntity.cpeToEnrollmentRole, ClassPermissionEntity.cpeClassUidNum) IN 
+                       (SELECT EnrollmentEntity.eRole, EnrollmentEntity.eClassUidNum
+                          FROM EnrollmentEntity
+                         WHERE EnrollmentEntity.ePersonUidNum = :authenticatedPersonUidNum
+                           AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT})
+            )
+        """
+
+
+
         /**
          * This CTE expression is shared between all functions that return a list. It handles the
          * includeRelated parameter efficiently. includeRelated is required by PersonDetail/Edit
@@ -258,6 +312,29 @@ interface PersonEntityDao {
                                             AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT} ))         
                            ) 
                           ) 
+                          -- Begin permission NOTE check should add permissions granted to children for parent
+                      AND (
+                           (PersonEntity.pGuidHash = :authenticatedPersonUidNum)
+                        OR PersonEntity.pGuidHash IN 
+                           (SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum 
+                              FROM AuthenticatedPersonRelatedPersonUids) 
+                        OR EXISTS(
+                               SELECT 1
+                                 FROM SchoolPermissionGrantEntity
+                                WHERE SchoolPermissionGrantEntity.spgToRole IN 
+                                      (SELECT PersonRoleEntity.prRoleEnum
+                                         FROM PersonRoleEntity
+                                        WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum)
+                                  AND (SchoolPermissionGrantEntity.spgPermissions & ($READ_WHEN_CLAUSE_SQL)) > 0)
+                        OR EXISTS(
+                               SELECT 1
+                                 FROM AuthenticatedPersonClassPermissions
+                                WHERE AuthenticatedPersonClassPermissions.cpeClassUidNum IN 
+                                      (SELECT EnrollmentEntity.eClassUidNum
+                                         FROM EnrollmentEntity
+                                        WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash)
+                                  AND (AuthenticatedPersonClassPermissions.cpePermissions & ($READ_WHEN_CLAUSE_SQL)) > 0)
+                          )
                       AND (:filterByName IS NULL 
                            OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
                       AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 

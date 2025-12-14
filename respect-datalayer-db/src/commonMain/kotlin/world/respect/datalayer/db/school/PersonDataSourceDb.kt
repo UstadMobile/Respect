@@ -28,7 +28,6 @@ import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PermissionCheckPagingSource
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -153,6 +152,7 @@ class PersonDataSourceDb(
         params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
         return schoolDb.getPersonEntityDao().listAsFlow(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
@@ -176,29 +176,20 @@ class PersonDataSourceDb(
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
         return IPagingSourceFactory {
-            PermissionCheckPagingSource(
-                src = schoolDb.getPersonEntityDao().listAsPagingSource(
-                    since = params.common.since?.toEpochMilliseconds() ?: 0,
-                    guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                    inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
-                    inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
-                    inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
-                    filterByName = params.filterByName,
-                    filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
-                    includeRelated = params.includeRelated,
-                    includeDeleted = params.common.includeDeleted ?: false,
-                ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
-                    it.toPersonEntities().toModel()
-                },
-                onCheckPermission = {
-                    params.common.guid?.let { guid ->
-                        schoolDb.getPersonEntityDao().userCanReadOther(
-                            authenticatedUidNum = uidNumberMapper(authenticatedUser.guid),
-                            uidNum = uidNumberMapper(guid)
-                        )
-                    } ?: true
-                }
-            )
+            schoolDb.getPersonEntityDao().listAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                since = params.common.since?.toEpochMilliseconds() ?: 0,
+                guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
+                inClazzRoleFlag = params.filterByEnrolmentRole?.flag ?: 0,
+                inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
+                filterByName = params.filterByName,
+                filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+                includeRelated = params.includeRelated,
+                includeDeleted = params.common.includeDeleted ?: false,
+            ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
+                it.toPersonEntities().toModel()
+            }
         }
     }
 
@@ -208,6 +199,7 @@ class PersonDataSourceDb(
     ): DataLoadState<List<Person>> {
         val queryTime = systemTimeInMillis()
         val data = schoolDb.getPersonEntityDao().list(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
@@ -237,6 +229,7 @@ class PersonDataSourceDb(
     ): IPagingSourceFactory<Int, PersonListDetails> {
         return IPagingSourceFactory {
             schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = listParams.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzGuidHash = listParams.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,

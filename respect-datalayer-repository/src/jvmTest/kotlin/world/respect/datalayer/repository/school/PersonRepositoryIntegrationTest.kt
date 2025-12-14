@@ -15,6 +15,7 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -22,6 +23,7 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -56,11 +58,17 @@ class PersonRepositoryIntegrationTest {
             clientServerDatasourceTest(temporaryFolder.newFolder("test")) {
                 serverRouting {
                     route("api/school/respect") {
-                        PersonRoute(schoolDataSource = { serverSchoolDataSource })
+                        PersonRoute(schoolDataSource = { serverSchoolDataSource } )
+                        SchoolPermissionGrantRoute(schoolDataSource = { serverSchoolDataSource })
                     }
                 }
 
                 server.start()
+
+                clients.first().schoolDataSource.schoolPermissionGrantDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolPermissionGrantDataSource.GetListParams()
+                )
 
                 serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
@@ -91,10 +99,16 @@ class PersonRepositoryIntegrationTest {
                 serverRouting {
                     route("api/school/respect") {
                         PersonRoute(schoolDataSource = { serverSchoolDataSource })
+                        SchoolPermissionGrantRoute(schoolDataSource = { serverSchoolDataSource })
                     }
                 }
 
                 server.start()
+
+                clients.first().schoolDataSource.schoolPermissionGrantDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolPermissionGrantDataSource.GetListParams()
+                )
 
                 serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
@@ -240,10 +254,15 @@ class PersonRepositoryIntegrationTest {
                 serverRouting {
                     route("api/school/respect") {
                         PersonRoute(schoolDataSource = { serverSchoolDataSource })
+                        SchoolPermissionGrantRoute(schoolDataSource = { serverSchoolDataSource })
                     }
                 }
 
                 server.start()
+                clients.first().schoolDataSource.schoolPermissionGrantDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolPermissionGrantDataSource.GetListParams()
+                )
 
                 serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)

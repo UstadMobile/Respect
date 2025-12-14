@@ -272,6 +272,13 @@ interface PersonEntityDao {
                  WHERE PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)
         """
 
+
+        /**
+         * Find ClassPermissionsEntity that are available to the authenticatedPersonUidNum
+         * including the permissions granted to the enrollment roles that the authenticated person
+         * has, and, if the authenticated person is a parent, the roles that their children have,
+         * such that a parent can see what their children can see.
+         */
         const val AUTHENTICATED_PERSON_CLASS_PERMISSIONS = """
             AuthenticatedPersonClassPermissions AS (
                 SELECT ClassPermissionEntity.*
@@ -279,7 +286,15 @@ interface PersonEntityDao {
                  WHERE (ClassPermissionEntity.cpeToEnrollmentRole, ClassPermissionEntity.cpeClassUidNum) IN 
                        (SELECT EnrollmentEntity.eRole, EnrollmentEntity.eClassUidNum
                           FROM EnrollmentEntity
-                         WHERE EnrollmentEntity.ePersonUidNum = :authenticatedPersonUidNum
+                         WHERE EnrollmentEntity.ePersonUidNum IN (
+                               SELECT :authenticatedPersonUidNum
+                                UNION 
+                               SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum
+                                 FROM AuthenticatedPersonRelatedPersonUids
+                                WHERE ${PersonRoleEnum.PARENT_INT} IN 
+                                      (SELECT PersonRoleEntity.prRoleEnum
+                                         FROM PersonRoleEntity
+                                        WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum))
                            AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT})
             )
         """

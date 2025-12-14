@@ -88,7 +88,7 @@ class PersonDataSourceDb(
                             permission = personToStore.primaryRole().writePermissionFlag
                         )
                      ) {
-                        throw ForbiddenException()
+                        throw ForbiddenException("Authenticated user does not have permission to store ${personToStore.guid}")
                     }
 
                     //Check that roles have not been change

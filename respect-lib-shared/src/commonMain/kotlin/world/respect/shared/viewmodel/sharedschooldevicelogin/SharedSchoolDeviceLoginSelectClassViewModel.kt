@@ -20,7 +20,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_class
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SelectStudent
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -69,9 +68,9 @@ class SharedSchoolDeviceLoginSelectClassViewModel(
     }
 
     fun onScanQRCode() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(ScanQRCode)
-        )
+//        _navCommandFlow.tryEmit(
+//            NavCommand.Navigate(ScanQRCode)
+//        )
     }
 
     fun onTeacherAdminLogin() {

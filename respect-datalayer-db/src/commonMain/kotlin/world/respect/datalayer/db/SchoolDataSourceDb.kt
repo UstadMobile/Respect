@@ -10,6 +10,7 @@ import world.respect.datalayer.db.school.IndicatorDataSourceDb
 import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
+import world.respect.datalayer.db.school.PersonQrDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
@@ -19,6 +20,7 @@ import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
+import world.respect.datalayer.school.PersonQrCodeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 
@@ -51,6 +53,11 @@ class SchoolDataSourceDb(
 
     override val personPasswordDataSource: PersonPasswordDataSourceLocal by lazy {
         PersonPasswordDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+    }
+
+
+    override val personQrDataSource: PersonQrCodeDataSourceLocal by lazy {
+        PersonQrDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 
     override val reportDataSource: ReportDataSourceLocal by lazy {

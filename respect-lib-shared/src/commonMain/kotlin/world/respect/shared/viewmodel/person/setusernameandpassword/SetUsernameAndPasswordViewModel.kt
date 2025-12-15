@@ -20,12 +20,13 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.ScanQRCode
+import world.respect.shared.navigation.SetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import kotlin.getValue
 import kotlin.time.Clock
 
 data class SetUsernameAndPasswordUiState(
@@ -33,6 +34,7 @@ data class SetUsernameAndPasswordUiState(
     val usernameErr: UiText? = null,
     val password: String = "",
     val passwordErr: UiText? = null,
+    val isStudent: Boolean = true
 )
 
 /**
@@ -76,8 +78,19 @@ class SetUsernameAndPasswordViewModel(
         _uiState.update { it.copy(username = filterUsernameUseCase(username, "")) }
     }
 
-    fun onPasswordChanged(password: String) {
-        _uiState.update { it.copy(password = password) }
+    fun onAssignQrCodeBadge() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(ScanQRCode(guid = route.guid))
+        )
+    }
+
+    fun onSetPassword() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(SetPassword(route.guid))
+        )
+    }
+
+    fun onLearnMore() {
     }
 
     fun onClickSave() {
@@ -107,18 +120,6 @@ class SetUsernameAndPasswordViewModel(
                         )
                     )
                 )
-
-                schoolDataSource.personPasswordDataSource.store(
-                    listOf(
-                        encryptPersonPasswordUseCase(
-                            EncryptPersonPasswordUseCase.Request(
-                                personGuid = route.guid,
-                                password = uiState.value.password
-                            )
-                        )
-                    )
-                )
-
                 _navCommandFlow.tryEmit(NavCommand.PopUp())
             }catch (e: Throwable) {
                 Napier.e("Error saving username and password", e)

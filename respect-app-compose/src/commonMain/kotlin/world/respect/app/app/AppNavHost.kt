@@ -136,6 +136,7 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreen
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.settings.SharedDeviceSettingsScreen
 import world.respect.app.view.shareddevicelogin.EnterRollNumberScreen
 import world.respect.app.view.shareddevicelogin.ScanQRCodeScreen
@@ -151,6 +152,7 @@ import world.respect.shared.navigation.EnterRollNumber
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SelectClassScreen
 import world.respect.shared.navigation.SelectStudent
+import world.respect.shared.navigation.SetPassword
 import world.respect.shared.navigation.SharedDeviceSettings
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
@@ -638,6 +640,14 @@ fun AppNavHost(
 
         composable<SetUsernameAndPassword> {
             SetUsernameAndPasswordScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<SetPassword> {
+            CreateAccountSetPasswordScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

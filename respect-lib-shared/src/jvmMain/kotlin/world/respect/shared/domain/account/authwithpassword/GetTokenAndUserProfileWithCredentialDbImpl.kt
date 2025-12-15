@@ -19,6 +19,7 @@ import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import java.lang.IllegalStateException
@@ -37,6 +38,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
     private val verifyPasskeyUseCase: VerifySignInWithPasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
     private val authenticatePasswordUseCase: AuthenticatePasswordUseCase,
+    private val authenticateQrBadgeUseCase: AuthenticateQrBadgeUseCase
 ): GetTokenAndUserProfileWithCredentialUseCase {
 
     override suspend fun invoke(
@@ -73,7 +75,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
             }
 
             is RespectQRBadgeCredential -> {
-                throw IllegalStateException("QRBadge authentication here: STUB")
+                authenticateQrBadgeUseCase(credential).authenticatedPerson
             }
         }
 

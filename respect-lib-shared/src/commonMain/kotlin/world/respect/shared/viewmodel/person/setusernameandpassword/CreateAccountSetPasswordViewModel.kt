@@ -1,0 +1,86 @@
+package world.respect.shared.viewmodel.person.setusernameandpassword
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.SchoolDataSource
+import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.create_account
+import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SetPassword
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+
+
+data class CreateAccountSetPasswordUiState(
+    val password: String = "",
+    val passwordErr: UiText? = null,
+)
+
+class CreateAccountSetPasswordViewModel(
+    savedStateHandle: SavedStateHandle,
+    accountManager: RespectAccountManager,
+    private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireSelectedAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
+    private val route: SetPassword = savedStateHandle.toRoute()
+
+    private val _uiState = MutableStateFlow(CreateAccountSetPasswordUiState())
+
+    val uiState = _uiState.asStateFlow()
+
+    init {
+        _appUiState.update {
+            it.copy(
+                title = Res.string.create_account.asUiText(),
+                hideBottomNavigation = true,
+                actionBarButtonState = ActionBarButtonUiState(
+                    text = Res.string.save.asUiText(),
+                    visible = true,
+                    onClick = ::onClickSave
+                )
+            )
+        }
+    }
+
+    fun onPasswordChanged(password: String) {
+        _uiState.update { it.copy(password = password) }
+    }
+
+    fun onClickSave() {
+        launchWithLoadingIndicator {
+            try {
+
+                schoolDataSource.personPasswordDataSource.store(
+                    listOf(
+                        encryptPersonPasswordUseCase(
+                            EncryptPersonPasswordUseCase.Request(
+                                personGuid = route.guid,
+                                password = uiState.value.password
+                            )
+                        )
+                    )
+                )
+
+                _navCommandFlow.tryEmit(NavCommand.PopUp())
+            } catch (e: Throwable) {
+                Napier.e("Error saving username and password", e)
+            }
+        }
+    }
+}

@@ -20,6 +20,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
 import world.respect.datalayer.school.model.PersonPassword
+import world.respect.datalayer.school.model.PersonQrCode
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -31,6 +32,7 @@ import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PasskeyList
+import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -44,6 +46,9 @@ data class ManageAccountUiState(
     val personPassword: DataLoadState<PersonPassword> = DataLoadingState(),
     val errorText: UiText? = null,
     val selectedAccount: RespectAccountAndPerson? = null,
+    val isStudent: Boolean = true,
+    val qrBadge: DataLoadState<PersonQrCode> = DataLoadingState(),
+    val showBottomSheet: Boolean = false,
 ) {
 
     val showCreatePasskey: Boolean
@@ -101,6 +106,13 @@ class ManageAccountViewModel(
                 route.guid
             ).collect { password ->
                 _uiState.update { it.copy(personPassword = password) }
+            }
+        }
+        viewModelScope.launch {
+            schoolDataSource.personQrDataSource.findByPersonGuidAsFlow(
+                route.guid
+            ).collect { qr ->
+                _uiState.update { it.copy(qrBadge = qr) }
             }
         }
 
@@ -172,6 +184,44 @@ class ManageAccountViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(HowPasskeyWorks)
         )
+    }
+    fun onClickQRCodeBadge() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(ScanQRCode(personGuid))
+        )
+    }
+
+    fun onDismissBottomSheet() {
+        _uiState.update { prev ->
+            prev.copy(
+                showBottomSheet = false,
+            )
+        }
+    }
+
+    fun onRemoveQRBadge() {
+        viewModelScope.launch {
+            try {
+                val currentQrBadge = uiState.value.qrBadge.dataOrNull()
+                if (currentQrBadge != null) {
+//                    schoolDataSource.personQrDataSource.delete(listOf(currentQrBadge))
+                }
+            } catch (e: Exception) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        errorText = StringUiText("Failed to remove QR badge: ${e.message}")
+                    )
+                }
+            }
+        }
+    }
+
+    fun onClickChangeQrBadge() {
+        _uiState.update { prev ->
+            prev.copy(
+                showBottomSheet = true,
+            )
+        }
     }
 
     fun onCreatePasskeyClick() {

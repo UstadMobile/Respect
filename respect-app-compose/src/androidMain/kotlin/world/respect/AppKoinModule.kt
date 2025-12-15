@@ -93,6 +93,7 @@ import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
@@ -210,6 +211,7 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.settings.SharedDeviceSettingsViewModel
@@ -217,6 +219,7 @@ import world.respect.shared.viewmodel.sharedschooldevicelogin.EnterRollNumberVie
 import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
 import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectClassViewModel
 import world.respect.shared.viewmodel.sharedschooldevicelogin.SharedSchoolDeviceLoginSelectStudentViewModel
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -340,6 +343,7 @@ val appKoinModule = module {
     viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
+    viewModelOf(::CreateAccountSetPasswordViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -729,6 +733,12 @@ val appKoinModule = module {
             AuthenticatePasswordUseCaseDbImpl(
                 schoolDb = get(),
                 encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
+            )
+        }
+        scoped<AuthenticateQrBadgeUseCase> {
+            AuthenticateQrBadgeUseCaseDbImpl(
+                schoolDb = get(),
                 uidNumberMapper = get(),
             )
         }

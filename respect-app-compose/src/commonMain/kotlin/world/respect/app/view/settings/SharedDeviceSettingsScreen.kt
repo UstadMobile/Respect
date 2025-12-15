@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.Icon
@@ -106,8 +105,7 @@ fun SettingToggleItem(
                 imageVector = Icons.Default.PhoneAndroid,
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(end = 16.dp)
-                    .size(24.dp),
+                    .padding(end = 16.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
 
@@ -136,7 +134,7 @@ fun SettingToggleItem(
         Switch(
             checked = isChecked,
             onCheckedChange = onCheckedChange,
-            modifier = Modifier.scale(0.9f)
+            modifier = Modifier.scale(0.6f)
         )
     }
 }

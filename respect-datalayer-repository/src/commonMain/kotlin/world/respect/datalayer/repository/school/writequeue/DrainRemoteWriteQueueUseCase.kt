@@ -45,6 +45,10 @@ class DrainRemoteWriteQueueUseCase(
                         repository.personPasswordDataSource.sendToRemote(listOf(item))
                     }
 
+                    WriteQueueItem.Model.PERSON_QRCODE -> {
+                        repository.personQrDataSource.sendToRemote(listOf(item))
+                    }
+
                     WriteQueueItem.Model.ASSIGNMENT -> {
                         repository.assignmentDataSource.sendToRemote(listOf(item))
                     }

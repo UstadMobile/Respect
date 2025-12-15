@@ -8,7 +8,8 @@ enum class RespectImage {
     DIGITAL_LIBRARY,
     WORKS_OFFLINE,
     DATA_REPORTING,
-    ASSIGNMENTS
+    ASSIGNMENTS,
+    FINGERPRINT,
 }
 @Composable
 expect fun respectImagePainter(image: RespectImage): Painter

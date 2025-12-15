@@ -647,7 +647,9 @@ data class SelectStudent(val guid: String) : RespectAppRoute
 data object EnterRollNumber : RespectAppRoute
 
 @Serializable
-data object ScanQRCode : RespectAppRoute
+data class ScanQRCode(
+    val guid: String? = null
+) : RespectAppRoute
 
 @Serializable
 data object CurriculumMappingList : RespectAppRoute
@@ -687,6 +689,12 @@ data class CurriculumMappingEdit(
 data class SetUsernameAndPassword(
     val guid: String
 ): RespectAppRoute
+
+@Serializable
+data class SetPassword(
+    val guid: String
+) : RespectAppRoute
+
 
 
 @Serializable

@@ -64,6 +64,21 @@
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
+
+    <string name="qr_badge_options">QR Badge Options</string>
+    <string name="assign_new_badge_replace">Assign new badge (replace)</string>
+    <string name="remove_badge">Remove badge</string>
+
+    <string name="quick_easy_sign_in">Quick and easy sign-in for students</string>
+    <string name="qr_code_badge_description">QR code badges enable students to quickly and safely sign-in, even on shared devices, without needing to use usernames and passwords</string>
+    <string name="assign_qr_code_badge">Assign QR code badge</string>
+    <string name="or">OR</string>
+    <string name="set_password">Set password</string>
+    <string name="save_password">Save Password</string>
+    <string name="creating_account_for">Creating account for %s</string>
+    <string name="password_cannot_be_empty">Password cannot be empty</string>
+    <string name="learn_more">Learn More</string>
+
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
@@ -89,15 +104,19 @@
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
+    <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
     <string name="date_later">Start date cannot be later than end date*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
+    <string name="url">Url</string>
+    <string name="paste_url">Paste Url</string>
     <string name="ok">Ok</string>
     <string name="name">Name</string>
     <string name="other_options">Other options</string>
+    <string name="scan_qr_code_badge">Scan QR code/badge</string>
     <string name="something_went_wrong">Something went wrong.</string>
     <string name="waiting_title">Waiting for approval</string>
     <string name="please_wait">Please wait</string>

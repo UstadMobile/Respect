@@ -1,0 +1,15 @@
+package world.respect.datalayer.db.school.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import kotlin.time.Instant
+
+@Entity
+data class PersonQrCodeEntity(
+    @PrimaryKey
+    val pqrGuidNum: Long,
+    val pqrGuid: String,
+    val pqrLastModified: Instant,
+    val pqrStored: Instant,
+    val pqrQrCodeUrl: String,
+)

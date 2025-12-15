@@ -2,7 +2,6 @@ package world.respect.app.components
 
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
 import androidx.paging.compose.LazyPagingItems
 
@@ -28,21 +27,4 @@ fun <T: Any> LazyListScope.respectPagingItems(
         itemContent(items[index])
     }
 
-}
-
-fun <T: Any> LazyGridScope.respectPagingItems(
-    items: LazyPagingItems<T>,
-    key: ((item: T?, index: Int) -> Any)?,
-    itemContent: @Composable (item: T?) -> Unit,
-) {
-    items(
-        count = items.itemCount,
-        key = if(key != null) {
-            { index -> key(items.peek(index), index) }
-        }else {
-            null
-        }
-    ) { index ->
-        itemContent(items[index])
-    }
 }

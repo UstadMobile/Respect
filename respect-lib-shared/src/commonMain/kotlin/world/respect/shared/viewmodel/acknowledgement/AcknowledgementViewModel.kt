@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Onboarding
@@ -22,7 +22,7 @@ class AcknowledgementViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val shouldShowOnboardingUseCase: ShouldShowOnboardingUseCase,
-    ) : RespectViewModel(savedStateHandle) {
+) : RespectViewModel(savedStateHandle) {
     private val _uiState = MutableStateFlow(AcknowledgementUiState())
 
     val uiState = _uiState.asStateFlow()

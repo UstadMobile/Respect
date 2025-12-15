@@ -5,7 +5,7 @@ import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
 
 @Serializable
-data class PersonQrCode(
+data class PersonBadge(
     val personGuid: String,
     val qrCodeUrl: String,
     override val lastModified: InstantAsISO8601,

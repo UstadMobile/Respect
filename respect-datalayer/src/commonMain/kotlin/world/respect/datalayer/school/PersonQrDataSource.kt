@@ -4,11 +4,11 @@ import io.ktor.http.Parameters
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.school.model.PersonQrCode
+import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-interface PersonQrDataSource : WritableDataSource<PersonQrCode> {
+interface PersonQrDataSource : WritableDataSource<PersonBadge> {
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
     ) {
@@ -23,12 +23,16 @@ interface PersonQrDataSource : WritableDataSource<PersonQrCode> {
 
     suspend fun listAll(
         listParams: GetListParams = GetListParams(),
-    ): DataLoadState<List<PersonQrCode>>
+    ): DataLoadState<List<PersonBadge>>
 
     fun listAllAsFlow(
         loadParams: DataLoadParams = DataLoadParams(),
         listParams: GetListParams = GetListParams(),
-    ): Flow<DataLoadState<List<PersonQrCode>>>
+    ): Flow<DataLoadState<List<PersonBadge>>>
+
+    suspend fun deletePersonBadge(
+        uidNum: Long
+    )
 
     companion object {
 

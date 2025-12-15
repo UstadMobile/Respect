@@ -9,7 +9,7 @@ import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonQrCodeDataSourceLocal
 import world.respect.datalayer.school.PersonQrDataSource
-import world.respect.datalayer.school.model.PersonQrCode
+import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
@@ -20,8 +20,8 @@ class PersonQrCodeDataSourceRepository(
     override val remote: PersonQrDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-): PersonQrDataSource, RepositoryModelDataSource<PersonQrCode> {
-    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonQrCode>> {
+): PersonQrDataSource, RepositoryModelDataSource<PersonBadge> {
+    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
         val remote = remote.listAll(listParams)
         local.updateFromRemoteListIfNeeded(
             remote, validationHelper
@@ -32,7 +32,7 @@ class PersonQrCodeDataSourceRepository(
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
         listParams: PersonQrDataSource.GetListParams
-    ): Flow<DataLoadState<List<PersonQrCode>>> {
+    ): Flow<DataLoadState<List<PersonBadge>>> {
         return local.listAllAsFlow(loadParams, listParams).combineWithRemote(
             remoteFlow = remote.listAllAsFlow(loadParams, listParams).onEach {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
@@ -40,7 +40,11 @@ class PersonQrCodeDataSourceRepository(
         )
     }
 
-    override suspend fun store(list: List<PersonQrCode>) {
+    override suspend fun deletePersonBadge(uidNum: Long) {
+        local.deletePersonBadge(uidNum)
+    }
+
+    override suspend fun store(list: List<PersonBadge>) {
         local.store(list)
         val timeNow = systemTimeInMillis()
         remoteWriteQueue.add(

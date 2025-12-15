@@ -1,11 +1,15 @@
 package world.respect.shared.viewmodel.person.setusernameandpassword
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -13,13 +17,14 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
+import world.respect.shared.generated.resources.password_not_set_error
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
@@ -32,9 +37,8 @@ import kotlin.time.Clock
 data class SetUsernameAndPasswordUiState(
     val username: String = "",
     val usernameErr: UiText? = null,
-    val password: String = "",
     val passwordErr: UiText? = null,
-    val isStudent: Boolean = true
+    val isPasswordSet: Boolean = false,
 )
 
 /**
@@ -44,7 +48,6 @@ data class SetUsernameAndPasswordUiState(
 class SetUsernameAndPasswordViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val validateUsernameUseCase: ValidateUsernameUseCase,
 ): RespectViewModel(savedStateHandle), KoinScopeComponent {
@@ -52,12 +55,17 @@ class SetUsernameAndPasswordViewModel(
     override val scope: Scope = accountManager.requireSelectedAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val navResultReturner: NavResultReturner by inject()
 
     private val route: SetUsernameAndPassword = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(SetUsernameAndPasswordUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    companion object {
+        const val PASSWORD_SET_RESULT = "password_set_result"
+    }
 
     init {
         _appUiState.update {
@@ -71,8 +79,24 @@ class SetUsernameAndPasswordViewModel(
                 )
             )
         }
-    }
 
+        viewModelScope.launch {
+            navResultReturner.filteredResultFlowForKey(PASSWORD_SET_RESULT)
+                .collectLatest { navResult ->
+                    val passwordWasSet = navResult.result as? Boolean ?: return@collectLatest
+
+                    if (passwordWasSet) {
+                        _uiState.update {
+                            it.copy(
+                                isPasswordSet = true,
+                                passwordErr = null
+                            )
+                        }
+                        Napier.d("Password set result received")
+                    }
+                }
+        }
+    }
 
     fun onUsernameChanged(username: String) {
         _uiState.update { it.copy(username = filterUsernameUseCase(username, "")) }
@@ -122,10 +146,8 @@ class SetUsernameAndPasswordViewModel(
                 )
                 _navCommandFlow.tryEmit(NavCommand.PopUp())
             }catch (e: Throwable) {
-                Napier.e("Error saving username and password", e)
+                Napier.e("Error saving username and password ${e.message}", e)
             }
-
         }
     }
-
 }

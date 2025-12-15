@@ -15,7 +15,6 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.save
-import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SetPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -44,6 +43,10 @@ class CreateAccountSetPasswordViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    companion object {
+        const val PASSWORD_SET_RESULT = "password_set_result"
+    }
+
     init {
         _appUiState.update {
             it.copy(
@@ -65,7 +68,6 @@ class CreateAccountSetPasswordViewModel(
     fun onClickSave() {
         launchWithLoadingIndicator {
             try {
-
                 schoolDataSource.personPasswordDataSource.store(
                     listOf(
                         encryptPersonPasswordUseCase(
@@ -77,9 +79,12 @@ class CreateAccountSetPasswordViewModel(
                     )
                 )
 
-                _navCommandFlow.tryEmit(NavCommand.PopUp())
+                sendResultAndPop(
+                    destKey = PASSWORD_SET_RESULT,
+                    result = true
+                )
             } catch (e: Throwable) {
-                Napier.e("Error saving username and password", e)
+                Napier.e("Error saving password", e)
             }
         }
     }

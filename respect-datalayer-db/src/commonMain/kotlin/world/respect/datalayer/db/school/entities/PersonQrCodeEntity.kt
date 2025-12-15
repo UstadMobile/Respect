@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import kotlin.time.Instant
 
 @Entity
-data class PersonQrCodeEntity(
+data class PersonBadgeEntity(
     @PrimaryKey
     val pqrGuidNum: Long,
     val pqrGuid: String,

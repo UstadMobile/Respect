@@ -19,7 +19,7 @@ import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonQrDataSource
-import world.respect.datalayer.school.model.PersonQrCode
+import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class PersonQrDataSourceHttp(
@@ -36,7 +36,7 @@ class PersonQrDataSourceHttp(
         }.build()
     }
 
-    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonQrCode>> {
+    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
         return httpClient.getAsDataLoadState(
             url = listParams.urlWithParams(),
             validationHelper = validationHelper,
@@ -49,7 +49,7 @@ class PersonQrDataSourceHttp(
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
         listParams: PersonQrDataSource.GetListParams
-    ): Flow<DataLoadState<List<PersonQrCode>>> {
+    ): Flow<DataLoadState<List<PersonBadge>>> {
         return httpClient.getDataLoadResultAsFlow(
             urlFn = { listParams.urlWithParams() },
             dataLoadParams = loadParams,
@@ -60,7 +60,11 @@ class PersonQrDataSourceHttp(
         }
     }
 
-    override suspend fun store(list: List<PersonQrCode>) {
+    override suspend fun deletePersonBadge(uidNum: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun store(list: List<PersonBadge>) {
         httpClient.post(
             respectEndpointUrl(PersonQrDataSource.ENDPOINT_NAME)
         ) {

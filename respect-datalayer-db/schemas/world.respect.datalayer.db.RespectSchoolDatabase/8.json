@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "6a390156ad004c7680826af29105a901",
+    "identityHash": "e70bf2100420a191a819ca3fcda4f7ca",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -944,7 +944,7 @@
         }
       },
       {
-        "tableName": "PersonQrCodeEntity",
+        "tableName": "PersonBadgeEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pqrGuidNum` INTEGER NOT NULL, `pqrGuid` TEXT NOT NULL, `pqrLastModified` INTEGER NOT NULL, `pqrStored` INTEGER NOT NULL, `pqrQrCodeUrl` TEXT NOT NULL, PRIMARY KEY(`pqrGuidNum`))",
         "fields": [
           {
@@ -988,7 +988,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6a390156ad004c7680826af29105a901')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e70bf2100420a191a819ca3fcda4f7ca')"
     ]
   }
 }

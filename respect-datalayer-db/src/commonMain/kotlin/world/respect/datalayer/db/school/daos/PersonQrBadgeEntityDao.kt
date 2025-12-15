@@ -5,40 +5,40 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.school.entities.PersonQrCodeEntity
+import world.respect.datalayer.db.school.entities.PersonBadgeEntity
 
 @Dao
 interface PersonQrBadgeEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(personQrCodeEntity: PersonQrCodeEntity)
+    suspend fun upsert(personQrCodeEntity: PersonBadgeEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertAsyncList(list: List<PersonQrCodeEntity>)
+    suspend fun upsertAsyncList(list: List<PersonBadgeEntity>)
 
     @Query(
         """
-           SELECT PersonQrCodeEntity.* 
-             FROM PersonQrCodeEntity
+           SELECT PersonBadgeEntity.* 
+             FROM PersonBadgeEntity
             WHERE pqrGuid = :guid
         """
     )
-    suspend fun findByGuid(guid: String): PersonQrCodeEntity?
+    suspend fun findByGuid(guid: String): PersonBadgeEntity?
 
     @Query(
         """
-        SELECT PersonQrCodeEntity.*
-          FROM PersonQrCodeEntity
-         WHERE PersonQrCodeEntity.pqrQrCodeUrl = :qrCodeUrl
+        SELECT PersonBadgeEntity.*
+          FROM PersonBadgeEntity
+         WHERE PersonBadgeEntity.pqrQrCodeUrl = :qrCodeUrl
     """
     )
-    suspend fun findByQrCodeUrl(qrCodeUrl: String): PersonQrCodeEntity?
+    suspend fun findByQrCodeUrl(qrCodeUrl: String): PersonBadgeEntity?
 
     @Query(
         """
-        SELECT PersonQrCodeEntity.pqrLastModified
-          FROM PersonQrCodeEntity
-         WHERE PersonQrCodeEntity.pqrGuidNum = :uidNum
+        SELECT PersonBadgeEntity.pqrLastModified
+          FROM PersonBadgeEntity
+         WHERE PersonBadgeEntity.pqrGuidNum = :uidNum
     """
     )
     suspend fun getLastModifiedByUidNum(
@@ -47,44 +47,44 @@ interface PersonQrBadgeEntityDao {
 
     @Query(
         """
-        SELECT PersonQrCodeEntity.*
-          FROM PersonQrCodeEntity
-         WHERE PersonQrCodeEntity.pqrGuidNum IN (:uids)
+        SELECT PersonBadgeEntity.*
+          FROM PersonBadgeEntity
+         WHERE PersonBadgeEntity.pqrGuidNum IN (:uids)
     """
     )
     suspend fun findByUidList(
         uids: List<Long>
-    ): List<PersonQrCodeEntity>
+    ): List<PersonBadgeEntity>
 
     @Query(
         """
-        SELECT PersonQrCodeEntity.*
-          FROM PersonQrCodeEntity
-         WHERE PersonQrCodeEntity.pqrGuid = :personGuid
+        SELECT PersonBadgeEntity.*
+          FROM PersonBadgeEntity
+         WHERE PersonBadgeEntity.pqrGuid = :personGuid
     """
     )
     suspend fun findAllByPersonGuid(
         personGuid: String
-    ): List<PersonQrCodeEntity>
+    ): List<PersonBadgeEntity>
 
     @Query(
         """
-        SELECT PersonQrCodeEntity.*
-          FROM PersonQrCodeEntity
-         WHERE PersonQrCodeEntity.pqrGuidNum = :personGuid
+        SELECT PersonBadgeEntity.*
+          FROM PersonBadgeEntity
+         WHERE PersonBadgeEntity.pqrGuidNum = :personGuid
     """
     )
     fun findAllByPersonGuidAsFlow(
         personGuid: Long
-    ): Flow<List<PersonQrCodeEntity>>
+    ): Flow<List<PersonBadgeEntity>>
 
     @Query(
         """
-        DELETE FROM PersonQrCodeEntity 
-         WHERE pqrGuid = :guid
+        DELETE FROM PersonBadgeEntity 
+         WHERE pqrGuid = :guidNum
     """
     )
-    suspend fun deleteByGuid(guid: String)
+    suspend fun deleteByGuid(guidNum: Long)
 
 
 }

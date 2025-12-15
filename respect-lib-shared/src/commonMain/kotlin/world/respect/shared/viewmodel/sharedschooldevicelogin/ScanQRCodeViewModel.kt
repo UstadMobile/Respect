@@ -15,12 +15,11 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.model.PersonQrCode
+import world.respect.datalayer.school.model.PersonBadge
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.saved
 import world.respect.shared.generated.resources.scan_qr_code
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
@@ -127,7 +126,7 @@ class ScanQRCodeViewModel(
             val now = Clock.System.now()
             schoolDataSource.personQrDataSource.store(
                 listOf(
-                    PersonQrCode(
+                    PersonBadge(
                         personGuid = personGuid,
                         qrCodeUrl = url,
                         lastModified = now,

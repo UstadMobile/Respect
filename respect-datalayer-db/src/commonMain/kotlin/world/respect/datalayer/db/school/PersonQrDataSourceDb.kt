@@ -14,7 +14,7 @@ import world.respect.datalayer.db.school.adapters.asEntity
 import world.respect.datalayer.db.school.adapters.asModel
 import world.respect.datalayer.school.PersonQrCodeDataSourceLocal
 import world.respect.datalayer.school.PersonQrDataSource
-import world.respect.datalayer.school.model.PersonQrCode
+import world.respect.datalayer.school.model.PersonBadge
 import kotlin.time.Clock
 
 class PersonQrDataSourceDb(
@@ -25,7 +25,7 @@ class PersonQrDataSourceDb(
 ) : PersonQrCodeDataSourceLocal {
 
     private suspend fun upsert(
-        list: List<PersonQrCode>,
+        list: List<PersonBadge>,
         forceOverwrite: Boolean
     ) {
         val timeNow = Clock.System.now()
@@ -41,18 +41,21 @@ class PersonQrDataSourceDb(
                 }
 
                 schoolDb.getPersonQrBadgeEntityDao().upsertAsyncList(toUpdate)
+                toUpdate.forEach { it ->
+                    schoolDb.getPersonQrBadgeEntityDao().deleteByGuid(it.pqrGuidNum)
+                }
             }
         }
     }
 
-    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonQrCode>> {
+    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
         TODO("Not yet implemented")
     }
 
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
         listParams: PersonQrDataSource.GetListParams
-    ): Flow<DataLoadState<List<PersonQrCode>>> {
+    ): Flow<DataLoadState<List<PersonBadge>>> {
         return schoolDb.getPersonQrBadgeEntityDao().findAllByPersonGuidAsFlow(
             personGuid = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
         ).map { list ->
@@ -62,18 +65,26 @@ class PersonQrDataSourceDb(
         }
     }
 
-    override suspend fun store(list: List<PersonQrCode>) {
+    override suspend fun deletePersonBadge(uidNum: Long) {
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                schoolDb.getPersonQrBadgeEntityDao().deleteByGuid(uidNum)
+            }
+        }
+    }
+
+    override suspend fun store(list: List<PersonBadge>) {
         upsert(list, false)
     }
 
     override suspend fun updateLocal(
-        list: List<PersonQrCode>,
+        list: List<PersonBadge>,
         forceOverwrite: Boolean
     ) {
         upsert(list, forceOverwrite)
     }
 
-    override suspend fun findByUidList(uids: List<String>): List<PersonQrCode> {
+    override suspend fun findByUidList(uids: List<String>): List<PersonBadge> {
         return schoolDb.getPersonQrBadgeEntityDao().findByUidList(
             uids.map { uidNumberMapper(it) }
         ).map {

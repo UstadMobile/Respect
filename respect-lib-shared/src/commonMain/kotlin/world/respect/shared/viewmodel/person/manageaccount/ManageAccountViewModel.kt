@@ -20,7 +20,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
 import world.respect.datalayer.school.model.PersonPassword
-import world.respect.datalayer.school.model.PersonQrCode
+import world.respect.datalayer.school.model.PersonBadge
 import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -47,7 +47,7 @@ data class ManageAccountUiState(
     val errorText: UiText? = null,
     val selectedAccount: RespectAccountAndPerson? = null,
     val isStudent: Boolean = true,
-    val qrBadge: DataLoadState<PersonQrCode> = DataLoadingState(),
+    val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
 ) {
 
@@ -204,7 +204,7 @@ class ManageAccountViewModel(
             try {
                 val currentQrBadge = uiState.value.qrBadge.dataOrNull()
                 if (currentQrBadge != null) {
-//                    schoolDataSource.personQrDataSource.delete(listOf(currentQrBadge))
+                    schoolDataSource.personQrDataSource.deletePersonBadge(currentQrBadge.personGuid.toLong())
                 }
             } catch (e: Exception) {
                 _uiState.update { prev ->

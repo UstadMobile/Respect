@@ -100,15 +100,12 @@ fun SetUsernameAndPasswordScreen(
                 },
         )
 
-        // QR Code Info Box (only for students)
-        if (uiState.isStudent) {
-            QrCodeInfoBox(
-                onLearnMore, onAssignQrCodeBadge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
+        QrCodeInfoBox(
+            onLearnMore, onAssignQrCodeBadge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -124,6 +121,17 @@ fun SetUsernameAndPasswordScreen(
             border = ButtonDefaults.outlinedButtonBorder
         ) {
             Text(stringResource(Res.string.set_password))
+        }
+
+        uiState.passwordErr?.let {
+            Text(
+                text = uiTextStringResource(it),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+            )
         }
     }
 }

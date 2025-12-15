@@ -6,25 +6,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
-import world.respect.shared.domain.sharedschooldevicelogin.SetSharedDeviceEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.SharedDeviceSettings
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class SettingsUiState(
     val loading: Boolean = false,
-    val showSharedDeviceDialog: Boolean = false,
-    val isSharedDevice: Boolean = false
 )
 
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
     private val json: Json,
-    private val setSharedDeviceEnabledUseCase: SetSharedDeviceEnabledUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -50,34 +45,5 @@ class SettingsViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(CurriculumMappingList)
         )
-    }
-    fun onToggleSharedDevice(checked: Boolean) {
-        _uiState.update { it.copy(isSharedDevice = checked) }
-
-        if (checked) {
-            setSharedDeviceEnabledUseCase(true)
-        }else{
-            setSharedDeviceEnabledUseCase(false)
-
-        }
-
-        if (checked) {
-            _uiState.update { it.copy(showSharedDeviceDialog = true) }
-        }
-    }
-
-    fun onClickOkay() {
-        _uiState.update { it.copy(showSharedDeviceDialog = false) }
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(SharedDeviceSettings)
-        )
-    }
-    fun onDismissSharedDeviceDialog() {
-        _uiState.update {
-            it.copy(
-                showSharedDeviceDialog = false,
-                isSharedDevice = false
-            )
-        }
     }
 }

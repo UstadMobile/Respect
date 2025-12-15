@@ -7,14 +7,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.sharedschooldevicelogin.GetSharedDeviceEnabledUseCase
+import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.RespectAppLauncher
-import world.respect.shared.navigation.SelectClassScreen
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class AcknowledgementUiState(
@@ -24,7 +22,6 @@ class AcknowledgementViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val shouldShowOnboardingUseCase: ShouldShowOnboardingUseCase,
-    private val getSharedDeviceEnabledUseCase: GetSharedDeviceEnabledUseCase,
     ) : RespectViewModel(savedStateHandle) {
     private val _uiState = MutableStateFlow(AcknowledgementUiState())
 
@@ -42,14 +39,12 @@ class AcknowledgementViewModel(
             delay(2000)
 
             val hasAccount = accountManager.selectedAccount != null
-            val isSharedDeviceMode = getSharedDeviceEnabledUseCase()
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
                         hasAccount -> RespectAppLauncher()
-                        isSharedDeviceMode -> SelectClassScreen
                         else -> GetStartedScreen()
                     },
                     clearBackStack = true,

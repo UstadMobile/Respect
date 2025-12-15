@@ -8,8 +8,8 @@
   "license": "",
   "website": "https://www.khanacademy.org/",
   "icon": "https://www.khanacademy.org/favicon.ico",
-  "learningUnits": "sample-app-response.json",
-  "defaultLaunchUri": "https://www.khanacademy.org/",
+  "learningUnits": "http://192.168.1.5/respect-ds/khan-app-response.json",
+  "defaultLaunchUri": "https://www.khanacademy.or/",
   "android": {
     "packageId": "org.khanacademy.android",
     "stores": [

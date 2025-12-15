@@ -96,6 +96,7 @@ fun AppLauncherScreen(
         onTabSelected = viewModel::onTabSelected,
         onClickMap = viewModel::onClickMap,
         onClickAddLink = viewModel::onClickAddLink,
+        onRemoveMapping = viewModel::removeMapping,
     )
 }
 
@@ -109,6 +110,7 @@ fun AppLauncherScreen(
     onTabSelected: (Int) -> Unit,
     onClickMap: () -> Unit,
     onClickAddLink: () -> Unit,
+    onRemoveMapping: (CurriculumMapping) -> Unit,
 ) {
     var selectedFilterChipIndex by remember { mutableIntStateOf(0) }
 
@@ -160,6 +162,7 @@ fun AppLauncherScreen(
                 onClickMapping = onClickMapping,
                 onClickAdd = onClickMap,
                 onClickAddLink = onClickAddLink,
+                onRemoveMapping = onRemoveMapping,
             )
         }
     }
@@ -248,6 +251,7 @@ private fun PlaylistsTabContent(
     onClickMapping: (CurriculumMapping) -> Unit,
     onClickAdd: () -> Unit,
     onClickAddLink: () -> Unit,
+    onRemoveMapping: (CurriculumMapping) -> Unit,
 ) {
     var isFabMenuExpanded by remember { mutableStateOf(false) }
 
@@ -298,7 +302,8 @@ private fun PlaylistsTabContent(
                         ) { mapping ->
                             MappingListItem(
                                 mapping = mapping,
-                                onClickMapping = onClickMapping
+                                onClickMapping = onClickMapping,
+                                onRemoveMapping = onRemoveMapping,
                             )
                         }
                     }
@@ -398,8 +403,11 @@ private fun PlaylistsTabContent(
 @Composable
 private fun MappingListItem(
     mapping: CurriculumMapping,
-    onClickMapping: (CurriculumMapping) -> Unit
+    onClickMapping: (CurriculumMapping) -> Unit,
+    onRemoveMapping: (CurriculumMapping) -> Unit,
 ) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -444,6 +452,30 @@ private fun MappingListItem(
                     text = "${mapping.sections.size} section, ${mapping.sections.sumOf { it.items.size }} items",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Box {
+            IconButton(onClick = { menuExpanded = true }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "",
+                )
+            }
+
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Text(stringResource(Res.string.remove))
+                    },
+                    onClick = {
+                        menuExpanded = false
+                        onRemoveMapping(mapping)
+                    }
                 )
             }
         }

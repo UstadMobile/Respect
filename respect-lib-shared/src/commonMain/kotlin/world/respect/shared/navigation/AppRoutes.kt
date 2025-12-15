@@ -230,7 +230,21 @@ class IndictorEdit(val indicatorId: String?) : RespectAppRoute
 object RespectAppList : RespectAppRoute
 
 @Serializable
-object EnterLink : RespectAppRoute
+data class EnterLink(
+    private val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+        fun create(
+            resultDest: ResultDest? = null,
+        ) = EnterLink(
+            resultDestStr = resultDest.encodeToJsonStringOrNull()
+        )
+    }
+}
 
 @Serializable
 data class GetStartedScreen(
@@ -635,8 +649,6 @@ data class PersonEdit(
 @Serializable
 data object Settings : RespectAppRoute
 
-@Serializable
-data object CurriculumMappingList : RespectAppRoute
 
 @Serializable
 data class CurriculumMappingEdit(
@@ -669,36 +681,6 @@ data class CurriculumMappingEdit(
         )
     }
 }
-@Serializable
-data class CurriculumMappingDetail(
-    val uid: Long,
-    private val mappingDataJson: String? = null
-) : RespectAppRoute {
-
-    @Transient
-    val mappingData: CurriculumMapping? = mappingDataJson?.let { jsonString ->
-        try {
-            Json.decodeFromString(CurriculumMapping.serializer(), jsonString)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    companion object {
-        fun create(
-            uid: Long,
-            mappingData: CurriculumMapping
-        ) = CurriculumMappingDetail(
-            uid = uid,
-            mappingDataJson = try {
-                Json.encodeToString(CurriculumMapping.serializer(), mappingData)
-            } catch (e: Exception) {
-                null
-            }
-        )
-    }
-}
-
 @Serializable
 data class SetUsernameAndPassword(
     val guid: String

@@ -275,6 +275,7 @@ class AppLauncherViewModel(
             )
         )
     }
+
     fun onClickAddLink() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -285,6 +286,11 @@ class AppLauncherViewModel(
 
     fun onClickMoreOptions(mapping: CurriculumMapping) {
         // TODO: Implement more options
+    }
+
+    fun removeMapping(mapping: CurriculumMapping) {
+        val updated = _uiState.value.mappings.filter { it.uid != mapping.uid }
+        updateMappings(updated)
     }
 
     fun respectAppForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<RespectAppManifest>> {

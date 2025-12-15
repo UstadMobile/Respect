@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
@@ -70,8 +72,8 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = RespectAppLauncher(),
-        icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        icon = Icons.Filled.Home,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
     TopNavigationItem(

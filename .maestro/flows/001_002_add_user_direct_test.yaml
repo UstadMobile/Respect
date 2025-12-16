@@ -30,7 +30,7 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Required field"   # First names* field is mandatory
 - tapOn: "First names*"
-- inputText: "Test"
+- inputText: "ParentA"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Last name* field is mandatory
 - tapOn: "Last name*"
@@ -39,10 +39,13 @@ onFlowComplete:
 - assertVisible: "Required field"   # Gender field is mandatory
 - tapOn: "Gender*"
 - tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Parent"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Test User"
+    text: "ParentA User"
 - tapOn:
     id: "floating_action_button"   # Edit button
 - assertVisible:
@@ -82,7 +85,7 @@ onFlowComplete:
 - eraseText
 - inputText: "2125554326"
 - tapOn: "Email"
-- inputText: "Testuser@gm"
+- inputText: "ParentAuser@gm"
 - hideKeyboard
 - scrollUntilVisible:
     element:
@@ -92,39 +95,120 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
 - eraseText
-- inputText: "Testuser@gmail.com"
-- assertVisible: "Testuser@gmail.com"
-- hideKeyboard
+- inputText: "ParentAuser@gmail.com"
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+# Add Family member - as new person
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Family member"
+- tapOn: "Add person"
+- tapOn: "First names*"
+- inputText: "Child"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "Save"
+- assertVisible: "Child User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+- tapOn: "Child User"
+- assertVisible:
+    id: "app_title"
+    text: "Child User"
+- assertVisible: "Student"
+- assertVisible: "ParentA User"
+- tapOn: "People"
+- assertVisible:
+    id: "app_title"
+    text: "People"
+- tapOn:
+    id: "floating_action_button"   #  +Person button
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: "Test"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Teacher"
+- assertNotVisible: "Family member"
+- tapOn:
+    id: "role"
+- tapOn: "Student"
+- tapOn: "Family member"
+- assertVisible:
+    id: "app_title"
+    text: "Select person"
+- tapOn: "ParentA User"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- assertVisible: "ParentA User"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
+- assertVisible: "ParentA User"
+- tapOn: "ParentA User"
 - tapOn: "Create account"
 - tapOn: "Username"
-- inputText: "testuser"
+- inputText: "2t"
 - tapOn: "Password"  # Password validations needs to be added
 - inputText: "test234"
 - tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test User"
+- assertVisible: "Username must be at least 3 characters"
+- tapOn: "Username"
+- inputText: "2est"
+- tapOn: "Save"
+- assertVisible: "Username cannot start with a number"  # 2est not a valid username
+- eraseText
+- inputText: "parenta@user"
+- assertVisible: "parentauser"    # @ symbol won't get added to the username field - so "parentauser" is expected result
+- tapOn: "Save"
+- tapOn: "Child User"
+- tapOn: "Create account"
+- tapOn: "Username"
+- inputText: "childuser"
+- tapOn: "Password"
+- inputText: "test123"
+- tapOn: "Save"
+- assertVisible: "Manage account"
 
 # Validate User login
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
 
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
-- inputText: "testuser"
+- inputText: "parentauser"
 - tapOn:
     id : "password"
 - inputText: "test234"
@@ -135,23 +219,7 @@ onFlowComplete:
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "People"
-- tapOn: "Test User"
-- tapOn: "Manage account"
-- assertVisible: "testuser"
-- tapOn: "Change"
-- tapOn: "Old password*"
-- inputText: "test234"
-- tapOn: "New password*"
-- inputText: "t2"
-- tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
-- tapOn: "New password*"
-- eraseText
-- inputText: "test123"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
+- tapOn: "ParentA User"
 
 
 # Validate User login after changing password
@@ -169,7 +237,7 @@ onFlowComplete:
 
 - tapOn:
     id: "username"
-- inputText: "testuser"
+- inputText: "childuser"
 - tapOn:
     id : "password"
 - inputText: "test123"
@@ -179,3 +247,6 @@ onFlowComplete:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
+- assertVisible: "Assignments"
+- assertNotVisible: "Classes"
+- assertNotVisible: "People"

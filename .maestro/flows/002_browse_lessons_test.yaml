@@ -57,12 +57,11 @@ onFlowComplete:
 - assertVisible: "School Playlists"
 - assertVisible: "My Playlists"
 - assertVisible: "No playlists yet"
-- tapOn:
-    id: "floating_action_button"  # + Playlist
+- tapOn: "Playlist"
 - assertVisible: "Add new"
 - assertVisible: "Add from a link"
 - tapOn:
-    id: "Add new"
+    text: "Add new"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"

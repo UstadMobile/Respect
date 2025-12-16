@@ -17,7 +17,7 @@ appId: world.respect.app
     id: "app_title"
     text: "App detail"
 - tapOn: "Add App"
-- tapOn: "Apps"
+- tapOn: "Home"
 - assertVisible: "My app"
 
 #  Admin add new class

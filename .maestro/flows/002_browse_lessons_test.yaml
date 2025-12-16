@@ -17,9 +17,13 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-
+- assertVisible: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "Apps"
 - tapOn:
-    id: "floating_action_button"
+    id: "floating_action_button"  # +Add App
 - tapOn: "Add from Link"
 - tapOn: "Link*"
 - inputText: "https://respect.world/respect-ds/case_valid/appmanifest.json"
@@ -31,10 +35,8 @@ onFlowComplete:
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
+- tapOn: "Home"
 - tapOn: "Apps"
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
 - assertVisible: "My app"
 - tapOn: "My app"
 - assertVisible: "Lessons"
@@ -49,5 +51,74 @@ onFlowComplete:
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
+- tapOn: "Home"
+- tapOn: "Playlists"
+- assertVisible: "All"
+- assertVisible: "School Playlists"
+- assertVisible: "My Playlists"
+- assertVisible: "No playlists yet"
+- tapOn:
+    id: "floating_action_button"  # + Playlist
+- assertVisible: "Add new"
+- assertVisible: "Add from a link"
+- tapOn:
+    id: "Add new"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- tapOn: "Save" # To test mandatory fields
+- assertVisible: "Required field"  #Title field is mandatory
+- tapOn: "Title*"
+- inputText: "Playlist - Grade 1"
+- tapOn: "Description"
+- inputText: "Test list"
+- tapOn: "Subject"
+- tapOn: "English"
+- tapOn: "Grade"
+- tapOn: "Grade 1"
+- tapOn: "Section"
+- tapOn: "Section title"
+- inputText: "Day 1"
+- hideKeyboard
+- tapOn:
+    id: "add_item"
+- tapOn: "My app"
+- tapOn: "Lessons"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- assertVisible: "Lesson 001"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- assertVisible: "Day 1"
+- assertVisible: "Lesson 001"
+- tapOn:
+    id: "floating_action_button"  # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit playlist"
+- tapOn: "Section"
+- tapOn: "Section title"
+- inputText: "Day 2"
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- assertVisible: "Day 1"
+- assertVisible: "Lesson 001"
+- assertVisible: "Day 2"
+- assertVisible:
+          id: "share_btn"
+- assertVisible:
+          id: "copy_btn"
+- assertVisible:
+           id: "assign_btn"
+- assertVisible:
+           id: "delete_btn"
 
 

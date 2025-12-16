@@ -49,7 +49,13 @@ class PersonQrDataSourceDb(
     }
 
     override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
-        TODO("Not yet implemented")
+        return DataReadyState(
+            data = schoolDb.getPersonQrBadgeEntityDao().findAll(
+                personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            ).map {
+                it.asModel()
+            }
+        )
     }
 
     override fun listAllAsFlow(

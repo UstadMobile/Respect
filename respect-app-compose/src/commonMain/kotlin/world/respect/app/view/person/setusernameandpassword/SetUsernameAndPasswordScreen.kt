@@ -34,8 +34,10 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.images.RespectImage
 import world.respect.images.respectImagePainter
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
+import world.respect.shared.generated.resources.Change_qr_code_badge
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_qr_code_badge
+import world.respect.shared.generated.resources.change_password
 import world.respect.shared.generated.resources.learn_more
 import world.respect.shared.generated.resources.qr_code_badge
 import world.respect.shared.generated.resources.qr_code_badge_description
@@ -101,10 +103,12 @@ fun SetUsernameAndPasswordScreen(
         )
 
         QrCodeInfoBox(
-            onLearnMore, onAssignQrCodeBadge,
+            onLearnMore,
+            onAssignQrCodeBadge,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            isQrBadgeSet = uiState.isQrBadgeSet
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -120,7 +124,13 @@ fun SetUsernameAndPasswordScreen(
             ),
             border = ButtonDefaults.outlinedButtonBorder
         ) {
-            Text(stringResource(Res.string.set_password))
+            Text(
+                if (uiState.isPasswordSet) {
+                    stringResource(Res.string.change_password)
+                } else {
+                    stringResource(Res.string.set_password)
+                }
+            )
         }
 
         uiState.passwordErr?.let {
@@ -137,7 +147,12 @@ fun SetUsernameAndPasswordScreen(
 }
 
 @Composable
-fun QrCodeInfoBox(onLearnMore: () -> Unit, onAssignQrCodeBadge: () -> Unit, modifier: Modifier) {
+fun QrCodeInfoBox(
+    onLearnMore: () -> Unit,
+    onAssignQrCodeBadge: () -> Unit,
+    modifier: Modifier,
+    isQrBadgeSet: Boolean? = null
+) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
@@ -195,7 +210,13 @@ fun QrCodeInfoBox(onLearnMore: () -> Unit, onAssignQrCodeBadge: () -> Unit, modi
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             ) {
-                Text(stringResource(Res.string.assign_qr_code_badge))
+                Text(
+                    if (isQrBadgeSet == true) {
+                        stringResource(Res.string.Change_qr_code_badge)
+                    } else {
+                        stringResource(Res.string.assign_qr_code_badge)
+                    }
+                )
             }
         }
     }

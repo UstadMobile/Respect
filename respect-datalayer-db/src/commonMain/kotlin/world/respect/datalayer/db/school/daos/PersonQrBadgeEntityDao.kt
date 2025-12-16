@@ -16,6 +16,18 @@ interface PersonQrBadgeEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAsyncList(list: List<PersonBadgeEntity>)
 
+    @Query("SELECT * FROM PersonBadgeEntity")
+    suspend fun getAll(): List<PersonBadgeEntity>
+
+    @Query("""
+        SELECT PersonBadgeEntity.*
+          FROM PersonBadgeEntity
+         WHERE PersonBadgeEntity.pqrGuidNum = :personGuidNum
+    """)
+    suspend fun findAll(
+        personGuidNum: Long
+    ): List<PersonBadgeEntity>
+
     @Query(
         """
            SELECT PersonBadgeEntity.* 

@@ -21,6 +21,7 @@ class PersonQrCodeDataSourceRepository(
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
 ): PersonQrDataSource, RepositoryModelDataSource<PersonBadge> {
+
     override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
         val remote = remote.listAll(listParams)
         local.updateFromRemoteListIfNeeded(

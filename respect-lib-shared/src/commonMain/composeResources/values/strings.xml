@@ -73,8 +73,10 @@
     <string name="quick_easy_sign_in">Quick and easy sign-in for students</string>
     <string name="qr_code_badge_description">QR code badges enable students to quickly and safely sign-in, even on shared devices, without needing to use usernames and passwords</string>
     <string name="assign_qr_code_badge">Assign QR code badge</string>
+    <string name="Change_qr_code_badge">Change QR code badge</string>
     <string name="or">OR</string>
     <string name="set_password">Set password</string>
+    <string name="require_password">Require Password</string>
     <string name="save_password">Save Password</string>
     <string name="creating_account_for">Creating account for %s</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>

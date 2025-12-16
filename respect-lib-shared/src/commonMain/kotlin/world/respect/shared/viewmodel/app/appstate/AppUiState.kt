@@ -29,4 +29,6 @@ data class AppUiState(
     val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
     val settingsIconVisible: Boolean? = null,
     val onClickSettings: (() -> Unit)? = null,
+    val showMoreIconVisible: Boolean = false,
+    val onClickMoreOption: (() -> Unit)? = null,
 )

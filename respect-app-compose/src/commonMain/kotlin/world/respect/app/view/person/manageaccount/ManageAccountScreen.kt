@@ -73,7 +73,7 @@ fun ManageAccountScreen(
         onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
         onAssignQrCodeBadge = viewModel::onClickQRCodeBadge,
         onClickChangeQrBadge = viewModel::onClickChangeQrBadge,
-        )
+    )
 
 }
 
@@ -108,7 +108,7 @@ fun ManageAccountScreen(
             }
         )
 
-        if (uiState.passkeySupported || uiState.isStudent){
+        if (uiState.passkeySupported || uiState.isStudent) {
             ListItem(
                 headlineContent = {
                     Text(text = stringResource(Res.string.security))
@@ -211,7 +211,7 @@ fun ManageAccountScreen(
                 )
             },
             supportingContent = {
-                if(personPasswordVal != null) {
+                if (personPasswordVal != null) {
                     Text(
                         text = "${stringResource(Res.string.last_updated)}: $passwordLastUpdatedStr"
                     )

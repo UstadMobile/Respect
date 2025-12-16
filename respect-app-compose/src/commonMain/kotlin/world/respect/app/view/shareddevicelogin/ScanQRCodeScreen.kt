@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -49,7 +48,12 @@ import org.jetbrains.compose.resources.stringResource
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
 import qrscanner.QrScanner
-import world.respect.shared.generated.resources.*
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.close
+import world.respect.shared.generated.resources.ok
+import world.respect.shared.generated.resources.paste_url
+import world.respect.shared.generated.resources.url
 import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeUiState
 import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
 
@@ -64,203 +68,241 @@ fun ScanQRCodeScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val zoomLevels = listOf(1f, 2f, 3f)
-    var selectedZoomIndex by remember { mutableStateOf(0) }
 
-    var qrCodeURL by remember { mutableStateOf("") }
+    // Scan throttling to prevent rapid processing
+    var lastScanTime by remember { mutableStateOf(0L) }
+    val scanThrottleMs = 1000L
+
+    // Manual entry dialog state
     var showManualEntryDialog by remember { mutableStateOf(false) }
     var manualUrlText by remember { mutableStateOf(TextFieldValue("")) }
-    var showPasteOption by remember { mutableStateOf(false) }
-    var flashlightOn by remember { mutableStateOf(false) }
+
+    // Camera states - all with default values
+    var isCameraActive by remember { mutableStateOf(true) }
     var openImagePicker by remember { mutableStateOf(false) }
     var overlayShape by remember { mutableStateOf(OverlayShape.Square) }
     var cameraLens by remember { mutableStateOf(CameraLens.Back) }
-    var currentZoomLevel by remember { mutableStateOf(zoomLevels[selectedZoomIndex]) }
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var isScreenVisible by remember { mutableStateOf(true) }
+    var flashlightOn by remember { mutableStateOf(false) }
 
+    // Zoom levels
+    val zoomLevels = listOf(1f, 2f, 3f)
+    var selectedZoomIndex by remember { mutableStateOf(0) }
+    var currentZoomLevel by remember { mutableStateOf(zoomLevels[selectedZoomIndex]) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Handle UI state changes
+    LaunchedEffect(uiState) {
+        when {
+            uiState.isSuccess -> {
+                snackbarHostState.showSnackbar("QR code processed successfully")
+            }
+
+            uiState.errorMessage != null -> {
+                snackbarHostState.showSnackbar(uiState.errorMessage!!)
+            }
+        }
+    }
+
+    // Camera lifecycle management
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> isCameraActive = true
+                Lifecycle.Event.ON_PAUSE -> isCameraActive = false
+                Lifecycle.Event.ON_STOP -> isCameraActive = false
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            isCameraActive = false
+        }
+    }
+
+    // Initialize clipboard check when dialog opens
     LaunchedEffect(showManualEntryDialog) {
         if (showManualEntryDialog) {
             val clipboardText = clipboardManager.getText()?.toString() ?: ""
-            showPasteOption = clipboardText.isNotBlank() &&
-                    (clipboardText.startsWith("http://") || clipboardText.startsWith("https://"))
-
-            // If there's a valid URL in clipboard, pre-fill it
-            if (showPasteOption) {
+            if (clipboardText.isNotBlank()) {
                 manualUrlText = TextFieldValue(clipboardText)
             }
         }
     }
 
-    // Stop QR scanner when screen is not visible
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> isScreenVisible = true
-                Lifecycle.Event.ON_PAUSE -> isScreenVisible = false
-                else -> {}
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            isScreenVisible = false
-        }
-    }
-
-    // Handle scanned QR code
-    LaunchedEffect(qrCodeURL) {
-        if (qrCodeURL.isNotEmpty()) {
-            // Process the scanned URL
-            viewModel.processQrCodeUrl(qrCodeURL)
-        }
-    }
-
-    if (isScreenVisible) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-        ) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        if (isCameraActive) {
             QrScanner(
                 modifier = Modifier.fillMaxSize(),
                 flashlightOn = flashlightOn,
                 cameraLens = cameraLens,
                 openImagePicker = openImagePicker,
                 onCompletion = { scannedUrl ->
-                    qrCodeURL = scannedUrl
+                    val currentTime = System.currentTimeMillis()
+                    // Throttle scanning to prevent crashes
+                    if (currentTime - lastScanTime > scanThrottleMs) {
+                        lastScanTime = currentTime
+                        coroutineScope.launch {
+                            viewModel.processQrCodeUrl(scannedUrl)
+                        }
+                    }
                 },
                 zoomLevel = currentZoomLevel,
                 maxZoomLevel = 3f,
                 imagePickerHandler = { openImagePicker = it },
-                onFailure = {
+                onFailure = { errorMessage ->
                     coroutineScope.launch {
-                        snackbarHostState.showSnackbar(it.ifEmpty { "Invalid QR Code" })
+                        snackbarHostState.showSnackbar(
+                            errorMessage.ifEmpty { "Failed to scan QR code" }
+                        )
                     }
                 },
                 overlayShape = overlayShape
             )
+        }
 
-            // Paste URL Button
-            OutlinedButton(
-                onClick = { showManualEntryDialog = true },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 12.dp, end = 12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Text(
-                    text = "Paste Url",
-                    fontFamily = FontFamily.Serif,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                )
-            }
+        if (uiState.showPasteButton) {
+            TopBarWithPasteButton(
+                onPasteClick = { showManualEntryDialog = true }
+            )
+        }
 
-            // Manual URL Entry Dialog
-            if (showManualEntryDialog) {
-                BasicAlertDialog(
-                    onDismissRequest = {
-                        showManualEntryDialog = false
-                        manualUrlText = TextFieldValue("")
-                    },
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = MaterialTheme.shapes.extraLarge
-                            )
-                            .padding(top = 24.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.paste_url),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            IconButton(
-                                onClick = {
-                                    showManualEntryDialog = false
-                                    manualUrlText = TextFieldValue("")
-                                },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(Res.string.close),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        OutlinedTextField(
-                            value = manualUrlText,
-                            onValueChange = { manualUrlText = it },
-                            label = {
-                                Text(
-                                    text = stringResource(Res.string.url),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .fillMaxWidth(),
-                            singleLine = true,
-                            shape = MaterialTheme.shapes.medium,
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            TextButton(
-                                onClick = {
-                                    showManualEntryDialog = false
-                                    manualUrlText = TextFieldValue("")
-                                },
-                                modifier = Modifier.width(100.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.cancel),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            TextButton(
-                                onClick = {
-                                    val url = manualUrlText.text.trim()
-                                    if (url.isNotEmpty()) {
-                                        showManualEntryDialog = false
-                                        viewModel.processQrCodeUrl(url)
-                                        manualUrlText = TextFieldValue("")
-                                    }
-                                },
-                                modifier = Modifier.width(100.dp),
-                                shape = MaterialTheme.shapes.medium,
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.ok),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
+        // Manual URL Entry Dialog
+        if (showManualEntryDialog) {
+            ManualUrlEntryDialog(
+                manualUrlText = manualUrlText,
+                onUrlTextChange = { manualUrlText = it },
+                onDismiss = {
+                    showManualEntryDialog = false
+                    manualUrlText = TextFieldValue("")
+                },
+                onSubmit = { url ->
+                    showManualEntryDialog = false
+                    if (url.isNotEmpty()) {
+                        coroutineScope.launch {
+                            viewModel.processQrCodeUrl(url)
                         }
                     }
+                    manualUrlText = TextFieldValue("")
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopBarWithPasteButton(
+    onPasteClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        OutlinedButton(
+            onClick = onPasteClick,
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            modifier = Modifier.padding(end = 8.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.paste_url),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ManualUrlEntryDialog(
+    manualUrlText: TextFieldValue,
+    onUrlTextChange: (TextFieldValue) -> Unit,
+    onDismiss: () -> Unit,
+    onSubmit: (String) -> Unit
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismiss,
+    ) {
+        Column(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.extraLarge
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.paste_url),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(Res.string.close),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = manualUrlText,
+                onValueChange = onUrlTextChange,
+                label = {
+                    Text(stringResource(Res.string.url))
+                },
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(),
+                singleLine = true
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.width(100.dp)
+                ) {
+                    Text(stringResource(Res.string.cancel))
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                TextButton(
+                    onClick = {
+                        val url = manualUrlText.text.trim()
+                        onSubmit(url)
+                    },
+                    modifier = Modifier.width(100.dp),
+                    enabled = manualUrlText.text.isNotBlank()
+                ) {
+                    Text(stringResource(Res.string.ok))
                 }
             }
         }

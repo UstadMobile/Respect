@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -44,6 +45,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
+import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
@@ -197,6 +199,17 @@ fun RespectAppBar(
                             RespectPersonAvatar(name = it.person.fullName())
                         }
 
+                    }
+                }
+                if (appUiState.showMoreIconVisible){
+                    IconButton(
+                        onClick = appUiState.onClickMoreOption ?: {},
+                        modifier = Modifier.testTag("More options")
+                    ) {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = stringResource(Res.string.more_info)
+                        )
                     }
                 }
             },

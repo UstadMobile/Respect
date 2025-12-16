@@ -636,8 +636,23 @@ data object Settings : RespectAppRoute
 
 @Serializable
 data class ScanQRCode(
-    val guid: String? = null
-) : RespectAppRoute
+    val guid: String? = null,
+    val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+        fun create(
+            guid: String? = null,
+            resultDest: ResultDest? = null,
+        ) = ScanQRCode(
+            guid = guid,
+            resultDestStr = resultDest?.encodeToJsonStringOrNull()
+        )
+    }
+}
 
 @Serializable
 data object CurriculumMappingList : RespectAppRoute

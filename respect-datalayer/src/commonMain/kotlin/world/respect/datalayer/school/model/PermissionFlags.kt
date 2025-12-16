@@ -30,9 +30,9 @@ object PermissionFlags {
      * When used as a SchoolPermission, then that role will have permission to add any student user
      * in the school to any class in the school.
      */
-    const val ADD_STUDENT_TO_CLASS = 512L
+    const val CLASS_WRITE_STUDENT_ENROLLMENT = 512L
 
-    const val ADD_TEACHER_TO_CLASS = 1024L
+    const val CLASS_WRITE_TEACHER_ENROLLMENT = 1024L
 
     const val INVITE_NEW_USER = 2048L
 
@@ -45,8 +45,8 @@ object PermissionFlags {
             .or(PERSON_PARENT_READ)
             .or(PERSON_PARENT_WRITE)
             .or(PERSON_TEACHER_READ)
-            .or(ADD_STUDENT_TO_CLASS)
-            .or(ADD_TEACHER_TO_CLASS)
+            .or(CLASS_WRITE_STUDENT_ENROLLMENT)
+            .or(CLASS_WRITE_TEACHER_ENROLLMENT)
             .or(INVITE_NEW_USER)
 
     const val STUDENT_DEFAULT_SCHOOL_PERMISSIONS = 0L

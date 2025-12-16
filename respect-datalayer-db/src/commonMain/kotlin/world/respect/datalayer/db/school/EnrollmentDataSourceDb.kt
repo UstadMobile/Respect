@@ -2,7 +2,6 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -17,9 +16,11 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
 import kotlin.collections.map
 import kotlin.time.Clock
@@ -33,30 +34,6 @@ class EnrollmentDataSourceDb(
 
     private val logPrefix: String by lazy {
         "EnrollmentDataSourceDb(${authenticatedUser.guid})"
-    }
-
-    private suspend fun upsertEnrollments(
-        enrollments: List<Enrollment>,
-        forceOverwrite: Boolean
-    ) {
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val timeStored = Clock.System.now()
-                val entitiesToStore = enrollments.map {
-                    it.copy(stored = timeStored).toEntities(uidNumberMapper)
-                }.filter {
-                    val lastModInDb = schoolDb.getEnrollmentEntityDao().getLastModifiedByUidNum(
-                        it.eUidNum
-                    ) ?: 0
-                    forceOverwrite || it.eLastModified.toEpochMilliseconds() > lastModInDb
-                }
-
-                schoolDb.getEnrollmentEntityDao().upsert(entitiesToStore)
-                Napier.d(tag = TAG_DATALAYER) {
-                    "$logPrefix: upsert ${entitiesToStore.size}/${enrollments.size} (${enrollments.joinToString { it.uid }}) entities"
-                }
-            }
-        }
     }
 
     override suspend fun findByGuid(
@@ -89,6 +66,7 @@ class EnrollmentDataSourceDb(
     ): DataLoadState<List<Enrollment>> {
         return DataReadyState(
             data = schoolDb.getEnrollmentEntityDao().list(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = listParams.common.since?.toEpochMilliseconds() ?: 0,
                 uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
@@ -107,6 +85,7 @@ class EnrollmentDataSourceDb(
     ): IPagingSourceFactory<Int, Enrollment> {
         return IPagingSourceFactory {
             schoolDb.getEnrollmentEntityDao().listAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = listParams.common.since?.toEpochMilliseconds() ?: 0,
                 uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
@@ -124,14 +103,60 @@ class EnrollmentDataSourceDb(
     }
 
     override suspend fun store(list: List<Enrollment>) {
-        upsertEnrollments(list, false)
+        if(list.isEmpty())
+            return
+
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val now = Clock.System.now()
+                list.forEach { enrollment ->
+                    val classPermissionResult = schoolDb.getClassEntityDao().getLastModifiedAndHasPermission(
+                        authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                        classUidNum = uidNumberMapper(enrollment.classUid),
+                        requiredPermission = when(enrollment.role) {
+                            EnrollmentRoleEnum.STUDENT, EnrollmentRoleEnum.PENDING_STUDENT -> {
+                                PermissionFlags.CLASS_WRITE_STUDENT_ENROLLMENT
+                            }
+                            else -> PermissionFlags.CLASS_WRITE_TEACHER_ENROLLMENT
+                        }
+                    )
+
+                    if(!classPermissionResult.hasPermission)
+                        throw ForbiddenException("$logPrefix no permission to enrol in " +
+                                "class ${enrollment.classUid}")
+
+
+                    schoolDb.getEnrollmentEntityDao().upsert(
+                        listOf(
+                            enrollment.copy(
+                                lastModified = now,
+                                stored = now
+                            ).toEntities(uidNumberMapper)
+                        )
+                    )
+                }
+            }
+        }
     }
 
     override suspend fun updateLocal(
         list: List<Enrollment>,
         forceOverwrite: Boolean
     ) {
-        upsertEnrollments(list, false)
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val now = Clock.System.now()
+                schoolDb.getEnrollmentEntityDao().upsert(
+                    enrolments = list.filter { enrollment ->
+                        forceOverwrite || schoolDb.getEnrollmentEntityDao().getLastModifiedByUidNum(
+                            uidNumberMapper(enrollment.uid)
+                        ).let { it ?: 0L } < enrollment.lastModified.toEpochMilliseconds()
+                    }.map {
+                        it.copy(stored = now).toEntities(uidNumberMapper)
+                    }
+                )
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Enrollment> {

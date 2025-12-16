@@ -82,17 +82,39 @@ interface ClassEntityDao {
 
     @Query("""
           WITH $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
-        SELECT ClassEntity.cGuidHash AS uidNum,
-               ClassEntity.cLastModified AS lastModified,
-               ($PERMISSION_CHECK_SQL) AS hasPermission
-          FROM ClassEntity
-        WHERE ClassEntity.cGuidHash = :classUidNum
+        SELECT :classUidNum AS uidNum,
+               (SELECT ClassEntity.cLastModified
+                  FROM ClassEntity
+                 WHERE ClassEntity.cGuidHash = :classUidNum) AS lastModified,
+                 
+               -- Begin permission check - slightly modified version of CLASS_PERMISSION_CHECK_SQL
+               -- that uses classUidNum param instead of ClassEntity.cGuidHash. This way it also 
+               -- works when checking permission to add a new class that does not yet exist
+               (EXISTS(
+                   SELECT 1
+                     FROM SchoolPermissionGrantEntity
+                    WHERE SchoolPermissionGrantEntity.spgToRole IN (
+                          SELECT PersonRoleEntity.prRoleEnum
+                            FROM PersonRoleEntity
+                           WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum) 
+                      AND (SchoolPermissionGrantEntity.spgPermissions & :requiredPermission) = :requiredPermission
+                      AND SchoolPermissionGrantEntity.spgStatusEnum = ${StatusEnum.ACTIVE_INT})
+                OR EXISTS(
+                   SELECT 1
+                     FROM ClassPermissionEntity
+                    WHERE ClassPermissionEntity.cpeClassUidNum = :classUidNum
+                      AND ClassPermissionEntity.cpeToEnrollmentRole IN 
+                          (SELECT AuthenticatedUserEnrollments.eRole
+                             FROM AuthenticatedUserEnrollments
+                            WHERE AuthenticatedUserEnrollments.eClassUidNum = :classUidNum)
+                      AND (ClassPermissionEntity.cpePermissions & :requiredPermission) = :requiredPermission)
+                ) AS hasPermission
     """)
     suspend fun getLastModifiedAndHasPermission(
         authenticatedPersonUidNum: Long,
         classUidNum: Long,
         requiredPermission: Long,
-    ): LastModifiedAndPermission?
+    ): LastModifiedAndPermission
 
     companion object {
 
@@ -118,7 +140,7 @@ interface ClassEntityDao {
          *  :requiredPermission - the PermissionFlags constant for the permission required
          *
          */
-        const val PERMISSION_CHECK_SQL = """
+        const val CLASS_PERMISSION_CHECK_SQL = """
                 EXISTS(
                    SELECT 1
                      FROM SchoolPermissionGrantEntity
@@ -147,7 +169,7 @@ interface ClassEntityDao {
         WHERE ClassEntity.cStored > :since 
           AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
           -- begin permission check
-          AND ($PERMISSION_CHECK_SQL)
+          AND ($CLASS_PERMISSION_CHECK_SQL)
           -- end permission check
           
           AND (:code IS NULL 

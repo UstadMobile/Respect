@@ -162,9 +162,9 @@ interface PersonEntityDao {
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
-         WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
-                $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
-                $LIST_PERSONS_CTES_SQL
+          WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+               $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
+               $LIST_PERSONS_CTES_SQL
         
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
@@ -222,12 +222,7 @@ interface PersonEntityDao {
                          WHERE PersonRoleEntity.prPersonGuidHash = :uidNum
                          LIMIT 1)
                          
-                         WHEN ${PersonRoleEnum.SITE_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
-                         WHEN ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
-                         WHEN ${PersonRoleEnum.TEACHER_INT} THEN ${PermissionFlags.PERSON_TEACHER_READ}
-                         WHEN ${PersonRoleEnum.STUDENT_INT} THEN ${PermissionFlags.PERSON_STUDENT_READ}
-                         WHEN ${PersonRoleEnum.PARENT_INT} THEN ${PermissionFlags.PERSON_PARENT_READ}
-                         ELSE ${Long.MAX_VALUE}
+                         $CASE_STATEMENT_READ_WHEN_CLAUSES_SQL
                       END
                   ) > 0))
                --Users can always read related persons (e.g. parent-child)   
@@ -245,23 +240,42 @@ interface PersonEntityDao {
 
     companion object {
 
+        /**
+         * The PermissionFlag required to read a person's info varies depending on the primary role.
+         * This is often handled using an SQL CASE statement with the subject being the PersonRoleEnum
+         * flag integer.
+         *
+         * For example: if one wanted check the permission required where the PersonEntity was
+         * already part of the SELECT statement, one could use
+         * CASE(
+         *   (SELECT PersonRoleEntity.prRoleEnum
+         *                           FROM PersonRoleEntity
+         *                          WHERE PersonRoleEntity.prPersonGuidHash = :uidNum
+         *                          LIMIT 1)
+         * $CASE_STATEMENT_READ_WHEN_CLAUSES_SQL
+         * END
+         *
+         */
+        const val CASE_STATEMENT_READ_WHEN_CLAUSES_SQL = """
+             WHEN ${PersonRoleEnum.SITE_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
+             WHEN ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
+             WHEN ${PersonRoleEnum.TEACHER_INT} THEN ${PermissionFlags.PERSON_TEACHER_READ}
+             WHEN ${PersonRoleEnum.STUDENT_INT} THEN ${PermissionFlags.PERSON_STUDENT_READ}
+             WHEN ${PersonRoleEnum.PARENT_INT} THEN ${PermissionFlags.PERSON_PARENT_READ}
+             ELSE ${Long.MAX_VALUE}
+        """
+
 
         /**
          * When expression that will evaluate to the permission flag required to read PersonEntity
-         * based on the person's role.
+         * based on the PersonEntity's primary role.
          */
-        const val READ_WHEN_CLAUSE_SQL = """
+        const val PERMISSION_REQUIRED_TO_READ_PERSON_EXPR = """
             CASE(SELECT PersonRoleEntity.prRoleEnum
                    FROM PersonRoleEntity
                   WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
-                  LIMIT 1)
-                             
-                 WHEN ${PersonRoleEnum.SITE_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
-                 WHEN ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT} THEN ${PermissionFlags.PERSON_ADMIN_READ}
-                 WHEN ${PersonRoleEnum.TEACHER_INT} THEN ${PermissionFlags.PERSON_TEACHER_READ}
-                 WHEN ${PersonRoleEnum.STUDENT_INT} THEN ${PermissionFlags.PERSON_STUDENT_READ}
-                 WHEN ${PersonRoleEnum.PARENT_INT} THEN ${PermissionFlags.PERSON_PARENT_READ}
-                 ELSE ${Long.MAX_VALUE}
+                  LIMIT 1)                    
+                 $CASE_STATEMENT_READ_WHEN_CLAUSES_SQL
             END     
         """
 
@@ -300,6 +314,29 @@ interface PersonEntityDao {
         """
 
 
+        const val AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL = """
+                (PersonEntity.pGuidHash = :authenticatedPersonUidNum)
+             OR PersonEntity.pGuidHash IN 
+                (SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum 
+                   FROM AuthenticatedPersonRelatedPersonUids) 
+             OR EXISTS(
+                    SELECT 1
+                      FROM SchoolPermissionGrantEntity
+                     WHERE SchoolPermissionGrantEntity.spgToRole IN 
+                           (SELECT PersonRoleEntity.prRoleEnum
+                              FROM PersonRoleEntity
+                             WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum)
+                               AND (SchoolPermissionGrantEntity.spgPermissions & ($PERMISSION_REQUIRED_TO_READ_PERSON_EXPR)) > 0)
+             OR EXISTS(
+                    SELECT 1
+                      FROM AuthenticatedPersonClassPermissions
+                     WHERE AuthenticatedPersonClassPermissions.cpeClassUidNum IN 
+                           (SELECT EnrollmentEntity.eClassUidNum
+                              FROM EnrollmentEntity
+                             WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash)
+                       AND (AuthenticatedPersonClassPermissions.cpePermissions & ($PERMISSION_REQUIRED_TO_READ_PERSON_EXPR)) > 0)
+        """
+
 
         /**
          * This CTE expression is shared between all functions that return a list. It handles the
@@ -328,28 +365,7 @@ interface PersonEntityDao {
                            ) 
                           ) 
                           -- Begin permission NOTE check should add permissions granted to children for parent
-                      AND (
-                           (PersonEntity.pGuidHash = :authenticatedPersonUidNum)
-                        OR PersonEntity.pGuidHash IN 
-                           (SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum 
-                              FROM AuthenticatedPersonRelatedPersonUids) 
-                        OR EXISTS(
-                               SELECT 1
-                                 FROM SchoolPermissionGrantEntity
-                                WHERE SchoolPermissionGrantEntity.spgToRole IN 
-                                      (SELECT PersonRoleEntity.prRoleEnum
-                                         FROM PersonRoleEntity
-                                        WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum)
-                                  AND (SchoolPermissionGrantEntity.spgPermissions & ($READ_WHEN_CLAUSE_SQL)) > 0)
-                        OR EXISTS(
-                               SELECT 1
-                                 FROM AuthenticatedPersonClassPermissions
-                                WHERE AuthenticatedPersonClassPermissions.cpeClassUidNum IN 
-                                      (SELECT EnrollmentEntity.eClassUidNum
-                                         FROM EnrollmentEntity
-                                        WHERE EnrollmentEntity.ePersonUidNum = PersonEntity.pGuidHash)
-                                  AND (AuthenticatedPersonClassPermissions.cpePermissions & ($READ_WHEN_CLAUSE_SQL)) > 0)
-                          )
+                      AND ($AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL)
                       AND (:filterByName IS NULL 
                            OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
                       AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 
@@ -370,6 +386,7 @@ interface PersonEntityDao {
                                SELECT Persons.uidNum
                                  FROM Persons)
                        )
+                   AND ($AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL)    
             ),
                 
             AllPersons(uidNum) AS (

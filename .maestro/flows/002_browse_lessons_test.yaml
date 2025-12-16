@@ -119,5 +119,9 @@ onFlowComplete:
            id: "assign_btn"
 - assertVisible:
            id: "delete_btn"
+- tapOn: "Lesson 001"
+- assertVisible: "Lesson 001"
+- assertVisible: "App name"
+- assertVisible: "Open"
 
 

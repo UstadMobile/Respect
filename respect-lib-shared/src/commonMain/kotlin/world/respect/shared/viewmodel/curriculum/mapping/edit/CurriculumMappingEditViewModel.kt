@@ -27,6 +27,7 @@ import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
@@ -118,7 +119,8 @@ class CurriculumMappingEditViewModel(
                                 it.copy(
                                     items = it.items + CurriculumMappingSectionLink(
                                         href = selectedLearningUnit.learningUnitManifestUrl.toString(),
-                                        title = selectedLearningUnit.selectedPublication.metadata.title.getTitle()
+                                        title = selectedLearningUnit.selectedPublication.metadata.title.getTitle(),
+                                        appManifestUrl = selectedLearningUnit.appManifestUrl
                                     )
                                 )
                             }
@@ -278,6 +280,22 @@ class CurriculumMappingEditViewModel(
                 )
             )
         }
+    }
+
+    fun onClickLesson(link: CurriculumMappingSectionLink) {
+        val publicationUrl = Url(link.href)
+        val appManifestUrl = link.appManifestUrl ?: return
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = publicationUrl,
+                    appManifestUrl = appManifestUrl,
+                    refererUrl = publicationUrl,
+                    expectedIdentifier = null
+                )
+            )
+        )
     }
 
     /**

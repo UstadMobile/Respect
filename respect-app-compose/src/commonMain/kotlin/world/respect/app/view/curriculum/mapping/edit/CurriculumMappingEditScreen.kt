@@ -69,6 +69,7 @@ fun CurriculumMappingEditScreenForViewModel(
         onClickAddLesson = viewModel::onClickAddLesson,
         onClickRemoveLesson = viewModel::onClickRemoveLesson,
         onLessonMovedBetweenSections = viewModel::onLessonMovedBetweenSections,
+        onClickLesson = viewModel::onClickLesson,
     )
 }
 
@@ -85,6 +86,7 @@ fun CurriculumMappingEditScreen(
     onClickAddLesson: (Int) -> Unit = {},
     onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
     onLessonMovedBetweenSections: (Int, Int, Int, Int) -> Unit = { _, _, _, _ -> },
+    onClickLesson: (CurriculumMappingSectionLink) -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
@@ -93,7 +95,7 @@ fun CurriculumMappingEditScreen(
     val reorderableLazyListState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         onMove = { from, to ->
-            val headerItemCount = 4 //TODO: This MUST be explained
+            val headerItemCount = 4
             val fromIndex = from.index - headerItemCount
             val toIndex = to.index - headerItemCount
 
@@ -290,6 +292,7 @@ fun CurriculumMappingEditScreen(
                                 sectionIndex = sectionIndex,
                                 linkIndex = linkIndex,
                                 onClickRemoveLesson = onClickRemoveLesson,
+                                onClickLesson = onClickLesson,
                                 isDragging = isDragging,
                                 isParentSectionDragging = isParentSectionDragging,
                                 dragModifier = Modifier.draggableHandle(
@@ -408,6 +411,7 @@ private fun LessonItem(
     sectionIndex: Int,
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
+    onClickLesson: (CurriculumMappingSectionLink) -> Unit = {},
     isDragging: Boolean,
     isParentSectionDragging: Boolean = false,
     dragModifier: Modifier = Modifier
@@ -429,6 +433,10 @@ private fun LessonItem(
                 } else {
                     Modifier
                 }
+            )
+            .clickable(
+                enabled = !isDragging && !isParentSectionDragging,
+                onClick = { onClickLesson(link) }
             ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isDragging) 8.dp else 1.dp

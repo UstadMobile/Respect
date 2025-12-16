@@ -287,45 +287,31 @@ class RespectAccountManager(
         return activeAccount?.let { getOrCreateAccountScope(it) }
             ?: throw IllegalStateException("require scope for selected account: no account selected")
     }
-    suspend fun startChildSessionWithParentToken(
-        child: RespectAccount,
-        parent: RespectAccount
-    ) {
-        val parentToken = tokenManager.providerFor(parent.scopeId).provideToken()
 
-        tokenManager.storeToken(child.scopeId, parentToken)
+    suspend fun switchProfile(personUid: String) {
+        val currentSession = _activeSession.value
+            ?: throw IllegalStateException("switchProfile: no active session")
 
-        val childAccountScope = getOrCreateAccountScope(child)
 
-        val schoolDataSource: SchoolDataSource = childAccountScope.get()
+        if(!_storedAccounts.value.any { it.isSameAccount(currentSession.account) }) {
+            throw IllegalArgumentException("switchProfile: account not stored/available")
+        }
+
+
+        val accountScope = getOrCreateAccountScope(currentSession.account)
+        val schoolDataSource: SchoolDataSource = accountScope.get()
         schoolDataSource.personDataSource.findByGuid(
             DataLoadParams(),
-            child.userGuid
+            personUid
         )
 
-        val schoolScope: Scope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
-            SchoolDirectoryEntryScopeId(child.school.self, null).scopeId
-        )
-        val mkDirUseCase: MakeSchoolPathDirUseCase? = schoolScope.getOrNull()
-        mkDirUseCase?.invoke()
 
-        selectedAccount = child
-        putDebugCrashCustomData("SelectedAccount", selectedAccount.toString())
-    }
+        val newSession = RespectSession(currentSession.account, personUid)
+        _activeSession.value = newSession
+        settings[SETTINGS_KEY_ACTIVE_SESSION] = json.encodeToString(newSession)
 
-    suspend fun startChildSessionWithParentGuid(
-        child: Person,
-        parentUserGuid: String
-    ) {
 
-        val parent = _storedAccounts.value.firstOrNull { it.userGuid == parentUserGuid }
-            ?: throw IllegalStateException("Parent account not found for userGuid=$parentUserGuid")
-       val childAccount = RespectAccount(
-            userGuid = child.guid,
-            school = parent.school,
-            startedViaParent = true
-        )
-        startChildSessionWithParentToken(childAccount, parent)
+        putDebugCrashCustomData("SelectedAccount", activeAccount.toString())
     }
 
 

@@ -46,7 +46,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
-    val familyPersons: List<Person> = emptyList(),
+    val familyPersons: List<Person>? = emptyList(),
     )
 
 class AccountListViewModel(
@@ -54,7 +54,7 @@ class AccountListViewModel(
     savedStateHandle: SavedStateHandle
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = respectAccountManager.requireSelectedAccountScope()
+    override val scope: Scope = respectAccountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
@@ -76,8 +76,9 @@ class AccountListViewModel(
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson)
+                    prev.copy(selectedAccount = accountAndPerson, familyPersons = accountAndPerson?.relatedPersons)
                 }
+                 accountAndPerson?.relatedPersons
             }
         }
 
@@ -102,21 +103,7 @@ class AccountListViewModel(
 
                     return@collectLatest
                 }
-                val personList = schoolDataSource.personDataSource.list(
-                    loadParams = DataLoadParams(),
-                    params = PersonDataSource.GetListParams(
-                        common = GetListCommonParams(
-                            guid = activeAccount?.userGuid
-                        ),
-                        includeRelated = true
-                    )
-                )
-                _uiState.update { prev ->
-                    prev.copy(familyPersons = personList.dataOrNull()?.filter
-                    {
-                        it.guid != activeAccount?.userGuid
-                    } ?: emptyList())
-                }
+
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {
@@ -180,17 +167,14 @@ class AccountListViewModel(
     }
 
     fun onClickFamilyPerson(person: Person) {
-        val parentGuid = uiState.value.selectedAccount?.account?.userGuid
-        if (parentGuid!=null){
-            viewModelScope.launch {
-                respectAccountManager.startChildSessionWithParentGuid(person, parentGuid)
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        RespectAppLauncher(),
-                        clearBackStack = true
-                    )
+        viewModelScope.launch {
+            respectAccountManager.switchProfile(person.guid)
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    RespectAppLauncher(),
+                    clearBackStack = true
                 )
-            }
+            )
         }
     }
     fun onClickAddAccount() {

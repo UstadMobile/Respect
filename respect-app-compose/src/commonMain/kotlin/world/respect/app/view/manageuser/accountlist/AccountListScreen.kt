@@ -82,14 +82,14 @@ fun AccountListScreen(
                 )
             }
         }
-          if (uiState.familyPersons.isNotEmpty()) {
+          if (!uiState.familyPersons.isNullOrEmpty()) {
               item {
                   Text(
                       modifier = Modifier.defaultItemPadding(),
                      text =  stringResource(Res.string.connected_family)
                   )
               }
-              uiState.familyPersons.forEach { account ->
+              uiState.familyPersons?.forEach { account ->
                   item {
                       ListItem(
                           modifier = Modifier.clickable {

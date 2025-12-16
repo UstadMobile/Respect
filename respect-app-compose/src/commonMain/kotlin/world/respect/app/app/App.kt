@@ -41,6 +41,7 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
@@ -160,7 +161,7 @@ fun App(
                         appUiState = appUiStateVal,
                         navController = navController,
                         onProfileClick = {
-                            if (activeAccount?.account?.startedViaParent == false) {
+                            if (activeAccount?.isChild == false) {
                                 navController.navigate(AccountList)
                                 return@RespectAppBar
                             }
@@ -193,7 +194,7 @@ fun App(
                     if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
 
                         val visibleNavItems = remember(activeAccount) {
-                            if (activeAccount?.account?.startedViaParent == true) {
+                            if (activeAccount?.isChild == true) {
                                 APP_TOP_LEVEL_NAV_ITEMS.filter {
                                     it.destRoute is RespectAppLauncher || it.destRoute === AssignmentList
                                 }

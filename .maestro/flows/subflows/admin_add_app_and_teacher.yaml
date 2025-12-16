@@ -5,7 +5,8 @@ appId: world.respect.app
 - runFlow: "school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
+- tapOn: "Apps"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"

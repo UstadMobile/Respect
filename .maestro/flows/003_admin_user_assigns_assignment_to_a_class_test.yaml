@@ -68,8 +68,6 @@ onFlowComplete:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
 - tapOn: "Lesson/assessment"
-- assertVisible:
-    id: "app_title"
 - tapOn: "My app"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"

@@ -35,7 +35,7 @@ class IndicatorListViewModel(
 
     private val _uiState = MutableStateFlow(IndicatorListUiState())
     val uiState = _uiState.asStateFlow()
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {

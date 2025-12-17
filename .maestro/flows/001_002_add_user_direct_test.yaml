@@ -234,7 +234,6 @@ onFlowComplete:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "childuser"
@@ -246,7 +245,10 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
 - assertVisible: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- assertVisible: "Apps"
 - assertNotVisible: "Classes"
 - assertNotVisible: "People"

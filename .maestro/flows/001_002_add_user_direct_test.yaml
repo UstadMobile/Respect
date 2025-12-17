@@ -56,7 +56,11 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.tomorrowDate}
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
 - eraseText
@@ -64,8 +68,12 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- hideKeyboard
-
+- runFlow:
+    when:
+      notVisible:
+           id: "phone_countrycode"
+    commands:
+        - hideKeyboard
 # Validate Phone number
 - tapOn:
      id: "phone_countrycode"
@@ -73,25 +81,32 @@ onFlowComplete:
 - inputText: "+1"
 - tapOn: "Phone number"
 - inputText: "23"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
 - inputText: "21255543268"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - eraseText
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "ParentAuser@gm"
-- hideKeyboard
-- scrollUntilVisible:
-    element:
-      text: "Save" # or any other selector
-    direction: UP
-    timeout: 1000
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
 - eraseText

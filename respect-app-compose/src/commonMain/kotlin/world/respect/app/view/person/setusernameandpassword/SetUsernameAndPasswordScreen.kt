@@ -101,15 +101,16 @@ fun SetUsernameAndPasswordScreen(
                     } else false
                 },
         )
-
-        QrCodeInfoBox(
-            onLearnMore,
-            onAssignQrCodeBadge,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            isQrBadgeSet = uiState.isQrBadgeSet
-        )
+        if (uiState.isStudent) {
+            QrCodeInfoBox(
+                onLearnMore,
+                onAssignQrCodeBadge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                isQrBadgeSet = uiState.isQrBadgeSet
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

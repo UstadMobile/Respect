@@ -32,6 +32,7 @@ import world.respect.shared.navigation.SetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.time.Clock
@@ -41,7 +42,8 @@ data class SetUsernameAndPasswordUiState(
     val usernameErr: UiText? = null,
     val passwordErr: UiText? = null,
     val isPasswordSet: Boolean = false,
-    val isQrBadgeSet: Boolean = false
+    val isQrBadgeSet: Boolean = false,
+    val isStudent: Boolean = false
 )
 
 /**
@@ -99,6 +101,17 @@ class SetUsernameAndPasswordViewModel(
                         Napier.d("Password set result received")
                     }
                 }
+        }
+        viewModelScope.launch {
+            schoolDataSource.personDataSource.findByGuidAsFlow(
+                route.guid
+            ).collect {
+                _uiState.update { prev ->
+                    prev.copy(
+                        isStudent = it.dataOrNull()?.isAdminOrTeacher() == false
+                    )
+                }
+            }
         }
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(QR_SCAN_ASSIGN)

@@ -38,6 +38,7 @@ import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.time.Clock
 
@@ -49,7 +50,7 @@ data class ManageAccountUiState(
     val personPassword: DataLoadState<PersonPassword> = DataLoadingState(),
     val errorText: UiText? = null,
     val selectedAccount: RespectAccountAndPerson? = null,
-    val isStudent: Boolean = true,
+    val isStudent: Boolean = false,
     val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
 ) {
@@ -104,6 +105,7 @@ class ManageAccountViewModel(
                 title = Res.string.manage_account.asUiText()
             )
         }
+
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(
                 QR_SELECT_RESULT
@@ -120,6 +122,7 @@ class ManageAccountViewModel(
                 _uiState.update { it.copy(personPassword = password) }
             }
         }
+
         viewModelScope.launch {
             schoolDataSource.personQrDataSource.findByPersonGuidAsFlow(
                 route.guid
@@ -152,7 +155,10 @@ class ManageAccountViewModel(
                     route.guid
                 ).collect {
                     _uiState.update { prev ->
-                        prev.copy(personUsername = it.dataOrNull()?.username ?: "")
+                        prev.copy(
+                            personUsername = it.dataOrNull()?.username ?: "",
+                            isStudent = it.dataOrNull()?.isAdminOrTeacher() == false
+                        )
                     }
                 }
             }
@@ -237,21 +243,23 @@ class ManageAccountViewModel(
         }
     }
 
-    private suspend fun storeQrCodeForPerson(personGuid: String, url: String) {
-        try {
-            val now = Clock.System.now()
-            schoolDataSource.personQrDataSource.store(
-                listOf(
-                    PersonBadge(
-                        personGuid = personGuid,
-                        qrCodeUrl = url,
-                        lastModified = now,
-                        stored = now
+    private fun storeQrCodeForPerson(personGuid: String, url: String) {
+        viewModelScope.launch {
+            try {
+                val now = Clock.System.now()
+                schoolDataSource.personQrDataSource.store(
+                    listOf(
+                        PersonBadge(
+                            personGuid = personGuid,
+                            qrCodeUrl = url,
+                            lastModified = now,
+                            stored = now
+                        )
                     )
                 )
-            )
-        } catch (e: Exception) {
-            throw e
+            } catch (e: Exception) {
+                throw e
+            }
         }
     }
 

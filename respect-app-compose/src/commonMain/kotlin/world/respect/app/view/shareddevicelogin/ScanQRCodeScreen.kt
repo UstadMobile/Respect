@@ -66,12 +66,7 @@ fun ScanQRCodeScreen(
         ScanQRCodeUiState()
     )
     val coroutineScope = rememberCoroutineScope()
-    val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // Scan throttling to prevent rapid processing
-    var lastScanTime by remember { mutableStateOf(0L) }
-    val scanThrottleMs = 1000L
 
     // Manual entry dialog state
     var showManualEntryDialog by remember { mutableStateOf(false) }
@@ -89,50 +84,6 @@ fun ScanQRCodeScreen(
     var selectedZoomIndex by remember { mutableStateOf(0) }
     var currentZoomLevel by remember { mutableStateOf(zoomLevels[selectedZoomIndex]) }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    // Handle UI state changes
-    LaunchedEffect(uiState) {
-        when {
-            uiState.isSuccess -> {
-                snackbarHostState.showSnackbar("QR code processed successfully")
-            }
-
-            uiState.errorMessage != null -> {
-                snackbarHostState.showSnackbar(uiState.errorMessage!!)
-            }
-        }
-    }
-
-    // Camera lifecycle management
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> isCameraActive = true
-                Lifecycle.Event.ON_PAUSE -> isCameraActive = false
-                Lifecycle.Event.ON_STOP -> isCameraActive = false
-                else -> {}
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            isCameraActive = false
-        }
-    }
-
-    // Initialize clipboard check when dialog opens
-    LaunchedEffect(showManualEntryDialog) {
-        if (showManualEntryDialog) {
-            val clipboardText = clipboardManager.getText()?.toString() ?: ""
-            if (clipboardText.isNotBlank()) {
-                manualUrlText = TextFieldValue(clipboardText)
-            }
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -146,13 +97,8 @@ fun ScanQRCodeScreen(
                 cameraLens = cameraLens,
                 openImagePicker = openImagePicker,
                 onCompletion = { scannedUrl ->
-                    val currentTime = System.currentTimeMillis()
-                    // Throttle scanning to prevent crashes
-                    if (currentTime - lastScanTime > scanThrottleMs) {
-                        lastScanTime = currentTime
-                        coroutineScope.launch {
-                            viewModel.processQrCodeUrl(scannedUrl)
-                        }
+                    coroutineScope.launch {
+                        viewModel.processQrCodeUrl(scannedUrl)
                     }
                 },
                 zoomLevel = currentZoomLevel,

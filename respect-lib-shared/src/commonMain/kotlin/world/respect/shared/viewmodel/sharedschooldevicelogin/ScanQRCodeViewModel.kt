@@ -60,6 +60,7 @@ class ScanQRCodeViewModel(
                 onClickMoreOption = {
                     _uiState.update { it.copy(showPasteButton = true) }
                 },
+                userAccountIconVisible = false
             )
         }
     }

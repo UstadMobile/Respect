@@ -26,8 +26,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,13 +34,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import qrscanner.CameraLens
@@ -116,7 +109,7 @@ fun ScanQRCodeScreen(
         }
 
         if (uiState.showPasteButton) {
-            TopBarWithPasteButton(
+            PasteButton(
                 onPasteClick = { showManualEntryDialog = true }
             )
         }
@@ -145,7 +138,7 @@ fun ScanQRCodeScreen(
 }
 
 @Composable
-private fun TopBarWithPasteButton(
+private fun PasteButton(
     onPasteClick: () -> Unit
 ) {
     Row(

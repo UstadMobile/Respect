@@ -103,18 +103,20 @@ class LoginViewModel(
                                 ),
                                 schoolUrl = route.schoolUrl,
                             )
-                            val person = accountManager.selectedAccountAndPersonFlow.first()
+                            accountManager.selectedAccountAndPersonFlow.collect { person ->
+                                val destination = if (person?.isChild == true) {
+                                    AssignmentList
+                                } else {
+                                    RespectAppLauncher()
+                                }
 
-                            val destination = if (person?.isChild == true) {
-                                AssignmentList
-                            } else {
-                                RespectAppLauncher()
-                            }
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(
-                                    destination = destination, clearBackStack = true
+                                _navCommandFlow.tryEmit(
+                                    NavCommand.Navigate(
+                                        destination = destination,
+                                        clearBackStack = true,
+                                    )
                                 )
-                            )
+                            }
                         }
 
                         is GetCredentialUseCase.PasswordCredentialResult -> {
@@ -212,20 +214,21 @@ class LoginViewModel(
                            password = password
                        )
                    }
-                    val person = accountManager.selectedAccountAndPersonFlow.first()
+                    accountManager.selectedAccountAndPersonFlow.collect { person ->
+                        val destination = if (person?.isChild == true) {
+                            AssignmentList
+                        } else {
+                            RespectAppLauncher()
+                        }
 
-                    val destination = if (person?.isChild == true) {
-                        AssignmentList
-                    } else {
-                        RespectAppLauncher()
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                destination = destination,
+                                clearBackStack = true,
+                            )
+                        )
                     }
 
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            destination = destination,
-                            clearBackStack = true,
-                        )
-                    )
                 }catch(e: Exception) {
                     e.printStackTrace()
                     _uiState.update { prev ->

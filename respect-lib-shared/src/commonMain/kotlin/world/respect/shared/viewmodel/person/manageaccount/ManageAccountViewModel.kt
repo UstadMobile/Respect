@@ -21,7 +21,7 @@ import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
 import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.school.model.PersonPassword
-import world.respect.shared.domain.account.RespectAccountAndPerson
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
@@ -49,7 +49,7 @@ data class ManageAccountUiState(
     val personUsername: String = "",
     val personPassword: DataLoadState<PersonPassword> = DataLoadingState(),
     val errorText: UiText? = null,
-    val selectedAccount: RespectAccountAndPerson? = null,
+    val selectedAccount: RespectSessionAndPerson? = null,
     val isStudent: Boolean = false,
     val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
@@ -72,7 +72,7 @@ class ManageAccountViewModel(
     private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase by lazy {
         scope.get()
@@ -175,7 +175,7 @@ class ManageAccountViewModel(
         _uiState.update { prev ->
             prev.copy(
                 passkeySupported = (createPasskeyUseCase != null &&
-                        accountManager.selectedAccount?.userGuid == personGuid),
+                        accountManager.activeAccount?.userGuid == personGuid),
             )
         }
     }
@@ -277,7 +277,7 @@ class ManageAccountViewModel(
                 CreatePasskeyUseCase.Request(
                     personUid = uiState.value.selectedAccount?.person?.guid ?: return@launch,
                     username = uiState.value.selectedAccount?.person?.username ?: return@launch,
-                    rpId = uiState.value.selectedAccount?.account?.school?.rpId ?: return@launch
+                    rpId = uiState.value.selectedAccount?.session?.account?.school?.rpId ?: return@launch
                 )
             )
 

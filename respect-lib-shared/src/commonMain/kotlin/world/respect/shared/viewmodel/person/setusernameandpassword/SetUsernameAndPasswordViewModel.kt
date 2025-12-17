@@ -57,7 +57,7 @@ class SetUsernameAndPasswordViewModel(
     private val validateUsernameUseCase: ValidateUsernameUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
     private val navResultReturner: NavResultReturner by inject()

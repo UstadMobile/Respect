@@ -186,7 +186,7 @@ class SignupViewModel(
                 when (route.type) {
                     ProfileType.CHILD -> {
                         viewModelScope.launch {
-                            val scope: Scope = accountManager.requireSelectedAccountScope()
+                            val scope: Scope = accountManager.requireActiveAccountScope()
                             val addChildAccountUseCase: AddChildAccountUseCase by lazy {
                                 scope.get()
                             }

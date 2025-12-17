@@ -227,6 +227,7 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: "test234"
+- hideKeyboard
 - tapOn: "Login"
 - runFlow:
     when:
@@ -255,6 +256,7 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: "test123"
+- hideKeyboard
 - tapOn: "Login"
 - runFlow:
     when:

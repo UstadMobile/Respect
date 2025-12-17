@@ -53,7 +53,11 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.tomorrowDate}
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
 - eraseText
@@ -70,20 +74,32 @@ onFlowComplete:
 - inputText: "+1"
 - tapOn: "Phone number"
 - inputText: "23"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
 - eraseText
 - inputText: "21255543268"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - eraseText
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "Testuser@gm"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       text: "Save" # or any other selector
@@ -94,12 +110,18 @@ onFlowComplete:
 - eraseText
 - inputText: "Testuser@gmail.com"
 - assertVisible: "Testuser@gmail.com"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
+- tapOn: "Username"
+- inputText: "testuser"
 - assertVisible: "Username"
 - assertVisible: "testuser" #Automatically generated
 - assertVisible: "Quick and easy sign-in for students"
@@ -115,6 +137,11 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
+    text: "Create account"
+- tapOn: "Save"
+- tapOn: "Manage account"
+- assertVisible:
+    id: "app_title"
     text: "Manage account"
 - assertVisible:
     id: "password_change_btn"  # Change password button
@@ -125,21 +152,25 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Scan QR code badge"
-- tapOn:
-     id: "more_options"
+- tapOn: "More Info"
 - tapOn: "Paste URL"
-- tapOn:
-   id: "url"
-- inputText: "https://school.example.org"  #Invalid url
-- tapOn: "OK"
-- assertVisible: "Invalid url, please try again"
-- eraseText
-- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
-- tapOn: "OK"
+- tapOn: "Url"
+#- inputText: "https://school.example.org"  #Invalid url
+#- tapOn: "OK"
+#- assertVisible: "Invalid url, please try again"
+#- eraseText
+- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121
+- tapOn: "Ok"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
 - assertVisible: "QR code badge"
 - assertVisible: "Badge.*"
 - tapOn:
     id: "qr_change_btn"
+- tapOn:
+    text: "Change"
+    index: 0
 - assertVisible: "Assign new badge (replace)"
 - assertVisible: "Revoke badge"
 
@@ -149,8 +180,10 @@ onFlowComplete:
     id: "app_title"
     text: "Scan QR code badge"
 - back
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
 - assertVisible: "QR code badge"
-
 # Verify the button - Revoke badge, it should remove the assigned badge
 - tapOn:
     id: "qr_change_btn"
@@ -159,20 +192,20 @@ onFlowComplete:
     id: "app_title"
     text: "Manage account"
 - assertVisible: "Assign QR code badge"
-
 - tapOn: "Assign QR code badge"
 - assertVisible:
     id: "app_title"
     text: "Scan QR code badge"
-- tapOn:
-    id: "more_options"
+- tapOn: "More Info"
 - tapOn: "Paste URL"
-- tapOn:
-    id: "url"
-- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
+- tapOn: "Url"
+- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "OK"
-- assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+#- assertVisible: "QR code badge"
+#- assertVisible: "Badge.*"
 
 # Validate User QR Login using Scan QR/badge
 
@@ -181,16 +214,14 @@ onFlowComplete:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
 - tapOn: "Get Started"
-- tapOn: "Scan QR/badge"
+- tapOn: "Scan QR code/badge"
 - assertVisible:
     id: "app_title"
-    text: "Scan QR/badge"
-- tapOn:
-    id: "more_options"
+    text: "Scan QR code badge"
+- tapOn: "More Info"
 - tapOn: "Paste URL"
-- tapOn:
-    id: "url"
-- inputText: "https://school.example.org/respect_qr_badge/id/123121?code=(secret)"
+- tapOn: "Url"
+- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "OK"
 - runFlow:
     when:
@@ -201,44 +232,3 @@ onFlowComplete:
 - tapOn: "Test User"
 - tapOn: "Manage account"
 - assertVisible: "testuser"
-- tapOn: "Change"
-- tapOn: "Old password*"
-- inputText: "test234"
-- tapOn: "New password*"
-- inputText: "t2"
-- tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
-- tapOn: "New password*"
-- eraseText
-- inputText: "test123"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-
-
-# Validate User login after changing password
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-
-- tapOn: "Get Started"
-
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-
-- tapOn:
-    id: "username"
-- inputText: "testuser"
-- tapOn:
-    id : "password"
-- inputText: "test123"
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"

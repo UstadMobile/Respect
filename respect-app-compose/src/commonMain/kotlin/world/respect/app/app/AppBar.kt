@@ -60,11 +60,13 @@ fun RespectAppBar(
     appUiState: AppUiState,
     navController: NavController,
     onProfileClick: () -> Unit = {},
+    isChild: Boolean = false
 ) {
     val currentBackStack by navController.currentBackStack.collectAsState()
     val currentRoute = currentBackStack.lastOrNull()?.destination?.route
+    val topLevelItems = if (isChild) APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD else APP_TOP_LEVEL_NAV_ITEMS
     val isRootDest = remember(currentRoute) {
-        APP_TOP_LEVEL_NAV_ITEMS.any { it.routeName == currentRoute }
+        topLevelItems.any { it.routeName == currentRoute }
     }
 
     val canGoBack = appUiState.showBackButton ?: !isRootDest && currentBackStack.size > 1

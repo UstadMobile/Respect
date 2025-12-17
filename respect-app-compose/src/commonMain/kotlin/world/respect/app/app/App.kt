@@ -41,7 +41,6 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
@@ -103,7 +102,20 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         routeName = "$routeNamePrefix.PersonList",
     ),
 )
-
+val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
+    TopNavigationItem(
+        destRoute = AssignmentList,
+        icon = Icons.Filled.ImportContacts,
+        label = Res.string.assignments,
+        routeName = "$routeNamePrefix.Assignment"
+    ),
+    TopNavigationItem(
+        destRoute = RespectAppLauncher(),
+        icon = Icons.Filled.GridView,
+        label = Res.string.apps,
+        routeName = "$routeNamePrefix.RespectAppLauncher",
+    ),
+)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
@@ -184,7 +196,8 @@ fun App(
                                 }
 
                             }
-                        }
+                        },
+                        isChild = activeAccount?.isChild == true
                     )
                 }
             },
@@ -195,9 +208,7 @@ fun App(
 
                         val visibleNavItems = remember(activeAccount) {
                             if (activeAccount?.isChild == true) {
-                                APP_TOP_LEVEL_NAV_ITEMS.filter {
-                                    it.destRoute is RespectAppLauncher || it.destRoute === AssignmentList
-                                }
+                                APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD
                             } else {
                                 APP_TOP_LEVEL_NAV_ITEMS
                             }

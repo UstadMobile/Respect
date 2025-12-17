@@ -8,28 +8,21 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSession
-import world.respect.shared.domain.biometric.BiometricAuthUseCase
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
-import world.respect.shared.generated.resources.biometric_login
-import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.login_using_biometric_credentials
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -59,8 +52,6 @@ class AccountListViewModel(
     private val _uiState = MutableStateFlow(AccountListUiState())
 
     val uiState = _uiState.asStateFlow()
-
-    private val schoolDataSource: SchoolDataSource by inject()
 
     private var emittedNavToGetStartedCommand = false
 
@@ -171,7 +162,7 @@ class AccountListViewModel(
             respectAccountManager.switchProfile(person.guid)
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    RespectAppLauncher(),
+                    AssignmentList,
                     clearBackStack = true
                 )
             )

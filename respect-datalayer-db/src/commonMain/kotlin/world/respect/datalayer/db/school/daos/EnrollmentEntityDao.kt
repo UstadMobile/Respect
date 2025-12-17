@@ -94,7 +94,7 @@ interface EnrollmentEntityDao {
          * done via a SchoolPermissionGrant (school-wide) or ClassPermission (specific class only).
          */
         const val LIST_SQL = """
-          WITH ${PersonEntityDao.AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL},  
+          WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},  
                ${PersonEntityDao.AUTHENTICATED_PERSON_CLASS_PERMISSIONS}
             
         SELECT EnrollmentEntity.*
@@ -109,18 +109,19 @@ interface EnrollmentEntityDao {
                 OR (     (:activeOnDayInUtcMs >= COALESCE(EnrollmentEntity.eBeginDate, 0))
                     AND ((:activeOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))))
            AND (:notRemovedBefore = 0 OR EnrollmentEntity.eRemovedAt > :notRemovedBefore)
-           AND (   EnrollmentEntity.ePersonUidNum = :authenticatedPersonUidNum
-                OR EnrollmentEntity.ePersonUidNum IN
-                   (SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum 
-                      FROM AuthenticatedPersonRelatedPersonUids)
+           AND (   EnrollmentEntity.ePersonUidNum IN 
+                   (SELECT AuthenticatedPermissionPersonUids.uidNum
+                      FROM AuthenticatedPermissionPersonUids) 
                 OR EXISTS(
                      SELECT 1
                        FROM SchoolPermissionGrantEntity
                       WHERE SchoolPermissionGrantEntity.spgToRole IN 
                             (SELECT PersonRoleEntity.prRoleEnum
                                FROM PersonRoleEntity
-                              WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum)
-                                AND (SchoolPermissionGrantEntity.spgPermissions & ($REQUIRED_PERMISSION_EXPRESSION)) > 0)  
+                              WHERE PersonRoleEntity.prPersonGuidHash IN 
+                                    (SELECT AuthenticatedPermissionPersonUids.uidNum
+                                       FROM AuthenticatedPermissionPersonUids)
+                                AND (SchoolPermissionGrantEntity.spgPermissions & ($REQUIRED_PERMISSION_EXPRESSION)) > 0))  
                 OR EXISTS(
                      SELECT 1
                        FROM AuthenticatedPersonClassPermissions

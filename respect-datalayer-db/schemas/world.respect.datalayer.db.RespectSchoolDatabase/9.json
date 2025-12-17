@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "86dd4a8fb00580d3e84539e9a01eeafe",
+    "identityHash": "43c142cee8e3dff7bafdc87f647775e7",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -656,7 +656,7 @@
       },
       {
         "tableName": "ClassPermissionEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cpeId` INTEGER NOT NULL, `cpeClassUidNum` INTEGER NOT NULL, `cpeToEnrollmentRole` INTEGER, `cpePermissions` INTEGER NOT NULL, PRIMARY KEY(`cpeId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cpeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cpeClassUidNum` INTEGER NOT NULL, `cpeToEnrollmentRole` INTEGER, `cpePermissions` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cpeId",
@@ -683,7 +683,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "cpeId"
           ]
@@ -1035,7 +1035,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '86dd4a8fb00580d3e84539e9a01eeafe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '43c142cee8e3dff7bafdc87f647775e7')"
     ]
   }
 }

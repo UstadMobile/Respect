@@ -16,7 +16,6 @@ import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.datalayer.exceptions.ForbiddenException
-import world.respect.datalayer.exceptions.UnauthorizedException
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
@@ -24,7 +23,6 @@ import world.respect.datalayer.school.ext.primaryRole
 import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -79,7 +77,7 @@ class PersonDataSourceDb(
                         (personInDb.primaryRole() != personToStore.primaryRole() ||
                                 personToStore.roles.size != 1)
                     ) {
-                        throw UnauthorizedException("Role cannot be changed, and must have one role")
+                        throw ForbiddenException("Role cannot be changed, and must have one role")
                     }
 
                     if(

@@ -67,7 +67,7 @@ interface PersonEntityDao {
 
     @Transaction
     @Query("""
-           WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+           WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL,  
                 $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
                 $LIST_PERSONS_CTES_SQL
                 
@@ -94,7 +94,7 @@ interface PersonEntityDao {
     ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
-           WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+           WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL,  
                 $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
                 $LIST_PERSONS_CTES_SQL
                          
@@ -136,7 +136,7 @@ interface PersonEntityDao {
      */
     @Transaction
     @Query("""
-           WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+           WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL,  
                 $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
                 $LIST_PERSONS_CTES_SQL
                          
@@ -162,7 +162,7 @@ interface PersonEntityDao {
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
-          WITH $AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL,  
+          WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL,  
                $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
                $LIST_PERSONS_CTES_SQL
         
@@ -241,6 +241,26 @@ interface PersonEntityDao {
     companion object {
 
         /**
+         * CTE of PersonUids applicable for the authenticated person: always includes the person uid
+         * for the authenticated person. If the authenticated user is a parent, then this will also
+         * include the personuids for their children (e.g. so the parent will have any permission
+         * the child would have, but not vice versa).
+         */
+        const val AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL = """
+            AuthenticatedPermissionPersonUids(uidNum) AS (
+                SELECT :authenticatedPersonUidNum AS uidNum
+                UNION
+                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum AS uidNum
+                  FROM PersonRelatedPersonEntity
+                 WHERE ${PersonRoleEnum.PARENT_INT} IN 
+                       (SELECT PersonRoleEntity.prRoleEnum
+                          FROM PersonRoleEntity
+                         WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum)
+                   AND PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)     
+        """
+
+
+        /**
          * The PermissionFlag required to read a person's info varies depending on the primary role.
          * This is often handled using an SQL CASE statement with the subject being the PersonRoleEnum
          * flag integer.
@@ -279,12 +299,6 @@ interface PersonEntityDao {
             END     
         """
 
-        const val AUTHENTICATED_PERSON_RELATED_PERSON_UIDS_CTE_SQL = """
-            AuthenticatedPersonRelatedPersonUids(relatedPersonUidNum) AS (
-                SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
-                  FROM PersonRelatedPersonEntity
-                 WHERE PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)
-        """
 
 
         /**
@@ -301,24 +315,18 @@ interface PersonEntityDao {
                        (SELECT EnrollmentEntity.eRole, EnrollmentEntity.eClassUidNum
                           FROM EnrollmentEntity
                          WHERE EnrollmentEntity.ePersonUidNum IN (
-                               SELECT :authenticatedPersonUidNum
-                                UNION 
-                               SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum
-                                 FROM AuthenticatedPersonRelatedPersonUids
-                                WHERE ${PersonRoleEnum.PARENT_INT} IN 
-                                      (SELECT PersonRoleEntity.prRoleEnum
-                                         FROM PersonRoleEntity
-                                        WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum))
+                               SELECT AuthenticatedPermissionPersonUids.uidNum
+                                 FROM AuthenticatedPermissionPersonUids)
                            AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT})
             )
         """
 
 
         const val AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL = """
-                (PersonEntity.pGuidHash = :authenticatedPersonUidNum)
-             OR PersonEntity.pGuidHash IN 
-                (SELECT AuthenticatedPersonRelatedPersonUids.relatedPersonUidNum 
-                   FROM AuthenticatedPersonRelatedPersonUids) 
+                
+                PersonEntity.pGuidHash IN 
+                (SELECT AuthenticatedPermissionPersonUids.uidNum 
+                   FROM AuthenticatedPermissionPersonUids) 
              OR EXISTS(
                     SELECT 1
                       FROM SchoolPermissionGrantEntity

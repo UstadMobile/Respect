@@ -6,7 +6,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 
 @Entity
 data class ClassPermissionEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val cpeId: Long = 0,
     val cpeClassUidNum: Long = 0,
     val cpeToEnrollmentRole: EnrollmentRoleEnum? = null,

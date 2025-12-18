@@ -168,9 +168,6 @@ onFlowComplete:
 - assertVisible: "Badge.*"
 - tapOn:
     id: "qr_change_btn"
-- tapOn:
-    text: "Change"
-    index: 0
 - assertVisible: "Assign new badge (replace)"
 - assertVisible: "Revoke badge"
 

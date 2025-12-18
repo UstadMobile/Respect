@@ -18,7 +18,6 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
@@ -34,8 +33,6 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
-import world.respect.datalayer.school.ext.primaryRole
-import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
@@ -97,16 +94,12 @@ class PersonDetailViewModel(
                 Pair(person, activeAccount)
             }.collect { (persons, activeAccount) ->
                 val personsVal = persons.dataOrNull()
-                if(personsVal != null) {
-                    println(personsVal.joinToString())
-                }
-
 
                 val personVal = personsVal?.firstOrNull { it.guid == route.guid }
                 val hasAccountPermission = activeAccount?.person?.isAdmin() == true
                         || activeAccount?.person?.guid == personVal?.guid
 
-                val canEdit = checkPersonPermissionUseCase(
+                val hasWritePermission = checkPersonPermissionUseCase(
                     otherPersonUid = route.guid,
                     otherPersonKnownRole = null,
                     permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS,
@@ -116,7 +109,7 @@ class PersonDetailViewModel(
                     prev.copy(
                         title = personVal?.fullName()?.asUiText(),
                         fabState = prev.fabState.copy(
-                            visible = canEdit,
+                            visible = hasWritePermission,
                         )
                     )
                 }

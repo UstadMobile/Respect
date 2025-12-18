@@ -318,7 +318,7 @@ interface PersonEntityDao {
         const val AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL = """
                 PersonEntity.pGuidHash = :authenticatedPersonUidNum
              OR PersonEntity.pGuidHash IN 
-                (SELECT PersonRelatedPersonEntity.prpOtherPersonUid
+                (SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
                    FROM PersonRelatedPersonEntity
                   WHERE PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)
              OR EXISTS(

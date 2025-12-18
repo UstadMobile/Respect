@@ -21,8 +21,8 @@ import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
 import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.school.model.PersonPassword
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
@@ -53,6 +53,7 @@ data class ManageAccountUiState(
     val isStudent: Boolean = false,
     val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
+    val badgeNumber: String? = null,  // New field
 ) {
 
     val showCreatePasskey: Boolean
@@ -126,8 +127,16 @@ class ManageAccountViewModel(
         viewModelScope.launch {
             schoolDataSource.personQrDataSource.findByPersonGuidAsFlow(
                 route.guid
-            ).collect { qr ->
-                _uiState.update { it.copy(qrBadge = qr) }
+            ).collect { qrBadgeState ->
+                val badgeNumber = qrBadgeState.dataOrNull()?.qrCodeUrl?.let { url ->
+                    extractBadgeNumberFromUrl(url)
+                }
+                _uiState.update {
+                    it.copy(
+                        qrBadge = qrBadgeState,
+                        badgeNumber = badgeNumber
+                    )
+                }
             }
         }
 
@@ -177,6 +186,15 @@ class ManageAccountViewModel(
                 passkeySupported = (createPasskeyUseCase != null &&
                         accountManager.activeAccount?.userGuid == personGuid),
             )
+        }
+    }
+
+    private fun extractBadgeNumberFromUrl(url: String): String? {
+        return try {
+            val pattern = """/id/(\d+)$""".toRegex()
+            pattern.find(url)?.groupValues?.get(1)
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -277,7 +295,8 @@ class ManageAccountViewModel(
                 CreatePasskeyUseCase.Request(
                     personUid = uiState.value.selectedAccount?.person?.guid ?: return@launch,
                     username = uiState.value.selectedAccount?.person?.username ?: return@launch,
-                    rpId = uiState.value.selectedAccount?.session?.account?.school?.rpId ?: return@launch
+                    rpId = uiState.value.selectedAccount?.session?.account?.school?.rpId
+                        ?: return@launch
                 )
             )
 

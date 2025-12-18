@@ -32,6 +32,7 @@ import world.respect.app.view.person.setusernameandpassword.QrCodeInfoBox
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_new_badge_replace
+import world.respect.shared.generated.resources.assigned
 import world.respect.shared.generated.resources.change
 import world.respect.shared.generated.resources.create_passkey
 import world.respect.shared.generated.resources.last_updated
@@ -39,9 +40,10 @@ import world.respect.shared.generated.resources.manage
 import world.respect.shared.generated.resources.passkeys
 import world.respect.shared.generated.resources.password_label
 import world.respect.shared.generated.resources.qr_code_badge
-import world.respect.shared.generated.resources.remove_badge
+import world.respect.shared.generated.resources.revoke_badge
 import world.respect.shared.generated.resources.security
 import world.respect.shared.generated.resources.username_label
+import world.respect.shared.generated.resources.badge
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountUiState
@@ -116,7 +118,6 @@ fun ManageAccountScreen(
                 }
             )
 
-
             if (uiState.showCreatePasskey) {
                 RespectPasskeySignInFasterCard(
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),
@@ -152,6 +153,9 @@ fun ManageAccountScreen(
         }
         if (uiState.isStudent) {
             val personQrVal = uiState.qrBadge.dataOrNull()
+
+            val badgeNumber = uiState.badgeNumber
+
             val qrLastUpdatedStr = rememberFormattedDateTime(
                 timeInMillis = personQrVal?.lastModified?.toEpochMilliseconds() ?: 0,
                 timeZoneId = TimeZone.currentSystemDefault().id,
@@ -169,9 +173,19 @@ fun ManageAccountScreen(
                         )
                     },
                     supportingContent = {
-                        Text(
-                            text = "${stringResource(Res.string.last_updated)}: $qrLastUpdatedStr"
-                        )
+                        if (badgeNumber != null) {
+                            Text(
+                                text = "${stringResource(Res.string.badge)} #$badgeNumber ${
+                                    stringResource(
+                                        Res.string.assigned
+                                    )
+                                } $qrLastUpdatedStr"
+                            )
+                        } else {
+                            Text(
+                                text = "${stringResource(Res.string.badge)} $qrLastUpdatedStr"
+                            )
+                        }
                     },
                     trailingContent = {
                         OutlinedButton(
@@ -266,7 +280,7 @@ fun RespectQRBadgeOptionsBottomSheet(
                 },
                 headlineContent = {
                     Text(
-                        text = stringResource(Res.string.remove_badge),
+                        text = stringResource(Res.string.revoke_badge),
                         color = MaterialTheme.colorScheme.error
                     )
                 },

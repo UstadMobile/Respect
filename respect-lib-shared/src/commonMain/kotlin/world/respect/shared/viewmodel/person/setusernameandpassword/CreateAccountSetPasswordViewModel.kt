@@ -13,8 +13,10 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.create_account
+import world.respect.shared.generated.resources.password_must_be_at_least
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
+import world.respect.shared.generated.resources.set_password
 import world.respect.shared.navigation.SetPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -45,12 +47,13 @@ class CreateAccountSetPasswordViewModel(
 
     companion object {
         const val PASSWORD_SET_RESULT = "password_set_result"
+        const val MIN_PASSWORD_LENGTH = 6
     }
 
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.create_account.asUiText(),
+                title = Res.string.set_password.asUiText(),
                 hideBottomNavigation = true,
                 actionBarButtonState = ActionBarButtonUiState(
                     text = Res.string.save.asUiText(),
@@ -65,7 +68,22 @@ class CreateAccountSetPasswordViewModel(
         _uiState.update { it.copy(password = password) }
     }
 
+    private fun validatePassword(): UiText? {
+        return when {
+            uiState.value.password.isEmpty() -> Res.string.required_field.asUiText()
+            uiState.value.password.length < MIN_PASSWORD_LENGTH -> Res.string.password_must_be_at_least.asUiText()
+            else -> null
+        }
+    }
+
     fun onClickSave() {
+        val error = validatePassword()
+
+        if (error != null) {
+            _uiState.update { it.copy(passwordErr = error) }
+            return
+        }
+
         launchWithLoadingIndicator {
             try {
                 schoolDataSource.personPasswordDataSource.store(

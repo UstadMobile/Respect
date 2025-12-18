@@ -68,7 +68,7 @@
 
     <string name="qr_badge_options">QR Badge Options</string>
     <string name="assign_new_badge_replace">Assign new badge (replace)</string>
-    <string name="remove_badge">Remove badge</string>
+    <string name="revoke_badge">Revoke badge</string>
 
     <string name="quick_easy_sign_in">Quick and easy sign-in for students</string>
     <string name="qr_code_badge_description">QR code badges enable students to quickly and safely sign-in, even on shared devices, without needing to use usernames and passwords</string>
@@ -77,6 +77,7 @@
     <string name="or">OR</string>
     <string name="set_password">Set password</string>
     <string name="require_password">Require Password</string>
+    <string name="password_too_short">Password must be at least %d characters</string>
     <string name="save_password">Save Password</string>
     <string name="creating_account_for">Creating account for %s</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
@@ -163,7 +164,7 @@
     <string name="select_student">Select Student</string>
     <string name="enter_roll_number">Enter Roll Number</string>
     <string name="shared_device_setting">Shared device setting</string>
-    <string name="scan_qr_code">Scan QR code</string>
+    <string name="scan_qr_code">Scan QR code badge</string>
     <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
@@ -442,6 +443,8 @@
     <string name="change_password">Change password</string>
     <string name="created">Created</string>
     <string name="last_updated">Last Updated</string>
+    <string name="badge">Badge</string>
+    <string name="assigned">assigned</string>
     <string name="delete_this_passkey">Delete this passkey?</string>
     <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
 

@@ -236,9 +236,10 @@ onFlowComplete:
 - assertVisible: "Apps"
 - tapOn: "People"
 - tapOn: "ParentA User"
+- assertVisible: "Test User"
+- assertVisible: "Child User"
 
-
-# Validate User login after changing password
+# Verify simplified child mode
 - clearState: world.respect.app
 - launchApp:
     arguments:

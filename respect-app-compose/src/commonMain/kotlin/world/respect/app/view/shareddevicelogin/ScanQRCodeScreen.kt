@@ -83,15 +83,20 @@ fun ScanQRCodeScreen(
             .statusBarsPadding()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (isCameraActive) {
+        if (isCameraActive && !showManualEntryDialog) {
             QrScanner(
                 modifier = Modifier.fillMaxSize(),
                 flashlightOn = flashlightOn,
                 cameraLens = cameraLens,
                 openImagePicker = openImagePicker,
                 onCompletion = { scannedUrl ->
-                    coroutineScope.launch {
-                        viewModel.processQrCodeUrl(scannedUrl)
+                    if (isCameraActive) { // Guard against multiple triggers
+                        isCameraActive = false // Pause camera immediately on success
+                        coroutineScope.launch {
+                            coroutineScope.launch {
+                                viewModel.processQrCodeUrl(scannedUrl)
+                            }
+                        }
                     }
                 },
                 zoomLevel = currentZoomLevel,

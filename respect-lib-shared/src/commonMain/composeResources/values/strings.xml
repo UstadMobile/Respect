@@ -378,7 +378,7 @@
     <string name="edit_mapping">Edit mapping</string>
     <string name="textbooks">Textbooks</string>
     <string name="chapter">Chapter</string>
-    <string name="lesson">Lesson</string>
+    <string name="lesson">Item</string>
     <string name="add_book_cover">Add book cover</string>
     <string name="no_sections_yet">No sections have been added yet. Click + Section to add one.</string>
     <string name="map">Map</string>
@@ -460,13 +460,13 @@
 
     <string name="edit_enrollment">Edit enrollment</string>
 
-    <string name="section_name">Section name</string>
+    <string name="section_name">Section title</string>
     <string name="playlists">Playlists</string>
     <string name="school_playlists">School Playlists</string>
     <string name="my_playlists">My Playlists</string>
     <string name="no_playlists_yet">No playlists yet</string>
     <string name="create_first_playlist">Create your first playlist to get started</string>
-    <string name="create_playlist">Create Playlist</string>
+    <string name="create_playlist">Add playlist</string>
     <string name="error_loading_playlists">Error loading playlists</string>
     <string name="add_new">Add new</string>
     <string name="add_from_a_link">Add from a link</string>
@@ -476,5 +476,7 @@
     <string name="created_by">Created by: </string>
     <string name="edit_playlist">Edit playlist</string>
     <string name="home">Home</string>
+    <string name="copy">copy playlist</string>
+    <string name="sections_and_items_count">%1$d sections • %2$d items</string>
 
 </resources>

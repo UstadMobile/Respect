@@ -22,6 +22,7 @@ import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.create_playlist
 import world.respect.shared.generated.resources.edit_mapping
 import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
@@ -68,6 +69,9 @@ data class CurriculumMappingEditUiState(
 
 data class CurriculumMappingSectionUiState(
     val icon: Url? = null,
+    val title: String = "",
+    val subtitle: String = "",
+    val description: String = "",
 )
 
 class CurriculumMappingEditViewModel(
@@ -94,7 +98,11 @@ class CurriculumMappingEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = Res.string.edit_playlist.asUiText(),
+                title = if (mappingData == null) {
+                    Res.string.create_playlist.asUiText()
+                } else {
+                    Res.string.edit_playlist.asUiText()
+                },
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,

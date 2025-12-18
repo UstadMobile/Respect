@@ -2,54 +2,42 @@ package world.respect.app.view.learningunit.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.NearMe
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_name
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import androidx.compose.ui.graphics.vector.ImageVector
-import world.respect.shared.generated.resources.assign
-import world.respect.shared.generated.resources.download
-import world.respect.shared.generated.resources.open
-import world.respect.shared.viewmodel.app.appstate.getTitle
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.layout.ContentScale
-import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
-import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.downloaded
+import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.shared.generated.resources.*
+import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
+import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 
 @Composable
 fun LearningUnitDetailScreen(
@@ -57,44 +45,52 @@ fun LearningUnitDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LearningUnitDetailScreen(
-        uiState = uiState,
-        onClickOpen = viewModel::onClickOpen,
-        onClickDownload = viewModel::onClickDownload,
-        onClickAssign = viewModel::onClickAssign,
-    )
+    // Choose which screen to show based on whether we have a mapping
+    if (uiState.mapping != null) {
+        PlaylistDetailScreen(
+            uiState = uiState,
+            onClickLesson = viewModel::onClickLesson,
+            onClickEdit = viewModel::onClickEdit,
+            onClickAssign = viewModel::onClickAssign,
+            onClickShare = viewModel::onClickShare,
+            onClickCopy = viewModel::onClickCopy,
+            onClickDelete = viewModel::onClickDelete,
+        )
+    } else {
+        SingleLessonDetailScreen(
+            uiState = uiState,
+            onClickOpen = viewModel::onClickOpen,
+            onClickDownload = viewModel::onClickDownload,
+            onClickAssign = viewModel::onClickAssign,
+        )
+    }
 }
 
+// Original single lesson screen
 @Composable
-fun LearningUnitDetailScreen(
+private fun SingleLessonDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
 ) {
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         item {
             ListItem(
                 leadingContent = {
                     val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
 
-                    iconUrl.also { icon ->
-                        RespectAsyncImage(
-                            uri = icon,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(120.dp)
-
-                        )
-                    }
+                    RespectAsyncImage(
+                        uri = iconUrl,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(120.dp)
+                    )
                 },
                 headlineContent = {
                     Text(
@@ -104,8 +100,7 @@ fun LearningUnitDetailScreen(
                 },
                 supportingContent = {
                     Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -133,10 +128,8 @@ fun LearningUnitDetailScreen(
                         }
 
                         Text(
-                            text = uiState.lessonDetail?.metadata?.subtitle
-                                ?.getTitle().orEmpty()
+                            text = uiState.lessonDetail?.metadata?.subtitle?.getTitle().orEmpty()
                         )
-
                     }
                 }
             )
@@ -144,9 +137,7 @@ fun LearningUnitDetailScreen(
 
         item {
             Button(
-                onClick = {
-                    onClickOpen()
-                },
+                onClick = onClickOpen,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.open))
@@ -184,27 +175,302 @@ fun LearningUnitDetailScreen(
         }
     }
 }
+@Composable
+private fun PlaylistDetailScreen(
+    uiState: LearningUnitDetailUiState,
+    onClickLesson: (CurriculumMappingSectionLink) -> Unit,
+    onClickEdit: () -> Unit,
+    onClickAssign: () -> Unit,
+    onClickShare: () -> Unit,
+    onClickCopy: () -> Unit,
+    onClickDelete: () -> Unit,
+) {
+    var expandedSections by remember { mutableStateOf(setOf<Long>()) }
+    val mapping = uiState.mapping
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 88.dp)
+        ) {
+            item("header") {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.Book,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+
+                            if (!mapping?.description.isNullOrEmpty()) {
+                                Text(
+                                    text = mapping?.description.orEmpty(),
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    lineHeight = 18.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            ActionButton(
+                                icon = Icons.Default.Share,
+                                label = stringResource(Res.string.share),
+                                onClick = onClickShare
+                            )
+                            ActionButton(
+                                icon = Icons.Default.ContentCopy,
+                                label = stringResource(Res.string.copy),
+                                onClick = onClickCopy
+                            )
+                            ActionButton(
+                                icon = Icons.Default.Task,
+                                label = stringResource(Res.string.assign),
+                                onClick = onClickAssign,
+                            )
+                            ActionButton(
+                                icon = Icons.Default.Delete,
+                                label = stringResource(Res.string.delete),
+                                onClick = onClickDelete
+                            )
+                        }
+                    }
+                }
+            }
+
+            mapping?.sections?.forEachIndexed { sectionIndex, section ->
+                item(key = "section_${section.uid}") {
+                    val isExpanded = expandedSections.contains(section.uid)
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding()
+                            .clickable {
+                                expandedSections = if (isExpanded) {
+                                    expandedSections - section.uid
+                                } else {
+                                    expandedSections + section.uid
+                                }
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = section.title,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            IconButton(
+                                onClick = onClickAssign,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Task,
+                                    contentDescription = stringResource(Res.string.assign),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    expandedSections = if (isExpanded) {
+                                        expandedSections - section.uid
+                                    } else {
+                                        expandedSections + section.uid
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    if (isExpanded) Icons.Default.KeyboardArrowUp
+                                    else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (expandedSections.contains(section.uid)) {
+                    itemsIndexed(
+                        items = section.items,
+                        key = { linkIndex, _ -> "lesson_${section.uid}_${linkIndex}" }
+                    ) { _, link ->
+                        LessonListItem(
+                            link = link,
+                            sectionLinkUiState = uiState.sectionLinkUiState,
+                            onClickLesson = onClickLesson
+                        )
+                    }
+                }
+            }
+        }
+
+        if (uiState.showEditButton) {
+            FloatingActionButton(
+                onClick = onClickEdit,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = stringResource(Res.string.edit),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = stringResource(Res.string.edit),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
-private fun IconLabel(icon: ImageVector, labelRes: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun LessonListItem(
+    link: CurriculumMappingSectionLink,
+    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
+    onClickLesson: (CurriculumMappingSectionLink) -> Unit
+) {
+    val stateFlow = remember(link.href) {
+        sectionLinkUiState(link)
+    }
+    val linkUiState by stateFlow.collectAsState(initial = DataLoadingState())
+    val linkData = linkUiState.dataOrNull()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClickLesson(link) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        linkData?.icon?.let { iconUrl ->
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            ) {
+                RespectAsyncImage(
+                    uri = iconUrl.toString(),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        } ?: run {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Android,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
-        Spacer(
-            modifier = Modifier
-                .height(4.dp)
-        )
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = linkData?.title ?: link.title.orEmpty(),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
+            )
 
+            if (linkData?.subtitle?.isNotEmpty() == true) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = linkData.subtitle,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier.size(40.dp),
+            enabled = enabled
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Text(
-            text = labelRes
+            text = label,
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 12.sp
         )
-
     }
 }

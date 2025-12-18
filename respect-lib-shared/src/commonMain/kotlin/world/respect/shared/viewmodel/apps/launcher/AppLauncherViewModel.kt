@@ -42,6 +42,7 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.EnterLink
+import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -260,10 +261,7 @@ class AppLauncherViewModel(
     fun onClickMapping(mapping: CurriculumMapping) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                CurriculumMappingEdit.create(
-                    uid = mapping.uid,
-                    mappingData = mapping
-                )
+                LearningUnitDetail.createFromMapping(mapping)
             )
         )
     }

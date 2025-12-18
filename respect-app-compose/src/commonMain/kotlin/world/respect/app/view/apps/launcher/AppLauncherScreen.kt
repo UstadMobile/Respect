@@ -63,6 +63,7 @@ import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add
+import world.respect.shared.generated.resources.add_from_a_link
 import world.respect.shared.generated.resources.add_from_link
 import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.add_playlist
@@ -363,11 +364,11 @@ private fun PlaylistsTabContent(
                     ) {
                         Icon(
                             Icons.Filled.Link,
-                            contentDescription = stringResource(Res.string.add_from_link),
+                            contentDescription = stringResource(Res.string.add_from_a_link),
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = stringResource(Res.string.add_from_link),
+                            text = stringResource(Res.string.add_from_a_link),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )

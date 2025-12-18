@@ -511,22 +511,33 @@ class CreateAccount(
  * @property expectedIdentifier (optional), where a refererUrl is provided, to use cached feed
  *           metadata as above, the identifier of the publication within the feed.
  */
+
 @Serializable
-class LearningUnitDetail(
+class LearningUnitDetail (
     private val learningUnitManifestUrlStr: String,
     private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
-    val expectedIdentifier: String? = null
+    val expectedIdentifier: String? = null,
+    private val mappingDataJson: String? = null
 ) : RespectAppRoute {
 
-    @Transient
-    val learningUnitManifestUrl = Url(learningUnitManifestUrlStr)
+    val learningUnitManifestUrl: Url
+        get() = Url(learningUnitManifestUrlStr)
 
-    @Transient
-    val refererUrl = refererUrlStr?.let { Url(it) }
+    val appManifestUrl: Url
+        get() = Url(appManifestUrlStr)
 
-    @Transient
-    val appManifestUrl = Url(appManifestUrlStr)
+    val refererUrl: Url?
+        get() = refererUrlStr?.let { Url(it) }
+
+    val mappingData: CurriculumMapping?
+        get() = mappingDataJson?.let {
+            try {
+                Json.decodeFromString(CurriculumMapping.serializer(), it)
+            } catch (e: Exception) {
+                null
+            }
+        }
 
     companion object {
 
@@ -540,11 +551,28 @@ class LearningUnitDetail(
             appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
+            mappingDataJson = null
         )
 
-    }
+        fun createFromMapping(mapping: CurriculumMapping): LearningUnitDetail {
+            val mappingJson = try {
+                Json.encodeToString(CurriculumMapping.serializer(), mapping)
+            } catch (e: Exception) {
+                null
+            }
 
+            return LearningUnitDetail(
+                learningUnitManifestUrlStr = "",
+                appManifestUrlStr = "",
+                refererUrlStr = null,
+                expectedIdentifier = null,
+                mappingDataJson = mappingJson
+            )
+        }
+    }
 }
+
+
 
 @Serializable
 class LearningUnitViewer(

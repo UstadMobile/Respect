@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectBottomSheetOption
@@ -180,6 +181,7 @@ fun ManageAccountScreen(
                         ) {
                             Text(
                                 text = stringResource(Res.string.change),
+                                modifier = Modifier.testTag("qr_change_btn"),
                             )
                         }
                     }
@@ -225,6 +227,7 @@ fun ManageAccountScreen(
                 ) {
                     Text(
                         text = stringResource(Res.string.change),
+                        modifier = Modifier.testTag("password_change_btn"),
                     )
                 }
             }

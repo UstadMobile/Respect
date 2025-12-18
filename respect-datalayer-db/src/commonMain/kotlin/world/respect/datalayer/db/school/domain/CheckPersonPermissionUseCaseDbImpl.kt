@@ -1,35 +1,31 @@
 package world.respect.datalayer.db.school.domain
 
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
-import world.respect.datalayer.db.school.ext.isAdmin
-import world.respect.datalayer.exceptions.UnauthorizedException
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
-import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 
 class CheckPersonPermissionUseCaseDbImpl(
-    private val getAuthenticatedPersonUseCase: GetAuthenticatedPersonUseCase,
+    private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
 ): CheckPersonPermissionUseCase {
 
     override suspend fun invoke(
-        subject: Person,
-        permission: Long
+        otherPersonUid: String,
+        otherPersonKnownRole: PersonRoleEnum?,
+        permissionsRequiredByRole: PermissionsRequiredByRole,
     ): Boolean {
-        val authenticatedPerson = getAuthenticatedPersonUseCase() ?: throw UnauthorizedException()
-
-        //Admin can do anything
-        if(authenticatedPerson.isAdmin())
-            return true
-
-        //User can update their own info
-        if(authenticatedPerson.guid == subject.guid)
-            return true
-
-        return schoolDb.getSchoolPermissionGrantDao().personHasPermission(
-            uidNumberMapper(authenticatedPerson.guid), permission
-        )
+        return schoolDb.getPersonEntityDao().getLastModifiedAndHasPermission(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+            personUidNum = uidNumberMapper(otherPersonUid),
+            knownRoleFlag = otherPersonKnownRole?.flag ?: 0,
+            roleAdminPermissionRequired = permissionsRequiredByRole.roleAdminPermissionRequired,
+            roleTeacherPermissionRequired = permissionsRequiredByRole.roleTeacherPermissionRequired,
+            roleParentPermissionRequired = permissionsRequiredByRole.roleParentPermissionRequired,
+            roleStudentPermissionRequired = permissionsRequiredByRole.roleStudentPermissionRequired
+        ).hasPermission
     }
 }

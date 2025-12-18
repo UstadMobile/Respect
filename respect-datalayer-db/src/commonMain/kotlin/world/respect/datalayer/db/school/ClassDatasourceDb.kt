@@ -118,16 +118,10 @@ class ClassDatasourceDb(
                             requiredPermission = PermissionFlags.CLASS_WRITE,
                         )
 
-                    val hasPermission = lastModAndPermissionInDb?.hasPermission
-                        ?: schoolDb.getSchoolPermissionGrantDao().personHasPermission(
-                            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
-                            permissionFlag = PermissionFlags.CLASS_WRITE,
-                        )
-
-                    if(!hasPermission)
+                    if(!lastModAndPermissionInDb.hasPermission)
                         throw ForbiddenException()
 
-                    if(clazz.lastModified.toEpochMilliseconds() > (lastModAndPermissionInDb?.lastModified ?: 0)) {
+                    if(clazz.lastModified.toEpochMilliseconds() > (lastModAndPermissionInDb.lastModified ?: 0)) {
                         doUpsertClass(clazz)
 
                         numUpdated++

@@ -14,7 +14,6 @@ import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
-import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -40,19 +39,12 @@ class SchoolDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
 ) : SchoolDataSourceLocal {
 
     private val getAuthenticatedPersonUseCase by lazy {
         GetAuthenticatedPersonUseCase(
             authenticatedUser, schoolDb, uidNumberMapper
-        )
-    }
-
-    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase by lazy {
-        CheckPersonPermissionUseCaseDbImpl(
-            getAuthenticatedPersonUseCase = getAuthenticatedPersonUseCase,
-            schoolDb = schoolDb,
-            uidNumberMapper = uidNumberMapper
         )
     }
 

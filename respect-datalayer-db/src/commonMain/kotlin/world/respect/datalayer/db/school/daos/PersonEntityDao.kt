@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.entities.LastModifiedAndPermission
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.school.model.PermissionFlags
@@ -30,6 +31,33 @@ interface PersonEntityDao {
          LIMIT 1
     """)
     suspend fun getLastModifiedByGuid(guidHash: Long): Long?
+
+
+    /**
+     * Query to determine if a user has a given (normally write related permission) for another user.
+     * Determining if a user has a given permission over another user requires knowing the role of
+     * the other user (eg. PERSON_TEACHER_WRITE vs. PERSON_PARENT_WRITE etc).
+     *
+     * This function can be used in two scenarios:
+     * a) Before the person has been written to the database, however the role is known (eg in the
+     *    PersonEdit screen): the knownRoleFlag can be passed to allow the query to determine the
+     *    appropriate permission flag.
+     * b) After the person has been written to the database, however the ViewModel does not
+     *    explicitly know the role e.g. the PersonView screen when it needs to check if the
+     *    authenticated user has permission to edit the person being displayed.
+     *
+     * @param knownRoleFlag .
+     */
+    @Query(SELECT_PERMISSION_AND_LAST_MODIFIED_SQL)
+    suspend fun getLastModifiedAndHasPermission(
+        authenticatedPersonUidNum: Long,
+        personUidNum: Long,
+        knownRoleFlag: Int,
+        roleAdminPermissionRequired: Long = PermissionFlags.SYSTEM_ADMIN,
+        roleTeacherPermissionRequired: Long = PermissionFlags.PERSON_TEACHER_WRITE,
+        roleStudentPermissionRequired: Long = PermissionFlags.PERSON_STUDENT_WRITE,
+        roleParentPermissionRequired: Long = PermissionFlags.PERSON_PARENT_WRITE,
+    ): LastModifiedAndPermission
 
 
     @Transaction
@@ -198,45 +226,6 @@ interface PersonEntityDao {
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
 
-    /**
-     * Determines if the authenticated user (as per authenticatedUidNum) has permission to view the
-     * person with the given uidNum
-     *
-     * @param authenticatedUidNum The uidNum of the authenticated user
-     * @param uidNum The uidNum of the person the authenticated user wants to view
-     */
-    @Query("""
-        SELECT (:authenticatedUidNum = :uidNum)
-            OR EXISTS(
-               SELECT SchoolPermissionGrantEntity.spgUidNum
-                 FROM SchoolPermissionGrantEntity
-                WHERE SchoolPermissionGrantEntity.spgToRole IN (
-                      SELECT PersonRoleEntity.prRoleEnum
-                        FROM PersonRoleEntity
-                       WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedUidNum)
-                  AND (SchoolPermissionGrantEntity.spgPermissions & (
-                      -- Select the required permission to view the given person based on the other persons role
-                      CASE(
-                        SELECT PersonRoleEntity.prRoleEnum
-                          FROM PersonRoleEntity
-                         WHERE PersonRoleEntity.prPersonGuidHash = :uidNum
-                         LIMIT 1)
-                         
-                         $CASE_STATEMENT_READ_WHEN_CLAUSES_SQL
-                      END
-                  ) > 0))
-               --Users can always read related persons (e.g. parent-child)   
-            OR (:authenticatedUidNum IN 
-                (SELECT PersonRelatedPersonEntity.prpOtherPersonUidNum
-                   FROM PersonRelatedPersonEntity
-                  WHERE PersonRelatedPersonEntity.prpPersonUidNum = :uidNum))       
-    """)
-    suspend fun userCanReadOther(
-        authenticatedUidNum: Long,
-        uidNum: Long,
-    ): Boolean
-
-
 
     companion object {
 
@@ -322,18 +311,25 @@ interface PersonEntityDao {
         """
 
 
-        const val AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL = """
-                
-                PersonEntity.pGuidHash IN 
-                (SELECT AuthenticatedPermissionPersonUids.uidNum 
-                   FROM AuthenticatedPermissionPersonUids) 
+        /**
+         * Where clause checking if the authenticated person has read permission for a PersonEntity
+         * in the select clause.
+         */
+        const val AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL = """
+                PersonEntity.pGuidHash = :authenticatedPersonUidNum
+             OR PersonEntity.pGuidHash IN 
+                (SELECT PersonRelatedPersonEntity.prpOtherPersonUid
+                   FROM PersonRelatedPersonEntity
+                  WHERE PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)
              OR EXISTS(
                     SELECT 1
                       FROM SchoolPermissionGrantEntity
                      WHERE SchoolPermissionGrantEntity.spgToRole IN 
                            (SELECT PersonRoleEntity.prRoleEnum
                               FROM PersonRoleEntity
-                             WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum)
+                             WHERE PersonRoleEntity.prPersonGuidHash IN 
+                                   (SELECT AuthenticatedPermissionPersonUids.uidNum 
+                                      FROM AuthenticatedPermissionPersonUids))
                                AND (SchoolPermissionGrantEntity.spgPermissions & ($PERMISSION_REQUIRED_TO_READ_PERSON_EXPR)) > 0)
              OR EXISTS(
                     SELECT 1
@@ -373,7 +369,7 @@ interface PersonEntityDao {
                            ) 
                           ) 
                           -- Begin permission NOTE check should add permissions granted to children for parent
-                      AND ($AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL)
+                      AND ($AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL)
                       AND (:filterByName IS NULL 
                            OR (PersonEntity.pGivenName || ' ' || PersonEntity.pFamilyName) LIKE ('%' || :filterByName || '%'))
                       AND (:filterByPersonRole = 0 OR :filterByPersonRole IN 
@@ -394,7 +390,7 @@ interface PersonEntityDao {
                                SELECT Persons.uidNum
                                  FROM Persons)
                        )
-                   AND ($AUTHENTICATED_USER_PERSON_PERMISSION_WHERE_CLAUSE_SQL)    
+                   AND ($AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL)    
             ),
                 
             AllPersons(uidNum) AS (
@@ -405,6 +401,55 @@ interface PersonEntityDao {
                    FROM RelatedPersons
             )
         """
+
+        const val SELECT_PERMISSION_AND_LAST_MODIFIED_SQL = """
+            WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL,
+                 $AUTHENTICATED_PERSON_CLASS_PERMISSIONS,
+                 RequiredPermission(flag) AS (
+                 SELECT CASE(
+                          SELECT COALESCE(
+                                 (SELECT PersonRoleEntity.prRoleEnum
+                                    FROM PersonRoleEntity
+                                   WHERE PersonRoleEntity.prPersonGuidHash = :personUidNum
+                                   LIMIT 1), :knownRoleFlag)
+                          )
+                          WHEN ${PersonRoleEnum.SITE_ADMINISTRATOR_INT} THEN :roleAdminPermissionRequired
+                          WHEN ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT} THEN :roleAdminPermissionRequired
+                          WHEN ${PersonRoleEnum.TEACHER_INT} THEN :roleTeacherPermissionRequired
+                          WHEN ${PersonRoleEnum.STUDENT_INT} THEN :roleStudentPermissionRequired
+                          WHEN ${PersonRoleEnum.PARENT_INT} THEN :roleParentPermissionRequired
+                          ELSE ${Long.MAX_VALUE}
+                        END
+                 )
+            
+          SELECT :personUidNum AS uidNum,
+                   (SELECT PersonEntity.pLastModified
+                      FROM PersonEntity
+                     WHERE PersonEntity.pGuidHash = :personUidNum) AS lastModified,
+                   (    :personUidNum IN 
+                        (SELECT AuthenticatedPermissionPersonUids.uidNum 
+                           FROM AuthenticatedPermissionPersonUids)
+                     OR EXISTS(
+                            SELECT 1
+                              FROM SchoolPermissionGrantEntity
+                             WHERE SchoolPermissionGrantEntity.spgToRole IN 
+                                   (SELECT PersonRoleEntity.prRoleEnum
+                                      FROM PersonRoleEntity
+                                     WHERE PersonRoleEntity.prPersonGuidHash IN 
+                                           (SELECT AuthenticatedPermissionPersonUids.uidNum 
+                                              FROM AuthenticatedPermissionPersonUids))
+                                       AND (SchoolPermissionGrantEntity.spgPermissions & (SELECT flag FROM RequiredPermission)) > 0)
+                     OR EXISTS(
+                            SELECT 1
+                              FROM AuthenticatedPersonClassPermissions
+                             WHERE AuthenticatedPersonClassPermissions.cpeClassUidNum IN 
+                                   (SELECT EnrollmentEntity.eClassUidNum
+                                      FROM EnrollmentEntity
+                                     WHERE EnrollmentEntity.ePersonUidNum = :personUidNum)
+                               AND (AuthenticatedPersonClassPermissions.cpePermissions & (SELECT flag FROM RequiredPermission)) > 0)
+                   ) AS hasPermission
+        """
+
 
     }
 }

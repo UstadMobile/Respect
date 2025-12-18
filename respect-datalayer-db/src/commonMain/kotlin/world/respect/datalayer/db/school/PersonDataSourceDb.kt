@@ -20,7 +20,6 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.ext.primaryRole
-import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.maxLastModifiedOrNull
@@ -82,8 +81,9 @@ class PersonDataSourceDb(
 
                     if(
                         !checkPersonPermissionUseCase(
-                            subject = personToStore,
-                            permission = personToStore.primaryRole().writePermissionFlag
+                            otherPersonUid = personToStore.guid,
+                            otherPersonKnownRole = personToStore.primaryRole(),
+                            permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS
                         )
                      ) {
                         throw ForbiddenException("Authenticated user does not have permission to store ${personToStore.guid}")

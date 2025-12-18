@@ -106,12 +106,11 @@ class PersonDetailViewModel(
                 val hasAccountPermission = activeAccount?.person?.isAdmin() == true
                         || activeAccount?.person?.guid == personVal?.guid
 
-                val canEdit = personVal?.let {
-                    checkPersonPermissionUseCase(
-                        subject = it,
-                        permission = it.primaryRole().writePermissionFlag,
-                    )
-                } ?: false
+                val canEdit = checkPersonPermissionUseCase(
+                    otherPersonUid = route.guid,
+                    otherPersonKnownRole = null,
+                    permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS,
+                )
 
                 _appUiState.update { prev ->
                     prev.copy(

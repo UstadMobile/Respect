@@ -797,7 +797,8 @@ val appKoinModule = module {
                     uidNumberMapper = get(),
                     authenticatedUser = AuthenticatedUserPrincipalId(
                         accountScopeId.accountPrincipalId.guid
-                    )
+                    ),
+                    checkPersonPermissionUseCase = get(),
                 ),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
@@ -836,9 +837,13 @@ val appKoinModule = module {
         }
 
         scoped<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
             CheckPersonPermissionUseCaseDbImpl(
-                getAuthenticatedPersonUseCase = get(),
                 schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
                 uidNumberMapper = get(),
             )
         }

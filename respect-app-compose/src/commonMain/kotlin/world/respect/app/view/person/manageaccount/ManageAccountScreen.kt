@@ -161,7 +161,7 @@ fun ManageAccountScreen(
                 timeZoneId = TimeZone.currentSystemDefault().id,
             )
 
-            if (personQrVal != null) {
+            if ((personQrVal != null || !uiState.isQrAlreadyAssignedToAnotherPerson) && uiState.isQrAdded) {
                 ListItem(
                     leadingContent = {
                         Icon(Icons.Default.QrCode, contentDescription = null)
@@ -237,7 +237,8 @@ fun ManageAccountScreen(
                 OutlinedButton(
                     onClick = {
                         onClickChangePassword()
-                    }
+                    },
+                    modifier = Modifier.testTag("password_change_btn"),
                 ) {
                     Text(
                         text = stringResource(Res.string.change),

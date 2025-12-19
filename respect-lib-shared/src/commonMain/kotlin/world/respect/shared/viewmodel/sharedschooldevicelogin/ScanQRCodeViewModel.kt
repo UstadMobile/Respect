@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
-import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +13,7 @@ import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.scan_qr_code
 import world.respect.shared.navigation.ManageAccount
@@ -33,16 +33,18 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 data class ScanQRCodeUiState(
     val qrCodeUrl: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val isSuccess: Boolean = false,
     val showPasteButton: Boolean = false,
-    val loginErrorText: UiText? = null
+    val loginErrorText: UiText? = null,
+    val manualUrlError: UiText? = null,
 )
 
 class ScanQRCodeViewModel(
     savedStateHandle: SavedStateHandle,
     private val snackBarDispatcher: SnackBarDispatcher,
-    private val resultReturner: NavResultReturner
+    private val resultReturner: NavResultReturner,
+    private val validateQrCodeUseCase: ValidateQrCodeUseCase
 ) : RespectViewModel(savedStateHandle), KoinComponent {
 
     private val _uiState = MutableStateFlow(ScanQRCodeUiState())
@@ -71,7 +73,8 @@ class ScanQRCodeViewModel(
                 it.copy(
                     isLoading = true,
                     errorMessage = null,
-                    showPasteButton = false
+                    showPasteButton = false,
+                    manualUrlError = null
                 )
             }
             try {
@@ -85,34 +88,49 @@ class ScanQRCodeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Failed to process QR code"
+                        errorMessage = e.getUiTextOrGeneric()
                     )
                 }
-                snackBarDispatcher.showSnackBar(Snack("Failed to process QR code".asUiText()))
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
             }
+        }
+    }
+
+    fun validateUrl(url: String): Boolean {
+        return try {
+            validateQrCodeUseCase.validateFormatOnly(
+                qrCodeUrl = url,
+                schoolUrl = route.schoolUrl?.toString()
+            )
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(
+                    manualUrlError = e.getUiTextOrGeneric()
+                )
+            }
+            false
         }
     }
 
     private fun authenticateWithQrCode(url: String) {
         launchWithLoadingIndicator {
             try {
-                val credential = RespectQRBadgeCredential(qrCodeUrl = Url(url))
+                // Validate QR code format for login
+                validateQrCodeUseCase(
+                    qrCodeUrl = url,
+                    schoolUrl = route.schoolUrl?.toString(),
+                    personGuid = null,
+                    allowReplacement = false
+                )
 
-                val qrCodeUrl = credential.qrCodeUrl
-                val schoolUrl = buildString {
-                    append(qrCodeUrl.protocol.name)
-                    append("://")
-                    append(qrCodeUrl.host)
-                    if (qrCodeUrl.port != qrCodeUrl.protocol.defaultPort) {
-                        append(":")
-                        append(qrCodeUrl.port)
-                    }
-                    append("/")
-                }
+                val credential = RespectQRBadgeCredential(qrCodeUrl = io.ktor.http.Url(url))
+                val schoolUrlString = route.schoolUrl?.toString()
+                    ?: throw IllegalArgumentException("School URL not available")
 
-                val schoolUrlObject = Url(schoolUrl)
+                val schoolUrlObject = io.ktor.http.Url(schoolUrlString)
                 val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrlObject, null)
-                val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
+                val schoolScope =
+                    getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
 
                 val respectAccountManager: RespectAccountManager = schoolScope.get()
 
@@ -135,14 +153,14 @@ class ScanQRCodeViewModel(
                                 clearBackStack = true,
                             )
                         )
-                    }catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         _uiState.update { prev ->
                             prev.copy(
                                 loginErrorText = e.getUiTextOrGeneric()
                             )
                         }
-                        snackBarDispatcher.showSnackBar(Snack( e.getUiTextOrGeneric()))
+                        snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
                     }
                 }
             } catch (e: Exception) {
@@ -152,21 +170,41 @@ class ScanQRCodeViewModel(
     }
 
     private fun storeQrCodeForPerson(personGuid: String, url: String) {
-        try {
-            if (
-                !resultReturner.sendResultIfResultExpected(
-                    route = route,
-                    navCommandFlow = _navCommandFlow,
-                    result = url,
+        viewModelScope.launch {
+            try {
+                // Validate QR code before storing
+                validateQrCodeUseCase(
+                    qrCodeUrl = url,
+                    schoolUrl = route.schoolUrl?.toString(),
+                    personGuid = personGuid,
+                    allowReplacement = true
                 )
-            ) {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(ManageAccount(personGuid))
-                )
+
+                // If validation passes, send the result
+                if (
+                    !resultReturner.sendResultIfResultExpected(
+                        route = route,
+                        navCommandFlow = _navCommandFlow,
+                        result = url,
+                    )
+                ) {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(ManageAccount(personGuid))
+                    )
+                }
+                _uiState.update { it.copy(showPasteButton = false) }
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = e.getUiTextOrGeneric(),
+                        showPasteButton = false
+                    )
+                }
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+                throw e
             }
-            _uiState.update { it.copy(showPasteButton = false) }
-        } catch (e: Exception) {
-            throw e
         }
     }
 }

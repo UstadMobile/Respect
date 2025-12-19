@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
+import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonQrCodeDataSourceLocal
@@ -20,7 +21,7 @@ class PersonQrCodeDataSourceRepository(
     override val remote: PersonQrDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-): PersonQrDataSource, RepositoryModelDataSource<PersonBadge> {
+) : PersonQrDataSource, RepositoryModelDataSource<PersonBadge> {
 
     override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
         val remote = remote.listAll(listParams)
@@ -28,7 +29,8 @@ class PersonQrCodeDataSourceRepository(
             remote, validationHelper
         )
 
-        return local.listAll(listParams)    }
+        return local.listAll(listParams)
+    }
 
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
@@ -41,8 +43,20 @@ class PersonQrCodeDataSourceRepository(
         )
     }
 
+    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<PersonBadge>> {
+        return local.findByGuidAsFlow(guid).combineWithRemote(
+            remoteFlow = remote.findByGuidAsFlow(guid).onEach {
+                local.updateFromRemoteIfNeeded(it, validationHelper)
+            }
+        )
+    }
+
     override suspend fun deletePersonBadge(uidNum: Long) {
         local.deletePersonBadge(uidNum)
+    }
+
+    override suspend fun existsByQrCodeUrl(url: String, uidNum: Long): Boolean {
+        return local.existsByQrCodeUrl(url, uidNum)
     }
 
     override suspend fun store(list: List<PersonBadge>) {

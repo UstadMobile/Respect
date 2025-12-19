@@ -118,6 +118,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseCli
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
+import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -559,6 +560,9 @@ val appKoinModule = module {
 
     single<ValidatePasswordUseCase> {
         ValidatePasswordUseCase()
+    }
+    single<ValidateQrCodeUseCase>{
+        ValidateQrCodeUseCase()
     }
 
     single<SnackBarFlowDispatcher> {

@@ -92,11 +92,33 @@ interface PersonQrBadgeEntityDao {
 
     @Query(
         """
+        SELECT EXISTS(
+            SELECT 1 
+            FROM PersonBadgeEntity 
+            WHERE pqrQrCodeUrl = :qrCodeUrl
+              AND pqrGuid != :excludePersonGuid
+        )
+    """
+    )
+    suspend fun existsByQrCodeUrlExcludingPerson(
+        qrCodeUrl: String,
+        excludePersonGuid: Long
+    ): Boolean
+
+    @Query(
+        """
         DELETE FROM PersonBadgeEntity 
          WHERE pqrGuid = :guidNum
     """
     )
     suspend fun deleteByGuid(guidNum: Long)
+
+    @Query("""
+        SELECT * 
+         FROM PersonBadgeEntity
+        WHERE pqrGuidNum = :guidnum
+    """)
+    fun findByGuidHashAsFlow(guidnum: Long): Flow<PersonBadgeEntity?>
 
 
 }

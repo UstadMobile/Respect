@@ -8,9 +8,11 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
@@ -21,6 +23,7 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.school.PersonQrDataSource
 import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.params.GetListCommonParams
 
 class PersonQrDataSourceHttp(
     override val schoolUrl: Url,
@@ -60,7 +63,27 @@ class PersonQrDataSourceHttp(
         }
     }
 
+    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<PersonBadge>> {
+        return httpClient.getDataLoadResultAsFlow<List<PersonBadge>>(
+            urlFn = {
+                PersonQrDataSource.GetListParams(
+                    GetListCommonParams(guid = guid)
+                ).urlWithParams()
+            },
+            dataLoadParams = DataLoadParams()
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }.map {
+            it.firstOrNotLoaded()
+        }
+    }
+
     override suspend fun deletePersonBadge(uidNum: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun existsByQrCodeUrl(url: String,uidNum: Long): Boolean {
         TODO("Not yet implemented")
     }
 

@@ -41,6 +41,7 @@ import org.jetbrains.compose.resources.stringResource
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
 import qrscanner.QrScanner
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.close
@@ -115,7 +116,11 @@ fun ScanQRCodeScreen(
 
         if (uiState.showPasteButton) {
             PasteButton(
-                onPasteClick = { showManualEntryDialog = true }
+                onPasteClick = {
+                    showManualEntryDialog = true
+                    // Clear any previous errors when opening dialog
+                    manualUrlText = TextFieldValue("")
+                }
             )
         }
 
@@ -127,6 +132,8 @@ fun ScanQRCodeScreen(
                 onDismiss = {
                     showManualEntryDialog = false
                     manualUrlText = TextFieldValue("")
+                    // Clear validation error when dismissing
+                    viewModel.validateUrl("")
                 },
                 onSubmit = { url ->
                     showManualEntryDialog = false
@@ -136,7 +143,9 @@ fun ScanQRCodeScreen(
                         }
                     }
                     manualUrlText = TextFieldValue("")
-                }
+                },
+                viewModel = viewModel,
+                uiState = uiState
             )
         }
     }
@@ -174,7 +183,9 @@ private fun ManualUrlEntryDialog(
     manualUrlText: TextFieldValue,
     onUrlTextChange: (TextFieldValue) -> Unit,
     onDismiss: () -> Unit,
-    onSubmit: (String) -> Unit
+    onSubmit: (String) -> Unit,
+    viewModel: ScanQRCodeViewModel,
+    uiState: ScanQRCodeUiState
 ) {
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -213,14 +224,32 @@ private fun ManualUrlEntryDialog(
 
             OutlinedTextField(
                 value = manualUrlText,
-                onValueChange = onUrlTextChange,
+                onValueChange = { newValue ->
+                    onUrlTextChange(newValue)
+                    // Validate as user types
+                    if (newValue.text.isNotEmpty()) {
+                        viewModel.validateUrl(newValue.text)
+                    } else {
+                        // Clear error when empty
+                        viewModel.validateUrl("")
+                    }
+                },
                 label = {
                     Text(stringResource(Res.string.url))
                 },
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                isError = uiState.manualUrlError != null,
+                supportingText = {
+                    uiState.manualUrlError?.let { error ->
+                        Text(
+                            text = uiTextStringResource(error),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
 
             Row(
@@ -241,10 +270,13 @@ private fun ManualUrlEntryDialog(
                 TextButton(
                     onClick = {
                         val url = manualUrlText.text.trim()
-                        onSubmit(url)
+                        // Validate before submitting
+                        if (viewModel.validateUrl(url)) {
+                            onSubmit(url)
+                        }
                     },
                     modifier = Modifier.width(100.dp),
-                    enabled = manualUrlText.text.isNotBlank()
+                    enabled = manualUrlText.text.isNotBlank() && uiState.manualUrlError == null
                 ) {
                     Text(stringResource(Res.string.ok))
                 }

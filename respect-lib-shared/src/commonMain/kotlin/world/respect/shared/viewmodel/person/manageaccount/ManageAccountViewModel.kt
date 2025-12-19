@@ -40,6 +40,8 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.time.Clock
 
 data class ManageAccountUiState(
@@ -53,7 +55,9 @@ data class ManageAccountUiState(
     val isStudent: Boolean = false,
     val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
-    val badgeNumber: String? = null,  // New field
+    val badgeNumber: String? = null,
+    val isQrAlreadyAssignedToAnotherPerson: Boolean = false,
+    val isQrAdded: Boolean = false,
 ) {
 
     val showCreatePasskey: Boolean
@@ -70,6 +74,7 @@ class ManageAccountViewModel(
     private val accountManager: RespectAccountManager,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val json: Json,
+    private val snackBarDispatcher: SnackBarDispatcher,
     private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -134,7 +139,8 @@ class ManageAccountViewModel(
                 _uiState.update {
                     it.copy(
                         qrBadge = qrBadgeState,
-                        badgeNumber = badgeNumber
+                        badgeNumber = badgeNumber,
+                        isQrAdded = badgeNumber != null
                     )
                 }
             }
@@ -223,10 +229,12 @@ class ManageAccountViewModel(
     }
 
     fun onClickQRCodeBadge() {
+        val schoolUrl = accountManager.activeAccount?.school?.self
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 ScanQRCode.create(
                     guid = personGuid,
+                    schoolUrl = schoolUrl,
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = QR_SELECT_RESULT
@@ -264,18 +272,43 @@ class ManageAccountViewModel(
     private fun storeQrCodeForPerson(personGuid: String, url: String) {
         viewModelScope.launch {
             try {
-                val now = Clock.System.now()
-                schoolDataSource.personQrDataSource.store(
-                    listOf(
-                        PersonBadge(
-                            personGuid = personGuid,
-                            qrCodeUrl = url,
-                            lastModified = now,
-                            stored = now
+                val qrCodeAlreadyAssignedToAnotherPerson =
+                    schoolDataSource.personQrDataSource.existsByQrCodeUrl(url, personGuid.toLong())
+
+                if (qrCodeAlreadyAssignedToAnotherPerson) {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            isQrAlreadyAssignedToAnotherPerson = true
+                        )
+                    }
+                    snackBarDispatcher.showSnackBar(
+                        Snack("This QR code is already assigned to another student".asUiText())
+                    )
+                } else {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            isQrAlreadyAssignedToAnotherPerson = false
+                        )
+                    }
+                }
+
+                if (!uiState.value.isQrAlreadyAssignedToAnotherPerson) {
+                    val now = Clock.System.now()
+                    schoolDataSource.personQrDataSource.store(
+                        listOf(
+                            PersonBadge(
+                                personGuid = personGuid,
+                                qrCodeUrl = url,
+                                lastModified = now,
+                                stored = now
+                            )
                         )
                     )
-                )
+                }
             } catch (e: Exception) {
+                snackBarDispatcher.showSnackBar(
+                    Snack("Failed to assign QR code: ${e.message}".asUiText())
+                )
                 throw e
             }
         }

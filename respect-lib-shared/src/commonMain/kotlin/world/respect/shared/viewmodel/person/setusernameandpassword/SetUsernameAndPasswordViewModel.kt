@@ -23,7 +23,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.require_password
 import world.respect.shared.generated.resources.save
-import world.respect.shared.generated.resources.set_password
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RouteResultDest
@@ -35,6 +34,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.time.Clock
 
 data class SetUsernameAndPasswordUiState(
@@ -43,7 +44,8 @@ data class SetUsernameAndPasswordUiState(
     val passwordErr: UiText? = null,
     val isPasswordSet: Boolean = false,
     val isQrBadgeSet: Boolean = false,
-    val isStudent: Boolean = false
+    val isStudent: Boolean = false,
+    val isQrAlreadyAssigned: Boolean = false
 )
 
 /**
@@ -55,6 +57,7 @@ class SetUsernameAndPasswordViewModel(
     accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val validateUsernameUseCase: ValidateUsernameUseCase,
+    private val snackBarDispatcher: SnackBarDispatcher
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -114,6 +117,17 @@ class SetUsernameAndPasswordViewModel(
             }
         }
         viewModelScope.launch {
+            schoolDataSource.personQrDataSource.findByGuidAsFlow(
+                route.guid
+            ).collect {
+                _uiState.update { prev ->
+                    prev.copy(
+                        isQrBadgeSet = it.dataOrNull() != null
+                    )
+                }
+            }
+        }
+        viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(QR_SCAN_ASSIGN)
                 .collectLatest { navResult ->
                     _uiState.update {
@@ -133,17 +147,38 @@ class SetUsernameAndPasswordViewModel(
 
     private suspend fun storeQrCodeForPerson(personGuid: String, url: String) {
         try {
-            val now = Clock.System.now()
-            schoolDataSource.personQrDataSource.store(
-                listOf(
-                    PersonBadge(
-                        personGuid = personGuid,
-                        qrCodeUrl = url,
-                        lastModified = now,
-                        stored = now
+            val qrCodeAlreadyAssignedToAnotherPerson = schoolDataSource.personQrDataSource.existsByQrCodeUrl(url,personGuid.toLong())
+
+            if (qrCodeAlreadyAssignedToAnotherPerson) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        isQrAlreadyAssigned = true
+                    )
+                }
+                snackBarDispatcher.showSnackBar(
+                    Snack("This QR code is already assigned to another student".asUiText())
+                )
+            } else {
+                _uiState.update { prev ->
+                    prev.copy(
+                        isQrAlreadyAssigned = false
+                    )
+                }
+            }
+
+            if (!uiState.value.isQrAlreadyAssigned) {
+                val now = Clock.System.now()
+                schoolDataSource.personQrDataSource.store(
+                    listOf(
+                        PersonBadge(
+                            personGuid = personGuid,
+                            qrCodeUrl = url,
+                            lastModified = now,
+                            stored = now
+                        )
                     )
                 )
-            )
+            }
         } catch (e: Exception) {
             throw e
         }

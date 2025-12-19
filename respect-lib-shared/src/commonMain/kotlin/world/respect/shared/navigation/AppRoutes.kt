@@ -638,18 +638,24 @@ data object Settings : RespectAppRoute
 data class ScanQRCode(
     val guid: String? = null,
     val resultDestStr: String? = null,
+    private val schoolUrlStr: String? = null
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
+    @Transient
+    val schoolUrl: Url? = schoolUrlStr?.let { Url(it) }
+
     companion object {
         fun create(
             guid: String? = null,
             resultDest: ResultDest? = null,
+            schoolUrl: Url? = null
         ) = ScanQRCode(
             guid = guid,
-            resultDestStr = resultDest?.encodeToJsonStringOrNull()
+            resultDestStr = resultDest?.encodeToJsonStringOrNull(),
+            schoolUrlStr = schoolUrl?.toString()
         )
     }
 }

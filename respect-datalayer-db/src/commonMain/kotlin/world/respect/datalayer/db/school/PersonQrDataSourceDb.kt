@@ -8,6 +8,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.asEntity
@@ -71,10 +72,32 @@ class PersonQrDataSourceDb(
         }
     }
 
+    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<PersonBadge>> {
+        return schoolDb.getPersonQrBadgeEntityDao().findByGuidHashAsFlow(
+            uidNumberMapper(guid)
+        ).map { personQrEntity ->
+            if (personQrEntity != null) {
+                DataReadyState(
+                    data = personQrEntity.asModel()
+                )
+            } else {
+                NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND)
+            }
+        }
+    }
+
     override suspend fun deletePersonBadge(uidNum: Long) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 schoolDb.getPersonQrBadgeEntityDao().deleteByGuid(uidNum)
+            }
+        }
+    }
+
+    override suspend fun existsByQrCodeUrl(url: String, uidNum: Long): Boolean {
+        return schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                schoolDb.getPersonQrBadgeEntityDao().existsByQrCodeUrlExcludingPerson(url, uidNum)
             }
         }
     }

@@ -30,9 +30,16 @@ interface PersonQrDataSource : WritableDataSource<PersonBadge> {
         listParams: GetListParams = GetListParams(),
     ): Flow<DataLoadState<List<PersonBadge>>>
 
+    fun findByGuidAsFlow(guid: String): Flow<DataLoadState<PersonBadge>>
+
     suspend fun deletePersonBadge(
         uidNum: Long
     )
+
+    suspend fun existsByQrCodeUrl(
+        url: String,
+        uidNum: Long
+    ): Boolean
 
     companion object {
 

@@ -84,7 +84,6 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- tapOn: "Phone number"
 - eraseText
 - inputText: "21255543268"
 - runFlow:
@@ -239,11 +238,11 @@ onFlowComplete:
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-#- inputText: ${SCHOOL_URL} #Invalid url
+#- inputText:  ${output.SCHOOL_URL} #Invalid url
 #- tapOn: "OK"
 #- assertVisible: "Invalid url, please try again"
 #- eraseText
-- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121
+- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "Ok"
 - assertVisible:
     id: "app_title"
@@ -279,7 +278,7 @@ onFlowComplete:
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121
+- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "OK"
 - assertVisible:
     id: "app_title"
@@ -308,11 +307,11 @@ onFlowComplete:
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-#- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121     #Validations needs to implement
+#- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validations needs to implement
 #- tapOn: "Ok"
 #- assertVisible: "QR already in use, try again"
 #- eraseText
-- inputText: ${SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
+- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
 - tapOn: "Ok"
 - assertVisible:
     id: "app_title"
@@ -361,7 +360,7 @@ onFlowComplete:
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- inputText: ${SCHOOL_URL}respect_qr_badge/id/123121
+- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "OK"
 - runFlow:
     when:

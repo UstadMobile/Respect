@@ -29,6 +29,9 @@ interface LocalModelDataSource<T : Any> {
 
     /**
      * findByUidList is used by the Remote Write Queue Drainer to get the data models to be sent.
+     *
+     * It is implemented ONLY on LocalModelDataSource and NOT exposed via HTTP, so it does not need
+     * to perform permission checks.
      */
     suspend fun findByUidList(
         uids: List<String>,

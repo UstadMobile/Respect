@@ -69,7 +69,7 @@ class SchoolDataSourceDb(
     }
 
     override val personPasswordDataSource: PersonPasswordDataSourceLocal by lazy {
-        PersonPasswordDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+        PersonPasswordDataSourceDb(schoolDb, uidNumberMapper, checkPersonPermissionUseCase, authenticatedUser)
     }
 
     override val reportDataSource: ReportDataSourceLocal by lazy {

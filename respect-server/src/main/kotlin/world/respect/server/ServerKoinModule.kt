@@ -21,8 +21,10 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -288,13 +290,24 @@ fun serverKoinModule(
      * be done in a way that is thread safe.
      */
     scope<RespectAccount> {
+        factory<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
         factory<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             SchoolDataSourceDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
-                authenticatedUser = accountScopeId.accountPrincipalId
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                checkPersonPermissionUseCase = get(),
             )
         }
 

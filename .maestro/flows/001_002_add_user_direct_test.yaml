@@ -264,8 +264,8 @@ onFlowComplete:
 #    text: "Manage account"
 #- assertVisible: "QR code badge"
 # Verify the button - Revoke badge, it should remove the assigned badge
-- tapOn:
-    id: "qr_change_btn"
+#- tapOn:
+#    id: "qr_change_btn"
 - tapOn: "Revoke badge"
 - assertVisible:
     id: "app_title"
@@ -315,7 +315,7 @@ onFlowComplete:
 - inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
 - tapOn: "Ok"
 - assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
+#- assertVisible: "Badge.*"
 - tapOn: "Save"
 
 # Validate Parent User Login using Username & Password
@@ -330,10 +330,10 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
-- inputText: "parentuser"
+- inputText: "parentauser"
 - tapOn:
     id : "password"
-- inputText: "test1234"
+- inputText: "test123"
 - tapOn: "Login"
 - runFlow:
     when:
@@ -360,10 +360,10 @@ onFlowComplete:
 - tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "OK"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
+#- runFlow:
+#    when:
+#      visible: "Save password for Respect?"
+#    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
 

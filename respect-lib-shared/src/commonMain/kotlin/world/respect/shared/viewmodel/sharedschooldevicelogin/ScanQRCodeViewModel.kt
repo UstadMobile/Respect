@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,18 +117,28 @@ class ScanQRCodeViewModel(
         launchWithLoadingIndicator {
             try {
                 // Validate QR code format for login
+                val credential = RespectQRBadgeCredential(qrCodeUrl = Url(url))
+                val qrCodeUrl = credential.qrCodeUrl
+                val schoolUrlString = buildString {
+                    append(qrCodeUrl.protocol.name)
+                    append("://")
+                    append(qrCodeUrl.host)
+                    if (qrCodeUrl.port != qrCodeUrl.protocol.defaultPort) {
+                        append(":")
+                        append(qrCodeUrl.port)
+                    }
+                    append("/")
+                }
                 validateQrCodeUseCase(
                     qrCodeUrl = url,
-                    schoolUrl = route.schoolUrl?.toString(),
+                    schoolUrl = schoolUrlString,
                     personGuid = null,
                     allowReplacement = false
                 )
 
-                val credential = RespectQRBadgeCredential(qrCodeUrl = io.ktor.http.Url(url))
-                val schoolUrlString = route.schoolUrl?.toString()
-                    ?: throw IllegalArgumentException("School URL not available")
+                println(route.schoolUrl)
 
-                val schoolUrlObject = io.ktor.http.Url(schoolUrlString)
+                val schoolUrlObject = Url(schoolUrlString)
                 val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrlObject, null)
                 val schoolScope =
                     getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)

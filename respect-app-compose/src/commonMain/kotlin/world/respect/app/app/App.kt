@@ -182,7 +182,7 @@ fun App(
                                     BiometricAuthUseCase.BiometricPromptData(
                                         title = getString(Res.string.biometric_login),
                                         subtitle = getString(Res.string.login_using_biometric_credentials),
-                                        useDeviceCredential = false,
+                                        useDeviceCredential = true,
                                         negativeButtonText = getString(Res.string.cancel),
                                     )
                                 )

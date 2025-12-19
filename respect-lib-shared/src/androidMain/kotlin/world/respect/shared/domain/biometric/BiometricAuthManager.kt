@@ -11,7 +11,7 @@ class BiometricAuthManager(private val activity: AppCompatActivity) {
     fun canAuthenticate(): Boolean {
         val manager = BiometricManager.from(activity)
         val canAuthenticate = manager.canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
         return canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS
@@ -56,7 +56,7 @@ class BiometricAuthManager(private val activity: AppCompatActivity) {
 
         if (promptData.useDeviceCredential) {
             builder.setAllowedAuthenticators(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
         } else {

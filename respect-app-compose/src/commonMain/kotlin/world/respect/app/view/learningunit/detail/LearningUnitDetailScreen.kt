@@ -124,7 +124,8 @@ private fun SingleLessonDetailScreen(
                         }
 
                         Text(
-                            text = uiState.lessonDetail?.metadata?.subtitle?.getTitle().orEmpty()
+                            text = uiState.lessonDetail?.metadata?.subtitle
+                                ?.getTitle().orEmpty()
                         )
                     }
                 }

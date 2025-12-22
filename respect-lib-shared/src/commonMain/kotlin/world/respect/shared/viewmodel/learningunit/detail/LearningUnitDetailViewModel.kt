@@ -217,7 +217,7 @@ class LearningUnitDetailViewModel(
                                         learningUnitSelected = LearningUnitSelection(
                                             learningUnitManifestUrl = Url(firstLesson.href),
                                             selectedPublication = publication,
-                                            appManifestUrl = firstLesson.appManifestUrl!!
+                                            appManifestUrl = firstLesson.appManifestUrl
                                         )
                                     )
                                 )

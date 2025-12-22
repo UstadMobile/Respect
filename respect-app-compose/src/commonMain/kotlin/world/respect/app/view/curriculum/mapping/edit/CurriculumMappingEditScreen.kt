@@ -95,7 +95,7 @@ fun CurriculumMappingEditScreen(
     val reorderableLazyListState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         onMove = { from, to ->
-            val headerItemCount = 4
+            val headerItemCount = 4 //TODO: This MUST be explained
             val fromIndex = from.index - headerItemCount
             val toIndex = to.index - headerItemCount
 
@@ -388,7 +388,8 @@ private fun SectionItem(
             ) {
                 OutlinedButton(
                     onClick = { onClickAddLesson(sectionIndex) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                    .testTag("add_item"),
                     enabled = !isDragging
                 ) {
                     Icon(

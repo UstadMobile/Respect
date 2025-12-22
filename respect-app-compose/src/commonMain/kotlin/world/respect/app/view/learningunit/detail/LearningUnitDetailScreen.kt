@@ -44,8 +44,6 @@ fun LearningUnitDetailScreen(
     viewModel: LearningUnitDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    // Choose which screen to show based on whether we have a mapping
     if (uiState.mapping != null) {
         PlaylistDetailScreen(
             uiState = uiState,
@@ -65,8 +63,6 @@ fun LearningUnitDetailScreen(
         )
     }
 }
-
-// Original single lesson screen
 @Composable
 private fun SingleLessonDetailScreen(
     uiState: LearningUnitDetailUiState,
@@ -128,7 +124,8 @@ private fun SingleLessonDetailScreen(
                         }
 
                         Text(
-                            text = uiState.lessonDetail?.metadata?.subtitle?.getTitle().orEmpty()
+                            text = uiState.lessonDetail?.metadata?.subtitle
+                                ?.getTitle().orEmpty()
                         )
                     }
                 }

@@ -9,6 +9,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ data class LearningUnitDetailUiState(
     ),
     val mapping: CurriculumMapping? = null,
     val sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>> = {
-        kotlinx.coroutines.flow.emptyFlow()
+        emptyFlow()
     },
 ) {
     val buttonsEnabled: Boolean
@@ -216,7 +217,7 @@ class LearningUnitDetailViewModel(
                                         learningUnitSelected = LearningUnitSelection(
                                             learningUnitManifestUrl = Url(firstLesson.href),
                                             selectedPublication = publication,
-                                            appManifestUrl = firstLesson.appManifestUrl!!
+                                            appManifestUrl = firstLesson.appManifestUrl
                                         )
                                     )
                                 )
@@ -252,49 +253,19 @@ class LearningUnitDetailViewModel(
     }
 
     fun onClickLesson(link: CurriculumMappingSectionLink) {
-        viewModelScope.launch {
-            val appManifestUrl = link.appManifestUrl
-            if (appManifestUrl == null) {
-                return@launch
-            }
+        val publicationUrl = Url(link.href)
+        val appManifestUrl = link.appManifestUrl ?: return
 
-            appDataSource.compatibleAppsDataSource.getAppAsFlow(
-                manifestUrl = appManifestUrl,
-                loadParams = DataLoadParams()
-            ).collect { appState ->
-                val app = appState.dataOrNull()
-                if (app != null) {
-                    appDataSource.opdsDataSource.loadOpdsPublication(
-                        url = Url(link.href),
-                        params = DataLoadParams(),
-                        referrerUrl = null,
-                        expectedPublicationId = null,
-                    ).collect { publicationState ->
-                        val publication = (publicationState as? DataReadyState)?.data
-                        if (publication != null) {
-                            val launchLink = publication.links.firstOrNull { pubLink ->
-                                pubLink.rel?.any {
-                                    it.startsWith("http://opds-spec.org/acquisition")
-                                } == true && LEARNING_UNIT_MIME_TYPES.any {
-                                    pubLink.type?.startsWith(it) == true
-                                }
-                            }
-
-                            if (launchLink != null) {
-                                val launchUrl = Url(link.href).resolve(launchLink.href)
-                                launchAppUseCase(
-                                    app = app,
-                                    learningUnitId = launchUrl,
-                                    navigateFn = {
-                                        _navCommandFlow.tryEmit(it)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = publicationUrl,
+                    appManifestUrl = appManifestUrl,
+                    refererUrl = publicationUrl,
+                    expectedIdentifier = null
+                )
+            )
+        )
     }
 
     fun onClickEdit() {

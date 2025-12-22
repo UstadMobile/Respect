@@ -388,7 +388,8 @@ private fun SectionItem(
             ) {
                 OutlinedButton(
                     onClick = { onClickAddLesson(sectionIndex) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                    .testTag("add_item"),
                     enabled = !isDragging
                 ) {
                     Icon(

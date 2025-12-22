@@ -64,7 +64,7 @@ class SchoolPermissionGrantDataSourceRepository(
         loadParams: DataLoadParams,
         params: SchoolPermissionGrantDataSource.GetListParams
     ): DataLoadState<List<SchoolPermissionGrant>> {
-        local.updateFromRemoteListIfNeeded(
+        local.takeIf { !loadParams.onlyIfCached }?.updateFromRemoteListIfNeeded(
             remote.list(loadParams, params), validationHelper
         )
         return local.list(loadParams, params)

@@ -105,7 +105,6 @@ class ClassDatasourceDb(
             return
 
         schoolDb.useWriterConnection { con ->
-            var numUpdated = 0
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach { clazz ->
                     //Permission check: if class already exists then check permission including
@@ -121,15 +120,10 @@ class ClassDatasourceDb(
                     if(!lastModAndPermissionInDb.hasPermission)
                         throw ForbiddenException()
 
-                    if(clazz.lastModified.toEpochMilliseconds() > (lastModAndPermissionInDb.lastModified ?: 0)) {
-                        doUpsertClass(clazz)
-
-                        numUpdated++
-                    }
+                    doUpsertClass(clazz)
                 }
             }
-            Napier.d("RPaging/ClassDataSourceDb: updated: $numUpdated/${list.size}")
-
+            Napier.d("RPaging/ClassDataSourceDb: store: ${list.size} classes")
         }
     }
 
@@ -137,6 +131,7 @@ class ClassDatasourceDb(
         list: List<Clazz>,
         forceOverwrite: Boolean
     ) {
+        var numUpdated = 0
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach { clazz ->
@@ -146,11 +141,12 @@ class ClassDatasourceDb(
 
                     if(forceOverwrite || clazz.lastModified.toEpochMilliseconds() > lastModifiedInDb) {
                         doUpsertClass(clazz)
+                        numUpdated++
                     }
                 }
             }
         }
-
+        Napier.d("RPaging/ClassDataSourceDb: updatedLocal: ${numUpdated}/${list.size} classes")
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Clazz> {

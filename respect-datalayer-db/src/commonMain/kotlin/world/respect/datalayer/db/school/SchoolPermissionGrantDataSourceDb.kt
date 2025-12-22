@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
@@ -20,6 +21,7 @@ import world.respect.datalayer.shared.paging.map
 class SchoolPermissionGrantDataSourceDb(
     private val schoolPermissionGrantDao: SchoolPermissionGrantDao,
     private val uidNumberMapper: UidNumberMapper,
+    private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val getAuthenticatedPersonUseCase: GetAuthenticatedPersonUseCase,
 ) : SchoolPermissionGrantDataSourceLocal {
 
@@ -60,9 +62,12 @@ class SchoolPermissionGrantDataSourceDb(
         loadParams: DataLoadParams,
         params: SchoolPermissionGrantDataSource.GetListParams
     ): DataLoadState<List<SchoolPermissionGrant>> {
-        return DataReadyState(data = schoolPermissionGrantDao.list(
-            uidNum = params.common.guid?.let { uidNumberMapper(it) } ?: 0
-        ).map { it.toModel() })
+        return DataReadyState(
+            data = schoolPermissionGrantDao.list(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                uidNum = params.common.guid?.let { uidNumberMapper(it) } ?: 0
+            ).map { it.toModel() }
+        )
     }
 
     override suspend fun updateLocal(

@@ -8,6 +8,7 @@ import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.ext.primaryRole
 import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.Person
@@ -34,6 +35,7 @@ class TestCheckPersonPermissionUseCaseImpl {
                 val studentUid = "2"
                 val adminSchoolDs = db.toDataSource(adminUid)
                 val adminPerson = adminSchoolDs.insertAdmin(adminUid)
+                AddDefaultSchoolPermissionGrantsUseCase(adminSchoolDs).invoke()
                 adminSchoolDs.personDataSource.store(
                     listOf(
                         Person(
@@ -46,18 +48,20 @@ class TestCheckPersonPermissionUseCaseImpl {
                     )
                 )
 
-                AddDefaultSchoolPermissionGrantsUseCase(adminSchoolDs).invoke()
+
                 val checkPersonUseCase = CheckPersonPermissionUseCaseDbImpl(
-                    getAuthenticatedPersonUseCase = GetAuthenticatedPersonUseCase(
-                        AuthenticatedUserPrincipalId(studentUid),
-                        db,
-                        XXHashUidNumberMapper(XXStringHasherCommonJvm())
-                    ),
+                    authenticatedUser = AuthenticatedUserPrincipalId(studentUid),
                     schoolDb = db,
                     uidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm())
                 )
 
-                assertFalse(checkPersonUseCase(adminPerson, adminPerson.primaryRole().writePermissionFlag))
+                assertFalse(
+                    checkPersonUseCase(
+                        otherPersonUid = adminPerson.guid,
+                        otherPersonKnownRole = adminPerson.primaryRole(),
+                        permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS,
+                    )
+                )
             }
         }
     }

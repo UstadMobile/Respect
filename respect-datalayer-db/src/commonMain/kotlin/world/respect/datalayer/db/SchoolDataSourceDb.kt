@@ -56,6 +56,7 @@ class SchoolDataSourceDb(
         SchoolPermissionGrantDataSourceDb(
             schoolPermissionGrantDao = schoolDb.getSchoolPermissionGrantDao(),
             uidNumberMapper = uidNumberMapper,
+            authenticatedUser = authenticatedUser,
             getAuthenticatedPersonUseCase = getAuthenticatedPersonUseCase
         )
     }

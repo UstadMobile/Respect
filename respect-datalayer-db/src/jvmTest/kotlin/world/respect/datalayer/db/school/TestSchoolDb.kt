@@ -6,6 +6,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
@@ -54,10 +55,16 @@ fun RespectSchoolDatabase.toDataSource(
     authenticatedUserUid: String,
     uidNumberMapper: UidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm()),
 ): SchoolDataSourceDb {
+    val authenticatedUser = AuthenticatedUserPrincipalId(authenticatedUserUid)
     return SchoolDataSourceDb(
         schoolDb = this,
         uidNumberMapper = uidNumberMapper,
-        authenticatedUser = AuthenticatedUserPrincipalId(authenticatedUserUid)
+        authenticatedUser = authenticatedUser,
+        checkPersonPermissionUseCase = CheckPersonPermissionUseCaseDbImpl(
+            authenticatedUser = authenticatedUser,
+            schoolDb = this,
+            uidNumberMapper = uidNumberMapper,
+        )
     )
 }
 

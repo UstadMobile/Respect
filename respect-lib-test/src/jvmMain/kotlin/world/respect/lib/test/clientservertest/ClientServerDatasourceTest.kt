@@ -32,6 +32,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -122,10 +123,17 @@ class ClientServerDataSourceTestBuilder internal constructor(
         ).setDriver(BundledSQLiteDriver())
             .build()
 
+        val uidMapper = XXHashUidNumberMapper(stringHasher)
+
         val schoolDataSource = SchoolDataSourceDb(
             schoolDb = schoolDb,
-            uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+            uidNumberMapper = uidMapper,
             authenticatedUser = localAuthenticatedUser,
+            checkPersonPermissionUseCase = CheckPersonPermissionUseCaseDbImpl(
+                authenticatedUser = localAuthenticatedUser,
+                schoolDb = schoolDb,
+                uidNumberMapper = uidMapper,
+            )
         )
 
         return Pair(schoolDb, schoolDataSource)

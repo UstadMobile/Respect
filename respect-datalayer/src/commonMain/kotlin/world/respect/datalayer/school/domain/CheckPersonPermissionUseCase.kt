@@ -16,6 +16,13 @@ interface CheckPersonPermissionUseCase {
         val roleParentPermissionRequired: Long = PermissionFlags.PERSON_PARENT_WRITE,
     ) {
 
+        val flagList: List<Long>
+            get() = listOf(roleAdminPermissionRequired,
+                roleTeacherPermissionRequired,
+                roleStudentPermissionRequired,
+                roleParentPermissionRequired
+            )
+
         companion object {
 
             val WRITE_PERMISSIONS = PermissionsRequiredByRole(

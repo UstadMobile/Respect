@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.daos.PersonEntityDao.Companion.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL
+import world.respect.datalayer.db.school.daos.PersonEntityDao.Companion.SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 
 @Dao
@@ -15,12 +17,19 @@ interface SchoolPermissionGrantDao {
     suspend fun upsert(entities: List<SchoolPermissionGrantEntity>)
 
     @Query("""
+          WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL
         SELECT SchoolPermissionGrantEntity.*
           FROM SchoolPermissionGrantEntity
          WHERE (:uidNum = 0 OR SchoolPermissionGrantEntity.spgUidNum = :uidNum)
+           AND (SchoolPermissionGrantEntity.spgToRole IN 
+                (SELECT PersonRoleEntity.prRoleEnum
+                   FROM PersonRoleEntity
+                  WHERE PersonRoleEntity.prPersonGuidHash IN 
+                        ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL)))
     """)
     suspend fun list(
-        uidNum: Long
+        authenticatedPersonUidNum: Long,
+        uidNum: Long,
     ): List<SchoolPermissionGrantEntity>
 
     @Query("""

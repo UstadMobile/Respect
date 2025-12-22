@@ -4,11 +4,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -25,8 +27,10 @@ class TestPersonStorage {
         val adminUid = "1"
         val parentGuid = "2"
         val childGuid = "3"
+
+        val folder = File("/home/mike/tmp/db/")
         runBlocking {
-            testSchoolDb(temporaryFolder.newFolder()) { db ->
+            testSchoolDb(folder/*temporaryFolder.newFolder()*/) { db ->
                 val schoolDs = db.toDataSource(adminUid)
 
                 val parentPerson = Person(
@@ -55,6 +59,7 @@ class TestPersonStorage {
 
 
                 schoolDs.insertAdmin(adminUid)
+                AddDefaultSchoolPermissionGrantsUseCase(schoolDs).invoke()
                 schoolDs.personDataSource.store(listOf(parentPerson, childPerson))
                 val parentFromDb = schoolDs.personDataSource.findByGuid(DataLoadParams(), parentGuid).dataOrNull()
                 val childFromDb = schoolDs.personDataSource.findByGuid(DataLoadParams(), childGuid).dataOrNull()

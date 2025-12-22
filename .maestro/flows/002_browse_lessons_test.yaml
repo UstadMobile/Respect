@@ -80,7 +80,6 @@ onFlowComplete:
 - tapOn:
     id: "add_item"
 - tapOn: "My app"
-- tapOn: "Lessons"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
 - assertVisible:

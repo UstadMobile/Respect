@@ -39,8 +39,6 @@ onFlowComplete:
 - tapOn: "Apps"
 - assertVisible: "My app"
 - tapOn: "My app"
-- assertVisible: "Lessons"
-- tapOn: "Lessons"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"

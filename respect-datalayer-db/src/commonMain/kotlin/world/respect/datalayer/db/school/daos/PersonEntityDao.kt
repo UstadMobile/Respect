@@ -248,6 +248,15 @@ interface PersonEntityDao {
                    AND PersonRelatedPersonEntity.prpPersonUidNum = :authenticatedPersonUidNum)     
         """
 
+        /* Commonly used expression to get a list of personuids for the authenticated person from the
+         * above CTE
+         */
+        const val SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL = """
+            SELECT AuthenticatedPermissionPersonUids.uidNum
+              FROM AuthenticatedPermissionPersonUids
+        """
+
+
 
         /**
          * The PermissionFlag required to read a person's info varies depending on the primary role.
@@ -303,9 +312,8 @@ interface PersonEntityDao {
                  WHERE (ClassPermissionEntity.cpeToEnrollmentRole, ClassPermissionEntity.cpeClassUidNum) IN 
                        (SELECT EnrollmentEntity.eRole, EnrollmentEntity.eClassUidNum
                           FROM EnrollmentEntity
-                         WHERE EnrollmentEntity.ePersonUidNum IN (
-                               SELECT AuthenticatedPermissionPersonUids.uidNum
-                                 FROM AuthenticatedPermissionPersonUids)
+                         WHERE EnrollmentEntity.ePersonUidNum IN 
+                               ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL)
                            AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT})
             )
         """
@@ -328,8 +336,7 @@ interface PersonEntityDao {
                            (SELECT PersonRoleEntity.prRoleEnum
                               FROM PersonRoleEntity
                              WHERE PersonRoleEntity.prPersonGuidHash IN 
-                                   (SELECT AuthenticatedPermissionPersonUids.uidNum 
-                                      FROM AuthenticatedPermissionPersonUids))
+                                   ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL))
                                AND (SchoolPermissionGrantEntity.spgPermissions & ($PERMISSION_REQUIRED_TO_READ_PERSON_EXPR)) > 0)
              OR EXISTS(
                     SELECT 1
@@ -427,8 +434,7 @@ interface PersonEntityDao {
                       FROM PersonEntity
                      WHERE PersonEntity.pGuidHash = :personUidNum) AS lastModified,
                    (    :personUidNum IN 
-                        (SELECT AuthenticatedPermissionPersonUids.uidNum 
-                           FROM AuthenticatedPermissionPersonUids)
+                        ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL)
                      OR EXISTS(
                             SELECT 1
                               FROM SchoolPermissionGrantEntity
@@ -436,8 +442,7 @@ interface PersonEntityDao {
                                    (SELECT PersonRoleEntity.prRoleEnum
                                       FROM PersonRoleEntity
                                      WHERE PersonRoleEntity.prPersonGuidHash IN 
-                                           (SELECT AuthenticatedPermissionPersonUids.uidNum 
-                                              FROM AuthenticatedPermissionPersonUids))
+                                           ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL))
                                        AND (SchoolPermissionGrantEntity.spgPermissions & (SELECT flag FROM RequiredPermission)) > 0)
                      OR EXISTS(
                             SELECT 1

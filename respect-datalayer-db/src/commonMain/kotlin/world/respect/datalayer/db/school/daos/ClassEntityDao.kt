@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.daos.PersonEntityDao.Companion.SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.ClassEntityWithPermissions
 import world.respect.datalayer.db.school.entities.LastModifiedAndPermission
@@ -81,7 +82,8 @@ interface ClassEntityDao {
     suspend fun findByInviteCode(code: String): List<ClassEntityWithPermissions>
 
     @Query("""
-          WITH $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
+          WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},
+               $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
         SELECT :classUidNum AS uidNum,
                (SELECT ClassEntity.cLastModified
                   FROM ClassEntity
@@ -96,7 +98,8 @@ interface ClassEntityDao {
                     WHERE SchoolPermissionGrantEntity.spgToRole IN (
                           SELECT PersonRoleEntity.prRoleEnum
                             FROM PersonRoleEntity
-                           WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum) 
+                           WHERE PersonRoleEntity.prPersonGuidHash IN 
+                                 ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL)) 
                       AND (SchoolPermissionGrantEntity.spgPermissions & :requiredPermission) = :requiredPermission
                       AND SchoolPermissionGrantEntity.spgStatusEnum = ${StatusEnum.ACTIVE_INT})
                 OR EXISTS(
@@ -126,7 +129,9 @@ interface ClassEntityDao {
         AuthenticatedUserEnrollments AS (
              SELECT EnrollmentEntity.*
                FROM EnrollmentEntity
-              WHERE EnrollmentEntity.ePersonUidNum = :authenticatedPersonUidNum 
+              WHERE EnrollmentEntity.ePersonUidNum IN
+                    (SELECT AuthenticatedPermissionPersonUids.uidNum
+                       FROM AuthenticatedPermissionPersonUids)
                 AND EnrollmentEntity.eStatus = ${StatusEnum.ACTIVE_INT}
         )
         """
@@ -147,7 +152,8 @@ interface ClassEntityDao {
                     WHERE SchoolPermissionGrantEntity.spgToRole IN (
                           SELECT PersonRoleEntity.prRoleEnum
                             FROM PersonRoleEntity
-                           WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum) 
+                           WHERE PersonRoleEntity.prPersonGuidHash IN
+                                 ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL)) 
                       AND (SchoolPermissionGrantEntity.spgPermissions & :requiredPermission) = :requiredPermission
                       AND SchoolPermissionGrantEntity.spgStatusEnum = ${StatusEnum.ACTIVE_INT})
                 OR EXISTS(
@@ -162,15 +168,14 @@ interface ClassEntityDao {
         """
 
         const val LIST_SQL = """
-        WITH $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
+        WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},
+              $AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL
             
        SELECT ClassEntity.* 
          FROM ClassEntity
         WHERE ClassEntity.cStored > :since 
           AND (:guidHash = 0 OR ClassEntity.cGuidHash = :guidHash)
-          -- begin permission check
           AND ($CLASS_PERMISSION_CHECK_SQL)
-          -- end permission check
           
           AND (:code IS NULL 
                 OR ClassEntity.cStudentInviteCode = :code

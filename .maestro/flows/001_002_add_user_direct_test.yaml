@@ -52,7 +52,7 @@ onFlowComplete:
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
-- inputText: ${output.tomorrowDate}
+- inputText: ${output.futureDate}
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."

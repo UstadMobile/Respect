@@ -125,5 +125,15 @@ onFlowComplete:
 - assertVisible: "Lesson 001"
 - assertVisible: "App name"
 - assertVisible: "Open"
-
-
+- tapOn: "Home"
+- tapOn: "Playlists"
+- tapOn: "Playlist - Grade 1"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- tapOn:
+    id: "assign_btn"
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- assertVisible: "Lesson 001"

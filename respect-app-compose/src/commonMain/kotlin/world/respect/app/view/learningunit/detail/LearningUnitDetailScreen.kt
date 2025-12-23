@@ -243,22 +243,27 @@ private fun PlaylistDetailScreen(
                             ActionButton(
                                 icon = Icons.Default.Share,
                                 label = stringResource(Res.string.share),
-                                onClick = onClickShare
+                                onClick = onClickShare,
+                                modifier = Modifier
+                                    .testTag("share_btn")
                             )
                             ActionButton(
                                 icon = Icons.Default.ContentCopy,
                                 label = stringResource(Res.string.copy),
-                                onClick = onClickCopy
+                                onClick = onClickCopy,
+                                modifier = Modifier.testTag("copy_btn")
                             )
                             ActionButton(
                                 icon = Icons.Default.Task,
                                 label = stringResource(Res.string.assign),
                                 onClick = onClickAssign,
+                                modifier = Modifier.testTag("assign_btn")
                             )
                             ActionButton(
                                 icon = Icons.Default.Delete,
                                 label = stringResource(Res.string.delete),
-                                onClick = onClickDelete
+                                onClick = onClickDelete,
+                                modifier = Modifier.testTag("delete_btn")
                             )
                         }
                     }
@@ -449,7 +454,8 @@ private fun ActionButton(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -457,7 +463,7 @@ private fun ActionButton(
     ) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(40.dp),
+            modifier = modifier.size(40.dp),
             enabled = enabled
         ) {
             Icon(

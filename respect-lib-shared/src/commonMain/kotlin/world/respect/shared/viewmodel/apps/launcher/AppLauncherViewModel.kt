@@ -135,7 +135,7 @@ class AppLauncherViewModel(
         }
 
         viewModelScope.launch {
-            resultReturner.resultFlowForKey(
+            resultReturner.filteredResultFlowForKey(
                 CurriculumMappingEditViewModel.KEY_SAVED_MAPPING
             ).collect { result ->
                 val savedMapping = result.result as? CurriculumMapping

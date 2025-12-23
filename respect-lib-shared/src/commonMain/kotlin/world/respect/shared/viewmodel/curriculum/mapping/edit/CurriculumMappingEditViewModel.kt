@@ -341,7 +341,13 @@ class CurriculumMappingEditViewModel(
                 result = mapping
             )
         )
-        _navCommandFlow.tryEmit(NavCommand.PopUp())
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = LearningUnitDetail.createFromMapping(mapping),
+                popUpTo = route,
+                popUpToInclusive = true  
+            )
+        )
     }
 
     fun onClearError() {

@@ -4,12 +4,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -22,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectBottomSheetOption
@@ -44,6 +48,8 @@ import world.respect.shared.generated.resources.revoke_badge
 import world.respect.shared.generated.resources.security
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.badge
+import world.respect.shared.generated.resources.change_password
+import world.respect.shared.generated.resources.set_password
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountUiState
@@ -215,38 +221,51 @@ fun ManageAccountScreen(
             timeInMillis = personPasswordVal?.lastModified?.toEpochMilliseconds() ?: 0,
             timeZoneId = TimeZone.currentSystemDefault().id,
         )
-
-        ListItem(
-            leadingContent = {
-                Icon(Icons.Default.Password, contentDescription = null)
-            },
-            headlineContent = {
-                Text(
-                    text = stringResource(Res.string.password_label),
-                    maxLines = 1,
-                )
-            },
-            supportingContent = {
-                if (personPasswordVal != null) {
+        if (personPasswordVal != null) {
+            ListItem(
+                leadingContent = {
+                    Icon(Icons.Default.Password, contentDescription = null)
+                },
+                headlineContent = {
+                    Text(
+                        text = stringResource(Res.string.password_label),
+                        maxLines = 1,
+                    )
+                },
+                supportingContent = {
                     Text(
                         text = "${stringResource(Res.string.last_updated)}: $passwordLastUpdatedStr"
                     )
-                }
-            },
-            trailingContent = {
-                OutlinedButton(
-                    onClick = {
-                        onClickChangePassword()
-                    },
-                    modifier = Modifier.testTag("password_change_btn"),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.change),
+                },
+                trailingContent = {
+                    OutlinedButton(
+                        onClick = {
+                            onClickChangePassword()
+                        },
                         modifier = Modifier.testTag("password_change_btn"),
-                    )
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.change),
+                            modifier = Modifier.testTag("password_change_btn"),
+                        )
+                    }
                 }
+            )
+        } else {
+            Button(
+                onClick = onClickChangePassword,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                border = ButtonDefaults.outlinedButtonBorder
+            ) {
+                Text(stringResource(Res.string.set_password))
             }
-        )
+        }
     }
 }
 

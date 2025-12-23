@@ -11,6 +11,7 @@
     <string name="example_url_placeholder">e.g. https://</string>
     <string name="next">Next</string>
     <string name="save">Save</string>
+    <string name="qr_or_password_required">QR code badge or password required</string>
     <string name="password_not_set_error">Password is required before saving</string>
     <string name="done">Done</string>
     <string name="try_it">Try it</string>

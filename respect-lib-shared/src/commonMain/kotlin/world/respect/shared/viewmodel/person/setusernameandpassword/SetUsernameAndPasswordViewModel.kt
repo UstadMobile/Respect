@@ -21,7 +21,7 @@ import world.respect.shared.domain.account.username.filterusername.FilterUsernam
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
-import world.respect.shared.generated.resources.require_password
+import world.respect.shared.generated.resources.qr_or_password_required
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
@@ -216,15 +216,26 @@ class SetUsernameAndPasswordViewModel(
                         usernameErr = usernameValidation.errorMessage?.asUiText()
                     )
                 }
-                if (!uiState.value.isPasswordSet) {
+
+                // Check if either password OR QR badge is set
+                val isPasswordSet = uiState.value.isPasswordSet
+                val isQrBadgeSet = uiState.value.isQrBadgeSet
+                val hasSignInMethod = isPasswordSet || isQrBadgeSet
+
+                if (!hasSignInMethod) {
                     _uiState.update {
                         it.copy(
-                            passwordErr = Res.string.require_password.asUiText()
+                            passwordErr = Res.string.qr_or_password_required.asUiText()
                         )
+                    }
+                } else {
+                    // Clear error if at least one sign-in method is set
+                    _uiState.update {
+                        it.copy(passwordErr = null)
                     }
                 }
 
-                if (usernameValidation.errorMessage != null || !uiState.value.isPasswordSet)
+                if (usernameValidation.errorMessage != null || !hasSignInMethod)
                     return@launchWithLoadingIndicator
 
 

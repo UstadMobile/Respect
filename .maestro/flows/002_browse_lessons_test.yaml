@@ -91,21 +91,26 @@ onFlowComplete:
     id: "app_title"
     text: "Playlist - Grade 1"
 - assertVisible: "Day 1"
+- tapOn:
+    id: "expand_collapse_icon_"
 - assertVisible: "Lesson 001"
 - tapOn:
-    id: "floating_action_button"  # Edit button
+    text: "Edit"
+    index: 1 # Edit button
 - assertVisible:
     id: "app_title"
     text: "Edit playlist"
 - tapOn: "Section"
-- tapOn: "Section title"
+- tapOn:
+    text: "Section title"
+    index: 1
 - inputText: "Day 2"
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Playlist - Grade 1"
-- assertVisible: "Day 1"
+- tapOn: "Day 1"
 - assertVisible: "Lesson 001"
 - assertVisible: "Day 2"
 - assertVisible:

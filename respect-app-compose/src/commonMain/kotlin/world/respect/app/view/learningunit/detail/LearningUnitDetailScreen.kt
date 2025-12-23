@@ -317,7 +317,7 @@ private fun PlaylistDetailScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .testTag("expand_collapse_icon_${section.uid}")
+                                    .testTag("expand_collapse_icon_")
                             ) {
                                 Icon(
                                     if (isExpanded) Icons.Default.KeyboardArrowUp

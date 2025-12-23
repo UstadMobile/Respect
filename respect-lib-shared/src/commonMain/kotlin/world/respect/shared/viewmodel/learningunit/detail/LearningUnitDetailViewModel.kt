@@ -39,6 +39,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingE
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.learningunit.AdditionalLesson
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
@@ -198,9 +199,23 @@ class LearningUnitDetailViewModel(
         val mapping = uiState.value.mapping
 
         if (mapping != null) {
-            val firstLesson = mapping.sections.firstOrNull()?.items?.firstOrNull()
+            val allLessons = mapping.sections.flatMap { it.items }
 
-            if (firstLesson != null && firstLesson.appManifestUrl != null) {
+            if (allLessons.isEmpty()) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = AssignmentEdit.create(
+                            uid = null,
+                            learningUnitSelected = null
+                        )
+                    )
+                )
+                return
+            }
+
+            val firstLesson = allLessons.first()
+
+            if (firstLesson.appManifestUrl != null) {
                 viewModelScope.launch {
                     appDataSource.opdsDataSource.loadOpdsPublication(
                         url = Url(firstLesson.href),
@@ -210,6 +225,16 @@ class LearningUnitDetailViewModel(
                     ).collect { publicationState ->
                         val publication = (publicationState as? DataReadyState)?.data
                         if (publication != null) {
+                            val additionalLessons = allLessons.drop(1).mapNotNull { lesson ->
+                                lesson.appManifestUrl?.let {
+                                    AdditionalLesson(
+                                        learningUnitManifestUrl = lesson.href,
+                                        title = lesson.title ?: "",
+                                        appManifestUrl = it.toString()
+                                    )
+                                }
+                            }
+
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = AssignmentEdit.create(
@@ -217,7 +242,8 @@ class LearningUnitDetailViewModel(
                                         learningUnitSelected = LearningUnitSelection(
                                             learningUnitManifestUrl = Url(firstLesson.href),
                                             selectedPublication = publication,
-                                            appManifestUrl = firstLesson.appManifestUrl
+                                            appManifestUrl = firstLesson.appManifestUrl,
+                                            additionalLessons = additionalLessons.takeIf { it.isNotEmpty() }
                                         )
                                     )
                                 )
@@ -225,15 +251,6 @@ class LearningUnitDetailViewModel(
                         }
                     }
                 }
-            } else {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        destination = AssignmentEdit.create(
-                            uid = null,
-                            learningUnitSelected = null
-                        )
-                    )
-                )
             }
         } else {
             val publicationVal = uiState.value.lessonDetail ?: return
@@ -244,7 +261,8 @@ class LearningUnitDetailViewModel(
                         learningUnitSelected = LearningUnitSelection(
                             learningUnitManifestUrl = route.learningUnitManifestUrl,
                             selectedPublication = publicationVal,
-                            appManifestUrl = route.appManifestUrl
+                            appManifestUrl = route.appManifestUrl,
+                            additionalLessons = null
                         )
                     )
                 )

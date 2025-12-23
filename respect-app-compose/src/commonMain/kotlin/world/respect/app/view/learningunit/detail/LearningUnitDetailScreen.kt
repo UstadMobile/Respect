@@ -64,6 +64,7 @@ fun LearningUnitDetailScreen(
         )
     }
 }
+
 @Composable
 private fun SingleLessonDetailScreen(
     uiState: LearningUnitDetailUiState,
@@ -173,6 +174,7 @@ private fun SingleLessonDetailScreen(
         }
     }
 }
+
 @Composable
 private fun PlaylistDetailScreen(
     uiState: LearningUnitDetailUiState,
@@ -322,7 +324,7 @@ private fun PlaylistDetailScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .testTag("expand_collapse_icon_")
+                                    .testTag("expand_collapse_icon_${section.uid}")
                             ) {
                                 Icon(
                                     if (isExpanded) Icons.Default.KeyboardArrowUp

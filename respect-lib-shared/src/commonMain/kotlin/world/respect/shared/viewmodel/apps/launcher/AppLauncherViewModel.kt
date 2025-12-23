@@ -33,23 +33,19 @@ import world.respect.shared.generated.resources.app
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.generated.resources.home
-import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
-import world.respect.shared.navigation.CurriculumMappingEdit
-import world.respect.shared.navigation.EnterLink
-import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 
 data class AppLauncherUiState(
@@ -57,9 +53,7 @@ data class AppLauncherUiState(
     val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
     val canRemove: Boolean = false,
     val emptyListDescription: UiText? = null,
-    val mappings: List<CurriculumMapping> = emptyList(),
     val selectedTabIndex: Int = 0,
-    val error: UiText? = null,
 )
 
 class AppLauncherViewModel(
@@ -68,7 +62,8 @@ class AppLauncherViewModel(
     private val accountManager: RespectAccountManager,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
     private val json: Json,
-    private val resultReturner: NavResultReturner,
+    resultReturner: NavResultReturner,
+    val playlistListViewModel: PlaylistListViewModel,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -77,7 +72,6 @@ class AppLauncherViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    var errorMessage: String = ""
     private var isAdmin: Boolean = false
 
     private val route: RespectAppLauncher = savedStateHandle.toRoute()
@@ -105,8 +99,14 @@ class AppLauncherViewModel(
             prev.copy(
                 respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
                 apps = pagingSourceHolder,
-                mappings = loadMappingsFromSavedState(savedStateHandle)
             )
+        }
+        val savedMappings = loadMappingsFromSavedState(savedStateHandle)
+        playlistListViewModel.setMappings(savedMappings)
+        viewModelScope.launch {
+            playlistListViewModel.navCommandFlow.collect { navCommand ->
+                _navCommandFlow.tryEmit(navCommand)
+            }
         }
 
         viewModelScope.launch {
@@ -133,19 +133,9 @@ class AppLauncherViewModel(
                 }
             }
         }
-
         viewModelScope.launch {
-            resultReturner.filteredResultFlowForKey(
-                CurriculumMappingEditViewModel.KEY_SAVED_MAPPING
-            ).collect { result ->
-                val savedMapping = result.result as? CurriculumMapping
-                if (savedMapping == null) {
-                    _uiState.update {
-                        it.copy(error = Res.string.error_unexpected_result_type.asUiText())
-                    }
-                    return@collect
-                }
-                addOrUpdateMapping(savedMapping)
+            playlistListViewModel.uiState.collect { playlistUiState ->
+                saveMappingsToSavedState(playlistUiState.mappings)
             }
         }
     }
@@ -191,30 +181,6 @@ class AppLauncherViewModel(
             mappings
         )
     }
-
-    private fun addOrUpdateMapping(mapping: CurriculumMapping) {
-        val currentMappings = _uiState.value.mappings.toMutableList()
-        val existingIndex = currentMappings.indexOfFirst { it.uid == mapping.uid }
-
-        if (existingIndex >= 0) {
-            currentMappings[existingIndex] = mapping
-        } else {
-            val newMapping = if (mapping.uid == 0L) {
-                mapping.copy(uid = System.currentTimeMillis())
-            } else {
-                mapping
-            }
-            currentMappings.add(newMapping)
-        }
-
-        updateMappings(currentMappings)
-    }
-
-    private fun updateMappings(newMappings: List<CurriculumMapping>) {
-        _uiState.update { it.copy(mappings = newMappings) }
-        saveMappingsToSavedState(newMappings)
-    }
-
     fun onClickApp(app: DataLoadState<RespectAppManifest>) {
         val url = app.metaInfo.url ?: return
         val appData = app.dataOrNull() ?: return
@@ -256,39 +222,6 @@ class AppLauncherViewModel(
                 )
             )
         }
-    }
-
-    fun onClickMapping(mapping: CurriculumMapping) {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                LearningUnitDetail.createFromMapping(mapping)
-            )
-        )
-    }
-
-    fun onClickMap() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                CurriculumMappingEdit.create(uid = 0L, mappingData = null)
-            )
-        )
-    }
-
-    fun onClickAddLink() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                EnterLink.create()
-            )
-        )
-    }
-
-    fun onClickMoreOptions(mapping: CurriculumMapping) {
-        // TODO: Implement more options
-    }
-
-    fun removeMapping(mapping: CurriculumMapping) {
-        val updated = _uiState.value.mappings.filter { it.uid != mapping.uid }
-        updateMappings(updated)
     }
 
     fun respectAppForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<RespectAppManifest>> {

@@ -538,7 +538,6 @@ fun AppNavHost(
             )
         }
 
-
         composable<CurriculumMappingEdit> {
             val viewModel: CurriculumMappingEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

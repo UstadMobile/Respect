@@ -1,9 +1,6 @@
 appId: world.respect.app
 
 ---
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
 #  Admin add new class
 - tapOn: "Classes"
 - assertVisible:

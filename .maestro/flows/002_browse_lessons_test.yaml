@@ -49,6 +49,7 @@ onFlowComplete:
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
+- runFlow: "subflows/admin_add_class.yaml"
 - tapOn: "Home"
 - tapOn: "Playlists"
 - assertVisible: "All"
@@ -127,6 +128,15 @@ onFlowComplete:
 - assertVisible: "Open"
 - tapOn: "Home"
 - tapOn: "Playlists"
+- assertVisible: "Playlist - Grade 1"
+- assertVisible: "2 sections, 1 items"
+- assertVisible: "Created by: Admin"
+- tapOn: "My Playlist"
+- assertVisible: "Playlist - Grade 1"
+- tapOn: "School Playlist"
+- assertVisible: "No playlists yet"
+- tapOn: "All"
+- assertVisible: "Playlist - Grade 1"
 - tapOn: "Playlist - Grade 1"
 - assertVisible:
     id: "app_title"
@@ -136,4 +146,49 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Add assignment"
+- tapOn: "Name*"
+- inputText: "Homework 1"
+- tapOn: "Class"
+- tapOn: "New Class"
+- tapOn: "Date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
 - assertVisible: "Lesson 001"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "Lesson 001"
+- tapOn: "Home"
+- tapOn: "Playlists"
+- tapOn: "Playlist - Grade 1"
+- assertVisible:
+    id: "share_btn"
+- assertVisible:
+      id: "app_title"
+      text: "Share"
+- assertVisible: ${output.futureDate}playlist/uid
+- tapOn: "Who can view"
+- tapOn: "Anyone with the link"
+- tapOn: "Who can edit"
+- tapOn: "Teacher/admin in my school"
+- assertVisible: "Share link"
+- assertVisible: "Copy link"
+- assertVisible: "Send link via SMS"
+- assertVisible: "Send link via email"
+- back
+- tapOn:
+    id: "copy_btn"
+- assertVisible: "Make a copy"
+- assertVisible: "copy the Playlist - Grade 1"
+- tapOn: "Copy"
+- assertVisible:
+    id: "app_title"
+    text: "copy the Playlist - Grade 1"
+- assertVisible: "Day 1"
+- assertVisible: "Day 2"

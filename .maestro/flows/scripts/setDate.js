@@ -19,13 +19,13 @@ const yesterdayMonth = String(yesterdayObj.getMonth() + 1).padStart(2, '0');
 const yesterdayYear = yesterdayObj.getFullYear();
 const yesterdayDate = `${yesterdayDay}/${yesterdayMonth}/${yesterdayYear}`;
 
-// Tomorrow
-const tomorrowObj = new Date(today);
-tomorrowObj.setDate(today.getDate() + 1);
-const tomorrowDay = String(tomorrowObj.getDate()).padStart(2, '0');
-const tomorrowMonth = String(tomorrowObj.getMonth() + 1).padStart(2, '0');
-const tomorrowYear = tomorrowObj.getFullYear();
-const tomorrowDate = `${tomorrowDay}/${tomorrowMonth}/${tomorrowYear}`;
+// Future Date  [Today + 5 days]
+const futureObj = new Date(today);
+futureObj.setDate(today.getDate() + 5);
+const futureDay = String(futureObj.getDate()).padStart(2, '0');
+const futureMonth = String(futureObj.getMonth() + 1).padStart(2, '0');
+const futureYear = futureObj.getFullYear();
+const futureDate = `${futureDay}/${futureMonth}/${futureYear}`;
 
 // Past year dates
 const lastYearDate = `${day}/${month}/${lastYear}`;
@@ -43,7 +43,7 @@ const delayTime = `${hoursMinus1}:${minutes}`;
 
 // Output
 output.yesterdayDate = yesterdayDate;
-output.tomorrowDate = tomorrowDate;
+output.futureDate = futureDate;
 output.delayTime = delayTime;
 output.currentDate = currentDate;
 output.currentTime = currentTime;

@@ -55,6 +55,8 @@ onFlowComplete:
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- hideKeyboard
 - inputText: ${output.tomorrowDate}
 - runFlow:
     when:

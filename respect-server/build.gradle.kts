@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.napier)
     implementation(libs.webauthn4j.core)
 
+    implementation(libs.ktor.server.html.builder)
+
     testImplementation(libs.kotlin.test.junit)
 
     swaggerUI(libs.swagger.ui)

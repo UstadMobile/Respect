@@ -213,6 +213,7 @@ class SignupViewModel(
                                 destination = CreateAccount.create(
                                     profileType = route.type,
                                     schoolUrl = route.schoolUrl,
+                                    type = route.inviteType,
                                     inviteRequest = route.respectRedeemInviteRequest.copy(
                                         accountPersonInfo = personInfo
                                     )

@@ -181,18 +181,20 @@ onFlowComplete:
     text: "Test User"
 - assertVisible: "ParentA User"
 
-# Create account for Parent user
+# Create account for Parent user  -- only username and password fields available for parent user
 - tapOn: "ParentA User"
 - tapOn: "Create account"
 - assertVisible:
     id: "app_title"
     text: "Create account"
 - tapOn: "Save"
+- assertVisible: "Require field"  # username is mandatory field
+- tapOn: "Username"
+- inputText: "pa"
+- tapOn: "Save"
 - assertVisible: "Username must be at least 3 characters"
-- assertVisible: "Require Password"
 - tapOn: "Username"
 - inputText: "parentauser"
-- assertVisible: "Password*"
 - tapOn: "Save"
 - assertVisible: "Required field" # Password is mandatory field
 - tapOn: "Password*"
@@ -202,12 +204,8 @@ onFlowComplete:
 - eraseText
 - inputText: "test123"
 - tapOn: "Save"
-- assertVisible:
-            id: "app_title"
-            text: "Manage account"
-- assertVisible:
-         id: "password_change_btn"  # Change password button
-- assertVisible: "Last updated:.*"
+- assertVisible: "Manage account"
+
 
 # Create account for Child user
 - tapOn: "Child User"

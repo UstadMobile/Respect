@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -92,34 +93,46 @@ object AssignmentList : RespectAppRoute
 data class AssignmentDetail(
     val uid: String,
 ) : RespectAppRoute
-
 @Serializable
 data class AssignmentEdit(
-    val guid: String?,
-    private val learningUnitStr: String? = null,
-): RespectAppRoute {
+    val guid: String? = null,
+    private val learningUnitsJson: String? = null,
+) : RespectAppRoute {
 
     @Transient
-    val learningUnitSelected: LearningUnitSelection? = learningUnitStr?.let {
-        Json.decodeFromString(LearningUnitSelection.serializer(), it)
+    val learningUnitSelectedList: List<LearningUnitSelection>? = learningUnitsJson?.let { jsonStr ->
+        try {
+            Json.decodeFromString<List<LearningUnitSelection>>(jsonStr)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     companion object {
-
         fun create(
             uid: String?,
-            learningUnitSelected: LearningUnitSelection? = null,
-        ) = AssignmentEdit(
-            guid = uid,
-            learningUnitStr = learningUnitSelected?.let {
-                Json.encodeToString(LearningUnitSelection.serializer(), it)
-            },
-        )
+            learningUnitSelected: LearningUnitSelection? = null
+        ): AssignmentEdit {
+            val learningUnits = learningUnitSelected?.let { listOf(it) }
+            return AssignmentEdit(
+                guid = uid,
+                learningUnitsJson = learningUnits?.let {
+                    Json.encodeToString(it)
+                }
+            )
+        }
 
+        fun createWithMultipleLessons(
+            uid: String?,
+            learningUnits: List<LearningUnitSelection>
+        ): AssignmentEdit {
+            return AssignmentEdit(
+                guid = uid,
+                learningUnitsJson = Json.encodeToString(learningUnits)
+            )
+        }
     }
-
 }
-
 @Serializable
 object ClazzList : RespectAppRoute
 

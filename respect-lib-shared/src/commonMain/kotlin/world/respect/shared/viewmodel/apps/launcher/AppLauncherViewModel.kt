@@ -133,11 +133,6 @@ class AppLauncherViewModel(
                 }
             }
         }
-        viewModelScope.launch {
-            playlistListViewModel.uiState.collect { playlistUiState ->
-                saveMappingsToSavedState(playlistUiState.mappings)
-            }
-        }
     }
 
     fun onTabSelected(index: Int) {
@@ -173,13 +168,6 @@ class AppLauncherViewModel(
         } catch (e: Exception) {
             emptyList()
         }
-    }
-
-    private fun saveMappingsToSavedState(mappings: List<CurriculumMapping>) {
-        savedStateHandle[KEY_MAPPINGS_LIST] = json.encodeToString(
-            kotlinx.serialization.builtins.ListSerializer(CurriculumMapping.serializer()),
-            mappings
-        )
     }
     fun onClickApp(app: DataLoadState<RespectAppManifest>) {
         val url = app.metaInfo.url ?: return

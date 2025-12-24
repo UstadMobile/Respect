@@ -6,7 +6,6 @@ import androidx.navigation.toRoute
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import io.ktor.http.Url
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -238,18 +237,11 @@ class LearningUnitDetailViewModel(
                     val learningUnitSelections = loadLessonPublications(allLessons)
 
                     if (learningUnitSelections.isNotEmpty()) {
-                        resultReturner.sendResult(
-                            NavResult(
-                                key = KEY_BULK_LEARNING_UNITS,
-                                result = learningUnitSelections
-                            )
-                        )
-                        delay(50)
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(
-                                destination = AssignmentEdit.create(
+                                destination = AssignmentEdit.createWithMultipleLessons(
                                     uid = null,
-                                    learningUnitSelected = learningUnitSelections.first()
+                                    learningUnits = learningUnitSelections
                                 )
                             )
                         )
@@ -291,18 +283,11 @@ class LearningUnitDetailViewModel(
                 val learningUnitSelections = loadLessonPublications(sectionLessons)
 
                 if (learningUnitSelections.isNotEmpty()) {
-                    resultReturner.sendResult(
-                        NavResult(
-                            key = KEY_BULK_LEARNING_UNITS,
-                            result = learningUnitSelections
-                        )
-                    )
-                    delay(50)
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            destination = AssignmentEdit.create(
+                            destination = AssignmentEdit.createWithMultipleLessons(
                                 uid = null,
-                                learningUnitSelected = learningUnitSelections.first()
+                                learningUnits = learningUnitSelections
                             )
                         )
                     )
@@ -408,9 +393,5 @@ class LearningUnitDetailViewModel(
                 )
             }
         }
-    }
-
-    companion object {
-        const val KEY_BULK_LEARNING_UNITS = "bulk_learning_units"
     }
 }

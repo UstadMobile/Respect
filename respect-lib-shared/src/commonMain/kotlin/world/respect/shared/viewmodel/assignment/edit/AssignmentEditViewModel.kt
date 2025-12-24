@@ -115,6 +115,24 @@ class AssignmentEditViewModel(
                 hideBottomNavigation = true,
             )
         }
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
+                val learningUnit = result.result as? LearningUnitSelection ?: return@collect
+                val assignmentResourceRef = learningUnit.toRef()
+
+                _uiState.update { prev ->
+                    val prevAssignment = prev.assignment.dataOrNull() ?: return@update prev
+
+                    prev.copy(
+                        assignment = DataReadyState(
+                            data = prevAssignment.copy(
+                                learningUnits = prevAssignment.learningUnits + assignmentResourceRef
+                            )
+                        )
+                    )
+                }
+            }
+        }
 
         launchWithLoadingIndicator {
             val classes = schoolDataSource.classDataSource.list(
@@ -151,6 +169,8 @@ class AssignmentEditViewModel(
                     }
                 )
             }else {
+                val initialLearningUnits = route.learningUnitSelectedList?.map { it.toRef() } ?: emptyList()
+
                 _uiState.update { prev ->
                     prev.copy(
                         assignment = DataReadyState(
@@ -158,31 +178,10 @@ class AssignmentEditViewModel(
                                 uid = uid,
                                 title = "",
                                 description = "",
-                                learningUnits = route.learningUnitSelected?.let {
-                                    listOf(it.toRef())
-                                } ?: emptyList()
+                                learningUnits = initialLearningUnits
                             )
                         )
                     )
-                }
-            }
-
-            viewModelScope.launch {
-                resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                    val learningUnit = result.result as? LearningUnitSelection ?: return@collect
-                    val assignmentResourceRef = learningUnit.toRef()
-
-                    _uiState.update { prev ->
-                        val prevAssignment = prev.assignment.dataOrNull() ?: return@update prev
-
-                        prev.copy(
-                            assignment = DataReadyState(
-                                data = prevAssignment.copy(
-                                    learningUnits = prevAssignment.learningUnits + assignmentResourceRef
-                                )
-                            )
-                        )
-                    }
                 }
             }
         }
@@ -231,7 +230,6 @@ class AssignmentEditViewModel(
             it.copy(assigneeText = text, classError = null)
         }
     }
-
 
     fun onClickAddLearningUnit() {
         _navCommandFlow.tryEmit(
@@ -303,9 +301,6 @@ class AssignmentEditViewModel(
     }
 
     companion object {
-
         const val KEY_LEARNING_UNIT = "result_learning_unit"
-
     }
-
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -92,34 +93,46 @@ object AssignmentList : RespectAppRoute
 data class AssignmentDetail(
     val uid: String,
 ) : RespectAppRoute
-
 @Serializable
 data class AssignmentEdit(
-    val guid: String?,
-    private val learningUnitStr: String? = null,
-): RespectAppRoute {
+    val guid: String? = null,
+    private val learningUnitsJson: String? = null,
+) : RespectAppRoute {
 
     @Transient
-    val learningUnitSelected: LearningUnitSelection? = learningUnitStr?.let {
-        Json.decodeFromString(LearningUnitSelection.serializer(), it)
+    val learningUnitSelectedList: List<LearningUnitSelection>? = learningUnitsJson?.let { jsonStr ->
+        try {
+            Json.decodeFromString<List<LearningUnitSelection>>(jsonStr)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     companion object {
-
         fun create(
             uid: String?,
-            learningUnitSelected: LearningUnitSelection? = null,
-        ) = AssignmentEdit(
-            guid = uid,
-            learningUnitStr = learningUnitSelected?.let {
-                Json.encodeToString(LearningUnitSelection.serializer(), it)
-            },
-        )
+            learningUnitSelected: LearningUnitSelection? = null
+        ): AssignmentEdit {
+            val learningUnits = learningUnitSelected?.let { listOf(it) }
+            return AssignmentEdit(
+                guid = uid,
+                learningUnitsJson = learningUnits?.let {
+                    Json.encodeToString(it)
+                }
+            )
+        }
 
+        fun createWithMultipleLessons(
+            uid: String?,
+            learningUnits: List<LearningUnitSelection>
+        ): AssignmentEdit {
+            return AssignmentEdit(
+                guid = uid,
+                learningUnitsJson = Json.encodeToString(learningUnits)
+            )
+        }
     }
-
 }
-
 @Serializable
 object ClazzList : RespectAppRoute
 
@@ -230,7 +243,21 @@ class IndictorEdit(val indicatorId: String?) : RespectAppRoute
 object RespectAppList : RespectAppRoute
 
 @Serializable
-object EnterLink : RespectAppRoute
+data class EnterLink(
+    private val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+        fun create(
+            resultDest: ResultDest? = null,
+        ) = EnterLink(
+            resultDestStr = resultDest.encodeToJsonStringOrNull()
+        )
+    }
+}
 
 @Serializable
 data class GetStartedScreen(
@@ -497,22 +524,33 @@ class CreateAccount(
  * @property expectedIdentifier (optional), where a refererUrl is provided, to use cached feed
  *           metadata as above, the identifier of the publication within the feed.
  */
+
 @Serializable
-class LearningUnitDetail(
+class LearningUnitDetail (
     private val learningUnitManifestUrlStr: String,
     private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
-    val expectedIdentifier: String? = null
+    val expectedIdentifier: String? = null,
+    private val mappingDataJson: String? = null
 ) : RespectAppRoute {
 
-    @Transient
-    val learningUnitManifestUrl = Url(learningUnitManifestUrlStr)
+    val learningUnitManifestUrl: Url
+        get() = Url(learningUnitManifestUrlStr)
 
-    @Transient
-    val refererUrl = refererUrlStr?.let { Url(it) }
+    val appManifestUrl: Url
+        get() = Url(appManifestUrlStr)
 
-    @Transient
-    val appManifestUrl = Url(appManifestUrlStr)
+    val refererUrl: Url?
+        get() = refererUrlStr?.let { Url(it) }
+
+    val mappingData: CurriculumMapping?
+        get() = mappingDataJson?.let {
+            try {
+                Json.decodeFromString(CurriculumMapping.serializer(), it)
+            } catch (e: Exception) {
+                null
+            }
+        }
 
     companion object {
 
@@ -526,11 +564,28 @@ class LearningUnitDetail(
             appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
+            mappingDataJson = null
         )
 
-    }
+        fun createFromMapping(mapping: CurriculumMapping): LearningUnitDetail {
+            val mappingJson = try {
+                Json.encodeToString(CurriculumMapping.serializer(), mapping)
+            } catch (e: Exception) {
+                null
+            }
 
+            return LearningUnitDetail(
+                learningUnitManifestUrlStr = "",
+                appManifestUrlStr = "",
+                refererUrlStr = null,
+                expectedIdentifier = null,
+                mappingDataJson = mappingJson
+            )
+        }
+    }
 }
+
+
 
 @Serializable
 class LearningUnitViewer(
@@ -635,8 +690,6 @@ data class PersonEdit(
 @Serializable
 data object Settings : RespectAppRoute
 
-@Serializable
-data object CurriculumMappingList : RespectAppRoute
 
 @Serializable
 data class CurriculumMappingEdit(

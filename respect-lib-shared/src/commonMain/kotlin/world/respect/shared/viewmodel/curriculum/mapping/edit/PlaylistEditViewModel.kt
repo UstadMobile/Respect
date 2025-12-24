@@ -22,10 +22,12 @@ import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.edit_mapping
+import world.respect.shared.generated.resources.create_playlist
+import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
@@ -66,6 +68,9 @@ data class CurriculumMappingEditUiState(
 
 data class CurriculumMappingSectionUiState(
     val icon: Url? = null,
+    val title: String = "",
+    val subtitle: String = "",
+    val description: String = "",
 )
 
 class CurriculumMappingEditViewModel(
@@ -78,10 +83,11 @@ class CurriculumMappingEditViewModel(
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
 
     private val mappingUid = route.textbookUid
+    private val mappingData = route.mappingData
 
     private val _uiState = MutableStateFlow(
         CurriculumMappingEditUiState(
-            mapping = CurriculumMapping(uid = mappingUid),
+            mapping = mappingData ?: CurriculumMapping(uid = mappingUid),
             isNew = mappingUid == 0L
         )
     )
@@ -91,10 +97,14 @@ class CurriculumMappingEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = Res.string.edit_mapping.asUiText(),
+                title = if (mappingData == null) {
+                    Res.string.create_playlist.asUiText()
+                } else {
+                    Res.string.edit_playlist.asUiText()
+                },
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
-                    visible = false,
+                    visible = true,
                     text = Res.string.save.asUiText(),
                     onClick = ::onClickSave
                 ),
@@ -116,7 +126,8 @@ class CurriculumMappingEditViewModel(
                                 it.copy(
                                     items = it.items + CurriculumMappingSectionLink(
                                         href = selectedLearningUnit.learningUnitManifestUrl.toString(),
-                                        title = selectedLearningUnit.selectedPublication.metadata.title.getTitle()
+                                        title = selectedLearningUnit.selectedPublication.metadata.title.getTitle(),
+                                        appManifestUrl = selectedLearningUnit.appManifestUrl
                                     )
                                 )
                             }
@@ -198,6 +209,58 @@ class CurriculumMappingEditViewModel(
         }
     }
 
+    fun onLessonMovedBetweenSections(
+        fromSectionIndex: Int,
+        fromLinkIndex: Int,
+        toSectionIndex: Int,
+        toLinkIndex: Int
+    ) {
+        updateUiStateAndCommit { prev ->
+            val mapping = prev.mapping
+            if (mapping == null) {
+                prev
+            } else if (fromSectionIndex == toSectionIndex) {
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.updateAtIndex(fromSectionIndex) { section ->
+                            section.copy(
+                                items = section.items.moveItem(from = fromLinkIndex, to = toLinkIndex)
+                            )
+                        }
+                    )
+                )
+            } else {
+                val fromSection = mapping.sections[fromSectionIndex]
+                val lessonToMove = fromSection.items[fromLinkIndex]
+
+                val updatedFromSection = fromSection.copy(
+                    items = fromSection.items.filterIndexed { index, _ -> index != fromLinkIndex }
+                )
+
+                val toSection = mapping.sections[toSectionIndex]
+                val updatedToSection = toSection.copy(
+                    items = buildList {
+                        addAll(toSection.items.take(toLinkIndex))
+                        add(lessonToMove)
+                        addAll(toSection.items.drop(toLinkIndex))
+                    }
+                )
+
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.mapIndexed { index, section ->
+                            when (index) {
+                                fromSectionIndex -> updatedFromSection
+                                toSectionIndex -> updatedToSection
+                                else -> section
+                            }
+                        }
+                    )
+                )
+            }
+        }
+    }
+
     fun onClickAddLesson(sectionIndex: Int) {
         _uiState.update { it.copy(pendingLessonSectionIndex = sectionIndex) }
         _navCommandFlow.tryEmit(
@@ -224,6 +287,22 @@ class CurriculumMappingEditViewModel(
                 )
             )
         }
+    }
+
+    fun onClickLesson(link: CurriculumMappingSectionLink) {
+        val publicationUrl = Url(link.href)
+        val appManifestUrl = link.appManifestUrl ?: return
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = publicationUrl,
+                    appManifestUrl = appManifestUrl,
+                    refererUrl = publicationUrl,
+                    expectedIdentifier = null
+                )
+            )
+        )
     }
 
     /**
@@ -261,7 +340,13 @@ class CurriculumMappingEditViewModel(
                 result = mapping
             )
         )
-        _navCommandFlow.tryEmit(NavCommand.PopUp())
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = LearningUnitDetail.createFromMapping(mapping),
+                popUpTo = route,
+                popUpToInclusive = true
+            )
+        )
     }
 
     fun onClearError() {

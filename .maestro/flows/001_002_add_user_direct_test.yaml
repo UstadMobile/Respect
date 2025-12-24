@@ -133,7 +133,7 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "People"
 - tapOn: "Test User"
 - tapOn: "Manage account"
@@ -178,4 +178,4 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+- assertVisible: "Home"

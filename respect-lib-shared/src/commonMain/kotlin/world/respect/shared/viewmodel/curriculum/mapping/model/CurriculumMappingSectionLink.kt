@@ -1,5 +1,6 @@
 package world.respect.shared.viewmodel.curriculum.mapping.model
 
+import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,5 +10,6 @@ import kotlinx.serialization.Serializable
 data class CurriculumMappingSectionLink(
     val uid: Long = System.currentTimeMillis(),
     val href: String,
-    val title: String? = ""
+    val title: String? = "",
+    val appManifestUrl: Url? = null,
 )

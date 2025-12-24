@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -29,26 +30,30 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
-import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
+import world.respect.shared.generated.resources.home
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 
 data class AppLauncherUiState(
-    val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
+    val apps: IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
     val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
     val canRemove: Boolean = false,
-    val emptyListDescription: UiText?=null,
+    val emptyListDescription: UiText? = null,
+    val selectedTabIndex: Int = 0,
 )
 
 class AppLauncherViewModel(
@@ -56,6 +61,9 @@ class AppLauncherViewModel(
     private val appDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
+    private val json: Json,
+    resultReturner: NavResultReturner,
+    val playlistListViewModel: PlaylistListViewModel,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -64,7 +72,7 @@ class AppLauncherViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    var errorMessage: String = ""
+    private var isAdmin: Boolean = false
 
     private val route: RespectAppLauncher = savedStateHandle.toRoute()
 
@@ -80,19 +88,8 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
-                fabState = FabUiState(
-                    icon = FabUiState.FabIcon.ADD,
-                    text = Res.string.app.asUiText(),
-                    onClick = {
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                RespectAppList
-                            )
-                        )
-                    }
-                ),
                 hideBottomNavigation = route.resultDest != null,
                 showBackButton = route.resultDest != null,
             )
@@ -101,20 +98,27 @@ class AppLauncherViewModel(
         _uiState.update { prev ->
             prev.copy(
                 respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
-                apps = pagingSourceHolder
+                apps = pagingSourceHolder,
             )
-
+        }
+        val savedMappings = loadMappingsFromSavedState(savedStateHandle)
+        playlistListViewModel.setMappings(savedMappings)
+        viewModelScope.launch {
+            playlistListViewModel.navCommandFlow.collect { navCommand ->
+                _navCommandFlow.tryEmit(navCommand)
+            }
         }
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
                 val devModeEnabled = getDevModeEnabledUseCase()
+
+                this@AppLauncherViewModel.isAdmin = isAdmin
+                updateFabState(isAdmin, _uiState.value.selectedTabIndex)
+
                 _appUiState.update {
                     it.copy(
-                        fabState = it.fabState.copy(
-                            visible = isAdmin
-                        ),
                         settingsIconVisible = isAdmin && devModeEnabled,
                     )
                 }
@@ -131,6 +135,40 @@ class AppLauncherViewModel(
         }
     }
 
+    fun onTabSelected(index: Int) {
+        _uiState.update { it.copy(selectedTabIndex = index) }
+        updateFabState(isAdmin, index)
+    }
+
+    private fun updateFabState(isAdmin: Boolean, tabIndex: Int) {
+        _appUiState.update {
+            it.copy(
+                fabState = when (tabIndex) {
+                    0 -> FabUiState(
+                        visible = isAdmin,
+                        icon = FabUiState.FabIcon.ADD,
+                        text = Res.string.app.asUiText(),
+                        onClick = {
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(RespectAppList)
+                            )
+                        }
+                    )
+                    1 -> FabUiState(visible = false)
+                    else -> FabUiState(visible = false)
+                }
+            )
+        }
+    }
+
+    private fun loadMappingsFromSavedState(savedStateHandle: SavedStateHandle): List<CurriculumMapping> {
+        val mappingsJson = savedStateHandle.get<String>(KEY_MAPPINGS_LIST) ?: return emptyList()
+        return try {
+            json.decodeFromString<List<CurriculumMapping>>(mappingsJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
     fun onClickApp(app: DataLoadState<RespectAppManifest>) {
         val url = app.metaInfo.url ?: return
         val appData = app.dataOrNull() ?: return
@@ -152,6 +190,7 @@ class AppLauncherViewModel(
             )
         )
     }
+
     fun onClickSettings() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(Settings)
@@ -179,5 +218,8 @@ class AppLauncherViewModel(
             DataLoadParams()
         )
     }
-}
 
+    companion object {
+        const val KEY_MAPPINGS_LIST = "mappings_list"
+    }
+}

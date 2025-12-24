@@ -13,14 +13,5 @@ data class LearningUnitSelection(
     val learningUnitManifestUrl: Url,
     val selectedPublication: OpdsPublication,
     val appManifestUrl: Url,
-    val additionalLessons: List<AdditionalLesson>? = null,
 )
-/**
- * Represents additional lessons when multiple lessons are selected from a playlist/section
- */
-@Serializable
-data class AdditionalLesson(
-    val learningUnitManifestUrl: String,
-    val title: String,
-    val appManifestUrl: String,
-)
+

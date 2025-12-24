@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
@@ -45,12 +46,24 @@ fun LearningUnitDetailScreen(
     viewModel: LearningUnitDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    if (uiState.showCopyDialog) {
+        CopyPlaylistDialog(
+            currentName = uiState.mapping?.title.orEmpty(),
+            copyDialogName = uiState.copyDialogName,
+            onNameChanged = viewModel::onCopyDialogNameChanged,
+            onDismiss = viewModel::onCopyDialogDismiss,
+            onConfirm = viewModel::onCopyDialogConfirm
+        )
+    }
+
     if (uiState.mapping != null) {
         PlaylistDetailScreen(
             uiState = uiState,
             onClickLesson = viewModel::onClickLesson,
             onClickEdit = viewModel::onClickEdit,
             onClickAssign = viewModel::onClickAssign,
+            onClickAssignSection = viewModel::onClickAssignSection,
             onClickShare = viewModel::onClickShare,
             onClickCopy = viewModel::onClickCopy,
             onClickDelete = viewModel::onClickDelete,
@@ -62,6 +75,67 @@ fun LearningUnitDetailScreen(
             onClickDownload = viewModel::onClickDownload,
             onClickAssign = viewModel::onClickAssign,
         )
+    }
+}
+
+@Composable
+private fun CopyPlaylistDialog(
+    currentName: String,
+    copyDialogName: String,
+    onNameChanged: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.make_a_copy),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                OutlinedTextField(
+                    value = copyDialogName,
+                    onValueChange = onNameChanged,
+                    label = { Text(stringResource(Res.string.name)) },
+                    placeholder = { Text("Copy of $currentName") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.cancel),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    TextButton(
+                        onClick = onConfirm
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.copy_playlist),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -181,6 +255,7 @@ private fun PlaylistDetailScreen(
     onClickLesson: (CurriculumMappingSectionLink) -> Unit,
     onClickEdit: () -> Unit,
     onClickAssign: () -> Unit,
+    onClickAssignSection: (Long) -> Unit,
     onClickShare: () -> Unit,
     onClickCopy: () -> Unit,
     onClickDelete: () -> Unit,
@@ -305,7 +380,7 @@ private fun PlaylistDetailScreen(
                             )
 
                             IconButton(
-                                onClick = onClickAssign,
+                                onClick = { onClickAssignSection(section.uid) },
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 Icon(
@@ -324,7 +399,7 @@ private fun PlaylistDetailScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .testTag("expand_collapse_icon_${section.uid}")
+                                    .testTag("expand_collapse_icon_")
                             ) {
                                 Icon(
                                     if (isExpanded) Icons.Default.KeyboardArrowUp

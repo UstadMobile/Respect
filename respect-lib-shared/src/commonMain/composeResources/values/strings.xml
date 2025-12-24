@@ -471,12 +471,13 @@
     <string name="add_new">Add new</string>
     <string name="add_from_a_link">Add from a link</string>
     <string name="add_playlist">Playlist</string>
-    <string name="copy_playlist">Copy playlist</string>
+    <string name="copy_playlist">Copy</string>
     <string name="all_sections_items">All sections,  items</string>
     <string name="created_by">Created by: </string>
     <string name="edit_playlist">Edit playlist</string>
     <string name="home">Home</string>
     <string name="copy">copy playlist</string>
+    <string name="make_a_copy">Make a copy</string>
     <string name="sections_and_items_count">%1$d sections • %2$d items</string>
 
 </resources>

@@ -23,7 +23,6 @@ import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_playlist
-import world.respect.shared.generated.resources.edit_mapping
 import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
@@ -345,7 +344,7 @@ class CurriculumMappingEditViewModel(
             NavCommand.Navigate(
                 destination = LearningUnitDetail.createFromMapping(mapping),
                 popUpTo = route,
-                popUpToInclusive = true  
+                popUpToInclusive = true
             )
         )
     }

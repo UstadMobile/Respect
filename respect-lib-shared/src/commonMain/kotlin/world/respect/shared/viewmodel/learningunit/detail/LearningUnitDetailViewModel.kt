@@ -6,10 +6,12 @@ import androidx.navigation.toRoute
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import io.ktor.http.Url
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,6 +32,7 @@ import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
@@ -39,7 +42,6 @@ import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingE
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
-import world.respect.shared.viewmodel.learningunit.AdditionalLesson
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
@@ -52,6 +54,8 @@ data class LearningUnitDetailUiState(
     val sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>> = {
         emptyFlow()
     },
+    val showCopyDialog: Boolean = false,
+    val copyDialogName: String = "",
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null || mapping != null
@@ -194,14 +198,64 @@ class LearningUnitDetailViewModel(
             }
         }
     }
+    private suspend fun loadLessonPublications(
+        lessons: List<CurriculumMappingSectionLink>
+    ): List<LearningUnitSelection> {
+        return lessons.mapNotNull { lesson ->
+            try {
+                val publicationState = appDataSource.opdsDataSource.loadOpdsPublication(
+                    url = Url(lesson.href),
+                    params = DataLoadParams(),
+                    referrerUrl = null,
+                    expectedPublicationId = null,
+                ).first { it is DataReadyState }
 
+                val publication = (publicationState as? DataReadyState)?.data
+
+                if (publication != null && lesson.appManifestUrl != null) {
+                    LearningUnitSelection(
+                        learningUnitManifestUrl = Url(lesson.href),
+                        selectedPublication = publication,
+                        appManifestUrl = lesson.appManifestUrl
+                    )
+                } else null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
     fun onClickAssign() {
         val mapping = uiState.value.mapping
 
         if (mapping != null) {
-            val allLessons = mapping.sections.flatMap { it.items }
+            val allLessons = mapping.sections.flatMap { section ->
+                section.items.filter { it.appManifestUrl != null }
+            }
 
-            if (allLessons.isEmpty()) {
+            if (allLessons.isNotEmpty()) {
+                viewModelScope.launch {
+                    val learningUnitSelections = loadLessonPublications(allLessons)
+
+                    if (learningUnitSelections.isNotEmpty()) {
+                        resultReturner.sendResult(
+                            NavResult(
+                                key = KEY_BULK_LEARNING_UNITS,
+                                result = learningUnitSelections
+                            )
+                        )
+                        delay(50)
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                destination = AssignmentEdit.create(
+                                    uid = null,
+                                    learningUnitSelected = learningUnitSelections.first()
+                                )
+                            )
+                        )
+                    }
+                }
+            } else {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = AssignmentEdit.create(
@@ -210,47 +264,6 @@ class LearningUnitDetailViewModel(
                         )
                     )
                 )
-                return
-            }
-
-            val firstLesson = allLessons.first()
-
-            if (firstLesson.appManifestUrl != null) {
-                viewModelScope.launch {
-                    appDataSource.opdsDataSource.loadOpdsPublication(
-                        url = Url(firstLesson.href),
-                        params = DataLoadParams(),
-                        referrerUrl = null,
-                        expectedPublicationId = null,
-                    ).collect { publicationState ->
-                        val publication = (publicationState as? DataReadyState)?.data
-                        if (publication != null) {
-                            val additionalLessons = allLessons.drop(1).mapNotNull { lesson ->
-                                lesson.appManifestUrl?.let {
-                                    AdditionalLesson(
-                                        learningUnitManifestUrl = lesson.href,
-                                        title = lesson.title ?: "",
-                                        appManifestUrl = it.toString()
-                                    )
-                                }
-                            }
-
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(
-                                    destination = AssignmentEdit.create(
-                                        uid = null,
-                                        learningUnitSelected = LearningUnitSelection(
-                                            learningUnitManifestUrl = Url(firstLesson.href),
-                                            selectedPublication = publication,
-                                            appManifestUrl = firstLesson.appManifestUrl,
-                                            additionalLessons = additionalLessons.takeIf { it.isNotEmpty() }
-                                        )
-                                    )
-                                )
-                            )
-                        }
-                    }
-                }
             }
         } else {
             val publicationVal = uiState.value.lessonDetail ?: return
@@ -261,12 +274,40 @@ class LearningUnitDetailViewModel(
                         learningUnitSelected = LearningUnitSelection(
                             learningUnitManifestUrl = route.learningUnitManifestUrl,
                             selectedPublication = publicationVal,
-                            appManifestUrl = route.appManifestUrl,
-                            additionalLessons = null
+                            appManifestUrl = route.appManifestUrl
                         )
                     )
                 )
             )
+        }
+    }
+    fun onClickAssignSection(sectionUid: Long) {
+        val mapping = _uiState.value.mapping ?: return
+        val section = mapping.sections.find { it.uid == sectionUid } ?: return
+        val sectionLessons = section.items.filter { it.appManifestUrl != null }
+
+        if (sectionLessons.isNotEmpty()) {
+            viewModelScope.launch {
+                val learningUnitSelections = loadLessonPublications(sectionLessons)
+
+                if (learningUnitSelections.isNotEmpty()) {
+                    resultReturner.sendResult(
+                        NavResult(
+                            key = KEY_BULK_LEARNING_UNITS,
+                            result = learningUnitSelections
+                        )
+                    )
+                    delay(50)
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = AssignmentEdit.create(
+                                uid = null,
+                                learningUnitSelected = learningUnitSelections.first()
+                            )
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -303,7 +344,43 @@ class LearningUnitDetailViewModel(
     }
 
     fun onClickCopy() {
-        // TODO: Implement copy functionality
+        _uiState.update { it.copy(showCopyDialog = true) }
+    }
+
+    fun onCopyDialogDismiss() {
+        _uiState.update { it.copy(showCopyDialog = false, copyDialogName = "") }
+    }
+
+    fun onCopyDialogNameChanged(name: String) {
+        _uiState.update { it.copy(copyDialogName = name) }
+    }
+
+    fun onCopyDialogConfirm() {
+        val mapping = _uiState.value.mapping ?: return
+        val newName = _uiState.value.copyDialogName.trim()
+
+        if (newName.isEmpty()) {
+            return
+        }
+
+        val copiedMapping = mapping.copy(
+            uid = System.currentTimeMillis(),
+            title = newName
+        )
+
+        resultReturner.sendResult(
+            NavResult(
+                key = CurriculumMappingEditViewModel.KEY_SAVED_MAPPING,
+                result = copiedMapping
+            )
+        )
+
+        _uiState.update {
+            it.copy(
+                showCopyDialog = false,
+                copyDialogName = ""
+            )
+        }
     }
 
     fun onClickDelete() {
@@ -331,5 +408,9 @@ class LearningUnitDetailViewModel(
                 )
             }
         }
+    }
+
+    companion object {
+        const val KEY_BULK_LEARNING_UNITS = "bulk_learning_units"
     }
 }

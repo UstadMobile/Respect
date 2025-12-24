@@ -4,19 +4,33 @@
   },
 
   "links": [
-    { "rel": "self", "href": "http://192.168.1.2/respect-ds/index.json", "type": "application/opds+json" }
+    { "rel": "self", "href": "http://192.168.1.10/respect-ds/index.json", "type": "application/opds+json" }
   ],
+
   "navigation": [
     {
-      "href": "http://192.168.1.2/respect-ds/grade1.json",
+      "href": "http://192.168.1.10/respect-ds/grade1.json",
       "title": "Grade 1",
       "type": "application/opds+json",
-      "alt": [
+      "alternate": [
         {
           "href": "grade1/lesson001/cover.png",
           "rel": "icon",
           "type": "image/png",
-          "title": "Book"
+          "title": "Grade 1 cover"
+        }
+      ]
+    },
+    {
+      "href": "http://192.168.1.10/respect-ds/grade2.json",
+      "title": "Grade 2",
+      "type": "application/opds+json",
+      "alternate": [
+        {
+          "href": "grade1/lesson001/cover.png",
+          "rel": "icon",
+          "type": "image/png",
+          "title": "Grade 2 cover"
         }
       ]
     }

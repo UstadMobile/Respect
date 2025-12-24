@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "title": "Example listing publications"
+    "title": "Grade 1"
   },
 
   "links": [
-    {"rel": "self", "href": "http://192.168.1.2/respect-ds/grade1.json", "type": "application/opds+json"}
+    {"rel": "self", "href": "http://192.168.1.10/respect-ds/grade1.json", "type": "application/opds+json"}
   ],
 
   "publications": [
@@ -25,10 +25,10 @@
         ]
       },
       "links": [
-        {"rel": "self", "href": "http://192.168.1.2/respect-ds/lesson001.json", "type": "application/opds-publication+json"},
+        {"rel": "self", "href": "http://192.168.1.10/respect-ds/lesson001.json", "type": "application/opds-publication+json"},
         {
           "rel": "http://opds-spec.org/acquisition/open-access",
-          "href": "http://192.168.1.2/respect-ds/lesson001.html",
+          "href": "http://192.168.1.10/respect-ds/lesson001.html",
           "type": "text/html"
         }
       ],

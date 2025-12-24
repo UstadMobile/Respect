@@ -24,6 +24,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
+import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -118,7 +119,9 @@ class GetStartedViewModel(
             )
         )
     }
-
+    fun onClickScanQRBadge() {
+        _navCommandFlow.tryEmit(NavCommand.Navigate(ScanQRCode()))
+    }
     fun onClickOtherOptions() {
         _navCommandFlow.tryEmit(NavCommand.Navigate(OtherOption))
     }

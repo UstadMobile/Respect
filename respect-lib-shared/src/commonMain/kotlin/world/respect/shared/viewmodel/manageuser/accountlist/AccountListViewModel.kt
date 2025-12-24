@@ -47,7 +47,6 @@ class AccountListViewModel(
     val uiState = _uiState.asStateFlow()
 
     private var emittedNavToGetStartedCommand = false
-
     init {
         _appUiState.update {
             it.copy(

@@ -2,6 +2,7 @@ package world.respect.shared.domain.account
 
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum
 
 /**
  *
@@ -21,4 +22,8 @@ data class RespectSessionAndPerson(
     val session: RespectSession,
     val person: Person,
     val relatedPersons: List<Person> = emptyList(),
-)
+){
+    val isChild: Boolean
+        get() = person.roles.any { it.roleEnum == PersonRoleEnum.STUDENT } &&
+                relatedPersons.isNotEmpty()
+}

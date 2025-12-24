@@ -8,17 +8,21 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSession
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -35,12 +39,15 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
-)
+    val familyPersons: List<Person>? = emptyList(),
+    )
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle){
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = respectAccountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
@@ -60,8 +67,9 @@ class AccountListViewModel(
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson)
+                    prev.copy(selectedAccount = accountAndPerson, familyPersons = accountAndPerson?.relatedPersons)
                 }
+                 accountAndPerson?.relatedPersons
             }
         }
 
@@ -90,7 +98,7 @@ class AccountListViewModel(
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {
-                    activeAccount?.isSameAccount(it) == true
+                    activeAccount?.isSameAccount(it) == true || it.startedViaParent
                 }
 
                 _uiState.update { prev ->
@@ -149,6 +157,17 @@ class AccountListViewModel(
         )
     }
 
+    fun onClickFamilyPerson(person: Person) {
+        viewModelScope.launch {
+            respectAccountManager.switchProfile(person.guid)
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    AssignmentList,
+                    clearBackStack = true
+                )
+            )
+        }
+    }
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(GetStartedScreen(canGoBack = true))

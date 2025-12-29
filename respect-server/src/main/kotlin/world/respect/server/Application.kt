@@ -219,6 +219,7 @@ fun Application.module() {
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
                         PersonRoute()

@@ -42,6 +42,7 @@ androidx-credentials =  "1.5.0"
 androidx-work = "2.10.4"
 jvm-toolchain = "17"
 acra = "5.13.1"
+androidx-browser = "1.9.0"
 
 # Compose material3 as per https://developer.android.com/jetpack/androidx/releases/compose-material3
 # Required to use material3 window sizes
@@ -114,6 +115,7 @@ androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 koalaplot = {module = "io.github.koalaplot:koalaplot-core",version.ref = "koalaplot-version"}
+ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
@@ -154,6 +156,7 @@ swagger-ui = { module = "org.webjars:swagger-ui", version.ref = "swagger-ui" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 
+androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 acra-http = { module = "ch.acra:acra-http", version.ref = "acra" }
 acra-core = { module = "ch.acra:acra-core", version.ref = "acra" }
 

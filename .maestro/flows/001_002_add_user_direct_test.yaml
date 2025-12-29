@@ -145,48 +145,12 @@ onFlowComplete:
     text: "Child User"
 - assertVisible: "Student"
 - assertVisible: "ParentA User"
-- tapOn: "People"
-- assertVisible:
-    id: "app_title"
-    text: "People"
-- tapOn:
-    id: "floating_action_button"   #  +Person button
-- assertVisible:
-    id: "app_title"
-    text: "Add person"
-- tapOn: "First names*"
-- inputText: "Test"
-- tapOn: "Last name*"
-- inputText: "User"
-- tapOn: "Gender*"
-- tapOn: "Female"
-- tapOn:
-    id: "role"
-- tapOn: "Teacher"
-- assertNotVisible: "Family member"
-- tapOn:
-    id: "role"
-- tapOn: "Student"
-- tapOn: "Family member"
-- assertVisible:
-    id: "app_title"
-    text: "Select person"
-- tapOn: "ParentA User"
-- assertVisible:
-    id: "app_title"
-    text: "Add person"
-- assertVisible: "ParentA User"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test User"
-- assertVisible: "ParentA User"
 - tapOn: "ParentA User"
 - tapOn: "Create account"
 - tapOn: "Username"
 - inputText: "2t"
 - tapOn: "Password"  # Password validations needs to be added
-- inputText: "test234"
+- inputText: "test123"
 - tapOn: "Save"
 - assertVisible: "Username must be at least 3 characters"
 - tapOn: "Username"
@@ -206,7 +170,7 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Manage account"
 
-# Validate User login
+# Validate Parent User login
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -222,7 +186,7 @@ onFlowComplete:
 - inputText: "parentauser"
 - tapOn:
     id : "password"
-- inputText: "test234"
+- inputText: "test123"
 - hideKeyboard
 - tapOn: "Login"
 - runFlow:
@@ -230,19 +194,27 @@ onFlowComplete:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
-- tapOn: "People"
-- tapOn: "ParentA User"
-- assertVisible: "Test User"
-- assertVisible: "Child User"
-
+- tapOn:
+    id: "user_account_icon"
+- assertVisible: "Profile"
+- assertVisible: "Logout"
+- assertVisible: "Connected family"
+- tapOn: "Child User"
 # Verify simplified child mode
+- assertVisible: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- assertVisible: "Apps"
+- assertNotVisible: "Classes"
+- assertNotVisible: "People"
+
+# Validate Child User login
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
@@ -259,10 +231,10 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Assignments"
+- assertVisible: "Apps"
 - assertVisible:
     id: "app_title"
-    text: "Assignments"
-- assertVisible: "Apps"
-- assertNotVisible: "Classes"
-- assertNotVisible: "People"
+    text: "Apps"
+- assertVisible: "Assignments"
+- assertVisible: "Classes"
+- assertVisible: "People"

@@ -78,27 +78,6 @@ class LearningUnitDetailViewModel(
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
     init {
-        viewModelScope.launch {
-            resultReturner.filteredResultFlowForKey(
-                CurriculumMappingEditViewModel.KEY_SAVED_MAPPING
-            ).collect { result ->
-                val savedMapping = result.result as? CurriculumMapping
-                if (savedMapping != null) {
-                    _uiState.update {
-                        it.copy(
-                            mapping = savedMapping,
-                            sectionLinkUiState = this@LearningUnitDetailViewModel::sectionLinkUiStateFor
-                        )
-                    }
-                    _appUiState.update {
-                        it.copy(
-                            title = savedMapping.title.asUiText()
-                        )
-                    }
-                }
-            }
-        }
-
         val mappingData = route.mappingData
 
         if (mappingData != null) {

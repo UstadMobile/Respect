@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.LearningUnitDetail
@@ -28,7 +27,6 @@ data class PlaylistListUiState(
 
 class PlaylistListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val json: Json,
     private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle) {
 

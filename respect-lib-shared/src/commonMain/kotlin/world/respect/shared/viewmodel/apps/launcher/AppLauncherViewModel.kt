@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -45,6 +46,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 
@@ -84,7 +86,6 @@ class AppLauncherViewModel(
             params = SchoolAppDataSource.GetListParams()
         )
     }
-
     init {
         _appUiState.update {
             it.copy(
@@ -101,13 +102,14 @@ class AppLauncherViewModel(
                 apps = pagingSourceHolder,
             )
         }
-        val savedMappings = loadMappingsFromSavedState(savedStateHandle)
-        playlistListViewModel.setMappings(savedMappings)
         viewModelScope.launch {
             playlistListViewModel.navCommandFlow.collect { navCommand ->
                 _navCommandFlow.tryEmit(navCommand)
             }
         }
+
+        val savedMappings = loadMappingsFromSavedState(savedStateHandle)
+        playlistListViewModel.setMappings(savedMappings)
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
@@ -134,7 +136,6 @@ class AppLauncherViewModel(
             }
         }
     }
-
     fun onTabSelected(index: Int) {
         _uiState.update { it.copy(selectedTabIndex = index) }
         updateFabState(isAdmin, index)

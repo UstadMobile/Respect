@@ -305,9 +305,6 @@ class CurriculumMappingEditViewModel(
         )
     }
 
-    /**
-     * Provide a flow that creates the SectionLinkUiState .
-     */
     fun sectionLinkUiStateFor(
         link: CurriculumMappingSectionLink
     ): Flow<DataLoadState<CurriculumMappingSectionUiState>> {
@@ -334,17 +331,24 @@ class CurriculumMappingEditViewModel(
             _uiState.update { it.copy(titleError = Res.string.required_field.asUiText()) }
             return
         }
+
+        val finalMapping = if (mapping.uid == 0L) {
+            mapping.copy(uid = System.currentTimeMillis())
+        } else {
+            mapping
+        }
+
         resultReturner.sendResult(
             NavResult(
                 key = KEY_SAVED_MAPPING,
-                result = mapping
+                result = finalMapping
             )
         )
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = LearningUnitDetail.createFromMapping(mapping),
-                popUpTo = route,
-                popUpToInclusive = true
+                destination = LearningUnitDetail.createFromMapping(finalMapping),
+                popUpTo = RespectAppLauncher(),
+                popUpToInclusive = false
             )
         )
     }

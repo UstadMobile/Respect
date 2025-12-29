@@ -41,7 +41,12 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn:
     id: "role"
+- tapOn: "Teacher"
+- assertNotVisible: "Family member"
+- tapOn:
+    id: "role"
 - tapOn: "Parent"
+- assertVisible: "Family member"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -198,7 +203,7 @@ onFlowComplete:
     id: "user_account_icon"
 - assertVisible: "Profile"
 - assertVisible: "Logout"
-- assertVisible: "Connected family"
+- assertVisible: "Family members"
 - tapOn: "Child User"
 # Verify simplified child mode
 - assertVisible: "Assignments"

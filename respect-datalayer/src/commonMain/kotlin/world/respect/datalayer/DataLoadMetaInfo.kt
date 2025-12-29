@@ -3,6 +3,7 @@ package world.respect.datalayer
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 /**
  * Combined metadata (e.g. data about data) on loaded data. This includes the loading status and
@@ -42,7 +43,7 @@ data class DataLoadMetaInfo(
 
     val url: Url? = null,
 
-    val consistentThrough: Long = -1,
+    val consistentThrough: Instant? = null,
 
     val validationInfoKey: Long = 0,
 

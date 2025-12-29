@@ -5,6 +5,7 @@ import androidx.room.useWriterConnection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
@@ -18,6 +19,8 @@ import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PermissionFlags
+import world.respect.datalayer.shared.maxLastModifiedOrNull
+import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.throwable.ForbiddenException
@@ -64,19 +67,28 @@ class EnrollmentDataSourceDb(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
     ): DataLoadState<List<Enrollment>> {
-        return DataReadyState(
-            data = schoolDb.getEnrollmentEntityDao().list(
-                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
-                since = listParams.common.since?.toEpochMilliseconds() ?: 0,
-                uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
-                classUidRoleFlag = listParams.role?.flag ?: 0,
-                personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0,
-                includeDeleted = listParams.common.includeDeleted ?: false,
-                activeOnDayInUtcMs = listParams.activeOnDay?.atStartOfDayInMillisUtc() ?: 0,
-                notRemovedBefore = 0,
-            ).map { it.toModel() }
-        )
+        val queryTime = Clock.System.now()
+
+        return schoolDb.getEnrollmentEntityDao().list(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+            since = listParams.common.since?.toEpochMilliseconds() ?: 0,
+            uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
+            classUidRoleFlag = listParams.role?.flag ?: 0,
+            personUidNum = listParams.personUid?.let { uidNumberMapper(it) } ?: 0,
+            includeDeleted = listParams.common.includeDeleted ?: false,
+            activeOnDayInUtcMs = listParams.activeOnDay?.atStartOfDayInMillisUtc() ?: 0,
+            notRemovedBefore = 0,
+        ).map { it.toModel() }.let {
+            DataReadyState(
+                data = it,
+                metaInfo = DataLoadMetaInfo(
+                    lastModified = it.maxLastModifiedOrNull()?.toEpochMilliseconds() ?: -1,
+                    lastStored = it.maxLastStoredOrNull()?.toEpochMilliseconds() ?: -1,
+                    consistentThrough = queryTime
+                )
+            )
+        }
     }
 
     override fun listAsPagingSource(

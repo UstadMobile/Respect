@@ -28,9 +28,8 @@ class TestPersonStorage {
         val parentGuid = "2"
         val childGuid = "3"
 
-        val folder = File("/home/mike/tmp/db/")
         runBlocking {
-            testSchoolDb(folder/*temporaryFolder.newFolder()*/) { db ->
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
                 val schoolDs = db.toDataSource(adminUid)
 
                 val parentPerson = Person(

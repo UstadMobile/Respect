@@ -29,6 +29,7 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.PermissionFlags
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -56,6 +57,8 @@ class ClazzListViewModel(
     private val _uiState = MutableStateFlow(ClazzListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
 
     private val pagingSourceHolder = PagingSourceFactoryHolder {
         schoolDataSource.classDataSource.listAsPagingSource(
@@ -96,6 +99,8 @@ class ClazzListViewModel(
         }
 
         viewModelScope.launch {
+            enqueuePullSyncUseCase()
+
             val canAddClass = checkSchoolPermissionsUseCase(
                 listOf(PermissionFlags.CLASS_WRITE)
             ).isNotEmpty()

@@ -21,7 +21,6 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import kotlin.test.Test
@@ -29,7 +28,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
 
 /**
  * This integration test checks if using consistent-through and since parameters works with a real
@@ -165,7 +163,7 @@ class PersonRepositoryIntegrationTest {
                     listOf(defaultTestPerson)
                 )
 
-                val startTime = systemTimeInMillis()
+                val startTime = Clock.System.now()
                 val initData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams())
                 println(initData)
@@ -177,7 +175,7 @@ class PersonRepositoryIntegrationTest {
                         loadParams = DataLoadParams(),
                         PersonDataSource.GetListParams(
                             common = GetListCommonParams(
-                                since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                                since = answer1ConsistentThrough
                             )
                         )
                     )
@@ -187,7 +185,7 @@ class PersonRepositoryIntegrationTest {
                 val remoteData = remoteDataState.data as List<*>
                 assertEquals(0, remoteData.size)
 
-                println("Run time: ${systemTimeInMillis() - startTime}")
+                println("Run time: ${Clock.System.now() - startTime}")
             }
         }
     }
@@ -208,7 +206,7 @@ class PersonRepositoryIntegrationTest {
                     listOf(defaultTestPerson)
                 )
 
-                val startTime = systemTimeInMillis()
+                val startTime = Clock.System.now()
                 val initData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams())
                 println(initData)
@@ -230,7 +228,7 @@ class PersonRepositoryIntegrationTest {
                         loadParams = DataLoadParams(),
                         params = PersonDataSource.GetListParams(
                             common = GetListCommonParams(
-                                since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                                since = answer1ConsistentThrough
                             )
                         )
                     )
@@ -242,7 +240,7 @@ class PersonRepositoryIntegrationTest {
                 assertEquals(1, remoteData.size)
                 assertEquals(updatedName, remoteData.first().givenName)
 
-                println("Run time: ${systemTimeInMillis() - startTime}")
+                println("Run time: ${Clock.System.now() - startTime}")
             }
         }
     }

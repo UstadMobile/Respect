@@ -78,32 +78,18 @@ class PersonDataSourceRepository(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
-        val remoteSource = remote.listAsPagingSource(
+        val remoteSource = remote.takeIf { !loadParams.onlyIfCached }?.listAsPagingSource(
             loadParams = loadParams,
             params = params.copy(
                 common = params.common.copy(includeDeleted = true),
                 inClassOnDay = null,
             )
-        ).invoke()
-
-        val enrollmentRemoteSource = enrollmentDataSourceRepository.remote
-            .takeIf { params.filterByClazzUid != null }
-            ?.listAsPagingSource(
-                loadParams,
-                EnrollmentDataSource.GetListParams(
-                    classUid = params.filterByClazzUid,
-                    common = GetListCommonParams(includeDeleted = true),
-                )
-            )?.invoke()
+        )?.invoke()
 
         return RepositoryPagingSourceFactory(
             onRemoteLoad = { remoteLoadParams ->
-                remoteSource.loadAndUpdateLocal2(
+                remoteSource?.loadAndUpdateLocal2(
                     remoteLoadParams, local::updateLocal,
-                )
-
-                enrollmentRemoteSource?.loadAndUpdateLocal2(
-                    remoteLoadParams, enrollmentDataSourceRepository.local::updateLocal,
                 )
             },
             local = local.listAsPagingSource(loadParams, params),

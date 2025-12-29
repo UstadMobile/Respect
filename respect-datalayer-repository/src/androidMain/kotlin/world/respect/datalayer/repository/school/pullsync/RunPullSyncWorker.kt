@@ -1,4 +1,4 @@
-package world.respect.datalayer.repository.school.writequeue
+package world.respect.datalayer.repository.school.pullsync
 
 import android.content.Context
 import androidx.work.CoroutineWorker
@@ -7,22 +7,20 @@ import io.github.aakira.napier.Napier
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.repository.school.worker.getWorkerKoinScope
 
-class DrainRemoteWriteQueueWorker(
+class RunPullSyncWorker(
     context: Context,
     params: WorkerParameters
 ): CoroutineWorker(context, params), KoinComponent {
 
     override suspend fun doWork(): Result {
-
-        val drainRemoteWriteQueueUseCase: DrainRemoteWriteQueueUseCase = getWorkerKoinScope().get()
-        val logPrefix = "DrainRemoteWriteQueueWorker"
+        val runPullSyncUseCase: RunPullSyncUseCase = getWorkerKoinScope().get()
 
         return try {
-            drainRemoteWriteQueueUseCase()
-            Napier.d("$logPrefix completed successfully")
+            runPullSyncUseCase()
+            Napier.d("RunPullSyncWorker completed successfully")
             Result.success()
         }catch(e: Throwable) {
-            Napier.w("$logPrefix error", e)
+            Napier.w("RunPullSyncWorker error", e)
             Result.failure()
         }
     }

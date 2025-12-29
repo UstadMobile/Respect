@@ -138,11 +138,10 @@ suspend inline fun <reified T: Any> ApplicationCall.respondDataLoadState(
         response.header(HttpHeaders.LastModified, GMTDate(it).toHttpDate())
     }
 
-    if(dataLoadState.metaInfo.consistentThrough > 0) {
+    dataLoadState.metaInfo.consistentThrough?.also { consistentThrough ->
         response.header(
             name = DataLayerHeaders.XConsistentThrough,
-            value = Instant.fromEpochMilliseconds(dataLoadState.metaInfo.consistentThrough)
-                .toString()
+            value = consistentThrough.toString()
         )
     }
 

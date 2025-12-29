@@ -90,8 +90,13 @@ interface EnrollmentEntityDao {
 
 
         /**
-         * Reading the enrollment entity requires the PERSON_STUDENT_READ permission: this can be
-         * done via a SchoolPermissionGrant (school-wide) or ClassPermission (specific class only).
+         * Reading the enrollment entity requires the PERSON_STUDENT_READ / PERSON_TEACHER_READ
+         * permission respectively. This will be granted when:
+         * a) The EnrollmentEntity personUid is the authenticated person, or when the authenticated
+         *    person is the parent of the enrolled user.
+         * b) The authenticated person has the required permission flag as a school-wide permission
+         *    grant.
+         * c) The authenticated person has the required permission for the given class.
          */
         const val LIST_SQL = """
           WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},  
@@ -110,8 +115,7 @@ interface EnrollmentEntityDao {
                     AND ((:activeOnDayInUtcMs - ${TimeConstants.DAY_IN_MILLIS - 1}) < COALESCE(EnrollmentEntity.eEndDate, ${Long.MAX_VALUE}))))
            AND (:notRemovedBefore = 0 OR EnrollmentEntity.eRemovedAt > :notRemovedBefore)
            AND (   EnrollmentEntity.ePersonUidNum IN 
-                   (SELECT AuthenticatedPermissionPersonUids.uidNum
-                      FROM AuthenticatedPermissionPersonUids) 
+                   (${PersonEntityDao.SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL}) 
                 OR EXISTS(
                      SELECT 1
                        FROM SchoolPermissionGrantEntity
@@ -127,7 +131,7 @@ interface EnrollmentEntityDao {
                        FROM AuthenticatedPersonClassPermissions
                       WHERE AuthenticatedPersonClassPermissions.cpeClassUidNum = EnrollmentEntity.eClassUidNum
                         AND (AuthenticatedPersonClassPermissions.cpePermissions & ($REQUIRED_PERMISSION_EXPRESSION)) > 0)
-               )      
+               )
         """
 
     }

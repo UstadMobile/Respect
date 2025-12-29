@@ -195,7 +195,7 @@ class PersonDataSourceDb(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
-        val queryTime = systemTimeInMillis()
+        val queryTime = Clock.System.now()
         val data = schoolDb.getPersonEntityDao().list(
             authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
             since = params.common.since?.toEpochMilliseconds() ?: 0,

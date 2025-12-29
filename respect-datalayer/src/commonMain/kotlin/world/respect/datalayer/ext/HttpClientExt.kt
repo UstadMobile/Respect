@@ -57,7 +57,7 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
                     url = response.request.url,
                     lastModified = response.lastModifiedAsLong(),
                     etag = response.etag(),
-                    consistentThrough = response.consistentThroughAsLong(),
+                    consistentThrough = response.consistentThrough(),
                     validationInfoKey = validationInfoKey ?: 0,
                     varyHeader = varyHeader,
                 )

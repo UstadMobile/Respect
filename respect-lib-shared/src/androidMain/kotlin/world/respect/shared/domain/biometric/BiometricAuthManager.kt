@@ -60,7 +60,7 @@ class BiometricAuthManager(private val activity: AppCompatActivity) {
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
         } else {
-            builder.setNegativeButtonText(promptData.negativeButtonText ?: "Cancel")
+            builder.setNegativeButtonText(promptData.negativeButtonText)
         }
 
         prompt.authenticate(builder.build())

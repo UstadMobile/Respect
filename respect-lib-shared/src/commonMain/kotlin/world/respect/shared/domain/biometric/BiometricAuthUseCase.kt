@@ -12,7 +12,7 @@ interface BiometricAuthUseCase {
         val title: String,
         val subtitle: String? = null,
         val description: String? = null,
-        val negativeButtonText: String? = null,
+        val negativeButtonText: String,
         val useDeviceCredential: Boolean = false
     )
 

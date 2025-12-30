@@ -23,34 +23,9 @@ class BiometricAuthProcessor(
                         return@launch
                     }
 
-                    val promptData = BiometricAuthUseCase.BiometricPromptData(
-                        title = job.request.title,
-                        subtitle = job.request.subtitle,
-                        description = job.request.description,
-                        useDeviceCredential = job.request.useDeviceCredential,
-                        negativeButtonText = job.request.negativeButtonText
-                    )
+                    val result = biometricManager.authenticate(job.request)
+                    job.response.complete(result)
 
-                    val res: BiometricAuthUseCase.BiometricResult =
-                        biometricManager.authenticate(promptData)
-
-                    when (res) {
-                        is BiometricAuthUseCase.BiometricResult.Success -> job.response.complete(
-                            BiometricAuthUseCase.BiometricResult.Success
-                        )
-
-                        is BiometricAuthUseCase.BiometricResult.Failure -> job.response.complete(
-                            BiometricAuthUseCase.BiometricResult.Failure(res.reason)
-                        )
-
-                        is BiometricAuthUseCase.BiometricResult.Canceled -> job.response.complete(
-                            BiometricAuthUseCase.BiometricResult.Canceled
-                        )
-
-                        is BiometricAuthUseCase.BiometricResult.Error -> job.response.complete(
-                            BiometricAuthUseCase.BiometricResult.Error(res.code, res.message)
-                        )
-                    }
                 } catch (t: Throwable) {
                     job.response.complete(
                         BiometricAuthUseCase.BiometricResult.Error(

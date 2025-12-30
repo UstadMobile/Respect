@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
@@ -98,7 +97,7 @@ class AccountListViewModel(
                 //As noted on UiState - the active account is removed from the list of other
                 //accounts
                 val storedAccountList = storedAccounts.filterNot {
-                    activeAccount?.isSameAccount(it) == true || it.startedViaParent
+                    activeAccount?.isSameAccount(it) == true
                 }
 
                 _uiState.update { prev ->

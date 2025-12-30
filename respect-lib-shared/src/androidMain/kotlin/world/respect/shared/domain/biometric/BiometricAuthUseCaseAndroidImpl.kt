@@ -1,12 +1,16 @@
 package world.respect.shared.domain.biometric
 
-class BiometricAuthUseCaseAndroidImpl(
-    private val sender: BiometricAuthUseCaseAndroidChannelHost
-) : BiometricAuthUseCase {
+import kotlinx.coroutines.channels.Channel
 
-    override suspend fun invoke(request: BiometricAuthUseCase.BiometricPromptData): BiometricAuthUseCase.BiometricResult {
+class BiometricAuthUseCaseAndroidImpl : BiometricAuthUseCase {
+
+    val requestChannel = Channel<BiometricAuthJob>(Channel.UNLIMITED)
+
+    override suspend fun invoke(
+        request: BiometricAuthUseCase.BiometricPromptData
+    ): BiometricAuthUseCase.BiometricResult {
         val job = BiometricAuthJob(request)
-        sender.requestChannel.send(job)
+        requestChannel.send(job)
         return job.response.await()
     }
 }

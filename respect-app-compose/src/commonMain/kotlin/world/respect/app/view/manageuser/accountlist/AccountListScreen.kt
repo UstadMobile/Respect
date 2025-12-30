@@ -26,7 +26,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
-import world.respect.shared.generated.resources.connected_family
+import world.respect.shared.generated.resources.my_children
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
 import world.respect.shared.util.ext.fullName
@@ -86,7 +86,7 @@ fun AccountListScreen(
               item {
                   Text(
                       modifier = Modifier.defaultItemPadding(),
-                     text =  stringResource(Res.string.connected_family)
+                     text =  stringResource(Res.string.my_children)
                   )
               }
               uiState.familyPersons?.forEach { account ->

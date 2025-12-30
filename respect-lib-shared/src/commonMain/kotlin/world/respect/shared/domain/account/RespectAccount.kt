@@ -16,7 +16,6 @@ import world.respect.shared.util.di.RespectAccountScopeId
 data class RespectAccount(
     val userGuid: String,
     val school: SchoolDirectoryEntry,
-    val startedViaParent : Boolean = false
 ) {
 
     /**

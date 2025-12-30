@@ -28,7 +28,6 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
-import world.respect.datalayer.school.model.Person
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -306,7 +305,7 @@ class RespectAccountManager(
         )
 
 
-        val newSession = RespectSession(currentSession.account, personUid)
+        val newSession = currentSession.copy(profilePersonUid = personUid)
         _activeSession.value = newSession
         settings[SETTINGS_KEY_ACTIVE_SESSION] = json.encodeToString(newSession)
 

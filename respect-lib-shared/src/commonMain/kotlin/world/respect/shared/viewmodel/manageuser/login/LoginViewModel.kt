@@ -6,7 +6,6 @@ import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -25,7 +24,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
-import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.JoinClazzWithCode
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
@@ -103,20 +101,12 @@ class LoginViewModel(
                                 ),
                                 schoolUrl = route.schoolUrl,
                             )
-                            accountManager.selectedAccountAndPersonFlow.collect { person ->
-                                val destination = if (person?.isChild == true) {
-                                    AssignmentList
-                                } else {
-                                    RespectAppLauncher()
-                                }
 
-                                _navCommandFlow.tryEmit(
-                                    NavCommand.Navigate(
-                                        destination = destination,
-                                        clearBackStack = true,
-                                    )
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = RespectAppLauncher(), clearBackStack = true
                                 )
-                            }
+                            )
                         }
 
                         is GetCredentialUseCase.PasswordCredentialResult -> {
@@ -214,21 +204,13 @@ class LoginViewModel(
                            password = password
                        )
                    }
-                    accountManager.selectedAccountAndPersonFlow.collect { person ->
-                        val destination = if (person?.isChild == true) {
-                            AssignmentList
-                        } else {
-                            RespectAppLauncher()
-                        }
 
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                destination = destination,
-                                clearBackStack = true,
-                            )
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = RespectAppLauncher(),
+                            clearBackStack = true,
                         )
-                    }
-
+                    )
                 }catch(e: Exception) {
                     e.printStackTrace()
                     _uiState.update { prev ->

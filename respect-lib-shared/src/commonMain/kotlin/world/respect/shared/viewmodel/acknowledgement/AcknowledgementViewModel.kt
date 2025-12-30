@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -32,12 +33,11 @@ class AcknowledgementViewModel(
     init {
 
         viewModelScope.launch {
-            accountManager.selectedAccountAndPersonFlow.collect { selected ->
-                _uiState.update { prev ->
-                    prev.copy(
-                        isChild = selected?.isChild == true
-                    )
-                }
+            val selectedPerson = accountManager.selectedAccountAndPersonFlow.firstOrNull()
+            _uiState.update { prev ->
+                prev.copy(
+                    isChild = selectedPerson?.isChild == true
+                )
             }
         }
         viewModelScope.launch {

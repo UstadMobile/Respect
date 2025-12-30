@@ -29,7 +29,6 @@ import world.respect.shared.navigation.SetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.util.ext.isStudent
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
@@ -85,23 +84,32 @@ class SetUsernameAndPasswordViewModel(
         viewModelScope.launch {
             schoolDataSource.personDataSource.findByGuidAsFlow(
                 route.guid
-            ).collect {
+            ).collect { personResult ->
+                val person = personResult.dataOrNull()
+                val isStudent = person?.isStudent() == true
+
                 _uiState.update { prev ->
                     prev.copy(
-                        isStudent = it.dataOrNull()?.isStudent() == true
+                        isStudent = isStudent
                     )
                 }
-            }
-        }
-        if (!uiState.value.isStudent){
-            _appUiState.update {
-                it.copy(
-                    actionBarButtonState = ActionBarButtonUiState(
-                        text = Res.string.save.asUiText(),
-                        visible = true,
-                        onClick = ::onClickSave
-                    )
-                )
+                _appUiState.update { appUiState ->
+                    if (!isStudent) {
+                        appUiState.copy(
+                            actionBarButtonState = ActionBarButtonUiState(
+                                text = Res.string.save.asUiText(),
+                                visible = true,
+                                onClick = ::onClickSave
+                            )
+                        )
+                    } else {
+                        appUiState.copy(
+                            actionBarButtonState = ActionBarButtonUiState(
+                                visible = false
+                            )
+                        )
+                    }
+                }
             }
         }
         viewModelScope.launch {
@@ -140,7 +148,7 @@ class SetUsernameAndPasswordViewModel(
                     )
                 }
 
-                if(usernameValidation.errorMessage != null)
+                if (usernameValidation.errorMessage != null)
                     return@launchWithLoadingIndicator
 
                 val error = validatePassword()
@@ -175,12 +183,13 @@ class SetUsernameAndPasswordViewModel(
                 )
 
                 _navCommandFlow.tryEmit(NavCommand.PopUp())
-            }catch (e: Throwable) {
+            } catch (e: Throwable) {
                 Napier.e("Error saving username and password", e)
             }
 
         }
     }
+
     fun onPasswordChanged(password: String) {
         _uiState.update { it.copy(password = password) }
     }

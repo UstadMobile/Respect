@@ -21,6 +21,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.ext.lastModifiedForHttpResponseHeader
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.libutil.util.throwable.ForbiddenException
@@ -66,8 +67,17 @@ fun ApplicationCall.requireAccountScope(): Scope {
 suspend inline fun <reified T: Any> ApplicationCall.respondOffsetLimitPaging(
     params: PagingSource.LoadParams<Int>,
     pagingSource: PagingSource<Int, T>,
+    getPermissionLastModifiedUseCase: GetPermissionLastModifiedUseCase? = null,
 ) {
     val consistentThrough = Clock.System.now()
+
+    getPermissionLastModifiedUseCase?.also { getPermissionLastMod ->
+        response.header(
+            name = DataLayerHeaders.XPermissionsLastModified,
+            value = getPermissionLastMod().toString(),
+        )
+    }
+
     val pagingLoadResult = pagingSource.load(params)
 
     when(pagingLoadResult) {
@@ -142,6 +152,13 @@ suspend inline fun <reified T: Any> ApplicationCall.respondDataLoadState(
         response.header(
             name = DataLayerHeaders.XConsistentThrough,
             value = consistentThrough.toString()
+        )
+    }
+
+    dataLoadState.metaInfo.permissionsLastModified?.also { permissionsLastMod ->
+        response.header(
+            name = DataLayerHeaders.XPermissionsLastModified,
+            value = permissionsLastMod.toString()
         )
     }
 

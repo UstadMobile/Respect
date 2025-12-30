@@ -226,6 +226,38 @@ interface PersonEntityDao {
     )
     suspend fun getAllUsers(sourcedId: String): List<PersonEntity>
 
+    /**
+     * Determine the most recent time that a person's permissions have changed. Used to determine
+     * the since validation key. See PullSyncTracker for more details.
+     */
+    @Query("""
+        WITH $AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL 
+      SELECT MAX(
+               -- Most recent change to schoolpermissiongrant for the given person
+               COALESCE(
+                   (SELECT MAX(SchoolPermissionGrantEntity.spgStored)
+                      FROM SchoolPermissionGrantEntity
+                     WHERE SchoolPermissionGrantEntity.spgToRole IN
+                           (SELECT PersonRoleEntity.prRoleEnum
+                              FROM PersonRoleEntity
+                             WHERE PersonRoleEntity.prPersonGuidHash IN 
+                                   ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL))), 
+                   0
+               ),
+               -- Most recent change to enrollment that will also affect permissions for person
+               COALESCE(
+                   (SELECT MAX(EnrollmentEntity.eStored)
+                      FROM EnrollmentEntity
+                     WHERE EnrollmentEntity.ePersonUidNum IN 
+                           ($SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL)),
+                   0
+               )
+             )
+    """)
+    suspend fun getMostRecentPermissionChangeTime(
+        authenticatedPersonUidNum: Long
+    ): Long
+
 
     companion object {
 

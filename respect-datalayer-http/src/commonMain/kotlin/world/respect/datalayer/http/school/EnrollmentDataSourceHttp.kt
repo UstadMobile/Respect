@@ -52,6 +52,7 @@ class EnrollmentDataSourceHttp(
                     personUid)
                 parameters.appendIfNotNull(DataLayerParams.ACTIVE_ON_DAY,
                     activeOnDay?.toString())
+                parameters.append(DataLayerParams.ORDER_BY, orderBy.orderOption.name)
             }.build()
     }
 

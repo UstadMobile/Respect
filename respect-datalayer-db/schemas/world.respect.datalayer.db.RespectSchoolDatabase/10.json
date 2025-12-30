@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "4095c48cb256a85631df9a0bdee41a59",
+    "identityHash": "a13fdc912072986ea26157e1f7404b45",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1034,7 +1034,7 @@
       },
       {
         "tableName": "PullSyncStatusEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pssAccountPersonUid` TEXT NOT NULL, `pssAccountPersonUidNum` INTEGER NOT NULL, `pssTableId` INTEGER NOT NULL, `pssLastConsistentThrough` INTEGER NOT NULL, PRIMARY KEY(`pssAccountPersonUid`, `pssTableId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pssAccountPersonUid` TEXT NOT NULL, `pssAccountPersonUidNum` INTEGER NOT NULL, `pssTableId` INTEGER NOT NULL, `pssLastConsistentThrough` INTEGER NOT NULL, `pssPermissionsLastModified` INTEGER NOT NULL, PRIMARY KEY(`pssAccountPersonUid`, `pssTableId`))",
         "fields": [
           {
             "fieldPath": "pssAccountPersonUid",
@@ -1059,6 +1059,12 @@
             "columnName": "pssLastConsistentThrough",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "pssPermissionsLastModified",
+            "columnName": "pssPermissionsLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -1072,7 +1078,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4095c48cb256a85631df9a0bdee41a59')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a13fdc912072986ea26157e1f7404b45')"
     ]
   }
 }

@@ -15,3 +15,7 @@ fun HttpMessage.consistentThrough(): Instant? {
     }
 }
 
+fun HttpMessage.permissionsLastModified(): Instant? {
+    return headers[DataLayerHeaders.XPermissionsLastModified]?.let { Instant.parse(it) }
+}
+

@@ -27,6 +27,7 @@ import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
 import kotlin.collections.map
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 class EnrollmentDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -68,10 +69,17 @@ class EnrollmentDataSourceDb(
         listParams: EnrollmentDataSource.GetListParams
     ): DataLoadState<List<Enrollment>> {
         val queryTime = Clock.System.now()
+        val permissionsLastModified = Instant.fromEpochMilliseconds(
+            schoolDb.getPersonEntityDao().getMostRecentPermissionChangeTime(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid)
+            )
+        )
 
         return schoolDb.getEnrollmentEntityDao().list(
             authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
-            since = listParams.common.since?.toEpochMilliseconds() ?: 0,
+            since = listParams.common.since?.toEpochMilliseconds().takeIf {
+                listParams.common.sinceIfPermissionsNotChangedSince == permissionsLastModified
+            } ?: 0,
             uidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
             classUidNum = listParams.classUid?.let { uidNumberMapper(it) } ?: 0,
             classUidRoleFlag = listParams.role?.flag ?: 0,
@@ -79,13 +87,15 @@ class EnrollmentDataSourceDb(
             includeDeleted = listParams.common.includeDeleted ?: false,
             activeOnDayInUtcMs = listParams.activeOnDay?.atStartOfDayInMillisUtc() ?: 0,
             notRemovedBefore = 0,
+            sortByFlag = listParams.orderBy.orderOption.flag,
         ).map { it.toModel() }.let {
             DataReadyState(
                 data = it,
                 metaInfo = DataLoadMetaInfo(
                     lastModified = it.maxLastModifiedOrNull()?.toEpochMilliseconds() ?: -1,
                     lastStored = it.maxLastStoredOrNull()?.toEpochMilliseconds() ?: -1,
-                    consistentThrough = queryTime
+                    consistentThrough = queryTime,
+                    permissionsLastModified = permissionsLastModified,
                 )
             )
         }
@@ -106,6 +116,7 @@ class EnrollmentDataSourceDb(
                 includeDeleted = listParams.common.includeDeleted ?: false,
                 activeOnDayInUtcMs = listParams.activeOnDay?.atStartOfDayInMillisUtc() ?: 0,
                 notRemovedBefore = 0,
+                sortByFlag = listParams.orderBy.orderOption.flag,
             ).map(
                 tag = { "EnrollmentDataSourceDb/list params=$listParams" }
             ) {

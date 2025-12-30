@@ -60,6 +60,8 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
                     consistentThrough = response.consistentThrough(),
                     validationInfoKey = validationInfoKey ?: 0,
                     varyHeader = varyHeader,
+                    permissionsLastModified = response.permissionsLastModified(),
+                    headers = response.headers.asIHttpHeaders(),
                 )
             )
         }

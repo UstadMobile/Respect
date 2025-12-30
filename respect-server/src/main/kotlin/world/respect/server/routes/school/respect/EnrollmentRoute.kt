@@ -12,12 +12,16 @@ import io.ktor.server.routing.post
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
+import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondOffsetLimitPaging
 
 fun Route.EnrollmentRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->
+        call.requireAccountScope().get()
+    },
+    getPermissionLastModifiedUseCase: (ApplicationCall) -> GetPermissionLastModifiedUseCase = { call ->
         call.requireAccountScope().get()
     }
 ) {
@@ -28,7 +32,8 @@ fun Route.EnrollmentRoute(
             pagingSource = schoolDataSource(call).enrollmentDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 listParams = EnrollmentDataSource.GetListParams.fromParams(call.request.queryParameters)
-            ).invoke()
+            ).invoke(),
+            getPermissionLastModifiedUseCase = getPermissionLastModifiedUseCase(call),
         )
     }
 

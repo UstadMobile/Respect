@@ -11,4 +11,5 @@ data class PullSyncStatusEntity(
     val pssAccountPersonUidNum: Long,
     val pssTableId: Int,
     val pssLastConsistentThrough: Instant,
+    val pssPermissionsLastModified: Instant,
 )

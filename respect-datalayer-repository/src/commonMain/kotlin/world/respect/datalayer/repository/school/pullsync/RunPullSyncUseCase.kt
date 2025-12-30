@@ -9,7 +9,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.PullSyncStatus
-import world.respect.datalayer.shared.PullSyncTracker
+import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.params.GetListCommonParams
 import java.lang.IllegalStateException
 import kotlin.time.Instant
@@ -39,10 +39,12 @@ class RunPullSyncUseCase(
         val status = pullSyncTracker.getPullSyncStatus(tableId) ?: PullSyncStatus(
             accountPersonUid = authenticatedUser.guid,
             consistentThrough = Instant.fromEpochMilliseconds(0),
+            permissionsLastModified = Instant.fromEpochMilliseconds(0),
             tableId = tableId,
         )
 
         var since: Instant = status.consistentThrough
+        var permissionsLastModified = status.permissionsLastModified
 
         do {
             Napier.d("PullSync: Loading since $since")
@@ -51,6 +53,7 @@ class RunPullSyncUseCase(
                 listParams = EnrollmentDataSource.GetListParams(
                     common = GetListCommonParams(
                         since = since,
+                        sinceIfPermissionsNotChangedSince = permissionsLastModified,
                     )
                 )
             )
@@ -62,9 +65,12 @@ class RunPullSyncUseCase(
             since = loadResult.remoteState?.metaInfo?.consistentThrough ?: throw IllegalStateException(
                 "RunPullSyncUseCase: Load result MUST have consistentThrough"
             )
+            permissionsLastModified = loadResult.remoteState?.metaInfo?.permissionsLastModified ?: throw IllegalStateException(
+                "RunPullSyncUseCase: Load result MUST have permissionsLastModified"
+            )
         }while (loadResult.dataOrNull()?.isNotEmpty() == true)
 
-        Napier.d("PullSync: Done consistent through to $since")
+        Napier.d("PullSync: Done consistent through to $since / permissions last modified $permissionsLastModified")
         pullSyncTracker.updatePullSyncStatus(
             status.copy(consistentThrough = since)
         )

@@ -10,6 +10,7 @@ import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.school.model.StatusEnum
+import world.respect.datalayer.shared.params.OrderOption
 import world.respect.libutil.util.time.TimeConstants
 
 @Dao
@@ -41,6 +42,7 @@ interface EnrollmentEntityDao {
         activeOnDayInUtcMs: Long = 0,
         notRemovedBefore: Long = 0,
         includeDeleted: Boolean = false,
+        sortByFlag: Int,
     ): PagingSource<Int, EnrollmentEntity>
 
     @Query(LIST_SQL)
@@ -54,6 +56,7 @@ interface EnrollmentEntityDao {
         activeOnDayInUtcMs: Long = 0,
         notRemovedBefore: Long = 0,
         includeDeleted: Boolean = false,
+        sortByFlag: Int,
     ): List<EnrollmentEntity>
 
     @Query("""
@@ -132,6 +135,10 @@ interface EnrollmentEntityDao {
                       WHERE AuthenticatedPersonClassPermissions.cpeClassUidNum = EnrollmentEntity.eClassUidNum
                         AND (AuthenticatedPersonClassPermissions.cpePermissions & ($REQUIRED_PERMISSION_EXPRESSION)) > 0)
                )
+      ORDER BY CASE(:sortByFlag)
+                    WHEN ${OrderOption.STORED_ASC_FLAG} THEN EnrollmentEntity.eStored
+                    ELSE EnrollmentEntity.eUidNum
+               END
         """
 
     }

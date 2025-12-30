@@ -12,6 +12,7 @@ fun PullSyncStatus.toEntity(
         pssAccountPersonUidNum = uidNumberMapper(accountPersonUid),
         pssLastConsistentThrough = consistentThrough,
         pssTableId = tableId,
+        pssPermissionsLastModified = permissionsLastModified,
     )
 }
 
@@ -20,6 +21,7 @@ fun PullSyncStatusEntity.toModel(): PullSyncStatus {
         accountPersonUid = pssAccountPersonUid,
         consistentThrough = pssLastConsistentThrough,
         tableId = pssTableId,
+        permissionsLastModified = pssPermissionsLastModified,
     )
 }
 

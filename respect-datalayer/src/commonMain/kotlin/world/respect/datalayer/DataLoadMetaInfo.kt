@@ -31,6 +31,9 @@ import kotlin.time.Instant
  *
  * @param varyHeader where this is from a remote server that provides an HTTP vary header, this is
  *        the value of the vary header (such that a varyHash can be calculated for subsequent requests).
+ *
+ * @param permissionsLastModified often required for subsequent requests that use the
+ *        consistentThrough header to set GetListCommonParams.since
  */
 @Serializable
 data class DataLoadMetaInfo(
@@ -50,6 +53,8 @@ data class DataLoadMetaInfo(
     val varyHeader: String? = null,
 
     val headers: IHttpHeaders? = null,
+
+    val permissionsLastModified: Instant? = null,
 
 ) {
 

@@ -13,6 +13,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
@@ -111,7 +112,12 @@ class ManageAccountViewModel(
                 title = Res.string.manage_account.asUiText()
             )
         }
-
+        viewModelScope.launch {
+            if (route.qrUrl != null && route.username != null) {
+                saveUsername(route.username)
+                storeQrCodeForPerson(personGuid = personGuid, url = route.qrUrl.toString())
+            }
+        }
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(
                 QR_SELECT_RESULT
@@ -311,6 +317,23 @@ class ManageAccountViewModel(
                 )
                 throw e
             }
+        }
+    }
+
+    private fun saveUsername(username: String?) {
+        viewModelScope.launch {
+            val person = schoolDataSource.personDataSource.findByGuid(
+                DataLoadParams(), route.guid
+            ).dataOrNull() ?: throw IllegalStateException("Person not found")
+
+            schoolDataSource.personDataSource.store(
+                listOf(
+                    person.copy(
+                        username = username,
+                        lastModified = Clock.System.now(),
+                    )
+                )
+            )
         }
     }
 

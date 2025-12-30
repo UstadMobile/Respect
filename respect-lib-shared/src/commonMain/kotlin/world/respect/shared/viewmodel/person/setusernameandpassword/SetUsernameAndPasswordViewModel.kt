@@ -3,29 +3,21 @@ package world.respect.shared.viewmodel.person.setusernameandpassword
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.model.PersonBadge
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
-import world.respect.shared.generated.resources.qr_or_password_required
-import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
@@ -33,10 +25,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.app.appstate.Snack
-import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import kotlin.time.Clock
 
 data class SetUsernameAndPasswordUiState(
     val username: String = "",
@@ -54,16 +42,14 @@ data class SetUsernameAndPasswordUiState(
  */
 class SetUsernameAndPasswordViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
-    private val validateUsernameUseCase: ValidateUsernameUseCase,
-    private val snackBarDispatcher: SnackBarDispatcher
+    private val validateUsernameUseCase: ValidateUsernameUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-    private val navResultReturner: NavResultReturner by inject()
 
     private val route: SetUsernameAndPassword = savedStateHandle.toRoute()
 
@@ -81,30 +67,9 @@ class SetUsernameAndPasswordViewModel(
             it.copy(
                 title = Res.string.create_account.asUiText(),
                 hideBottomNavigation = true,
-                actionBarButtonState = ActionBarButtonUiState(
-                    text = Res.string.save.asUiText(),
-                    visible = true,
-                    onClick = ::onClickSave
-                )
             )
         }
 
-        viewModelScope.launch {
-            navResultReturner.filteredResultFlowForKey(PASSWORD_SET_RESULT)
-                .collectLatest { navResult ->
-                    val passwordWasSet = navResult.result as? Boolean ?: return@collectLatest
-
-                    if (passwordWasSet) {
-                        _uiState.update {
-                            it.copy(
-                                isPasswordSet = true,
-                                passwordErr = null
-                            )
-                        }
-                        Napier.d("Password set result received")
-                    }
-                }
-        }
         viewModelScope.launch {
             schoolDataSource.personDataSource.findByGuidAsFlow(
                 route.guid
@@ -127,134 +92,61 @@ class SetUsernameAndPasswordViewModel(
                 }
             }
         }
-        viewModelScope.launch {
-            navResultReturner.filteredResultFlowForKey(QR_SCAN_ASSIGN)
-                .collectLatest { navResult ->
-                    _uiState.update {
-                        it.copy(
-                            isQrBadgeSet = true
-                        )
-                    }
-                    val qrUrl = navResult.result as? String ?: return@collectLatest
-                    storeQrCodeForPerson(personGuid = route.guid, url = qrUrl)
-                }
-        }
     }
 
     fun onUsernameChanged(username: String) {
         _uiState.update { it.copy(username = filterUsernameUseCase(username, "")) }
     }
 
-    private suspend fun storeQrCodeForPerson(personGuid: String, url: String) {
-        try {
-            val qrCodeAlreadyAssignedToAnotherPerson = schoolDataSource.personQrDataSource.existsByQrCodeUrl(url,personGuid.toLong())
 
-            if (qrCodeAlreadyAssignedToAnotherPerson) {
-                _uiState.update { prev ->
-                    prev.copy(
-                        isQrAlreadyAssigned = true
-                    )
-                }
-                snackBarDispatcher.showSnackBar(
-                    Snack("This QR code is already assigned to another student".asUiText())
+    fun onAssignQrCodeBadge() {
+        launchWithLoadingIndicator {
+            val username = uiState.value.username.trim()
+            val usernameValidation = validateUsernameUseCase(username)
+            _uiState.update {
+                it.copy(
+                    usernameErr = usernameValidation.errorMessage?.asUiText()
                 )
-            } else {
-                _uiState.update { prev ->
-                    prev.copy(
-                        isQrAlreadyAssigned = false
-                    )
-                }
             }
+            val schoolUrl = accountManager.activeAccount?.school?.self
 
-            if (!uiState.value.isQrAlreadyAssigned) {
-                val now = Clock.System.now()
-                schoolDataSource.personQrDataSource.store(
-                    listOf(
-                        PersonBadge(
-                            personGuid = personGuid,
-                            qrCodeUrl = url,
-                            lastModified = now,
-                            stored = now
+            if (usernameValidation.errorMessage == null) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        ScanQRCode.create(
+                            username = username,
+                            guid = route.guid,
+                            schoolUrl = schoolUrl
                         )
                     )
                 )
             }
-        } catch (e: Exception) {
-            throw e
         }
-    }
-
-    fun onAssignQrCodeBadge() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                ScanQRCode.create(
-                    resultDest = RouteResultDest(
-                        resultKey = QR_SCAN_ASSIGN,
-                        resultPopUpTo = route,
-                    ),
-                )
-            )
-        )
     }
 
     fun onSetPassword() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(SetPassword(route.guid))
-        )
-    }
-
-    fun onLearnMore() {
-    }
-
-    fun onClickSave() {
         launchWithLoadingIndicator {
-            try {
-                val username = uiState.value.username.trim()
-                val usernameValidation = validateUsernameUseCase(username)
-                _uiState.update {
-                    it.copy(
-                        usernameErr = usernameValidation.errorMessage?.asUiText()
-                    )
-                }
-
-                // Check if either password OR QR badge is set
-                val isPasswordSet = uiState.value.isPasswordSet
-                val isQrBadgeSet = uiState.value.isQrBadgeSet
-                val hasSignInMethod = isPasswordSet || isQrBadgeSet
-
-                if (!hasSignInMethod) {
-                    _uiState.update {
-                        it.copy(
-                            passwordErr = Res.string.qr_or_password_required.asUiText()
-                        )
-                    }
-                } else {
-                    // Clear error if at least one sign-in method is set
-                    _uiState.update {
-                        it.copy(passwordErr = null)
-                    }
-                }
-
-                if (usernameValidation.errorMessage != null || !hasSignInMethod)
-                    return@launchWithLoadingIndicator
-
-
-                val person = schoolDataSource.personDataSource.findByGuid(
-                    DataLoadParams(), route.guid
-                ).dataOrNull() ?: throw IllegalStateException()
-
-                schoolDataSource.personDataSource.store(
-                    listOf(
-                        person.copy(
-                            username = uiState.value.username,
-                            lastModified = Clock.System.now(),
+            val username = uiState.value.username.trim()
+            val usernameValidation = validateUsernameUseCase(username)
+            _uiState.update {
+                it.copy(
+                    usernameErr = usernameValidation.errorMessage?.asUiText()
+                )
+            }
+            if (usernameValidation.errorMessage == null) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        SetPassword(
+                            guid = route.guid,
+                            username = uiState.value.username
                         )
                     )
                 )
-                _navCommandFlow.tryEmit(NavCommand.PopUp())
-            } catch (e: Throwable) {
-                Napier.e("Error saving username and password ${e.message}", e)
             }
         }
+    }
+
+    fun onLearnMore() {
+        //TODO
     }
 }

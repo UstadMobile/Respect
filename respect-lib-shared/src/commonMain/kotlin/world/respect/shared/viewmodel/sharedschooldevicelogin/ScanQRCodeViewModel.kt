@@ -20,6 +20,7 @@ import world.respect.shared.generated.resources.scan_qr_code
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.sendResultIfResultExpected
@@ -79,7 +80,7 @@ class ScanQRCodeViewModel(
                 )
             }
             try {
-                if (route.resultDest != null) {
+                if (route.resultDest != null || route.username != null) {
                     storeQrCodeForPerson(route.guid ?: "", url) // ASSIGNING
                 } else {
                     authenticateWithQrCode(url)  // LOGIN
@@ -98,15 +99,22 @@ class ScanQRCodeViewModel(
     }
 
     fun validateUrl(url: String): Boolean {
-        return try {
-            validateQrCodeUseCase.validateFormatOnly(
-                qrCodeUrl = url,
-                schoolUrl = route.schoolUrl?.toString()
-            )
-        } catch (e: Exception) {
+        // Clear previous error first
+        _uiState.update {
+            it.copy(manualUrlError = null)
+        }
+
+        val validationResult = validateQrCodeUseCase.validateFormatOnly(
+            qrCodeUrl = url,
+            schoolUrl = route.schoolUrl?.toString()
+        )
+
+        return if (validationResult.isValid) {
+            true
+        } else {
             _uiState.update {
                 it.copy(
-                    manualUrlError = e.getUiTextOrGeneric()
+                    manualUrlError = validationResult.errorMessage?.asUiText()
                 )
             }
             false
@@ -129,49 +137,55 @@ class ScanQRCodeViewModel(
                     }
                     append("/")
                 }
-                validateQrCodeUseCase(
+                val qrBadgeValidation = validateQrCodeUseCase(
                     qrCodeUrl = url,
                     schoolUrl = schoolUrlString,
                     personGuid = null,
                     allowReplacement = false
                 )
-
-                println(route.schoolUrl)
-
-                val schoolUrlObject = Url(schoolUrlString)
-                val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrlObject, null)
-                val schoolScope =
-                    getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
-
-                val respectAccountManager: RespectAccountManager = schoolScope.get()
-
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        showPasteButton = false
+                        manualUrlError = qrBadgeValidation.errorMessage?.asUiText()
                     )
                 }
-                viewModelScope.launch {
-                    try {
-                        respectAccountManager.login(
-                            credential = credential,
-                            schoolUrl = schoolUrlObject
+
+                if (qrBadgeValidation.errorMessage == null) {
+
+                    val schoolUrlObject = Url(schoolUrlString)
+                    val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrlObject, null)
+                    val schoolScope =
+                        getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
+
+                    val respectAccountManager: RespectAccountManager = schoolScope.get()
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = true,
+                            showPasteButton = false
                         )
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                destination = RespectAppLauncher(),
-                                clearBackStack = true,
+                    }
+                    viewModelScope.launch {
+                        try {
+                            respectAccountManager.login(
+                                credential = credential,
+                                schoolUrl = schoolUrlObject
                             )
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        _uiState.update { prev ->
-                            prev.copy(
-                                loginErrorText = e.getUiTextOrGeneric()
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    destination = RespectAppLauncher(),
+                                    clearBackStack = true,
+                                )
                             )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    loginErrorText = e.getUiTextOrGeneric()
+                                )
+                            }
+                            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
                         }
-                        snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
                     }
                 }
             } catch (e: Exception) {
@@ -183,27 +197,43 @@ class ScanQRCodeViewModel(
     private fun storeQrCodeForPerson(personGuid: String, url: String) {
         viewModelScope.launch {
             try {
-                // Validate QR code before storing
-                validateQrCodeUseCase(
+                val qrBadgeValidation = validateQrCodeUseCase(
                     qrCodeUrl = url,
                     schoolUrl = route.schoolUrl?.toString(),
-                    personGuid = personGuid,
-                    allowReplacement = true
+                    personGuid = null,
+                    allowReplacement = false
                 )
-
-                // If validation passes, send the result
-                if (
-                    !resultReturner.sendResultIfResultExpected(
-                        route = route,
-                        navCommandFlow = _navCommandFlow,
-                        result = url,
-                    )
-                ) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(ManageAccount(personGuid))
+                _uiState.update {
+                    it.copy(
+                        manualUrlError = qrBadgeValidation.errorMessage?.asUiText()
                     )
                 }
-                _uiState.update { it.copy(showPasteButton = false) }
+
+                if (qrBadgeValidation.errorMessage == null) {
+
+                    if (route.resultDest != null) {
+                        // Coming from ManageAccount - use result pattern
+                        resultReturner.sendResultIfResultExpected(
+                            route = route,
+                            navCommandFlow = _navCommandFlow,
+                            result = url,
+                        )
+                    } else {
+                        // Coming from SetUsernameAndPassword - navigate directly
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                destination = ManageAccount(
+                                    guid = personGuid,
+                                    qrUrlStr = url,
+                                    username = route.username
+                                ),
+                                popUpToClass = PersonDetail::class,
+                                popUpToInclusive = false
+                            )
+                        )
+                    }
+                    _uiState.update { it.copy(showPasteButton = false) }
+                }
 
             } catch (e: Exception) {
                 _uiState.update {

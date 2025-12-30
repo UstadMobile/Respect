@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.generated.resources.Res
@@ -17,12 +19,14 @@ import world.respect.shared.generated.resources.password_must_be_at_least
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.set_password
+import world.respect.shared.navigation.ManageAccount
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SetPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-
+import kotlin.time.Clock
 
 data class CreateAccountSetPasswordUiState(
     val password: String = "",
@@ -97,12 +101,28 @@ class CreateAccountSetPasswordViewModel(
                     )
                 )
 
-                sendResultAndPop(
-                    destKey = PASSWORD_SET_RESULT,
-                    result = true
+                route.username?.let { username ->
+                    val person = schoolDataSource.personDataSource.findByGuid(
+                        DataLoadParams(), route.guid
+                    ).dataOrNull() ?: throw IllegalStateException("Person not found")
+
+                    schoolDataSource.personDataSource.store(
+                        listOf(
+                            person.copy(
+                                username = username,
+                                lastModified = Clock.System.now(),
+                            )
+                        )
+                    )
+                }
+
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        ManageAccount(guid = route.guid)
+                    )
                 )
             } catch (e: Throwable) {
-                Napier.e("Error saving password", e)
+                Napier.e("Error saving password and username", e)
             }
         }
     }

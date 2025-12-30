@@ -599,7 +599,25 @@ data class PasskeyList(
 @Serializable
 data class ManageAccount(
     val guid: String,
-) : RespectAppRoute
+    val username: String? = null,
+    private val qrUrlStr: String? = null,
+) : RespectAppRoute {
+    @Transient
+
+    val qrUrl: Url? = qrUrlStr?.let { Url(it) }
+
+    companion object {
+        fun create(
+            guid: String,
+            qrUrl: Url? = null,
+            username: String? = null
+        ) = ManageAccount(
+            guid = guid,
+            qrUrlStr = qrUrl?.toString(),
+            username = username
+        )
+    }
+}
 
 @Serializable
 data class PersonEdit(
@@ -638,7 +656,8 @@ data object Settings : RespectAppRoute
 data class ScanQRCode(
     val guid: String? = null,
     val resultDestStr: String? = null,
-    private val schoolUrlStr: String? = null
+    private val schoolUrlStr: String? = null,
+    val username: String? = null
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -651,10 +670,12 @@ data class ScanQRCode(
         fun create(
             guid: String? = null,
             resultDest: ResultDest? = null,
-            schoolUrl: Url? = null
+            schoolUrl: Url? = null,
+            username: String? = null
         ) = ScanQRCode(
             guid = guid,
             resultDestStr = resultDest?.encodeToJsonStringOrNull(),
+            username = username,
             schoolUrlStr = schoolUrl?.toString()
         )
     }
@@ -701,7 +722,8 @@ data class SetUsernameAndPassword(
 
 @Serializable
 data class SetPassword(
-    val guid: String
+    val guid: String,
+    val username: String? = null,
 ) : RespectAppRoute
 
 

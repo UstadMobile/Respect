@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -27,8 +28,10 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectPasswordField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.images.RespectImage
@@ -39,6 +42,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_qr_code_badge
 import world.respect.shared.generated.resources.change_password
 import world.respect.shared.generated.resources.learn_more
+import world.respect.shared.generated.resources.password_label
 import world.respect.shared.generated.resources.qr_code_badge
 import world.respect.shared.generated.resources.qr_code_badge_description
 import world.respect.shared.generated.resources.quick_easy_sign_in
@@ -63,7 +67,8 @@ fun SetUsernameAndPasswordScreen(
         onAssignQrCodeBadge = viewModel::onAssignQrCodeBadge,
         onSetPassword = viewModel::onSetPassword,
         onLearnMore = viewModel::onLearnMore,
-    )
+        onPasswordChanged = viewModel::onPasswordChanged,
+        )
 }
 
 @Composable
@@ -74,7 +79,8 @@ fun SetUsernameAndPasswordScreen(
     onAssignQrCodeBadge: () -> Unit,
     onSetPassword: () -> Unit,
     onLearnMore: () -> Unit,
-) {
+    onPasswordChanged: (String) -> Unit,
+    ) {
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -114,34 +120,38 @@ fun SetUsernameAndPasswordScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = onSetPassword,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-            border = ButtonDefaults.outlinedButtonBorder
-        ) {
-            Text(
-                if (uiState.isPasswordSet) {
-                    stringResource(Res.string.change_password)
-                } else {
-                    stringResource(Res.string.set_password)
-                }
-            )
-        }
-
-        uiState.passwordErr?.let {
-            Text(
-                text = uiTextStringResource(it),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
+        if (uiState.isStudent) {
+            Button(
+                onClick = onSetPassword,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                border = ButtonDefaults.outlinedButtonBorder
+            ) {
+                Text(
+                    if (uiState.isPasswordSet) {
+                        stringResource(Res.string.change_password)
+                    } else {
+                        stringResource(Res.string.set_password)
+                    }
+                )
+            }
+        }else {
+            RespectPasswordField(
+                value = uiState.password,
+                onValueChange = onPasswordChanged,
+                label = { Text(stringResource(Res.string.password_label)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                isError = uiState.passwordErr != null,
+                supportingText = uiState.passwordErr?.let {
+                    { Text(uiTextStringResource(it)) }
+                },
+                enabled = !appUiState.isLoading,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("password")
             )
         }
     }

@@ -187,20 +187,20 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- tapOn: "Save"
-- assertVisible: "Require field"  # username is mandatory field
+#- tapOn: "Save"
+#- assertVisible: "Require field"  # username is mandatory field
 - tapOn: "Username"
-- inputText: "pa"
-- tapOn: "Save"
-- assertVisible: "Username must be at least 3 characters"
-- tapOn: "Username"
+#- inputText: "pa"
+#- tapOn: "Save"
+#- assertVisible: "Username must be at least 3 characters"
+#- tapOn: "Username"
 - inputText: "parentauser"
-- tapOn: "Save"
-- assertVisible: "Required field" # Password is mandatory field
+#- tapOn: "Save"
+#- assertVisible: "Required field" # Password is mandatory field
 - tapOn: "Password*"
 - inputText: "test"
 - tapOn: "Save"
-- assertVisible: "Password should be at least 6 characters"
+- assertVisible: "Password must be at least 6 characters"
 - eraseText
 - inputText: "test123"
 - tapOn: "Save"

@@ -39,7 +39,7 @@ import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.shared.util.ext.isStudent
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
@@ -178,7 +178,7 @@ class ManageAccountViewModel(
                     _uiState.update { prev ->
                         prev.copy(
                             personUsername = it.dataOrNull()?.username ?: "",
-                            isStudent = it.dataOrNull()?.isAdminOrTeacher() == false
+                            isStudent = it.dataOrNull()?.isStudent() == true
                         )
                     }
                 }

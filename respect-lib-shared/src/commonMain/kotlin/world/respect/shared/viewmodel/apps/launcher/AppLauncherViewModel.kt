@@ -110,6 +110,11 @@ class AppLauncherViewModel(
 
         val savedMappings = loadMappingsFromSavedState(savedStateHandle)
         playlistListViewModel.setMappings(savedMappings)
+        viewModelScope.launch {
+            playlistListViewModel.uiState.collect { state ->
+                cachedPlaylists = state.mappings
+            }
+        }
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
@@ -222,5 +227,6 @@ class AppLauncherViewModel(
 
     companion object {
         const val KEY_MAPPINGS_LIST = "mappings_list"
+        var cachedPlaylists: List<CurriculumMapping> = emptyList()
     }
 }

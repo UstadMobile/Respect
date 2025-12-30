@@ -13,6 +13,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.generated.resources.Res
@@ -53,6 +54,7 @@ class PlaylistListViewModel(
 
     fun setMappings(mappings: List<CurriculumMapping>) {
         _uiState.update { it.copy(mappings = mappings) }
+        AppLauncherViewModel.cachedPlaylists = mappings
     }
 
     fun onFilterSelected(index: Int) {
@@ -86,6 +88,7 @@ class PlaylistListViewModel(
     fun removeMapping(mapping: CurriculumMapping): List<CurriculumMapping> {
         val updated = _uiState.value.mappings.filter { it.uid != mapping.uid }
         _uiState.update { it.copy(mappings = updated) }
+        AppLauncherViewModel.cachedPlaylists = updated
         return updated
     }
 
@@ -105,5 +108,6 @@ class PlaylistListViewModel(
         }
 
         _uiState.update { it.copy(mappings = currentMappings) }
+        AppLauncherViewModel.cachedPlaylists = currentMappings
     }
 }

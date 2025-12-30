@@ -43,6 +43,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 
 data class AssignmentDetailUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -136,7 +137,12 @@ class AssignmentDetailViewModel(
 
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(AssignmentEdit.create(uid = route.uid))
+            NavCommand.Navigate(
+                AssignmentEdit.create(
+                    uid = route.uid,
+                    availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                )
+            )
         )
     }
 

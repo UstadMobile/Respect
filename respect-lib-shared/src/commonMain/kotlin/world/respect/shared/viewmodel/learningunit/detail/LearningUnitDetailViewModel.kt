@@ -37,6 +37,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
@@ -220,7 +221,8 @@ class LearningUnitDetailViewModel(
                             NavCommand.Navigate(
                                 destination = AssignmentEdit.createWithMultipleLessons(
                                     uid = null,
-                                    learningUnits = learningUnitSelections
+                                    learningUnits = learningUnitSelections,
+                                    availablePlaylists = AppLauncherViewModel.cachedPlaylists
                                 )
                             )
                         )
@@ -231,7 +233,8 @@ class LearningUnitDetailViewModel(
                     NavCommand.Navigate(
                         destination = AssignmentEdit.create(
                             uid = null,
-                            learningUnitSelected = null
+                            learningUnitSelected = null,
+                            availablePlaylists = AppLauncherViewModel.cachedPlaylists
                         )
                     )
                 )
@@ -245,8 +248,9 @@ class LearningUnitDetailViewModel(
                         learningUnitSelected = LearningUnitSelection(
                             learningUnitManifestUrl = route.learningUnitManifestUrl,
                             selectedPublication = publicationVal,
-                            appManifestUrl = route.appManifestUrl
-                        )
+                            appManifestUrl = route.appManifestUrl,
+                        ),
+                        availablePlaylists = AppLauncherViewModel.cachedPlaylists
                     )
                 )
             )
@@ -266,7 +270,8 @@ class LearningUnitDetailViewModel(
                         NavCommand.Navigate(
                             destination = AssignmentEdit.createWithMultipleLessons(
                                 uid = null,
-                                learningUnits = learningUnitSelections
+                                learningUnits = learningUnitSelections,
+                                availablePlaylists = AppLauncherViewModel.cachedPlaylists
                             )
                         )
                     )

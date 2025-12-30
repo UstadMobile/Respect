@@ -34,6 +34,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 
 data class AssignmentListUiState(
     val assignments: IPagingSourceFactory<Int, Assignment> = EmptyPagingSourceFactory(),
@@ -107,7 +108,10 @@ class AssignmentListViewModel(
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AssignmentEdit.create(uid = null)
+                AssignmentEdit.create(
+                    uid = null,
+                    availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                )
             )
         )
     }

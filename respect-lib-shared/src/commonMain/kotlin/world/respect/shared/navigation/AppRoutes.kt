@@ -93,10 +93,13 @@ object AssignmentList : RespectAppRoute
 data class AssignmentDetail(
     val uid: String,
 ) : RespectAppRoute
+
+
 @Serializable
 data class AssignmentEdit(
     val guid: String? = null,
     private val learningUnitsJson: String? = null,
+    private val availablePlaylistsJson: String? = null,
 ) : RespectAppRoute {
 
     @Transient
@@ -108,27 +111,59 @@ data class AssignmentEdit(
         }
     }
 
+    @Transient
+    val availablePlaylists: List<CurriculumMapping>? = availablePlaylistsJson?.let { jsonStr ->
+        try {
+            Json.decodeFromString(
+                ListSerializer(CurriculumMapping.serializer()),
+                jsonStr
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     companion object {
         fun create(
             uid: String?,
-            learningUnitSelected: LearningUnitSelection? = null
+            learningUnitSelected: LearningUnitSelection? = null,
+            availablePlaylists: List<CurriculumMapping>? = null,
         ): AssignmentEdit {
             val learningUnits = learningUnitSelected?.let { listOf(it) }
             return AssignmentEdit(
                 guid = uid,
                 learningUnitsJson = learningUnits?.let {
-                    Json.encodeToString(it)
+                    Json.encodeToString(
+                        ListSerializer(LearningUnitSelection.serializer()),
+                        it
+                    )
+                },
+                availablePlaylistsJson = availablePlaylists?.let {
+                    Json.encodeToString(
+                        ListSerializer(CurriculumMapping.serializer()),
+                        it
+                    )
                 }
             )
         }
 
         fun createWithMultipleLessons(
             uid: String?,
-            learningUnits: List<LearningUnitSelection>
+            learningUnits: List<LearningUnitSelection>,
+            availablePlaylists: List<CurriculumMapping>? = null,
         ): AssignmentEdit {
             return AssignmentEdit(
                 guid = uid,
-                learningUnitsJson = Json.encodeToString(learningUnits)
+                learningUnitsJson = Json.encodeToString(
+                    ListSerializer(LearningUnitSelection.serializer()),
+                    learningUnits
+                ),
+                availablePlaylistsJson = availablePlaylists?.let {
+                    Json.encodeToString(
+                        ListSerializer(CurriculumMapping.serializer()),
+                        it
+                    )
+                }
             )
         }
     }

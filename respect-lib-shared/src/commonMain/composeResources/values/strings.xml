@@ -479,5 +479,6 @@
     <string name="copy">copy playlist</string>
     <string name="make_a_copy">Make a copy</string>
     <string name="sections_and_items_count">%1$d sections • %2$d items</string>
-
+    <string name="add_from_playlist">Add From Playlist</string>
+    <string name="select_curriculum_unit">Select Playlist Unit</string>
 </resources>

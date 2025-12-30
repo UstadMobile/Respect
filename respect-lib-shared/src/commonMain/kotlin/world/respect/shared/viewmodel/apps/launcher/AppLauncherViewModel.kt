@@ -46,6 +46,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
@@ -95,11 +96,12 @@ class AppLauncherViewModel(
                 showBackButton = route.resultDest != null,
             )
         }
-
+        val showPlaylistTab = route.resultDest?.resultKey == AssignmentEditViewModel.KEY_PLAYLIST_SELECTION
         _uiState.update { prev ->
             prev.copy(
                 respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
                 apps = pagingSourceHolder,
+                selectedTabIndex = if (showPlaylistTab) 1 else 0,
             )
         }
         viewModelScope.launch {

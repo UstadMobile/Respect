@@ -31,7 +31,7 @@ import world.respect.shared.generated.resources.*
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 
 
 @Composable

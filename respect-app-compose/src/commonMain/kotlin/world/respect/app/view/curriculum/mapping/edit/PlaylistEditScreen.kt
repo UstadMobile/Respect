@@ -42,11 +42,11 @@ import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
 import world.respect.shared.generated.resources.section_name
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditUiState
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingSectionUiState
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
 import androidx.compose.ui.draw.alpha
 
 

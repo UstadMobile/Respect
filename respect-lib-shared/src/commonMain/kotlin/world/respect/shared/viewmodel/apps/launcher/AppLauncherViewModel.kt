@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -48,9 +47,8 @@ import world.respect.shared.util.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
 
 data class AppLauncherUiState(
     val apps: IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),

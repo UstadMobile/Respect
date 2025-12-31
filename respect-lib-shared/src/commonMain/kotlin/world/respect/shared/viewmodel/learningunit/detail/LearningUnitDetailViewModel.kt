@@ -38,10 +38,10 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingSectionUiState
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(

@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.curriculum.mapping.list
+package world.respect.shared.viewmodel.playlists.mapping.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -17,8 +17,8 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.resources.UiText

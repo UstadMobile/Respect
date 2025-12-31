@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.curriculum.mapping.edit
+package world.respect.shared.viewmodel.playlists.mapping.edit
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -41,9 +41,9 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.KEY_LEARNING_UNIT
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.viewmodel.app.appstate.getTitle

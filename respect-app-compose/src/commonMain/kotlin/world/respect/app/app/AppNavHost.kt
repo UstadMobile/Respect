@@ -137,7 +137,7 @@ import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.navigation.Settings
 
 import world.respect.shared.navigation.CurriculumMappingEdit

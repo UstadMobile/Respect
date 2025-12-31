@@ -36,8 +36,8 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.*
 import world.respect.shared.viewmodel.app.appstate.getTitle
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingSectionUiState
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 

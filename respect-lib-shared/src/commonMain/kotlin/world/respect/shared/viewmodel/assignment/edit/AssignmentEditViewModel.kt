@@ -48,8 +48,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.assignment.toAssignmentLearningUnitRefs
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.curriculum.mapping.toOpdsGroup
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.toOpdsGroup
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import kotlin.time.Clock
 

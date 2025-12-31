@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.curriculum.mapping.model
+package world.respect.shared.viewmodel.playlists.mapping.model
 
 import kotlinx.serialization.Serializable
 

@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.curriculum.mapping
+package world.respect.shared.viewmodel.playlists.mapping
 
 //Add functions that convert CurriculumMapping to OpdsFeed and vice versa. See the adapters in the
 //database module
@@ -13,9 +13,9 @@ import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
 
 
 fun CurriculumMapping.toOpds(selfLink: String): OpdsFeed {

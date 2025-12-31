@@ -3,7 +3,6 @@
 
 package world.respect.shared.navigation
 
-import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -13,7 +12,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 

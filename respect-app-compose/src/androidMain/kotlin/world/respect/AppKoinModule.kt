@@ -206,10 +206,10 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"

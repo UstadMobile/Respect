@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.*
-import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListUiState
-import world.respect.shared.viewmodel.curriculum.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
 
 @Composable
 fun PlaylistListScreen(

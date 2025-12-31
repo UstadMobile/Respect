@@ -141,6 +141,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Playlist - Grade 1"
+
+# Assigning a playlist to a assignment
 - tapOn:
     id: "assign_btn"
 - assertVisible:
@@ -192,3 +194,57 @@ onFlowComplete:
     text: "copy the Playlist - Grade 1"
 - assertVisible: "Day 1"
 - assertVisible: "Day 2"
+
+# Adding playlist to an assignment
+- tapOn: "Assignments"
+- tapOn:
+    id: "floating_action_button"   #  +Assignment button
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Name*"
+- inputText: "Homework 2"
+- tapOn: "Class"
+- tapOn: "New Class"
+- tapOn: "Date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
+- tapOn: "Lesson/assessment"
+- assertVisible:
+    id: "app_title"
+    text: "Add task to assignment"
+- tapOn: "Playlists"
+- tapOn: "copy the Playlist - Grade 1"
+- assertVisible:
+    id: "app_title"
+    text: "copy the Playlist - Grade 1"
+- assertVisible: "Select all"
+- assertVisible: "Select none"
+- tapOn: "Select all"
+- assertVisible:
+        id: "check_box"
+        checked: true
+- tapOn: "Select none"
+- assertVisible:
+        id: "check_box"
+        checked: false
+- tapOn:
+    id: "check_box"
+    index: 1
+- tapOn: "Add 1 task to assignment"
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 2"
+- assertVisible: "Lesson 001"
+- back
+- assertVisible: "Homework 2"
+

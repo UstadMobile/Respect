@@ -45,8 +45,6 @@ class AssignmentDatasourceDb(
 
                 schoolDb.getAssignmentEntityDao().upsert(entities.map { it.assignment })
                 entities.forEach {
-                    schoolDb.getAssignmentAssigneeRefEntityDao().deleteByAssignmentUidNum(it.assignment.aeUidNum)
-                    schoolDb.getAssignmentAssigneeRefEntityDao().upsert(it.assignees)
                     schoolDb.getAssignmentLearningResourceRefEntityDao().deleteByAssignmentUidNum(
                         it.assignment.aeUidNum
                     )

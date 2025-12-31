@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "a13fdc912072986ea26157e1f7404b45",
+    "identityHash": "5748f96ddcfef779d40ddb6468f255d0",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -799,7 +799,7 @@
       },
       {
         "tableName": "AssignmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeDeadline` INTEGER, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeClassUid` TEXT NOT NULL, `aeClassUidNum` INTEGER NOT NULL, `aeDeadline` INTEGER, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
         "fields": [
           {
             "fieldPath": "aeUid",
@@ -826,6 +826,18 @@
             "notNull": true
           },
           {
+            "fieldPath": "aeClassUid",
+            "columnName": "aeClassUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeClassUidNum",
+            "columnName": "aeClassUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "aeDeadline",
             "columnName": "aeDeadline",
             "affinity": "INTEGER"
@@ -847,43 +859,6 @@
           "autoGenerate": false,
           "columnNames": [
             "aeUidNum"
-          ]
-        }
-      },
-      {
-        "tableName": "AssignmentAssigneeRefEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aarAeUidNum` INTEGER NOT NULL, `aarType` INTEGER NOT NULL, `aarAeAssigneeUid` TEXT NOT NULL, `aarAeAssigneeUidNum` INTEGER NOT NULL, PRIMARY KEY(`aarAeUidNum`, `aarAeAssigneeUidNum`))",
-        "fields": [
-          {
-            "fieldPath": "aarAeUidNum",
-            "columnName": "aarAeUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aarType",
-            "columnName": "aarType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aarAeAssigneeUid",
-            "columnName": "aarAeAssigneeUid",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aarAeAssigneeUidNum",
-            "columnName": "aarAeAssigneeUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "aarAeUidNum",
-            "aarAeAssigneeUidNum"
           ]
         }
       },
@@ -1078,7 +1053,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a13fdc912072986ea26157e1f7404b45')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5748f96ddcfef779d40ddb6468f255d0')"
     ]
   }
 }

@@ -84,7 +84,7 @@ fun ScanQRCodeScreen(
             .statusBarsPadding()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (isCameraActive && !showManualEntryDialog && !uiState.showPasteButton) {
+        if (isCameraActive && !showManualEntryDialog) {
             QrScanner(
                 modifier = Modifier.fillMaxSize(),
                 flashlightOn = flashlightOn,

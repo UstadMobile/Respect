@@ -2,10 +2,14 @@ package world.respect.shared.viewmodel.curriculum.mapping.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.scope.Scope
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.LearningUnitDetail
@@ -13,7 +17,6 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.generated.resources.Res
@@ -24,18 +27,48 @@ data class PlaylistListUiState(
     val mappings: List<CurriculumMapping> = emptyList(),
     val selectedFilterIndex: Int = 0,
     val error: UiText? = null,
-)
+    val currentUserGuid: String? = null,
+    val currentSchoolUrl: Url? = null,
+) {
+    val filteredMappings: List<CurriculumMapping>
+        get() = when (selectedFilterIndex) {
+            0 -> mappings
+            1 -> mappings.filter { mapping ->
+                mapping.isSchoolWide &&
+                        mapping.schoolUrl == currentSchoolUrl &&
+                        mapping.createdBy != currentUserGuid
+            }
+            2 -> mappings.filter { mapping ->
+                mapping.createdBy == currentUserGuid
+            }
+            else -> mappings
+        }
+}
 
 class PlaylistListViewModel(
     savedStateHandle: SavedStateHandle,
     private val resultReturner: NavResultReturner,
-) : RespectViewModel(savedStateHandle) {
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(PlaylistListUiState())
 
     val uiState = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
+                _uiState.update { prev ->
+                    prev.copy(
+                        currentUserGuid = sessionAndPerson?.person?.guid,
+                        currentSchoolUrl = sessionAndPerson?.session?.account?.school?.self
+                    )
+                }
+            }
+        }
+
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(
                 CurriculumMappingEditViewModel.KEY_SAVED_MAPPING
@@ -54,13 +87,11 @@ class PlaylistListViewModel(
 
     fun setMappings(mappings: List<CurriculumMapping>) {
         _uiState.update { it.copy(mappings = mappings) }
-        AppLauncherViewModel.cachedPlaylists = mappings
     }
 
     fun onFilterSelected(index: Int) {
         _uiState.update { it.copy(selectedFilterIndex = index) }
     }
-
     fun onClickMapping(mapping: CurriculumMapping) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -68,7 +99,6 @@ class PlaylistListViewModel(
             )
         )
     }
-
     fun onClickAddNew() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -85,11 +115,9 @@ class PlaylistListViewModel(
         )
     }
 
-    fun removeMapping(mapping: CurriculumMapping): List<CurriculumMapping> {
+    fun removeMapping(mapping: CurriculumMapping) {
         val updated = _uiState.value.mappings.filter { it.uid != mapping.uid }
         _uiState.update { it.copy(mappings = updated) }
-        AppLauncherViewModel.cachedPlaylists = updated
-        return updated
     }
 
     private fun addOrUpdateMapping(mapping: CurriculumMapping) {
@@ -99,15 +127,9 @@ class PlaylistListViewModel(
         if (existingIndex >= 0) {
             currentMappings[existingIndex] = mapping
         } else {
-            val newMapping = if (mapping.uid == 0L) {
-                mapping.copy(uid = System.currentTimeMillis())
-            } else {
-                mapping
-            }
-            currentMappings.add(newMapping)
+            currentMappings.add(mapping)
         }
 
         _uiState.update { it.copy(mappings = currentMappings) }
-        AppLauncherViewModel.cachedPlaylists = currentMappings
     }
 }

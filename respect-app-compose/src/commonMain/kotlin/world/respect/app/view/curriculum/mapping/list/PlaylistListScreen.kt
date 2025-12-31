@@ -81,7 +81,7 @@ fun PlaylistListScreenContent(
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                if (uiState.mappings.isEmpty()) {
+                if (uiState.filteredMappings.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -101,7 +101,7 @@ fun PlaylistListScreenContent(
                         )
                     ) {
                         items(
-                            items = uiState.mappings,
+                            items = uiState.filteredMappings,
                             key = { mapping -> mapping.uid }
                         ) { mapping ->
                             MappingListItem(

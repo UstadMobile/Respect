@@ -8,11 +8,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.RespectAppDataSource
@@ -21,6 +24,7 @@ import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_playlist
 import world.respect.shared.generated.resources.edit_playlist
@@ -78,8 +82,10 @@ class CurriculumMappingEditViewModel(
     private val resultReturner: NavResultReturner,
     private val json: Json,
     private val respectAppDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
 
     private val mappingUid = route.textbookUid
@@ -324,7 +330,6 @@ class CurriculumMappingEditViewModel(
             }
         }
     }
-
     fun onClickSave() {
         val mapping = _uiState.value.mapping ?: return
         if (mapping.title.isBlank()) {
@@ -332,27 +337,34 @@ class CurriculumMappingEditViewModel(
             return
         }
 
-        val finalMapping = if (mapping.uid == 0L) {
-            mapping.copy(uid = System.currentTimeMillis())
-        } else {
-            mapping
+        viewModelScope.launch {
+            val currentSession = accountManager.selectedAccountAndPersonFlow.first()
+
+            val finalMapping = if (mapping.uid == 0L) {
+                mapping.copy(
+                    uid = System.currentTimeMillis(),
+                    createdBy = currentSession?.person?.guid,
+                    schoolUrl= currentSession?.session?.account?.school?.self
+                )
+            } else {
+                mapping
+            }
+
+            resultReturner.sendResult(
+                NavResult(
+                    key = KEY_SAVED_MAPPING,
+                    result = finalMapping
+                )
+            )
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = LearningUnitDetail.createFromMapping(finalMapping),
+                    popUpTo = RespectAppLauncher(),
+                    popUpToInclusive = false
+                )
+            )
         }
-
-        resultReturner.sendResult(
-            NavResult(
-                key = KEY_SAVED_MAPPING,
-                result = finalMapping
-            )
-        )
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                destination = LearningUnitDetail.createFromMapping(finalMapping),
-                popUpTo = RespectAppLauncher(),
-                popUpToInclusive = false
-            )
-        )
     }
-
     fun onClearError() {
         _uiState.update { it.copy(titleError = null) }
     }

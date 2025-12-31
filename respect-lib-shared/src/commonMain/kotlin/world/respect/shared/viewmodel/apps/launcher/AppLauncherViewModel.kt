@@ -30,6 +30,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_task_to_assignment
 import world.respect.shared.generated.resources.app
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
@@ -90,7 +91,16 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.home.asUiText(),
+                title = if (route.resultDest != null) {
+                    when (route.resultDest.resultKey) {
+                        AssignmentEditViewModel.KEY_PLAYLIST_SELECTION ->
+                            Res.string.add_task_to_assignment.asUiText()
+                        else ->
+                            Res.string.home.asUiText()
+                    }
+                } else {
+                    Res.string.home.asUiText()
+                },
                 onClickSettings = ::onClickSettings,
                 hideBottomNavigation = route.resultDest != null,
                 showBackButton = route.resultDest != null,

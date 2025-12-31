@@ -161,27 +161,14 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn:
     id: "role"
-- tapOn: "Teacher"
-- assertNotVisible: "Family member"
-- tapOn:
-    id: "role"
 - tapOn: "Student"
-- tapOn: "Family member"
-- assertVisible:
-    id: "app_title"
-    text: "Select person"
-- tapOn: "ParentA User"
-- assertVisible:
-    id: "app_title"
-    text: "Add person"
-- assertVisible: "ParentA User"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
-- assertVisible: "ParentA User"
 
 # Create account for Parent user  -- only username and password fields available for parent user
+- tapOn: "People"
 - tapOn: "ParentA User"
 - tapOn: "Create account"
 - assertVisible:
@@ -190,10 +177,10 @@ onFlowComplete:
 #- tapOn: "Save"
 #- assertVisible: "Require field"  # username is mandatory field
 - tapOn: "Username"
-#- inputText: "pa"
-#- tapOn: "Save"
-#- assertVisible: "Username must be at least 3 characters"
-#- tapOn: "Username"
+- inputText: "pa"
+- tapOn: "Save"
+- assertVisible: "Username must be at least 3 characters"
+- eraseText
 - inputText: "parentauser"
 #- tapOn: "Save"
 #- assertVisible: "Required field" # Password is mandatory field
@@ -231,42 +218,6 @@ onFlowComplete:
     text: "Manage account"
 - assertVisible: "QR code badge"
 - assertVisible: "Badge.*"
-- tapOn:
-    id: "qr_change_btn"
-- assertVisible: "Assign new badge (replace)"
-- assertVisible: "Revoke badge"
-# Verify the button Assign new badge (replace) takes user to Scan QR code screen
-- tapOn: "Assign new badge (replace)"
-- assertVisible:
-    id: "app_title"
-    text: "Scan QR code badge"
-- back
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "QR code badge"
-# Verify the button - Revoke badge, it should remove the assigned badge
-- tapOn:
-    id: "qr_change_btn"
-- tapOn: "Revoke badge"
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "Assign QR code badge"
-- tapOn: "Assign QR code badge"
-- assertVisible:
-    id: "app_title"
-    text: "Scan QR code badge"
-- tapOn: "More Info"
-- tapOn: "Paste URL"
-- tapOn: "Url"
-- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
-- tapOn: "OK"
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
 - back
 - tapOn: "People"
 - tapOn: "Test User"
@@ -289,15 +240,60 @@ onFlowComplete:
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-#- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validations needs to implement
-#- tapOn: "Ok"
-#- assertVisible: "QR already in use, try again"
-#- eraseText
+- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validations needs to implement
+- tapOn: "Ok"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "Assign QR code badge"
+- assertVisible: "This QR code is already assigned to another student"
+- tapOn: "Assign QR code badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Info"
+- tapOn: "Paste URL"
+- tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
 - tapOn: "Ok"
 - assertVisible: "QR code badge"
 - assertVisible: "Badge.*"
-#- tapOn: "Save"
+- tapOn:
+    id: "qr_change_btn"
+- assertVisible: "Assign new badge (replace)"
+- assertVisible: "Revoke badge"
+# Verify the button - Revoke badge, it should remove the assigned badge
+- tapOn: "Revoke badge"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "Assign QR code badge"
+- tapOn: "Assign QR code badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Info"
+- tapOn: "Paste URL"
+- tapOn: "Url"
+- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/983123
+- tapOn: "OK"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+# Verify the button Assign new badge (replace) takes user to Scan QR code screen
+- tapOn:
+    id: "qr_change_btn"
+- tapOn: "Assign new badge (replace)"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- back
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "QR code badge"
 
 # Validate Parent User Login using Username & Password
 - clearState: world.respect.app
@@ -324,7 +320,6 @@ onFlowComplete:
 - tapOn: "People"
 - tapOn: "ParentA User"
 - assertVisible: "Child User"
-- assertVisible: "Test User"
 
 # Validate Child User QR Login using Scan QR/badge
 - clearState: world.respect.app

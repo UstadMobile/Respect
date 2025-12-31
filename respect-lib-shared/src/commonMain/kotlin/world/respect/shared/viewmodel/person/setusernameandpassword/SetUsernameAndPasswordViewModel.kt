@@ -25,7 +25,7 @@ import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
-import world.respect.shared.navigation.SetPassword
+import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -231,7 +231,7 @@ class SetUsernameAndPasswordViewModel(
             if (usernameValidation.errorMessage == null) {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        SetPassword(
+                        CreateAccountSetPassword(
                             guid = route.guid,
                             username = uiState.value.username
                         ),

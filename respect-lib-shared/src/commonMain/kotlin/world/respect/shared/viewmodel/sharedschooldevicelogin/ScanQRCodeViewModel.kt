@@ -101,9 +101,11 @@ class ScanQRCodeViewModel(
     }
 
     fun validateUrl(url: String): Boolean {
-        // Clear previous error first
         _uiState.update {
             it.copy(manualUrlError = null)
+        }
+        if (url.isBlank()) {
+            return false
         }
 
         val validationResult = validateQrCodeUseCase.validateFormatOnly(
@@ -197,6 +199,12 @@ class ScanQRCodeViewModel(
             } catch (e: Exception) {
                 throw e
             }
+        }
+    }
+
+    fun clearValidationError() {
+        _uiState.update {
+            it.copy(manualUrlError = null)
         }
     }
 

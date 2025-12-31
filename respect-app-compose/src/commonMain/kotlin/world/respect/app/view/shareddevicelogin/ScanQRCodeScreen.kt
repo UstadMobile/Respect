@@ -214,12 +214,8 @@ private fun ManualUrlEntryDialog(
                 value = manualUrlText,
                 onValueChange = { newValue ->
                     onUrlTextChange(newValue)
-                    // Validate as user types
-                    if (newValue.text.isNotEmpty()) {
-                        viewModel.validateUrl(newValue.text)
-                    } else {
-                        // Clear error when empty
-                        viewModel.validateUrl("")
+                    if (uiState.manualUrlError != null) {
+                        viewModel.clearValidationError()
                     }
                 },
                 label = {
@@ -258,13 +254,12 @@ private fun ManualUrlEntryDialog(
                 TextButton(
                     onClick = {
                         val url = manualUrlText.text.trim()
-                        // Validate before submitting
                         if (viewModel.validateUrl(url)) {
                             onSubmit(url)
                         }
                     },
                     modifier = Modifier.width(100.dp),
-                    enabled = manualUrlText.text.isNotBlank() && uiState.manualUrlError == null
+                    enabled = manualUrlText.text.isNotBlank()
                 ) {
                     Text(stringResource(Res.string.ok))
                 }

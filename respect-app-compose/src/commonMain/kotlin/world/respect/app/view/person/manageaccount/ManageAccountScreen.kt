@@ -65,13 +65,9 @@ fun ManageAccountScreen(
 
     if (uiState.showBottomSheet) {
         RespectQRBadgeOptionsBottomSheet(
-            onAssignNewBadge = {
-                viewModel.onClickQRCodeBadge()
-            },
-            onRemoveBadge = {
-                viewModel.onRemoveQRBadge()
-            },
-            onDismissRequest = { viewModel.onDismissBottomSheet() }
+            onAssignNewBadge = viewModel::onClickQRCodeBadge,
+            onRemoveBadge = viewModel::onRemoveQRBadge,
+            onDismissRequest = viewModel::onDismissBottomSheet
         )
     }
     ManageAccountScreen(

@@ -721,7 +721,7 @@ data class SetUsernameAndPassword(
 ): RespectAppRoute
 
 @Serializable
-data class SetPassword(
+data class CreateAccountSetPassword(
     val guid: String,
     val username: String? = null,
 ) : RespectAppRoute

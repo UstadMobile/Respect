@@ -104,7 +104,7 @@ import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
-import world.respect.shared.navigation.SetPassword
+import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
@@ -149,7 +149,6 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
 
 
 @Composable
@@ -544,12 +543,11 @@ fun AppNavHost(
             )
         }
         composable<ScanQRCode> {
-            val viewModel: ScanQRCodeViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
             ScanQRCodeScreen(
-                viewModel = viewModel
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
             )
         }
 
@@ -598,7 +596,7 @@ fun AppNavHost(
                 )
             )
         }
-        composable<SetPassword> {
+        composable<CreateAccountSetPassword> {
             CreateAccountSetPasswordScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,

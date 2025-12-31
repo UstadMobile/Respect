@@ -22,7 +22,7 @@ import world.respect.shared.generated.resources.set_password
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
-import world.respect.shared.navigation.SetPassword
+import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -44,7 +44,7 @@ class CreateAccountSetPasswordViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val route: SetPassword = savedStateHandle.toRoute()
+    private val route: CreateAccountSetPassword = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(CreateAccountSetPasswordUiState())
 

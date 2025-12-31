@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -12,9 +13,11 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.model.Assignment
+import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
@@ -26,32 +29,16 @@ class AssignmentDatasourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : AssignmentDataSourceLocal{
 
-
-    private suspend fun upsertAssignments(
-        assignments: List<Assignment>,
-        forceOverwrite: Boolean,
+    private suspend fun doUpsertAssignment(
+        assignment: Assignment,
     ) {
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val timeStored = Clock.System.now()
-                val entities = assignments.map {
-                    it.copy(stored = timeStored).toEntities(uidNumberMapper)
-                }.filter {
-                    val lastModInDb: Long = schoolDb.getAssignmentEntityDao().getLastModifiedByUidNum(
-                        it.assignment.aeUidNum
-                    ) ?: 0
-                    forceOverwrite || it.assignment.aeLastModified.toEpochMilliseconds() > lastModInDb
-                }
+        val entities = assignment.copy(stored = Clock.System.now()).toEntities(uidNumberMapper)
 
-                schoolDb.getAssignmentEntityDao().upsert(entities.map { it.assignment })
-                entities.forEach {
-                    schoolDb.getAssignmentLearningResourceRefEntityDao().deleteByAssignmentUidNum(
-                        it.assignment.aeUidNum
-                    )
-                    schoolDb.getAssignmentLearningResourceRefEntityDao().upsert(it.learningUnits)
-                }
-            }
-        }
+        schoolDb.getAssignmentLearningResourceRefEntityDao().deleteByAssignmentUidNum(
+            entities.assignment.aeUidNum
+        )
+        schoolDb.getAssignmentEntityDao().upsert(listOf(entities.assignment))
+        schoolDb.getAssignmentLearningResourceRefEntityDao().upsert(entities.learningUnits)
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Assignment>> {
@@ -76,6 +63,7 @@ class AssignmentDatasourceDb(
     ): IPagingSourceFactory<Int, Assignment> {
         return IPagingSourceFactory {
             schoolDb.getAssignmentEntityDao().listAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 uidNum = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             ).map { it.toModel() }
         }
@@ -95,14 +83,45 @@ class AssignmentDatasourceDb(
     }
 
     override suspend fun store(list: List<Assignment>) {
-        upsertAssignments(list, false)
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { assignment ->
+                    val lastModAndPermissionInDb = schoolDb.getClassEntityDao()
+                        .getLastModifiedAndHasPermission(
+                            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                            classUidNum = uidNumberMapper(assignment.classUid),
+                            requiredPermission = PermissionFlags.CLASS_WRITE,
+                        )
+
+                    if(!lastModAndPermissionInDb.hasPermission)
+                        throw ForbiddenException()
+
+                    doUpsertAssignment(assignment)
+                }
+            }
+        }
     }
 
     override suspend fun updateLocal(
         list: List<Assignment>,
         forceOverwrite: Boolean
     ) {
-        upsertAssignments(list, forceOverwrite)
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { assignment ->
+                    val lastModifiedInDb = schoolDb.getAssignmentEntityDao().getLastModifiedByUidNum(
+                        uidNumberMapper(assignment.uid)
+                    ) ?: -1
+
+                    if(forceOverwrite ||
+                            assignment.lastModified.toEpochMilliseconds() > lastModifiedInDb) {
+                        doUpsertAssignment(assignment)
+                    }
+                }
+            }
+        }
+
+        Napier.d("RPaging/AssignmentDataSourceDb: updatedLocal: ${list.size} assignments")
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Assignment> {

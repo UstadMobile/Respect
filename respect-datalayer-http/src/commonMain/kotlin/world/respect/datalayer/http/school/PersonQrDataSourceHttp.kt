@@ -1,6 +1,7 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -80,7 +81,11 @@ class PersonQrDataSourceHttp(
     }
 
     override suspend fun deletePersonBadge(uidNum: Long) {
-        TODO("Not yet implemented")
+        httpClient.delete(
+            respectEndpointUrl("${PersonQrDataSource.ENDPOINT_NAME}/$uidNum")
+        ) {
+            useTokenProvider(tokenProvider)
+        }
     }
 
     override suspend fun existsByQrCodeUrl(url: String,uidNum: Long): Boolean {

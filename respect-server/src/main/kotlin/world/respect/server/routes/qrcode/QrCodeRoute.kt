@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import world.respect.datalayer.SchoolDataSource
@@ -29,6 +30,14 @@ fun Route.QrCodeRoute(
 
     post(PersonQrDataSource.ENDPOINT_NAME) {
         schoolDataSource(call).personQrDataSource.store(call.receive())
+        call.respond(HttpStatusCode.NoContent)
+    }
+
+    delete("${PersonQrDataSource.ENDPOINT_NAME}/{uidNum}") {
+        val uidNum = call.parameters["uidNum"]?.toLongOrNull()
+            ?: throw IllegalArgumentException("Invalid uidNum parameter")
+
+        schoolDataSource(call).personQrDataSource.deletePersonBadge(uidNum)
         call.respond(HttpStatusCode.NoContent)
     }
 }

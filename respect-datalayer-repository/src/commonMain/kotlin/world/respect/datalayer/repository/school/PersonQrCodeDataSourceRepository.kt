@@ -53,6 +53,21 @@ class PersonQrCodeDataSourceRepository(
 
     override suspend fun deletePersonBadge(uidNum: Long) {
         local.deletePersonBadge(uidNum)
+
+        try {
+            remote.deletePersonBadge(uidNum)
+        } catch (e: Exception) {
+            remoteWriteQueue.add(
+                listOf(
+                    WriteQueueItem(
+                        model = WriteQueueItem.Model.PERSON_QRCODE_DELETE,
+                        uid = uidNum.toString(),
+                        timeQueued = systemTimeInMillis(),
+                    )
+                )
+            )
+            throw e
+        }
     }
 
     override suspend fun existsByQrCodeUrl(url: String, uidNum: Long): Boolean {

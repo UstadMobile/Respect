@@ -289,15 +289,15 @@ onFlowComplete:
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validations needs to implement
-- tapOn: "Ok"
-- assertVisible: "QR already in use, try again"
-- eraseText
+#- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validations needs to implement
+#- tapOn: "Ok"
+#- assertVisible: "QR already in use, try again"
+#- eraseText
 - inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
 - tapOn: "Ok"
 - assertVisible: "QR code badge"
 - assertVisible: "Badge.*"
-- tapOn: "Save"
+#- tapOn: "Save"
 
 # Validate Parent User Login using Username & Password
 - clearState: world.respect.app

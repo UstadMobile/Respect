@@ -3,8 +3,8 @@ package world.respect.shared.viewmodel.playlists.mapping.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CurriculumMappingSection(
+data class PlaylistsMappingSection(
     val uid: Long = System.currentTimeMillis(),
     val title: String,
-    val items: List<CurriculumMappingSectionLink> = emptyList()
+    val items: List<PlaylistsMappingSectionLink> = emptyList()
 )

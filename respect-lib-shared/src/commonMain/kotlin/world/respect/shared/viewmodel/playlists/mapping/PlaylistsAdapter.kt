@@ -13,12 +13,12 @@ import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
 
 
-fun CurriculumMapping.toOpds(selfLink: String): OpdsFeed {
+fun PlaylistsMapping.toOpds(selfLink: String): OpdsFeed {
     return OpdsFeed(
         metadata = OpdsFeedMetadata(
             title = this.title,
@@ -47,7 +47,7 @@ fun CurriculumMapping.toOpds(selfLink: String): OpdsFeed {
     )
 }
 
-fun CurriculumMapping.toOpdsGroup(): OpdsGroup {
+fun PlaylistsMapping.toOpdsGroup(): OpdsGroup {
     return OpdsGroup(
         metadata = OpdsFeedMetadata(
             title = this.title
@@ -76,17 +76,17 @@ fun CurriculumMapping.toOpdsGroup(): OpdsGroup {
     )
 }
 
-fun OpdsFeed.toCurriculumMapping(): CurriculumMapping {
-    return CurriculumMapping(
+fun OpdsFeed.toCurriculumMapping(): PlaylistsMapping {
+    return PlaylistsMapping(
         uid = System.currentTimeMillis(),
         title = this.metadata.title,
         description = this.metadata.description ?: "",
         sections = this.groups?.map { group ->
-            CurriculumMappingSection(
+            PlaylistsMappingSection(
                 uid = System.currentTimeMillis(),
                 title = group.metadata.title,
                 items = group.navigation?.map { navLink ->
-                    CurriculumMappingSectionLink(
+                    PlaylistsMappingSectionLink(
                         uid = System.currentTimeMillis(),
                         href = navLink.href,
                         title = navLink.title ?: ""

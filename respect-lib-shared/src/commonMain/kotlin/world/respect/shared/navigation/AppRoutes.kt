@@ -12,7 +12,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
@@ -111,10 +111,10 @@ data class AssignmentEdit(
     }
 
     @Transient
-    val availablePlaylists: List<CurriculumMapping>? = availablePlaylistsJson?.let { jsonStr ->
+    val availablePlaylists: List<PlaylistsMapping>? = availablePlaylistsJson?.let { jsonStr ->
         try {
             Json.decodeFromString(
-                ListSerializer(CurriculumMapping.serializer()),
+                ListSerializer(PlaylistsMapping.serializer()),
                 jsonStr
             )
         } catch (e: Exception) {
@@ -126,7 +126,7 @@ data class AssignmentEdit(
         fun create(
             uid: String?,
             learningUnitSelected: LearningUnitSelection? = null,
-            availablePlaylists: List<CurriculumMapping>? = null,
+            availablePlaylists: List<PlaylistsMapping>? = null,
         ): AssignmentEdit {
             val learningUnits = learningUnitSelected?.let { listOf(it) }
             return AssignmentEdit(
@@ -139,7 +139,7 @@ data class AssignmentEdit(
                 },
                 availablePlaylistsJson = availablePlaylists?.let {
                     Json.encodeToString(
-                        ListSerializer(CurriculumMapping.serializer()),
+                        ListSerializer(PlaylistsMapping.serializer()),
                         it
                     )
                 }
@@ -149,7 +149,7 @@ data class AssignmentEdit(
         fun createWithMultipleLessons(
             uid: String?,
             learningUnits: List<LearningUnitSelection>,
-            availablePlaylists: List<CurriculumMapping>? = null,
+            availablePlaylists: List<PlaylistsMapping>? = null,
         ): AssignmentEdit {
             return AssignmentEdit(
                 guid = uid,
@@ -159,7 +159,7 @@ data class AssignmentEdit(
                 ),
                 availablePlaylistsJson = availablePlaylists?.let {
                     Json.encodeToString(
-                        ListSerializer(CurriculumMapping.serializer()),
+                        ListSerializer(PlaylistsMapping.serializer()),
                         it
                     )
                 }
@@ -577,10 +577,10 @@ class LearningUnitDetail (
     val refererUrl: Url?
         get() = refererUrlStr?.let { Url(it) }
 
-    val mappingData: CurriculumMapping?
+    val mappingData: PlaylistsMapping?
         get() = mappingDataJson?.let {
             try {
-                Json.decodeFromString(CurriculumMapping.serializer(), it)
+                Json.decodeFromString(PlaylistsMapping.serializer(), it)
             } catch (e: Exception) {
                 null
             }
@@ -601,9 +601,9 @@ class LearningUnitDetail (
             mappingDataJson = null
         )
 
-        fun createFromMapping(mapping: CurriculumMapping): LearningUnitDetail {
+        fun createFromMapping(mapping: PlaylistsMapping): LearningUnitDetail {
             val mappingJson = try {
-                Json.encodeToString(CurriculumMapping.serializer(), mapping)
+                Json.encodeToString(PlaylistsMapping.serializer(), mapping)
             } catch (e: Exception) {
                 null
             }
@@ -732,9 +732,9 @@ data class CurriculumMappingEdit(
 ) : RespectAppRoute {
 
     @Transient
-    val mappingData: CurriculumMapping? = mappingDataJson?.let { jsonString ->
+    val mappingData: PlaylistsMapping? = mappingDataJson?.let { jsonString ->
         try {
-            Json.decodeFromString(CurriculumMapping.serializer(), jsonString)
+            Json.decodeFromString(PlaylistsMapping.serializer(), jsonString)
         } catch (e: Exception) {
             null
         }
@@ -743,12 +743,12 @@ data class CurriculumMappingEdit(
     companion object {
         fun create(
             uid: Long,
-            mappingData: CurriculumMapping? = null
+            mappingData: PlaylistsMapping? = null
         ) = CurriculumMappingEdit(
             textbookUid = uid,
             mappingDataJson = mappingData?.let { mapping ->
                 try {
-                    Json.encodeToString(CurriculumMapping.serializer(), mapping)
+                    Json.encodeToString(PlaylistsMapping.serializer(), mapping)
                 } catch (e: Exception) {
                     null
                 }

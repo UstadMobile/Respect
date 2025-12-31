@@ -42,17 +42,17 @@ import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
 import world.respect.shared.generated.resources.section_name
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditUiState
-import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingSectionUiState
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
 import androidx.compose.ui.draw.alpha
 
 
 @Composable
 fun CurriculumMappingEditScreenForViewModel(
-    viewModel: CurriculumMappingEditViewModel
+    viewModel: PlaylistEditViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -74,8 +74,8 @@ fun CurriculumMappingEditScreenForViewModel(
 
 @Composable
 fun CurriculumMappingEditScreen(
-    uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
-    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
+    uiState: PlaylistEditUiState = PlaylistEditUiState(),
+    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     onTitleChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onClickAddSection: () -> Unit = {},
@@ -85,7 +85,7 @@ fun CurriculumMappingEditScreen(
     onClickAddLesson: (Int) -> Unit = {},
     onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
     onLessonMovedBetweenSections: (Int, Int, Int, Int) -> Unit = { _, _, _, _ -> },
-    onClickLesson: (CurriculumMappingSectionLink) -> Unit = {},
+    onClickLesson: (PlaylistsMappingSectionLink) -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
@@ -315,7 +315,7 @@ fun CurriculumMappingEditScreen(
 
 @Composable
 private fun SectionItem(
-    section: CurriculumMappingSection,
+    section: PlaylistsMappingSection,
     sectionIndex: Int,
     isDragging: Boolean,
     onSectionTitleChanged: (Int, String) -> Unit,
@@ -406,12 +406,12 @@ private fun SectionItem(
 
 @Composable
 private fun LessonItem(
-    link: CurriculumMappingSectionLink,
-    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
+    link: PlaylistsMappingSectionLink,
+    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     sectionIndex: Int,
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
-    onClickLesson: (CurriculumMappingSectionLink) -> Unit = {},
+    onClickLesson: (PlaylistsMappingSectionLink) -> Unit = {},
     isDragging: Boolean,
     isParentSectionDragging: Boolean = false,
     dragModifier: Modifier = Modifier

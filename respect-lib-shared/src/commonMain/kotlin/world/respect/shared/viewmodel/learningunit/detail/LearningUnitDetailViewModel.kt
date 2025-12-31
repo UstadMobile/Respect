@@ -38,10 +38,10 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingSectionUiState
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
@@ -50,8 +50,8 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
-    val mapping: CurriculumMapping? = null,
-    val sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>> = {
+    val mapping: PlaylistsMapping? = null,
+    val sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>> = {
         emptyFlow()
     },
     val showCopyDialog: Boolean = false,
@@ -178,7 +178,7 @@ class LearningUnitDetailViewModel(
         }
     }
     private suspend fun loadLessonPublications(
-        lessons: List<CurriculumMappingSectionLink>
+        lessons: List<PlaylistsMappingSectionLink>
     ): List<LearningUnitSelection> {
         return lessons.mapNotNull { lesson ->
             try {
@@ -280,7 +280,7 @@ class LearningUnitDetailViewModel(
         }
     }
 
-    fun onClickLesson(link: CurriculumMappingSectionLink) {
+    fun onClickLesson(link: PlaylistsMappingSectionLink) {
         val publicationUrl = Url(link.href)
         val appManifestUrl = link.appManifestUrl ?: return
 
@@ -339,7 +339,7 @@ class LearningUnitDetailViewModel(
 
         resultReturner.sendResult(
             NavResult(
-                key = CurriculumMappingEditViewModel.KEY_SAVED_MAPPING,
+                key = PlaylistEditViewModel.KEY_SAVED_MAPPING,
                 result = copiedMapping
             )
         )
@@ -357,8 +357,8 @@ class LearningUnitDetailViewModel(
     }
 
     fun sectionLinkUiStateFor(
-        link: CurriculumMappingSectionLink
-    ): Flow<DataLoadState<CurriculumMappingSectionUiState>> {
+        link: PlaylistsMappingSectionLink
+    ): Flow<DataLoadState<PlaylistSectionUiState>> {
         val publicationUrl = Url(link.href)
         return appDataSource.opdsDataSource.loadOpdsPublication(
             url = publicationUrl,
@@ -367,7 +367,7 @@ class LearningUnitDetailViewModel(
             expectedPublicationId = null,
         ).map { opdsLoadState ->
             opdsLoadState.map { publication ->
-                CurriculumMappingSectionUiState(
+                PlaylistSectionUiState(
                     icon = publication.findIcons().firstOrNull()?.let {
                         publicationUrl.resolve(it.href)
                     },

@@ -24,7 +24,7 @@ import world.respect.shared.generated.resources.*
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
 
 @Composable
 fun PlaylistListScreen(
@@ -46,10 +46,10 @@ fun PlaylistListScreen(
 fun PlaylistListScreenContent(
     uiState: PlaylistListUiState,
     onFilterSelected: (Int) -> Unit,
-    onClickMapping: (CurriculumMapping) -> Unit,
+    onClickMapping: (PlaylistsMapping) -> Unit,
     onClickAddNew: () -> Unit,
     onClickAddLink: () -> Unit,
-    onRemoveMapping: (CurriculumMapping) -> Unit,
+    onRemoveMapping: (PlaylistsMapping) -> Unit,
 ) {
     var isFabMenuExpanded by remember { mutableStateOf(false) }
 
@@ -207,9 +207,9 @@ fun PlaylistListScreenContent(
 
 @Composable
 private fun MappingListItem(
-    mapping: CurriculumMapping,
-    onClickMapping: (CurriculumMapping) -> Unit,
-    onRemoveMapping: (CurriculumMapping) -> Unit,
+    mapping: PlaylistsMapping,
+    onClickMapping: (PlaylistsMapping) -> Unit,
+    onRemoveMapping: (PlaylistsMapping) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 

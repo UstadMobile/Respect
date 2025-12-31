@@ -41,21 +41,21 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.KEY_LEARNING_UNIT
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.viewmodel.app.appstate.getTitle
 
-data class CurriculumMappingEditUiState(
-    val mapping: CurriculumMapping? = null,
+data class PlaylistEditUiState(
+    val mapping: PlaylistsMapping? = null,
     val loading: Boolean = false,
     val isNew: Boolean = true,
     val titleError: UiText? = null,
     val error: UiText? = null,
     val pendingLessonSectionIndex: Int? = null,
-    val sectionUiState: (CurriculumMappingSection) -> Flow<CurriculumMappingSectionUiState> = { emptyFlow() },
+    val sectionUiState: (PlaylistsMappingSection) -> Flow<PlaylistSectionUiState> = { emptyFlow() },
 ) {
     val fieldsEnabled: Boolean
         get() = !loading
@@ -66,18 +66,18 @@ data class CurriculumMappingEditUiState(
     val description: String
         get() = mapping?.description ?: ""
 
-    val sections: List<CurriculumMappingSection>
+    val sections: List<PlaylistsMappingSection>
         get() = mapping?.sections ?: emptyList()
 }
 
-data class CurriculumMappingSectionUiState(
+data class PlaylistSectionUiState(
     val icon: Url? = null,
     val title: String = "",
     val subtitle: String = "",
     val description: String = "",
 )
 
-class CurriculumMappingEditViewModel(
+class PlaylistEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val resultReturner: NavResultReturner,
     private val json: Json,
@@ -92,8 +92,8 @@ class CurriculumMappingEditViewModel(
     private val mappingData = route.mappingData
 
     private val _uiState = MutableStateFlow(
-        CurriculumMappingEditUiState(
-            mapping = mappingData ?: CurriculumMapping(uid = mappingUid),
+        PlaylistEditUiState(
+            mapping = mappingData ?: PlaylistsMapping(uid = mappingUid),
             isNew = mappingUid == 0L
         )
     )
@@ -130,7 +130,7 @@ class CurriculumMappingEditViewModel(
                         mapping = prev.mapping?.copy(
                             sections = prev.mapping.sections.updateAtIndex(pendingSectionIndex) {
                                 it.copy(
-                                    items = it.items + CurriculumMappingSectionLink(
+                                    items = it.items + PlaylistsMappingSectionLink(
                                         href = selectedLearningUnit.learningUnitManifestUrl.toString(),
                                         title = selectedLearningUnit.selectedPublication.metadata.title.getTitle(),
                                         appManifestUrl = selectedLearningUnit.appManifestUrl
@@ -145,11 +145,11 @@ class CurriculumMappingEditViewModel(
         }
     }
 
-    private fun updateUiStateAndCommit(block: (CurriculumMappingEditUiState) -> CurriculumMappingEditUiState) {
+    private fun updateUiStateAndCommit(block: (PlaylistEditUiState) -> PlaylistEditUiState) {
         val mappingToCommit = _uiState.updateAndGet(block).mapping ?: return
 
         savedStateHandle[KEY_MAPPING] = json.encodeToString(
-            CurriculumMapping.serializer(), mappingToCommit
+            PlaylistsMapping.serializer(), mappingToCommit
         )
     }
 
@@ -175,7 +175,7 @@ class CurriculumMappingEditViewModel(
         updateUiStateAndCommit { prev ->
             prev.copy(
                 mapping = prev.mapping?.copy(
-                    sections = prev.mapping.sections + CurriculumMappingSection(title = "")
+                    sections = prev.mapping.sections + PlaylistsMappingSection(title = "")
                 )
             )
         }
@@ -295,7 +295,7 @@ class CurriculumMappingEditViewModel(
         }
     }
 
-    fun onClickLesson(link: CurriculumMappingSectionLink) {
+    fun onClickLesson(link: PlaylistsMappingSectionLink) {
         val publicationUrl = Url(link.href)
         val appManifestUrl = link.appManifestUrl ?: return
 
@@ -312,8 +312,8 @@ class CurriculumMappingEditViewModel(
     }
 
     fun sectionLinkUiStateFor(
-        link: CurriculumMappingSectionLink
-    ): Flow<DataLoadState<CurriculumMappingSectionUiState>> {
+        link: PlaylistsMappingSectionLink
+    ): Flow<DataLoadState<PlaylistSectionUiState>> {
         val publicationUrl = Url(link.href)
         return respectAppDataSource.opdsDataSource.loadOpdsPublication(
             url = Url(link.href),
@@ -322,7 +322,7 @@ class CurriculumMappingEditViewModel(
             expectedPublicationId = null,
         ).map { opdsLoadState ->
             opdsLoadState.map { publication ->
-                CurriculumMappingSectionUiState(
+                PlaylistSectionUiState(
                     icon = publication.findIcons().firstOrNull()?.let {
                         publicationUrl.resolve(it.href)
                     }

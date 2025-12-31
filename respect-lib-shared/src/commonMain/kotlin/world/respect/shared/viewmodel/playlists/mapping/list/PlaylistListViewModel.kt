@@ -17,20 +17,20 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_unexpected_result_type
 import world.respect.shared.resources.UiText
 
 data class PlaylistListUiState(
-    val mappings: List<CurriculumMapping> = emptyList(),
+    val mappings: List<PlaylistsMapping> = emptyList(),
     val selectedFilterIndex: Int = 0,
     val error: UiText? = null,
     val currentUserGuid: String? = null,
     val currentSchoolUrl: Url? = null,
 ) {
-    val filteredMappings: List<CurriculumMapping>
+    val filteredMappings: List<PlaylistsMapping>
         get() = when (selectedFilterIndex) {
             0 -> mappings
             1 -> mappings.filter { mapping ->
@@ -71,9 +71,9 @@ class PlaylistListViewModel(
 
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(
-                CurriculumMappingEditViewModel.KEY_SAVED_MAPPING
+                PlaylistEditViewModel.KEY_SAVED_MAPPING
             ).collect { result ->
-                val savedMapping = result.result as? CurriculumMapping
+                val savedMapping = result.result as? PlaylistsMapping
                 if (savedMapping == null) {
                     _uiState.update {
                         it.copy(error = Res.string.error_unexpected_result_type.asUiText())
@@ -85,14 +85,14 @@ class PlaylistListViewModel(
         }
     }
 
-    fun setMappings(mappings: List<CurriculumMapping>) {
+    fun setMappings(mappings: List<PlaylistsMapping>) {
         _uiState.update { it.copy(mappings = mappings) }
     }
 
     fun onFilterSelected(index: Int) {
         _uiState.update { it.copy(selectedFilterIndex = index) }
     }
-    fun onClickMapping(mapping: CurriculumMapping) {
+    fun onClickMapping(mapping: PlaylistsMapping) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LearningUnitDetail.createFromMapping(mapping)
@@ -115,12 +115,12 @@ class PlaylistListViewModel(
         )
     }
 
-    fun removeMapping(mapping: CurriculumMapping) {
+    fun removeMapping(mapping: PlaylistsMapping) {
         val updated = _uiState.value.mappings.filter { it.uid != mapping.uid }
         _uiState.update { it.copy(mappings = updated) }
     }
 
-    private fun addOrUpdateMapping(mapping: CurriculumMapping) {
+    private fun addOrUpdateMapping(mapping: PlaylistsMapping) {
         val currentMappings = _uiState.value.mappings.toMutableList()
         val existingIndex = currentMappings.indexOfFirst { it.uid == mapping.uid }
 

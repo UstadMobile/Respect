@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -29,12 +28,7 @@ import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentAssigneeRef
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
-import world.respect.lib.opds.model.LangMap
-import world.respect.lib.opds.model.OpdsFeedMetadata
-import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.ReadiumLink
-import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -53,7 +47,9 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.assignment.toAssignmentLearningUnitRefs
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
+import world.respect.shared.viewmodel.curriculum.mapping.toOpdsGroup
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import kotlin.time.Clock
 
@@ -145,29 +141,27 @@ class AssignmentEditViewModel(
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_PLAYLIST_SELECTION).collect { result ->
                 val mapping = result.result as? CurriculumMapping ?: return@collect
-                val group = convertMappingToOpdsGroup(mapping)
+                val group = mapping.toOpdsGroup()
+                val newLearningUnits = group.toAssignmentLearningUnitRefs()
 
-                viewModelScope.launch {
-                    val assignment = _uiState.value.assignment.dataOrNull() ?: return@launch
-                    val newLearningUnits = loadLessonsFromOpdsGroup(group)
+                val assignment = _uiState.value.assignment.dataOrNull() ?: return@collect
 
-                    val existingUrls = assignment.learningUnits.map {
-                        it.learningUnitManifestUrl
-                    }.toSet()
+                val existingUrls = assignment.learningUnits.map {
+                    it.learningUnitManifestUrl
+                }.toSet()
 
-                    val uniqueNewUnits = newLearningUnits.filter {
-                        it.learningUnitManifestUrl !in existingUrls
-                    }
+                val uniqueNewUnits = newLearningUnits.filter {
+                    it.learningUnitManifestUrl !in existingUrls
+                }
 
-                    _uiState.update { prev ->
-                        prev.copy(
-                            assignment = DataReadyState(
-                                assignment.copy(
-                                    learningUnits = assignment.learningUnits + uniqueNewUnits
-                                )
+                _uiState.update { prev ->
+                    prev.copy(
+                        assignment = DataReadyState(
+                            assignment.copy(
+                                learningUnits = assignment.learningUnits + uniqueNewUnits
                             )
                         )
-                    }
+                    )
                 }
             }
         }
@@ -241,39 +235,7 @@ class AssignmentEditViewModel(
         }
     }
 
-    /**
-     * Convert CurriculumMapping to OpdsGroup for processing multiple lessons
-     */
-    private fun convertMappingToOpdsGroup(mapping: CurriculumMapping): OpdsGroup {
-        return OpdsGroup(
-            metadata = OpdsFeedMetadata(
-                title = mapping.title
-            ),
-            publications = mapping.sections.flatMap { section ->
-                section.items.map { link ->
-                    OpdsPublication(
-                        metadata = ReadiumMetadata(
-                            title = mapOf("en" to (link.title ?: "Untitled")) as LangMap,
-                        ),
-                        links = listOfNotNull(
-                            ReadiumLink(
-                                href = link.href,
-                                rel = listOf("http://opds-spec.org/acquisition"),
-                            ),
-                            link.appManifestUrl?.let {
-                                ReadiumLink(
-                                    href = it.toString(),
-                                    rel = listOf("http://opds-spec.org/compatible-app"),
-                                )
-                            }
-                        )
-                    )
-                }
-            }
-        )
-    }
-
-    fun onClickAddFromCurriculum() {
+    fun onClickAddFromPlaylists() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 RespectAppLauncher.create(
@@ -284,35 +246,6 @@ class AssignmentEditViewModel(
                 )
             )
         )
-    }
-
-    private suspend fun loadLessonsFromOpdsGroup(group: OpdsGroup): List<AssignmentLearningUnitRef> {
-        val publications = group.publications ?: emptyList()
-
-        return publications.mapNotNull { publication ->
-            try {
-                val acquisitionLink = publication.links.firstOrNull { link ->
-                    link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true
-                } ?: return@mapNotNull null
-
-                val publicationUrl = Url(acquisitionLink.href)
-
-                val appManifestLink = publication.links.firstOrNull { link ->
-                    link.rel?.contains("http://opds-spec.org/compatible-app") == true
-                }
-
-                val appManifestUrl = appManifestLink?.let { Url(it.href) }
-                    ?: return@mapNotNull null
-
-                AssignmentLearningUnitRef(
-                    learningUnitManifestUrl = publicationUrl,
-                    appManifestUrl = appManifestUrl
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
     }
 
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {

@@ -6,10 +6,13 @@ package world.respect.shared.viewmodel.curriculum.mapping
 //e.g. have CurriculumMapping.toOpds (convert from CurriculumMapping data class to Opds)
 // and OpdsFeed.toCurriculumMapping (convert from OpdsFeed to CurriculumMapping)
 
+import world.respect.lib.opds.model.LangMap
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
@@ -40,6 +43,35 @@ fun CurriculumMapping.toOpds(selfLink: String): OpdsFeed {
                     )
                 }
             )
+        }
+    )
+}
+
+fun CurriculumMapping.toOpdsGroup(): OpdsGroup {
+    return OpdsGroup(
+        metadata = OpdsFeedMetadata(
+            title = this.title
+        ),
+        publications = this.sections.flatMap { section ->
+            section.items.map { link ->
+                OpdsPublication(
+                    metadata = ReadiumMetadata(
+                        title = mapOf("en" to (link.title ?: "")) as LangMap,
+                    ),
+                    links = listOfNotNull(
+                        ReadiumLink(
+                            href = link.href,
+                            rel = listOf("http://opds-spec.org/acquisition"),
+                        ),
+                        link.appManifestUrl?.let {
+                            ReadiumLink(
+                                href = it.toString(),
+                                rel = listOf("http://opds-spec.org/compatible-app"),
+                            )
+                        }
+                    )
+                )
+            }
         }
     )
 }

@@ -8,5 +8,5 @@ appId: world.respect.app
 - tapOn: "More Info"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- inputText: ${QR_BADGE_LINK} # ${output.SCHOOL_URL}respect_qr_badge/id/983123
+- inputText: ${QR_BADGE_LINK}
 - tapOn: "OK"

@@ -21,6 +21,7 @@ import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.set_password
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.SetPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -118,9 +119,12 @@ class CreateAccountSetPasswordViewModel(
 
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        ManageAccount(guid = route.guid)
+                        ManageAccount(guid = route.guid),
+                        popUpToClass = PersonDetail::class,
+                        popUpToInclusive = true,
                     )
                 )
+
             } catch (e: Throwable) {
                 Napier.e("Error saving password and username", e)
             }

@@ -62,7 +62,9 @@ class ScanQRCodeViewModel(
                 hideBottomNavigation = true,
                 showMoreIconVisible = true,
                 onClickMoreOption = {
-                    _uiState.update { it.copy(showPasteButton = true) }
+                    _uiState.update { currentState ->
+                        currentState.copy(showPasteButton = !currentState.showPasteButton)
+                    }
                 },
                 userAccountIconVisible = false
             )
@@ -119,6 +121,10 @@ class ScanQRCodeViewModel(
             }
             false
         }
+    }
+
+    fun onMenuDismiss() {
+        _uiState.update { it.copy(showPasteButton = false) }
     }
 
     private fun authenticateWithQrCode(url: String) {

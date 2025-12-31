@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -114,14 +114,28 @@ fun ScanQRCodeScreen(
             )
         }
 
-        if (uiState.showPasteButton) {
-            PasteButton(
-                onPasteClick = {
-                    showManualEntryDialog = true
-                    // Clear any previous errors when opening dialog
-                    manualUrlText = TextFieldValue("")
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            if (uiState.showPasteButton) {
+                DropdownMenu(
+                    expanded = uiState.showPasteButton,
+                    onDismissRequest = {
+                        viewModel.onMenuDismiss()
+                    },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.paste_url)) },
+                        onClick = {
+                            viewModel.onMenuDismiss()
+                            showManualEntryDialog = true
+                            manualUrlText = TextFieldValue("")
+                        },
+                    )
                 }
-            )
+            }
         }
 
         // Manual URL Entry Dialog
@@ -146,32 +160,6 @@ fun ScanQRCodeScreen(
                 },
                 viewModel = viewModel,
                 uiState = uiState
-            )
-        }
-    }
-}
-
-@Composable
-private fun PasteButton(
-    onPasteClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        OutlinedButton(
-            onClick = onPasteClick,
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-            modifier = Modifier.padding(end = 8.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.paste_url),
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
     }

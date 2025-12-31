@@ -234,7 +234,7 @@ class SetUsernameAndPasswordViewModel(
                         SetPassword(
                             guid = route.guid,
                             username = uiState.value.username
-                        )
+                        ),
                     )
                 )
             }

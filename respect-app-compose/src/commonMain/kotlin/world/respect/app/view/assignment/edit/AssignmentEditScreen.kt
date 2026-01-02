@@ -202,22 +202,6 @@ fun AssignmentEditScreen(
             text = stringResource(Res.string.assignment_tasks),
             style = MaterialTheme.typography.titleMedium
         )
-        ListItem(
-            modifier = Modifier.fillMaxWidth().clickable {
-                onClickAddLearningUnit()
-            },
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    modifier = Modifier.size(40.dp).padding(8.dp),
-                    contentDescription = ""
-                )
-            },
-            headlineContent = {
-                Text(stringResource(Res.string.lesson_assessment))
-            }
-        )
-
         if (uiState.showPlaylistButton) {
             ListItem(
                 modifier = Modifier.fillMaxWidth().clickable {
@@ -225,7 +209,7 @@ fun AssignmentEditScreen(
                 },
                 leadingContent = {
                     Icon(
-                        imageVector = Icons.Default.LibraryAdd,
+                        imageVector = Icons.Default.Add,
                         modifier = Modifier.size(40.dp).padding(8.dp),
                         contentDescription = "",
                     )

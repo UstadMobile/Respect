@@ -134,7 +134,7 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreenForViewModel
-import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.edit.CurriculumMappingEditScreenForViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel

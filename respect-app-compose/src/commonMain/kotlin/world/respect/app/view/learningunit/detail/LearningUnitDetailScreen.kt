@@ -67,6 +67,7 @@ fun LearningUnitDetailScreen(
             onClickShare = viewModel::onClickShare,
             onClickCopy = viewModel::onClickCopy,
             onClickDelete = viewModel::onClickDelete,
+            onConfirmSelection = viewModel::onConfirmSelection
         )
     } else {
         SingleLessonDetailScreen(
@@ -248,7 +249,6 @@ private fun SingleLessonDetailScreen(
         }
     }
 }
-
 @Composable
 private fun PlaylistDetailScreen(
     uiState: LearningUnitDetailUiState,
@@ -259,6 +259,7 @@ private fun PlaylistDetailScreen(
     onClickShare: () -> Unit,
     onClickCopy: () -> Unit,
     onClickDelete: () -> Unit,
+    onConfirmSelection: () -> Unit,
 ) {
     var expandedSections by remember { mutableStateOf(setOf<Long>()) }
     val mapping = uiState.mapping
@@ -266,7 +267,9 @@ private fun PlaylistDetailScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 88.dp)
+            contentPadding = PaddingValues(
+                bottom = if (uiState.isSelectionMode && uiState.selectedLessons.isNotEmpty()) 88.dp else 16.dp
+            )
         ) {
             item("header") {
                 Card(
@@ -301,47 +304,59 @@ private fun PlaylistDetailScreen(
                                 )
                             }
 
-                            if (!mapping?.description.isNullOrEmpty()) {
-                                Text(
-                                    text = mapping?.description.orEmpty(),
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    lineHeight = 18.sp,
-                                    modifier = Modifier.weight(1f)
-                                )
+                            Column(modifier = Modifier.weight(1f)) {
+                                if (!mapping?.description.isNullOrEmpty()) {
+                                    Text(
+                                        text = mapping.description,
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        lineHeight = 18.sp,
+                                    )
+                                }
+
+                                if (uiState.isSelectionMode && uiState.selectedLessons.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "${uiState.selectedLessons.size} lessons selected",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            ActionButton(
-                                icon = Icons.Default.Share,
-                                label = stringResource(Res.string.share),
-                                onClick = onClickShare,
-                                modifier = Modifier
-                                    .testTag("share_btn")
-                            )
-                            ActionButton(
-                                icon = Icons.Default.ContentCopy,
-                                label = stringResource(Res.string.copy),
-                                onClick = onClickCopy,
-                                modifier = Modifier.testTag("copy_btn")
-                            )
-                            ActionButton(
-                                icon = Icons.Default.Task,
-                                label = stringResource(Res.string.assign),
-                                onClick = onClickAssign,
-                                modifier = Modifier.testTag("assign_btn")
-                            )
-                            ActionButton(
-                                icon = Icons.Default.Delete,
-                                label = stringResource(Res.string.delete),
-                                onClick = onClickDelete,
-                                modifier = Modifier.testTag("delete_btn")
-                            )
+                        if (!uiState.isSelectionMode) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                ActionButton(
+                                    icon = Icons.Default.Share,
+                                    label = stringResource(Res.string.share),
+                                    onClick = onClickShare,
+                                    modifier = Modifier.testTag("share_btn")
+                                )
+                                ActionButton(
+                                    icon = Icons.Default.ContentCopy,
+                                    label = stringResource(Res.string.copy),
+                                    onClick = onClickCopy,
+                                    modifier = Modifier.testTag("copy_btn")
+                                )
+                                ActionButton(
+                                    icon = Icons.Default.Task,
+                                    label = stringResource(Res.string.assign),
+                                    onClick = onClickAssign,
+                                    modifier = Modifier.testTag("assign_btn")
+                                )
+                                ActionButton(
+                                    icon = Icons.Default.Delete,
+                                    label = stringResource(Res.string.delete),
+                                    onClick = onClickDelete,
+                                    modifier = Modifier.testTag("delete_btn")
+                                )
+                            }
                         }
                     }
                 }
@@ -379,15 +394,17 @@ private fun PlaylistDetailScreen(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            IconButton(
-                                onClick = { onClickAssignSection(section.uid) },
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.Task,
-                                    contentDescription = stringResource(Res.string.assign),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            if (!uiState.isSelectionMode) {
+                                IconButton(
+                                    onClick = { onClickAssignSection(section.uid) },
+                                    modifier = Modifier.size(40.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Task,
+                                        contentDescription = stringResource(Res.string.assign),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
 
                             IconButton(
@@ -398,8 +415,7 @@ private fun PlaylistDetailScreen(
                                         expandedSections + section.uid
                                     }
                                 },
-                                modifier = Modifier
-                                    .testTag("expand_collapse_icon_")
+                                modifier = Modifier.testTag("expand_collapse_icon_")
                             ) {
                                 Icon(
                                     if (isExpanded) Icons.Default.KeyboardArrowUp
@@ -419,14 +435,35 @@ private fun PlaylistDetailScreen(
                         LessonListItem(
                             link = link,
                             sectionLinkUiState = uiState.sectionLinkUiState,
-                            onClickLesson = onClickLesson
+                            onClickLesson = onClickLesson,
+                            isSelectionMode = uiState.isSelectionMode,
+                            isSelected = uiState.selectedLessons.contains(link)
                         )
                     }
                 }
             }
         }
 
-        if (uiState.showEditButton) {
+        if (uiState.isSelectionMode && uiState.selectedLessons.isNotEmpty()) {
+            Button(
+                onClick = onConfirmSelection,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = "Add ${uiState.selectedLessons.size} task${if (uiState.selectedLessons.size > 1) "s" else ""} to assignment",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+        } else if (uiState.showEditButton) {
             FloatingActionButton(
                 onClick = onClickEdit,
                 modifier = Modifier
@@ -454,12 +491,13 @@ private fun PlaylistDetailScreen(
         }
     }
 }
-
 @Composable
 private fun LessonListItem(
     link: PlaylistsMappingSectionLink,
     sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
-    onClickLesson: (PlaylistsMappingSectionLink) -> Unit
+    onClickLesson: (PlaylistsMappingSectionLink) -> Unit,
+    isSelectionMode: Boolean = false,
+    isSelected: Boolean = false
 ) {
     val stateFlow = remember(link.href) {
         sectionLinkUiState(link)

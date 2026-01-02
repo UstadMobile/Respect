@@ -565,7 +565,8 @@ class LearningUnitDetail (
     private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
     val expectedIdentifier: String? = null,
-    private val mappingDataJson: String? = null
+    private val mappingDataJson: String? = null,
+    val isSelectionMode: Boolean = false,
 ) : RespectAppRoute {
 
     val learningUnitManifestUrl: Url
@@ -598,10 +599,14 @@ class LearningUnitDetail (
             appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
-            mappingDataJson = null
+            mappingDataJson = null,
+            isSelectionMode = false,
         )
 
-        fun createFromMapping(mapping: PlaylistsMapping): LearningUnitDetail {
+        fun createFromMapping(
+            mapping: PlaylistsMapping,
+            isSelectionMode: Boolean = false
+        ): LearningUnitDetail {
             val mappingJson = try {
                 Json.encodeToString(PlaylistsMapping.serializer(), mapping)
             } catch (e: Exception) {
@@ -613,7 +618,8 @@ class LearningUnitDetail (
                 appManifestUrlStr = "",
                 refererUrlStr = null,
                 expectedIdentifier = null,
-                mappingDataJson = mappingJson
+                mappingDataJson = mappingJson,
+                isSelectionMode = isSelectionMode,
             )
         }
     }

@@ -22,7 +22,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
-import world.respect.app.view.curriculum.mapping.list.PlaylistListScreen
+import world.respect.app.view.playlists.mapping.list.PlaylistListScreen
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest

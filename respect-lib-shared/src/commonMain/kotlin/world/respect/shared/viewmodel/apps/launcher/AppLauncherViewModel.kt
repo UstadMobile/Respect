@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -56,6 +57,7 @@ data class AppLauncherUiState(
     val canRemove: Boolean = false,
     val emptyListDescription: UiText? = null,
     val selectedTabIndex: Int = 0,
+    val isSelectionMode: Boolean = false,
 )
 
 class AppLauncherViewModel(
@@ -86,6 +88,7 @@ class AppLauncherViewModel(
             params = SchoolAppDataSource.GetListParams()
         )
     }
+
     init {
         _appUiState.update {
             it.copy(
@@ -93,6 +96,7 @@ class AppLauncherViewModel(
                     when (route.resultDest.resultKey) {
                         AssignmentEditViewModel.KEY_PLAYLIST_SELECTION ->
                             Res.string.add_task_to_assignment.asUiText()
+
                         else ->
                             Res.string.home.asUiText()
                     }
@@ -104,14 +108,21 @@ class AppLauncherViewModel(
                 showBackButton = route.resultDest != null,
             )
         }
-        val showPlaylistTab = route.resultDest?.resultKey == AssignmentEditViewModel.KEY_PLAYLIST_SELECTION
+
+        val isFromAssignmentEdit =
+            route.resultDest?.resultKey == AssignmentEditViewModel.KEY_PLAYLIST_SELECTION
+
         _uiState.update { prev ->
             prev.copy(
                 respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
                 apps = pagingSourceHolder,
-                selectedTabIndex = if (showPlaylistTab) 1 else 0,
+                selectedTabIndex = if (isFromAssignmentEdit) 1 else 0,
+                isSelectionMode = isFromAssignmentEdit,
             )
         }
+
+        playlistListViewModel.setSelectionMode(isFromAssignmentEdit)
+
         viewModelScope.launch {
             playlistListViewModel.navCommandFlow.collect { navCommand ->
                 _navCommandFlow.tryEmit(navCommand)
@@ -122,7 +133,10 @@ class AppLauncherViewModel(
         playlistListViewModel.setMappings(savedMappings)
         viewModelScope.launch {
             playlistListViewModel.uiState.collect { state ->
-                cachedPlaylists = state.mappings
+                savedStateHandle[KEY_MAPPINGS_LIST] = json.encodeToString(
+                    ListSerializer(PlaylistsMapping.serializer()),
+                    state.mappings
+                )
             }
         }
 
@@ -142,7 +156,7 @@ class AppLauncherViewModel(
                 _uiState.update {
                     it.copy(
                         canRemove = isAdmin,
-                        emptyListDescription = if(isAdmin)
+                        emptyListDescription = if (isAdmin)
                             Res.string.empty_list_description_admin.asUiText()
                         else
                             Res.string.empty_list_description_non_admin.asUiText()
@@ -180,7 +194,10 @@ class AppLauncherViewModel(
     private fun loadMappingsFromSavedState(savedStateHandle: SavedStateHandle): List<PlaylistsMapping> {
         val mappingsJson = savedStateHandle.get<String>(KEY_MAPPINGS_LIST) ?: return emptyList()
         return try {
-            json.decodeFromString<List<PlaylistsMapping>>(mappingsJson)
+            json.decodeFromString(
+                ListSerializer(PlaylistsMapping.serializer()),
+                mappingsJson
+            )
         } catch (e: Exception) {
             emptyList()
         }
@@ -191,13 +208,13 @@ class AppLauncherViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                if(route.resultDest != null) {
+                if (route.resultDest != null) {
                     LearningUnitList.create(
                         opdsFeedUrl = url.resolve(appData.learningUnits.toString()),
                         appManifestUrl = url,
                         resultDest = route.resultDest,
                     )
-                }else {
+                } else {
                     AppsDetail.create(
                         manifestUrl = url,
                         resultDest = route.resultDest,
@@ -237,6 +254,5 @@ class AppLauncherViewModel(
 
     companion object {
         const val KEY_MAPPINGS_LIST = "mappings_list"
-        var cachedPlaylists: List<PlaylistsMapping> = emptyList()
     }
 }

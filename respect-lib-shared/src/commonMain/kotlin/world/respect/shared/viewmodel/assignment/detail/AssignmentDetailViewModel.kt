@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -44,6 +46,7 @@ import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
 
 data class AssignmentDetailUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -55,6 +58,7 @@ class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
+    private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -136,16 +140,31 @@ class AssignmentDetailViewModel(
     }
 
     fun onClickEdit() {
+        val availablePlaylists = getAvailablePlaylists()
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AssignmentEdit.create(
                     uid = route.uid,
-                    availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                    availablePlaylists = availablePlaylists
                 )
             )
         )
     }
-
+    private fun getAvailablePlaylists(): List<PlaylistsMapping> {
+        val mappingsJson = savedStateHandle.get<String>(AppLauncherViewModel.KEY_MAPPINGS_LIST)
+        return if (mappingsJson != null) {
+            try {
+                json.decodeFromString(
+                    ListSerializer(PlaylistsMapping.serializer()),
+                    mappingsJson
+                )
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+    }
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
         return respectAppDataSource.opdsDataSource.loadOpdsPublication(
             url = url, params = DataLoadParams(), null, null

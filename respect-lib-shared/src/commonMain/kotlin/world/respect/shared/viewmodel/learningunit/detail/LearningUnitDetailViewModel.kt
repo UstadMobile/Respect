@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
@@ -38,6 +40,7 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
 import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
@@ -56,12 +59,14 @@ data class LearningUnitDetailUiState(
     },
     val showCopyDialog: Boolean = false,
     val copyDialogName: String = "",
+    val isSelectionMode: Boolean = false,
+    val selectedLessons: Set<PlaylistsMappingSectionLink> = emptySet(),
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null || mapping != null
 
     val showEditButton: Boolean
-        get() = mapping != null
+        get() = mapping != null && !isSelectionMode
 }
 
 class LearningUnitDetailViewModel(
@@ -70,6 +75,7 @@ class LearningUnitDetailViewModel(
     private val launchAppUseCase: LaunchAppUseCase,
     private val ustadCache: UstadCache,
     private val resultReturner: NavResultReturner,
+    private val json: Json,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
@@ -80,17 +86,21 @@ class LearningUnitDetailViewModel(
 
     init {
         val mappingData = route.mappingData
+        val isSelectionMode = route.isSelectionMode
 
         if (mappingData != null) {
             _uiState.update {
                 it.copy(
                     mapping = mappingData,
-                    sectionLinkUiState = this@LearningUnitDetailViewModel::sectionLinkUiStateFor
+                    sectionLinkUiState = this@LearningUnitDetailViewModel::sectionLinkUiStateFor,
+                    isSelectionMode = isSelectionMode
                 )
             }
             _appUiState.update {
                 it.copy(
-                    title = mappingData.title.asUiText()
+                    title = mappingData.title.asUiText(),
+                    hideBottomNavigation = isSelectionMode,
+                    showBackButton = true,
                 )
             }
         } else {
@@ -113,7 +123,9 @@ class LearningUnitDetailViewModel(
 
                             _appUiState.update {
                                 it.copy(
-                                    title = result.data.metadata.title.getTitle().asUiText()
+                                    title = result.data.metadata.title.getTitle().asUiText(),
+                                    showBackButton = true,
+                                    hideBottomNavigation = false
                                 )
                             }
                         }
@@ -177,6 +189,7 @@ class LearningUnitDetailViewModel(
             }
         }
     }
+
     private suspend fun loadLessonPublications(
         lessons: List<PlaylistsMappingSectionLink>
     ): List<LearningUnitSelection> {
@@ -204,8 +217,26 @@ class LearningUnitDetailViewModel(
             }
         }
     }
+
+    private fun getAvailablePlaylists(): List<PlaylistsMapping> {
+        val mappingsJson = savedStateHandle.get<String>(AppLauncherViewModel.KEY_MAPPINGS_LIST)
+        return if (mappingsJson != null) {
+            try {
+                json.decodeFromString(
+                    ListSerializer(PlaylistsMapping.serializer()),
+                    mappingsJson
+                )
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+    }
+
     fun onClickAssign() {
         val mapping = uiState.value.mapping
+        val availablePlaylists = getAvailablePlaylists()
 
         if (mapping != null) {
             val allLessons = mapping.sections.flatMap { section ->
@@ -222,7 +253,7 @@ class LearningUnitDetailViewModel(
                                 destination = AssignmentEdit.createWithMultipleLessons(
                                     uid = null,
                                     learningUnits = learningUnitSelections,
-                                    availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                                    availablePlaylists = availablePlaylists
                                 )
                             )
                         )
@@ -234,7 +265,7 @@ class LearningUnitDetailViewModel(
                         destination = AssignmentEdit.create(
                             uid = null,
                             learningUnitSelected = null,
-                            availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                            availablePlaylists = availablePlaylists
                         )
                     )
                 )
@@ -250,16 +281,18 @@ class LearningUnitDetailViewModel(
                             selectedPublication = publicationVal,
                             appManifestUrl = route.appManifestUrl,
                         ),
-                        availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                        availablePlaylists = availablePlaylists
                     )
                 )
             )
         }
     }
+
     fun onClickAssignSection(sectionUid: Long) {
         val mapping = _uiState.value.mapping ?: return
         val section = mapping.sections.find { it.uid == sectionUid } ?: return
         val sectionLessons = section.items.filter { it.appManifestUrl != null }
+        val availablePlaylists = getAvailablePlaylists()
 
         if (sectionLessons.isNotEmpty()) {
             viewModelScope.launch {
@@ -271,7 +304,7 @@ class LearningUnitDetailViewModel(
                             destination = AssignmentEdit.createWithMultipleLessons(
                                 uid = null,
                                 learningUnits = learningUnitSelections,
-                                availablePlaylists = AppLauncherViewModel.cachedPlaylists
+                                availablePlaylists = availablePlaylists
                             )
                         )
                     )
@@ -280,20 +313,55 @@ class LearningUnitDetailViewModel(
         }
     }
 
-    fun onClickLesson(link: PlaylistsMappingSectionLink) {
-        val publicationUrl = Url(link.href)
-        val appManifestUrl = link.appManifestUrl ?: return
+    fun onLessonSelectionToggle(link: PlaylistsMappingSectionLink) {
+        _uiState.update { prev ->
+            val selected = if (prev.selectedLessons.contains(link)) {
+                prev.selectedLessons - link
+            } else {
+                prev.selectedLessons + link
+            }
+            prev.copy(selectedLessons = selected)
+        }
+    }
 
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = publicationUrl,
-                    appManifestUrl = appManifestUrl,
-                    refererUrl = publicationUrl,
-                    expectedIdentifier = null
+    fun onConfirmSelection() {
+        val selectedLessons = _uiState.value.selectedLessons.toList()
+
+        if (selectedLessons.isEmpty()) return
+
+        viewModelScope.launch {
+            val learningUnitSelections = loadLessonPublications(selectedLessons)
+
+            if (learningUnitSelections.isNotEmpty()) {
+                resultReturner.sendResult(
+                    NavResult(
+                        key = AssignmentEditViewModel.KEY_PLAYLIST_SELECTION,
+                        result = learningUnitSelections
+                    )
+                )
+                _navCommandFlow.tryEmit(NavCommand.PopUp())
+            }
+        }
+    }
+
+    fun onClickLesson(link: PlaylistsMappingSectionLink) {
+        if (_uiState.value.isSelectionMode) {
+            onLessonSelectionToggle(link)
+        } else {
+            val publicationUrl = Url(link.href)
+            val appManifestUrl = link.appManifestUrl ?: return
+
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = publicationUrl,
+                        appManifestUrl = appManifestUrl,
+                        refererUrl = publicationUrl,
+                        expectedIdentifier = null
+                    )
                 )
             )
-        )
+        }
     }
 
     fun onClickEdit() {

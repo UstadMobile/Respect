@@ -1,4 +1,4 @@
-package world.respect.app.view.curriculum.mapping.list
+package world.respect.app.view.playlists.mapping.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

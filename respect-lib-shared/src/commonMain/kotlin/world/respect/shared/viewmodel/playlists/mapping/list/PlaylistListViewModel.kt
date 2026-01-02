@@ -17,6 +17,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
 import world.respect.shared.generated.resources.Res
@@ -29,6 +30,7 @@ data class PlaylistListUiState(
     val error: UiText? = null,
     val currentUserGuid: String? = null,
     val currentSchoolUrl: Url? = null,
+    val isSelectionMode: Boolean = false,
 ) {
     val filteredMappings: List<PlaylistsMapping>
         get() = when (selectedFilterIndex) {
@@ -89,16 +91,25 @@ class PlaylistListViewModel(
         _uiState.update { it.copy(mappings = mappings) }
     }
 
+    fun setSelectionMode(isSelectionMode: Boolean) {
+        _uiState.update { it.copy(isSelectionMode = isSelectionMode) }
+    }
+
     fun onFilterSelected(index: Int) {
         _uiState.update { it.copy(selectedFilterIndex = index) }
     }
+
     fun onClickMapping(mapping: PlaylistsMapping) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                LearningUnitDetail.createFromMapping(mapping)
+                LearningUnitDetail.createFromMapping(
+                    mapping = mapping,
+                    isSelectionMode = _uiState.value.isSelectionMode
+                )
             )
         )
     }
+
     fun onClickAddNew() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(

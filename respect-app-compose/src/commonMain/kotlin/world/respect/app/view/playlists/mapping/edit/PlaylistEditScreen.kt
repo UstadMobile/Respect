@@ -1,9 +1,8 @@
-package world.respect.app.view.curriculum.mapping.edit
+package world.respect.app.view.playlists.mapping.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -43,16 +42,17 @@ import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
 import world.respect.shared.generated.resources.section_name
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditUiState
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingSectionUiState
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSection
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
+import androidx.compose.ui.draw.alpha
 
 
 @Composable
 fun CurriculumMappingEditScreenForViewModel(
-    viewModel: CurriculumMappingEditViewModel
+    viewModel: PlaylistEditViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -67,13 +67,15 @@ fun CurriculumMappingEditScreenForViewModel(
         onSectionMoved = viewModel::onSectionMoved,
         onClickAddLesson = viewModel::onClickAddLesson,
         onClickRemoveLesson = viewModel::onClickRemoveLesson,
+        onLessonMovedBetweenSections = viewModel::onLessonMovedBetweenSections,
+        onClickLesson = viewModel::onClickLesson,
     )
 }
 
 @Composable
 fun CurriculumMappingEditScreen(
-    uiState: CurriculumMappingEditUiState = CurriculumMappingEditUiState(),
-    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
+    uiState: PlaylistEditUiState = PlaylistEditUiState(),
+    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     onTitleChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onClickAddSection: () -> Unit = {},
@@ -82,9 +84,13 @@ fun CurriculumMappingEditScreen(
     onSectionMoved: (Int, Int) -> Unit = { _, _ -> },
     onClickAddLesson: (Int) -> Unit = {},
     onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
+    onLessonMovedBetweenSections: (Int, Int, Int, Int) -> Unit = { _, _, _, _ -> },
+    onClickLesson: (PlaylistsMappingSectionLink) -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
+    var draggingSectionIndex by remember { mutableStateOf<Int?>(null) }
+    var isDraggingAnySection by remember { mutableStateOf(false) }
     val reorderableLazyListState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         onMove = { from, to ->
@@ -92,11 +98,63 @@ fun CurriculumMappingEditScreen(
             val fromIndex = from.index - headerItemCount
             val toIndex = to.index - headerItemCount
 
-            if (fromIndex >= 0 && toIndex >= 0 &&
-                fromIndex < uiState.sections.size &&
-                toIndex < uiState.sections.size) {
-                onSectionMoved(fromIndex, toIndex)
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            if (fromIndex >= 0 && toIndex >= 0) {
+                var currentItemCount = 0
+                var fromSectionIndex = -1
+                var fromLessonIndex = -1
+                var toSectionIndex = -1
+                var toLessonIndex = -1
+
+                for (sectionIndex in uiState.sections.indices) {
+                    val section = uiState.sections[sectionIndex]
+                    val sectionHeaderIndex = currentItemCount
+                    val lessonStartIndex = currentItemCount + 1
+                    val lessonEndIndex = lessonStartIndex + section.items.size
+
+                    if (fromIndex == sectionHeaderIndex) {
+                        fromSectionIndex = sectionIndex
+                        fromLessonIndex = -1
+                    } else if (fromIndex in lessonStartIndex until lessonEndIndex) {
+                        fromSectionIndex = sectionIndex
+                        fromLessonIndex = fromIndex - lessonStartIndex
+                    }
+
+                    if (toIndex == sectionHeaderIndex) {
+                        toSectionIndex = sectionIndex
+                        toLessonIndex = -1
+                    } else if (toIndex in lessonStartIndex until lessonEndIndex) {
+                        toSectionIndex = sectionIndex
+                        toLessonIndex = toIndex - lessonStartIndex
+                    }
+
+                    currentItemCount = lessonEndIndex
+                }
+
+                when {
+                    fromLessonIndex >= 0 && toLessonIndex >= 0 -> {
+                        onLessonMovedBetweenSections(
+                            fromSectionIndex,
+                            fromLessonIndex,
+                            toSectionIndex,
+                            toLessonIndex
+                        )
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                    fromLessonIndex >= 0 && toLessonIndex == -1 && toSectionIndex >= 0 -> {
+                        onLessonMovedBetweenSections(
+                            fromSectionIndex,
+                            fromLessonIndex,
+                            toSectionIndex,
+                            0
+                        )
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                    fromLessonIndex == -1 && toLessonIndex == -1 &&
+                            fromSectionIndex >= 0 && toSectionIndex >= 0 -> {
+                        onSectionMoved(fromSectionIndex, toSectionIndex)
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                }
             }
         }
     )
@@ -184,32 +242,70 @@ fun CurriculumMappingEditScreen(
                 }
             }
         } else {
-            itemsIndexed(
-                items = uiState.sections,
-                key = { _, section -> section.uid }
-            ) { sectionIndex, section ->
-                ReorderableItem(
-                    state = reorderableLazyListState,
-                    key = section.uid
-                ) { isDragging ->
-                    SectionItem(
-                        section = section,
-                        sectionLinkUiState = sectionLinkUiState,
-                        sectionIndex = sectionIndex,
-                        isDragging = isDragging,
-                        onSectionTitleChanged = onSectionTitleChanged,
-                        onClickRemoveSection = onClickRemoveSection,
-                        onClickAddLesson = onClickAddLesson,
-                        onClickRemoveLesson = onClickRemoveLesson,
-                        dragModifier = Modifier.draggableHandle(
-                            onDragStarted = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            },
-                            onDragStopped = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            uiState.sections.forEachIndexed { sectionIndex, section ->
+                item(key = "section_header_${section.uid}") {
+                    ReorderableItem(
+                        state = reorderableLazyListState,
+                        key = "section_header_${section.uid}"
+                    ) { isDragging ->
+                        LaunchedEffect(isDragging) {
+                            if (isDragging) {
+                                draggingSectionIndex = sectionIndex
+                                isDraggingAnySection = true
+                            } else {
+                                draggingSectionIndex = null
+                                isDraggingAnySection = false
                             }
+                        }
+
+                        SectionItem(
+                            section = section,
+                            sectionIndex = sectionIndex,
+                            isDragging = isDragging,
+                            onSectionTitleChanged = onSectionTitleChanged,
+                            onClickRemoveSection = onClickRemoveSection,
+                            onClickAddLesson = onClickAddLesson,
+                            dragModifier = Modifier.draggableHandle(
+                                onDragStarted = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                },
+                                onDragStopped = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }
+                            )
                         )
-                    )
+                    }
+                }
+
+                section.items.forEachIndexed { linkIndex, link ->
+                    item(key = "lesson_${section.uid}_${link.href}_$linkIndex") {
+                        ReorderableItem(
+                            state = reorderableLazyListState,
+                            key = "lesson_${section.uid}_${link.href}_$linkIndex",
+                            enabled = !isDraggingAnySection
+                        ) { isDragging ->
+                            val isParentSectionDragging = draggingSectionIndex == sectionIndex
+                            LessonItem(
+                                link = link,
+                                sectionLinkUiState = sectionLinkUiState,
+                                sectionIndex = sectionIndex,
+                                linkIndex = linkIndex,
+                                onClickRemoveLesson = onClickRemoveLesson,
+                                onClickLesson = onClickLesson,
+                                isDragging = isDragging,
+                                isParentSectionDragging = isParentSectionDragging,
+                                dragModifier = Modifier.draggableHandle(
+                                    enabled = !isDraggingAnySection,
+                                    onDragStarted = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    },
+                                    onDragStopped = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    }
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -219,14 +315,12 @@ fun CurriculumMappingEditScreen(
 
 @Composable
 private fun SectionItem(
-    section: CurriculumMappingSection,
-    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
+    section: PlaylistsMappingSection,
     sectionIndex: Int,
     isDragging: Boolean,
     onSectionTitleChanged: (Int, String) -> Unit,
     onClickRemoveSection: (Int) -> Unit,
     onClickAddLesson: (Int) -> Unit,
-    onClickRemoveLesson: (Int, Int) -> Unit,
     dragModifier: Modifier = Modifier
 ) {
     Card(
@@ -293,7 +387,8 @@ private fun SectionItem(
             ) {
                 OutlinedButton(
                     onClick = { onClickAddLesson(sectionIndex) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                    .testTag("add_item"),
                     enabled = !isDragging
                 ) {
                     Icon(
@@ -305,32 +400,21 @@ private fun SectionItem(
                     Text(stringResource(Res.string.lesson))
                 }
             }
-
-            section.items.forEachIndexed { linkIndex, link ->
-                LessonItem(
-                    link = link,
-                    sectionLinkUiState = sectionLinkUiState,
-                    sectionIndex = sectionIndex,
-                    linkIndex = linkIndex,
-                    onClickRemoveLesson = onClickRemoveLesson,
-                    enabled = !isDragging
-                )
-                if (linkIndex < section.items.size - 1) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
         }
     }
 }
 
 @Composable
 private fun LessonItem(
-    link: CurriculumMappingSectionLink,
-    sectionLinkUiState: (CurriculumMappingSectionLink) -> Flow<DataLoadState<CurriculumMappingSectionUiState>>,
+    link: PlaylistsMappingSectionLink,
+    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     sectionIndex: Int,
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
-    enabled: Boolean
+    onClickLesson: (PlaylistsMappingSectionLink) -> Unit = {},
+    isDragging: Boolean,
+    isParentSectionDragging: Boolean = false,
+    dragModifier: Modifier = Modifier
 ) {
 
     val stateFlow = remember(link.href) {
@@ -339,41 +423,77 @@ private fun LessonItem(
 
     val linkUiState by stateFlow.collectAsState(initial = DataLoadingState())
 
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 32.dp, top = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        linkUiState.dataOrNull()?.icon?.also { iconUrl ->
-            RespectAsyncImage(
-                uri = iconUrl.toString(),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(36.dp)
+            .padding(start = 48.dp, end = 16.dp, bottom = 8.dp)
+            .then(
+                if (isParentSectionDragging) {
+                    Modifier.alpha(0.5f)
+                } else {
+                    Modifier
+                }
             )
-        }
-
-        Spacer(Modifier.width(16.dp))
-
-        Text(
-            text = link.title ?: "${stringResource(Res.string.lesson)} ${linkIndex + 1}",
-            modifier = Modifier.weight(1f)
+            .clickable(
+                enabled = !isDragging && !isParentSectionDragging,
+                onClick = { onClickLesson(link) }
+            ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isDragging) 8.dp else 1.dp
         )
-
-        Spacer(Modifier.width(16.dp))
-
-        IconButton(
-            onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
-            modifier = Modifier.size(24.dp),
-            enabled = enabled
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                Icons.Filled.Close,
-                contentDescription = stringResource(Res.string.remove_lesson),
-                modifier = Modifier.size(16.dp)
+                Icons.Filled.DragHandle,
+                contentDescription = stringResource(Res.string.drag),
+                modifier = dragModifier.size(20.dp),
+                tint = if (isDragging) MaterialTheme.colorScheme.primary
+                else if (isParentSectionDragging) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                else MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(Modifier.width(12.dp))
+
+            linkUiState.dataOrNull()?.icon?.also { iconUrl ->
+                RespectAsyncImage(
+                    uri = iconUrl.toString(),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(36.dp)
+                )
+            }
+
+            Spacer(Modifier.width(16.dp))
+
+            Text(
+                text = link.title ?: "${stringResource(Res.string.lesson)} ${linkIndex + 1}",
+                modifier = Modifier.weight(1f),
+                color = if (isParentSectionDragging) {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+
+            Spacer(Modifier.width(16.dp))
+
+            IconButton(
+                onClick = { onClickRemoveLesson(sectionIndex, linkIndex) },
+                modifier = Modifier.size(24.dp),
+                enabled = !isDragging && !isParentSectionDragging
+            ) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(Res.string.remove_lesson),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }

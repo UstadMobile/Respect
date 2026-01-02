@@ -21,6 +21,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 
 
+
 data class AppListUiState(
     val appList: List<DataLoadState<RespectAppManifest>> = emptyList()
 )
@@ -63,7 +64,7 @@ class AppListViewModel(
     fun onClickAddLink() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                EnterLink
+                EnterLink.create()
             )
         )
     }

@@ -190,7 +190,6 @@ import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForAp
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
-import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidChannelHost
 import world.respect.shared.domain.biometric.BiometricAuthManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
@@ -614,9 +613,6 @@ val appKoinModule = module {
         CustomDeepLinkToUrlUseCase(customProtocol = androidApplication().packageName)
     }
 
-    single<BiometricAuthUseCaseAndroidChannelHost> {
-        BiometricAuthUseCaseAndroidChannelHost()
-    }
     single {
         BiometricAuthUseCaseAndroidImpl()
     }

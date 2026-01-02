@@ -34,6 +34,7 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: ${SCHOOL_ADMIN_PASSWORD}
+- hideKeyboard
 - tapOn: "Login"
 - runFlow:
     when:

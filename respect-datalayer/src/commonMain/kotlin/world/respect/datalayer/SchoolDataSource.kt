@@ -8,6 +8,7 @@ import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
+import world.respect.datalayer.school.PersonQrDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
 
 /**
@@ -25,6 +26,8 @@ interface SchoolDataSource {
     val personPasskeyDataSource: PersonPasskeyDataSource
 
     val personPasswordDataSource: PersonPasswordDataSource
+
+    val personQrDataSource: PersonQrDataSource
 
     val reportDataSource: ReportDataSource
 

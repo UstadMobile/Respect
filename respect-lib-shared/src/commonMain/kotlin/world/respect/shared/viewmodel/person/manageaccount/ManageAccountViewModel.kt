@@ -13,15 +13,17 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
+import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.school.model.PersonPassword
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.generated.resources.Res
@@ -30,11 +32,18 @@ import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PasskeyList
+import world.respect.shared.navigation.RouteResultDest
+import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.isStudent
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import kotlin.time.Clock
 
 data class ManageAccountUiState(
     val accountGuid: String = "",
@@ -44,6 +53,12 @@ data class ManageAccountUiState(
     val personPassword: DataLoadState<PersonPassword> = DataLoadingState(),
     val errorText: UiText? = null,
     val selectedAccount: RespectSessionAndPerson? = null,
+    val isStudent: Boolean = false,
+    val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
+    val showBottomSheet: Boolean = false,
+    val badgeNumber: String? = null,
+    val isQrAlreadyAssignedToAnotherPerson: Boolean = false,
+    val isQrAdded: Boolean = false,
 ) {
 
     val showCreatePasskey: Boolean
@@ -60,6 +75,8 @@ class ManageAccountViewModel(
     private val accountManager: RespectAccountManager,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val json: Json,
+    private val snackBarDispatcher: SnackBarDispatcher,
+    private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -95,12 +112,43 @@ class ManageAccountViewModel(
                 title = Res.string.manage_account.asUiText()
             )
         }
+        viewModelScope.launch {
+            if (route.qrUrl != null && route.username != null) {
+                saveUsername(route.username)
+                storeQrCodeForPerson(personGuid = personGuid, url = route.qrUrl.toString())
+            }
+        }
+        viewModelScope.launch {
+            navResultReturner.filteredResultFlowForKey(
+                QR_SELECT_RESULT
+            ).collect { navResult ->
+                val qrUrl = navResult.result as? String ?: return@collect
+                storeQrCodeForPerson(personGuid = personGuid, url = qrUrl)
+            }
+        }
 
         viewModelScope.launch {
             schoolDataSource.personPasswordDataSource.findByPersonGuidAsFlow(
                 route.guid
             ).collect { password ->
                 _uiState.update { it.copy(personPassword = password) }
+            }
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.personQrDataSource.findByPersonGuidAsFlow(
+                route.guid
+            ).collect { qrBadgeState ->
+                val badgeNumber = qrBadgeState.dataOrNull()?.qrCodeUrl?.let { url ->
+                    extractBadgeNumberFromUrl(url)
+                }
+                _uiState.update {
+                    it.copy(
+                        qrBadge = qrBadgeState,
+                        badgeNumber = badgeNumber,
+                        isQrAdded = badgeNumber != null
+                    )
+                }
             }
         }
 
@@ -128,7 +176,10 @@ class ManageAccountViewModel(
                     route.guid
                 ).collect {
                     _uiState.update { prev ->
-                        prev.copy(personUsername = it.dataOrNull()?.username ?: "")
+                        prev.copy(
+                            personUsername = it.dataOrNull()?.username ?: "",
+                            isStudent = it.dataOrNull()?.isStudent() == true
+                        )
                     }
                 }
             }
@@ -147,6 +198,15 @@ class ManageAccountViewModel(
                 passkeySupported = (createPasskeyUseCase != null &&
                         accountManager.activeAccount?.userGuid == personGuid),
             )
+        }
+    }
+
+    private fun extractBadgeNumberFromUrl(url: String): String? {
+        return try {
+            val pattern = """/id/(\d+)$""".toRegex()
+            pattern.find(url)?.groupValues?.get(1)
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -174,13 +234,125 @@ class ManageAccountViewModel(
         )
     }
 
+    fun onClickQRCodeBadge() {
+        val schoolUrl = accountManager.activeAccount?.school?.self
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                ScanQRCode.create(
+                    guid = personGuid,
+                    schoolUrl = schoolUrl,
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = QR_SELECT_RESULT
+                    )
+                )
+            )
+        )
+    }
+
+    fun onDismissBottomSheet() {
+        _uiState.update { prev ->
+            prev.copy(
+                showBottomSheet = false,
+            )
+        }
+    }
+
+    fun onRemoveQRBadge() {
+        viewModelScope.launch {
+            try {
+                val currentQrBadge = uiState.value.qrBadge.dataOrNull()
+                if (currentQrBadge != null) {
+                    schoolDataSource.personQrDataSource.deletePersonBadge(currentQrBadge.personGuid.toLong())
+                }
+            } catch (e: Exception) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        errorText = StringUiText("Failed to remove QR badge: ${e.message}")
+                    )
+                }
+            }
+        }
+    }
+
+    private fun storeQrCodeForPerson(personGuid: String, url: String) {
+        viewModelScope.launch {
+            try {
+                val qrCodeAlreadyAssignedToAnotherPerson =
+                    schoolDataSource.personQrDataSource.existsByQrCodeUrl(url, personGuid.toLong())
+
+                if (qrCodeAlreadyAssignedToAnotherPerson) {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            isQrAlreadyAssignedToAnotherPerson = true
+                        )
+                    }
+                    snackBarDispatcher.showSnackBar(
+                        Snack("This QR code is already assigned to another student".asUiText())
+                    )
+                } else {
+                    _uiState.update { prev ->
+                        prev.copy(
+                            isQrAlreadyAssignedToAnotherPerson = false
+                        )
+                    }
+                }
+
+                if (!uiState.value.isQrAlreadyAssignedToAnotherPerson) {
+                    val now = Clock.System.now()
+                    schoolDataSource.personQrDataSource.store(
+                        listOf(
+                            PersonBadge(
+                                personGuid = personGuid,
+                                qrCodeUrl = url,
+                                lastModified = now,
+                                stored = now
+                            )
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                snackBarDispatcher.showSnackBar(
+                    Snack("Failed to assign QR code: ${e.message}".asUiText())
+                )
+                throw e
+            }
+        }
+    }
+
+    private fun saveUsername(username: String?) {
+        viewModelScope.launch {
+            val person = schoolDataSource.personDataSource.findByGuid(
+                DataLoadParams(), route.guid
+            ).dataOrNull() ?: throw IllegalStateException("Person not found")
+
+            schoolDataSource.personDataSource.store(
+                listOf(
+                    person.copy(
+                        username = username,
+                        lastModified = Clock.System.now(),
+                    )
+                )
+            )
+        }
+    }
+
+    fun onClickChangeQrBadge() {
+        _uiState.update { prev ->
+            prev.copy(
+                showBottomSheet = true,
+            )
+        }
+    }
+
     fun onCreatePasskeyClick() {
         viewModelScope.launch {
             val passkeyCreated = createPasskeyUseCase?.invoke(
                 CreatePasskeyUseCase.Request(
                     personUid = uiState.value.selectedAccount?.person?.guid ?: return@launch,
                     username = uiState.value.selectedAccount?.person?.username ?: return@launch,
-                    rpId = uiState.value.selectedAccount?.session?.account?.school?.rpId ?: return@launch
+                    rpId = uiState.value.selectedAccount?.session?.account?.school?.rpId
+                        ?: return@launch
                 )
             )
 
@@ -213,6 +385,10 @@ class ManageAccountViewModel(
             }
 
         }
+    }
+
+    companion object {
+        const val QR_SELECT_RESULT = "qr_select_result"
     }
 
 }

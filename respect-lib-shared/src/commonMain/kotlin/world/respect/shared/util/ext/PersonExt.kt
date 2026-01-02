@@ -20,6 +20,12 @@ fun Person.isAdminOrTeacher() : Boolean {
     }
 }
 
+fun Person.isStudent() : Boolean {
+    return roles.any {
+        it.roleEnum == PersonRoleEnum.STUDENT
+    }
+}
+
 fun Person.isAdmin() : Boolean {
     return roles.any {
         it.roleEnum == PersonRoleEnum.SYSTEM_ADMINISTRATOR

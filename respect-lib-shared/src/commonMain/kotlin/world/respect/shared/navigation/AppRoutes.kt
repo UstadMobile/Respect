@@ -3,7 +3,6 @@
 
 package world.respect.shared.navigation
 
-import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -600,7 +599,25 @@ data class PasskeyList(
 @Serializable
 data class ManageAccount(
     val guid: String,
-) : RespectAppRoute
+    val username: String? = null,
+    private val qrUrlStr: String? = null,
+) : RespectAppRoute {
+    @Transient
+
+    val qrUrl: Url? = qrUrlStr?.let { Url(it) }
+
+    companion object {
+        fun create(
+            guid: String,
+            qrUrl: Url? = null,
+            username: String? = null
+        ) = ManageAccount(
+            guid = guid,
+            qrUrlStr = qrUrl?.toString(),
+            username = username
+        )
+    }
+}
 
 @Serializable
 data class PersonEdit(
@@ -634,6 +651,35 @@ data class PersonEdit(
 
 @Serializable
 data object Settings : RespectAppRoute
+
+@Serializable
+data class ScanQRCode(
+    val guid: String? = null,
+    val resultDestStr: String? = null,
+    private val schoolUrlStr: String? = null,
+    val username: String? = null
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    @Transient
+    val schoolUrl: Url? = schoolUrlStr?.let { Url(it) }
+
+    companion object {
+        fun create(
+            guid: String? = null,
+            resultDest: ResultDest? = null,
+            schoolUrl: Url? = null,
+            username: String? = null
+        ) = ScanQRCode(
+            guid = guid,
+            resultDestStr = resultDest?.encodeToJsonStringOrNull(),
+            username = username,
+            schoolUrlStr = schoolUrl?.toString()
+        )
+    }
+}
 
 @Serializable
 data object CurriculumMappingList : RespectAppRoute
@@ -673,6 +719,13 @@ data class CurriculumMappingEdit(
 data class SetUsernameAndPassword(
     val guid: String
 ): RespectAppRoute
+
+@Serializable
+data class CreateAccountSetPassword(
+    val guid: String,
+    val username: String? = null,
+) : RespectAppRoute
+
 
 
 @Serializable

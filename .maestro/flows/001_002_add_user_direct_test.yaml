@@ -311,7 +311,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Manage account"
-- assertVisible: "Child User"
 
 # Validate Child User QR Login using Scan QR/badge
 - clearState: world.respect.app

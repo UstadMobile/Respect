@@ -14,6 +14,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
@@ -159,9 +160,11 @@ class AccountListViewModel(
     fun onClickFamilyPerson(person: Person) {
         viewModelScope.launch {
             respectAccountManager.switchProfile(person.guid)
+            val destination = if(person.roles.firstOrNull()?.roleEnum== PersonRoleEnum.PARENT)
+                RespectAppLauncher() else AssignmentList
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    AssignmentList,
+                    destination,
                     clearBackStack = true
                 )
             )

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,14 +33,7 @@ class AcknowledgementViewModel(
 
     init {
 
-        viewModelScope.launch {
-            val selectedPerson = accountManager.selectedAccountAndPersonFlow.firstOrNull()
-            _uiState.update { prev ->
-                prev.copy(
-                    isChild = selectedPerson?.isChild == true
-                )
-            }
-        }
+
         viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(
@@ -47,7 +41,14 @@ class AcknowledgementViewModel(
                     hideAppBar = true
                 )
             }
+            val selectedPerson =
+                accountManager.selectedAccountAndPersonFlow.first()
 
+            val isChild = selectedPerson?.isChild == true
+
+            _uiState.update { prev ->
+                prev.copy(isChild = isChild)
+            }
             delay(2000)
 
             val hasAccount = accountManager.activeAccount != null

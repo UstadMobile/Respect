@@ -299,14 +299,14 @@ onFlowComplete:
 - tapOn:
     id: "password_change_btn"  # Change password button
 - tapOn: "Old password*"
-- inputText: "test234"
+- inputText: "test123"
 - tapOn: "New password*"
 - inputText: "t2"
 - tapOn: "Save"
 - assertVisible: "Password must be at least 6 characters"
 - tapOn: "New password*"
 - eraseText
-- inputText: "test123"
+- inputText: "test234"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"

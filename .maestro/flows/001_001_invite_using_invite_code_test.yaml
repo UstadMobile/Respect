@@ -330,6 +330,16 @@ onFlowComplete:
     text: "Done"
     retryTapIfNoChange: true
     waitToSettleTimeoutMs: 1000
+
+- repeat:
+    while:
+      notVisible: "Waiting for approval"
+    commands:
+      - tapOn:
+          text: "Done"
+          retryTapIfNoChange: true
+          waitToSettleTimeoutMs: 1000
+
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"

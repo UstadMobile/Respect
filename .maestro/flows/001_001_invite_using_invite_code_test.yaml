@@ -325,9 +325,12 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
+# 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
 - tapOn:
     id: "action_bar_button"
     text: "Done"
+    retryTapIfNoChange: true
+    waitToSettleTimeoutMs: 1000
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"

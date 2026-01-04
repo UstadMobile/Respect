@@ -328,17 +328,15 @@ onFlowComplete:
 # 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
 - tapOn:
     text: "Done"
-    retryTapIfNoChange: true
-    waitToSettleTimeoutMs: 1000
 
 - repeat:
     while:
       notVisible: "Waiting for approval"
+      visible: "Done"
     commands:
       - tapOn:
           text: "Done"
-          retryTapIfNoChange: true
-          waitToSettleTimeoutMs: 1000
+          retryTapIfNoChange: false
 
 - assertVisible:
     id: "app_title"

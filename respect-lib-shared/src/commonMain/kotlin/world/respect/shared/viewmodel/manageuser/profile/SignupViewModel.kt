@@ -65,6 +65,8 @@ class SignupViewModel(
     val uiState = _uiState.asStateFlow()
 
     init {
+        Napier.d("SignupViewModel: init: route type=${route.type}")
+
         _uiState.update { prev ->
             when(route.type) {
                 ProfileType.CHILD -> {
@@ -151,9 +153,9 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-        Napier.d("SignupViewModel: onClickSave")
+        Napier.d("SignupViewModel: onClickSave: route type=${route.type}")
         launchWithLoadingIndicator {
-            Napier.d("SignupViewModel: onClickSave.launch")
+            Napier.d("SignupViewModel: onClickSave.launch: name=${_uiState.value.personInfo.name}")
             val personInfo = _uiState.value.personInfo
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 

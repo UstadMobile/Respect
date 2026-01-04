@@ -1,12 +1,11 @@
 package world.respect.shared.viewmodel.manageuser.profile
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -41,15 +40,12 @@ import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.time.Clock
 
 data class SignupUiState(
-    val screenTitle: UiText? = null,
-    val actionBarButtonName: UiText? = null,
     val nameLabel: UiText? = null,
     val genderLabel: UiText? = null,
     val dateOfBirthLabel: UiText?=null,
     val personPicture: String?=null,
 
     val personInfo: RespectRedeemInviteRequest.PersonInfo = RespectRedeemInviteRequest.PersonInfo(),
-
 
     val fullNameError: UiText? = null,
     val genderError: UiText? = null,
@@ -73,8 +69,6 @@ class SignupViewModel(
             when(route.type) {
                 ProfileType.CHILD -> {
                     prev.copy(
-                        screenTitle = Res.string.child_profile_title.asUiText(),
-                        actionBarButtonName = Res.string.done.asUiText(),
                         nameLabel = Res.string.child_name_label.asUiText(),
                         genderLabel = Res.string.child_gender_label.asUiText(),
                         dateOfBirthLabel = Res.string.child_dob_label.asUiText(),
@@ -83,8 +77,6 @@ class SignupViewModel(
 
                 else -> {
                     prev.copy(
-                        screenTitle = Res.string.your_profile_title.asUiText(),
-                        actionBarButtonName = Res.string.next.asUiText(),
                         nameLabel = Res.string.your_name_label.asUiText(),
                         genderLabel = Res.string.your_gender_label.asUiText(),
                         dateOfBirthLabel = Res.string.your_dob_label.asUiText(),
@@ -95,22 +87,26 @@ class SignupViewModel(
             }
         }
 
-        viewModelScope.launch {
-            _appUiState.update { prev ->
-                prev.copy(
-                    actionBarButtonState = ActionBarButtonUiState(
-                        visible = true,
-                        text = uiState.value.actionBarButtonName,
-                        onClick = { onClickSave() }
-                    ),
-                    title = uiState.value.screenTitle,
-                    hideBottomNavigation = true,
-                    userAccountIconVisible = false
-                )
-            }
+        _appUiState.update { prev ->
+            prev.copy(
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = when(route.type) {
+                        ProfileType.CHILD -> Res.string.done.asUiText()
+                        else -> Res.string.next.asUiText()
+                    },
+                    onClick = ::onClickSave
+                ),
+                title = when(route.type) {
+                    ProfileType.CHILD -> Res.string.child_profile_title.asUiText()
+                    else -> Res.string.your_profile_title.asUiText()
+                },
+                hideBottomNavigation = true,
+                userAccountIconVisible = false
+            )
         }
-
     }
+
     fun onFullNameChanged(value: String) {
         _uiState.update { prev ->
             val currentPerson = prev.personInfo
@@ -155,7 +151,9 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
+        Napier.d("SignupViewModel: onClickSave")
         launchWithLoadingIndicator {
+            Napier.d("SignupViewModel: onClickSave.launch")
             val personInfo = _uiState.value.personInfo
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -181,14 +179,14 @@ class SignupViewModel(
             ).any { it }
 
             if (hasError) {
+                Napier.w("SignupViewModel: onClickSave.launch: haserrors")
                 return@launchWithLoadingIndicator
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {
+                        Napier.d("SignupViewModel: adding child")
                         val scope: Scope = accountManager.requireActiveAccountScope()
-                        val addChildAccountUseCase: AddChildAccountUseCase by lazy {
-                            scope.get()
-                        }
+                        val addChildAccountUseCase: AddChildAccountUseCase = scope.get()
 
                         addChildAccountUseCase(
                             personInfo = personInfo,
@@ -197,6 +195,7 @@ class SignupViewModel(
                             inviteCode = route.respectRedeemInviteRequest.code
                         )
 
+                        Napier.d("SignupViewModel: Navigating to wait for approval")
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(
                                 destination = WaitingForApproval(),
@@ -207,6 +206,7 @@ class SignupViewModel(
                     }
 
                     else -> {
+                        Napier.d("SignupViewModel: Navigating to create account")
                         _navCommandFlow.tryEmit(
                             value = NavCommand.Navigate(
                                 destination = CreateAccount.create(

@@ -325,7 +325,9 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- tapOn: "Done"
+- tapOn:
+    id: "action_bar_button"
+    text: "Done"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"

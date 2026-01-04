@@ -8,12 +8,4 @@ fun interface EnqueueDrainRemoteWriteQueueUseCase {
 
     suspend operator fun invoke()
 
-
-    companion object {
-
-        const val DATA_SCOPE_ID = "scopeId"
-
-        const val DATA_SCOPE_QUALIFIER = "scopeQualifier"
-
-    }
 }

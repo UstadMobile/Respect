@@ -8,6 +8,7 @@ import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
+import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal
@@ -17,6 +18,8 @@ import world.respect.datalayer.school.SchoolAppDataSourceLocal
 interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSourceLocal
+
+    override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceLocal
 
     override val personDataSource: PersonDataSourceLocal
 

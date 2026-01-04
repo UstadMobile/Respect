@@ -34,7 +34,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
     };
 
   it('Login and save video URLs to text file', {
-    defaultCommandTimeout: 30000,
+    defaultCommandTimeout: 60000,
     pageLoadTimeout: 60000,
   }, () => {
 
@@ -65,7 +65,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
 
       // Wait for the list of runs to appear
       cy.get('a[href*="/flow/run_"]', { timeout: 30000 }).should('have.length.gt', 0);
-
+      cy.screenshot('00_Main_Dashboard', { capture: 'fullPage', timeout: 120000 });
       // --- Step 3: Collect list of tests ---
       cy.get('a[href*="/flow/run_"]').then(($links) => {
         const tests = [];
@@ -81,13 +81,16 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
 
         // --- Step 4: Iterate and Save ---
         cy.wrap(tests).each((test, index) => {
-          cy.log(`Processing ${index + 1}: ${test.name}`);
-          cy.visit(test.url);
+        cy.log(`Processing ${index + 1}: ${test.name}`);
+        cy.visit(test.url);
 
           // Extract URL
           cy.get('video', { timeout: 20000 })
             .should('have.prop', 'src')
             .then((videoUrl) => {
+
+               cy.screenshot(test.name, { capture: 'fullPage', timeout: 120000 });
+
               if (videoUrl) {
                 cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
               }

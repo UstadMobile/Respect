@@ -88,12 +88,18 @@ data class NoDataLoadedState<T: Any>(
         @Suppress("unused") //reserved for future use
         fun <T: Any> notModified(
             metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
-        ): NoDataLoadedState<T> = NoDataLoadedState(Reason.NOT_MODIFIED)
+        ): NoDataLoadedState<T> = NoDataLoadedState(
+            reason = Reason.NOT_MODIFIED,
+            metaInfo = metaInfo,
+        )
 
         @Suppress("unused") //reserved for future use
         fun <T: Any> notFound(
             metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
-        ): NoDataLoadedState<T> = NoDataLoadedState(Reason.NOT_FOUND)
+        ): NoDataLoadedState<T> = NoDataLoadedState(
+            reason = Reason.NOT_FOUND,
+            metaInfo = metaInfo,
+        )
 
     }
 

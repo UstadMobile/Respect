@@ -3,9 +3,9 @@ package world.respect.datalayer.repository.school.pullsync
 import io.github.aakira.napier.Napier
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.ext.isLoadedOrNotModified
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.PullSyncStatus
@@ -58,9 +58,14 @@ class RunPullSyncUseCase(
                 )
             )
 
-            if(loadResult.remoteState !is DataReadyState) {
+
+            val remoteDataLoadedState = loadResult.remoteState
+
+            if(remoteDataLoadedState?.isLoadedOrNotModified() != true) {
                 throw IllegalStateException("Could not load remote data")
             }
+
+            val remoteData = remoteDataLoadedState.dataOrNull() as? List<*> ?: emptyList<Any>()
 
             since = loadResult.remoteState?.metaInfo?.consistentThrough ?: throw IllegalStateException(
                 "RunPullSyncUseCase: Load result MUST have consistentThrough"
@@ -68,7 +73,7 @@ class RunPullSyncUseCase(
             permissionsLastModified = loadResult.remoteState?.metaInfo?.permissionsLastModified ?: throw IllegalStateException(
                 "RunPullSyncUseCase: Load result MUST have permissionsLastModified"
             )
-        }while (loadResult.dataOrNull()?.isNotEmpty() == true)
+        }while (remoteData.isNotEmpty())
 
         Napier.d("PullSync: Done consistent through to $since / permissions last modified $permissionsLastModified")
         pullSyncTracker.updatePullSyncStatus(

@@ -82,6 +82,11 @@ fun DataLoadState<*>.isReadyAndSettled(): Boolean {
     return this is DataReadyState && this.remoteState !is DataLoadingState
 }
 
+fun DataLoadState<*>.isLoadedOrNotModified(): Boolean {
+    return this is DataReadyState ||
+            (this is NoDataLoadedState && reason == NoDataLoadedState.Reason.NOT_MODIFIED)
+}
+
 fun <T: Any, R: Any> DataLoadState<T>.map(
     transform: (T) -> R
 ): DataLoadState<R> {

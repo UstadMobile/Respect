@@ -14,7 +14,7 @@ interface LocalModelDataSource<T : Any> {
      * Local data will normally only be replaced when it is newer than the current local data
      * (e.g. to avoid overwriting local data that has not yet been sent).
      *
-     * It is NOT subject to permission checks (this function is for data is being received from a
+     * It is NOT subject to permission checks (this function is for data being received from a
      * trusted server or peer). Permission checks are carried out when using the store function.
      *
      * @param list - specific list of model data to insert

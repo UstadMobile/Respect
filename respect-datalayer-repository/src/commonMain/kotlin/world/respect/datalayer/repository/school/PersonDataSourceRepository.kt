@@ -10,7 +10,6 @@ import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
-import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -19,7 +18,6 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class PersonDataSourceRepository(
@@ -27,7 +25,6 @@ class PersonDataSourceRepository(
     override val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-    private val enrollmentDataSourceRepository: EnrollmentDataSourceRepository,
 ) : PersonDataSource, RepositoryModelDataSource<Person> {
 
     override suspend fun findByUsername(username: String): Person? {

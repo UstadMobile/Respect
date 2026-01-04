@@ -22,6 +22,9 @@ enum class EnrollmentRoleEnum(
 
     PENDING_STUDENT("pending_student", 4);
 
+    val requiresApproval: Boolean
+        get() = this == PENDING_TEACHER || this == PENDING_STUDENT
+
     companion object {
 
         const val TEACHER_FLAG = 1

@@ -113,19 +113,6 @@ class ClazzListViewModel(
                 )
             }
         }
-
-        viewModelScope.launch {
-            accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
-                schoolDataSource.enrollmentDataSource.takeIf {
-                    selectedAcct?.session?.account?.userGuid != null
-                }?.list(
-                    loadParams = DataLoadParams(),
-                    listParams = EnrollmentDataSource.GetListParams(
-                        personUid = selectedAcct?.person?.guid
-                    )
-                )
-            }
-        }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

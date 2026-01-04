@@ -144,15 +144,13 @@ class EnrollmentDataSourceDb(
                         }
                     )
 
-                    if(!classPermissionResult.hasPermission)
+                    if(!enrollment.role.requiresApproval && !classPermissionResult.hasPermission)
                         throw ForbiddenException("$logPrefix no permission to enrol in " +
                                 "class ${enrollment.classUid}")
-
 
                     schoolDb.getEnrollmentEntityDao().upsert(
                         listOf(
                             enrollment.copy(
-                                lastModified = now,
                                 stored = now
                             ).toEntities(uidNumberMapper)
                         )

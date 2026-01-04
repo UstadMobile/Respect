@@ -142,7 +142,7 @@ class RedeemInviteUseCaseDb(
 
         //If a teacher/student, make the pending enrollment now
         if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-            schoolDataSourceVal.enrollmentDataSource.store(
+            schoolDataSourceVal.enrollmentDataSource.updateLocal(
                 listOf(
                     Enrollment(
                         uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(

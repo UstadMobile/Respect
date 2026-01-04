@@ -72,8 +72,7 @@ class SchoolDataSourceRepository(
             local.personDataSource,
             remote.personDataSource,
             validationHelper,
-            remoteWriteQueue,
-            enrollmentDataSource
+            remoteWriteQueue
         )
     }
 

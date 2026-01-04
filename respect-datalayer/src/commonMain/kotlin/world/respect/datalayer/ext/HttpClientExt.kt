@@ -39,30 +39,32 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
             validationHelper?.also { addCacheValidationHeaders(it) }
         }
 
+        val extendedValidationHelper = validationHelper as? ExtendedDataSourceValidationHelper
+        val varyHeader = response.headers.getAll(HttpHeaders.Vary)
+            ?.joinToString(separator = ",")
+        val validationInfoKey = extendedValidationHelper?.validationInfoKey(
+            response.request.headers.asIHttpHeaders(),
+            response.headers.getAll(HttpHeaders.Vary)?.joinToString(separator = ",")
+        )
+        val metaInfo = DataLoadMetaInfo(
+            url = response.request.url,
+            lastModified = response.lastModifiedAsLong(),
+            etag = response.etag(),
+            consistentThrough = response.consistentThrough(),
+            validationInfoKey = validationInfoKey ?: 0,
+            varyHeader = varyHeader,
+            permissionsLastModified = response.permissionsLastModified(),
+            headers = response.headers.asIHttpHeaders(),
+        )
+
         return if(response.status == HttpStatusCode.NotModified) {
-            NoDataLoadedState.notModified()
+            NoDataLoadedState.notModified(metaInfo = metaInfo)
         }else {
             val data = response.body<T>(typeInfo)
-            val extendedValidationHelper = validationHelper as? ExtendedDataSourceValidationHelper
-            val varyHeader = response.headers.getAll(HttpHeaders.Vary)
-                ?.joinToString(separator = ",")
-            val validationInfoKey = extendedValidationHelper?.validationInfoKey(
-                response.request.headers.asIHttpHeaders(),
-                response.headers.getAll(HttpHeaders.Vary)?.joinToString(separator = ",")
-            )
 
             DataReadyState(
                 data = data,
-                metaInfo = DataLoadMetaInfo(
-                    url = response.request.url,
-                    lastModified = response.lastModifiedAsLong(),
-                    etag = response.etag(),
-                    consistentThrough = response.consistentThrough(),
-                    validationInfoKey = validationInfoKey ?: 0,
-                    varyHeader = varyHeader,
-                    permissionsLastModified = response.permissionsLastModified(),
-                    headers = response.headers.asIHttpHeaders(),
-                )
+                metaInfo = metaInfo
             )
         }
     }catch(t: Throwable) {

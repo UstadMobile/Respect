@@ -325,7 +325,6 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- hideKeyboard
 - tapOn: "Done"
 - assertVisible:
     id: "app_title"

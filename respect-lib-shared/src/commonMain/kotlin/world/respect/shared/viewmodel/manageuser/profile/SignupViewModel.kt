@@ -185,26 +185,25 @@ class SignupViewModel(
             } else {
                 when (route.type) {
                     ProfileType.CHILD -> {
-                        viewModelScope.launch {
-                            val scope: Scope = accountManager.requireActiveAccountScope()
-                            val addChildAccountUseCase: AddChildAccountUseCase by lazy {
-                                scope.get()
-                            }
-
-                            addChildAccountUseCase(
-                                personInfo = personInfo,
-                                parentUsername = route.respectRedeemInviteRequest.account.username,
-                                classUid = route.respectRedeemInviteRequest.classUid ?: "",
-                                inviteCode = route.respectRedeemInviteRequest.code
-                            )
-
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(
-                                    destination = WaitingForApproval(),
-                                    clearBackStack = true,
-                                )
-                            )
+                        val scope: Scope = accountManager.requireActiveAccountScope()
+                        val addChildAccountUseCase: AddChildAccountUseCase by lazy {
+                            scope.get()
                         }
+
+                        addChildAccountUseCase(
+                            personInfo = personInfo,
+                            parentUsername = route.respectRedeemInviteRequest.account.username,
+                            classUid = route.respectRedeemInviteRequest.classUid ?: "",
+                            inviteCode = route.respectRedeemInviteRequest.code
+                        )
+
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                destination = WaitingForApproval(),
+                                clearBackStack = true,
+                            )
+                        )
+
                     }
 
                     else -> {

@@ -2,7 +2,6 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Transactor
 import androidx.room.useWriterConnection
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -16,11 +15,13 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
+import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.ext.primaryRole
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -32,57 +33,67 @@ import kotlin.time.Clock
 class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
-    @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val checkPersonPermissionUseCase    : CheckPersonPermissionUseCase,
 ): PersonDataSourceLocal {
 
-    private suspend fun upsertPersons(
-        persons: List<Person>,
-        forceOverwrite: Boolean = false,
+
+    private suspend fun doUpsertPerson(
+        person: Person
     ) {
-        if(persons.isEmpty())
+        val entities = person.copy(stored = Clock.System.now()).toEntities(uidNumberMapper)
+
+        schoolDb.getPersonEntityDao().insert(entities.personEntity)
+
+        schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(
+            entities.personEntity.pGuidHash
+        )
+        schoolDb.getPersonRoleEntityDao().upsertList(
+            entities.personRoleEntities
+        )
+
+        schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(
+            entities.personEntity.pGuidHash
+        )
+        schoolDb.getPersonRelatedPersonEntityDao().upsert(
+            entities.relatedPersonEntities
+        )
+    }
+
+    override suspend fun store(list: List<Person>) {
+        if(list.isEmpty())
             return
 
         schoolDb.useWriterConnection { con ->
-            val timeStored = Clock.System.now()
-            var numStored = 0
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                persons.map { it.copy(stored = timeStored) }.forEach { person ->
-                    val entities = person.toEntities(uidNumberMapper)
-                    val lastModified = schoolDb.getPersonEntityDao().getLastModifiedByGuid(
-                        entities.personEntity.pGuidHash
-                    ) ?: -1
+                list.forEach { personToStore ->
+                    val personInDb = schoolDb.getPersonEntityDao().findByGuidNum(
+                        uidNumberMapper(personToStore.guid)
+                    )?.toPersonEntities()?.toModel()
 
-                    if(forceOverwrite || entities.personEntity.pLastModified > lastModified) {
-                        schoolDb.getPersonEntityDao().insert(entities.personEntity)
-
-                        schoolDb.getPersonRoleEntityDao().deleteByPersonGuidHash(
-                            entities.personEntity.pGuidHash
-                        )
-                        schoolDb.getPersonRoleEntityDao().upsertList(
-                            entities.personRoleEntities
-                        )
-
-                        schoolDb.getPersonRelatedPersonEntityDao().deleteByPersonUidNum(
-                            entities.personEntity.pGuidHash
-                        )
-                        schoolDb.getPersonRelatedPersonEntityDao().upsert(
-                            entities.relatedPersonEntities
-                        )
-                        numStored++
+                    //Check that if person is in db, role is not being changed.
+                    if(personInDb != null &&
+                        (personInDb.primaryRole() != personToStore.primaryRole() ||
+                                personToStore.roles.size != 1)
+                    ) {
+                        throw ForbiddenException("Role cannot be changed, and must have one role")
                     }
-                }
 
-                Napier.d(tag = TAG_DATALAYER) {
-                    "PersonDataSourceDb: upsert $numStored/${persons.size}(${persons.joinToString { it.guid }}) persons"
+                    if(
+                        !checkPersonPermissionUseCase(
+                            otherPersonUid = personToStore.guid,
+                            otherPersonKnownRole = personToStore.primaryRole(),
+                            permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS
+                        )
+                     ) {
+                        throw ForbiddenException("Authenticated user does not have permission to store ${personToStore.guid}")
+                    }
+
+                    //Check that roles have not been change
+                    doUpsertPerson(personToStore)
                 }
             }
         }
-    }
-
-
-    override suspend fun store(list: List<Person>) {
-        upsertPersons(list)
     }
 
     override suspend fun findByUsername(username: String): Person? {
@@ -115,7 +126,17 @@ class PersonDataSourceDb(
         list: List<Person>,
         forceOverwrite: Boolean
     ) {
-        upsertPersons(list, forceOverwrite)
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE){
+                list.filter { person ->
+                    forceOverwrite || schoolDb.getPersonEntityDao().getLastModifiedByGuid(
+                        uidNumberMapper(person.guid)
+                    ).let { it ?: 0L } < person.lastModified.toEpochMilliseconds()
+                }.forEach { person ->
+                    doUpsertPerson(person)
+                }
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Person> {
@@ -129,6 +150,7 @@ class PersonDataSourceDb(
         params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
         return schoolDb.getPersonEntityDao().listAsFlow(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
@@ -153,6 +175,7 @@ class PersonDataSourceDb(
     ): IPagingSourceFactory<Int, Person> {
         return IPagingSourceFactory {
             schoolDb.getPersonEntityDao().listAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
@@ -172,8 +195,9 @@ class PersonDataSourceDb(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
-        val queryTime = systemTimeInMillis()
+        val queryTime = Clock.System.now()
         val data = schoolDb.getPersonEntityDao().list(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
             since = params.common.since?.toEpochMilliseconds() ?: 0,
             guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
             inClazzGuidHash = params.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,
@@ -203,6 +227,7 @@ class PersonDataSourceDb(
     ): IPagingSourceFactory<Int, PersonListDetails> {
         return IPagingSourceFactory {
             schoolDb.getPersonEntityDao().findAllListDetailsAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = listParams.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 inClazzGuidHash = listParams.filterByClazzUid?.let { uidNumberMapper(it) } ?: 0,

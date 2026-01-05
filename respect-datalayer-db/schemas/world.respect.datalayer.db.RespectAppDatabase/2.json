@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "cc352074c4d3b21c12ffcfc1e712890e",
+    "identityHash": "9483cee680b9388b763f97e77c2b62b1",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -777,7 +777,7 @@
       },
       {
         "tableName": "NetworkValidationInfoEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nviUrlHash` INTEGER NOT NULL, `nviKey` INTEGER NOT NULL, `nviVaryHeader` TEXT, `nviLastModified` INTEGER NOT NULL, `nviEtag` TEXT, `nviConsistentThrough` INTEGER NOT NULL, `nviLastChecked` INTEGER NOT NULL, PRIMARY KEY(`nviUrlHash`, `nviKey`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nviUrlHash` INTEGER NOT NULL, `nviKey` INTEGER NOT NULL, `nviVaryHeader` TEXT, `nviLastModified` INTEGER NOT NULL, `nviEtag` TEXT, `nviConsistentThrough` INTEGER, `nviLastChecked` INTEGER NOT NULL, PRIMARY KEY(`nviUrlHash`, `nviKey`))",
         "fields": [
           {
             "fieldPath": "nviUrlHash",
@@ -810,8 +810,7 @@
           {
             "fieldPath": "nviConsistentThrough",
             "columnName": "nviConsistentThrough",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "nviLastChecked",
@@ -831,7 +830,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc352074c4d3b21c12ffcfc1e712890e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9483cee680b9388b763f97e77c2b62b1')"
     ]
   }
 }

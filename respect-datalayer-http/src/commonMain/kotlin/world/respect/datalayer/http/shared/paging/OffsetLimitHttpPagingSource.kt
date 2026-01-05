@@ -107,7 +107,9 @@ class OffsetLimitHttpPagingSource<T: Any>(
                 return when {
                     listLoadState is NoDataLoadedState && listLoadState.reason == Reason.NOT_MODIFIED -> {
                         Napier.d(tag = DataLayerTags.TAG_DATALAYER) { "$logPrefix not modified" }
-                        LoadResult.Error(CacheableHttpPagingSource.NotModifiedNonException())
+                        LoadResult.Error(
+                            CacheableHttpPagingSource.NotModifiedNonException(listLoadState.metaInfo)
+                        )
                     }
 
                     listLoadState is NoDataLoadedState && listLoadState.reason == Reason.NOT_FOUND -> {

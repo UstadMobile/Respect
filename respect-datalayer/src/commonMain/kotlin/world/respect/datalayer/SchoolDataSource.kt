@@ -9,6 +9,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
+import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -19,6 +20,8 @@ import world.respect.datalayer.school.SchoolAppDataSource
 interface SchoolDataSource {
 
     val schoolAppDataSource: SchoolAppDataSource
+
+    val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSource
 
     val personDataSource: PersonDataSource
 

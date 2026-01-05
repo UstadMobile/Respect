@@ -249,6 +249,7 @@ private fun SingleLessonDetailScreen(
         }
     }
 }
+
 @Composable
 private fun PlaylistDetailScreen(
     uiState: LearningUnitDetailUiState,
@@ -457,7 +458,10 @@ private fun PlaylistDetailScreen(
                 )
             ) {
                 Text(
-                    text = "Add ${uiState.selectedLessons.size} task${if (uiState.selectedLessons.size > 1) "s" else ""} to assignment",
+                    text = stringResource(
+                        Res.string.add_tasks_to_assignment,
+                        uiState.selectedLessons.size
+                    ),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -491,6 +495,7 @@ private fun PlaylistDetailScreen(
         }
     }
 }
+
 @Composable
 private fun LessonListItem(
     link: PlaylistsMappingSectionLink,
@@ -574,6 +579,7 @@ private fun LessonListItem(
         }
     }
 }
+
 @Composable
 private fun ActionButton(
     icon: ImageVector,

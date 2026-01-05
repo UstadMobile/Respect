@@ -38,6 +38,7 @@ import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.UrlParser
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isStudent
 import world.respect.shared.viewmodel.RespectViewModel
@@ -56,9 +57,7 @@ data class ManageAccountUiState(
     val isStudent: Boolean = false,
     val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
-    val badgeNumber: String? = null,
-    val isQrAlreadyAssignedToAnotherPerson: Boolean = false,
-    val isQrAdded: Boolean = false,
+    val qrCodeBadgeError: UiText? = null,
 ) {
 
     val showCreatePasskey: Boolean
@@ -68,6 +67,11 @@ data class ManageAccountUiState(
     val showManagePasskey: Boolean
         get() = passkeyCount != null && passkeyCount > 0
 
+    val badgeNumber: String?
+        get() = qrBadge.dataOrNull()?.qrCodeUrl?.let { UrlParser.extractBadgeNumberFromUrl(it) }
+
+    val isQrAdded: Boolean
+        get() = badgeNumber != null
 }
 
 class ManageAccountViewModel(
@@ -103,7 +107,6 @@ class ManageAccountViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-
     init {
         _appUiState.update { prev ->
             prev.copy(
@@ -112,12 +115,14 @@ class ManageAccountViewModel(
                 title = Res.string.manage_account.asUiText()
             )
         }
+
         viewModelScope.launch {
             if (route.qrUrl != null && route.username != null) {
                 saveUsername(route.username)
                 storeQrCodeForPerson(personGuid = personGuid, url = route.qrUrl.toString())
             }
         }
+
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(
                 QR_SELECT_RESULT
@@ -139,24 +144,20 @@ class ManageAccountViewModel(
             schoolDataSource.personQrDataSource.findByPersonGuidAsFlow(
                 route.guid
             ).collect { qrBadgeState ->
-                val badgeNumber = qrBadgeState.dataOrNull()?.qrCodeUrl?.let { url ->
-                    extractBadgeNumberFromUrl(url)
-                }
                 _uiState.update {
                     it.copy(
                         qrBadge = qrBadgeState,
-                        badgeNumber = badgeNumber,
-                        isQrAdded = badgeNumber != null
+                        qrCodeBadgeError = null // Clear error when data loads successfully
                     )
                 }
             }
         }
 
         viewModelScope.launch {
-            _uiState.takeIf { checkPasskeySupportUseCase() }?.update { prev ->
-                prev.copy(
-                    passkeySupported = true
-                )
+            if (checkPasskeySupportUseCase()) {
+                _uiState.update { prev ->
+                    prev.copy(passkeySupported = true)
+                }
             }
         }
 
@@ -198,15 +199,6 @@ class ManageAccountViewModel(
                 passkeySupported = (createPasskeyUseCase != null &&
                         accountManager.activeAccount?.userGuid == personGuid),
             )
-        }
-    }
-
-    private fun extractBadgeNumberFromUrl(url: String): String? {
-        return try {
-            val pattern = """/id/(\d+)$""".toRegex()
-            pattern.find(url)?.groupValues?.get(1)
-        } catch (e: Exception) {
-            null
         }
     }
 
@@ -268,7 +260,7 @@ class ManageAccountViewModel(
             } catch (e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(
-                        errorText = StringUiText("Failed to remove QR badge: ${e.message}")
+                        qrCodeBadgeError = StringUiText("Failed to remove QR badge: ${e.message}")
                     )
                 }
             }
@@ -284,21 +276,13 @@ class ManageAccountViewModel(
                 if (qrCodeAlreadyAssignedToAnotherPerson) {
                     _uiState.update { prev ->
                         prev.copy(
-                            isQrAlreadyAssignedToAnotherPerson = true
+                            qrCodeBadgeError = StringUiText("This QR code is already assigned to another student")
                         )
                     }
                     snackBarDispatcher.showSnackBar(
                         Snack("This QR code is already assigned to another student".asUiText())
                     )
                 } else {
-                    _uiState.update { prev ->
-                        prev.copy(
-                            isQrAlreadyAssignedToAnotherPerson = false
-                        )
-                    }
-                }
-
-                if (!uiState.value.isQrAlreadyAssignedToAnotherPerson) {
                     val now = Clock.System.now()
                     schoolDataSource.personQrDataSource.store(
                         listOf(
@@ -310,11 +294,16 @@ class ManageAccountViewModel(
                             )
                         )
                     )
+                    _uiState.update { prev ->
+                        prev.copy(qrCodeBadgeError = null) // Clear error on success
+                    }
                 }
             } catch (e: Exception) {
-                snackBarDispatcher.showSnackBar(
-                    Snack("Failed to assign QR code: ${e.message}".asUiText())
-                )
+                _uiState.update { prev ->
+                    prev.copy(
+                        qrCodeBadgeError = StringUiText("Failed to assign QR code: ${e.message}")
+                    )
+                }
                 throw e
             }
         }
@@ -383,12 +372,10 @@ class ManageAccountViewModel(
                     }
                 }
             }
-
         }
     }
 
     companion object {
         const val QR_SELECT_RESULT = "qr_select_result"
     }
-
 }

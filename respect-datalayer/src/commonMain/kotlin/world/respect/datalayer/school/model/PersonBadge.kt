@@ -10,4 +10,5 @@ data class PersonBadge(
     val qrCodeUrl: String,
     override val lastModified: InstantAsISO8601,
     override val stored: InstantAsISO8601,
-):  ModelWithTimes
+    val status: StatusEnum = StatusEnum.ACTIVE,
+    ):  ModelWithTimes

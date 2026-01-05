@@ -63,7 +63,6 @@ fun ScanQRCodeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Manual entry dialog state
-    var showManualEntryDialog by remember { mutableStateOf(false) }
     var manualUrlText by remember { mutableStateOf(TextFieldValue("")) }
 
     // Camera states - all with default values
@@ -84,7 +83,7 @@ fun ScanQRCodeScreen(
             .statusBarsPadding()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (isCameraActive && !showManualEntryDialog) {
+        if (isCameraActive && !uiState.showManualEntryDialog) {
             QrScanner(
                 modifier = Modifier.fillMaxSize(),
                 flashlightOn = flashlightOn,
@@ -114,43 +113,19 @@ fun ScanQRCodeScreen(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        ) {
-            if (uiState.showPasteButton) {
-                DropdownMenu(
-                    expanded = uiState.showPasteButton,
-                    onDismissRequest = {
-                        viewModel.onMenuDismiss()
-                    },
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.paste_url)) },
-                        onClick = {
-                            viewModel.onMenuDismiss()
-                            showManualEntryDialog = true
-                            manualUrlText = TextFieldValue("")
-                        },
-                    )
-                }
-            }
-        }
-
         // Manual URL Entry Dialog
-        if (showManualEntryDialog) {
+        if (uiState.showManualEntryDialog) {
             ManualUrlEntryDialog(
                 manualUrlText = manualUrlText,
                 onUrlTextChange = { manualUrlText = it },
                 onDismiss = {
-                    showManualEntryDialog = false
+                    viewModel.hideManualEntryDialog()
                     manualUrlText = TextFieldValue("")
                     // Clear validation error when dismissing
                     viewModel.validateUrl("")
                 },
                 onSubmit = { url ->
-                    showManualEntryDialog = false
+                    viewModel.hideManualEntryDialog()
                     if (url.isNotEmpty()) {
                         coroutineScope.launch {
                             viewModel.processQrCodeUrl(url)

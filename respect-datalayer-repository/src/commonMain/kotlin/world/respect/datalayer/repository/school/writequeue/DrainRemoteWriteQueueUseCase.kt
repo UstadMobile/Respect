@@ -56,10 +56,6 @@ class DrainRemoteWriteQueueUseCase(
                     WriteQueueItem.Model.SCHOOL_APP -> {
                         repository.schoolAppDataSource.sendToRemote(listOf(item))
                     }
-
-                    WriteQueueItem.Model.PERSON_QRCODE_DELETE -> {
-                        repository.personQrDataSource.sendToRemote(listOf(item))
-                    }
                 }
 
             }

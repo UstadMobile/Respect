@@ -6,6 +6,7 @@ import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -16,10 +17,7 @@ import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
@@ -54,8 +52,8 @@ class RedeemInviteUseCaseDb(
         val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
             ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
         val expectedInviteCode = when(redeemRequest.role) {
-            PersonRoleEnum.TEACHER -> clazz.cTeacherInviteCode
-            else -> clazz.cStudentInviteCode
+            PersonRoleEnum.TEACHER -> clazz.clazz.cTeacherInviteCode
+            else -> clazz.clazz.cStudentInviteCode
         } ?: throw IllegalArgumentException("No invite code for requested role")
             .withHttpStatus(400)
 
@@ -136,11 +134,15 @@ class RedeemInviteUseCaseDb(
                     person = accountPerson,
                 )
             }
+
+            is RespectQRBadgeCredential -> {
+                throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
+            }
         }
 
         //If a teacher/student, make the pending enrollment now
         if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-            schoolDataSourceVal.enrollmentDataSource.store(
+            schoolDataSourceVal.enrollmentDataSource.updateLocal(
                 listOf(
                     Enrollment(
                         uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(

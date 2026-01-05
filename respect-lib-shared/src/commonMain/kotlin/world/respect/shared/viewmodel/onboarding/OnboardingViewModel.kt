@@ -51,7 +51,7 @@ class OnboardingViewModel(
         settings.putString(ShouldShowOnboardingUseCase.KEY_ONBOARDING_SHOWN, true.toString())
         setUsageReportingEnabledUseCase(_uiState.value.usageStatsOptInChecked)
 
-        val hasAccount = accountManager.selectedAccount != null
+        val hasAccount = accountManager.activeAccount != null
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(

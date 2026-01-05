@@ -1,5 +1,7 @@
 package world.respect.datalayer.networkvalidation
 
+import kotlin.time.Instant
+
 /**
  * Validation info needed when making an http datasource implementation is about to make a request
  *
@@ -13,7 +15,7 @@ package world.respect.datalayer.networkvalidation
 data class NetworkValidationInfo(
     val lastModified: Long,
     val etag: String?,
-    val consistentThrough: Long = 0,
+    val consistentThrough: Instant? = null,
     val lastChecked: Long = 0,
     val varyHeader: String? = null,
     val validationInfoKey: Long = 0,

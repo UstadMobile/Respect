@@ -54,7 +54,7 @@ class EnrollmentEditViewModel(
     private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     val route: EnrollmentEdit = savedStateHandle.toRoute()
 

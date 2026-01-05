@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLongVersionInfoItem
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
@@ -29,7 +30,6 @@ import world.respect.shared.generated.resources.add_account
 import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 

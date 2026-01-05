@@ -13,6 +13,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
@@ -29,7 +30,6 @@ import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.SetUsernameAndPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isStudent
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel.Companion.MIN_PASSWORD_LENGTH

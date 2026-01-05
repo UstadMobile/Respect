@@ -25,7 +25,6 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Assignment
-import world.respect.datalayer.school.model.AssignmentAssigneeRef
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.opds.model.OpdsPublication
@@ -47,7 +46,10 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.assignment.toAssignmentLearningUnitRefs
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.toOpdsGroup
 import kotlin.time.Clock
 
 data class AssignmentEditUiState(
@@ -57,6 +59,7 @@ data class AssignmentEditUiState(
     val classOptions: List<Clazz> = emptyList(),
     val classError: UiText? = null,
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
+    val showPlaylistButton: Boolean = true,
 ) {
     val fieldsEnabled: Boolean
         get() = assignment.isReadyAndSettled()
@@ -116,6 +119,53 @@ class AssignmentEditViewModel(
             )
         }
 
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
+                val learningUnit = result.result as? LearningUnitSelection ?: return@collect
+                val assignmentResourceRef = learningUnit.toRef()
+
+                _uiState.update { prev ->
+                    val prevAssignment = prev.assignment.dataOrNull() ?: return@update prev
+
+                    prev.copy(
+                        assignment = DataReadyState(
+                            data = prevAssignment.copy(
+                                learningUnits = prevAssignment.learningUnits + assignmentResourceRef
+                            )
+                        )
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(KEY_PLAYLIST_SELECTION).collect { result ->
+                val mapping = result.result as? PlaylistsMapping ?: return@collect
+                val group = mapping.toOpdsGroup()
+                val newLearningUnits = group.toAssignmentLearningUnitRefs()
+
+                val assignment = _uiState.value.assignment.dataOrNull() ?: return@collect
+
+                val existingUrls = assignment.learningUnits.map {
+                    it.learningUnitManifestUrl
+                }.toSet()
+
+                val uniqueNewUnits = newLearningUnits.filter {
+                    it.learningUnitManifestUrl !in existingUrls
+                }
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        assignment = DataReadyState(
+                            assignment.copy(
+                                learningUnits = assignment.learningUnits + uniqueNewUnits
+                            )
+                        )
+                    )
+                }
+            }
+        }
+
         launchWithLoadingIndicator {
             val classes = schoolDataSource.classDataSource.list(
                 DataLoadParams(),
@@ -140,7 +190,7 @@ class AssignmentEditViewModel(
                     },
                     uiUpdateFn = { entity ->
                         _uiState.update { prev ->
-                            val assigneeClassUid = entity.dataOrNull()?.assignees?.firstOrNull()?.uid
+                            val assigneeClassUid = entity.dataOrNull()?.classUid
                             prev.copy(
                                 assignment = entity,
                                 assigneeText = classes.firstOrNull {
@@ -150,7 +200,25 @@ class AssignmentEditViewModel(
                         }
                     }
                 )
+
+                viewModelScope.launch {
+                    schoolDataSource.assignmentDataSource.findByGuidAsFlow(
+                        route.guid
+                    ).collect { assignmentState ->
+                        if (assignmentState is DataReadyState) {
+                            val currentLearningUnits = _uiState.value.assignment.dataOrNull()?.learningUnits
+                            val newLearningUnits = assignmentState.data.learningUnits
+                            if (currentLearningUnits != newLearningUnits) {
+                                _uiState.update { prev ->
+                                    prev.copy(assignment = assignmentState)
+                                }
+                            }
+                        }
+                    }
+                }
             }else {
+                val initialLearningUnits = route.learningUnitSelectedList?.map { it.toRef() } ?: emptyList()
+
                 _uiState.update { prev ->
                     prev.copy(
                         assignment = DataReadyState(
@@ -158,34 +226,27 @@ class AssignmentEditViewModel(
                                 uid = uid,
                                 title = "",
                                 description = "",
-                                learningUnits = route.learningUnitSelected?.let {
-                                    listOf(it.toRef())
-                                } ?: emptyList()
+                                classUid = "",
+                                learningUnits = initialLearningUnits
                             )
                         )
                     )
                 }
             }
-
-            viewModelScope.launch {
-                resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                    val learningUnit = result.result as? LearningUnitSelection ?: return@collect
-                    val assignmentResourceRef = learningUnit.toRef()
-
-                    _uiState.update { prev ->
-                        val prevAssignment = prev.assignment.dataOrNull() ?: return@update prev
-
-                        prev.copy(
-                            assignment = DataReadyState(
-                                data = prevAssignment.copy(
-                                    learningUnits = prevAssignment.learningUnits + assignmentResourceRef
-                                )
-                            )
-                        )
-                    }
-                }
-            }
         }
+    }
+
+    fun onClickAddFromPlaylists() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                RespectAppLauncher.create(
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_PLAYLIST_SELECTION,
+                    )
+                )
+            )
+        )
     }
 
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
@@ -200,9 +261,7 @@ class AssignmentEditViewModel(
             it.copy(
                 assignment = DataReadyState(
                     assignment.copy(
-                        assignees = listOf(
-                            AssignmentAssigneeRef(uid = clazz.guid)
-                        )
+                        classUid = clazz.guid
                     )
                 ),
                 assigneeText = clazz.title,
@@ -222,7 +281,10 @@ class AssignmentEditViewModel(
         }
 
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
-            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(assignment)
+            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(
+                Assignment.serializer(),
+                assignment
+            )
         }
     }
 
@@ -231,7 +293,6 @@ class AssignmentEditViewModel(
             it.copy(assigneeText = text, classError = null)
         }
     }
-
 
     fun onClickAddLearningUnit() {
         _navCommandFlow.tryEmit(
@@ -246,9 +307,7 @@ class AssignmentEditViewModel(
         )
     }
 
-    fun onClickRemoveLearningUnit(
-        ref: AssignmentLearningUnitRef
-    ) {
+    fun onClickRemoveLearningUnit(ref: AssignmentLearningUnitRef) {
         val assignment = uiState.value.assignment.dataOrNull() ?: return
 
         _uiState.update { prev ->
@@ -273,7 +332,7 @@ class AssignmentEditViewModel(
                     assignmentVal?.title.isNullOrBlank()
                 },
                 classError = Res.string.required_field.asUiText().takeIf {
-                    assignmentVal?.assignees?.isEmpty() != false
+                    assignmentVal?.classUid.isNullOrBlank()
                 }
             )
         }
@@ -303,9 +362,7 @@ class AssignmentEditViewModel(
     }
 
     companion object {
-
         const val KEY_LEARNING_UNIT = "result_learning_unit"
-
+        const val KEY_PLAYLIST_SELECTION = "result_playlist_selection"
     }
-
 }

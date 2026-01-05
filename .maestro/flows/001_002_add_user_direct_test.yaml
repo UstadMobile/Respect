@@ -93,7 +93,7 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- eraseText: 15
+- eraseText: 11
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "ParentAuser@gm"

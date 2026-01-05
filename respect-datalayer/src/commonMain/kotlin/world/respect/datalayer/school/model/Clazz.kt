@@ -20,6 +20,18 @@ data class Clazz(
     val studentInviteCode: String? = Random.nextInt(
         DEFAULT_INVITE_CODE_MAX
     ).toString().padStart(DEFAULT_INVITE_CODE_LEN, '0'),
+    val permissions: List<ClassPermission> = listOf(
+        ClassPermission(
+            permissionToRef = ClassPermission.PermissionToEnrollmentRole(EnrollmentRoleEnum.TEACHER),
+            permissions = PermissionFlags.CLASS_WRITE
+        ),
+        ClassPermission(
+            permissionToRef = ClassPermission.PermissionToEnrollmentRole(EnrollmentRoleEnum.STUDENT),
+            permissions = PermissionFlags.CLASS_READ
+                .or(PermissionFlags.PERSON_TEACHER_READ)
+                .or(PermissionFlags.PERSON_STUDENT_READ)
+        ),
+    )
 ): ModelWithTimes {
 
     companion object {

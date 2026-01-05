@@ -16,6 +16,8 @@ fun ParametersBuilder.appendCommonListParams(
 ) {
     appendIfNotNull(DataLayerParams.GUID, params.guid)
     appendIfNotNull(DataLayerParams.SINCE, params.since?.toString())
+    appendIfNotNull(DataLayerParams.SINCE_IF_PERMISSIONS_NOT_CHANGED_SINCE,
+        params.sinceIfPermissionsNotChangedSince?.toString())
     appendIfNotNull(DataLayerParams.SEARCH_QUERY, params.searchQuery)
     appendIfNotNull(DataLayerParams.INCLUDE_DELETED, params.includeDeleted?.toString())
 }

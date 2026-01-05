@@ -52,6 +52,7 @@ import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppActionButton
 import world.respect.shared.viewmodel.app.appstate.AppBarColors

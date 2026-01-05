@@ -11,7 +11,7 @@ data class Assignment(
     val title: String,
     val description: String,
     val deadline: InstantAsISO8601? = null,
-    val assignees: List<AssignmentAssigneeRef> = emptyList(),
+    val classUid: String,
     val learningUnits: List<AssignmentLearningUnitRef> = emptyList(),
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),

@@ -28,6 +28,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -208,6 +209,11 @@ class RespectAccountManager(
             )
         )
 
+        //Load school permission grants (rules)
+        schoolDataSource.schoolPermissionGrantDataSource.list(
+            DataLoadParams(), SchoolPermissionGrantDataSource.GetListParams()
+        ).dataOrNull() ?: throw IllegalStateException("Could not load permission grants")
+
         //now we can get the datalayer by creating a RespectAccount scope
         val mkDirUseCase: MakeSchoolPathDirUseCase? = schoolScope.getOrNull()
         mkDirUseCase?.invoke()
@@ -261,8 +267,11 @@ class RespectAccountManager(
 
         if(accountsOnRealmScope == 0) {
             //close it
-            val realmScope = getKoin().getScope(account.school.self.toString())
-            realmScope.close()
+            val schoolScopeId = SchoolDirectoryEntryScopeId(
+                schoolUrl = account.school.self, accountPrincipalId = null
+            )
+            val schoolScope = getKoin().getScopeOrNull(schoolScopeId.scopeId)
+            schoolScope?.close()
         }
 
     }
@@ -276,7 +285,7 @@ class RespectAccountManager(
     }
 
     /**
-     * When the RespectAccount scope is created it MUST be linked to the parent Realm scope.
+     * When the RespectAccount scope is created it MUST be linked to the parent school scope.
      */
     fun getOrCreateAccountScope(account: RespectAccount): Scope {
         return getKoin().getOrCreateScope<RespectAccount>(account.scopeId)

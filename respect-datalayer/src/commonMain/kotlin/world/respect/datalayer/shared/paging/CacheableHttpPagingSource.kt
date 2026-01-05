@@ -1,6 +1,8 @@
 package world.respect.datalayer.shared.paging
 
 import androidx.paging.PagingSource
+import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 
 /**
  * A Cacheable Http Paging Source is one that loads data over http that can be cached by a
@@ -27,7 +29,12 @@ interface CacheableHttpPagingSource<Key: Any, Value: Any> {
      * This will only happen when using our own validation helper, which is put there to work with
      * the repository.
      */
-    class NotModifiedNonException: Exception()
+    class NotModifiedNonException(
+        val metaInfo: DataLoadMetaInfo
+    ): Exception(), ExceptionWithHttpStatusCode {
+        override val statusCode: Int
+            get() = 304
+    }
 
     /**
      * To be called by a repository after successfully storing a cacheable loadResult. This will

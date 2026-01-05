@@ -51,7 +51,8 @@ import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -125,6 +126,8 @@ class ClazzDetailViewModel(
 
     private val studentsPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_STUDENT)
 
+    private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
+
     init {
         _appUiState.update {
             it.copy(
@@ -155,6 +158,11 @@ class ClazzDetailViewModel(
                     FilterChipsOption(Res.string.active.asUiText())
                 ),
             )
+        }
+
+
+        viewModelScope.launch {
+            enqueuePullSyncUseCase()
         }
 
         viewModelScope.launch {

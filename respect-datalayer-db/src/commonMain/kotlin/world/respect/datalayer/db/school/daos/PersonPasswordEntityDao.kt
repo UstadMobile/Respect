@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.daos.PersonEntityDao.Companion.AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL
 import world.respect.datalayer.db.school.entities.PersonPasswordEntity
 
 @Dao
@@ -45,24 +46,33 @@ interface PersonPasswordEntityDao {
     ) : List<PersonPasswordEntity>
 
 
-    @Query("""
-        SELECT PersonPasswordEntity.*
-          FROM PersonPasswordEntity
-         WHERE PersonPasswordEntity.ppwGuidNum = :personGuidNum
-    """)
+    @Query(LIST_SQL)
     suspend fun findAll(
+        authenticatedPersonUidNum: Long,
         personGuidNum: Long
     ): List<PersonPasswordEntity>
 
-    @Query("""
-        SELECT PersonPasswordEntity.*
-          FROM PersonPasswordEntity
-         WHERE PersonPasswordEntity.ppwGuidNum = :personGuidNum
-    """)
+    @Query(LIST_SQL)
     fun findAllAsFlow(
+        authenticatedPersonUidNum: Long,
         personGuidNum: Long
     ): Flow<List<PersonPasswordEntity>>
 
 
 
+    companion object {
+
+        const val LIST_SQL = """
+          WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},  
+               ${PersonEntityDao.AUTHENTICATED_PERSON_CLASS_PERMISSIONS}
+        
+        SELECT PersonPasswordEntity.*
+          FROM PersonPasswordEntity
+               JOIN PersonEntity 
+                    ON PersonEntity.pGuidHash = PersonPasswordEntity.ppwGuidNum
+         WHERE PersonPasswordEntity.ppwGuidNum = :personGuidNum
+           AND ($AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL)
+        """
+
+    }
 }

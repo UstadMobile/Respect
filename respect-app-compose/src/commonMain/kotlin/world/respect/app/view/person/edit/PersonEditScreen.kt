@@ -29,6 +29,7 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
@@ -44,7 +45,6 @@ import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.remove
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.role
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.edit.PersonEditUiState

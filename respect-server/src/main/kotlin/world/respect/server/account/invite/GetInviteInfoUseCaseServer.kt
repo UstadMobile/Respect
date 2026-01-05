@@ -11,16 +11,16 @@ class GetInviteInfoUseCaseServer(
 ): GetInviteInfoUseCase, KoinComponent {
 
     override suspend fun invoke(code: String): RespectInviteInfo {
-        val clazz = schoolDb.getClassEntityDao().list(
+        val clazz = schoolDb.getClassEntityDao().findByInviteCode(
             code = code
         ).firstOrNull() ?: throw IllegalArgumentException("class not found for code: $code")
             .withHttpStatus(404)
 
         return RespectInviteInfo(
             code = code,
-            classGuid = clazz.cGuid,
-            className = clazz.cTitle,
-            userInviteType = if(code == clazz.cTeacherInviteCode) {
+            classGuid = clazz.clazz.cGuid,
+            className = clazz.clazz.cTitle,
+            userInviteType = if(code == clazz.clazz.cTeacherInviteCode) {
                 RespectInviteInfo.UserInviteType.TEACHER
             }else {
                 RespectInviteInfo.UserInviteType.STUDENT_OR_PARENT

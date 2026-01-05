@@ -52,8 +52,8 @@ class RedeemInviteUseCaseDb(
         val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
             ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
         val expectedInviteCode = when(redeemRequest.role) {
-            PersonRoleEnum.TEACHER -> clazz.cTeacherInviteCode
-            else -> clazz.cStudentInviteCode
+            PersonRoleEnum.TEACHER -> clazz.clazz.cTeacherInviteCode
+            else -> clazz.clazz.cStudentInviteCode
         } ?: throw IllegalArgumentException("No invite code for requested role")
             .withHttpStatus(400)
 
@@ -142,7 +142,7 @@ class RedeemInviteUseCaseDb(
 
         //If a teacher/student, make the pending enrollment now
         if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-            schoolDataSourceVal.enrollmentDataSource.store(
+            schoolDataSourceVal.enrollmentDataSource.updateLocal(
                 listOf(
                     Enrollment(
                         uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(

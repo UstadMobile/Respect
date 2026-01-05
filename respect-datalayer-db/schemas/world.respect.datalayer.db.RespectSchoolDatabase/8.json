@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "7e04f3ed1feac2fb1c338814e8e17e5c",
+    "identityHash": "e718d3b73f7e0bd46a2dba3e7cf99bb8",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -942,11 +942,65 @@
             "wqiQueueItemId"
           ]
         }
+      },
+      {
+        "tableName": "SchoolPermissionGrantEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spgUid` TEXT NOT NULL, `spgUidNum` INTEGER NOT NULL, `spgStatusEnum` INTEGER NOT NULL, `spgToRole` INTEGER NOT NULL, `spgPermissions` INTEGER NOT NULL, `spgLastModified` INTEGER NOT NULL, `spgStored` INTEGER NOT NULL, PRIMARY KEY(`spgUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "spgUid",
+            "columnName": "spgUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgUidNum",
+            "columnName": "spgUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgStatusEnum",
+            "columnName": "spgStatusEnum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgToRole",
+            "columnName": "spgToRole",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgPermissions",
+            "columnName": "spgPermissions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgLastModified",
+            "columnName": "spgLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgStored",
+            "columnName": "spgStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "spgUidNum"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7e04f3ed1feac2fb1c338814e8e17e5c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e718d3b73f7e0bd46a2dba3e7cf99bb8')"
     ]
   }
 }

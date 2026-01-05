@@ -153,7 +153,7 @@ fun GetStartedScreen(
             ) {
                 Text(text = stringResource(Res.string.scan_qr_code_badge))
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(
                 onClick = onClickOtherOptions,

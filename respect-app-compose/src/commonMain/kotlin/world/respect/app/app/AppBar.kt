@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.uiTextStringResource
+import world.respect.app.util.ext.toImageVector
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
@@ -49,7 +52,9 @@ import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.util.ext.isLoading
+import world.respect.shared.viewmodel.app.appstate.AppActionButton
 import world.respect.shared.viewmodel.app.appstate.AppBarColors
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
@@ -91,6 +96,11 @@ fun RespectAppBar(
         if(compactHeader && searchActive)
             focusRequester.requestFocus()
     }
+
+    var showOverflowMenu by remember { mutableStateOf(false) }
+
+    val overflowActions = appUiState.actions.filter { it.display == AppActionButton.Companion.ActionButtonDisplay.OVERFLOW_MENU }
+    val iconActions = appUiState.actions.filter { it.display == AppActionButton.Companion.ActionButtonDisplay.ICON }
 
     Box(
         contentAlignment = Alignment.BottomCenter
@@ -179,6 +189,17 @@ fun RespectAppBar(
                         )
                     }
                 }
+                iconActions.forEach { action ->
+                    IconButton(
+                        onClick = action.onClick,
+                        modifier = Modifier.testTag("action_${action.id}"),
+                    ) {
+                        Icon(
+                            imageVector = action.icon.toImageVector(),
+                            contentDescription = action.contentDescription,
+                        )
+                    }
+                }
                 if (appUiState.settingsIconVisible == true) {
                     IconButton(
                         onClick = appUiState.onClickSettings ?: {},
@@ -201,15 +222,32 @@ fun RespectAppBar(
 
                     }
                 }
-                if (appUiState.showMoreIconVisible){
-                    IconButton(
-                        onClick = appUiState.onClickMoreOption ?: {},
-                        modifier = Modifier.testTag("More options")
-                    ) {
-                        Icon(
-                            Icons.Default.MoreVert,
-                            contentDescription = stringResource(Res.string.more_info)
-                        )
+                if (overflowActions.isNotEmpty()) {
+                    Box {
+                        IconButton(
+                            onClick = { showOverflowMenu = true },
+                            modifier = Modifier.testTag("more_options"),
+                        ) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = stringResource(Res.string.more_info)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false }
+                        ) {
+                            overflowActions.forEach { action ->
+                                DropdownMenuItem(
+                                    text = { Text(uiTextStringResource(action.text)) },
+                                    onClick = {
+                                        action.onClick()
+                                        showOverflowMenu = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             },

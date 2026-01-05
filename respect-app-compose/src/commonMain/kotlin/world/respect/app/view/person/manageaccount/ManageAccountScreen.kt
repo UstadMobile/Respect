@@ -70,7 +70,7 @@ fun ManageAccountScreen(
             onDismissRequest = viewModel::onDismissBottomSheet
         )
     }
-    ManageAccountScreen(
+    ManageAccountScreenContent(
         uiState = uiState,
         onCreatePasskeyClick = viewModel::onCreatePasskeyClick,
         onClickManagePasskey = viewModel::onClickManagePasskey,
@@ -79,19 +79,18 @@ fun ManageAccountScreen(
         onAssignQrCodeBadge = viewModel::onClickQRCodeBadge,
         onClickChangeQrBadge = viewModel::onClickChangeQrBadge,
     )
-
 }
 
 @Composable
-fun ManageAccountScreen(
+fun ManageAccountScreenContent(
     uiState: ManageAccountUiState,
     onCreatePasskeyClick: () -> Unit = {},
     onClickHowPasskeysWork: () -> Unit = {},
     onClickManagePasskey: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
     onAssignQrCodeBadge: () -> Unit = {},
-    onLearnMore: () -> Unit = {},
     onClickChangeQrBadge: () -> Unit = {},
+    onLearnMore: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -101,6 +100,16 @@ fun ManageAccountScreen(
                 uiTextStringResource(it),
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.defaultItemPadding(),
+            )
+        }
+
+        // Show QR badge specific error
+        uiState.qrCodeBadgeError?.also { error ->
+            Text(
+                text = uiTextStringResource(error),
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .defaultItemPadding()
             )
         }
 
@@ -151,19 +160,18 @@ fun ManageAccountScreen(
                     }
                 )
             }
-
         }
+
         if (uiState.isStudent) {
             val personQrVal = uiState.qrBadge.dataOrNull()
-
             val badgeNumber = uiState.badgeNumber
-
             val qrLastUpdatedStr = rememberFormattedDateTime(
                 timeInMillis = personQrVal?.lastModified?.toEpochMilliseconds() ?: 0,
                 timeZoneId = TimeZone.currentSystemDefault().id,
             )
 
-            if ((personQrVal != null || !uiState.isQrAlreadyAssignedToAnotherPerson) && uiState.isQrAdded) {
+            if (uiState.isQrAdded) {
+                // Show assigned badge
                 ListItem(
                     leadingContent = {
                         Icon(Icons.Default.QrCode, contentDescription = null)
@@ -175,19 +183,13 @@ fun ManageAccountScreen(
                         )
                     },
                     supportingContent = {
-                        if (badgeNumber != null) {
-                            Text(
-                                text = "${stringResource(Res.string.badge)} #$badgeNumber ${
-                                    stringResource(
-                                        Res.string.assigned
-                                    )
-                                } $qrLastUpdatedStr"
-                            )
-                        } else {
-                            Text(
-                                text = "${stringResource(Res.string.badge)} $qrLastUpdatedStr"
-                            )
-                        }
+                        Text(
+                            text = "${stringResource(Res.string.badge)} #$badgeNumber ${
+                                stringResource(
+                                    Res.string.assigned
+                                )
+                            } $qrLastUpdatedStr"
+                        )
                     },
                     trailingContent = {
                         OutlinedButton(
@@ -203,9 +205,10 @@ fun ManageAccountScreen(
                     }
                 )
             } else {
+                // Show QR code info box for assigning a badge
                 QrCodeInfoBox(
-                    onLearnMore,
-                    onAssignQrCodeBadge,
+                    onLearnMore = onLearnMore,
+                    onAssignQrCodeBadge = onAssignQrCodeBadge,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),

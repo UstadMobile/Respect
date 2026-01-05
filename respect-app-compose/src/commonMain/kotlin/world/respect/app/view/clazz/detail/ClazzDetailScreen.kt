@@ -52,7 +52,7 @@ import world.respect.shared.generated.resources.gender_literal
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.util.ext.fullName
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import androidx.compose.material3.DropdownMenu

@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.RespectQRBadgeCredential
-import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.paste_url
 import world.respect.shared.generated.resources.scan_qr_code
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
@@ -25,10 +25,12 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
-import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.extractSchoolUrl
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.AppActionButton
+import world.respect.shared.viewmodel.app.appstate.AppStateIcon
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
@@ -37,9 +39,9 @@ data class ScanQRCodeUiState(
     val isLoading: Boolean = false,
     val errorMessage: UiText? = null,
     val isSuccess: Boolean = false,
-    val showPasteButton: Boolean = false,
     val loginErrorText: UiText? = null,
     val manualUrlError: UiText? = null,
+    var showManualEntryDialog: Boolean = false,
 )
 
 class ScanQRCodeViewModel(
@@ -60,12 +62,20 @@ class ScanQRCodeViewModel(
                 title = Res.string.scan_qr_code.asUiText(),
                 navigationVisible = true,
                 hideBottomNavigation = true,
-                showMoreIconVisible = true,
-                onClickMoreOption = {
-                    _uiState.update { currentState ->
-                        currentState.copy(showPasteButton = !currentState.showPasteButton)
-                    }
-                },
+                actions = listOf(
+                    AppActionButton(
+                        icon = AppStateIcon.MORE_VERT, // You'll need to define this or use appropriate icon
+                        contentDescription = "more_options",
+                        text = Res.string.paste_url.asUiText(), // Text for overflow menu
+                        onClick = {
+                            _uiState.update { currentState ->
+                                currentState.copy(showManualEntryDialog = true)
+                            }
+                        },
+                        id = "more_options_qr_scan",
+                        display = AppActionButton.Companion.ActionButtonDisplay.OVERFLOW_MENU
+                    )
+                ),
                 userAccountIconVisible = false
             )
         }
@@ -77,15 +87,14 @@ class ScanQRCodeViewModel(
                 it.copy(
                     isLoading = true,
                     errorMessage = null,
-                    showPasteButton = false,
                     manualUrlError = null
                 )
             }
             try {
                 if (route.resultDest != null || route.username != null) {
-                    storeQrCodeForPerson(route.guid ?: "", url) // ASSIGNING
+                    handleQrCodeForAccountManagement(route.guid ?: "", url) // ASSIGNING
                 } else {
-                    authenticateWithQrCode(url)  // LOGIN
+                    authenticateWithQrCode(Url(url))  // LOGIN
                 }
             } catch (e: Exception) {
                 Napier.e("Error processing QR Code", e)
@@ -125,29 +134,24 @@ class ScanQRCodeViewModel(
         }
     }
 
-    fun onMenuDismiss() {
-        _uiState.update { it.copy(showPasteButton = false) }
+    fun hideManualEntryDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(showManualEntryDialog = false)
+        }
     }
 
-    private fun authenticateWithQrCode(url: String) {
+    private fun authenticateWithQrCode(url: Url) {
         launchWithLoadingIndicator {
             try {
                 // Validate QR code format for login
-                val credential = RespectQRBadgeCredential(qrCodeUrl = Url(url))
-                val qrCodeUrl = credential.qrCodeUrl
-                val schoolUrlString = buildString {
-                    append(qrCodeUrl.protocol.name)
-                    append("://")
-                    append(qrCodeUrl.host)
-                    if (qrCodeUrl.port != qrCodeUrl.protocol.defaultPort) {
-                        append(":")
-                        append(qrCodeUrl.port)
-                    }
-                    append("/")
-                }
+                val credential = RespectQRBadgeCredential(qrCodeUrl = url)
+
+                val schoolUrl = credential.extractSchoolUrl()
+                    ?: throw IllegalArgumentException("Invalid QR code format: Unable to extract school URL")
+
                 val qrBadgeValidation = validateQrCodeUseCase(
-                    qrCodeUrl = url,
-                    schoolUrl = schoolUrlString,
+                    qrCodeUrl = url.toString(),
+                    schoolUrl = schoolUrl.toString(),
                     personGuid = null,
                     allowReplacement = false
                 )
@@ -159,25 +163,19 @@ class ScanQRCodeViewModel(
 
                 if (qrBadgeValidation.errorMessage == null) {
 
-                    val schoolUrlObject = Url(schoolUrlString)
-                    val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrlObject, null)
-                    val schoolScope =
-                        getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
-
-                    val respectAccountManager: RespectAccountManager = schoolScope.get()
+                    val respectAccountManager: RespectAccountManager = getKoin().get()
 
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isSuccess = true,
-                            showPasteButton = false
                         )
                     }
                     viewModelScope.launch {
                         try {
                             respectAccountManager.login(
                                 credential = credential,
-                                schoolUrl = schoolUrlObject
+                                schoolUrl = schoolUrl
                             )
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
@@ -208,7 +206,7 @@ class ScanQRCodeViewModel(
         }
     }
 
-    private fun storeQrCodeForPerson(personGuid: String, url: String) {
+    private fun handleQrCodeForAccountManagement(personGuid: String, url: String) {
         viewModelScope.launch {
             try {
                 val qrBadgeValidation = validateQrCodeUseCase(
@@ -233,7 +231,7 @@ class ScanQRCodeViewModel(
                             result = url,
                         )
                     } else {
-                        // Coming from SetUsernameAndPassword - navigate directly
+                        // Coming from SetUsernameAndPassword/Create Account Screen - navigate directly
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(
                                 destination = ManageAccount(
@@ -246,7 +244,6 @@ class ScanQRCodeViewModel(
                             )
                         )
                     }
-                    _uiState.update { it.copy(showPasteButton = false) }
                 }
 
             } catch (e: Exception) {
@@ -254,7 +251,6 @@ class ScanQRCodeViewModel(
                     it.copy(
                         isLoading = false,
                         errorMessage = e.getUiTextOrGeneric(),
-                        showPasteButton = false
                     )
                 }
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))

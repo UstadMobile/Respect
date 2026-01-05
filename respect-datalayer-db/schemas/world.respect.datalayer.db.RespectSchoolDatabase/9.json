@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "6a390156ad004c7680826af29105a901",
+    "identityHash": "43c142cee8e3dff7bafdc87f647775e7",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -655,6 +655,41 @@
         }
       },
       {
+        "tableName": "ClassPermissionEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cpeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cpeClassUidNum` INTEGER NOT NULL, `cpeToEnrollmentRole` INTEGER, `cpePermissions` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "cpeId",
+            "columnName": "cpeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cpeClassUidNum",
+            "columnName": "cpeClassUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cpeToEnrollmentRole",
+            "columnName": "cpeToEnrollmentRole",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cpePermissions",
+            "columnName": "cpePermissions",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "cpeId"
+          ]
+        }
+      },
+      {
         "tableName": "EnrollmentEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUid` TEXT NOT NULL, `eClassUidNum` INTEGER NOT NULL, `ePersonUid` TEXT NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` INTEGER NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eRemovedAt` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
         "fields": [
@@ -944,51 +979,63 @@
         }
       },
       {
-        "tableName": "PersonQrCodeEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pqrGuidNum` INTEGER NOT NULL, `pqrGuid` TEXT NOT NULL, `pqrLastModified` INTEGER NOT NULL, `pqrStored` INTEGER NOT NULL, `pqrQrCodeUrl` TEXT NOT NULL, PRIMARY KEY(`pqrGuidNum`))",
+        "tableName": "SchoolPermissionGrantEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spgUid` TEXT NOT NULL, `spgUidNum` INTEGER NOT NULL, `spgStatusEnum` INTEGER NOT NULL, `spgToRole` INTEGER NOT NULL, `spgPermissions` INTEGER NOT NULL, `spgLastModified` INTEGER NOT NULL, `spgStored` INTEGER NOT NULL, PRIMARY KEY(`spgUidNum`))",
         "fields": [
           {
-            "fieldPath": "pqrGuidNum",
-            "columnName": "pqrGuidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pqrGuid",
-            "columnName": "pqrGuid",
+            "fieldPath": "spgUid",
+            "columnName": "spgUid",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "pqrLastModified",
-            "columnName": "pqrLastModified",
+            "fieldPath": "spgUidNum",
+            "columnName": "spgUidNum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "pqrStored",
-            "columnName": "pqrStored",
+            "fieldPath": "spgStatusEnum",
+            "columnName": "spgStatusEnum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "pqrQrCodeUrl",
-            "columnName": "pqrQrCodeUrl",
-            "affinity": "TEXT",
+            "fieldPath": "spgToRole",
+            "columnName": "spgToRole",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgPermissions",
+            "columnName": "spgPermissions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgLastModified",
+            "columnName": "spgLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgStored",
+            "columnName": "spgStored",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "pqrGuidNum"
+            "spgUidNum"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6a390156ad004c7680826af29105a901')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '43c142cee8e3dff7bafdc87f647775e7')"
     ]
   }
 }

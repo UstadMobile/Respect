@@ -23,6 +23,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
@@ -31,7 +32,6 @@ import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.enrollment_for
 import world.respect.shared.generated.resources.more_options
-import world.respect.shared.util.ext.fullName
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListUiState
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel

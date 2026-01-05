@@ -30,17 +30,17 @@ import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.images.RespectImage
-import world.respect.images.respectImagePainter
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Change_qr_code_badge
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_qr_code_badge
 import world.respect.shared.generated.resources.change_password
+import world.respect.shared.generated.resources.fingerprint
 import world.respect.shared.generated.resources.learn_more
 import world.respect.shared.generated.resources.password_label
 import world.respect.shared.generated.resources.qr_code_badge
@@ -183,7 +183,7 @@ fun QrCodeInfoBox(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(
-                    painter = respectImagePainter(RespectImage.FINGERPRINT),
+                    painter = painterResource(Res.drawable.fingerprint),
                     contentDescription = stringResource(Res.string.qr_code_badge),
                     modifier = Modifier
                         .width(120.dp).height(100.dp)

@@ -1,5 +1,6 @@
 package world.respect.shared.domain.account.child
 
+import io.github.aakira.napier.Napier
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
@@ -25,6 +26,7 @@ class AddChildAccountUseCaseDataSource(
         classUid: String,
         inviteCode: String
     ) {
+        Napier.d("AddChildAccountUseCase: adding child ${personInfo.name} for parent $parentUsername")
         val parentPerson = schoolDataSource.personDataSource.findByGuid(
             loadParams = DataLoadParams(),
             guid = authenticatedUser.guid,

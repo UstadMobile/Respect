@@ -21,6 +21,16 @@ fun <T: Any> DataLoadState<T>.combineWithRemote(
     )
 }
 
+fun <T: Any> DataLoadState<T>.combineWithRemoteIfNotNull(
+    remote: DataLoadState<*>?
+): DataLoadState<T> {
+    return if(remote != null) {
+        this.combineWithRemote(remote)
+    }else {
+        this
+    }
+}
+
 fun <T: Any> Flow<DataLoadState<T>>.combineWithRemote(
     remoteFlow: Flow<DataLoadState<*>>,
 ): Flow<DataLoadState<T>> =combine(remoteFlow) { local, remote ->
@@ -70,6 +80,11 @@ fun <T: Any> DataLoadState<T>.dataOrNull(): T? {
  */
 fun DataLoadState<*>.isReadyAndSettled(): Boolean {
     return this is DataReadyState && this.remoteState !is DataLoadingState
+}
+
+fun DataLoadState<*>.isLoadedOrNotModified(): Boolean {
+    return this is DataReadyState ||
+            (this is NoDataLoadedState && reason == NoDataLoadedState.Reason.NOT_MODIFIED)
 }
 
 fun <T: Any, R: Any> DataLoadState<T>.map(

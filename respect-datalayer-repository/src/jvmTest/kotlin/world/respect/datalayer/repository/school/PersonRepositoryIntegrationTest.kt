@@ -15,17 +15,19 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
-import world.respect.libutil.util.time.systemTimeInMillis
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
 
 /**
  * This integration test checks if using consistent-through and since parameters works with a real
@@ -42,7 +44,9 @@ class PersonRepositoryIntegrationTest {
         username = "test",
         givenName = "test",
         familyName = "test",
-        roles = emptyList(),
+        roles = listOf(
+            PersonRole(true, PersonRoleEnum.SITE_ADMINISTRATOR)
+        ),
         gender = PersonGenderEnum.FEMALE,
     )
 
@@ -52,11 +56,17 @@ class PersonRepositoryIntegrationTest {
             clientServerDatasourceTest(temporaryFolder.newFolder("test")) {
                 serverRouting {
                     route("api/school/respect") {
-                        PersonRoute(schoolDataSource = { serverSchoolDataSource })
+                        PersonRoute(schoolDataSource = { serverSchoolDataSource } )
+                        SchoolPermissionGrantRoute(schoolDataSource = { serverSchoolDataSource })
                     }
                 }
 
                 server.start()
+
+                clients.first().schoolDataSource.schoolPermissionGrantDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolPermissionGrantDataSource.GetListParams()
+                )
 
                 serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
@@ -68,20 +78,14 @@ class PersonRepositoryIntegrationTest {
                 val validatedData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams())
 
-                assertEquals(
-                    defaultTestPerson.guid,
-                    initData.dataOrNull()!!.first().guid
-                )
+                assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
 
                 assertEquals(
                     NoDataLoadedState.Reason.NOT_MODIFIED,
                     (validatedData.remoteState as? NoDataLoadedState)?.reason
                 )
 
-                assertEquals(
-                    defaultTestPerson.guid,
-                    validatedData.dataOrNull()!!.first().guid
-                )
+                assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
             }
         }
     }
@@ -93,10 +97,16 @@ class PersonRepositoryIntegrationTest {
                 serverRouting {
                     route("api/school/respect") {
                         PersonRoute(schoolDataSource = { serverSchoolDataSource })
+                        SchoolPermissionGrantRoute(schoolDataSource = { serverSchoolDataSource })
                     }
                 }
 
                 server.start()
+
+                clients.first().schoolDataSource.schoolPermissionGrantDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolPermissionGrantDataSource.GetListParams()
+                )
 
                 serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
@@ -121,16 +131,13 @@ class PersonRepositoryIntegrationTest {
                 val newData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams())
 
-                assertEquals(
-                    defaultTestPerson.guid,
-                    initData.dataOrNull()!!.first().guid
-                )
+                assertTrue(initData.dataOrNull()!!.any { it.guid == defaultTestPerson.guid })
 
                 assertTrue(newData.remoteState is DataReadyState)
 
                 assertEquals(
                     updatedName,
-                    newData.dataOrNull()!!.first().givenName
+                    newData.dataOrNull()!!.first { it.guid == defaultTestPerson.guid}.givenName
                 )
             }
         }
@@ -156,7 +163,7 @@ class PersonRepositoryIntegrationTest {
                     listOf(defaultTestPerson)
                 )
 
-                val startTime = systemTimeInMillis()
+                val startTime = Clock.System.now()
                 val initData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams())
                 println(initData)
@@ -168,7 +175,7 @@ class PersonRepositoryIntegrationTest {
                         loadParams = DataLoadParams(),
                         PersonDataSource.GetListParams(
                             common = GetListCommonParams(
-                                since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                                since = answer1ConsistentThrough
                             )
                         )
                     )
@@ -178,7 +185,7 @@ class PersonRepositoryIntegrationTest {
                 val remoteData = remoteDataState.data as List<*>
                 assertEquals(0, remoteData.size)
 
-                println("Run time: ${systemTimeInMillis() - startTime}")
+                println("Run time: ${Clock.System.now() - startTime}")
             }
         }
     }
@@ -199,7 +206,7 @@ class PersonRepositoryIntegrationTest {
                     listOf(defaultTestPerson)
                 )
 
-                val startTime = systemTimeInMillis()
+                val startTime = Clock.System.now()
                 val initData = clients.first().schoolDataSource.personDataSource
                     .list(DataLoadParams())
                 println(initData)
@@ -221,7 +228,7 @@ class PersonRepositoryIntegrationTest {
                         loadParams = DataLoadParams(),
                         params = PersonDataSource.GetListParams(
                             common = GetListCommonParams(
-                                since = Instant.fromEpochMilliseconds(answer1ConsistentThrough)
+                                since = answer1ConsistentThrough
                             )
                         )
                     )
@@ -233,7 +240,7 @@ class PersonRepositoryIntegrationTest {
                 assertEquals(1, remoteData.size)
                 assertEquals(updatedName, remoteData.first().givenName)
 
-                println("Run time: ${systemTimeInMillis() - startTime}")
+                println("Run time: ${Clock.System.now() - startTime}")
             }
         }
     }
@@ -245,10 +252,15 @@ class PersonRepositoryIntegrationTest {
                 serverRouting {
                     route("api/school/respect") {
                         PersonRoute(schoolDataSource = { serverSchoolDataSource })
+                        SchoolPermissionGrantRoute(schoolDataSource = { serverSchoolDataSource })
                     }
                 }
 
                 server.start()
+                clients.first().schoolDataSource.schoolPermissionGrantDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolPermissionGrantDataSource.GetListParams()
+                )
 
                 serverSchoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)
@@ -267,9 +279,9 @@ class PersonRepositoryIntegrationTest {
                     timeout = 10.seconds
                 ) {
                     val localData = awaitItem()
-                    assertEquals(1, localData.dataOrNull()?.size)
+                    assertEquals(2, localData.dataOrNull()?.size)
                     assertEquals(defaultTestPerson.givenName,
-                        localData.dataOrNull()?.first()?.givenName)
+                        localData.dataOrNull()?.first { it.guid == defaultTestPerson.guid}?.givenName)
                 }
             }
         }
@@ -287,6 +299,8 @@ class PersonRepositoryIntegrationTest {
                 }
 
                 server.start()
+
+                clients.first().insertServerAdminAndDefaultGrants()
 
                 clients.first().schoolDataSource.personDataSource.store(
                     listOf(defaultTestPerson)

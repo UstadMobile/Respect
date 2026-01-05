@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
+import world.respect.datalayer.ext.combineWithRemoteIfNotNull
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -75,18 +76,20 @@ class EnrollmentDataSourceRepository(
         loadParams: DataLoadParams,
         listParams: EnrollmentDataSource.GetListParams
     ): DataLoadState<List<Enrollment>> {
-        try {
-            val remote = remote.list(loadParams, listParams)
-            local.updateFromRemoteListIfNeeded(remote, validationHelper)
+        val remote = try {
+            remote.list(loadParams, listParams).also {
+                local.updateFromRemoteListIfNeeded(it, validationHelper)
+            }
         }catch(e: Throwable) {
             Napier.w(
                 message = "EnrollmentDataSourceRepository.list() failed:",
                 throwable = e,
                 tag = DataLayerTags.TAG_DATALAYER
             )
+            null
         }
 
-        return local.list(loadParams, listParams)
+        return local.list(loadParams, listParams).combineWithRemoteIfNotNull(remote)
     }
 
     override suspend fun store(list: List<Enrollment>) {

@@ -44,7 +44,7 @@ import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel

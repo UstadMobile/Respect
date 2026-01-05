@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -42,7 +43,8 @@ import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
@@ -50,8 +52,10 @@ import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
 
 data class AssignmentDetailUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
-    val assignees: List<IPagingSourceFactory<Int, Person>> = emptyList(),
-    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
+    val assignmentClass: DataLoadState<Clazz> = DataLoadingState(),
+    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+        flowOf(DataLoadingState())
+    },
 )
 
 class AssignmentDetailViewModel(
@@ -103,23 +107,16 @@ class AssignmentDetailViewModel(
         }
 
         viewModelScope.launch {
-            assignmentFlow.map { it.dataOrNull()?.assignees }
-                .distinctUntilChangedBy { list -> list?.joinToString { it.uid } ?: "" }
-                .collect { assigneeList ->
-                    _uiState.update {
-                        it.copy(
-                            assignees = assigneeList?.map { assigneeRef ->
-                                PagingSourceFactoryHolder {
-                                    schoolDataSource.personDataSource.listAsPagingSource(
-                                        loadParams = DataLoadParams(),
-                                        params = PersonDataSource.GetListParams(
-                                            filterByClazzUid = assigneeRef.uid,
-                                            filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
-                                        )
-                                    )
-                                }
-                            } ?: emptyList()
-                        )
+            assignmentFlow.distinctUntilChangedBy { it.dataOrNull()?.classUid }
+                .collectLatest { assignment ->
+                    schoolDataSource.classDataSource.findByGuidAsFlow(
+                        guid = assignment.dataOrNull()?.classUid ?: ""
+                    ).collect { assignmentClazz ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                assignmentClass = assignmentClazz
+                            )
+                        }
                     }
                 }
         }

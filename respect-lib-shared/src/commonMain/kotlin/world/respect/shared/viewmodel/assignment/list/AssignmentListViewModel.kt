@@ -33,7 +33,7 @@ import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel

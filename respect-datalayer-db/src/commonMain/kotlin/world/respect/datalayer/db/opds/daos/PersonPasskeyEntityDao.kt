@@ -17,23 +17,6 @@ abstract class PersonPasskeyEntityDao {
 
     @Query(
         """
-        SELECT ppCredentialId
-          FROM PersonPasskeyEntity
-    """
-    )
-    abstract suspend fun allPasskey(): List<String>
-
-    @Query(
-        """
-        SELECT * 
-          FROM PersonPasskeyEntity
-         WHERE isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
-           AND ppPersonUidNum = :uid
-    """
-    )
-    abstract fun getAllActivePasskeys(uid: Long): Flow<List<PersonPasskeyEntity>>
-    @Query(
-        """
         SELECT * 
           FROM PersonPasskeyEntity
          WHERE isRevoked = ${PersonPasskeyEntity.NOT_REVOKED}
@@ -68,19 +51,6 @@ abstract class PersonPasskeyEntityDao {
         credentialId: String,
     ): PersonPasskeyEntity?
 
-
-    @Query(
-        """
-        UPDATE PersonPasskeyEntity
-           SET isRevoked = ${PersonPasskeyEntity.REVOKED}
-         WHERE ppPersonUidNum = :personUidNum
-           AND ppCredentialId = :passKeyId
-    """
-    )
-    abstract suspend fun revokePersonPasskey(
-        personUidNum: Long,
-        passKeyId: String,
-    )
 
     @Query(
         """

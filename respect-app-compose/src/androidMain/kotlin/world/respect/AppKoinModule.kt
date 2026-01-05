@@ -67,19 +67,27 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
+import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.datalayer.repository.school.pullsync.EnqueueRunPullSyncUseCaseAndroidImpl
+import world.respect.datalayer.repository.school.pullsync.RunPullSyncUseCase
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
@@ -132,6 +140,7 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
@@ -794,7 +803,8 @@ val appKoinModule = module {
                     uidNumberMapper = get(),
                     authenticatedUser = AuthenticatedUserPrincipalId(
                         accountScopeId.accountPrincipalId.guid
-                    )
+                    ),
+                    checkPersonPermissionUseCase = get(),
                 ),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
@@ -820,6 +830,64 @@ val appKoinModule = module {
                 authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
             )
         }
+
+        scoped<GetAuthenticatedPersonUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            GetAuthenticatedPersonUseCase(
+                authenticatedUserPrincipalId = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckSchoolPermissionsUseCase> {
+            CheckSchoolPermissionsUseCase(
+                schoolDataSource = get(),
+            )
+        }
+
+        scoped<PullSyncTracker> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            PullSyncTrackerDbImpl(
+                schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<EnqueueRunPullSyncUseCase> {
+            EnqueueRunPullSyncUseCaseAndroidImpl(
+                context = androidApplication(),
+                scopeId = id,
+                scopeClass = RespectAccount::class,
+            )
+        }
+
+        scoped<RunPullSyncUseCase> {
+            RunPullSyncUseCase(
+                pullSyncTracker = get(),
+                schoolDataSource = get(),
+                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            )
+        }
+
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

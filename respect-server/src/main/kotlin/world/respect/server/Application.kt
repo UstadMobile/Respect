@@ -48,6 +48,7 @@ import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
@@ -214,13 +215,16 @@ fun Application.module() {
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     route("username"){
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
+                        SchoolPermissionGrantRoute()
                         PersonRoute()
                         PersonPasskeyRoute()
                         PersonPasswordRoute()

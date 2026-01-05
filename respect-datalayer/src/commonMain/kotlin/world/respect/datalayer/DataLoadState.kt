@@ -21,6 +21,32 @@ sealed interface DataLoadState<T: Any> {
     val metaInfo: DataLoadMetaInfo
     val localState: DataLoadState<T>?
     val remoteState: DataLoadState<*>?
+
+
+    companion object {
+
+        fun <T: Any> readyOrNotFoundIfNull(
+            data: T?,
+            metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
+            localState: DataLoadState<T>? = null,
+            remoteState: DataLoadState<*>? = null,
+        ): DataLoadState<T> {
+            return data?.let {
+                DataReadyState(
+                    data = it,
+                    metaInfo = metaInfo,
+                    localState = localState,
+                    remoteState = remoteState,
+                )
+            } ?: NoDataLoadedState(
+                reason = NoDataLoadedState.Reason.NOT_FOUND,
+                metaInfo = metaInfo,
+                localState = localState,
+                remoteState = remoteState,
+            )
+        }
+
+    }
 }
 
 /**
@@ -62,12 +88,18 @@ data class NoDataLoadedState<T: Any>(
         @Suppress("unused") //reserved for future use
         fun <T: Any> notModified(
             metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
-        ): NoDataLoadedState<T> = NoDataLoadedState(Reason.NOT_MODIFIED)
+        ): NoDataLoadedState<T> = NoDataLoadedState(
+            reason = Reason.NOT_MODIFIED,
+            metaInfo = metaInfo,
+        )
 
         @Suppress("unused") //reserved for future use
         fun <T: Any> notFound(
             metaInfo: DataLoadMetaInfo = DataLoadMetaInfo(),
-        ): NoDataLoadedState<T> = NoDataLoadedState(Reason.NOT_FOUND)
+        ): NoDataLoadedState<T> = NoDataLoadedState(
+            reason = Reason.NOT_FOUND,
+            metaInfo = metaInfo,
+        )
 
     }
 

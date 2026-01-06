@@ -25,7 +25,6 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Assignment
-import world.respect.datalayer.school.model.AssignmentAssigneeRef
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.opds.model.OpdsPublication
@@ -73,7 +72,7 @@ class AssignmentEditViewModel(
     private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val route: AssignmentEdit = savedStateHandle.toRoute()
 
@@ -140,7 +139,7 @@ class AssignmentEditViewModel(
                     },
                     uiUpdateFn = { entity ->
                         _uiState.update { prev ->
-                            val assigneeClassUid = entity.dataOrNull()?.assignees?.firstOrNull()?.uid
+                            val assigneeClassUid = entity.dataOrNull()?.classUid
                             prev.copy(
                                 assignment = entity,
                                 assigneeText = classes.firstOrNull {
@@ -158,6 +157,7 @@ class AssignmentEditViewModel(
                                 uid = uid,
                                 title = "",
                                 description = "",
+                                classUid = "",
                                 learningUnits = route.learningUnitSelected?.let {
                                     listOf(it.toRef())
                                 } ?: emptyList()
@@ -200,9 +200,7 @@ class AssignmentEditViewModel(
             it.copy(
                 assignment = DataReadyState(
                     assignment.copy(
-                        assignees = listOf(
-                            AssignmentAssigneeRef(uid = clazz.guid)
-                        )
+                        classUid = clazz.guid
                     )
                 ),
                 assigneeText = clazz.title,
@@ -273,7 +271,7 @@ class AssignmentEditViewModel(
                     assignmentVal?.title.isNullOrBlank()
                 },
                 classError = Res.string.required_field.asUiText().takeIf {
-                    assignmentVal?.assignees?.isEmpty() != false
+                    assignmentVal?.classUid.isNullOrEmpty()
                 }
             )
         }

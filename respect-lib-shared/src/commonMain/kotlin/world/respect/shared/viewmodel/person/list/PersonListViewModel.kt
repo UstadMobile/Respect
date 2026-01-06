@@ -35,9 +35,11 @@ import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
+import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
@@ -59,7 +61,7 @@ class PersonListViewModel(
     private val setClipboardStringUseCase: SetClipboardStringUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -70,6 +72,8 @@ class PersonListViewModel(
     private val launchDebounced = LaunchDebouncer(viewModelScope)
 
     private val route: PersonList = savedStateHandle.toRoute()
+
+    private val checkPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
 
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
@@ -119,8 +123,11 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
+            val canAddPerson = checkPermissionUseCase(
+                PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
+            ).isNotEmpty()
+
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
-                val canAddPerson = selectedAcct?.person?.isAdminOrTeacher() == true
                 _appUiState.update { prev ->
                     prev.copy(
                         fabState = prev.fabState.copy(

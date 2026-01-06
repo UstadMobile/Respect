@@ -12,14 +12,17 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.ClassEntities
+import world.respect.datalayer.db.school.adapters.toClassEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import kotlin.collections.map
 import kotlin.time.Clock
 
 class ClassDatasourceDb(
@@ -29,41 +32,26 @@ class ClassDatasourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : ClassDataSourceLocal {
 
-    private suspend fun upsertClasses(
-        classes: List<Clazz>,
-        forceOverwrite: Boolean = false,
+
+    private suspend fun doUpsertClass(
+        clazz: Clazz,
     ) {
-        if(classes.isEmpty())
-            return
+        val entities = clazz.copy(stored = Clock.System.now()).toEntities(uidNumberMapper)
 
-        schoolDb.useWriterConnection { con ->
-            val timeStored = Clock.System.now()
-
-            var numUpdated = 0
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                classes.map { it.copy(stored = timeStored) }.forEach { clazz ->
-                    val entities = clazz.toEntities(uidNumberMapper)
-                    val lastModifiedInDb = schoolDb.getClassEntityDao().getLastModifiedByGuid(
-                        entities.clazz.cGuidHash
-                    ) ?: -1
-
-                    if(forceOverwrite ||
-                            entities.clazz.cLastModified.toEpochMilliseconds() > lastModifiedInDb) {
-                        schoolDb.getClassEntityDao().upsert(entities.clazz)
-                        numUpdated++
-                    }
-                }
-            }
-            Napier.d("RPaging/ClassDataSourceDb: updated: $numUpdated/${classes.size}")
-
-        }
+        schoolDb.getClassPermissionEntityDao().deleteByClassUidNum(
+            classUidNum = entities.clazz.cGuidHash
+        )
+        schoolDb.getClassEntityDao().upsert(entities.clazz)
+        schoolDb.getClassPermissionEntityDao().upsertList(
+            permissionsList = entities.permissionEntities
+        )
     }
 
     override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Clazz>> {
         return schoolDb.getClassEntityDao().findByGuidHashAsFlow(
             uidNumberMapper(guid)
         ).map { classEntity ->
-            classEntity?.let { ClassEntities(it) }?.toModel()?.let {
+            classEntity?.toClassEntities()?.toModel()?.let {
                 DataReadyState(it)
             } ?: NoDataLoadedState.notFound()
         }
@@ -76,7 +64,7 @@ class ClassDatasourceDb(
         return schoolDb.getClassEntityDao().findByGuid(
             uidNumberMapper(guid)
         )?.let {
-            DataReadyState(ClassEntities(it).toModel())
+            DataReadyState(it.toClassEntities().toModel())
         } ?: NoDataLoadedState.notFound()
     }
 
@@ -85,12 +73,13 @@ class ClassDatasourceDb(
         params: ClassDataSource.GetListParams
     ): IPagingSourceFactory<Int, Clazz> {
         return IPagingSourceFactory {
-            schoolDb.getClassEntityDao().findAllAsPagingSource(
+            schoolDb.getClassEntityDao().listAsPagingSource(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteGuid,
             ).map {
-                ClassEntities(it).toModel()
+                it.toClassEntities().toModel()
             }
         }
     }
@@ -101,31 +90,70 @@ class ClassDatasourceDb(
     ): DataLoadState<List<Clazz>> {
         return DataReadyState(
             data = schoolDb.getClassEntityDao().list(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteGuid,
             ).map {
-                ClassEntities(it).toModel()
+                it.toClassEntities().toModel()
             }
         )
     }
 
     override suspend fun store(list: List<Clazz>) {
-        upsertClasses(list, false)
+        if(list.isEmpty())
+            return
+
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { clazz ->
+                    //Permission check: if class already exists then check permission including
+                    //class permissions granted by role. Otherwise, look for the system permission
+                    //to insert a new class.
+                    val lastModAndPermissionInDb = schoolDb.getClassEntityDao()
+                        .getLastModifiedAndHasPermission(
+                            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                            classUidNum = uidNumberMapper(clazz.guid),
+                            requiredPermission = PermissionFlags.CLASS_WRITE,
+                        )
+
+                    if(!lastModAndPermissionInDb.hasPermission)
+                        throw ForbiddenException()
+
+                    doUpsertClass(clazz)
+                }
+            }
+            Napier.d("RPaging/ClassDataSourceDb: store: ${list.size} classes")
+        }
     }
 
     override suspend fun updateLocal(
         list: List<Clazz>,
         forceOverwrite: Boolean
     ) {
-        upsertClasses(list, false)
+        var numUpdated = 0
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { clazz ->
+                    val lastModifiedInDb = schoolDb.getClassEntityDao().getLastModifiedByGuid(
+                        uidNumberMapper(clazz.guid)
+                    ) ?: -1
+
+                    if(forceOverwrite || clazz.lastModified.toEpochMilliseconds() > lastModifiedInDb) {
+                        doUpsertClass(clazz)
+                        numUpdated++
+                    }
+                }
+            }
+        }
+        Napier.d("RPaging/ClassDataSourceDb: updatedLocal: ${numUpdated}/${list.size} classes")
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Clazz> {
         return schoolDb.getClassEntityDao().findByUidList(
             uids.map { uidNumberMapper(it) }
         ).map {
-            ClassEntities(it).toModel()
+            it.toClassEntities().toModel()
         }
     }
 }

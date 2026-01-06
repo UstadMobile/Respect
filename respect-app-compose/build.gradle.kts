@@ -26,6 +26,9 @@ val acraPropertiesFile = System.getenv("ACRA")?.let {
 acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
+// The applist list - see main README
+val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
+
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
 ACRA_PROP_NAMES.forEach { propName ->
@@ -39,12 +42,20 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.buildconfigPlugin)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 compose.resources {
     publicResClass = true
     packageOfResClass = "world.respect.app.generated.resources"
+}
+
+buildConfig {
+    packageName("world.respect.app.config")
+    className("RespectBuildConfig")
+
+    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
 }
 
 kotlin {
@@ -166,8 +177,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 112
-        versionName = "1.0.12"
+        versionCode = 16
+        versionName = "1.0.16"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

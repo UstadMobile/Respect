@@ -407,13 +407,13 @@ class WaitingForApproval : RespectAppRoute
 @Serializable
 class SignupScreen(
     private val schoolUrlStr: String,
-    private val profileType: ProfileType,
+    private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
     val inviteType: Int?=null,
     ) : RespectAppRoute {
 
     @Transient
-    val type = profileType
+    val type: ProfileType = ProfileType.fromValue(profileTypeStr)
     @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest =
         Json.decodeFromString(inviteRedeemRequestStr)
@@ -430,9 +430,9 @@ class SignupScreen(
         ): SignupScreen {
             return SignupScreen(
                 schoolUrlStr = schoolUrl.toString(),
-                profileType = profileType,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
-                inviteType = type
+                profileTypeStr = profileType.value,
+                inviteType = type,
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
             )
         }
     }
@@ -441,13 +441,13 @@ class SignupScreen(
 @Serializable
 class TermsAndCondition(
     private val schoolUrlStr: String,
-    private val profileType: ProfileType,
+    private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
     val inviteType: Int?=null,
     ) : RespectAppRoute {
 
     @Transient
-    val type = profileType
+    val type: ProfileType = ProfileType.fromValue(profileTypeStr)
 
     @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest =
@@ -465,7 +465,7 @@ class TermsAndCondition(
         ): TermsAndCondition {
             return TermsAndCondition(
                 schoolUrlStr = schoolUrl.toString(),
-                profileType = profileType,
+                profileTypeStr = profileType.value,
                 inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
                 inviteType = type
             )
@@ -476,13 +476,13 @@ class TermsAndCondition(
 @Serializable
 class CreateAccount(
     private val schoolUrlStr: String,
-    private val profileType: ProfileType,
+    private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
     val inviteType: Int?=null,
     ) : RespectAppRoute {
 
     @Transient
-    val type = profileType
+    val type = ProfileType.fromValue(profileTypeStr)
 
     @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest = Json.decodeFromString(
@@ -501,9 +501,9 @@ class CreateAccount(
         ): CreateAccount {
             return CreateAccount(
                 schoolUrlStr = schoolUrl.toString(),
-                profileType = profileType,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
-                inviteType = type
+                profileTypeStr = profileType.value,
+                inviteType = type,
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
             )
         }
     }

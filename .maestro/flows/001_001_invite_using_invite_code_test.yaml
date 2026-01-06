@@ -89,7 +89,7 @@ onFlowComplete:
 - tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
-- inputText: ${output.tomorrowDate}
+- inputText: ${output.futureDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
 - eraseText
@@ -325,8 +325,19 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- hideKeyboard
-- tapOn: "Done"
+# 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
+- tapOn:
+    text: "Done"
+
+- repeat:
+    while:
+      notVisible: "Waiting for approval"
+      visible: "Done"
+    commands:
+      - tapOn:
+          text: "Done"
+          retryTapIfNoChange: false
+
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"

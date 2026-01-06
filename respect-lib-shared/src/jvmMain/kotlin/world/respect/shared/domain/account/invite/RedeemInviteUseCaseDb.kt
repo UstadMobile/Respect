@@ -6,6 +6,7 @@ import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -48,7 +49,7 @@ class RedeemInviteUseCaseDb(
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
     ): AuthResponse {
-        val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(redeemRequest.code)
+      val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(redeemRequest.code)
             ?: throw IllegalArgumentException("invite not found for code: ${redeemRequest.code}")
                 .withHttpStatus(404)
         if (invite.iInviteStatus == Invite.STATUS_REVOKED) {
@@ -76,22 +77,20 @@ class RedeemInviteUseCaseDb(
             }
 
             isClassInvite -> {
-                val classUid = redeemRequest.invite.forClassGuid
+                val classUid = redeemRequest.classUid
                     ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
                 val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
                     ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
-                val expectedInviteGuid = when (redeemRequest.role) {
-                    PersonRoleEnum.TEACHER -> clazz.cTeacherInviteGuid
-                    else -> clazz.cStudentInviteGuid
+                val expectedInviteCode = when(redeemRequest.role) {
+                    PersonRoleEnum.TEACHER -> clazz.clazz.cTeacherInviteCode
+                    else -> clazz.clazz.cStudentInviteCode
                 } ?: throw IllegalArgumentException("No invite code for requested role")
                     .withHttpStatus(400)
-                val clazzInvite = schoolDb.getInviteEntityDao().findByGuid(expectedInviteGuid)
-                    ?: throw IllegalArgumentException("No invite found")
-                        .withHttpStatus(400)
-                if (!redeemRequest.code.endsWith(clazzInvite.iCode)) {
+
+                if(!redeemRequest.code.endsWith(expectedInviteCode)) {
                     throw IllegalArgumentException("Bad code").withHttpStatus(400)
+
                 }
-            }
 
             isFamilyInvite -> {
 
@@ -172,16 +171,21 @@ class RedeemInviteUseCaseDb(
                     person = accountPerson,
                 )
             }
+
+            is RespectQRBadgeCredential -> {
+                throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
+            }
         }
 
         //If a teacher/student, make the pending enrollment now
+
         if(isClassInvite){
 
             val classUid = redeemRequest.invite.forClassGuid
                 ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
 
             if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-                schoolDataSourceVal.enrollmentDataSource.store(
+                schoolDataSourceVal.enrollmentDataSource.updateLocal(
                     listOf(
                         Enrollment(
                             uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
@@ -190,19 +194,15 @@ class RedeemInviteUseCaseDb(
                             classUid = classUid,
                             personUid = accountPerson.guid,
                             role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
-                              if (invite.iApprovalRequired)  EnrollmentRoleEnum.PENDING_TEACHER
-                              else EnrollmentRoleEnum.TEACHER
+                                EnrollmentRoleEnum.PENDING_TEACHER
                             } else {
-                                if (invite.iApprovalRequired)  EnrollmentRoleEnum.PENDING_STUDENT
-                                else
-                                EnrollmentRoleEnum.STUDENT
+                                EnrollmentRoleEnum.PENDING_STUDENT
                             },
                             inviteCode = redeemRequest.code,
                         )
                     )
                 )
             }
-        }
         if (!invite.iInviteMultipleAllowed){
             schoolDb.getInviteEntityDao().updateInviteStatus(invite.iGuid)
         }

@@ -40,7 +40,7 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -58,7 +58,7 @@ class AppLauncherViewModel(
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(AppLauncherUiState())
 

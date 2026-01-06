@@ -34,7 +34,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.shared.util.ext.resolve
 
 data class AppsDetailUiState(
@@ -53,7 +53,7 @@ class AppsDetailViewModel(
     accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
 

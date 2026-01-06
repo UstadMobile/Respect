@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "20dfaca6569921c135e5c2ad9e06408f",
+    "identityHash": "e718d3b73f7e0bd46a2dba3e7cf99bb8",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -593,7 +593,7 @@
       },
       {
         "tableName": "ClassEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteGuid` TEXT, `cStudentInviteGuid` TEXT, PRIMARY KEY(`cGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteCode` TEXT, `cStudentInviteCode` TEXT, PRIMARY KEY(`cGuidHash`))",
         "fields": [
           {
             "fieldPath": "cGuid",
@@ -637,13 +637,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "cTeacherInviteGuid",
-            "columnName": "cTeacherInviteGuid",
+            "fieldPath": "cTeacherInviteCode",
+            "columnName": "cTeacherInviteCode",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "cStudentInviteGuid",
-            "columnName": "cStudentInviteGuid",
+            "fieldPath": "cStudentInviteCode",
+            "columnName": "cStudentInviteCode",
             "affinity": "TEXT"
           }
         ],
@@ -944,100 +944,48 @@
         }
       },
       {
-        "tableName": "InviteEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iNewRole` INTEGER, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, `iInviteMultipleAllowed` INTEGER NOT NULL, `iIsFirstUser` INTEGER NOT NULL, `iApprovalRequired` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iExpiration` INTEGER NOT NULL, `iInviteStatus` INTEGER NOT NULL, PRIMARY KEY(`iGuidHash`))",
+        "tableName": "SchoolPermissionGrantEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spgUid` TEXT NOT NULL, `spgUidNum` INTEGER NOT NULL, `spgStatusEnum` INTEGER NOT NULL, `spgToRole` INTEGER NOT NULL, `spgPermissions` INTEGER NOT NULL, `spgLastModified` INTEGER NOT NULL, `spgStored` INTEGER NOT NULL, PRIMARY KEY(`spgUidNum`))",
         "fields": [
           {
-            "fieldPath": "iGuid",
-            "columnName": "iGuid",
+            "fieldPath": "spgUid",
+            "columnName": "spgUid",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "iGuidHash",
-            "columnName": "iGuidHash",
+            "fieldPath": "spgUidNum",
+            "columnName": "spgUidNum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "iCode",
-            "columnName": "iCode",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iNewRole",
-            "columnName": "iNewRole",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "iForFamilyOfGuid",
-            "columnName": "iForFamilyOfGuid",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "iForFamilyOfGuidHash",
-            "columnName": "iForFamilyOfGuidHash",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "iForClassGuid",
-            "columnName": "iForClassGuid",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "iForClassName",
-            "columnName": "iForClassName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "iSchoolName",
-            "columnName": "iSchoolName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "iForClassGuidHash",
-            "columnName": "iForClassGuidHash",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "iForClassRole",
-            "columnName": "iForClassRole",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "iInviteMultipleAllowed",
-            "columnName": "iInviteMultipleAllowed",
+            "fieldPath": "spgStatusEnum",
+            "columnName": "spgStatusEnum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "iIsFirstUser",
-            "columnName": "iIsFirstUser",
+            "fieldPath": "spgToRole",
+            "columnName": "spgToRole",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "iApprovalRequired",
-            "columnName": "iApprovalRequired",
+            "fieldPath": "spgPermissions",
+            "columnName": "spgPermissions",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "iLastModified",
-            "columnName": "iLastModified",
+            "fieldPath": "spgLastModified",
+            "columnName": "spgLastModified",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "iExpiration",
-            "columnName": "iExpiration",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iInviteStatus",
-            "columnName": "iInviteStatus",
+            "fieldPath": "spgStored",
+            "columnName": "spgStored",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -1045,14 +993,14 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "iGuidHash"
+            "spgUidNum"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '20dfaca6569921c135e5c2ad9e06408f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e718d3b73f7e0bd46a2dba3e7cf99bb8')"
     ]
   }
 }

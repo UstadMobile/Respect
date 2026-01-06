@@ -38,6 +38,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import world.respect.app.config.RespectBuildConfig
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
@@ -66,19 +67,27 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
+import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.datalayer.repository.school.pullsync.EnqueueRunPullSyncUseCaseAndroidImpl
+import world.respect.datalayer.repository.school.pullsync.RunPullSyncUseCase
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
@@ -132,6 +141,7 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
@@ -222,10 +232,7 @@ import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 
-@Suppress("unused")
-const val DEFAULT_COMPATIBLE_APP_LIST_URL = "https://respect.world/respect-ds/manifestlist.json"
-
-const val SHARED_PREF_SETTINGS_NAME = "respect_settings2_"
+const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
 val appKoinModule = module {
@@ -473,7 +480,7 @@ val appKoinModule = module {
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
-            appContext, appContext.getDatabasePath("respect__app.db").absolutePath
+            appContext, appContext.getDatabasePath("respect_3_app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
             .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
@@ -496,7 +503,7 @@ val appKoinModule = module {
                     primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
                 ),
                 httpClient = get(),
-                defaultCompatibleAppListUrl = DEFAULT_COMPATIBLE_APP_LIST_URL,
+                defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         )
     }
@@ -668,7 +675,7 @@ val appKoinModule = module {
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                "school__" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
                 .addMigrations(MIGRATION_2_3(true))
@@ -832,7 +839,8 @@ val appKoinModule = module {
                     uidNumberMapper = get(),
                     authenticatedUser = AuthenticatedUserPrincipalId(
                         accountScopeId.accountPrincipalId.guid
-                    )
+                    ),
+                    checkPersonPermissionUseCase = get(),
                 ),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
@@ -858,6 +866,64 @@ val appKoinModule = module {
                 authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
             )
         }
+
+        scoped<GetAuthenticatedPersonUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            GetAuthenticatedPersonUseCase(
+                authenticatedUserPrincipalId = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckSchoolPermissionsUseCase> {
+            CheckSchoolPermissionsUseCase(
+                schoolDataSource = get(),
+            )
+        }
+
+        scoped<PullSyncTracker> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            PullSyncTrackerDbImpl(
+                schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<EnqueueRunPullSyncUseCase> {
+            EnqueueRunPullSyncUseCaseAndroidImpl(
+                context = androidApplication(),
+                scopeId = id,
+                scopeClass = RespectAccount::class,
+            )
+        }
+
+        scoped<RunPullSyncUseCase> {
+            RunPullSyncUseCase(
+                pullSyncTracker = get(),
+                schoolDataSource = get(),
+                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            )
+        }
+
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

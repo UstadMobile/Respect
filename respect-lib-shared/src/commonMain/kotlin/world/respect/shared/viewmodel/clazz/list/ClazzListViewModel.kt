@@ -27,7 +27,10 @@ import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.school.EnrollmentDataSource
+import world.respect.datalayer.school.model.PermissionFlags
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -45,13 +48,17 @@ class ClazzListViewModel(
     accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+
+    private val checkSchoolPermissionsUseCase: CheckSchoolPermissionsUseCase by inject()
 
     private val _uiState = MutableStateFlow(ClazzListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
 
     private val pagingSourceHolder = PagingSourceFactoryHolder {
         schoolDataSource.classDataSource.listAsPagingSource(
@@ -92,14 +99,18 @@ class ClazzListViewModel(
         }
 
         viewModelScope.launch {
-            accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
-                _appUiState.update { prev ->
-                    prev.copy(
-                        fabState = prev.fabState.copy(
-                            visible = selectedAcct?.person?.isAdminOrTeacher() == true
-                        )
+            enqueuePullSyncUseCase()
+
+            val canAddClass = checkSchoolPermissionsUseCase(
+                listOf(PermissionFlags.CLASS_WRITE)
+            ).isNotEmpty()
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    fabState = prev.fabState.copy(
+                        visible = canAddClass
                     )
-                }
+                )
             }
         }
     }

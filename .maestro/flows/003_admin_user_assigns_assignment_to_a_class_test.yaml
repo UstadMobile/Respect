@@ -62,7 +62,7 @@ onFlowComplete:
 - tapOn: "Date"
 - runScript:
     file: "scripts/setDate.js"
-- inputText: ${output.tomorrowDate}
+- inputText: ${output.futureDate}
 - tapOn: "Time"
 - runScript:
     file: "scripts/setDate.js"

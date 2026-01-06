@@ -37,7 +37,7 @@ class DeleteAccountViewModel(
     private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val route: DeleteAccount = savedStateHandle.toRoute()
 
@@ -92,9 +92,9 @@ class DeleteAccountViewModel(
             try {
                 deleteAccountUseCase()
 
-                val account = accountManager.selectedAccount
+                val account = accountManager.activeAccount
                 if (account != null) {
-                    accountManager.endSession(account)
+                    accountManager.removeAccount(account)
                 }
 
                 _navCommandFlow.tryEmit(

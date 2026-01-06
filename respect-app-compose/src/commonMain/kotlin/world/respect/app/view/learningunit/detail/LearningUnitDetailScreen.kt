@@ -1,5 +1,6 @@
 package world.respect.app.view.learningunit.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -67,7 +68,10 @@ fun LearningUnitDetailScreen(
             onClickShare = viewModel::onClickShare,
             onClickCopy = viewModel::onClickCopy,
             onClickDelete = viewModel::onClickDelete,
-            onConfirmSelection = viewModel::onConfirmSelection
+            onConfirmSelection = viewModel::onConfirmSelection,
+            onClickSelectAll = viewModel::onClickSelectAll,
+            onClickSelectNone = viewModel::onClickSelectNone,
+            onClickToggleSectionSelection = viewModel::onClickToggleSectionSelection
         )
     } else {
         SingleLessonDetailScreen(
@@ -261,6 +265,9 @@ private fun PlaylistDetailScreen(
     onClickCopy: () -> Unit,
     onClickDelete: () -> Unit,
     onConfirmSelection: () -> Unit,
+    onClickSelectAll: () -> Unit,
+    onClickSelectNone: () -> Unit,
+    onClickToggleSectionSelection: (Long) -> Unit,
 ) {
     var expandedSections by remember { mutableStateOf(setOf<Long>()) }
     val mapping = uiState.mapping
@@ -363,67 +370,108 @@ private fun PlaylistDetailScreen(
                 }
             }
 
+            if (uiState.isSelectionMode) {
+                item("selection_controls") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onClickSelectAll,
+                            modifier = Modifier.testTag("select_all_btn"),
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.select_all),
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = onClickSelectNone,
+                            modifier = Modifier.testTag("select_none_btn"),
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.select_none),
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
+            }
+
             mapping?.sections?.forEachIndexed { sectionIndex, section ->
                 item(key = "section_${section.uid}") {
                     val isExpanded = expandedSections.contains(section.uid)
+                    val sectionLessons = section.items
+                    val allSectionLessonsSelected = sectionLessons.all {
+                        uiState.selectedLessons.contains(it)
+                    }
 
-                    Card(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultItemPadding()
                             .clickable {
                                 expandedSections = if (isExpanded) {
                                     expandedSections - section.uid
                                 } else {
                                     expandedSections + section.uid
                                 }
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = section.title,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            if (!uiState.isSelectionMode) {
-                                IconButton(
-                                    onClick = { onClickAssignSection(section.uid) },
-                                    modifier = Modifier.size(40.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Task,
-                                        contentDescription = stringResource(Res.string.assign),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
-
-                            IconButton(
-                                onClick = {
-                                    expandedSections = if (isExpanded) {
-                                        expandedSections - section.uid
-                                    } else {
-                                        expandedSections + section.uid
-                                    }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (uiState.isSelectionMode) {
+                            Checkbox(
+                                checked = allSectionLessonsSelected,
+                                onCheckedChange = { checked ->
+                                    onClickToggleSectionSelection(section.uid)
                                 },
-                                modifier = Modifier.testTag("expand_collapse_icon_")
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+
+                        Text(
+                            text = section.title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        if (!uiState.isSelectionMode) {
+                            IconButton(
+                                onClick = { onClickAssignSection(section.uid) },
+                                modifier = Modifier.size(40.dp)
                             ) {
                                 Icon(
-                                    if (isExpanded) Icons.Default.KeyboardArrowUp
-                                    else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = null
+                                    Icons.Default.Task,
+                                    contentDescription = stringResource(Res.string.assign),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
+                        }
+
+                        IconButton(
+                            onClick = {
+                                expandedSections = if (isExpanded) {
+                                    expandedSections - section.uid
+                                } else {
+                                    expandedSections + section.uid
+                                }
+                            },
+                            modifier = Modifier.testTag("expand_collapse_icon_")
+                        ) {
+                            Icon(
+                                if (isExpanded) Icons.Default.KeyboardArrowUp
+                                else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null
+                            )
                         }
                     }
                 }

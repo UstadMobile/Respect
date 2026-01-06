@@ -35,6 +35,7 @@ import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
@@ -324,6 +325,33 @@ class LearningUnitDetailViewModel(
         }
     }
 
+    fun onClickSelectAll() {
+        val mapping = _uiState.value.mapping ?: return
+        val allLessons = mapping.sections.flatMap { it.items }.toSet()
+        _uiState.update { it.copy(selectedLessons = allLessons) }
+    }
+
+    fun onClickSelectNone() {
+        _uiState.update { it.copy(selectedLessons = emptySet()) }
+    }
+
+    fun onClickToggleSectionSelection(sectionUid: Long) {
+        val mapping = _uiState.value.mapping ?: return
+        val section = mapping.sections.find { it.uid == sectionUid } ?: return
+        val sectionLessons = section.items
+
+        val allSelected = sectionLessons.all { _uiState.value.selectedLessons.contains(it) }
+
+        _uiState.update { prev ->
+            val newSelection = if (allSelected) {
+                prev.selectedLessons - sectionLessons.toSet()
+            } else {
+                prev.selectedLessons + sectionLessons.toSet()
+            }
+            prev.copy(selectedLessons = newSelection)
+        }
+    }
+
     fun onConfirmSelection() {
         val selectedLessons = _uiState.value.selectedLessons.toList()
 
@@ -377,7 +405,12 @@ class LearningUnitDetailViewModel(
     }
 
     fun onClickShare() {
-        // TODO: Implement share functionality
+        val mapping = _uiState.value.mapping ?: return
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                PlaylistShare.create(playlistUid = mapping.uid)
+            )
+        )
     }
 
     fun onClickCopy() {
@@ -421,7 +454,7 @@ class LearningUnitDetailViewModel(
     }
 
     fun onClickDelete() {
-        // TODO: Implement delete functionality
+        // TODO:
     }
 
     fun sectionLinkUiStateFor(

@@ -773,3 +773,12 @@ data class ChangePassword(
     val guid: String,
 ): RespectAppRoute
 
+@Serializable
+data class PlaylistShare(
+    val playlistUid: Long
+) : RespectAppRoute {
+    companion object {
+        fun create(playlistUid: Long) = PlaylistShare(playlistUid)
+    }
+}
+

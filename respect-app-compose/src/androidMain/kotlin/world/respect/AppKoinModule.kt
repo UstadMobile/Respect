@@ -219,6 +219,7 @@ import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewMod
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -337,6 +338,7 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::PlaylistListViewModel)
+    viewModelOf(::PlaylistShareViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {

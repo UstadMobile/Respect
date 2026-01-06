@@ -204,7 +204,6 @@ import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
-import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
@@ -220,6 +219,7 @@ import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
@@ -333,7 +333,7 @@ val appKoinModule = module {
     viewModelOf(::ScanQRCodeViewModel)
     viewModelOf(::CurriculumMappingListViewModel)
     viewModelOf(::CurriculumMappingEditViewModel)
-    viewModelOf(::SetUsernameAndPasswordViewModel)
+    viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
@@ -570,9 +570,6 @@ val appKoinModule = module {
     single<ValidatePasswordUseCase> {
         ValidatePasswordUseCase()
     }
-    single<ValidateQrCodeUseCase>{
-        ValidateQrCodeUseCase()
-    }
 
     single<SnackBarFlowDispatcher> {
         SnackBarFlowDispatcher()
@@ -735,6 +732,11 @@ val appKoinModule = module {
             AuthenticateQrBadgeUseCaseDbImpl(
                 schoolDb = get(),
                 uidNumberMapper = get(),
+            )
+        }
+        scoped<ValidateQrCodeUseCase> {
+            ValidateQrCodeUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
     }

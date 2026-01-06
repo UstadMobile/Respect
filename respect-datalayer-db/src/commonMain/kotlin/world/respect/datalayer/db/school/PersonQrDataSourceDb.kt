@@ -40,19 +40,19 @@ class PersonQrDataSourceDb(
                 }.map {
                     it.copy(stored = timeNow).asEntity(uidNumberMapper)
                 }
-
                 schoolDb.getPersonQrBadgeEntityDao().upsertAsyncList(toUpdate)
-                toUpdate.forEach { it ->
-                    schoolDb.getPersonQrBadgeEntityDao().deleteByGuid(it.pqrGuidNum)
-                }
             }
         }
     }
 
-    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
+    override suspend fun listAll(
+        loadParams: DataLoadParams,
+        listParams: PersonQrDataSource.GetListParams
+    ): DataLoadState<List<PersonBadge>> {
         return DataReadyState(
             data = schoolDb.getPersonQrBadgeEntityDao().findAll(
                 personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+                includeDeleted = listParams.includeDeleted
             ).map {
                 it.asModel()
             }
@@ -65,6 +65,7 @@ class PersonQrDataSourceDb(
     ): Flow<DataLoadState<List<PersonBadge>>> {
         return schoolDb.getPersonQrBadgeEntityDao().findAllByPersonGuidAsFlow(
             personGuid = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            includeDeleted = listParams.includeDeleted
         ).map { list ->
             DataReadyState(
                 data = list.map { it.asModel() }
@@ -72,7 +73,10 @@ class PersonQrDataSourceDb(
         }
     }
 
-    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<PersonBadge>> {
+    override fun findByGuidAsFlow(
+        loadParams: DataLoadParams,
+        guid: String
+    ): Flow<DataLoadState<PersonBadge>> {
         return schoolDb.getPersonQrBadgeEntityDao().findByGuidHashAsFlow(
             uidNumberMapper(guid)
         ).map { personQrEntity ->
@@ -86,13 +90,6 @@ class PersonQrDataSourceDb(
         }
     }
 
-    override suspend fun deletePersonBadge(uidNum: Long) {
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                schoolDb.getPersonQrBadgeEntityDao().deleteByGuid(uidNum)
-            }
-        }
-    }
 
     override suspend fun existsByQrCodeUrl(url: String, uidNum: Long): Boolean {
         return schoolDb.useWriterConnection { con ->

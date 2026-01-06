@@ -1,5 +1,6 @@
 package world.respect.shared.domain.account.validateqrbadge
 
+import io.ktor.http.Url
 import org.jetbrains.compose.resources.StringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.*
@@ -25,20 +26,20 @@ data class QrValidationResult(
     }
 }
 
-class ValidateQrCodeUseCase {
+class ValidateQrCodeUseCase(
+    private val schoolUrl: Url?
+) {
 
     operator fun invoke(
         qrCodeUrl: String,
-        schoolUrl: String?,
         personGuid: String? = null,
-        allowReplacement: Boolean = false
     ): QrValidationResult {
         // 1. Validate URL format
         val formatValidation = validateUrlFormat(qrCodeUrl)
         if (!formatValidation.isValid) return formatValidation
 
         // 2. Validate starts with school URL
-        val schoolUrlValidation = validateSchoolUrl(qrCodeUrl, schoolUrl)
+        val schoolUrlValidation = validateSchoolUrl(qrCodeUrl)
         if (!schoolUrlValidation.isValid) return schoolUrlValidation
 
         // 3. Validate contains /respect_qr_badge section
@@ -50,15 +51,15 @@ class ValidateQrCodeUseCase {
 
     private fun validateUrlFormat(qrCodeUrl: String): QrValidationResult {
         return try {
-            io.ktor.http.Url(qrCodeUrl)
+            Url(qrCodeUrl)
             QrValidationResult.Valid
         } catch (e: Exception) {
             QrValidationResult.InvalidFormat
         }
     }
 
-    private fun validateSchoolUrl(qrCodeUrl: String, schoolUrl: String?): QrValidationResult {
-        return if (schoolUrl != null && !qrCodeUrl.startsWith(schoolUrl)) {
+    private fun validateSchoolUrl(qrCodeUrl: String): QrValidationResult {
+        return if (schoolUrl != null && !qrCodeUrl.startsWith(schoolUrl.toString())) {
             QrValidationResult.InvalidSchoolUrl
         } else {
             QrValidationResult.Valid
@@ -73,15 +74,14 @@ class ValidateQrCodeUseCase {
         }
     }
 
-
     /**
      * Quick validation without database checks (for UI validation)
      */
-    fun validateFormatOnly(qrCodeUrl: String, schoolUrl: String?): QrValidationResult {
+    fun validateFormatOnly(qrCodeUrl: String): QrValidationResult {
         val formatCheck = validateUrlFormat(qrCodeUrl)
         if (!formatCheck.isValid) return formatCheck
 
-        val schoolCheck = validateSchoolUrl(qrCodeUrl, schoolUrl)
+        val schoolCheck = validateSchoolUrl(qrCodeUrl)
         if (!schoolCheck.isValid) return schoolCheck
 
         return validateQrBadgeSection(qrCodeUrl)

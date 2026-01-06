@@ -39,7 +39,10 @@ class PersonQrDataSourceHttp(
         }.build()
     }
 
-    override suspend fun listAll(listParams: PersonQrDataSource.GetListParams): DataLoadState<List<PersonBadge>> {
+    override suspend fun listAll(
+        loadParams: DataLoadParams,
+        listParams: PersonQrDataSource.GetListParams
+    ): DataLoadState<List<PersonBadge>> {
         return httpClient.getAsDataLoadState(
             url = listParams.urlWithParams(),
             validationHelper = validationHelper,
@@ -63,7 +66,10 @@ class PersonQrDataSourceHttp(
         }
     }
 
-    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<PersonBadge>> {
+    override fun findByGuidAsFlow(
+        loadParams: DataLoadParams,
+        guid: String
+    ): Flow<DataLoadState<PersonBadge>> {
         return httpClient.getDataLoadResultAsFlow<List<PersonBadge>>(
             urlFn = {
                 PersonQrDataSource.GetListParams(
@@ -77,10 +83,6 @@ class PersonQrDataSourceHttp(
         }.map {
             it.firstOrNotLoaded()
         }
-    }
-
-    override suspend fun deletePersonBadge(uidNum: Long) {
-        TODO("Not yet implemented")
     }
 
     override suspend fun existsByQrCodeUrl(url: String,uidNum: Long): Boolean {

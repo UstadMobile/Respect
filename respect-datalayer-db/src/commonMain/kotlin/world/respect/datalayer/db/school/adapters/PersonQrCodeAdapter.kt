@@ -12,7 +12,8 @@ fun PersonBadge.asEntity(
         pqrGuidNum =  uidNumberMapper(personGuid),
         pqrLastModified = lastModified,
         pqrStored = stored,
-        pqrQrCodeUrl = qrCodeUrl
+        pqrQrCodeUrl = qrCodeUrl,
+        pqrStatus = status
     )
 }
 
@@ -22,5 +23,6 @@ fun PersonBadgeEntity.asModel(): PersonBadge {
         qrCodeUrl = pqrQrCodeUrl,
         lastModified = pqrLastModified,
         stored = pqrStored,
+        status = pqrStatus,
     )
 }

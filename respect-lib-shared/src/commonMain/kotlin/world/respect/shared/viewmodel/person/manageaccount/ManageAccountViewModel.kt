@@ -23,6 +23,7 @@ import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
 import world.respect.datalayer.school.model.PersonBadge
 import world.respect.datalayer.school.model.PersonPassword
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -255,7 +256,14 @@ class ManageAccountViewModel(
             try {
                 val currentQrBadge = uiState.value.qrBadge.dataOrNull()
                 if (currentQrBadge != null) {
-                    schoolDataSource.personQrDataSource.deletePersonBadge(currentQrBadge.personGuid.toLong())
+                    schoolDataSource.personQrDataSource.store(
+                        listOf(
+                            currentQrBadge.copy(
+                                status = StatusEnum.TO_BE_DELETED,
+                                lastModified = Clock.System.now(),
+                            )
+                        )
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update { prev ->
@@ -290,7 +298,8 @@ class ManageAccountViewModel(
                                 personGuid = personGuid,
                                 qrCodeUrl = url,
                                 lastModified = now,
-                                stored = now
+                                stored = now,
+                                status = StatusEnum.ACTIVE,
                             )
                         )
                     )

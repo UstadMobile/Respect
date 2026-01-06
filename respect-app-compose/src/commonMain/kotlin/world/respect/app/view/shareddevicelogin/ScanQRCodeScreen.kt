@@ -93,9 +93,7 @@ fun ScanQRCodeScreen(
                     if (isCameraActive) { // Guard against multiple triggers
                         isCameraActive = false // Pause camera immediately on success
                         coroutineScope.launch {
-                            coroutineScope.launch {
-                                viewModel.processQrCodeUrl(scannedUrl)
-                            }
+                            viewModel.processQrCodeUrl(scannedUrl)
                         }
                     }
                 },
@@ -121,17 +119,14 @@ fun ScanQRCodeScreen(
                 onDismiss = {
                     viewModel.hideManualEntryDialog()
                     manualUrlText = TextFieldValue("")
-                    // Clear validation error when dismissing
-                    viewModel.validateUrl("")
+                    viewModel.clearValidationError()
                 },
                 onSubmit = { url ->
-                    viewModel.hideManualEntryDialog()
                     if (url.isNotEmpty()) {
                         coroutineScope.launch {
-                            viewModel.processQrCodeUrl(url)
+                            viewModel.processManualUrl(url)
                         }
                     }
-                    manualUrlText = TextFieldValue("")
                 },
                 viewModel = viewModel,
                 uiState = uiState
@@ -229,9 +224,7 @@ private fun ManualUrlEntryDialog(
                 TextButton(
                     onClick = {
                         val url = manualUrlText.text.trim()
-                        if (viewModel.validateUrl(url)) {
-                            onSubmit(url)
-                        }
+                        onSubmit(url)
                     },
                     modifier = Modifier.width(100.dp),
                     enabled = manualUrlText.text.isNotBlank()

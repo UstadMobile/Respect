@@ -19,6 +19,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
+import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.password_must_be_at_least
@@ -27,7 +28,7 @@ import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.CreateAccountSetPassword
-import world.respect.shared.navigation.SetUsernameAndPassword
+import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -35,7 +36,7 @@ import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel.Companion.MIN_PASSWORD_LENGTH
 import kotlin.time.Clock
 
-data class SetUsernameAndPasswordUiState(
+data class CreateAccountSetUserNameUiState(
     val username: String = "",
     val usernameErr: UiText? = null,
     val passwordErr: UiText? = null,
@@ -50,7 +51,7 @@ data class SetUsernameAndPasswordUiState(
  * Used to manually set a username and password for an existing person where the active user (eg.
  * admin) has sufficient permission to do so.
  */
-class SetUsernameAndPasswordViewModel(
+class CreateAccountSetUserNameViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
@@ -62,16 +63,11 @@ class SetUsernameAndPasswordViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val route: SetUsernameAndPassword = savedStateHandle.toRoute()
+    private val route: CreateAccountSetUsername = savedStateHandle.toRoute()
 
-    private val _uiState = MutableStateFlow(SetUsernameAndPasswordUiState())
+    private val _uiState = MutableStateFlow(CreateAccountSetUserNameUiState())
 
     val uiState = _uiState.asStateFlow()
-
-    companion object {
-        const val PASSWORD_SET_RESULT = "password_set_result"
-        const val QR_SCAN_ASSIGN = "qr_scan_result"
-    }
 
     init {
         _appUiState.update {
@@ -114,7 +110,7 @@ class SetUsernameAndPasswordViewModel(
         }
         viewModelScope.launch {
             schoolDataSource.personQrDataSource.findByGuidAsFlow(
-                route.guid
+                DataLoadParams(), route.guid
             ).collect {
                 _uiState.update { prev ->
                     prev.copy(
@@ -209,9 +205,10 @@ class SetUsernameAndPasswordViewModel(
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         ScanQRCode.create(
-                            username = username,
                             guid = route.guid,
-                            schoolUrl = schoolUrl
+                            username = username,
+                            schoolUrl = schoolUrl,
+                            nextAfterScan = NextAfterScan.GoToCreateAccount
                         )
                     )
                 )

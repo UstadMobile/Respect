@@ -50,17 +50,17 @@ import world.respect.shared.generated.resources.set_password
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppUiState
-import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordUiState
-import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameUiState
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 
 @Composable
-fun SetUsernameAndPasswordScreen(
-    viewModel: SetUsernameAndPasswordViewModel,
+fun CreateAccountSetUsernameScreen(
+    viewModel: CreateAccountSetUserNameViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val appUiState by viewModel.appUiState.collectAsState()
 
-    SetUsernameAndPasswordScreen(
+    CreateAccountSetUsernameScreen(
         uiState = uiState,
         appUiState = appUiState,
         onUsernameChanged = viewModel::onUsernameChanged,
@@ -72,8 +72,8 @@ fun SetUsernameAndPasswordScreen(
 }
 
 @Composable
-fun SetUsernameAndPasswordScreen(
-    uiState: SetUsernameAndPasswordUiState,
+fun CreateAccountSetUsernameScreen(
+    uiState: CreateAccountSetUserNameUiState,
     appUiState: AppUiState,
     onUsernameChanged: (String) -> Unit,
     onAssignQrCodeBadge: () -> Unit,

@@ -11,6 +11,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
@@ -602,19 +603,20 @@ data class ManageAccount(
     val username: String? = null,
     private val qrUrlStr: String? = null,
 ) : RespectAppRoute {
-    @Transient
 
+    @Transient
     val qrUrl: Url? = qrUrlStr?.let { Url(it) }
+
 
     companion object {
         fun create(
             guid: String,
             qrUrl: Url? = null,
-            username: String? = null
+            username: String? = null,
         ) = ManageAccount(
             guid = guid,
             qrUrlStr = qrUrl?.toString(),
-            username = username
+            username = username,
         )
     }
 }
@@ -657,7 +659,8 @@ data class ScanQRCode(
     val guid: String? = null,
     val resultDestStr: String? = null,
     private val schoolUrlStr: String? = null,
-    val username: String? = null
+    val username: String? = null,
+    private val nextAfterScanStr: String? = null
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -666,17 +669,24 @@ data class ScanQRCode(
     @Transient
     val schoolUrl: Url? = schoolUrlStr?.let { Url(it) }
 
+    @Transient
+    val nextAfterScan: NextAfterScan? = nextAfterScanStr?.let {
+        NextAfterScan.valueOf(it)
+    }
+
     companion object {
         fun create(
             guid: String? = null,
             resultDest: ResultDest? = null,
             schoolUrl: Url? = null,
-            username: String? = null
+            username: String? = null,
+            nextAfterScan: NextAfterScan? = null
         ) = ScanQRCode(
             guid = guid,
             resultDestStr = resultDest?.encodeToJsonStringOrNull(),
             username = username,
-            schoolUrlStr = schoolUrl?.toString()
+            schoolUrlStr = schoolUrl?.toString(),
+            nextAfterScanStr = nextAfterScan?.name
         )
     }
 }
@@ -716,7 +726,7 @@ data class CurriculumMappingEdit(
     }
 }
 @Serializable
-data class SetUsernameAndPassword(
+data class CreateAccountSetUsername(
     val guid: String
 ): RespectAppRoute
 

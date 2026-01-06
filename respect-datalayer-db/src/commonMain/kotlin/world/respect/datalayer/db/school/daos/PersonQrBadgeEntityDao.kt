@@ -23,9 +23,11 @@ interface PersonQrBadgeEntityDao {
         SELECT PersonBadgeEntity.*
           FROM PersonBadgeEntity
          WHERE PersonBadgeEntity.pqrGuidNum = :personGuidNum
+         AND (:includeDeleted OR PersonBadgeEntity.pqrStatus = 1) 
     """)
     suspend fun findAll(
-        personGuidNum: Long
+        personGuidNum: Long,
+        includeDeleted: Boolean = false
     ): List<PersonBadgeEntity>
 
     @Query(
@@ -84,10 +86,13 @@ interface PersonQrBadgeEntityDao {
         SELECT PersonBadgeEntity.*
           FROM PersonBadgeEntity
          WHERE PersonBadgeEntity.pqrGuidNum = :personGuid
+         AND (:includeDeleted OR PersonBadgeEntity.pqrStatus = 1)  
+
     """
     )
     fun findAllByPersonGuidAsFlow(
-        personGuid: Long
+        personGuid: Long,
+        includeDeleted: Boolean = false
     ): Flow<List<PersonBadgeEntity>>
 
     @Query(

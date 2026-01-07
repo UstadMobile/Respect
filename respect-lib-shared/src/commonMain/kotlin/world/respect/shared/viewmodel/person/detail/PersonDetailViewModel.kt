@@ -27,7 +27,7 @@ import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.navigation.SetUsernameAndPassword
+import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdmin
@@ -135,7 +135,7 @@ class PersonDetailViewModel(
 
     fun onClickCreateAccount() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(SetUsernameAndPassword(route.guid))
+            NavCommand.Navigate(CreateAccountSetUsername(route.guid))
         )
     }
 

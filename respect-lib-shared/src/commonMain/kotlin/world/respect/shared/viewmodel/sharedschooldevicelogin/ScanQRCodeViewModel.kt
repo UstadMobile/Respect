@@ -15,6 +15,7 @@ import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
+import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.paste_url
 import world.respect.shared.generated.resources.scan_qr_code
@@ -82,34 +83,6 @@ class ScanQRCodeViewModel(
         }
     }
 
-    fun processManualUrl(url: String) {
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    errorMessage = null,
-                    manualUrlError = null
-                )
-            }
-            try {
-                if (route.resultDest != null || route.username != null) {
-                    handleQrCodeForAccountManagement(route.guid ?: "", url, isManualEntry = true)
-                } else {
-                    authenticateWithQrCode(Url(url), isManualEntry = true)
-                }
-            } catch (e: Exception) {
-                Napier.e("Error processing QR Code", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = e.getUiTextOrGeneric()
-                    )
-                }
-                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
-            }
-        }
-    }
-
     fun processQrCodeUrl(url: String) {
         viewModelScope.launch {
             _uiState.update {
@@ -120,10 +93,10 @@ class ScanQRCodeViewModel(
                 )
             }
             try {
-                if (route.resultDest != null || route.username != null) {
-                    handleQrCodeForAccountManagement(route.guid ?: "", url, isManualEntry = false)
+                if (route.nextAfterScan == NextAfterScan.GoToManageAccount) {
+                    handleQrCodeForAccountManagement(route.guid ?: "", url)
                 } else {
-                    authenticateWithQrCode(Url(url), isManualEntry = false)
+                    authenticateWithQrCode(Url(url))
                 }
             } catch (e: Exception) {
                 Napier.e("Error processing QR Code", e)
@@ -144,7 +117,7 @@ class ScanQRCodeViewModel(
         }
     }
 
-    private fun authenticateWithQrCode(url: Url, isManualEntry: Boolean) {
+    private fun authenticateWithQrCode(url: Url) {
         launchWithLoadingIndicator {
             try {
                 val credential = RespectQRBadgeCredential(qrCodeUrl = url)
@@ -169,9 +142,6 @@ class ScanQRCodeViewModel(
                         manualUrlError = null
                     )
                 }
-                if (isManualEntry) {
-                    _uiState.update { it.copy(showManualEntryDialog = false) }
-                }
 
                 viewModelScope.launch {
                     try {
@@ -185,6 +155,7 @@ class ScanQRCodeViewModel(
                                 clearBackStack = true,
                             )
                         )
+                        _uiState.update { it.copy(showManualEntryDialog = false) }
                     } catch (e: Exception) {
                         e.printStackTrace()
                         _uiState.update { prev ->
@@ -215,7 +186,6 @@ class ScanQRCodeViewModel(
     private fun handleQrCodeForAccountManagement(
         personGuid: String,
         url: String,
-        isManualEntry: Boolean
     ) {
         viewModelScope.launch {
             try {
@@ -243,19 +213,15 @@ class ScanQRCodeViewModel(
                         )
                     }
 
-                    if (isManualEntry) {
-                        _uiState.update { it.copy(showManualEntryDialog = false) }
-                    }
-
                     if (route.resultDest != null) {
-                        // Coming from ManageAccount - use result pattern
+                        // Coming from ManageAccount
                         resultReturner.sendResultIfResultExpected(
                             route = route,
                             navCommandFlow = _navCommandFlow,
                             result = url,
                         )
                     } else {
-                        // Coming from CreateAccountSetUserName with nextAfterScan = GoToCreateAccount
+                        // Coming from CreateAccountSetUserName
                         _navCommandFlow.tryEmit(
                             NavCommand.Navigate(
                                 destination = ManageAccount(
@@ -263,11 +229,12 @@ class ScanQRCodeViewModel(
                                     qrUrlStr = url,
                                     username = route.username
                                 ),
-                                popUpToClass = CreateAccountSetUsername::class, // Pop up to the CreateAccount screen
-                                popUpToInclusive = true // Remove CreateAccount from back stack
+                                popUpToClass = CreateAccountSetUsername::class,
+                                popUpToInclusive = true
                             )
                         )
                     }
+                    _uiState.update { it.copy(showManualEntryDialog = false) }
                 }
             } catch (e: Exception) {
                 _uiState.update {

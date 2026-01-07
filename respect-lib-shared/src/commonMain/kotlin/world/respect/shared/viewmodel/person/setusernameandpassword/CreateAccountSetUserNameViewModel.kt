@@ -208,7 +208,7 @@ class CreateAccountSetUserNameViewModel(
                             guid = route.guid,
                             username = username,
                             schoolUrl = schoolUrl,
-                            nextAfterScan = NextAfterScan.GoToCreateAccount
+                            nextAfterScan = NextAfterScan.GoToManageAccount
                         )
                     )
                 )

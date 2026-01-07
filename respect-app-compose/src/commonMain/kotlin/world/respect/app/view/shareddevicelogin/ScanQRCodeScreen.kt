@@ -124,7 +124,7 @@ fun ScanQRCodeScreen(
                 onSubmit = { url ->
                     if (url.isNotEmpty()) {
                         coroutineScope.launch {
-                            viewModel.processManualUrl(url)
+                            viewModel.processQrCodeUrl(url)
                         }
                     }
                 },

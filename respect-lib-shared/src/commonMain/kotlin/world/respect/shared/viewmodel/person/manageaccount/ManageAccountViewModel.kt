@@ -28,6 +28,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
+import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.manage_account
 import world.respect.shared.navigation.ChangePassword
@@ -116,14 +117,14 @@ class ManageAccountViewModel(
                 title = Res.string.manage_account.asUiText()
             )
         }
-
+        // Coming from CreateAccountSetUserName
         viewModelScope.launch {
             if (route.qrUrl != null && route.username != null) {
                 saveUsername(route.username)
                 storeQrCodeForPerson(personGuid = personGuid, url = route.qrUrl.toString())
             }
         }
-
+        // Coming from ManageAccount
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(
                 QR_SELECT_RESULT
@@ -237,7 +238,8 @@ class ManageAccountViewModel(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = QR_SELECT_RESULT
-                    )
+                    ),
+                    nextAfterScan = NextAfterScan.GoToManageAccount
                 )
             )
         )

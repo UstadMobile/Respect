@@ -55,7 +55,6 @@ class AddChildAccountUseCaseDataSource(
             role = EnrollmentRoleEnum.PENDING_STUDENT,
             inviteCode = inviteCode,
         )
-
         schoolDataSource.personDataSource.store(
             listOf(parentWithRel, childPerson)
         )

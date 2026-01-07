@@ -23,6 +23,8 @@ import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
 import world.respect.credentials.password.SavePasswordUseCaseProcessor
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.shared.domain.biometric.BiometricAuthProcessor
+import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
@@ -59,6 +61,15 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             processOnScope = lifecycleScope
         )
 
+        val biometricUseCase =
+            getKoin().get<BiometricAuthUseCaseAndroidImpl>()
+
+        val biometricProcessor = BiometricAuthProcessor(
+            activity = this,
+            jobChannel = biometricUseCase.requestChannel,
+            processOnScope = lifecycleScope
+        )
+
         //Launch processors for jobs that need an activity context.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -71,6 +82,9 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
                 }
                 launch {
                     savePasswordProcessor.receiveJobs()
+                }
+                launch {
+                    biometricProcessor.receiveJobs()
                 }
             }
         }

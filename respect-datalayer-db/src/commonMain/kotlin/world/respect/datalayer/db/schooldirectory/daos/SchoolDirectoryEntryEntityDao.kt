@@ -24,17 +24,6 @@ interface SchoolDirectoryEntryEntityDao {
     )
     suspend fun findByUid(uid: Long): SchoolDirectoryEntryEntities?
 
-    @Query(
-        """
-        SELECT SchoolDirectoryEntryEntity.*
-          FROM SchoolDirectoryEntryEntity
-               JOIN LangMapEntity
-                    ON LangMapEntity.lmeTopParentUid1 = SchoolDirectoryEntryEntity.reUid
-         WHERE LangMapEntity.lmeValue LIKE :query
-     """
-    )
-    fun searchSchoolsByName(query: String): Flow<List<SchoolDirectoryEntryEntity>>
-
     @Transaction
     @Query(SELECT_LIST_SQL)
     fun listAsFlow(

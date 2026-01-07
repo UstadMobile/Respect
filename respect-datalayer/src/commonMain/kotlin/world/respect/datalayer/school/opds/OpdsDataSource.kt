@@ -1,4 +1,4 @@
-package world.respect.datalayer.opds
+package world.respect.datalayer.school.opds
 
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow

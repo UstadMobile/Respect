@@ -1,5 +1,11 @@
 package world.respect.shared.domain.school
 
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.opds.entities.OpdsFacetEntity
+import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
+import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
+import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
+import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.Person
@@ -17,14 +23,7 @@ data class SchoolPrimaryKeyGenerator(
 ) {
     companion object {
 
-        val TABLE_IDS = listOf(
-            Person.TABLE_ID,
-            Report.TABLE_ID,
-            Indicator.TABLE_ID,
-            Enrollment.TABLE_ID,
-            Clazz.TABLE_ID,
-            PersonPasskeyEntity.TABLE_ID,
-            Assignment.TABLE_ID,
-        )
+        val TABLE_IDS = RespectSchoolDatabase.TABLE_IDS
+
     }
 }

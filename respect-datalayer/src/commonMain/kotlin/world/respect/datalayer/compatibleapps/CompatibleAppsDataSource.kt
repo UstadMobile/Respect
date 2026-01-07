@@ -38,18 +38,4 @@ interface CompatibleAppsDataSource {
         loadParams: DataLoadParams
     ): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>>
 
-    fun getLaunchpadApps(
-        loadParams: DataLoadParams
-    ): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>>
-
-    suspend fun addAppToLaunchpad(
-        manifestUrl: Url,
-    )
-
-    suspend fun removeAppFromLaunchpad(
-        manifestUrl: Url
-    )
-
-    fun appIsAddedToLaunchpadAsFlow(manifestUrl: Url): Flow<Boolean>
-
 }

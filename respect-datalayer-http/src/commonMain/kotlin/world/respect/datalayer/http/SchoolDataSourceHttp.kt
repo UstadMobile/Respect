@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.http.Url
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.opds.OpdsDataSourceHttp
 import world.respect.datalayer.http.school.AssignmentDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
@@ -13,6 +14,7 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.school.opds.OpdsDataSource
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.ClassDataSource
@@ -116,6 +118,12 @@ class SchoolDataSourceHttp(
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
+        )
+    }
+
+    override val opdsDataSource: OpdsDataSource by lazy {
+        OpdsDataSourceHttp(
+            httpClient = httpClient
         )
     }
 }

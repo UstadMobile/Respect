@@ -5,10 +5,8 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.http.compatibleapps.CompatibleAppDataSourceHttp
-import world.respect.datalayer.http.opds.OpdsDataSourceHttp
 import world.respect.datalayer.http.schooldirectory.SchoolDirectoryEntryDataSourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
-import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
@@ -24,12 +22,6 @@ class RespectAppDataSourceHttp(
             httpClient = httpClient,
             defaultCompatibleAppListUrl = defaultCompatibleAppListUrl,
             validationValidationHelper = compatibleAppsValidationHelper,
-        )
-    }
-
-    override val opdsDataSource: OpdsDataSource by lazy {
-        OpdsDataSourceHttp(
-            httpClient = httpClient
         )
     }
 

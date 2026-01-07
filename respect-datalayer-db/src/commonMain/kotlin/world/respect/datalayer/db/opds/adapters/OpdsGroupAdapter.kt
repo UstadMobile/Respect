@@ -1,6 +1,7 @@
 package world.respect.datalayer.db.opds.adapters
 
 import kotlinx.serialization.json.Json
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.opds.OpdsParentType
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
 import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
@@ -10,7 +11,6 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
-import world.respect.libxxhash.XXStringHasher
 
 data class OpdsGroupEntities(
     val group: OpdsGroupEntity,
@@ -23,7 +23,7 @@ data class OpdsGroupEntities(
 fun OpdsGroup.asEntities(
     primaryKeyGenerator: PrimaryKeyGenerator,
     json: Json,
-    xxStringHasher: XXStringHasher,
+    uidNumberMapper: UidNumberMapper,
     ofeUid: Long,
     index: Int,
 ): OpdsGroupEntities {
@@ -50,7 +50,7 @@ fun OpdsGroup.asEntities(
             dataLoadResult = null,
             primaryKeyGenerator = primaryKeyGenerator,
             json = json,
-            xxStringHasher = xxStringHasher,
+            uidNumberMapper = uidNumberMapper,
             feedUid = ofeUid,
             groupUid = groupUid,
             feedIndex = pubIndex

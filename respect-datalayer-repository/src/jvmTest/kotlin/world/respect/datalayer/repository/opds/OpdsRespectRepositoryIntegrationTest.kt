@@ -26,11 +26,13 @@ import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.db.RespectAppDatabase
+import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.opds.OpdsDataSourceDb
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.findFreePort
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
@@ -47,7 +49,7 @@ class OpdsRespectRepositoryIntegrationTest {
 
     data class OpdsRepositoryIntegrationTestContext(
         val port: Int,
-        val db: RespectAppDatabase,
+        val db: RespectSchoolDatabase,
         val json: Json,
         val okHttpClient: OkHttpClient,
         val httpClient: HttpClient,
@@ -72,8 +74,8 @@ class OpdsRespectRepositoryIntegrationTest {
         }.start()
 
         try {
-            val dbFile = temporaryFolder.newFile("respect.db")
-            val db = Room.databaseBuilder<RespectAppDatabase>(dbFile.absolutePath)
+            val dbFile = temporaryFolder.newFile("respect-school.db")
+            val db = Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
                 .build()
 
@@ -92,7 +94,13 @@ class OpdsRespectRepositoryIntegrationTest {
 
             val xxStringHasher = XXStringHasherCommonJvm()
 
-            val localDataSource = OpdsDataSourceDb(db, json, xxStringHasher)
+            val localDataSource = OpdsDataSourceDb(
+                respectSchoolDatabase = db,
+                json = json,
+                uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
+                primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS)
+            )
+
             val httpDataSource = OpdsDataSourceHttp(
                 httpClient, localDataSource.feedNetworkValidationHelper
             )

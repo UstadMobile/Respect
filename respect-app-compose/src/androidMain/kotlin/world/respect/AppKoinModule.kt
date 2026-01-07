@@ -472,14 +472,12 @@ val appKoinModule = module {
                 respectAppDatabase = get(),
                 json = get(),
                 xxStringHasher = get(),
-                primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
             ),
             remote = RespectAppDataSourceHttp(
                 local = RespectAppDataSourceDb(
                     respectAppDatabase = get(),
                     json = get(),
                     xxStringHasher = get(),
-                    primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
                 ),
                 httpClient = get(),
                 defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
@@ -805,6 +803,7 @@ val appKoinModule = module {
                         accountScopeId.accountPrincipalId.guid
                     ),
                     checkPersonPermissionUseCase = get(),
+                    json = get(),
                 ),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,

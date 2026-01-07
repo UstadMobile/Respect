@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.opds.OpdsDataSource
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
@@ -38,5 +39,7 @@ interface SchoolDataSource {
     val enrollmentDataSource: EnrollmentDataSource
 
     val assignmentDataSource: AssignmentDataSource
+
+    val opdsDataSource: OpdsDataSource
 
 }

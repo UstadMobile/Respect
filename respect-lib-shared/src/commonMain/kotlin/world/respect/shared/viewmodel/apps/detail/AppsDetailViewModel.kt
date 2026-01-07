@@ -88,7 +88,7 @@ class AppsDetailViewModel(
                 }
 
                 result.dataOrNull()?.learningUnits?.also { learningUnitsUri ->
-                    appDataSource.opdsDataSource.loadOpdsFeed(
+                    schoolDataSource.opdsDataSource.loadOpdsFeed(
                         url = route.manifestUrl.resolve(
                             learningUnitsUri.toString()
                         ),

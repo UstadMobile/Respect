@@ -11,19 +11,6 @@ import world.respect.datalayer.db.compatibleapps.entities.CompatibleAppAddJoin
 import world.respect.datalayer.db.compatibleapps.entities.CompatibleAppEntity
 import world.respect.datalayer.db.networkvalidation.daos.NetworkValidationInfoEntityDao
 import world.respect.datalayer.db.networkvalidation.entities.NetworkValidationInfoEntity
-import world.respect.datalayer.db.opds.OpdsTypeConverters
-import world.respect.datalayer.db.opds.daos.OpdsFeedEntityDao
-import world.respect.datalayer.db.opds.daos.OpdsFeedMetadataEntityDao
-import world.respect.datalayer.db.opds.daos.OpdsGroupEntityDao
-import world.respect.datalayer.db.opds.daos.OpdsPublicationEntityDao
-import world.respect.datalayer.db.opds.daos.ReadiumLinkEntityDao
-import world.respect.datalayer.db.opds.entities.OpdsFacetEntity
-import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
-import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
-import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
-import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
-import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
-import world.respect.datalayer.db.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.schooldirectory.daos.SchoolConfigEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntryEntityDao
@@ -33,23 +20,9 @@ import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryLangMapEntity
 import world.respect.datalayer.db.shared.SharedConverters
-import world.respect.datalayer.db.shared.daos.LangMapEntityDao
-import world.respect.datalayer.db.shared.entities.LangMapEntity
 
 @Database(
     entities = [
-        //Shared
-        LangMapEntity::class,
-
-        //OPDS
-        ReadiumLinkEntity::class,
-        OpdsPublicationEntity::class,
-        ReadiumSubjectEntity::class,
-        OpdsFacetEntity::class,
-        OpdsGroupEntity::class,
-        OpdsFeedEntity::class,
-        OpdsFeedMetadataEntity::class,
-
         //Compatible apps
         CompatibleAppEntity::class,
         CompatibleAppAddJoin::class,
@@ -65,25 +38,13 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
     ],
     version = 2,
 )
-@TypeConverters(SharedConverters::class, OpdsTypeConverters::class)
+@TypeConverters(SharedConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)
 abstract class RespectAppDatabase : RoomDatabase() {
 
     abstract fun getCompatibleAppEntityDao(): CompatibleAppEntityDao
 
     abstract fun getCompatibleAppAddJoinDao(): CompatibleAppAddJoinDao
-
-    abstract fun getLangMapEntityDao(): LangMapEntityDao
-
-    abstract fun getOpdsFeedEntityDao(): OpdsFeedEntityDao
-
-    abstract fun getOpdsPublicationEntityDao(): OpdsPublicationEntityDao
-
-    abstract fun getOpdsFeedMetadataEntityDao(): OpdsFeedMetadataEntityDao
-
-    abstract fun getReadiumLinkEntityDao(): ReadiumLinkEntityDao
-
-    abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
     abstract fun getSchoolDirectoryEntryEntityDao(): SchoolDirectoryEntryEntityDao
 
@@ -95,17 +56,6 @@ abstract class RespectAppDatabase : RoomDatabase() {
 
     abstract fun getNetworkValidationInfoEntityDao(): NetworkValidationInfoEntityDao
 
-    companion object {
-
-        val TABLE_IDS = listOf(
-            ReadiumLinkEntity.TABLE_ID,
-            OpdsPublicationEntity.TABLE_ID,
-            OpdsFacetEntity.TABLE_ID,
-            OpdsGroupEntity.TABLE_ID,
-            OpdsFeedEntity.TABLE_ID,
-        )
-
-    }
 }
 
 // The Room compiler generates the `actual` implementations.

@@ -3,6 +3,7 @@ package world.respect.datalayer.db.opds.adapters
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.opds.OpdsParentType
 import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
@@ -15,7 +16,6 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
-import world.respect.libxxhash.XXStringHasher
 
 class OpdsFeedEntities(
     val opdsFeed: OpdsFeedEntity,
@@ -29,11 +29,11 @@ class OpdsFeedEntities(
 fun DataReadyState<OpdsFeed>.asEntities(
     json: Json,
     primaryKeyGenerator: PrimaryKeyGenerator,
-    xxStringHasher: XXStringHasher,
+    uidNumberMapper: UidNumberMapper,
 ) : OpdsFeedEntities? {
     val url = metaInfo.requireUrl()
 
-    val ofeUid = xxStringHasher.hash(metaInfo.requireUrl().toString())
+    val ofeUid = uidNumberMapper(metaInfo.requireUrl().toString())
 
     fun List<ReadiumLink>?.asEntitiesSub(
         propType: ReadiumLinkEntity.PropertyType,
@@ -61,7 +61,7 @@ fun DataReadyState<OpdsFeed>.asEntities(
         group.asEntities(
             primaryKeyGenerator = primaryKeyGenerator,
             json = json,
-            xxStringHasher = xxStringHasher,
+            uidNumberMapper = uidNumberMapper,
             ofeUid = ofeUid,
             index = index,
         )
@@ -72,7 +72,7 @@ fun DataReadyState<OpdsFeed>.asEntities(
             dataLoadResult = null,
             primaryKeyGenerator = primaryKeyGenerator,
             json = json,
-            xxStringHasher = xxStringHasher,
+            uidNumberMapper = uidNumberMapper,
             feedUid = ofeUid,
             groupUid = 0,
             feedIndex = index,

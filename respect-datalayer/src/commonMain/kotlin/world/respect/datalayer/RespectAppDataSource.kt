@@ -1,7 +1,6 @@
 package world.respect.datalayer
 
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
-import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
@@ -20,8 +19,6 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 interface RespectAppDataSource {
 
     val compatibleAppsDataSource: CompatibleAppsDataSource
-
-    val opdsDataSource: OpdsDataSource
 
     val schoolDirectoryDataSource: SchoolDirectoryDataSource
 

@@ -96,9 +96,7 @@ fun serverKoinModule(
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-    single<PrimaryKeyGenerator> {
-        PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
-    }
+
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
@@ -111,7 +109,6 @@ fun serverKoinModule(
             respectAppDatabase = get(),
             json = get(),
             xxStringHasher = get(),
-            primaryKeyGenerator = get(),
         )
     }
 
@@ -310,6 +307,8 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 checkPersonPermissionUseCase = get(),
+                json = get(),
+                primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator
             )
         }
 

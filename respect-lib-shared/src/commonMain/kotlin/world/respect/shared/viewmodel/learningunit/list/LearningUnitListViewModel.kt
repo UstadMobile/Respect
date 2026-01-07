@@ -8,18 +8,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.language
 import world.respect.shared.navigation.NavCommand
@@ -45,15 +49,19 @@ data class LearningUnitListUiState(
 
 class LearningUnitListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     private val resultReturner: NavResultReturner,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitListUiState())
 
     val uiState = _uiState.asStateFlow()
 
     private val route: LearningUnitList = savedStateHandle.toRoute()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     init {
         viewModelScope.launch {
@@ -65,7 +73,7 @@ class LearningUnitListViewModel(
                 )
             }
 
-            appDataSource.opdsDataSource.loadOpdsFeed(
+            schoolDataSource.opdsDataSource.loadOpdsFeed(
                 url = route.opdsFeedUrl,
                 params = DataLoadParams()
             ).collect { result ->

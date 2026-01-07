@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -12,6 +13,7 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import java.io.File
 
@@ -64,7 +66,12 @@ fun RespectSchoolDatabase.toDataSource(
             authenticatedUser = authenticatedUser,
             schoolDb = this,
             uidNumberMapper = uidNumberMapper,
-        )
+        ),
+        json = Json {
+            encodeDefaults = false
+            ignoreUnknownKeys = true
+        },
+        primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS)
     )
 }
 

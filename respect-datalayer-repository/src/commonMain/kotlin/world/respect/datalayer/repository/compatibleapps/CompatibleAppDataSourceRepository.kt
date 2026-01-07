@@ -60,21 +60,4 @@ class CompatibleAppDataSourceRepository(
         }
     }
 
-    override fun getLaunchpadApps(
-        loadParams: DataLoadParams
-    ): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>> {
-        return local.getLaunchpadApps(loadParams)
-    }
-
-    override suspend fun addAppToLaunchpad(manifestUrl: Url) {
-        local.addAppToLaunchpad(manifestUrl)
-    }
-
-    override suspend fun removeAppFromLaunchpad(manifestUrl: Url) {
-        local.removeAppFromLaunchpad(manifestUrl)
-    }
-
-    override fun appIsAddedToLaunchpadAsFlow(manifestUrl: Url): Flow<Boolean> {
-        return local.appIsAddedToLaunchpadAsFlow(manifestUrl)
-    }
 }

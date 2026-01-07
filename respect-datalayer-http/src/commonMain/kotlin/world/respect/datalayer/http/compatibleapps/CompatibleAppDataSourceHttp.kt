@@ -5,9 +5,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadParams
@@ -74,22 +72,4 @@ class CompatibleAppDataSourceHttp(
         }
     }
 
-    override fun getLaunchpadApps(
-        loadParams: DataLoadParams
-    ): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>> {
-        return emptyFlow()
-    }
-
-    override suspend fun addAppToLaunchpad(manifestUrl: Url) {
-        //do nothing - does not run remotely
-    }
-
-    override suspend fun removeAppFromLaunchpad(manifestUrl: Url) {
-        //do nothing - does not run remotely
-    }
-
-    override fun appIsAddedToLaunchpadAsFlow(manifestUrl: Url): Flow<Boolean> {
-        //currently does nothing
-        return flowOf(false)
-    }
 }

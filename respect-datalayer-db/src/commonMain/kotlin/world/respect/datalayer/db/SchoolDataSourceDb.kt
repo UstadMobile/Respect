@@ -1,8 +1,10 @@
 package world.respect.datalayer.db
 
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.opds.OpdsDataSourceDb
 import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
@@ -25,6 +27,8 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.opds.OpdsDataSourceLocal
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 /**
  * SchoolDataSource implementation based on a local (Room) database
@@ -40,6 +44,8 @@ class SchoolDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
+    private val json: Json,
+    private val primaryKeyGenerator: PrimaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
 ) : SchoolDataSourceLocal {
 
     private val getAuthenticatedPersonUseCase by lazy {
@@ -91,5 +97,14 @@ class SchoolDataSourceDb(
 
     override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
         AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+    }
+
+    override val opdsDataSource: OpdsDataSourceLocal by lazy {
+        OpdsDataSourceDb(
+            respectSchoolDatabase = schoolDb,
+            json = json,
+            uidNumberMapper = uidNumberMapper,
+            primaryKeyGenerator = primaryKeyGenerator,
+        )
     }
 }

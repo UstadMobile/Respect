@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
@@ -16,11 +19,13 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
@@ -45,7 +50,11 @@ class LearningUnitDetailViewModel(
     private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
     private val ustadCache: UstadCache,
-) : RespectViewModel(savedStateHandle) {
+    accountMananger: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+
+    override val scope: Scope = accountMananger.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
 
@@ -53,9 +62,11 @@ class LearningUnitDetailViewModel(
 
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
+    private val schoolDataSource: SchoolDataSource by inject()
+
     init {
         viewModelScope.launch {
-            appDataSource.opdsDataSource.loadOpdsPublication(
+            schoolDataSource.opdsDataSource.loadOpdsPublication(
                 url = route.learningUnitManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = route.learningUnitManifestUrl,

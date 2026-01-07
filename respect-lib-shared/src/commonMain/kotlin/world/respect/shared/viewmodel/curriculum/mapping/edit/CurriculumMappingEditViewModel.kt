@@ -13,14 +13,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit_mapping
 import world.respect.shared.generated.resources.required_field
@@ -72,8 +76,13 @@ class CurriculumMappingEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val resultReturner: NavResultReturner,
     private val json: Json,
-    private val respectAppDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
 
@@ -233,7 +242,7 @@ class CurriculumMappingEditViewModel(
         link: CurriculumMappingSectionLink
     ): Flow<DataLoadState<CurriculumMappingSectionUiState>> {
         val publicationUrl = Url(link.href)
-        return respectAppDataSource.opdsDataSource.loadOpdsPublication(
+        return schoolDataSource.opdsDataSource.loadOpdsPublication(
             url = Url(link.href),
             params = DataLoadParams(),
             referrerUrl = null,

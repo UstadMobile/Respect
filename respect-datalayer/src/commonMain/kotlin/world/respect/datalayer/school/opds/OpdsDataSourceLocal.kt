@@ -1,4 +1,4 @@
-package world.respect.datalayer.opds
+package world.respect.datalayer.school.opds
 
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper

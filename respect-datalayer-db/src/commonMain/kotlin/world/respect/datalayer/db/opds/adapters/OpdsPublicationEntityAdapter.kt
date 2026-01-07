@@ -3,6 +3,7 @@ package world.respect.datalayer.db.opds.adapters
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.opds.OpdsParentType
 import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
@@ -15,7 +16,6 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
-import world.respect.libxxhash.XXStringHasher
 
 data class OpdsPublicationEntities(
     val opdsPublicationEntity: OpdsPublicationEntity,
@@ -27,7 +27,7 @@ fun OpdsPublication.asEntities(
     dataLoadResult: DataReadyState<*>?,
     primaryKeyGenerator: PrimaryKeyGenerator,
     json: Json,
-    xxStringHasher: XXStringHasher,
+    uidNumberMapper: UidNumberMapper,
     feedUid: Long,
     groupUid: Long,
     feedIndex: Int,
@@ -68,7 +68,7 @@ fun OpdsPublication.asEntities(
             opeOgeUid = groupUid,
             opeIndex = feedIndex,
             opeUrl = dataLoadResult?.metaInfo?.url,
-            opeUrlHash = dataLoadResult?.metaInfo?.url?.toString()?.let { xxStringHasher.hash(it) } ?: 0,
+            opeUrlHash = dataLoadResult?.metaInfo?.url?.toString()?.let { uidNumberMapper(it) } ?: 0,
             opeLastModified = dataLoadResult?.metaInfo?.lastModified ?: 0,
             opeEtag = dataLoadResult?.metaInfo?.etag,
             opeMdIdentifier = metadata.identifier,

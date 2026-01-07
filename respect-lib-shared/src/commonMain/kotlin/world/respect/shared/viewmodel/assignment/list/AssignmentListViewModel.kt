@@ -113,7 +113,7 @@ class AssignmentListViewModel(
     }
 
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
-        return respectAppDataSource.opdsDataSource.loadOpdsPublication(
+        return schoolDataSource.opdsDataSource.loadOpdsPublication(
             url = url, params = DataLoadParams(), null, null
         )
     }

@@ -129,6 +129,8 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.country.GetCountryForUrlUseCase
+import world.respect.shared.domain.country.GetCountryForUrlUseCaseImpl
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -285,6 +287,10 @@ val appKoinModule = module {
         LaunchAppUseCaseAndroid(
             appContext = androidContext().applicationContext
         )
+    }
+    single<GetCountryForUrlUseCase> {
+        GetCountryForUrlUseCaseImpl(httpClient = get())
+
     }
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
@@ -608,7 +614,6 @@ val appKoinModule = module {
     single<SetDevModeEnabledUseCase> {
         SetDevModeEnabledUseCase(settings = get())
     }
-
     single<UrlToCustomDeepLinkUseCase> {
         UrlToCustomDeepLinkUseCase(customProtocol = androidApplication().packageName)
     }
@@ -616,8 +621,6 @@ val appKoinModule = module {
     single<CustomDeepLinkToUrlUseCase> {
         CustomDeepLinkToUrlUseCase(customProtocol = androidApplication().packageName)
     }
-
-
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.

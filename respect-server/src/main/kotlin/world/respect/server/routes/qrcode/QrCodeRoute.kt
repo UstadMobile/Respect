@@ -7,6 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonQrDataSource
 import world.respect.server.util.ext.requireAccountScope
@@ -20,7 +21,8 @@ fun Route.QrCodeRoute(
     get(PersonQrDataSource.ENDPOINT_NAME) {
         call.respondDataLoadState(
             schoolDataSource(call).personQrDataSource.listAll(
-                PersonQrDataSource.GetListParams.fromParams(
+                loadParams = DataLoadParams(),
+                listParams = PersonQrDataSource.GetListParams.fromParams(
                     call.request.queryParameters
                 )
             )

@@ -26,7 +26,7 @@ class CopyInviteCodeViewModel(
     private val setClipboardStringUseCase: SetClipboardStringUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val route: CopyCode = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(CopyInviteCodeUiState())

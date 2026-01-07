@@ -66,7 +66,7 @@ class InvitePersonViewModel(
 
     private val route: InvitePerson = savedStateHandle.toRoute()
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val createLinkUseCase: CreateLinkUseCase by lazy {
         scope.get()
@@ -92,7 +92,7 @@ class InvitePersonViewModel(
                 familyPersonGuid = route.familyPersonGuid,
                 className = route.className,
                 classRole = route.role,
-                schoolName = accountManager.selectedAccount?.school?.name?.getTitle()
+                schoolName = accountManager.activeAccount?.school?.name?.getTitle()
             )
         }
         _appUiState.update {

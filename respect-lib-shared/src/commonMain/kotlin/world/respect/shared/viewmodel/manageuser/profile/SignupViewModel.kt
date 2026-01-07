@@ -99,7 +99,7 @@ class SignupViewModel(
                         else -> Res.string.next.asUiText()
                     },
                     onClick = ::onClickSave
-                ), ASSIGNMENT(5), SCHOOL_APP(6),
+                ),
                 title = when(route.type) {
                     ProfileType.CHILD -> Res.string.child_profile_title.asUiText()
                     else -> Res.string.your_profile_title.asUiText()

@@ -16,6 +16,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondOffsetLimitPaging
+import world.respect.shared.domain.account.deleteaccount.DeleteAccountUseCase
 
 @Suppress("FunctionName")
 fun Route.PersonRoute(
@@ -47,4 +48,9 @@ fun Route.PersonRoute(
         call.respond(HttpStatusCode.NoContent)
     }
 
+    post("${PersonDataSource.ENDPOINT_NAME}/delete") {
+        val deleteUseCase = call.requireAccountScope().get<DeleteAccountUseCase>()
+        val result = deleteUseCase.invoke()
+        call.respond(result)
+    }
 }

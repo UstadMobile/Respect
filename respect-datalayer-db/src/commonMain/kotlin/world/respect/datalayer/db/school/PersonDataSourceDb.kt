@@ -239,4 +239,25 @@ class PersonDataSourceDb(
         }
     }
 
+    override suspend fun delete(guid: String): Boolean {
+        val guidHash = uidNumberMapper(guid)
+
+        return schoolDb.useWriterConnection { con ->
+            var deleted = false
+
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+
+                val rows = schoolDb.getPersonEntityDao()
+                    .deletePerson(guidHash.toString())
+
+                deleted = rows > 0
+            }
+
+            deleted
+        }
+    }
+
+
+
 }
+

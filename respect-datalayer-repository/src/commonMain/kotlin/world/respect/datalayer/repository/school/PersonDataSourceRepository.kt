@@ -109,6 +109,10 @@ class PersonDataSourceRepository(
         )
     }
 
+    override suspend fun delete(guid: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun store(list: List<Person>) {
         local.store(list)
         val timeNow = systemTimeInMillis()

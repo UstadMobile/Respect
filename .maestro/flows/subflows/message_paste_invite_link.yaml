@@ -1,0 +1,24 @@
+appId: com.google.android.apps.messaging
+
+---
+- launchApp
+- tapOn: "Start chat"
+- tapOn: "Type a name, phone number, or email"
+- inputText: "1234567890"
+- tapOn: "Send to 1234567890"
+- tapOn: "Text message"
+- pasteText
+- tapOn: Send SMS
+clearState: com.google.android.apps.messaging
+tapOn: Messages
+tapOn: Continue
+tapOn: Allow
+tapOn: Don’t allow
+tapOn: Don’t allow
+tapOn:
+    id: com.google.android.apps.messaging:id/enable_permission_illustration
+tapOn: You're almost done
+tapOn: Continue
+launchApp: com.google.android.apps.messaging
+tapOn: (876) 543-6785
+tapOn: Fghjj

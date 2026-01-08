@@ -104,7 +104,7 @@ class EnterPasswordSignupViewModel(
                                 inviteRequest = redeemRequest,
                             )
                         }else {
-                            if (redeemRequest.invite.forClassGuid == null &&
+                            if (!redeemRequest.invite.approvalRequired||redeemRequest.invite.forClassGuid == null &&
                                 redeemRequest.invite.forFamilyOfGuid == null){
                                 RespectAppLauncher()
                             }else{

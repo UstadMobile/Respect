@@ -77,19 +77,21 @@ class RedeemInviteUseCaseDb(
             }
 
             isClassInvite -> {
-                val classUid = redeemRequest.classUid
+                val classUid = redeemRequest.invite.forClassGuid
                     ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
                 val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
                     ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
-                val expectedInviteCode = when (redeemRequest.role) {
+                val expectedInviteGuid = when (redeemRequest.role) {
                     PersonRoleEnum.TEACHER -> clazz.clazz.cTeacherInviteGuid
-                    else -> clazz.clazz.cStudentInviteGuid
+                    PersonRoleEnum.STUDENT -> clazz.clazz.cStudentInviteGuid
+                    else -> clazz.clazz.cTeacherInviteGuid
                 } ?: throw IllegalArgumentException("No invite code for requested role")
                     .withHttpStatus(400)
-
-                if (!redeemRequest.code.endsWith(expectedInviteCode)) {
-                    throw IllegalArgumentException("Bad code").withHttpStatus(400)
-
+                val clazzInvite = schoolDb.getInviteEntityDao().findByGuid(redeemRequest.invite.guid)
+                    ?: throw IllegalArgumentException("No invite found")
+                        .withHttpStatus(400)
+                if (!redeemRequest.code.endsWith(clazzInvite.iCode)) {
+                    throw IllegalArgumentException("Bad code${redeemRequest.role} ${redeemRequest.code} ${clazzInvite.iCode}").withHttpStatus(400)
                 }
             }
 

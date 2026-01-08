@@ -1,0 +1,304 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "001_001_invite_using_invite_code_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+
+# Invite new user:
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn:
+    text: "Invite person"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Class name or school name"
+- assertVisible: "TestSchool"
+- assertVisible: "Invite multiple people"
+- assertVisible: "Allow multiple people to use this invite"  #switch is off
+- assertVisible: "Approval required"    #switch is off
+- tapOn: "Role"
+- tapOn: "Student"
+- assertVisible: "Copy link"
+- assertVisible: "Send link via SMS"
+- assertVisible: "Send link via email"
+- assertVisible: "Share link"
+- tapOn: "QR code"
+- assertVisible:
+    id: "app_title"
+    text: "QR code"
+- copyTextFrom:
+      id: "qr_code_link"
+
+# Student user joining using invite code
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- tapOn: "Scan QR code"
+- tapOn:
+    id: "more_options"
+- tapOn: "Paste url"
+- tapOn: "URL"
+- pasteText
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "Student User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateC}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: "studentuser"  #use
+- tapOn: "Next"
+- tapOn: "Password*"
+- inputText: "tests1"
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- assertVisible: "Apps"
+- assertVisible: "Assignments"
+- assertVisible: "Classes"
+- assertVisible: "People"
+
+# Admin invite Teacher user to a class
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow:
+    file: "subflows/admin_add_class.yaml"
+    env:
+      CLASSNAME: "New Class"
+- assertVisible:
+    id: "app_title"
+    text: "New Class"
+- tapOn: "Add Teacher"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- tapOn: "Approval required"  #switch is ON
+- assertVisible:
+      id: "role"
+      text: "Teacher"
+- tapOn: "Invite code"
+- assertVisible:
+    id: "app_title"
+    text: "Code"
+- copyTextFrom:
+    id: "invite_code"
+
+# C) Teacher sign-up via invite code to the class
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- pasteText
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "New Class"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Next"
+- assertVisible: "Required field" # Name is mandatory field
+- tapOn: "Your name*"
+- inputText: "Teacher User"
+- tapOn: "Next"
+- assertVisible: "Required field" # Gender is mandatory field
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Next"
+- assertVisible: "Required field" # DOB is mandatory field
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Next"
+- assertVisible: "Date of Birth cannot be in the future."
+- eraseText
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- extendedWaitUntil:
+    visible: "teacheruser" #username
+    timeout: 10000      # Timeout in milliseconds
+- tapOn: "Next"
+# passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
+- assertVisible: "Password*"
+- tapOn: "Sign-up"
+- assertVisible: "Required field" # Password is mandatory field
+- tapOn: "Password*"
+- inputText: "testt1"
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+# D) Admin approve teacher's request to join the class
+- clearState: world.respect.app
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn: "New Class"
+- assertVisible: "Pending requests.*"
+- assertVisible: "Teacher User.*"
+- tapOn: "Accept Invite"
+
+# E) Teacher login to the class and share invite link to Parent to join as a family member of student user
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "teacheruser"
+- tapOn:
+    id : "password"
+- inputText: "testt1"
+- tapOn: "Login"
+- tapOn: "People"
+- tapOn: "Student User"
+- tapOn: "Edit"
+- tapOn: "New member"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- tapOn: "Approval required"  #switch is ON
+- assertVisible:
+    id: "role"
+    text: "Parent"
+- copyTextFrom:
+    id: "copy_link"
+- runFlow:
+    file: "subflows/message_paste_invite_link.yaml"
+
+# Parent sign-up their child to the class using invite code
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/message_open_invite_link.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "Parent User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- extendedWaitUntil:
+    visible: "parentuser" #username
+    timeout: 10000
+- tapOn: "Next"
+# passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
+- tapOn: "Password*"
+- inputText: "testp1"
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Child Profile"
+- assertVisible: "Child's name*"
+- assertVisible: "Student User"
+- assertVisible: "Gender*"
+- assertVisible: "Male"
+- assertVisible: "Child's date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- assertVisible: ${output.pastYearDateC}
+# 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
+- tapOn:
+    text: "Done"
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "studentuser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- tapOn: "Login"
+- assertVisible: "Apps"
+- tapOn: "People"
+- tapOn: "Student User"
+- assertVisible: "Parent User"

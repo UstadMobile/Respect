@@ -18,6 +18,11 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
+import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -33,6 +38,8 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import java.lang.System.currentTimeMillis
+import kotlin.random.Random
 import kotlin.time.Clock
 
 data class ClazzEditUiState(
@@ -60,6 +67,12 @@ class ClazzEditViewModel(
         Clazz.TABLE_ID
     ).toString()
 
+    private val studentInviteGuid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+        Invite.TABLE_ID
+    ).toString()
+    private val teacherInviteGuid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+        Invite.TABLE_ID
+    ).toString()
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -138,14 +151,25 @@ class ClazzEditViewModel(
 
         launchWithLoadingIndicator {
             try {
-                schoolDataSource.classDataSource.store(listOf(clazz))
                 if (route.guid == null) {
+                    val studentInvite = createInvite(PersonRoleEnum.STUDENT)
+                    val teacherInvite = createInvite(PersonRoleEnum.TEACHER)
+
+                    val newClazz = clazz.copy(
+                        studentInviteGuid = studentInvite.guid,
+                        teacherInviteGuid = teacherInvite.guid
+                    )
+
+                    schoolDataSource.inviteDataSource.store(listOf(studentInvite, teacherInvite))
+                    schoolDataSource.classDataSource.store(listOf(newClazz))
+
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             ClazzDetail(guid), popUpTo = route, popUpToInclusive = true
                         )
                     )
                 } else {
+                    schoolDataSource.classDataSource.store(listOf(clazz))
                     _navCommandFlow.tryEmit(NavCommand.PopUp())
                 }
             } catch (e: Throwable) {
@@ -155,6 +179,27 @@ class ClazzEditViewModel(
         }
     }
 
+    fun createInvite(role: PersonRoleEnum): Invite {
+        val inviteGuid = if (role == PersonRoleEnum.STUDENT) studentInviteGuid else teacherInviteGuid
+        val classRole = if (role == PersonRoleEnum.STUDENT) EnrollmentRoleEnum.PENDING_STUDENT
+        else EnrollmentRoleEnum.PENDING_TEACHER
+        return Invite(
+            guid = inviteGuid,
+            code = generateCode(),
+            newRole = role ,
+            forClassRole = classRole,
+            inviteMultipleAllowed = true,
+            approvalRequired = true,
+            forClassGuid = uiState.value.clazz.dataOrNull()?.guid,
+            forClassName = uiState.value.clazz.dataOrNull()?.title,
+            expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
+        )
+    }
+    private fun generateCode(): String {
+        return Random.nextInt(DEFAULT_INVITE_CODE_MAX)
+            .toString()
+            .padStart(DEFAULT_INVITE_CODE_LEN, '0')
+    }
     fun onClearError() {
         _uiState.update { prev -> prev.copy(clazzNameError = null) }
     }

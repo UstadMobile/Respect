@@ -37,9 +37,14 @@ class GetInviteInfoUseCaseServer(
         } else {
             return RespectInviteInfo(
                 code = code,
-                classGuid = invite.iForClassGuid,
-                className = invite.iForClassName,
                 invite = invite.toModel(),
+                classGuid = clazz.clazz.cGuid,
+                className = clazz.clazz.cTitle,
+                userInviteType = if(code == clazz.clazz.cTeacherInviteGuid) {
+                    RespectInviteInfo.UserInviteType.TEACHER
+                }else {
+                    RespectInviteInfo.UserInviteType.STUDENT_OR_PARENT
+                }
             )
         }
 

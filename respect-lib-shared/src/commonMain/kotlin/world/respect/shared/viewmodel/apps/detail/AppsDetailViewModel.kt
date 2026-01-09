@@ -22,9 +22,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
@@ -35,21 +33,20 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.lib.opds.model.respectAppDefaultLessonList
 import world.respect.shared.util.ext.resolve
 
 data class AppsDetailUiState(
-    val appDetail: DataLoadState<RespectAppManifest>? = null,
+    val appDetail: DataLoadState<OpdsPublication>? = null,
     val publications: List<OpdsPublication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
-    val appIcon: String? = null,
     val isAdded: Boolean = false,
     val showAddRemoveButton: Boolean = false,
 )
 
 class AppsDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -71,43 +68,36 @@ class AppsDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.getAppAsFlow(
-                manifestUrl = route.manifestUrl,
-                loadParams = DataLoadParams()
+            schoolDataSource.opdsDataSource.loadOpdsPublication(
+                url = route.manifestUrl,
+                params = DataLoadParams(),
+                referrerUrl = null,
+                expectedPublicationId = null,
             ).collectLatest { result ->
-                if (result is DataReadyState) {
-                    _uiState.update {
-                        it.copy(
-                            appDetail = result,
-                            appIcon = route.manifestUrl.resolve(
-                                result.data.icon.toString()
-                            ).toString()
-                        )
-
-                    }
+                _uiState.update { prev ->
+                    prev.copy(appDetail = result)
                 }
 
-                result.dataOrNull()?.learningUnits?.also { learningUnitsUri ->
-                    schoolDataSource.opdsDataSource.loadOpdsFeed(
-                        url = route.manifestUrl.resolve(
-                            learningUnitsUri.toString()
-                        ),
-                        params = DataLoadParams()
-                    ).collect { result ->
-                        when (result) {
-                            is DataReadyState -> {
-                                _uiState.update {
-                                    val resolvedFeed = result.data.resolve(route.manifestUrl)
+                val defaultLessonLink = result.dataOrNull()?.respectAppDefaultLessonList()
+                    ?: return@collectLatest
 
-                                    it.copy(
-                                        navigation = resolvedFeed.navigation ?: emptyList(),
-                                        publications = resolvedFeed.publications ?: emptyList(),
-                                        group = resolvedFeed.groups ?: emptyList()
-                                    )
-                                }
+                schoolDataSource.opdsDataSource.loadOpdsFeed(
+                    url = route.manifestUrl.resolve(defaultLessonLink.href),
+                    params = DataLoadParams()
+                ).collect { result ->
+                    when (result) {
+                        is DataReadyState -> {
+                            _uiState.update {
+                                val resolvedFeed = result.data.resolve(route.manifestUrl)
+
+                                it.copy(
+                                    navigation = resolvedFeed.navigation ?: emptyList(),
+                                    publications = resolvedFeed.publications ?: emptyList(),
+                                    group = resolvedFeed.groups ?: emptyList()
+                                )
                             }
-                            else -> {}
                         }
+                        else -> {}
                     }
                 }
             }
@@ -133,14 +123,12 @@ class AppsDetailViewModel(
     }
 
     fun onClickLessonList() {
-
         val appManifest = uiState.value.appDetail?.dataOrNull()
-
-        appManifest?.learningUnits?.toString()?.also { uri ->
+        appManifest?.respectAppDefaultLessonList()?.also { defaultLessonListLink ->
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     LearningUnitList.create(
-                        opdsFeedUrl = route.manifestUrl.resolve(uri),
+                        opdsFeedUrl = route.manifestUrl.resolve(defaultLessonListLink.href),
                         appManifestUrl = route.manifestUrl,
                         resultDest = route.resultDest,
                     )
@@ -155,15 +143,16 @@ class AppsDetailViewModel(
             it.rel?.equals(SELF) == true
         }?.href.toString()
 
-        val refererUrl = uiState.value.appDetail?.dataOrNull()?.learningUnits.toString()
+        val refererUrl = uiState.value.appDetail?.dataOrNull()
+            ?.respectAppDefaultLessonList()?.href
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LearningUnitDetail.create(
                     learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
                     appManifestUrl = route.manifestUrl,
-                    refererUrl = Url(refererUrl),
-                    expectedIdentifier = publication.metadata.identifier.toString()
+                    refererUrl = refererUrl?.let { Url(it) },
+                    expectedIdentifier = publication.metadata.identifier?.toString()
                 )
             )
         )

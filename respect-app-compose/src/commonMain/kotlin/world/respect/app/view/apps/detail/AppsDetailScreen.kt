@@ -53,6 +53,7 @@ import world.respect.datalayer.DataReadyState
 
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.findIcons
 
 @Composable
 fun AppsDetailScreen(
@@ -94,25 +95,23 @@ fun AppsDetailScreen(
         ) {
             ListItem(
                 leadingContent = {
-                    uiState.appIcon.also { icon ->
+                    appDetail?.findIcons()?.firstOrNull()?.also {
                         RespectAsyncImage(
-                            uri = icon,
+                            uri = it.href,
                             contentDescription = "",
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(80.dp)
-
+                            modifier = Modifier.size(80.dp)
                         )
                     }
                 },
                 headlineContent = {
                     Text(
-                        text = appDetail?.name?.getTitle().toString()
+                        text = appDetail?.metadata?.title?.getTitle() ?: ""
                     )
                 },
                 supportingContent = {
                     Text(
-                        text = appDetail?.description?.getTitle().toString(),
+                        text = appDetail?.metadata?.subtitle?.getTitle() ?: "",
                         maxLines = 1
                     )
                 },
@@ -156,35 +155,35 @@ fun AppsDetailScreen(
         item(
             key = SCREENSHOT
         ) {
-            val screenshots = appDetail?.screenshots.orEmpty()
-
-            if (screenshots.isNotEmpty()) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
-                ) {
-                    items(
-                        count = screenshots.size,
-                        key = { index -> screenshots[index].url.toString() }
-                    ) { index ->
-                        val screenshot = screenshots[index]
-
-                        screenshot.url.also { screenshotUrl ->
-                            RespectAsyncImage(
-                                uri = screenshotUrl.toString(),
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .width(200.dp)
-                                    .aspectRatio(16f / 9f)
-                                    .clip(
-                                        RoundedCornerShape(12.dp)
-                                    )
-                            )
-                        }
-                    }
-                }
-            }
+//            val screenshots = appDetail?.screenshots.orEmpty()
+//
+//            if (screenshots.isNotEmpty()) {
+//                LazyRow(
+//                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+//                    contentPadding = PaddingValues(horizontal = 4.dp)
+//                ) {
+//                    items(
+//                        count = screenshots.size,
+//                        key = { index -> screenshots[index].url.toString() }
+//                    ) { index ->
+//                        val screenshot = screenshots[index]
+//
+//                        screenshot.url.also { screenshotUrl ->
+//                            RespectAsyncImage(
+//                                uri = screenshotUrl.toString(),
+//                                contentDescription = "",
+//                                contentScale = ContentScale.Crop,
+//                                modifier = Modifier
+//                                    .width(200.dp)
+//                                    .aspectRatio(16f / 9f)
+//                                    .clip(
+//                                        RoundedCornerShape(12.dp)
+//                                    )
+//                            )
+//                        }
+//                    }
+//                }
+//            }
         }
 
         item(

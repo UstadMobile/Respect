@@ -378,7 +378,7 @@
     <string name="edit_mapping">Edit mapping</string>
     <string name="textbooks">Textbooks</string>
     <string name="chapter">Chapter</string>
-    <string name="lesson">Lesson</string>
+    <string name="lesson">Item</string>
     <string name="add_book_cover">Add book cover</string>
     <string name="no_sections_yet">No sections have been added yet. Click + Section to add one.</string>
     <string name="map">Map</string>
@@ -440,7 +440,7 @@
 
     <string name="date">Date</string>
     <string name="time">Time</string>
-    <string name="assignment_tasks">Assignment tasks</string>
+    <string name="assignment_tasks">Tasks</string>
     <string name="lesson_assessment">Lesson/assessment</string>
 
     <string name="due_date">Due date</string>
@@ -460,6 +460,38 @@
 
     <string name="edit_enrollment">Edit enrollment</string>
 
-    <string name="section_name">Section name</string>
+    <string name="section_name">Section title</string>
+    <string name="playlists">Playlists</string>
+    <string name="school_playlists">School Playlists</string>
+    <string name="my_playlists">My Playlists</string>
+    <string name="no_playlists_yet">No playlists yet</string>
+    <string name="create_first_playlist">Create your first playlist to get started</string>
+    <string name="create_playlist">Add playlist</string>
+    <string name="error_loading_playlists">Error loading playlists</string>
+    <string name="add_new">Add new</string>
+    <string name="add_from_a_link">Add from a link</string>
+    <string name="add_playlist">Playlist</string>
+    <string name="copy_playlist">Copy</string>
+    <string name="all_sections_items">All sections,  items</string>
+    <string name="created_by">Created by: </string>
+    <string name="edit_playlist">Edit playlist</string>
+    <string name="home">Home</string>
+    <string name="copy">copy playlist</string>
+    <string name="make_a_copy">Make a copy</string>
+    <string name="sections_and_items_count">%1$d sections • %2$d items</string>
+    <string name="add_from_playlist">Task</string>
+    <string name="select_curriculum_unit">Select Playlist Unit</string>
+    <string name="add_task_to_assignment"> Add task to assignment</string>
+    <string name="add_tasks_to_assignment">Add %1$d tasks to assignment</string>
+    <string name="select_all">Select all</string>
+    <string name="select_none">Select none</string>
 
+    <string name="who_can_view">Who can view</string>
+    <string name="who_can_edit">Who can edit</string>
+    <string name="anyone_with_the_link">Anyone with the link</string>
+    <string name="teacher_admin_in_my_school">Teacher/admin in my school</string>
+    <string name="share_link">Share link</string>
+    <string name="copy_link">Copy link</string>
+    <string name="send_link_via_sms">Send link via SMS</string>
+    <string name="send_link_via_email">Send link via email</string>
 </resources>

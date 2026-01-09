@@ -134,15 +134,17 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreenForViewModel
-import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
-import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.share.PlaylistShareScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.navigation.Settings
-import world.respect.shared.navigation.CurriculumMappingList
+
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
+import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 
@@ -539,22 +541,21 @@ fun AppNavHost(
             )
         }
 
-        composable<CurriculumMappingList> {
-            val viewModel: CurriculumMappingListViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            CurriculumMappingListScreenForViewModel(
-                viewModel = viewModel
-            )
-        }
-
         composable<CurriculumMappingEdit> {
-            val viewModel: CurriculumMappingEditViewModel = respectViewModel(
+            val viewModel: PlaylistEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
             CurriculumMappingEditScreenForViewModel(
+                viewModel = viewModel
+            )
+        }
+        composable<PlaylistShare> {
+            val viewModel: PlaylistShareViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            PlaylistShareScreen(
                 viewModel = viewModel
             )
         }

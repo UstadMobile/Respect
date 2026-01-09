@@ -42,12 +42,15 @@ import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
+import world.respect.server.routes.school.respect.InviteCreateRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
+import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.virtualHost
@@ -213,15 +216,22 @@ fun Application.module() {
                         InviteInfoRoute(
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
+                        InviteCreateRoute(
+                            createInviteUseCase = { it.getSchoolKoinScope().get() }
+                        )
                     }
+
                     route("username"){
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
+                        SchoolPermissionGrantRoute()
                         PersonRoute()
+                        InviteRoute()
                         PersonPasskeyRoute()
                         PersonPasswordRoute()
                         ClassRoute()

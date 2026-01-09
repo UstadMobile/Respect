@@ -67,19 +67,27 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
+import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
+import world.respect.datalayer.repository.school.pullsync.EnqueueRunPullSyncUseCaseAndroidImpl
+import world.respect.datalayer.repository.school.pullsync.RunPullSyncUseCase
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
+import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
@@ -121,6 +129,7 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.createlink.CreateLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -132,6 +141,7 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
@@ -188,9 +198,11 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
+import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
+import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
@@ -210,6 +222,15 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.domain.sharelink.EmailLinkLauncher
+import world.respect.shared.domain.sharelink.ShareLinkLauncher
+import world.respect.shared.domain.sharelink.SmsLinkLauncher
+import world.respect.shared.domain.sendinvite.SmsLinkLauncherAndroid
+import world.respect.shared.domain.sendinvite.EmailLinkLauncherAndroid
+import world.respect.shared.domain.sendinvite.ShareLinkLauncherAndroid
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.settings.SchoolSettingsViewModel
 import world.respect.shared.viewmodel.settings.SharedDevicesSettingsViewmodel
 
@@ -236,7 +257,15 @@ val appKoinModule = module {
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
     }
-
+    single<SmsLinkLauncher> {
+        SmsLinkLauncherAndroid(androidContext())
+    }
+    single<EmailLinkLauncher> {
+        EmailLinkLauncherAndroid(androidContext())
+    }
+    single<ShareLinkLauncher> {
+        ShareLinkLauncherAndroid(androidContext())
+    }
     single<UidNumberMapper> {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
@@ -307,6 +336,8 @@ val appKoinModule = module {
     viewModelOf(::AccountListViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
+    viewModelOf(::InvitePersonViewModel)
+    viewModelOf(::CopyInviteCodeViewModel)
     viewModelOf(::PersonEditViewModel)
     viewModelOf(::PersonDetailViewModel)
     viewModelOf(::ReportDetailViewModel)
@@ -567,6 +598,10 @@ val appKoinModule = module {
         get<SnackBarFlowDispatcher>()
     }
 
+    single<ResolveUrlToNavCommandUseCase> {
+        ResolveUrlToNavCommandUseCase()
+    }
+
     single<PhoneNumValidatorUseCase> {
         PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
     }
@@ -673,7 +708,18 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+        scoped<CreateLinkUseCase> {
+            CreateLinkUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+            )
+        }
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -798,7 +844,8 @@ val appKoinModule = module {
                     uidNumberMapper = get(),
                     authenticatedUser = AuthenticatedUserPrincipalId(
                         accountScopeId.accountPrincipalId.guid
-                    )
+                    ),
+                    checkPersonPermissionUseCase = get(),
                 ),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
@@ -824,6 +871,64 @@ val appKoinModule = module {
                 authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
             )
         }
+
+        scoped<GetAuthenticatedPersonUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+            GetAuthenticatedPersonUseCase(
+                authenticatedUserPrincipalId = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckSchoolPermissionsUseCase> {
+            CheckSchoolPermissionsUseCase(
+                schoolDataSource = get(),
+            )
+        }
+
+        scoped<PullSyncTracker> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            PullSyncTrackerDbImpl(
+                schoolDb = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<EnqueueRunPullSyncUseCase> {
+            EnqueueRunPullSyncUseCaseAndroidImpl(
+                context = androidApplication(),
+                scopeId = id,
+                scopeClass = RespectAccount::class,
+            )
+        }
+
+        scoped<RunPullSyncUseCase> {
+            RunPullSyncUseCase(
+                pullSyncTracker = get(),
+                schoolDataSource = get(),
+                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            )
+        }
+
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

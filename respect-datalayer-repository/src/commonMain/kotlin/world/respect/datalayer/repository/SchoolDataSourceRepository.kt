@@ -7,9 +7,11 @@ import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
+import world.respect.datalayer.repository.school.InviteDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasskeyDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
+import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -39,6 +41,15 @@ class SchoolDataSourceRepository(
         )
     }
 
+    override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceRepository by lazy {
+        SchoolPermissionGrantDataSourceRepository(
+            local = local.schoolPermissionGrantDataSource,
+            remote = remote.schoolPermissionGrantDataSource,
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
+        )
+    }
+
     override val classDataSource: ClassDataSourceRepository by lazy {
         ClassDataSourceRepository(
             local = local.classDataSource,
@@ -62,8 +73,7 @@ class SchoolDataSourceRepository(
             local.personDataSource,
             remote.personDataSource,
             validationHelper,
-            remoteWriteQueue,
-            enrollmentDataSource
+            remoteWriteQueue
         )
     }
 
@@ -90,6 +100,15 @@ class SchoolDataSourceRepository(
             remote = remote.assignmentDataSource,
             validationHelper = validationHelper,
             remoteWriteQueue = remoteWriteQueue,
+        )
+    }
+
+    override val inviteDataSource: InviteDataSourceRepository by lazy {
+        InviteDataSourceRepository(
+            local = local.inviteDataSource,
+            remote = remote.inviteDataSource,
+            remoteWriteQueue = remoteWriteQueue,
+            validationHelper = validationHelper
         )
     }
 }

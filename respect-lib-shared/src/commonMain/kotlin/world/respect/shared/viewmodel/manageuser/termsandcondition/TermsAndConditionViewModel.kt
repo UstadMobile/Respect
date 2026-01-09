@@ -52,7 +52,8 @@ class TermsAndConditionViewModel(
                 SignupScreen.create(
                     route.schoolUrl,
                     route.type,
-                    route.respectRedeemInviteRequest
+                    route.respectRedeemInviteRequest,
+                    route.inviteType
                 )
             )
         )

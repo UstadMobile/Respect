@@ -17,7 +17,7 @@ fun Route.AddChildAccountRoute(
         val parentUsername = call.request.queryParameters["parentUsername"]
             ?: throw IllegalArgumentException("missing parentUsername param").withHttpStatus(400)
         val classUid = call.request.queryParameters["classUid"]
-            ?: throw IllegalArgumentException("missing classUid param").withHttpStatus(400)
+        val familyPersonGuid = call.request.queryParameters["familyPersonGuid"]
         val inviteCode = call.request.queryParameters["inviteCode"]
             ?: throw IllegalArgumentException("missing inviteCode param").withHttpStatus(400)
         call.respond(
@@ -25,7 +25,8 @@ fun Route.AddChildAccountRoute(
                 personInfo = personInfo,
                 parentUsername = parentUsername,
                 classUid = classUid,
-                inviteCode = inviteCode
+                inviteCode = inviteCode,
+                familyPersonGuid = familyPersonGuid
             )
         )
     }

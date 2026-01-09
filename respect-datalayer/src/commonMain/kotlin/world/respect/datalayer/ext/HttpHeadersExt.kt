@@ -9,9 +9,13 @@ fun HttpMessage.lastModifiedAsLong(): Long {
     return lastModified()?.time ?: -1
 }
 
-fun HttpMessage.consistentThroughAsLong(): Long {
+fun HttpMessage.consistentThrough(): Instant? {
     return headers[DataLayerHeaders.XConsistentThrough]?.let {
-        Instant.parse(it).toEpochMilliseconds()
-    } ?: -1
+        Instant.parse(it)
+    }
+}
+
+fun HttpMessage.permissionsLastModified(): Instant? {
+    return headers[DataLayerHeaders.XPermissionsLastModified]?.let { Instant.parse(it) }
 }
 

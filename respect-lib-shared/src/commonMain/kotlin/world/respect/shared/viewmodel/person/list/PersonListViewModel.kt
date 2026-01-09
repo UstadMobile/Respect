@@ -22,9 +22,11 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_new_person
+import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.generated.resources.people
-import world.respect.shared.generated.resources.person
 import world.respect.shared.generated.resources.select_person
+import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
@@ -33,10 +35,14 @@ import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
 
 
 data class PersonListUiState(
@@ -45,6 +51,7 @@ data class PersonListUiState(
     },
     val showAddPersonItem: Boolean = false,
     val showInviteCode: String? = null,
+    val showInviteButton: Boolean = false,
 )
 
 class PersonListViewModel(
@@ -65,6 +72,8 @@ class PersonListViewModel(
     private val launchDebounced = LaunchDebouncer(viewModelScope)
 
     private val route: PersonList = savedStateHandle.toRoute()
+
+    private val checkPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
 
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
@@ -87,10 +96,20 @@ class PersonListViewModel(
                 }else {
                     Res.string.select_person.asUiText()
                 },
-                fabState = it.fabState.copy(
-                    onClick = ::onClickAdd,
-                    text = Res.string.person.asUiText(),
-                    icon = FabUiState.FabIcon.ADD,
+                expandableFabState = ExpandableFabUiState(
+                    visible = !(route.filterByRole != null||route.classUidStr!=null),
+                    items = listOf(
+                        ExpandableFabItem(
+                            icon = ExpandableFabIcon.INVITE,
+                            text =  Res.string.invite_person.asUiText(),
+                            onClick = { onClickInvitePerson()}
+                        ),
+                        ExpandableFabItem(
+                            icon = ExpandableFabIcon.ADD,
+                            text = Res.string.add_new_person.asUiText(),
+                            onClick = { onClickAdd() }
+                        )
+                    )
                 ),
                 searchState = AppBarSearchUiState(
                     visible = true,
@@ -104,8 +123,11 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
+            val canAddPerson = checkPermissionUseCase(
+                PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
+            ).isNotEmpty()
+
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
-                val canAddPerson = selectedAcct?.person?.isAdminOrTeacher() == true
                 _appUiState.update { prev ->
                     prev.copy(
                         fabState = prev.fabState.copy(
@@ -121,7 +143,10 @@ class PersonListViewModel(
         }
 
         _uiState.update {
-            it.copy(persons = pagingSourceFactoryHolder)
+            it.copy(
+                persons = pagingSourceFactoryHolder,
+                showInviteButton = route.filterByRole != null||route.classUidStr!=null
+            )
         }
     }
 
@@ -161,7 +186,6 @@ class PersonListViewModel(
     }
 
     fun onClickAdd() {
-        print(""+route.filterByRole)
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 PersonEdit.create(
@@ -177,6 +201,21 @@ class PersonListViewModel(
         _uiState.value.showInviteCode?.also {
             setClipboardStringUseCase(it)
         }
+    }
+
+    fun onClickInvitePerson() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                InvitePerson.create(
+                    classUid = route.classUidStr,
+                    className = route.classNameStr,
+                    role = route.role,
+                    familyPersonGuid = route.personGuidStr,
+                    presetRole = route.filterByRole,
+                    inviteCode = route.showInviteCode
+                )
+            )
+        )
     }
 
 }

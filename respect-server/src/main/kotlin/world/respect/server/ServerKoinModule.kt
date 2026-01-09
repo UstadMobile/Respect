@@ -21,14 +21,19 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
+import world.respect.datalayer.db.school.domain.GetPermissionLastModifiedUseCaseDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.server.account.invite.CreateInviteUseCaseServer
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
@@ -38,6 +43,7 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
@@ -55,6 +61,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -63,6 +70,7 @@ import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePa
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
+const val CUSTOM_PROTO = "world.respect.app"
 
 fun serverKoinModule(
     config: ApplicationConfig,
@@ -130,7 +138,9 @@ fun serverKoinModule(
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
     }
-
+    single<UrlToCustomDeepLinkUseCase> {
+        UrlToCustomDeepLinkUseCase(customProtocol = CUSTOM_PROTO)
+    }
     single<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseJvm(
             json = get(),
@@ -254,6 +264,15 @@ fun serverKoinModule(
             )
         }
 
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseServer(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                schoolUrl = schoolUrl(),
+                urlToCustomDeepLinkUseCase = get()
+            )
+        }
+
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
             val accountScopeManager: ServerAccountScopeManager = get()
@@ -288,18 +307,39 @@ fun serverKoinModule(
      * be done in a way that is thread safe.
      */
     scope<RespectAccount> {
+        factory<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
         factory<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             SchoolDataSourceDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
-                authenticatedUser = accountScopeId.accountPrincipalId
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                checkPersonPermissionUseCase = get(),
             )
         }
 
         factory<SchoolDataSource> {
             get<SchoolDataSourceLocal>()
+        }
+
+        factory<GetPermissionLastModifiedUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetPermissionLastModifiedUseCaseDbImpl(
+                schoolDb = get(),
+                numberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId,
+            )
         }
     }
 

@@ -14,12 +14,20 @@ data class Clazz(
     val description: String? = null,
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
-    val teacherInviteCode: String? = Random.nextInt(
-        DEFAULT_INVITE_CODE_MAX
-    ).toString().padStart(DEFAULT_INVITE_CODE_LEN, '0'),
-    val studentInviteCode: String? = Random.nextInt(
-        DEFAULT_INVITE_CODE_MAX
-    ).toString().padStart(DEFAULT_INVITE_CODE_LEN, '0'),
+    val teacherInviteGuid: String? = null,
+    val studentInviteGuid: String? = null,
+    val permissions: List<ClassPermission> = listOf(
+        ClassPermission(
+            permissionToRef = ClassPermission.PermissionToEnrollmentRole(EnrollmentRoleEnum.TEACHER),
+            permissions = PermissionFlags.CLASS_WRITE
+        ),
+        ClassPermission(
+            permissionToRef = ClassPermission.PermissionToEnrollmentRole(EnrollmentRoleEnum.STUDENT),
+            permissions = PermissionFlags.CLASS_READ
+                .or(PermissionFlags.PERSON_TEACHER_READ)
+                .or(PermissionFlags.PERSON_STUDENT_READ)
+        ),
+    )
 ): ModelWithTimes {
 
     companion object {

@@ -12,9 +12,11 @@ import world.respect.datalayer.repository.school.PersonPasskeyDataSourceReposito
 import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
+import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.opds.OpdsDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 
@@ -109,5 +111,9 @@ class SchoolDataSourceRepository(
             local = local.opdsDataSource,
             remote = remote.opdsDataSource,
         )
+    }
+
+    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
+        DummySchoolConfigSettingsDataSource()
     }
 }

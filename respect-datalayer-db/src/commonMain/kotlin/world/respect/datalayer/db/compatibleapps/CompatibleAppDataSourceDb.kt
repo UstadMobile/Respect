@@ -9,13 +9,10 @@ import world.respect.datalayer.compatibleapps.CompatibleAppsDataSourceLocal
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.compatibleapps.adapters.asEntities
-import world.respect.datalayer.db.compatibleapps.adapters.asModel
 import world.respect.libxxhash.XXStringHasher
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
-import kotlinx.coroutines.flow.combine
-import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.db.compatibleapps.adapters.combineWithLangMaps
+import kotlinx.coroutines.flow.emptyFlow
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
@@ -99,7 +96,8 @@ class CompatibleAppDataSourceDb(
         loadParams: DataLoadParams
     ): Flow<DataLoadState<List<DataLoadState<RespectAppManifest>>>> {
         val appEntities = respectDb.getCompatibleAppEntityDao().selectAllAsFlow()
-        TODO()
+        //TODO
+        return emptyFlow()
 //        val langmaps = respectDb.getLangMapEntityDao().selectAllByTopParentType(
 //            LangMapEntity.TopParentType.RESPECT_MANIFEST.id
 //        )

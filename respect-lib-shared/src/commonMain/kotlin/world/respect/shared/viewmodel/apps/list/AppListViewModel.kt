@@ -3,10 +3,15 @@ package world.respect.shared.viewmodel.apps.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_app
@@ -15,24 +20,34 @@ import world.respect.shared.navigation.EnterLink
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.ext.map
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findSelfLinks
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 
 
 data class AppListUiState(
-    val appList: List<DataLoadState<RespectAppManifest>> = emptyList()
+    val appList: DataLoadState<List<OpdsPublication>> = DataReadyState(emptyList())
 )
 
 class AppListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(AppListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     init {
         _appUiState.update {
@@ -42,19 +57,27 @@ class AppListViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.getAddableApps(
-                loadParams = DataLoadParams()
-            ).collect { result ->
-                when (result) {
-                    is DataReadyState -> {
-                        _uiState.update {
-                            it.copy(
-                                appList = result.data
-                            )
-                        }
-                    }
+            schoolDataSource.schoolConfigSettingDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                params = SchoolConfigSettingDataSource.GetListParams(
+                    key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS
+                )
+            ).collectLatest { config ->
+                val feedUrl = config.dataOrNull()?.firstOrNull()?.value?.let {
+                    Url(it)
+                } ?: return@collectLatest
 
-                    else -> {}
+                schoolDataSource.opdsDataSource.loadOpdsFeed(
+                    url = feedUrl,
+                    params = DataLoadParams()
+                ).collect { dataLoad ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            appList = dataLoad.map {
+                                it.resolve(feedUrl).publications ?: emptyList()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -68,17 +91,15 @@ class AppListViewModel(
         )
     }
 
-    fun onClickApp(app: DataLoadState<RespectAppManifest>) {
-        val url = app.metaInfo.url ?: return
+    fun onClickApp(app: OpdsPublication) {
+        val url = app.findSelfLinks().firstOrNull()?.href ?: return
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AppsDetail.create(url)
+                AppsDetail.create(Url(url))
             )
         )
     }
 
-    companion object{
-       const val EMPTY_LIST = "empty_list"
-    }
 }
 

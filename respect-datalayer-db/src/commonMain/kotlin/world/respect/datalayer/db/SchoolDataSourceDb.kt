@@ -18,6 +18,7 @@ import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
+import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
@@ -25,6 +26,7 @@ import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.opds.OpdsDataSourceLocal
@@ -106,5 +108,9 @@ class SchoolDataSourceDb(
             uidNumberMapper = uidNumberMapper,
             primaryKeyGenerator = primaryKeyGenerator,
         )
+    }
+
+    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
+        DummySchoolConfigSettingsDataSource()
     }
 }

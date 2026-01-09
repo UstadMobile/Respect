@@ -10,6 +10,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 
 /**
@@ -41,5 +42,7 @@ interface SchoolDataSource {
     val assignmentDataSource: AssignmentDataSource
 
     val opdsDataSource: OpdsDataSource
+
+    val schoolConfigSettingDataSource: SchoolConfigSettingDataSource
 
 }

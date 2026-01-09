@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * @property href Absolute URL to the OPDS publication linked (NOT the Learning Unit ID URL).
  */
 @Serializable
-data class PlaylistsMappingSectionLink(
+data class PlaylistsSectionLink(
     val uid: Long = System.currentTimeMillis(),
     val href: String,
     val title: String? = "",

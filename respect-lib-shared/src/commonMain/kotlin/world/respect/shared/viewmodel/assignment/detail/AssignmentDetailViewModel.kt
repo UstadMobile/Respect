@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,13 +25,8 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.ext.whenSubscribed
@@ -48,7 +42,7 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 
 data class AssignmentDetailUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -147,12 +141,12 @@ class AssignmentDetailViewModel(
             )
         )
     }
-    private fun getAvailablePlaylists(): List<PlaylistsMapping> {
+    private fun getAvailablePlaylists(): List<Playlists> {
         val mappingsJson = savedStateHandle.get<String>(AppLauncherViewModel.KEY_MAPPINGS_LIST)
         return if (mappingsJson != null) {
             try {
                 json.decodeFromString(
-                    ListSerializer(PlaylistsMapping.serializer()),
+                    ListSerializer(Playlists.serializer()),
                     mappingsJson
                 )
             } catch (e: Exception) {

@@ -37,7 +37,7 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 
 data class AssignmentListUiState(
     val assignments: IPagingSourceFactory<Int, Assignment> = EmptyPagingSourceFactory(),
@@ -122,12 +122,12 @@ class AssignmentListViewModel(
         )
     }
 
-    private fun getAvailablePlaylists(): List<PlaylistsMapping> {
+    private fun getAvailablePlaylists(): List<Playlists> {
         val mappingsJson = savedStateHandle.get<String>(AppLauncherViewModel.KEY_MAPPINGS_LIST)
         return if (mappingsJson != null) {
             try {
                 json.decodeFromString(
-                    ListSerializer(PlaylistsMapping.serializer()),
+                    ListSerializer(Playlists.serializer()),
                     mappingsJson
                 )
             } catch (e: Exception) {

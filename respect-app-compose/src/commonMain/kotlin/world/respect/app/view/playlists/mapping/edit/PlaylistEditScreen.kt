@@ -45,8 +45,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
 import androidx.compose.ui.draw.alpha
 
 
@@ -75,7 +75,7 @@ fun CurriculumMappingEditScreenForViewModel(
 @Composable
 fun CurriculumMappingEditScreen(
     uiState: PlaylistEditUiState = PlaylistEditUiState(),
-    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
+    sectionLinkUiState: (PlaylistsSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     onTitleChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onClickAddSection: () -> Unit = {},
@@ -85,7 +85,7 @@ fun CurriculumMappingEditScreen(
     onClickAddLesson: (Int) -> Unit = {},
     onClickRemoveLesson: (Int, Int) -> Unit = { _, _ -> },
     onLessonMovedBetweenSections: (Int, Int, Int, Int) -> Unit = { _, _, _, _ -> },
-    onClickLesson: (PlaylistsMappingSectionLink) -> Unit = {},
+    onClickLesson: (PlaylistsSectionLink) -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
@@ -315,7 +315,7 @@ fun CurriculumMappingEditScreen(
 
 @Composable
 private fun SectionItem(
-    section: PlaylistsMappingSection,
+    section: PlaylistsSection,
     sectionIndex: Int,
     isDragging: Boolean,
     onSectionTitleChanged: (Int, String) -> Unit,
@@ -406,12 +406,12 @@ private fun SectionItem(
 
 @Composable
 private fun LessonItem(
-    link: PlaylistsMappingSectionLink,
-    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
+    link: PlaylistsSectionLink,
+    sectionLinkUiState: (PlaylistsSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     sectionIndex: Int,
     linkIndex: Int,
     onClickRemoveLesson: (Int, Int) -> Unit,
-    onClickLesson: (PlaylistsMappingSectionLink) -> Unit = {},
+    onClickLesson: (PlaylistsSectionLink) -> Unit = {},
     isDragging: Boolean,
     isParentSectionDragging: Boolean = false,
     dragModifier: Modifier = Modifier

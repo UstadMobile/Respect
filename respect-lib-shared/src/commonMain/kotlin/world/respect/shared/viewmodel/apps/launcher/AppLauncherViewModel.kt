@@ -49,7 +49,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 
 data class AppLauncherUiState(
     val apps: IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
@@ -134,7 +134,7 @@ class AppLauncherViewModel(
         viewModelScope.launch {
             playlistListViewModel.uiState.collect { state ->
                 savedStateHandle[KEY_MAPPINGS_LIST] = json.encodeToString(
-                    ListSerializer(PlaylistsMapping.serializer()),
+                    ListSerializer(Playlists.serializer()),
                     state.mappings
                 )
             }
@@ -191,11 +191,11 @@ class AppLauncherViewModel(
         }
     }
 
-    private fun loadMappingsFromSavedState(savedStateHandle: SavedStateHandle): List<PlaylistsMapping> {
+    private fun loadMappingsFromSavedState(savedStateHandle: SavedStateHandle): List<Playlists> {
         val mappingsJson = savedStateHandle.get<String>(KEY_MAPPINGS_LIST) ?: return emptyList()
         return try {
             json.decodeFromString(
-                ListSerializer(PlaylistsMapping.serializer()),
+                ListSerializer(Playlists.serializer()),
                 mappingsJson
             )
         } catch (e: Exception) {

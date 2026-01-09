@@ -41,21 +41,21 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.KEY_LEARNING_UNIT
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.viewmodel.app.appstate.getTitle
 
 data class PlaylistEditUiState(
-    val mapping: PlaylistsMapping? = null,
+    val mapping: Playlists? = null,
     val loading: Boolean = false,
     val isNew: Boolean = true,
     val titleError: UiText? = null,
     val error: UiText? = null,
     val pendingLessonSectionIndex: Int? = null,
-    val sectionUiState: (PlaylistsMappingSection) -> Flow<PlaylistSectionUiState> = { emptyFlow() },
+    val sectionUiState: (PlaylistsSection) -> Flow<PlaylistSectionUiState> = { emptyFlow() },
 ) {
     val fieldsEnabled: Boolean
         get() = !loading
@@ -66,7 +66,7 @@ data class PlaylistEditUiState(
     val description: String
         get() = mapping?.description ?: ""
 
-    val sections: List<PlaylistsMappingSection>
+    val sections: List<PlaylistsSection>
         get() = mapping?.sections ?: emptyList()
 }
 
@@ -93,7 +93,7 @@ class PlaylistEditViewModel(
 
     private val _uiState = MutableStateFlow(
         PlaylistEditUiState(
-            mapping = mappingData ?: PlaylistsMapping(uid = mappingUid),
+            mapping = mappingData ?: Playlists(uid = mappingUid),
             isNew = mappingUid == 0L
         )
     )
@@ -130,7 +130,7 @@ class PlaylistEditViewModel(
                         mapping = prev.mapping?.copy(
                             sections = prev.mapping.sections.updateAtIndex(pendingSectionIndex) {
                                 it.copy(
-                                    items = it.items + PlaylistsMappingSectionLink(
+                                    items = it.items + PlaylistsSectionLink(
                                         href = selectedLearningUnit.learningUnitManifestUrl.toString(),
                                         title = selectedLearningUnit.selectedPublication.metadata.title.getTitle(),
                                         appManifestUrl = selectedLearningUnit.appManifestUrl
@@ -149,7 +149,7 @@ class PlaylistEditViewModel(
         val mappingToCommit = _uiState.updateAndGet(block).mapping ?: return
 
         savedStateHandle[KEY_MAPPING] = json.encodeToString(
-            PlaylistsMapping.serializer(), mappingToCommit
+            Playlists.serializer(), mappingToCommit
         )
     }
 
@@ -175,7 +175,7 @@ class PlaylistEditViewModel(
         updateUiStateAndCommit { prev ->
             prev.copy(
                 mapping = prev.mapping?.copy(
-                    sections = prev.mapping.sections + PlaylistsMappingSection(title = "")
+                    sections = prev.mapping.sections + PlaylistsSection(title = "")
                 )
             )
         }
@@ -295,7 +295,7 @@ class PlaylistEditViewModel(
         }
     }
 
-    fun onClickLesson(link: PlaylistsMappingSectionLink) {
+    fun onClickLesson(link: PlaylistsSectionLink) {
         val publicationUrl = Url(link.href)
         val appManifestUrl = link.appManifestUrl ?: return
 
@@ -312,7 +312,7 @@ class PlaylistEditViewModel(
     }
 
     fun sectionLinkUiStateFor(
-        link: PlaylistsMappingSectionLink
+        link: PlaylistsSectionLink
     ): Flow<DataLoadState<PlaylistSectionUiState>> {
         val publicationUrl = Url(link.href)
         return respectAppDataSource.opdsDataSource.loadOpdsPublication(

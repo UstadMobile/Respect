@@ -44,8 +44,8 @@ import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
@@ -54,14 +54,14 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
-    val mapping: PlaylistsMapping? = null,
-    val sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>> = {
+    val mapping: Playlists? = null,
+    val sectionLinkUiState: (PlaylistsSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>> = {
         emptyFlow()
     },
     val showCopyDialog: Boolean = false,
     val copyDialogName: String = "",
     val isSelectionMode: Boolean = false,
-    val selectedLessons: Set<PlaylistsMappingSectionLink> = emptySet(),
+    val selectedLessons: Set<PlaylistsSectionLink> = emptySet(),
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null || mapping != null
@@ -192,7 +192,7 @@ class LearningUnitDetailViewModel(
     }
 
     private suspend fun loadLessonPublications(
-        lessons: List<PlaylistsMappingSectionLink>
+        lessons: List<PlaylistsSectionLink>
     ): List<LearningUnitSelection> {
         return lessons.mapNotNull { lesson ->
             try {
@@ -219,12 +219,12 @@ class LearningUnitDetailViewModel(
         }
     }
 
-    private fun getAvailablePlaylists(): List<PlaylistsMapping> {
+    private fun getAvailablePlaylists(): List<Playlists> {
         val mappingsJson = savedStateHandle.get<String>(AppLauncherViewModel.KEY_MAPPINGS_LIST)
         return if (mappingsJson != null) {
             try {
                 json.decodeFromString(
-                    ListSerializer(PlaylistsMapping.serializer()),
+                    ListSerializer(Playlists.serializer()),
                     mappingsJson
                 )
             } catch (e: Exception) {
@@ -314,7 +314,7 @@ class LearningUnitDetailViewModel(
         }
     }
 
-    fun onLessonSelectionToggle(link: PlaylistsMappingSectionLink) {
+    fun onLessonSelectionToggle(link: PlaylistsSectionLink) {
         _uiState.update { prev ->
             val selected = if (prev.selectedLessons.contains(link)) {
                 prev.selectedLessons - link
@@ -372,7 +372,7 @@ class LearningUnitDetailViewModel(
         }
     }
 
-    fun onClickLesson(link: PlaylistsMappingSectionLink) {
+    fun onClickLesson(link: PlaylistsSectionLink) {
         if (_uiState.value.isSelectionMode) {
             onLessonSelectionToggle(link)
         } else {
@@ -458,7 +458,7 @@ class LearningUnitDetailViewModel(
     }
 
     fun sectionLinkUiStateFor(
-        link: PlaylistsMappingSectionLink
+        link: PlaylistsSectionLink
     ): Flow<DataLoadState<PlaylistSectionUiState>> {
         val publicationUrl = Url(link.href)
         return appDataSource.opdsDataSource.loadOpdsPublication(

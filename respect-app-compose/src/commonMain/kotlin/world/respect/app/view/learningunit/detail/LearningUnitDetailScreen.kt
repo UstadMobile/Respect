@@ -38,7 +38,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.*
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 
@@ -257,7 +257,7 @@ private fun SingleLessonDetailScreen(
 @Composable
 private fun PlaylistDetailScreen(
     uiState: LearningUnitDetailUiState,
-    onClickLesson: (PlaylistsMappingSectionLink) -> Unit,
+    onClickLesson: (PlaylistsSectionLink) -> Unit,
     onClickEdit: () -> Unit,
     onClickAssign: () -> Unit,
     onClickAssignSection: (Long) -> Unit,
@@ -546,9 +546,9 @@ private fun PlaylistDetailScreen(
 
 @Composable
 private fun LessonListItem(
-    link: PlaylistsMappingSectionLink,
-    sectionLinkUiState: (PlaylistsMappingSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
-    onClickLesson: (PlaylistsMappingSectionLink) -> Unit,
+    link: PlaylistsSectionLink,
+    sectionLinkUiState: (PlaylistsSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
+    onClickLesson: (PlaylistsSectionLink) -> Unit,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false
 ) {

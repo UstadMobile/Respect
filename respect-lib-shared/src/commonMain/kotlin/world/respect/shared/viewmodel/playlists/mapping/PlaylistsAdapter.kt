@@ -13,12 +13,12 @@ import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSection
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMappingSectionLink
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
 
 
-fun PlaylistsMapping.toOpds(selfLink: String): OpdsFeed {
+fun Playlists.toOpds(selfLink: String): OpdsFeed {
     return OpdsFeed(
         metadata = OpdsFeedMetadata(
             title = this.title,
@@ -47,7 +47,7 @@ fun PlaylistsMapping.toOpds(selfLink: String): OpdsFeed {
     )
 }
 
-fun PlaylistsMapping.toOpdsGroup(): OpdsGroup {
+fun Playlists.toOpdsGroup(): OpdsGroup {
     return OpdsGroup(
         metadata = OpdsFeedMetadata(
             title = this.title
@@ -76,17 +76,17 @@ fun PlaylistsMapping.toOpdsGroup(): OpdsGroup {
     )
 }
 
-fun OpdsFeed.toCurriculumMapping(): PlaylistsMapping {
-    return PlaylistsMapping(
+fun OpdsFeed.toCurriculumMapping(): Playlists {
+    return Playlists(
         uid = System.currentTimeMillis(),
         title = this.metadata.title,
         description = this.metadata.description ?: "",
         sections = this.groups?.map { group ->
-            PlaylistsMappingSection(
+            PlaylistsSection(
                 uid = System.currentTimeMillis(),
                 title = group.metadata.title,
                 items = group.navigation?.map { navLink ->
-                    PlaylistsMappingSectionLink(
+                    PlaylistsSectionLink(
                         uid = System.currentTimeMillis(),
                         href = navLink.href,
                         title = navLink.title ?: ""

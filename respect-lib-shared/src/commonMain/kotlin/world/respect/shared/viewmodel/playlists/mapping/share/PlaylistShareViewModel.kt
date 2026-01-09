@@ -17,8 +17,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.share
-import world.respect.shared.generated.resources.anyone_with_the_link
-import world.respect.shared.generated.resources.teacher_admin_in_my_school
+
 
 data class PlaylistShareUiState(
     val playlistUid: Long = 0L,
@@ -77,19 +76,19 @@ class PlaylistShareViewModel(
     }
 
     fun onClickShareLink() {
-        // TODO: Implement native share
+        // TODO:
     }
 
     fun onClickCopyLink() {
-        // TODO: Implement copy to clipboard
+        // TODO:
     }
 
     fun onClickSendViaSms() {
-        // TODO: Implement SMS share
+        // TODO:
     }
 
     fun onClickSendViaEmail() {
-        // TODO: Implement email share
+        // TODO:
     }
 
     fun onViewPermissionChanged(permission: String) {

@@ -48,7 +48,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.assignment.toAssignmentLearningUnitRefs
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsMapping
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 import world.respect.shared.viewmodel.playlists.mapping.toOpdsGroup
 import kotlin.time.Clock
 
@@ -140,7 +140,7 @@ class AssignmentEditViewModel(
 
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_PLAYLIST_SELECTION).collect { result ->
-                val mapping = result.result as? PlaylistsMapping ?: return@collect
+                val mapping = result.result as? Playlists ?: return@collect
                 val group = mapping.toOpdsGroup()
                 val newLearningUnits = group.toAssignmentLearningUnitRefs()
 

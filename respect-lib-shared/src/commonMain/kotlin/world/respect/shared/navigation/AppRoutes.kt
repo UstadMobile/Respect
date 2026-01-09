@@ -639,6 +639,12 @@ data object Settings : RespectAppRoute
 data object CurriculumMappingList : RespectAppRoute
 
 @Serializable
+data object SchoolSettings : RespectAppRoute
+
+@Serializable
+data object SharedDevicesSettings : RespectAppRoute
+
+@Serializable
 data class CurriculumMappingEdit(
     val textbookUid: Long = 0L,
     private val mappingDataJson: String? = null

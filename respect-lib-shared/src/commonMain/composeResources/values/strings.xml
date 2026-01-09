@@ -19,6 +19,8 @@
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
     <string name="assignment">Assignment</string>
+    <string name="device">Device</string>
+    <string name="devices">Devices</string>
     <string name="add_assignment">Add assignment</string>
     <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
@@ -302,6 +304,14 @@
     <string name="school">School</string>
     <string name="grade_level">Grade Level</string>
     <string name="assessment_type">Assessment Type (Self/Assignment)</string>
+
+    <string name="sharedDevicesSettings">SharedDevicesSettings</string>
+    <string name="school_name">School name</string>
+    <string name="shared_school_devices">Shared school devices</string>
+    <string name="device_name">device name</string>
+    <string name="enable_shared_device_mode">Enable shared device mode</string>
+    <string name="students_must_enter_their_roll_number">Students must enter their roll number to login</string>
+    <string name="student_can_self_select_their_class_name">Student can self-select their class and name</string>
 
 
     <!-- Demographic Dimensions -->

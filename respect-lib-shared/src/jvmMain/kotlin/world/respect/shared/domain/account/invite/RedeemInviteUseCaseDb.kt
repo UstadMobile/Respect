@@ -12,7 +12,10 @@ import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toEntity
+import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
@@ -71,7 +74,13 @@ class RedeemInviteUseCaseDb(
         val isClassInvite = invite.iForClassGuid != null
 
         val isFamilyInvite = invite.iForFamilyOfGuid != null
+        val accountGuid = redeemRequest.account.guid
 
+        val accountPerson = redeemRequest.accountPersonInfo.toPerson(
+            role = redeemRequest.role,
+            username = redeemRequest.account.username,
+            guid = accountGuid,
+        )
         when {
             isDirectJoin -> {
             }
@@ -79,14 +88,8 @@ class RedeemInviteUseCaseDb(
             isClassInvite -> {
                 val classUid = redeemRequest.invite.forClassGuid
                     ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
-                val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
+                schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
                     ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
-                val expectedInviteGuid = when (redeemRequest.role) {
-                    PersonRoleEnum.TEACHER -> clazz.clazz.cTeacherInviteGuid
-                    PersonRoleEnum.STUDENT -> clazz.clazz.cStudentInviteGuid
-                    else -> clazz.clazz.cTeacherInviteGuid
-                } ?: throw IllegalArgumentException("No invite code for requested role")
-                    .withHttpStatus(400)
                 val clazzInvite = schoolDb.getInviteEntityDao().findByGuid(redeemRequest.invite.guid)
                     ?: throw IllegalArgumentException("No invite found")
                         .withHttpStatus(400)
@@ -96,18 +99,34 @@ class RedeemInviteUseCaseDb(
             }
 
             isFamilyInvite -> {
+                val parentGuid = invite.iForFamilyOfGuid
+                    ?: throw IllegalArgumentException("Family invite missing parent guid")
+                        .withHttpStatus(400)
 
+                val parentEntity = schoolDb.getPersonEntityDao()
+                    .findByGuidNum(uidNumberMapper(parentGuid))
+                    ?: throw IllegalArgumentException("Parent not found")
+                        .withHttpStatus(404)
+
+                val parentPerson = parentEntity.toPersonEntities().toModel()
+
+
+                val updatedParent = parentPerson.copy(
+                    relatedPersonUids = (parentPerson.relatedPersonUids + accountPerson.guid).distinct(),
+                )
+
+                val updatedChild = accountPerson.copy(
+                    relatedPersonUids = (accountPerson.relatedPersonUids + parentGuid).distinct(),
+                )
+
+                schoolDb.getPersonRelatedPersonEntityDao().upsert(
+                        updatedParent.toEntities(uidNumberMapper).relatedPersonEntities,
+                    )
+                schoolDb.getPersonRelatedPersonEntityDao().upsert(
+                        updatedChild.toEntities(uidNumberMapper).relatedPersonEntities,
+                )
             }
         }
-
-
-        val accountGuid = redeemRequest.account.guid
-
-        val accountPerson = redeemRequest.accountPersonInfo.toPerson(
-            role = redeemRequest.role,
-            username = redeemRequest.account.username,
-            guid = accountGuid,
-        )
 
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)

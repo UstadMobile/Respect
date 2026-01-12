@@ -46,10 +46,7 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.assignment.toAssignmentLearningUnitRefs
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
-import world.respect.shared.viewmodel.playlists.mapping.toOpdsGroup
 import kotlin.time.Clock
 
 data class AssignmentEditUiState(
@@ -118,7 +115,6 @@ class AssignmentEditViewModel(
                 hideBottomNavigation = true,
             )
         }
-
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
                 val learningUnit = result.result as? LearningUnitSelection ?: return@collect
@@ -137,15 +133,16 @@ class AssignmentEditViewModel(
                 }
             }
         }
-
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_PLAYLIST_SELECTION).collect { result ->
-                val mapping = result.result as? Playlists ?: return@collect
-                val group = mapping.toOpdsGroup()
-                val newLearningUnits = group.toAssignmentLearningUnitRefs()
+                val learningUnitSelections = result.result as? List<*> ?: return@collect
+                val newLearningUnits = learningUnitSelections.mapNotNull { item ->
+                    (item as? LearningUnitSelection)?.toRef()
+                }
+
+                if (newLearningUnits.isEmpty()) return@collect
 
                 val assignment = _uiState.value.assignment.dataOrNull() ?: return@collect
-
                 val existingUrls = assignment.learningUnits.map {
                     it.learningUnitManifestUrl
                 }.toSet()
@@ -153,6 +150,7 @@ class AssignmentEditViewModel(
                 val uniqueNewUnits = newLearningUnits.filter {
                     it.learningUnitManifestUrl !in existingUrls
                 }
+                if (uniqueNewUnits.isEmpty()) return@collect
 
                 _uiState.update { prev ->
                     prev.copy(

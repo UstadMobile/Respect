@@ -1,4 +1,4 @@
-package world.respect.app.view.shareddevicelogin
+package world.respect.app.view.scanqrcode
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,13 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,8 +45,8 @@ import world.respect.shared.generated.resources.close
 import world.respect.shared.generated.resources.ok
 import world.respect.shared.generated.resources.paste_url
 import world.respect.shared.generated.resources.url
-import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeUiState
-import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
+import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeUiState
+import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

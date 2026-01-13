@@ -223,7 +223,7 @@ import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccoun
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.sharedschooldevicelogin.ScanQRCodeViewModel
+import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 
 

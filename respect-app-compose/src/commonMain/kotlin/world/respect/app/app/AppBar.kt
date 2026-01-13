@@ -100,8 +100,12 @@ fun RespectAppBar(
 
     var showOverflowMenu by remember { mutableStateOf(false) }
 
-    val overflowActions = appUiState.actions.filter { it.display == AppActionButton.Companion.ActionButtonDisplay.OVERFLOW_MENU }
-    val iconActions = appUiState.actions.filter { it.display == AppActionButton.Companion.ActionButtonDisplay.ICON }
+    val overflowActions = appUiState.actions.filter {
+        it.display == AppActionButton.Companion.ActionButtonDisplay.OVERFLOW_MENU
+    }
+    val iconActions = appUiState.actions.filter {
+        it.display == AppActionButton.Companion.ActionButtonDisplay.ICON
+    }
 
     Box(
         contentAlignment = Alignment.BottomCenter
@@ -177,6 +181,7 @@ fun RespectAppBar(
                         }
                     }
                 }
+
                 if(appUiState.actionBarButtonState.visible) {
                     Button(
                         onClick = appUiState.actionBarButtonState.onClick,
@@ -190,6 +195,7 @@ fun RespectAppBar(
                         )
                     }
                 }
+
                 iconActions.forEach { action ->
                     IconButton(
                         onClick = action.onClick,
@@ -201,6 +207,7 @@ fun RespectAppBar(
                         )
                     }
                 }
+
                 if (appUiState.settingsIconVisible == true) {
                     IconButton(
                         onClick = appUiState.onClickSettings ?: {},
@@ -223,6 +230,7 @@ fun RespectAppBar(
 
                     }
                 }
+
                 if (overflowActions.isNotEmpty()) {
                     Box {
                         IconButton(

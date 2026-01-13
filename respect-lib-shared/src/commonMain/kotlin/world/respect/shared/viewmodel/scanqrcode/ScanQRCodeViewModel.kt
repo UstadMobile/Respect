@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.sharedschooldevicelogin
+package world.respect.shared.viewmodel.scanqrcode
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope

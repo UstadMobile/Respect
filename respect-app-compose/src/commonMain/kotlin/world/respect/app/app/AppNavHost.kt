@@ -56,7 +56,7 @@ import world.respect.app.view.report.list.ReportTemplateListScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
-import world.respect.app.view.shareddevicelogin.ScanQRCodeScreen
+import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement

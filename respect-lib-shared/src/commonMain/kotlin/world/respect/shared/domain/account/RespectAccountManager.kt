@@ -300,11 +300,9 @@ class RespectAccountManager(
         val currentSession = _activeSession.value
             ?: throw IllegalStateException("switchProfile: no active session")
 
-
         if(!_storedAccounts.value.any { it.isSameAccount(currentSession.account) }) {
             throw IllegalArgumentException("switchProfile: account not stored/available")
         }
-
 
         val accountScope = getOrCreateAccountScope(currentSession.account)
         val schoolDataSource: SchoolDataSource = accountScope.get()
@@ -317,7 +315,6 @@ class RespectAccountManager(
         val newSession = currentSession.copy(profilePersonUid = personUid)
         _activeSession.value = newSession
         settings[SETTINGS_KEY_ACTIVE_SESSION] = json.encodeToString(newSession)
-
 
         putDebugCrashCustomData("SelectedAccount", activeAccount.toString())
     }

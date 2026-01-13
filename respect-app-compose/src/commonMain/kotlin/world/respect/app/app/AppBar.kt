@@ -61,11 +61,10 @@ fun RespectAppBar(
     appUiState: AppUiState,
     navController: NavController,
     onProfileClick: () -> Unit = {},
-    isChild: Boolean = false
+    topLevelItems: List<TopNavigationItem>,
 ) {
     val currentBackStack by navController.currentBackStack.collectAsState()
     val currentRoute = currentBackStack.lastOrNull()?.destination?.route
-    val topLevelItems = if (isChild) APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD else APP_TOP_LEVEL_NAV_ITEMS
     val isRootDest = remember(currentRoute) {
         topLevelItems.any { it.routeName == currentRoute }
     }

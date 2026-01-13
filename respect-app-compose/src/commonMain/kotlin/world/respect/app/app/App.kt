@@ -46,10 +46,10 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
-import world.respect.shared.generated.resources.biometric_login
+import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
-import world.respect.shared.generated.resources.login_using_biometric_credentials
+import world.respect.shared.generated.resources.continue_using_fingerprint_or
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
@@ -137,6 +137,12 @@ fun App(
     val accountManager: RespectAccountManager = koinInject()
     val biometricAuthUseCase : BiometricAuthUseCase = koinInject()
     val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
+    val topLevelNavItems = if (activeAccount?.isChild == true) {
+        APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD
+    } else {
+        APP_TOP_LEVEL_NAV_ITEMS
+    }
+
 
     NavControllerLogEffect(navController)
 
@@ -172,32 +178,27 @@ fun App(
                         compactHeader = (widthClass != SizeClass.EXPANDED),
                         appUiState = appUiStateVal,
                         navController = navController,
+                        topLevelItems = topLevelNavItems,
                         onProfileClick = {
                             if (activeAccount?.isChild == false) {
                                 navController.navigate(AccountList)
-                                return@RespectAppBar
-                            }
-                            coroutineScope.launch {
-                                val result = biometricAuthUseCase.invoke(
-                                    BiometricAuthUseCase.BiometricPromptData(
-                                        title = getString(Res.string.biometric_login),
-                                        subtitle = getString(Res.string.login_using_biometric_credentials),
-                                        useDeviceCredential = true,
-                                        negativeButtonText = getString(Res.string.cancel),
+                            }else {
+                                coroutineScope.launch {
+                                    val result = biometricAuthUseCase(
+                                        BiometricAuthUseCase.BiometricPromptData(
+                                            title = getString(Res.string.parents_only),
+                                            subtitle = getString(Res.string.continue_using_fingerprint_or),
+                                            useDeviceCredential = true,
+                                            negativeButtonText = getString(Res.string.cancel),
+                                        )
                                     )
-                                )
-                                when(result){
-                                    BiometricAuthUseCase.BiometricResult.Canceled -> {}
-                                    is BiometricAuthUseCase.BiometricResult.Error -> {}
-                                    is BiometricAuthUseCase.BiometricResult.Failure -> {}
-                                    BiometricAuthUseCase.BiometricResult.Success -> {
+
+                                    if(result is BiometricAuthUseCase.BiometricResult.Success) {
                                         navController.navigate(AccountList)
                                     }
                                 }
-
                             }
                         },
-                        isChild = activeAccount?.isChild == true
                     )
                 }
             },
@@ -205,23 +206,15 @@ fun App(
                 var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
                 if (useBottomBar) {
                     if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
-
-                        val visibleNavItems = remember(activeAccount) {
-                            if (activeAccount?.isChild == true) {
-                                APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD
-                            } else {
-                                APP_TOP_LEVEL_NAV_ITEMS
-                            }
-                        }
-
                         NavigationBar {
-                            visibleNavItems.forEachIndexed { index, item ->
-                                val label = stringResource(item.label)
+                            topLevelNavItems.forEachIndexed { index, item ->
                                 NavigationBarItem(
                                     icon = {
                                         Icon(item.icon, contentDescription = null)
                                     },
-                                    label = { Text(label, maxLines = 1) },
+                                    label = {
+                                        Text(stringResource(item.label), maxLines = 1)
+                                    },
                                     selected = selectedTopLevelItemIndex == index,
                                     onClick = {
                                         navController.navigate(item.destRoute)  {

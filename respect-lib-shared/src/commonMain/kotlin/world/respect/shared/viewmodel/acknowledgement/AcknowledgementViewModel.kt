@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -20,7 +19,6 @@ import world.respect.shared.viewmodel.RespectViewModel
 
 data class AcknowledgementUiState(
     val isLoading: Boolean = false,
-    val isChild: Boolean = false,
 )
 class AcknowledgementViewModel(
     savedStateHandle: SavedStateHandle,
@@ -32,8 +30,6 @@ class AcknowledgementViewModel(
     val uiState = _uiState.asStateFlow()
 
     init {
-
-
         viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(
@@ -41,14 +37,8 @@ class AcknowledgementViewModel(
                     hideAppBar = true
                 )
             }
-            val selectedPerson =
-                accountManager.selectedAccountAndPersonFlow.first()
+            val isChild = accountManager.selectedAccountAndPersonFlow.first()?.isChild == true
 
-            val isChild = selectedPerson?.isChild == true
-
-            _uiState.update { prev ->
-                prev.copy(isChild = isChild)
-            }
             delay(2000)
 
             val hasAccount = accountManager.activeAccount != null
@@ -57,7 +47,7 @@ class AcknowledgementViewModel(
                 NavCommand.Navigate(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
-                        hasAccount -> if (_uiState.value.isChild) AssignmentList else RespectAppLauncher()
+                        hasAccount -> if (isChild) AssignmentList else RespectAppLauncher()
                         else -> GetStartedScreen()
                     },
                     clearBackStack = true,

@@ -37,11 +37,14 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
         checkNotNull(scope)
 
-        val createPasskeyChannelHost = getKoin().get<CreatePasskeyUseCaseAndroidChannelHost>()
-        val getCredentialUseCase = getKoin().get<GetCredentialUseCase>()
+        val koin = getKoin()
+
+        val createPasskeyChannelHost = koin.get<CreatePasskeyUseCaseAndroidChannelHost>()
+        val getCredentialUseCase = koin.get<GetCredentialUseCase>()
                 as GetCredentialUseCaseAndroidImpl
-        val savePasswordUseCase = getKoin().get<SavePasswordUseCase>()
+        val savePasswordUseCase = koin.get<SavePasswordUseCase>()
                 as SavePasswordUseCaseAndroidImpl
+        val biometricUseCase = koin.get<BiometricAuthUseCaseAndroidImpl>()
 
         val createPasskeyProcessor = CreatePasskeyUseCaseProcessor(
             activityContext = this,
@@ -61,9 +64,6 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             processOnScope = lifecycleScope
         )
 
-        val biometricUseCase =
-            getKoin().get<BiometricAuthUseCaseAndroidImpl>()
-
         val biometricProcessor = BiometricAuthProcessor(
             activity = this,
             jobChannel = biometricUseCase.requestChannel,
@@ -76,7 +76,6 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
                 launch {
                     createPasskeyProcessor.receiveJobs()
                 }
-
                 launch {
                     getCredentialProcessor.receiveJobs()
                 }

@@ -22,27 +22,25 @@ class BiometricAuthManager(private val activity: AppCompatActivity) {
         val executor = ContextCompat.getMainExecutor(activity)
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                if (!deferred.isCompleted) deferred.complete(BiometricAuthUseCase.BiometricResult.Success)
+                deferred.complete(BiometricAuthUseCase.BiometricResult.Success)
             }
 
             override fun onAuthenticationFailed() {
-                if (!deferred.isCompleted) deferred.complete(BiometricAuthUseCase.BiometricResult.Failure())
+                deferred.complete(BiometricAuthUseCase.BiometricResult.Failure())
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                if (!deferred.isCompleted) {
-                    when (errorCode) {
-                        BiometricPrompt.ERROR_NEGATIVE_BUTTON,
-                        BiometricPrompt.ERROR_USER_CANCELED,
-                        BiometricPrompt.ERROR_CANCELED -> deferred.complete(BiometricAuthUseCase.BiometricResult.Canceled)
+                when (errorCode) {
+                    BiometricPrompt.ERROR_NEGATIVE_BUTTON,
+                    BiometricPrompt.ERROR_USER_CANCELED,
+                    BiometricPrompt.ERROR_CANCELED -> deferred.complete(BiometricAuthUseCase.BiometricResult.Canceled)
 
-                        else -> deferred.complete(
-                            BiometricAuthUseCase.BiometricResult.Error(
-                                errorCode,
-                                errString.toString()
-                            )
+                    else -> deferred.complete(
+                        BiometricAuthUseCase.BiometricResult.Error(
+                            errorCode,
+                            errString.toString()
                         )
-                    }
+                    )
                 }
             }
         }
@@ -51,12 +49,11 @@ class BiometricAuthManager(private val activity: AppCompatActivity) {
         val builder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(promptData.title)
 
-        promptData.subtitle?.let { builder.setSubtitle(it) }
-        promptData.description?.let { builder.setDescription(it) }
+        promptData.subtitle?.also { builder.setSubtitle(it) }
+        promptData.description?.also { builder.setDescription(it) }
 
         if (promptData.useDeviceCredential) {
-            builder.setAllowedAuthenticators(
-                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+            builder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
         } else {

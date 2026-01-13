@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.HorizontalDivider
@@ -57,10 +58,11 @@ fun AccountListScreen(
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize())
-      {
+    val familyPersons = uiState.selectedAccount?.relatedPersons ?: emptyList()
+
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         uiState.selectedAccount?.also { activeAccount ->
-            item {
+            item("selected_account") {
                 AccountListItem(
                     account = activeAccount,
                     onClickAccount = null,
@@ -82,61 +84,70 @@ fun AccountListScreen(
                 )
             }
         }
-          if (!uiState.familyPersons.isNullOrEmpty()) {
-              item {
-                  Text(
-                      modifier = Modifier.defaultItemPadding(),
-                     text =  stringResource(Res.string.family_members)
-                  )
-              }
-              uiState.familyPersons?.forEach { account ->
-                  item {
-                      ListItem(
-                          modifier = Modifier.clickable {
-                              onClickFamilyPerson(account)
-                          },
-                          leadingContent = {
-                              RespectPersonAvatar(name = account.fullName())
-                          },
-                          headlineContent = {
-                              Text(account.fullName())
-                          }
-                      )
-                  }
-              }
-          }
-          item {
-              HorizontalDivider()
-          }
-        uiState.accounts.forEach { account ->
-            item {
-                AccountListItem(
-                    account = account,
-                    onClickAccount = onClickAccount,
+
+        if (!familyPersons.isEmpty()) {
+            item("family_member_header") {
+                Text(
+                    modifier = Modifier.defaultItemPadding(),
+                    text = stringResource(Res.string.family_members)
+                )
+            }
+
+            items(
+                items = familyPersons,
+                key = { it.guid }
+            ) { account ->
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickFamilyPerson(account)
+                    },
+                    leadingContent = {
+                        RespectPersonAvatar(name = account.fullName())
+                    },
+                    headlineContent = {
+                        Text(account.fullName())
+                    }
                 )
             }
         }
-          item {
-              HorizontalDivider()
-          }
-          item {
-              ListItem(
-                  modifier = Modifier.clickable {
-                      onClickAddAccount()
-                  },
-                  headlineContent = {
-                      Text(stringResource(Res.string.add_account))
-                  },
-                  leadingContent = {
-                      Icon(Icons.Default.Add, contentDescription = "")
-                  }
-              )
-          }
-          item {
-              HorizontalDivider()
-          }
-          item {
-              RespectLongVersionInfoItem()
-          }
+
+        item("divider1") {
+            HorizontalDivider()
+        }
+
+        items(
+            items = uiState.accounts,
+            key = { it.session.account.userGuid }
+        ) { account ->
+            AccountListItem(
+                account = account,
+                onClickAccount = onClickAccount,
+            )
+        }
+
+        item("divider2") {
+            HorizontalDivider()
+        }
+
+        item("add_account") {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickAddAccount()
+                },
+                headlineContent = {
+                    Text(stringResource(Res.string.add_account))
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Add, contentDescription = "")
+                }
+            )
+        }
+        item("divider3") {
+            HorizontalDivider()
+        }
+
+        item("version_info") {
+            RespectLongVersionInfoItem()
+        }
     }
 }

@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
@@ -39,15 +37,12 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
-    val familyPersons: List<Person>? = emptyList(),
-    )
+)
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle), KoinScopeComponent {
-
-    override val scope: Scope = respectAccountManager.requireActiveAccountScope()
+) : RespectViewModel(savedStateHandle){
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
@@ -67,9 +62,8 @@ class AccountListViewModel(
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
                 _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson, familyPersons = accountAndPerson?.relatedPersons)
+                    prev.copy(selectedAccount = accountAndPerson)
                 }
-                 accountAndPerson?.relatedPersons
             }
         }
 
@@ -160,16 +154,19 @@ class AccountListViewModel(
     fun onClickFamilyPerson(person: Person) {
         viewModelScope.launch {
             respectAccountManager.switchProfile(person.guid)
-            val destination = if(person.roles.firstOrNull()?.roleEnum== PersonRoleEnum.PARENT)
-                RespectAppLauncher() else AssignmentList
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination,
+                    destination = if(person.roles.firstOrNull()?.roleEnum == PersonRoleEnum.PARENT) {
+                        RespectAppLauncher()
+                    } else {
+                        AssignmentList
+                    },
                     clearBackStack = true
                 )
             )
         }
     }
+
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(GetStartedScreen(canGoBack = true))

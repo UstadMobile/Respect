@@ -41,7 +41,12 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn:
     id: "role"
+- tapOn: "Teacher"
+- assertNotVisible: "Family member"
+- tapOn:
+    id: "role"
 - tapOn: "Parent"
+- assertVisible: "Family member"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -56,11 +61,7 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.futureDate}
-- runFlow:
-    when:
-      notVisible: "Save"
-    commands:
-      - hideKeyboard
+- hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
 - eraseText
@@ -68,8 +69,12 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- hideKeyboard
-
+- runFlow:
+    when:
+      notVisible:
+           id: "phone_countrycode"
+    commands:
+        - hideKeyboard
 # Validate Phone number
 - tapOn:
      id: "phone_countrycode"
@@ -84,6 +89,7 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
+- tapOn: "Phone number"
 - eraseText
 - inputText: "21255543268"
 - runFlow:
@@ -93,7 +99,7 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- eraseText: 11
+- eraseText
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "ParentAuser@gm"
@@ -144,133 +150,71 @@ onFlowComplete:
     text: "Child User"
 - assertVisible: "Student"
 - assertVisible: "ParentA User"
-
-# Create account for Parent user  -- only username and password fields available for parent user
-- tapOn: "People"
 - tapOn: "ParentA User"
 - tapOn: "Create account"
-- assertVisible:
-    id: "app_title"
-    text: "Create account"
 - tapOn: "Username"
-- inputText: "pa"
-- tapOn: "Save"
-- assertVisible: "Username must be at least 3 characters"
-- eraseText
-- inputText: "parentauser"
-- tapOn: "Password*"
-- inputText: "test"
-- tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
-- eraseText
+- inputText: "2t"
+- tapOn: "Password"  # Password validations needs to be added
 - inputText: "test123"
 - tapOn: "Save"
-- assertVisible: "Manage account"
-
-# Create account for Child user
+- assertVisible: "Username must be at least 3 characters"
+- tapOn: "Username"
+- inputText: "2est"
+- tapOn: "Save"
+- assertVisible: "Username cannot start with a number"  # 2est not a valid username
+- eraseText
+- inputText: "parenta@user"
+- assertVisible: "parentauser"    # @ symbol won't get added to the username field - so "parentauser" is expected result
+- tapOn: "Save"
 - tapOn: "Child User"
 - tapOn: "Create account"
 - tapOn: "Username"
 - inputText: "childuser"
-- runFlow:
-      file: "subflows/assign_qr_badge_flow.yaml"
-      env:
-        QR_BADGE_LINK: ${output.SCHOOL_URL}
-- assertVisible: "Invalid url, please try again"
-- eraseText
-- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
-- tapOn: "Ok"
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
-- back
-
-# Create a student user for QR code validation
-- tapOn: "People"
-- tapOn: "People"
-- assertVisible:
-    id: "app_title"
-    text: "People"
-- tapOn:
-    id: "floating_action_button"   #  +Person button
-- assertVisible:
-    id: "app_title"
-    text: "Add person"
-- tapOn: "First names*"
-- inputText: "Test"
-- tapOn: "Last name*"
-- inputText: "User"
-- tapOn: "Gender*"
-- tapOn: "Female"
-- tapOn:
-    id: "role"
-- tapOn: "Student"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Test User"
-- tapOn: "Create account"
-- tapOn: "Username"
-- inputText: "testuser"
-- tapOn: "Set password"
-- tapOn: "Password*"
+- tapOn: "Password"
 - inputText: "test123"
 - tapOn: "Save"
-- assertVisible:
-    id: "password_change_btn"  # Change password button
-- assertVisible: "Last updated:.*"
-# Assign QR code badge for the user
-- runFlow:
-    file: "subflows/assign_qr_badge_flow.yaml"
-    env:
-      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validation to ensure that one QR badge is assigned to one, and only one, student.
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "Assign QR code badge"
-- assertVisible: "This QR code is already assigned to another student"
-- runFlow:
-    file: "subflows/assign_qr_badge_flow.yaml"
-    env:
-      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
-- assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
-- tapOn:
-    id: "qr_change_btn"
-- assertVisible: "Assign new badge (replace)"
-- assertVisible: "Revoke badge"
-# Verify the button - Revoke badge, it should remove the assigned badge
-- tapOn: "Revoke badge"
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "Assign QR code badge"
-- runFlow:
-    file: "subflows/assign_qr_badge_flow.yaml"
-    env:
-      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_qr_badge/id/983123
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "QR code badge"
-- assertVisible: "Badge.*"
-# Verify the button Assign new badge (replace) takes user to Scan QR code screen
-- tapOn:
-    id: "qr_change_btn"
-- tapOn: "Assign new badge (replace)"
-- assertVisible:
-    id: "app_title"
-    text: "Scan QR code badge"
-- back
-- assertVisible:
-    id: "app_title"
-    text: "Manage account"
-- assertVisible: "QR code badge"
+- assertVisible: "Manage account"
 
+# Validate Parent User login
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
 
-# Validate Parent User Login using Username & Password
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "parentauser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- hideKeyboard
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"
+- tapOn:
+    id: "user_account_icon"
+- assertVisible: "Profile"
+- assertVisible: "Logout"
+- assertVisible: "Family members"
+- tapOn: "Child User"
+# Verify simplified child mode
+- assertVisible: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- assertVisible: "Apps"
+- assertNotVisible: "Classes"
+- assertNotVisible: "People"
+
+# Validate Child User login
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -282,51 +226,20 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
-- inputText: "parentauser"
+- inputText: "childuser"
 - tapOn:
     id : "password"
 - inputText: "test123"
+- hideKeyboard
 - tapOn: "Login"
 - runFlow:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
-- tapOn: "People"
-- tapOn: "ParentA User"
-- tapOn: "Manage account"
-- assertVisible: "parentauser"
-- tapOn:
-    id: "password_change_btn"  # Change password button
-- tapOn: "Old password*"
-- inputText: "test123"
-- tapOn: "New password*"
-- inputText: "t2"
-- tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
-- tapOn: "New password*"
-- eraseText
-- inputText: "test234"
-- tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Manage account"
-
-# Validate Child User QR Login using Scan QR/badge
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
-- tapOn: "Scan QR code/badge"
-- assertVisible:
-    id: "app_title"
-    text: "Scan QR code badge"
-- tapOn: "More Info"
-- tapOn: "Paste URL"
-- tapOn: "Url"
-- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
-- tapOn: "OK"
-- assertVisible: "Apps"
+    text: "Apps"
 - assertVisible: "Assignments"
-
+- assertVisible: "Classes"
+- assertVisible: "People"

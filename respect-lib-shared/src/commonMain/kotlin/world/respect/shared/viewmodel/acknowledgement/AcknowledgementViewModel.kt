@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo.Companion.INVITE_TYPE_GENERIC
@@ -13,6 +14,7 @@ import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.Acknowledgement
 import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Onboarding
@@ -40,6 +42,7 @@ class AcknowledgementViewModel(
                     hideAppBar = true
                 )
             }
+            val isChild = accountManager.selectedAccountAndPersonFlow.first()?.isChild == true
 
             delay(2000)
 
@@ -49,12 +52,12 @@ class AcknowledgementViewModel(
                 NavCommand.Navigate(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
+                        hasAccount -> if (isChild) AssignmentList else RespectAppLauncher()
                         route.schoolUrl != null -> ConfirmationScreen.create(
                             route.schoolUrl,
                             route.inviteCode.toString(),
                             INVITE_TYPE_GENERIC
                         )
-                        hasAccount -> RespectAppLauncher()
                         else -> GetStartedScreen()
                     },
                     clearBackStack = true,

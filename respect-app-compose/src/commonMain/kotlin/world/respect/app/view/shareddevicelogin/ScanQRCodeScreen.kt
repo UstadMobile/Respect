@@ -80,7 +80,6 @@ fun ScanQRCodeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
             .background(MaterialTheme.colorScheme.background)
     ) {
         if (isCameraActive && !uiState.showManualEntryDialog) {

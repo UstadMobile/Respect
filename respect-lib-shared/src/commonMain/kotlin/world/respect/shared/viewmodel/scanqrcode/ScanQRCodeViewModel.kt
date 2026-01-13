@@ -39,21 +39,19 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class ScanQRCodeUiState(
     val qrCodeUrl: String = "",
-    val isLoading: Boolean = false,
     val errorMessage: UiText? = null,
-    val isSuccess: Boolean = false,
-    val loginErrorText: UiText? = null,
-    val manualUrlError: UiText? = null,
-    var showManualEntryDialog: Boolean = false,
+    val showManualEntryDialog: Boolean = false,
 )
 
 class ScanQRCodeViewModel(
     savedStateHandle: SavedStateHandle,
     private val snackBarDispatcher: SnackBarDispatcher,
     private val resultReturner: NavResultReturner,
+    private val respectAccountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinComponent {
 
     private val _uiState = MutableStateFlow(ScanQRCodeUiState())
+
     val uiState: Flow<ScanQRCodeUiState> = _uiState.asStateFlow()
 
     private val route: ScanQRCode = savedStateHandle.toRoute()
@@ -84,14 +82,7 @@ class ScanQRCodeViewModel(
     }
 
     fun processQrCodeUrl(url: String) {
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    errorMessage = null,
-                    manualUrlError = null
-                )
-            }
+        launchWithLoadingIndicator {
             try {
                 if (route.nextAfterScan == NextAfterScan.GoToManageAccount) {
                     handleQrCodeForAccountManagement(route.guid ?: "", url)
@@ -102,10 +93,10 @@ class ScanQRCodeViewModel(
                 Napier.e("Error processing QR Code", e)
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
                         errorMessage = e.getUiTextOrGeneric()
                     )
                 }
+
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
             }
         }
@@ -126,60 +117,32 @@ class ScanQRCodeViewModel(
                 if (schoolUrl == null) {
                     _uiState.update {
                         it.copy(
-                            isLoading = false,
-                            manualUrlError = "Invalid QR code format: Unable to extract school URL".asUiText()
+                            errorMessage = "Invalid QR code format: Unable to extract school URL".asUiText()
                         )
                     }
                     return@launchWithLoadingIndicator
                 }
 
-                val respectAccountManager: RespectAccountManager = getKoin().get()
+                respectAccountManager.login(
+                    credential = credential,
+                    schoolUrl = schoolUrl
+                )
 
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        manualUrlError = null
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = RespectAppLauncher(),
+                        clearBackStack = true,
                     )
-                }
+                )
+                _uiState.update { it.copy(showManualEntryDialog = false) }
 
-                viewModelScope.launch {
-                    try {
-                        respectAccountManager.login(
-                            credential = credential,
-                            schoolUrl = schoolUrl
-                        )
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                destination = RespectAppLauncher(),
-                                clearBackStack = true,
-                            )
-                        )
-                        _uiState.update { it.copy(showManualEntryDialog = false) }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        _uiState.update { prev ->
-                            prev.copy(
-                                loginErrorText = e.getUiTextOrGeneric()
-                            )
-                        }
-                        snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
-                    }
-                }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        manualUrlError = e.getUiTextOrGeneric()
+                        errorMessage = e.getUiTextOrGeneric()
                     )
                 }
             }
-        }
-    }
-
-    fun clearValidationError() {
-        _uiState.update {
-            it.copy(manualUrlError = null)
         }
     }
 
@@ -187,7 +150,7 @@ class ScanQRCodeViewModel(
         personGuid: String,
         url: String,
     ) {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             try {
                 // For account management, we need the school URL from route
                 val schoolUrl = route.schoolUrl ?: throw IllegalArgumentException(
@@ -200,16 +163,14 @@ class ScanQRCodeViewModel(
                 if (validationResult.errorMessage != null) {
                     _uiState.update {
                         it.copy(
-                            isLoading = false,
-                            manualUrlError = validationResult.errorMessage.asUiText()
+                            errorMessage = validationResult.errorMessage.asUiText()
                         )
                     }
                     snackBarDispatcher.showSnackBar(Snack(validationResult.errorMessage.asUiText()))
                 } else {
                     _uiState.update {
                         it.copy(
-                            isLoading = false,
-                            manualUrlError = null
+                            errorMessage = null
                         )
                     }
 
@@ -239,9 +200,7 @@ class ScanQRCodeViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
                         errorMessage = e.getUiTextOrGeneric(),
-                        manualUrlError = e.getUiTextOrGeneric()
                     )
                 }
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))

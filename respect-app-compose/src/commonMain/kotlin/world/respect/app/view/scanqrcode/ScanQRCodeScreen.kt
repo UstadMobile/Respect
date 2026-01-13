@@ -38,7 +38,6 @@ import org.jetbrains.compose.resources.stringResource
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
 import qrscanner.QrScanner
-import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.close
@@ -115,7 +114,6 @@ fun ScanQRCodeScreen(
                 onDismiss = {
                     viewModel.hideManualEntryDialog()
                     manualUrlText = TextFieldValue("")
-                    viewModel.clearValidationError()
                 },
                 onSubmit = { url ->
                     if (url.isNotEmpty()) {
@@ -124,8 +122,6 @@ fun ScanQRCodeScreen(
                         }
                     }
                 },
-                viewModel = viewModel,
-                uiState = uiState
             )
         }
     }
@@ -138,8 +134,6 @@ private fun ManualUrlEntryDialog(
     onUrlTextChange: (TextFieldValue) -> Unit,
     onDismiss: () -> Unit,
     onSubmit: (String) -> Unit,
-    viewModel: ScanQRCodeViewModel,
-    uiState: ScanQRCodeUiState
 ) {
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -180,9 +174,6 @@ private fun ManualUrlEntryDialog(
                 value = manualUrlText,
                 onValueChange = { newValue ->
                     onUrlTextChange(newValue)
-                    if (uiState.manualUrlError != null) {
-                        viewModel.clearValidationError()
-                    }
                 },
                 label = {
                     Text(stringResource(Res.string.url))
@@ -191,15 +182,6 @@ private fun ManualUrlEntryDialog(
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
                 singleLine = true,
-                isError = uiState.manualUrlError != null,
-                supportingText = {
-                    uiState.manualUrlError?.let { error ->
-                        Text(
-                            text = uiTextStringResource(error),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
             )
 
             Row(

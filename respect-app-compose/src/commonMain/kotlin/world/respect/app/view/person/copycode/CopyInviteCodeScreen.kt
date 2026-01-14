@@ -92,7 +92,7 @@ fun CopyInviteCodeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultItemPadding()
-                .testTag("copy_button"),
+                .testTag("invite_code"),
         ) {
             Icon(Icons.Default.ContentCopy, contentDescription = null)
             Text(

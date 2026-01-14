@@ -12,10 +12,8 @@ import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toEntity
-import world.respect.datalayer.db.school.adapters.toModel
-import world.respect.datalayer.db.school.adapters.toPersonEntities
+import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
@@ -26,7 +24,7 @@ import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.AuthResponse
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -99,32 +97,18 @@ class RedeemInviteUseCaseDb(
             }
 
             isFamilyInvite -> {
-                val parentGuid = invite.iForFamilyOfGuid
-                    ?: throw IllegalArgumentException("Family invite missing parent guid")
+                val childGuid = invite.iForFamilyOfGuid
+                    ?: throw IllegalArgumentException("Family invite missing child guid")
                         .withHttpStatus(400)
 
-                val parentEntity = schoolDb.getPersonEntityDao()
-                    .findByGuidNum(uidNumberMapper(parentGuid))
-                    ?: throw IllegalArgumentException("Parent not found")
+                schoolDb.getPersonEntityDao()
+                    .findByGuidNum(uidNumberMapper(childGuid))
+                    ?: throw IllegalArgumentException("child not found")
                         .withHttpStatus(404)
 
-                val parentPerson = parentEntity.toPersonEntities().toModel()
 
 
-                val updatedParent = parentPerson.copy(
-                    relatedPersonUids = (parentPerson.relatedPersonUids + accountPerson.guid).distinct(),
-                )
 
-                val updatedChild = accountPerson.copy(
-                    relatedPersonUids = (accountPerson.relatedPersonUids + parentGuid).distinct(),
-                )
-
-                schoolDb.getPersonRelatedPersonEntityDao().upsert(
-                        updatedParent.toEntities(uidNumberMapper).relatedPersonEntities,
-                    )
-                schoolDb.getPersonRelatedPersonEntityDao().upsert(
-                        updatedChild.toEntities(uidNumberMapper).relatedPersonEntities,
-                )
             }
         }
 
@@ -176,7 +160,7 @@ class RedeemInviteUseCaseDb(
                 val token = AuthToken(
                     accessToken = randomString(32),
                     timeCreated = System.currentTimeMillis(),
-                    ttl = TOKEN_DEFAULT_TTL,
+                    ttl = GetTokenAndUserProfileWithCredentialDbImpl.TOKEN_DEFAULT_TTL,
                 )
 
                 val personGuidHash = uidNumberMapper(accountPerson.guid)
@@ -198,7 +182,27 @@ class RedeemInviteUseCaseDb(
                 throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
             }
         }
+        if (isFamilyInvite){
+            val childGuid = invite.iForFamilyOfGuid
+                ?: throw IllegalArgumentException("Family invite missing child guid")
+                    .withHttpStatus(400)
 
+            val parentGuid = accountPerson.guid
+            schoolDb.getPersonRelatedPersonEntityDao().upsert(
+                listOf(
+                    PersonRelatedPersonEntity(
+                        prpPersonUidNum = uidNumberMapper(childGuid),
+                        prpOtherPersonUid = parentGuid,
+                        prpOtherPersonUidNum = uidNumberMapper(parentGuid),
+                    ),
+                    PersonRelatedPersonEntity(
+                        prpPersonUidNum = uidNumberMapper(parentGuid),
+                        prpOtherPersonUid = childGuid,
+                        prpOtherPersonUidNum = uidNumberMapper(childGuid),
+                    )
+                )
+            )
+        }
         //If a teacher/student, make the pending enrollment now
 
         if (isClassInvite) {

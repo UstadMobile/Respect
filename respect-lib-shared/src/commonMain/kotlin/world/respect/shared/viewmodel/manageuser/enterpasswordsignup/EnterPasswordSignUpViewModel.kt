@@ -98,11 +98,20 @@ class EnterPasswordSignupViewModel(
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = if(redeemRequest.role == PersonRoleEnum.PARENT) {
-                            SignupScreen.create(
-                                schoolUrl = route.schoolUrl,
-                                profileType = ProfileType.CHILD,
-                                inviteRequest = redeemRequest,
-                            )
+                            if (redeemRequest.invite.forFamilyOfGuid != null){
+                                if (!redeemRequest.invite.approvalRequired){
+                                    RespectAppLauncher()
+                                }else{
+                                    WaitingForApproval()
+
+                                }
+                            }else{
+                                SignupScreen.create(
+                                    schoolUrl = route.schoolUrl,
+                                    profileType = ProfileType.CHILD,
+                                    inviteRequest = redeemRequest,
+                                )
+                            }
                         }else {
                             if (!redeemRequest.invite.approvalRequired||redeemRequest.invite.forClassGuid == null &&
                                 redeemRequest.invite.forFamilyOfGuid == null){

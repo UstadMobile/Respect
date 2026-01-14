@@ -91,14 +91,14 @@ fun InvitePersonScreen(
                 .defaultItemPadding()
 
         ) {
-           val res =  if (uiState.className!=null){
-               Res.string.class_name
-            }else{
-               Res.string.enter_school_name
-           }
-            Text(text = stringResource(res))
-            Text(
-                text = uiState.className ?: uiState.schoolName?: "",
+            val res = if (uiState.className != null) {
+                Res.string.class_name
+            } else {
+                Res.string.enter_school_name
+            }
+            ListItem(
+                headlineContent = { Text(stringResource(res)) },
+                supportingContent = { Text(text = uiState.className ?: uiState.schoolName ?: "") }
             )
         }
 

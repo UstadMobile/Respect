@@ -32,7 +32,7 @@ onFlowComplete:
     id: "app_title"
     text: "Invite person"
 - assertVisible: "School name"
-- assertVisible: {output.SCHOOL_NAME}
+- assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "Invite multiple people"
 - assertVisible: "Allow multiple people to use this invite"  #switch is off
 - assertVisible: "Approval required"    #switch is off

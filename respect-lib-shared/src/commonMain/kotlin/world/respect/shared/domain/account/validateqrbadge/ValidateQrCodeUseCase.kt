@@ -11,17 +11,9 @@ data class QrValidationResult(
 ) {
     companion object {
         val Valid = QrValidationResult(isValid = true)
-        val InvalidFormat = QrValidationResult(
+        val InvalidUrl = QrValidationResult(
             isValid = false,
             errorMessage = Res.string.qr_code_invalid_format
-        )
-        val InvalidSchoolUrl = QrValidationResult(
-            isValid = false,
-            errorMessage = Res.string.qr_code_must_start_with_school_url
-        )
-        val MissingBadgeSection = QrValidationResult(
-            isValid = false,
-            errorMessage = Res.string.qr_code_must_contain_respect_qr_badge
         )
     }
 }
@@ -35,55 +27,46 @@ class ValidateQrCodeUseCase(
         personGuid: String? = null,
     ): QrValidationResult {
         // 1. Validate URL format
-        val formatValidation = validateUrlFormat(qrCodeUrl)
-        if (!formatValidation.isValid) return formatValidation
+        if (!isValidUrlFormat(qrCodeUrl)) return QrValidationResult.InvalidUrl
 
         // 2. Validate starts with school URL
-        val schoolUrlValidation = validateSchoolUrl(qrCodeUrl)
-        if (!schoolUrlValidation.isValid) return schoolUrlValidation
+        if (!isValidSchoolUrl(qrCodeUrl)) return QrValidationResult.InvalidUrl
 
         // 3. Validate contains /respect_qr_badge section
-        val badgeValidation = validateQrBadgeSection(qrCodeUrl)
-        if (!badgeValidation.isValid) return badgeValidation
+        if (!hasValidBadgeSection(qrCodeUrl)) return QrValidationResult.InvalidUrl
 
         return QrValidationResult.Valid
     }
 
-    private fun validateUrlFormat(qrCodeUrl: String): QrValidationResult {
+    private fun isValidUrlFormat(qrCodeUrl: String): Boolean {
         return try {
             Url(qrCodeUrl)
-            QrValidationResult.Valid
+            true
         } catch (e: Exception) {
-            QrValidationResult.InvalidFormat
+            false
         }
     }
 
-    private fun validateSchoolUrl(qrCodeUrl: String): QrValidationResult {
-        return if (schoolUrl != null && !qrCodeUrl.startsWith(schoolUrl.toString())) {
-            QrValidationResult.InvalidSchoolUrl
+    private fun isValidSchoolUrl(qrCodeUrl: String): Boolean {
+        return if (schoolUrl != null) {
+            qrCodeUrl.startsWith(schoolUrl.toString())
         } else {
-            QrValidationResult.Valid
+            true
         }
     }
 
-    private fun validateQrBadgeSection(qrCodeUrl: String): QrValidationResult {
-        return if (!qrCodeUrl.contains("/respect_qr_badge", ignoreCase = true)) {
-            QrValidationResult.MissingBadgeSection
-        } else {
-            QrValidationResult.Valid
-        }
+    private fun hasValidBadgeSection(qrCodeUrl: String): Boolean {
+        return qrCodeUrl.contains("/respect_qr_badge", ignoreCase = true)
     }
 
     /**
      * Quick validation without database checks (for UI validation)
      */
     fun validateFormatOnly(qrCodeUrl: String): QrValidationResult {
-        val formatCheck = validateUrlFormat(qrCodeUrl)
-        if (!formatCheck.isValid) return formatCheck
+        if (!isValidUrlFormat(qrCodeUrl)) return QrValidationResult.InvalidUrl
+        if (!isValidSchoolUrl(qrCodeUrl)) return QrValidationResult.InvalidUrl
+        if (!hasValidBadgeSection(qrCodeUrl)) return QrValidationResult.InvalidUrl
 
-        val schoolCheck = validateSchoolUrl(qrCodeUrl)
-        if (!schoolCheck.isValid) return schoolCheck
-
-        return validateQrBadgeSection(qrCodeUrl)
+        return QrValidationResult.Valid
     }
 }

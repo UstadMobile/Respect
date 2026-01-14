@@ -476,9 +476,7 @@
     <string name="password_must_be_at_least">Password must be at least 6 characters</string>
     <string name="saved">Saved</string>
 
-    <string name="qr_code_invalid_format">Invalid QR code URL format</string>
-    <string name="qr_code_must_start_with_school_url">QR code must start with school URL</string>
-    <string name="qr_code_must_contain_respect_qr_badge">Invalid url, please try again</string>
+    <string name="qr_code_invalid_format">Invalid url, please try again</string>
 
     <string name="manage_school_directories">Manage school directories</string>
     <string name="school_directories">School directories</string>

@@ -45,7 +45,7 @@ class AddChildAccountUseCaseDataSource(
             role = PersonRoleEnum.STUDENT,
             guid = childUid
         ).copy(
-            relatedPersonUids = listOf(authenticatedUser.guid)
+            relatedPersonUids = listOf(familyPersonGuid?:authenticatedUser.guid)
         )
 
         schoolDataSource.personDataSource.store(

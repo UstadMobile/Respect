@@ -38,7 +38,24 @@ appId: world.respect.app
 
 # Admin copy invite code to the teacher
 - tapOn: "Add Teacher"
-- tapOn: ".*Copy invite code.*"
+- tapOn: "Invite person"
+- assertVisible:
+      id: "app_title"
+      text: "Invite person"
+- assertVisible: "Class name"
+- assertVisible: "New Class"
+- tapOn: "Approval required"  #switch is ON
+- tapOn:
+      id: role
+- tapOn:
+      text: Teacher
+- tapOn: "Invite code"
+- assertVisible:
+      id: "app_title"
+      text: "Code"
+- copyTextFrom:
+      id: "invite_code"
+
 
 # Teacher sign-up via invite code to the class
 - clearState: world.respect.app

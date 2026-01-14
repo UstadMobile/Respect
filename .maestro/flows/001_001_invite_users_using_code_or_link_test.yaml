@@ -17,9 +17,8 @@ onFlowComplete:
       file: "scripts/teardown.js"
 
 ---
-- runFlow: "subflows/school_admin_login_flow.yaml"
-
 # Invite new user:
+- runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"
     text: "Apps"
@@ -32,8 +31,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "Class name or school name"
-- assertVisible: "TestSchool"
+- assertVisible: "School name"
+- assertVisible: {output.SCHOOL_NAME}
 - assertVisible: "Invite multiple people"
 - assertVisible: "Allow multiple people to use this invite"  #switch is off
 - assertVisible: "Approval required"    #switch is off
@@ -105,25 +104,27 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
+- assertVisible: "Class name"
+- assertVisible: "New Class"
 - tapOn: "Approval required"  #switch is ON
-- assertVisible:
-      id: "role"
-      text: "Student"
+- tapOn:
+      id: role
+- tapOn:
+     text: Student
+     index: 1
 - tapOn: "Invite code"
 - assertVisible:
     id: "app_title"
     text: "Code"
 - copyTextFrom:
-    id: "invite_code"
+      id: "copy_code"
 
 # C) Student sign-up via invite code to the class
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:

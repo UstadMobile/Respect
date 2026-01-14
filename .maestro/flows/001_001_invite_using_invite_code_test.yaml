@@ -45,6 +45,21 @@ onFlowComplete:
 
 # B) Admin copy invite code to the teacher
 - tapOn: "Add Teacher"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Class name"
+- assertVisible: "New Class"
+- tapOn: "Approval required"  #switch is ON
+- tapOn:
+    id: role
+- tapOn:
+    text: Teacher
+- tapOn: "Invite code"
+- assertVisible:
+    id: "app_title"
+    text: "Code"
 - copyTextFrom:
     id: "invite_code"
 
@@ -53,9 +68,7 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
@@ -134,14 +147,11 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "teacheruser"
@@ -158,6 +168,22 @@ onFlowComplete:
 - tapOn: "New Class"
 - assertVisible: "Teacher User.*"
 - tapOn: "Add Student"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Class name"
+- assertVisible: "New Class"
+- tapOn: "Approval required"  #switch is ON
+- tapOn:
+    id: role
+- tapOn:
+    text: Student
+    index: 1
+- tapOn: "Invite code"
+- assertVisible:
+    id: "app_title"
+    text: "Code"
 - copyTextFrom:
     id: "invite_code"
 
@@ -166,9 +192,7 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
@@ -210,14 +234,11 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "teacheruser"
@@ -234,23 +255,17 @@ onFlowComplete:
 - assertVisible: "Pending requests.*"
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
-- tapOn: "Add Student"
-- copyTextFrom:
-    id: "invite_code"
 
 # I) Student login to the class
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "studentuser"
@@ -272,9 +287,7 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
@@ -312,23 +325,11 @@ onFlowComplete:
 - tapOn: "Next"
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
 - tapOn: "Password*"
-- inputText: "testp1"
+- inputText: "test123"
 - tapOn: "Sign-up"
-- assertVisible:
-    id: "app_title"
-    text: "Child Profile"
-- tapOn: "Child's name*"
-- inputText: "Child User"
-- tapOn: "Gender*"
-- tapOn: "Male"
-- tapOn: "Child's date of birth*"
-- runScript:
-    file: "scripts/setDate.js"
-- inputText: ${output.pastYearDateC}
 # 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
 - tapOn:
     text: "Done"
-
 - repeat:
     while:
       notVisible: "Waiting for approval"
@@ -337,7 +338,6 @@ onFlowComplete:
       - tapOn:
           text: "Done"
           retryTapIfNoChange: false
-
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -348,20 +348,17 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
-- inputText: "teacheruser"
+- inputText: "teacherauser"
 - tapOn:
     id : "password"
-- inputText: "testt1"
+- inputText: "test123"
 - tapOn: "Login"
 - assertVisible: "Apps"
 - tapOn: "People"
@@ -381,21 +378,17 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "parentuser"
 - tapOn:
     id : "password"
-- inputText: "testp1"
-- hideKeyboard
+- inputText: "test123"
 - tapOn: "Login"
 - assertVisible: "Apps"
 - tapOn: "Classes"

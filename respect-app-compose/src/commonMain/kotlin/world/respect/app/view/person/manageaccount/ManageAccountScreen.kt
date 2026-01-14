@@ -48,7 +48,6 @@ import world.respect.shared.generated.resources.revoke_badge
 import world.respect.shared.generated.resources.security
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.badge
-import world.respect.shared.generated.resources.change_password
 import world.respect.shared.generated.resources.set_password
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.rememberFormattedDateTime
@@ -100,16 +99,6 @@ fun ManageAccountScreenContent(
                 uiTextStringResource(it),
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.defaultItemPadding(),
-            )
-        }
-
-        // Show QR badge specific error
-        uiState.qrCodeBadgeError?.also { error ->
-            Text(
-                text = uiTextStringResource(error),
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .defaultItemPadding()
             )
         }
 

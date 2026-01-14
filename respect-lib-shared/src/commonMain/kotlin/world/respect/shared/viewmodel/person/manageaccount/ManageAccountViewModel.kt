@@ -59,7 +59,6 @@ data class ManageAccountUiState(
     val isStudent: Boolean = false,
     val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
-    val qrCodeBadgeError: UiText? = null,
 ) {
 
     val showCreatePasskey: Boolean
@@ -149,7 +148,6 @@ class ManageAccountViewModel(
                 _uiState.update {
                     it.copy(
                         qrBadge = qrBadgeState,
-                        qrCodeBadgeError = null // Clear error when data loads successfully
                     )
                 }
             }
@@ -270,7 +268,7 @@ class ManageAccountViewModel(
             } catch (e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(
-                        qrCodeBadgeError = StringUiText("Failed to remove QR badge: ${e.message}")
+                        errorText = StringUiText("Failed to remove QR badge: ${e.message}")
                     )
                 }
             }
@@ -286,7 +284,7 @@ class ManageAccountViewModel(
                 if (qrCodeAlreadyAssignedToAnotherPerson) {
                     _uiState.update { prev ->
                         prev.copy(
-                            qrCodeBadgeError = StringUiText("This QR code is already assigned to another student")
+                            errorText = StringUiText("This QR code is already assigned to another student")
                         )
                     }
                     snackBarDispatcher.showSnackBar(
@@ -306,13 +304,13 @@ class ManageAccountViewModel(
                         )
                     )
                     _uiState.update { prev ->
-                        prev.copy(qrCodeBadgeError = null) // Clear error on success
+                        prev.copy(errorText = null) // Clear error on success
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(
-                        qrCodeBadgeError = StringUiText("Failed to assign QR code: ${e.message}")
+                        errorText = StringUiText("Failed to assign QR code: ${e.message}")
                     )
                 }
                 throw e

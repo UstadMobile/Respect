@@ -183,38 +183,38 @@ class ScanQRCodeViewModel(
                     showManualEntryDialog = false
                 )
             }
-        }
-        try {
-            if (route.resultDest != null) {
-                // Coming from ManageAccount
-                resultReturner.sendResultIfResultExpected(
-                    route = route,
-                    navCommandFlow = _navCommandFlow,
-                    result = url,
-                )
-            } else {
-                // Coming from CreateAccountSetUserName
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        destination = ManageAccount(
-                            guid = personGuid,
-                            qrUrlStr = url,
-                            username = route.username
-                        ),
-                        popUpToClass = CreateAccountSetUsername::class,
-                        popUpToInclusive = true
+            try {
+                if (route.resultDest != null) {
+                    // Coming from ManageAccount
+                    resultReturner.sendResultIfResultExpected(
+                        route = route,
+                        navCommandFlow = _navCommandFlow,
+                        result = url,
                     )
-                )
-                _uiState.update { it.copy(showManualEntryDialog = false) }
+                } else {
+                    // Coming from CreateAccountSetUserName
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = ManageAccount(
+                                guid = personGuid,
+                                qrUrlStr = url,
+                                username = route.username
+                            ),
+                            popUpToClass = CreateAccountSetUsername::class,
+                            popUpToInclusive = true
+                        )
+                    )
+                    _uiState.update { it.copy(showManualEntryDialog = false) }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        errorMessage = e.getUiTextOrGeneric(),
+                    )
+                }
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+                throw e
             }
-        } catch (e: Exception) {
-            _uiState.update {
-                it.copy(
-                    errorMessage = e.getUiTextOrGeneric(),
-                )
-            }
-            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
-            throw e
         }
     }
 

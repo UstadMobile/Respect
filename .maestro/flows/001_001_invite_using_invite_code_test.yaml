@@ -395,6 +395,7 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: "testp1"
+- hideKeyboard
 - tapOn: "Login"
 - assertVisible: "Home"
 - tapOn: "Classes"

@@ -12,13 +12,15 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSession
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -147,6 +149,22 @@ class AccountListViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
         )
+    }
+
+    fun onClickFamilyPerson(person: Person) {
+        viewModelScope.launch {
+            respectAccountManager.switchProfile(person.guid)
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = if(person.roles.firstOrNull()?.roleEnum == PersonRoleEnum.PARENT) {
+                        RespectAppLauncher()
+                    } else {
+                        AssignmentList
+                    },
+                    clearBackStack = true
+                )
+            )
+        }
     }
 
     fun onClickAddAccount() {

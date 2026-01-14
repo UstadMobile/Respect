@@ -6,9 +6,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
 import world.respect.shared.generated.resources.sharedDevicesSettings
+import world.respect.shared.navigation.InvitePerson
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -63,7 +66,14 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onClickAdd() {
-        // Implementation for the FAB click action
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                InvitePerson.create(
+                    inviteCode = null,
+                    presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                )
+            )
+        )
     }
 
     fun onClickEnableSharedSchoolDeviceMode() {

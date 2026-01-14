@@ -179,8 +179,14 @@ onFlowComplete:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
       QR_BADGE_LINK: ${output.SCHOOL_URL}
-- assertVisible: "Invalid url, please try again"
-- eraseText
+- assertVisible: "Invalid QR code scanned"
+- tapOn: "Try again"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Info"
+- tapOn: "Paste URL"
+- tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
 - tapOn: "Ok"
 - assertVisible:

@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,6 +44,8 @@ import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.close
 import world.respect.shared.generated.resources.ok
 import world.respect.shared.generated.resources.paste_url
+import world.respect.shared.generated.resources.qr_code_invalid_format
+import world.respect.shared.generated.resources.try_again
 import world.respect.shared.generated.resources.url
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeUiState
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
@@ -56,10 +59,6 @@ fun ScanQRCodeScreen(
         ScanQRCodeUiState()
     )
     val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // Manual entry dialog state
-    var manualUrlText by remember { mutableStateOf(TextFieldValue("")) }
 
     // Camera states - all with default values
     var isCameraActive by remember { mutableStateOf(true) }
@@ -78,7 +77,16 @@ fun ScanQRCodeScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (isCameraActive && !uiState.showManualEntryDialog) {
+        // Show error screen if there's an error
+        if (uiState.errorMessage != null) {
+            ErrorScreen(
+                onTryAgain = {
+                    viewModel.resetErrorState()
+                    isCameraActive = true
+                }
+            )
+        } else if (isCameraActive && !uiState.showManualEntryDialog) {
+            // Show QR scanner when no error and camera is active
             QrScanner(
                 modifier = Modifier.fillMaxSize(),
                 flashlightOn = flashlightOn,
@@ -96,11 +104,7 @@ fun ScanQRCodeScreen(
                 maxZoomLevel = 3f,
                 imagePickerHandler = { openImagePicker = it },
                 onFailure = { errorMessage ->
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            errorMessage.ifEmpty { "Failed to scan QR code" }
-                        )
-                    }
+                    viewModel.resetErrorState()
                 },
                 overlayShape = overlayShape
             )
@@ -108,6 +112,7 @@ fun ScanQRCodeScreen(
 
         // Manual URL Entry Dialog
         if (uiState.showManualEntryDialog) {
+            var manualUrlText by remember { mutableStateOf(TextFieldValue("")) }
             ManualUrlEntryDialog(
                 manualUrlText = manualUrlText,
                 onUrlTextChange = { manualUrlText = it },
@@ -210,6 +215,41 @@ private fun ManualUrlEntryDialog(
                     Text(stringResource(Res.string.ok))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ErrorScreen(
+    onTryAgain: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            modifier = Modifier.size(100.dp).padding(bottom = 10.dp),
+            imageVector = Icons.Default.WarningAmber,
+            contentDescription = "WarningAmber",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = stringResource(Res.string.qr_code_invalid_format),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = onTryAgain,
+            modifier = Modifier.fillMaxWidth(0.7f)
+        ) {
+            Text(
+                text = stringResource(Res.string.try_again),
+            )
         }
     }
 }

@@ -307,7 +307,6 @@
     <string name="grade_level">Grade Level</string>
     <string name="assessment_type">Assessment Type (Self/Assignment)</string>
 
-    <string name="sharedDevicesSettings">SharedDevicesSettings</string>
     <string name="school_name">School name</string>
     <string name="shared_school_devices">Shared school devices</string>
     <string name="device_name">device name</string>

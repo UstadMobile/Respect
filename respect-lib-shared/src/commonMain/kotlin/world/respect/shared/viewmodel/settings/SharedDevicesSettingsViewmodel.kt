@@ -9,7 +9,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
-import world.respect.shared.generated.resources.sharedDevicesSettings
+import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
@@ -39,7 +39,7 @@ class SharedDevicesSettingsViewmodel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.sharedDevicesSettings.asUiText(),
+                title = Res.string.shared_school_devices.asUiText(),
                 hideBottomNavigation = true,
                 fabState = FabUiState(
                     text = Res.string.device.asUiText(),

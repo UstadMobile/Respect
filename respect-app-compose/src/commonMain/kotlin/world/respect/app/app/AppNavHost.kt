@@ -149,6 +149,7 @@ import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.SchoolSettings
+import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
@@ -567,6 +568,15 @@ fun AppNavHost(
         }
 
         composable<SharedDevicesSettings> {
+            SharedDevicesSettingsScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<SharedDevicesEnable> {
             SharedDevicesSettingsScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,

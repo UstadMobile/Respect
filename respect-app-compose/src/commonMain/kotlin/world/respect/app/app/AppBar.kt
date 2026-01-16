@@ -53,6 +53,7 @@ import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.shared.generated.resources.more_options
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppActionButton
 import world.respect.shared.viewmodel.app.appstate.AppBarColors
@@ -239,7 +240,7 @@ fun RespectAppBar(
                         ) {
                             Icon(
                                 Icons.Default.MoreVert,
-                                contentDescription = stringResource(Res.string.more_info)
+                                contentDescription = stringResource(Res.string.more_options)
                             )
                         }
 

@@ -116,14 +116,27 @@ class ManageAccountViewModel(
                 title = Res.string.manage_account.asUiText()
             )
         }
-        // Coming from CreateAccountSetUserName
+
+        /**
+         * Handle when a badge and username is being set for the first time.
+         *
+         * Flow: PersonDetail (no username/credential set): go to set username, scan QR code,
+         * then go to ManageAccount (pop up to CreateAccountSetUsername inclusive).
+         */
         viewModelScope.launch {
             if (route.qrUrl != null && route.username != null) {
                 saveUsername(route.username)
                 storeQrCodeForPerson(personGuid = personGuid, url = route.qrUrl.toString())
             }
         }
-        // Coming from ManageAccount
+
+        /**
+         * Handle when a badge is being assigned/updated for a person where a username is already
+         * set
+         *
+         * Flow: ManageAccount, go to Scan QR code, returns result using NavResultReturner, pops back
+         * to ManageAccount.
+         */
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(
                 QR_SELECT_RESULT
@@ -275,64 +288,61 @@ class ManageAccountViewModel(
         }
     }
 
-    private fun storeQrCodeForPerson(personGuid: String, url: String) {
-        viewModelScope.launch {
-            try {
-                val qrCodeAlreadyAssignedToAnotherPerson =
-                    schoolDataSource.personQrDataSource.existsByQrCodeUrl(url, personGuid.toLong())
+    private suspend fun storeQrCodeForPerson(personGuid: String, url: String) {
+        try {
+            val qrCodeAlreadyAssignedToAnotherPerson =
+                schoolDataSource.personQrDataSource.existsByQrCodeUrl(url, personGuid.toLong())
 
-                if (qrCodeAlreadyAssignedToAnotherPerson) {
-                    _uiState.update { prev ->
-                        prev.copy(
-                            errorText = StringUiText("This QR code is already assigned to another student")
-                        )
-                    }
-                    snackBarDispatcher.showSnackBar(
-                        Snack("This QR code is already assigned to another student".asUiText())
-                    )
-                } else {
-                    val now = Clock.System.now()
-                    schoolDataSource.personQrDataSource.store(
-                        listOf(
-                            PersonBadge(
-                                personGuid = personGuid,
-                                qrCodeUrl = url,
-                                lastModified = now,
-                                stored = now,
-                                status = StatusEnum.ACTIVE,
-                            )
-                        )
-                    )
-                    _uiState.update { prev ->
-                        prev.copy(errorText = null) // Clear error on success
-                    }
-                }
-            } catch (e: Exception) {
+            if (qrCodeAlreadyAssignedToAnotherPerson) {
                 _uiState.update { prev ->
                     prev.copy(
-                        errorText = StringUiText("Failed to assign QR code: ${e.message}")
+                        errorText = StringUiText("This QR code is already assigned to another student")
                     )
                 }
-                throw e
-            }
-        }
-    }
-
-    private fun saveUsername(username: String?) {
-        viewModelScope.launch {
-            val person = schoolDataSource.personDataSource.findByGuid(
-                DataLoadParams(), route.guid
-            ).dataOrNull() ?: throw IllegalStateException("Person not found")
-
-            schoolDataSource.personDataSource.store(
-                listOf(
-                    person.copy(
-                        username = username,
-                        lastModified = Clock.System.now(),
+                snackBarDispatcher.showSnackBar(
+                    Snack("This QR code is already assigned to another student".asUiText())
+                )
+            } else {
+                val now = Clock.System.now()
+                schoolDataSource.personQrDataSource.store(
+                    listOf(
+                        PersonBadge(
+                            personGuid = personGuid,
+                            qrCodeUrl = url,
+                            lastModified = now,
+                            stored = now,
+                            status = StatusEnum.ACTIVE,
+                        )
                     )
                 )
-            )
+                _uiState.update { prev ->
+                    prev.copy(errorText = null) // Clear error on success
+                }
+            }
+        } catch (e: Exception) {
+            _uiState.update { prev ->
+                prev.copy(
+                    errorText = StringUiText("Failed to assign QR code: ${e.message}")
+                )
+            }
+            throw e
         }
+
+    }
+
+    private suspend fun saveUsername(username: String?) {
+        val person = schoolDataSource.personDataSource.findByGuid(
+            DataLoadParams(), route.guid
+        ).dataOrNull() ?: throw IllegalStateException("Person not found")
+
+        schoolDataSource.personDataSource.store(
+            listOf(
+                person.copy(
+                    username = username,
+                    lastModified = Clock.System.now(),
+                )
+            )
+        )
     }
 
     fun onClickChangeQrBadge() {

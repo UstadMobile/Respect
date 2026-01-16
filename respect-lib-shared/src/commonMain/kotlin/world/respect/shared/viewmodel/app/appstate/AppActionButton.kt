@@ -7,7 +7,7 @@ import world.respect.shared.resources.UiText
  */
 data class AppActionButton(
     val icon: AppStateIcon,
-    val contentDescription: String,
+    val contentDescription: UiText,
     val text: UiText,
     val onClick: () -> Unit,
     val id: String,

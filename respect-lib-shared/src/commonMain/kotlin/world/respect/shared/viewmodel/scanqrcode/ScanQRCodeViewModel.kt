@@ -17,6 +17,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.paste_url
 import world.respect.shared.generated.resources.qr_code_invalid_format
 import world.respect.shared.generated.resources.scan_qr_code
@@ -39,7 +40,6 @@ import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class ScanQRCodeUiState(
-    val qrCodeUrl: String = "",
     val errorMessage: UiText? = null,
     val showManualEntryDialog: Boolean = false,
 )
@@ -66,7 +66,7 @@ class ScanQRCodeViewModel(
                 actions = listOf(
                     AppActionButton(
                         icon = AppStateIcon.MORE_VERT,
-                        contentDescription = "more_options",
+                        contentDescription = Res.string.more_options.asUiText(),
                         text = Res.string.paste_url.asUiText(),
                         onClick = {
                             _uiState.update { currentState ->
@@ -228,7 +228,7 @@ class ScanQRCodeViewModel(
                 actions = listOf(
                     AppActionButton(
                         icon = AppStateIcon.MORE_VERT,
-                        contentDescription = "more_options",
+                        contentDescription = Res.string.more_options.asUiText(),
                         text = Res.string.paste_url.asUiText(),
                         onClick = {
                             _uiState.update { currentState ->

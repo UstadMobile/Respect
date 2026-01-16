@@ -203,7 +203,7 @@ fun RespectAppBar(
                     ) {
                         Icon(
                             imageVector = action.icon.toImageVector(),
-                            contentDescription = action.contentDescription,
+                            contentDescription = uiTextStringResource(action.contentDescription),
                         )
                     }
                 }

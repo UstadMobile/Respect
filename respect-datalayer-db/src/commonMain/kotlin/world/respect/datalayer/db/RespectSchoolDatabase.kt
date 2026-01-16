@@ -33,7 +33,7 @@ import world.respect.datalayer.db.school.entities.AssignmentEntity
 import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
-import world.respect.datalayer.db.school.entities.PersonBadgeEntity
+import world.respect.datalayer.db.school.entities.PersonQrBadgeEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
@@ -67,7 +67,7 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
         WriteQueueItemEntity::class,
         SchoolPermissionGrantEntity::class,
         PullSyncStatusEntity::class,
-        PersonBadgeEntity::class,
+        PersonQrBadgeEntity::class,
     ],
     version = 10,
 )

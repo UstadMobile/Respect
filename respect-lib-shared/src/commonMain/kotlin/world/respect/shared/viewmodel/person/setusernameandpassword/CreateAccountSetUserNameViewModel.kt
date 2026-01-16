@@ -109,7 +109,7 @@ class CreateAccountSetUserNameViewModel(
             }
         }
         viewModelScope.launch {
-            schoolDataSource.personQrDataSource.findByGuidAsFlow(
+            schoolDataSource.personQrBadgeDataSource.findByGuidAsFlow(
                 DataLoadParams(), route.guid
             ).collect {
                 _uiState.update { prev ->

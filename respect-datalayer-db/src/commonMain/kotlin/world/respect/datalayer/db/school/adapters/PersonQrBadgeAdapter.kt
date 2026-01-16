@@ -1,13 +1,13 @@
 package world.respect.datalayer.db.school.adapters
 
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.entities.PersonBadgeEntity
-import world.respect.datalayer.school.model.PersonBadge
+import world.respect.datalayer.db.school.entities.PersonQrBadgeEntity
+import world.respect.datalayer.school.model.PersonQrBadge
 
-fun PersonBadge.asEntity(
+fun PersonQrBadge.asEntity(
     uidNumberMapper: UidNumberMapper
-): PersonBadgeEntity {
-    return PersonBadgeEntity(
+): PersonQrBadgeEntity {
+    return PersonQrBadgeEntity(
         pqrGuid = personGuid,
         pqrGuidNum =  uidNumberMapper(personGuid),
         pqrLastModified = lastModified,
@@ -17,8 +17,8 @@ fun PersonBadge.asEntity(
     )
 }
 
-fun PersonBadgeEntity.asModel(): PersonBadge {
-    return PersonBadge(
+fun PersonQrBadgeEntity.asModel(): PersonQrBadge {
+    return PersonQrBadge(
         personGuid = pqrGuid,
         qrCodeUrl = pqrQrCodeUrl,
         lastModified = pqrLastModified,

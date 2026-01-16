@@ -13,20 +13,20 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.asEntity
 import world.respect.datalayer.db.school.adapters.asModel
-import world.respect.datalayer.school.PersonQrCodeDataSourceLocal
-import world.respect.datalayer.school.PersonQrDataSource
-import world.respect.datalayer.school.model.PersonBadge
+import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
+import world.respect.datalayer.school.PersonQrBadgeDataSource
+import world.respect.datalayer.school.model.PersonQrBadge
 import kotlin.time.Clock
 
-class PersonQrDataSourceDb(
+class PersonQrBadgeDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-) : PersonQrCodeDataSourceLocal {
+) : PersonQrCodeBadgeDataSourceLocal {
 
     private suspend fun upsert(
-        list: List<PersonBadge>,
+        list: List<PersonQrBadge>,
         forceOverwrite: Boolean
     ) {
         val timeNow = Clock.System.now()
@@ -47,8 +47,8 @@ class PersonQrDataSourceDb(
 
     override suspend fun listAll(
         loadParams: DataLoadParams,
-        listParams: PersonQrDataSource.GetListParams
-    ): DataLoadState<List<PersonBadge>> {
+        listParams: PersonQrBadgeDataSource.GetListParams
+    ): DataLoadState<List<PersonQrBadge>> {
         return DataReadyState(
             data = schoolDb.getPersonQrBadgeEntityDao().findAll(
                 personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
@@ -61,8 +61,8 @@ class PersonQrDataSourceDb(
 
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
-        listParams: PersonQrDataSource.GetListParams
-    ): Flow<DataLoadState<List<PersonBadge>>> {
+        listParams: PersonQrBadgeDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonQrBadge>>> {
         return schoolDb.getPersonQrBadgeEntityDao().findAllByPersonGuidAsFlow(
             personGuid = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
             includeDeleted = listParams.includeDeleted
@@ -76,7 +76,7 @@ class PersonQrDataSourceDb(
     override fun findByGuidAsFlow(
         loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<PersonBadge>> {
+    ): Flow<DataLoadState<PersonQrBadge>> {
         return schoolDb.getPersonQrBadgeEntityDao().findByGuidHashAsFlow(
             uidNumberMapper(guid)
         ).map { personQrEntity ->
@@ -99,18 +99,18 @@ class PersonQrDataSourceDb(
         }
     }
 
-    override suspend fun store(list: List<PersonBadge>) {
+    override suspend fun store(list: List<PersonQrBadge>) {
         upsert(list, false)
     }
 
     override suspend fun updateLocal(
-        list: List<PersonBadge>,
+        list: List<PersonQrBadge>,
         forceOverwrite: Boolean
     ) {
         upsert(list, forceOverwrite)
     }
 
-    override suspend fun findByUidList(uids: List<String>): List<PersonBadge> {
+    override suspend fun findByUidList(uids: List<String>): List<PersonQrBadge> {
         return schoolDb.getPersonQrBadgeEntityDao().findByUidList(
             uids.map { uidNumberMapper(it) }
         ).map {

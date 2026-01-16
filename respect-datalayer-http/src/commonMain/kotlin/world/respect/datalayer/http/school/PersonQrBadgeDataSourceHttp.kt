@@ -20,29 +20,29 @@ import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.school.PersonQrDataSource
-import world.respect.datalayer.school.model.PersonBadge
+import world.respect.datalayer.school.PersonQrBadgeDataSource
+import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-class PersonQrDataSourceHttp(
+class PersonQrBadgeDataSourceHttp(
     override val schoolUrl: Url,
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
-) : PersonQrDataSource, SchoolUrlBasedDataSource {
+) : PersonQrBadgeDataSource, SchoolUrlBasedDataSource {
 
-    private suspend fun PersonQrDataSource.GetListParams.urlWithParams(): Url {
-        return URLBuilder(respectEndpointUrl(PersonQrDataSource.ENDPOINT_NAME)).apply {
+    private suspend fun PersonQrBadgeDataSource.GetListParams.urlWithParams(): Url {
+        return URLBuilder(respectEndpointUrl(PersonQrBadgeDataSource.ENDPOINT_NAME)).apply {
             parameters.appendCommonListParams(common)
         }.build()
     }
 
     override suspend fun listAll(
         loadParams: DataLoadParams,
-        listParams: PersonQrDataSource.GetListParams
-    ): DataLoadState<List<PersonBadge>> {
+        listParams: PersonQrBadgeDataSource.GetListParams
+    ): DataLoadState<List<PersonQrBadge>> {
         return httpClient.getAsDataLoadState(
             url = listParams.urlWithParams(),
             validationHelper = validationHelper,
@@ -54,8 +54,8 @@ class PersonQrDataSourceHttp(
 
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
-        listParams: PersonQrDataSource.GetListParams
-    ): Flow<DataLoadState<List<PersonBadge>>> {
+        listParams: PersonQrBadgeDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonQrBadge>>> {
         return httpClient.getDataLoadResultAsFlow(
             urlFn = { listParams.urlWithParams() },
             dataLoadParams = loadParams,
@@ -69,10 +69,10 @@ class PersonQrDataSourceHttp(
     override fun findByGuidAsFlow(
         loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<PersonBadge>> {
-        return httpClient.getDataLoadResultAsFlow<List<PersonBadge>>(
+    ): Flow<DataLoadState<PersonQrBadge>> {
+        return httpClient.getDataLoadResultAsFlow<List<PersonQrBadge>>(
             urlFn = {
-                PersonQrDataSource.GetListParams(
+                PersonQrBadgeDataSource.GetListParams(
                     GetListCommonParams(guid = guid)
                 ).urlWithParams()
             },
@@ -89,9 +89,9 @@ class PersonQrDataSourceHttp(
         TODO("Not yet implemented")
     }
 
-    override suspend fun store(list: List<PersonBadge>) {
+    override suspend fun store(list: List<PersonQrBadge>) {
         httpClient.post(
-            respectEndpointUrl(PersonQrDataSource.ENDPOINT_NAME)
+            respectEndpointUrl(PersonQrBadgeDataSource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)

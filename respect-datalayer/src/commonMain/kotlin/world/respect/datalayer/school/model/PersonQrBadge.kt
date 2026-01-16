@@ -4,11 +4,14 @@ import kotlinx.serialization.Serializable
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
 
+/**
+ * Represents a QR code badge assigned to a given person.
+ */
 @Serializable
-data class PersonBadge(
+data class PersonQrBadge(
     val personGuid: String,
     val qrCodeUrl: String,
     override val lastModified: InstantAsISO8601,
     override val stored: InstantAsISO8601,
     val status: StatusEnum = StatusEnum.ACTIVE,
-    ):  ModelWithTimes
+):  ModelWithTimes

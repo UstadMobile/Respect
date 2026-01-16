@@ -10,26 +10,26 @@ import world.respect.datalayer.ext.combineWithRemoteIfNotNull
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.school.PersonQrCodeDataSourceLocal
-import world.respect.datalayer.school.PersonQrDataSource
-import world.respect.datalayer.school.model.PersonBadge
+import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
+import world.respect.datalayer.school.PersonQrBadgeDataSource
+import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.DataLayerTags
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.libutil.util.time.systemTimeInMillis
 
-class PersonQrCodeDataSourceRepository(
-    override val local: PersonQrCodeDataSourceLocal,
-    override val remote: PersonQrDataSource,
+class PersonQrCodeBadgeDataSourceRepository(
+    override val local: PersonQrCodeBadgeDataSourceLocal,
+    override val remote: PersonQrBadgeDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-) : PersonQrDataSource, RepositoryModelDataSource<PersonBadge> {
+) : PersonQrBadgeDataSource, RepositoryModelDataSource<PersonQrBadge> {
 
     override suspend fun listAll(
         loadParams: DataLoadParams,
-        listParams: PersonQrDataSource.GetListParams
-    ): DataLoadState<List<PersonBadge>> {
+        listParams: PersonQrBadgeDataSource.GetListParams
+    ): DataLoadState<List<PersonQrBadge>> {
         val remote = try {
             remote.listAll(loadParams, listParams).also {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
@@ -48,8 +48,8 @@ class PersonQrCodeDataSourceRepository(
 
     override fun listAllAsFlow(
         loadParams: DataLoadParams,
-        listParams: PersonQrDataSource.GetListParams
-    ): Flow<DataLoadState<List<PersonBadge>>> {
+        listParams: PersonQrBadgeDataSource.GetListParams
+    ): Flow<DataLoadState<List<PersonQrBadge>>> {
         return local.listAllAsFlow(loadParams, listParams).combineWithRemote(
             remoteFlow = remote.listAllAsFlow(loadParams, listParams.copy(includeDeleted = true))
                 .onEach {
@@ -61,7 +61,7 @@ class PersonQrCodeDataSourceRepository(
     override fun findByGuidAsFlow(
         loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<PersonBadge>> {
+    ): Flow<DataLoadState<PersonQrBadge>> {
         return local.findByGuidAsFlow(loadParams, guid).combineWithRemote(
             remoteFlow = remote.findByGuidAsFlow(loadParams, guid).onEach {
                 local.updateFromRemoteIfNeeded(it, validationHelper)
@@ -73,7 +73,7 @@ class PersonQrCodeDataSourceRepository(
         return local.existsByQrCodeUrl(url, uidNum)
     }
 
-    override suspend fun store(list: List<PersonBadge>) {
+    override suspend fun store(list: List<PersonQrBadge>) {
         local.store(list)
         val timeNow = systemTimeInMillis()
         remoteWriteQueue.add(

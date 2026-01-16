@@ -6,7 +6,7 @@ import world.respect.datalayer.school.model.StatusEnum
 import kotlin.time.Instant
 
 @Entity
-data class PersonBadgeEntity(
+data class PersonQrBadgeEntity(
     @PrimaryKey
     val pqrGuidNum: Long,
     val pqrGuid: String,

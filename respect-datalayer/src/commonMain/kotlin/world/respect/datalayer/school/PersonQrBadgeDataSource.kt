@@ -5,11 +5,12 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.SchoolAppDataSource.Companion.INCLUDE_DELETED
-import world.respect.datalayer.school.model.PersonBadge
+import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-interface PersonQrDataSource : WritableDataSource<PersonBadge> {
+interface PersonQrBadgeDataSource : WritableDataSource<PersonQrBadge> {
+
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val includeDeleted: Boolean = false
@@ -27,17 +28,17 @@ interface PersonQrDataSource : WritableDataSource<PersonBadge> {
     suspend fun listAll(
         loadParams: DataLoadParams,
         listParams: GetListParams = GetListParams(),
-    ): DataLoadState<List<PersonBadge>>
+    ): DataLoadState<List<PersonQrBadge>>
 
     fun listAllAsFlow(
         loadParams: DataLoadParams = DataLoadParams(),
         listParams: GetListParams = GetListParams(),
-    ): Flow<DataLoadState<List<PersonBadge>>>
+    ): Flow<DataLoadState<List<PersonQrBadge>>>
 
     fun findByGuidAsFlow(
         loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<PersonBadge>>
+    ): Flow<DataLoadState<PersonQrBadge>>
 
 
     suspend fun existsByQrCodeUrl(
@@ -47,7 +48,7 @@ interface PersonQrDataSource : WritableDataSource<PersonBadge> {
 
     companion object {
 
-        const val ENDPOINT_NAME = "personqrcode"
+        const val ENDPOINT_NAME = "personqrbadge"
 
     }
 }

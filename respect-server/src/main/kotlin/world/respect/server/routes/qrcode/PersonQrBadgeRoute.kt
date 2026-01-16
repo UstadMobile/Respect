@@ -9,28 +9,28 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.PersonQrDataSource
+import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondDataLoadState
 
-fun Route.QrCodeRoute(
+fun Route.PersonQrBadgeRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->
         call.requireAccountScope().get()
     },
 ) {
-    get(PersonQrDataSource.ENDPOINT_NAME) {
+    get(PersonQrBadgeDataSource.ENDPOINT_NAME) {
         call.respondDataLoadState(
-            schoolDataSource(call).personQrDataSource.listAll(
+            schoolDataSource(call).personQrBadgeDataSource.listAll(
                 loadParams = DataLoadParams(),
-                listParams = PersonQrDataSource.GetListParams.fromParams(
+                listParams = PersonQrBadgeDataSource.GetListParams.fromParams(
                     call.request.queryParameters
                 )
             )
         )
     }
 
-    post(PersonQrDataSource.ENDPOINT_NAME) {
-        schoolDataSource(call).personQrDataSource.store(call.receive())
+    post(PersonQrBadgeDataSource.ENDPOINT_NAME) {
+        schoolDataSource(call).personQrBadgeDataSource.store(call.receive())
         call.respond(HttpStatusCode.NoContent)
     }
 }

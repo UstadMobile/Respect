@@ -9,7 +9,7 @@ import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasskeyDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
-import world.respect.datalayer.repository.school.PersonQrCodeDataSourceRepository
+import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
@@ -85,10 +85,10 @@ class SchoolDataSourceRepository(
             remoteWriteQueue = remoteWriteQueue,
         )
     }
-    override val personQrDataSource: PersonQrCodeDataSourceRepository by lazy {
-        PersonQrCodeDataSourceRepository(
-            local = local.personQrDataSource,
-            remote = remote.personQrDataSource,
+    override val personQrBadgeDataSource: PersonQrCodeBadgeDataSourceRepository by lazy {
+        PersonQrCodeBadgeDataSourceRepository(
+            local = local.personQrBadgeDataSource,
+            remote = remote.personQrBadgeDataSource,
             validationHelper = validationHelper,
             remoteWriteQueue = remoteWriteQueue,
         )

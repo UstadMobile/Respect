@@ -21,7 +21,7 @@ import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
-import world.respect.datalayer.school.model.PersonBadge
+import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.school.model.PersonPassword
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
@@ -57,7 +57,7 @@ data class ManageAccountUiState(
     val errorText: UiText? = null,
     val selectedAccount: RespectSessionAndPerson? = null,
     val isStudent: Boolean = false,
-    val qrBadge: DataLoadState<PersonBadge> = DataLoadingState(),
+    val qrBadge: DataLoadState<PersonQrBadge> = DataLoadingState(),
     val showBottomSheet: Boolean = false,
 ) {
 
@@ -155,7 +155,7 @@ class ManageAccountViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.personQrDataSource.findByPersonGuidAsFlow(
+            schoolDataSource.personQrBadgeDataSource.findByPersonGuidAsFlow(
                 route.guid
             ).collect { qrBadgeState ->
                 _uiState.update {
@@ -269,7 +269,7 @@ class ManageAccountViewModel(
             try {
                 val currentQrBadge = uiState.value.qrBadge.dataOrNull()
                 if (currentQrBadge != null) {
-                    schoolDataSource.personQrDataSource.store(
+                    schoolDataSource.personQrBadgeDataSource.store(
                         listOf(
                             currentQrBadge.copy(
                                 status = StatusEnum.TO_BE_DELETED,
@@ -291,7 +291,7 @@ class ManageAccountViewModel(
     private suspend fun storeQrCodeForPerson(personGuid: String, url: String) {
         try {
             val qrCodeAlreadyAssignedToAnotherPerson =
-                schoolDataSource.personQrDataSource.existsByQrCodeUrl(url, personGuid.toLong())
+                schoolDataSource.personQrBadgeDataSource.existsByQrCodeUrl(url, personGuid.toLong())
 
             if (qrCodeAlreadyAssignedToAnotherPerson) {
                 _uiState.update { prev ->
@@ -304,9 +304,9 @@ class ManageAccountViewModel(
                 )
             } else {
                 val now = Clock.System.now()
-                schoolDataSource.personQrDataSource.store(
+                schoolDataSource.personQrBadgeDataSource.store(
                     listOf(
-                        PersonBadge(
+                        PersonQrBadge(
                             personGuid = personGuid,
                             qrCodeUrl = url,
                             lastModified = now,

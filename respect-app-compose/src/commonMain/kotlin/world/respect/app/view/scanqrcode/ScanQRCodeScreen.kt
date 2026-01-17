@@ -33,18 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import qrscanner.CameraLens
-import qrscanner.OverlayShape
-import qrscanner.QrScanner
+import org.ncgroup.kscan.BarcodeFormats
+import org.ncgroup.kscan.BarcodeResult
+import org.ncgroup.kscan.ScannerView
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.close
@@ -65,106 +62,96 @@ fun ScanQRCodeScreen(
         ScanQRCodeUiState()
     )
     val coroutineScope = rememberCoroutineScope()
+    var showScanner by remember { mutableStateOf(true) }
 
-    var isCameraActive by remember { mutableStateOf(true) }
-    var openImagePicker by remember { mutableStateOf(false) }
-    var overlayShape by remember { mutableStateOf(OverlayShape.Square) }
-    var cameraLens by remember { mutableStateOf(CameraLens.Back) }
-    var flashlightOn by remember { mutableStateOf(false) }
-
-    // Zoom levels
-    val zoomLevels = listOf(1f, 2f, 3f)
-    var selectedZoomIndex by remember { mutableStateOf(0) }
-    var currentZoomLevel by remember { mutableStateOf(zoomLevels[selectedZoomIndex]) }
-
-    val windowInfo = LocalWindowInfo.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Show error screen if there's an error
-        if (uiState.errorMessage != null) {
-            ErrorScreen(
-                onTryAgain = {
-                    viewModel.resetErrorState()
-                    isCameraActive = true
-                }
-            )
-        } else if (isCameraActive && !uiState.showManualEntryDialog) {
-            // Show QR scanner when no error and camera is active
-            val isLandscape = windowInfo.containerSize.width > windowInfo.containerSize.height
-            QrScanner(
-                modifier = Modifier.fillMaxSize(),
-                flashlightOn = flashlightOn,
-                cameraLens = cameraLens,
-                openImagePicker = openImagePicker,
-                onCompletion = { scannedUrl ->
-                    if (isCameraActive) { // Guard against multiple triggers
-                        isCameraActive = false // Pause camera immediately on success
+    // Show error screen if there's an error
+    if (uiState.errorMessage != null) {
+        ErrorScreen(
+            onTryAgain = {
+                viewModel.resetErrorState()
+                showScanner = true
+            }
+        )
+    } else if (!uiState.showManualEntryDialog && showScanner) {
+        // Show QR scanner when no error
+        Box(modifier = Modifier.fillMaxSize()) {
+            ScannerView(
+                codeTypes = listOf(
+                    BarcodeFormats.FORMAT_QR_CODE,
+                ),
+                scannerUiOptions = null,
+                modifier = Modifier.fillMaxSize()
+            ) { result ->
+                when (result) {
+                    is BarcodeResult.OnSuccess -> {
+                        showScanner = false
                         coroutineScope.launch {
-                            viewModel.processQrCodeUrl(scannedUrl)
+                            viewModel.processQrCodeUrl(result.barcode.data)
                         }
                     }
-                },
-                zoomLevel = currentZoomLevel,
-                maxZoomLevel = 3f,
-                imagePickerHandler = { openImagePicker = it },
-                onFailure = { errorMessage ->
-                    viewModel.resetErrorState()
-                },
-                customOverlay = {
-                    // Calculate scan area size - smaller in landscape, larger in portrait
-                    val scanAreaFraction = if (isLandscape) 0.6f else 0.8f
-                    val scanAreaSize = minOf(size.width, size.height) * scanAreaFraction
-
-                    val left = (size.width - scanAreaSize) / 2
-                    val top = (size.height - scanAreaSize) / 2
-
-                    // Draw overlay outside scan area
-                    drawRect(
-                        color = Color(0x88000000),
-                        size = Size(size.width, size.height),
-                    )
-
-                    // Clear scan area
-                    drawRect(
-                        color = Color.Transparent,
-                        blendMode = BlendMode.Overlay,
-                        topLeft = Offset(left, top),
-                        size = Size(scanAreaSize, scanAreaSize)
-                    )
-
-                    // Draw border
-                    drawRect(
-                        color = Color.White,
-                        topLeft = Offset(left, top),
-                        size = Size(scanAreaSize, scanAreaSize),
-                        style = Stroke(width = 2.dp.toPx())
-                    )
+                    is BarcodeResult.OnFailed -> {
+                        result.exception.printStackTrace()
+                        showScanner = false
+                        coroutineScope.launch {
+                            viewModel.handleScanError(result.exception?.message ?: "Scan failed")
+                        }
+                    }
+                    BarcodeResult.OnCanceled -> {
+                        showScanner = false
+                    }
                 }
-            )
+            }
+            ScannerOverlay()
         }
+    }
 
-        // Manual URL Entry Dialog
-        if (uiState.showManualEntryDialog) {
-            var manualUrlText by remember { mutableStateOf(TextFieldValue("")) }
-            ManualUrlEntryDialog(
-                manualUrlText = manualUrlText,
-                onUrlTextChange = { manualUrlText = it },
-                onDismiss = {
-                    viewModel.hideManualEntryDialog()
-                    manualUrlText = TextFieldValue("")
-                },
-                onSubmit = { url ->
-                    if (url.isNotEmpty()) {
-                        coroutineScope.launch {
-                            viewModel.processQrCodeUrl(url)
-                        }
+    // Manual URL Entry Dialog
+    if (uiState.showManualEntryDialog) {
+        var manualUrlText by remember { mutableStateOf(TextFieldValue("")) }
+        ManualUrlEntryDialog(
+            manualUrlText = manualUrlText,
+            onUrlTextChange = { manualUrlText = it },
+            onDismiss = {
+                viewModel.hideManualEntryDialog()
+                manualUrlText = TextFieldValue("")
+                showScanner = true
+            },
+            onSubmit = { url ->
+                if (url.isNotEmpty()) {
+                    coroutineScope.launch {
+                        viewModel.processQrCodeUrl(url)
+                        viewModel.hideManualEntryDialog()
                     }
-                },
-            )
+                }
+            },
+        )
+    }
+}
+
+@Composable
+fun ScannerOverlay() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.6f))
+        )
+        Box(
+            modifier = Modifier
+                .size(250.dp)
+                .align(Alignment.Center)
+                .background(Color.Transparent)
+        ) {
+            androidx.compose.foundation.Canvas(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                drawRect(
+                    color = Color.White,
+                    topLeft = Offset.Zero,
+                    size = size,
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
         }
     }
 }

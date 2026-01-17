@@ -109,6 +109,15 @@ class ScanQRCodeViewModel(
         }
     }
 
+    fun handleScanError(errorMessage: String) {
+        _uiState.update {
+            it.copy(
+                errorMessage = errorMessage.asUiText(),
+                showManualEntryDialog = false
+            )
+        }
+    }
+
     private fun authenticateWithQrCode(url: Url) {
         try {
             val credential = RespectQRBadgeCredential(qrCodeUrl = url)

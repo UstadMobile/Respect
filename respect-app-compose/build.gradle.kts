@@ -142,7 +142,7 @@ kotlin {
             implementation(libs.kotlinx.io.core)
             implementation(libs.androidx.paging.compose)
             implementation(libs.reorderable)
-            implementation(libs.qr.kit)
+            implementation(libs.kscan)
         }
 
         desktopMain.dependencies {

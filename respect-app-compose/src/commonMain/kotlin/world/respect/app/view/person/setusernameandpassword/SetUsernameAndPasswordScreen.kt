@@ -1,27 +1,17 @@
 package world.respect.app.view.person.setusernameandpassword
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
@@ -30,22 +20,15 @@ import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.app.components.RespectQrBadgeInfoBox
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
-import world.respect.shared.generated.resources.Change_qr_code_badge
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.assign_qr_code_badge
 import world.respect.shared.generated.resources.change_password
-import world.respect.shared.generated.resources.fingerprint
-import world.respect.shared.generated.resources.learn_more
 import world.respect.shared.generated.resources.password_label
-import world.respect.shared.generated.resources.qr_code_badge
-import world.respect.shared.generated.resources.qr_code_badge_description
-import world.respect.shared.generated.resources.quick_easy_sign_in
 import world.respect.shared.generated.resources.set_password
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.util.ext.isLoading
@@ -64,11 +47,11 @@ fun CreateAccountSetUsernameScreen(
         uiState = uiState,
         appUiState = appUiState,
         onUsernameChanged = viewModel::onUsernameChanged,
-        onAssignQrCodeBadge = viewModel::onAssignQrCodeBadge,
-        onSetPassword = viewModel::onSetPassword,
-        onLearnMore = viewModel::onLearnMore,
+        onClickAssignQrCodeBadge = viewModel::onClickAssignQrCodeBadge,
+        onClickSetPassword = viewModel::onClickSetPassword,
+        onClickQrBadgeLearnMore = viewModel::onClickQrBadgeLearnMore,
         onPasswordChanged = viewModel::onPasswordChanged,
-        )
+    )
 }
 
 @Composable
@@ -76,11 +59,11 @@ fun CreateAccountSetUsernameScreen(
     uiState: CreateAccountSetUserNameUiState,
     appUiState: AppUiState,
     onUsernameChanged: (String) -> Unit,
-    onAssignQrCodeBadge: () -> Unit,
-    onSetPassword: () -> Unit,
-    onLearnMore: () -> Unit,
+    onClickAssignQrCodeBadge: () -> Unit,
+    onClickSetPassword: () -> Unit,
+    onClickQrBadgeLearnMore: () -> Unit,
     onPasswordChanged: (String) -> Unit,
-    ) {
+) {
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -107,10 +90,11 @@ fun CreateAccountSetUsernameScreen(
                     } else false
                 },
         )
+
         if (uiState.isStudent) {
-            QrCodeInfoBox(
-                onLearnMore,
-                onAssignQrCodeBadge,
+            RespectQrBadgeInfoBox(
+                onClickQrBadgeLearnMore,
+                onClickAssignQrCodeBadge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -122,15 +106,10 @@ fun CreateAccountSetUsernameScreen(
 
         if (uiState.isStudent) {
             Button(
-                onClick = onSetPassword,
+                onClick = onClickSetPassword,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                border = ButtonDefaults.outlinedButtonBorder
             ) {
                 Text(
                     if (uiState.isPasswordSet) {
@@ -153,83 +132,6 @@ fun CreateAccountSetUsernameScreen(
                 enabled = !appUiState.isLoading,
                 modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("password")
             )
-        }
-    }
-}
-
-@Composable
-fun QrCodeInfoBox(
-    onLearnMore: () -> Unit,
-    onAssignQrCodeBadge: () -> Unit,
-    modifier: Modifier,
-    isQrBadgeSet: Boolean? = null
-) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.fingerprint),
-                    contentDescription = stringResource(Res.string.qr_code_badge),
-                    modifier = Modifier
-                        .width(120.dp).height(100.dp)
-                )
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.quick_easy_sign_in),
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Text(
-                        text = stringResource(Res.string.qr_code_badge_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    TextButton(
-                        onClick = onLearnMore,
-                    ) {
-                        Text(stringResource(Res.string.learn_more))
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Button(
-                onClick = onAssignQrCodeBadge,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                border = ButtonDefaults.outlinedButtonBorder
-            ) {
-                Text(
-                    if (isQrBadgeSet == true) {
-                        stringResource(Res.string.Change_qr_code_badge)
-                    } else {
-                        stringResource(Res.string.assign_qr_code_badge)
-                    }
-                )
-            }
         }
     }
 }

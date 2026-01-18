@@ -64,44 +64,74 @@ fun ScanQRCodeScreen(
     val coroutineScope = rememberCoroutineScope()
     var showScanner by remember { mutableStateOf(true) }
 
-    // Show error screen if there's an error
-    if (uiState.errorMessage != null) {
-        ErrorScreen(
-            onTryAgain = {
-                viewModel.resetErrorState()
-                showScanner = true
-            }
-        )
-    } else if (!uiState.showManualEntryDialog && showScanner) {
-        // Show QR scanner when no error
-        Box(modifier = Modifier.fillMaxSize()) {
-            ScannerView(
-                codeTypes = listOf(
-                    BarcodeFormats.FORMAT_QR_CODE,
-                ),
-                scannerUiOptions = null,
-                modifier = Modifier.fillMaxSize()
-            ) { result ->
-                when (result) {
-                    is BarcodeResult.OnSuccess -> {
-                        showScanner = false
-                        coroutineScope.launch {
-                            viewModel.processQrCodeUrl(result.barcode.data)
-                        }
-                    }
-                    is BarcodeResult.OnFailed -> {
-                        result.exception.printStackTrace()
-                        showScanner = false
-                        coroutineScope.launch {
-                            viewModel.handleScanError(result.exception?.message ?: "Scan failed")
-                        }
-                    }
-                    BarcodeResult.OnCanceled -> {
-                        showScanner = false
-                    }
+    when {
+        // Show error screen if there's an error
+        uiState.errorMessage != null -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    modifier = Modifier.size(100.dp).padding(bottom = 10.dp),
+                    imageVector = Icons.Default.WarningAmber,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = stringResource(Res.string.qr_code_invalid_format),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                )
+
+                Button(
+                    onClick = viewModel::onClickTryAgain,
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.try_again),
+                    )
                 }
             }
-            ScannerOverlay()
+        }
+
+        // Show scanner view if no error and showScanner enabled
+        !uiState.showManualEntryDialog && showScanner -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                ScannerView(
+                    codeTypes = listOf(
+                        BarcodeFormats.FORMAT_QR_CODE,
+                    ),
+                    scannerUiOptions = null,
+                    modifier = Modifier.fillMaxSize()
+                ) { result ->
+                    when (result) {
+                        is BarcodeResult.OnSuccess -> {
+                            showScanner = false
+                            coroutineScope.launch {
+                                viewModel.onQrCodeScanned(result.barcode.data)
+                            }
+                        }
+
+                        is BarcodeResult.OnFailed -> {
+                            result.exception.printStackTrace()
+                            showScanner = false
+                            coroutineScope.launch {
+                                viewModel.handleScanError(result.exception?.message ?: "Scan failed")
+                            }
+                        }
+
+                        BarcodeResult.OnCanceled -> {
+                            showScanner = false
+                        }
+                    }
+                }
+
+                ScannerOverlay()
+            }
         }
     }
 
@@ -119,7 +149,7 @@ fun ScanQRCodeScreen(
             onSubmit = { url ->
                 if (url.isNotEmpty()) {
                     coroutineScope.launch {
-                        viewModel.processQrCodeUrl(url)
+                        viewModel.onQrCodeScanned(url)
                         viewModel.hideManualEntryDialog()
                     }
                 }
@@ -239,41 +269,6 @@ private fun ManualUrlEntryDialog(
                     Text(stringResource(Res.string.ok))
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun ErrorScreen(
-    onTryAgain: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            modifier = Modifier.size(100.dp).padding(bottom = 10.dp),
-            imageVector = Icons.Default.WarningAmber,
-            contentDescription = "WarningAmber",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(Res.string.qr_code_invalid_format),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = onTryAgain,
-            modifier = Modifier.fillMaxWidth(0.7f)
-        ) {
-            Text(
-                text = stringResource(Res.string.try_again),
-            )
         }
     }
 }

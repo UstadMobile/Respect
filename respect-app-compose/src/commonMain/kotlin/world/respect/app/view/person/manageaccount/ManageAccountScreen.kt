@@ -11,8 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -33,7 +31,7 @@ import world.respect.app.components.RespectPasskeySignInFasterCard
 import world.respect.app.components.appendStringRes
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.app.view.person.setusernameandpassword.QrCodeInfoBox
+import world.respect.app.components.RespectQrBadgeInfoBox
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_new_badge_replace
@@ -196,9 +194,9 @@ fun ManageAccountScreenContent(
                 )
             } else {
                 // Show QR code info box for assigning a badge
-                QrCodeInfoBox(
-                    onLearnMore = onClickQrBadgeLearnMore,
-                    onAssignQrCodeBadge = onClickAssignQrCodeBadge,
+                RespectQrBadgeInfoBox(
+                    onClickLearnMore = onClickQrBadgeLearnMore,
+                    onClickAssignQrCodeBadge = onClickAssignQrCodeBadge,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),

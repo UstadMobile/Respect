@@ -190,7 +190,7 @@ class CreateAccountSetUserNameViewModel(
         _uiState.update { it.copy(password = password) }
     }
 
-    fun onAssignQrCodeBadge() {
+    fun onClickAssignQrCodeBadge() {
         launchWithLoadingIndicator {
             val username = uiState.value.username.trim()
             val usernameValidation = validateUsernameUseCase(username)
@@ -216,7 +216,7 @@ class CreateAccountSetUserNameViewModel(
         }
     }
 
-    fun onSetPassword() {
+    fun onClickSetPassword() {
         launchWithLoadingIndicator {
             val username = uiState.value.username.trim()
             val usernameValidation = validateUsernameUseCase(username)
@@ -238,7 +238,7 @@ class CreateAccountSetUserNameViewModel(
         }
     }
 
-    fun onLearnMore() {
+    fun onClickQrBadgeLearnMore() {
         //TODO
     }
 }

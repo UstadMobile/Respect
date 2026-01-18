@@ -82,7 +82,7 @@ class ScanQRCodeViewModel(
         }
     }
 
-    fun processQrCodeUrl(url: String) {
+    fun onQrCodeScanned(url: String) {
         launchWithLoadingIndicator {
             try {
                 if (route.nextAfterScan == NextAfterScan.GoToManageAccount) {
@@ -227,10 +227,11 @@ class ScanQRCodeViewModel(
         }
     }
 
-    fun resetErrorState() {
+    fun onClickTryAgain() {
         _uiState.update { currentState ->
             currentState.copy(errorMessage = null)
         }
+
         // Restore the action buttons when error is cleared
         _appUiState.update { prev ->
             prev.copy(

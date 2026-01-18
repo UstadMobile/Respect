@@ -30,6 +30,7 @@ import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectBottomSheetOption
 import world.respect.app.components.RespectPasskeySignInFasterCard
+import world.respect.app.components.appendStringRes
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.view.person.setusernameandpassword.QrCodeInfoBox
@@ -48,6 +49,7 @@ import world.respect.shared.generated.resources.revoke_badge
 import world.respect.shared.generated.resources.security
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.generated.resources.badge
+import world.respect.shared.generated.resources.not_set
 import world.respect.shared.generated.resources.set_password
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.rememberFormattedDateTime
@@ -69,13 +71,14 @@ fun ManageAccountScreen(
             onDismissRequest = viewModel::onDismissBottomSheet
         )
     }
+
     ManageAccountScreenContent(
         uiState = uiState,
         onCreatePasskeyClick = viewModel::onCreatePasskeyClick,
         onClickManagePasskey = viewModel::onClickManagePasskey,
         onClickChangePassword = viewModel::onClickChangePassword,
         onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
-        onAssignQrCodeBadge = viewModel::onClickQRCodeBadge,
+        onClickAssignQrCodeBadge = viewModel::onClickQRCodeBadge,
         onClickChangeQrBadge = viewModel::onClickChangeQrBadge,
     )
 }
@@ -87,9 +90,9 @@ fun ManageAccountScreenContent(
     onClickHowPasskeysWork: () -> Unit = {},
     onClickManagePasskey: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
-    onAssignQrCodeBadge: () -> Unit = {},
+    onClickAssignQrCodeBadge: () -> Unit = {},
     onClickChangeQrBadge: () -> Unit = {},
-    onLearnMore: () -> Unit = {},
+    onClickQrBadgeLearnMore: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -182,9 +185,7 @@ fun ManageAccountScreenContent(
                     },
                     trailingContent = {
                         OutlinedButton(
-                            onClick = {
-                                onClickChangeQrBadge()
-                            }
+                            onClick = onClickChangeQrBadge
                         ) {
                             Text(
                                 text = stringResource(Res.string.change),
@@ -196,8 +197,8 @@ fun ManageAccountScreenContent(
             } else {
                 // Show QR code info box for assigning a badge
                 QrCodeInfoBox(
-                    onLearnMore = onLearnMore,
-                    onAssignQrCodeBadge = onAssignQrCodeBadge,
+                    onLearnMore = onClickQrBadgeLearnMore,
+                    onAssignQrCodeBadge = onClickAssignQrCodeBadge,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -210,51 +211,51 @@ fun ManageAccountScreenContent(
             timeInMillis = personPasswordVal?.lastModified?.toEpochMilliseconds() ?: 0,
             timeZoneId = TimeZone.currentSystemDefault().id,
         )
-        if (personPasswordVal != null) {
-            ListItem(
-                leadingContent = {
-                    Icon(Icons.Default.Password, contentDescription = null)
-                },
-                headlineContent = {
-                    Text(
-                        text = stringResource(Res.string.password_label),
-                        maxLines = 1,
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = "${stringResource(Res.string.last_updated)}: $passwordLastUpdatedStr"
-                    )
-                },
-                trailingContent = {
-                    OutlinedButton(
-                        onClick = {
-                            onClickChangePassword()
-                        },
-                        modifier = Modifier.testTag("password_change_btn"),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.change),
-                            modifier = Modifier.testTag("password_change_btn"),
-                        )
+
+        ListItem(
+            leadingContent = {
+                Icon(Icons.Default.Password, contentDescription = null)
+            },
+            headlineContent = {
+                Text(
+                    text = stringResource(Res.string.password_label),
+                    maxLines = 1,
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = buildString {
+                        if(personPasswordVal != null) {
+                            appendStringRes(Res.string.last_updated)
+                            append(": ")
+                            append(passwordLastUpdatedStr)
+                        }else {
+                            appendStringRes(Res.string.not_set)
+                        }
                     }
+                )
+
+                Text(
+                    text = "${stringResource(Res.string.last_updated)}: $passwordLastUpdatedStr"
+                )
+            },
+            trailingContent = {
+                OutlinedButton(
+                    onClick = onClickChangePassword,
+                    modifier = Modifier.testTag("password_change_btn"),
+                ) {
+                    Text(
+                        text = stringResource(
+                            if(personPasswordVal != null)
+                                Res.string.change
+                            else
+                                Res.string.set_password
+                        ),
+                        modifier = Modifier.testTag("password_change_btn"),
+                    )
                 }
-            )
-        } else {
-            Button(
-                onClick = onClickChangePassword,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                border = ButtonDefaults.outlinedButtonBorder
-            ) {
-                Text(stringResource(Res.string.set_password))
             }
-        }
+        )
     }
 }
 

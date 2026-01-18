@@ -13,7 +13,7 @@ fun PersonQrBadge.asEntity(
         pqrLastModified = lastModified,
         pqrStored = stored,
         pqrQrCodeUrl = qrCodeUrl,
-        pqrStatus = status
+        pqrStatus = status,
     )
 }
 

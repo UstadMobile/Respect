@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import io.ktor.http.Url
 import world.respect.datalayer.school.model.StatusEnum
 import kotlin.time.Instant
 
@@ -12,6 +13,6 @@ data class PersonQrBadgeEntity(
     val pqrGuid: String,
     val pqrLastModified: Instant,
     val pqrStored: Instant,
-    val pqrQrCodeUrl: String,
+    val pqrQrCodeUrl: Url,
     val pqrStatus: StatusEnum = StatusEnum.ACTIVE,
 )

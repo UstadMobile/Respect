@@ -23,7 +23,7 @@ class AuthenticateQrBadgeUseCaseDbImpl(
             ?: throw ForbiddenException("QR badge not found")
 
         // Verify the URL matches exactly
-        if (qrCodeEntity.pqrQrCodeUrl != credential.qrCodeUrl.toString()) {
+        if (qrCodeEntity.pqrQrCodeUrl != credential.qrCodeUrl) {
             throw ForbiddenException("QR badge URL mismatch")
         }
 

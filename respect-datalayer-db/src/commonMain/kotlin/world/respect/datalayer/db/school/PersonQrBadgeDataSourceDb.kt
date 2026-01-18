@@ -13,8 +13,10 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.asEntity
 import world.respect.datalayer.db.school.adapters.asModel
+import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.PersonQrBadgeDataSource
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.model.PersonQrBadge
 import kotlin.time.Clock
 
@@ -23,24 +25,29 @@ class PersonQrBadgeDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
 ) : PersonQrCodeBadgeDataSourceLocal {
 
-    private suspend fun upsert(
-        list: List<PersonQrBadge>,
-        forceOverwrite: Boolean
-    ) {
-        val timeNow = Clock.System.now()
 
+    override suspend fun store(list: List<PersonQrBadge>) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val toUpdate = list.filter {
-                    forceOverwrite || (schoolDb.getPersonQrBadgeEntityDao().getLastModifiedByUidNum(
-                        uidNum = uidNumberMapper(it.personGuid)
-                    ) ?: 0) < it.lastModified.toEpochMilliseconds()
-                }.map {
-                    it.copy(stored = timeNow).asEntity(uidNumberMapper)
+                val now = Clock.System.now()
+                list.forEach { personQrBadge ->
+                    if(
+                        !checkPersonPermissionUseCase(
+                            otherPersonUid = personQrBadge.personGuid,
+                            otherPersonKnownRole = null,
+                            permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS,
+                        )
+                    ) {
+                        throw ForbiddenException("Authenticated user does not have permission to set password ${personQrBadge.personGuid}")
+                    }
                 }
-                schoolDb.getPersonQrBadgeEntityDao().upsertAsyncList(toUpdate)
+
+                schoolDb.getPersonQrBadgeEntityDao().upsertAsyncList(
+                    list.map { it.copy(stored = now).asEntity(uidNumberMapper) }
+                )
             }
         }
     }
@@ -51,8 +58,10 @@ class PersonQrBadgeDataSourceDb(
     ): DataLoadState<List<PersonQrBadge>> {
         return DataReadyState(
             data = schoolDb.getPersonQrBadgeEntityDao().findAll(
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                includeDeleted = listParams.includeDeleted
+                includeDeleted = listParams.common.includeDeleted ?: false,
+                qrCodeUrl = listParams.qrCodeUrl?.toString(),
             ).map {
                 it.asModel()
             }
@@ -63,9 +72,11 @@ class PersonQrBadgeDataSourceDb(
         loadParams: DataLoadParams,
         listParams: PersonQrBadgeDataSource.GetListParams
     ): Flow<DataLoadState<List<PersonQrBadge>>> {
-        return schoolDb.getPersonQrBadgeEntityDao().findAllByPersonGuidAsFlow(
-            personGuid = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
-            includeDeleted = listParams.includeDeleted
+        return schoolDb.getPersonQrBadgeEntityDao().findAllAsFlow(
+            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+            personGuidNum = listParams.common.guid?.let { uidNumberMapper(it) } ?: 0,
+            includeDeleted = listParams.common.includeDeleted ?: false,
+            qrCodeUrl = listParams.qrCodeUrl?.toString(),
         ).map { list ->
             DataReadyState(
                 data = list.map { it.asModel() }
@@ -99,15 +110,25 @@ class PersonQrBadgeDataSourceDb(
         }
     }
 
-    override suspend fun store(list: List<PersonQrBadge>) {
-        upsert(list, false)
-    }
 
     override suspend fun updateLocal(
         list: List<PersonQrBadge>,
         forceOverwrite: Boolean
     ) {
-        upsert(list, forceOverwrite)
+        val timeNow = Clock.System.now()
+
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val toUpdate = list.filter {
+                    forceOverwrite || (schoolDb.getPersonQrBadgeEntityDao().getLastModifiedByUidNum(
+                        uidNum = uidNumberMapper(it.personGuid)
+                    ) ?: 0) < it.lastModified.toEpochMilliseconds()
+                }.map {
+                    it.copy(stored = timeNow).asEntity(uidNumberMapper)
+                }
+                schoolDb.getPersonQrBadgeEntityDao().upsertAsyncList(toUpdate)
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<PersonQrBadge> {

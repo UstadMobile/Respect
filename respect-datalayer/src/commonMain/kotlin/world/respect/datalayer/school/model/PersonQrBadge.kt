@@ -1,5 +1,6 @@
 package world.respect.datalayer.school.model
 
+import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
@@ -10,7 +11,7 @@ import world.respect.lib.serializers.InstantAsISO8601
 @Serializable
 data class PersonQrBadge(
     val personGuid: String,
-    val qrCodeUrl: String,
+    val qrCodeUrl: Url,
     override val lastModified: InstantAsISO8601,
     override val stored: InstantAsISO8601,
     val status: StatusEnum = StatusEnum.ACTIVE,

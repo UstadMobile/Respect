@@ -515,4 +515,6 @@
 
     <string name="section_name">Section name</string>
 
+    <string name="not_set">Not set</string>
+
 </resources>

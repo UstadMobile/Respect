@@ -1,10 +1,10 @@
 package world.respect.datalayer.school
 
 import io.ktor.http.Parameters
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.school.SchoolAppDataSource.Companion.INCLUDE_DELETED
 import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -13,13 +13,13 @@ interface PersonQrBadgeDataSource : WritableDataSource<PersonQrBadge> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
-        val includeDeleted: Boolean = false
+        val qrCodeUrl: Url? = null,
     ) {
         companion object {
             fun fromParams(params: Parameters): GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
-                    includeDeleted = params[INCLUDE_DELETED]?.toBoolean() ?: false
+                    qrCodeUrl = params[PARAM_QRCODE_URL]?.let { Url(it) },
                 )
             }
         }
@@ -49,6 +49,8 @@ interface PersonQrBadgeDataSource : WritableDataSource<PersonQrBadge> {
     companion object {
 
         const val ENDPOINT_NAME = "personqrbadge"
+
+        const val PARAM_QRCODE_URL = "qrCodeUrl"
 
     }
 }

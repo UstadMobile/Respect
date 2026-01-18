@@ -77,7 +77,7 @@ class SchoolDataSourceDb(
 
 
     override val personQrBadgeDataSource: PersonQrCodeBadgeDataSourceLocal by lazy {
-        PersonQrBadgeDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+        PersonQrBadgeDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, checkPersonPermissionUseCase)
     }
 
     override val reportDataSource: ReportDataSourceLocal by lazy {

@@ -51,10 +51,12 @@ class PersonQrCodeBadgeDataSourceRepository(
         listParams: PersonQrBadgeDataSource.GetListParams
     ): Flow<DataLoadState<List<PersonQrBadge>>> {
         return local.listAllAsFlow(loadParams, listParams).combineWithRemote(
-            remoteFlow = remote.listAllAsFlow(loadParams, listParams.copy(includeDeleted = true))
-                .onEach {
-                    local.updateFromRemoteListIfNeeded(it, validationHelper)
-                }
+            remoteFlow = remote.listAllAsFlow(
+                loadParams,
+                listParams.copy(common = listParams.common.copy(includeDeleted = true))
+            ).onEach {
+                local.updateFromRemoteListIfNeeded(it, validationHelper)
+            }
         )
     }
 

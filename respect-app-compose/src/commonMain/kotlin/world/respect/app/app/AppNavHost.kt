@@ -596,6 +596,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<CreateAccountSetPassword> {
             CreateAccountSetPasswordScreen(
                 viewModel = respectViewModel(

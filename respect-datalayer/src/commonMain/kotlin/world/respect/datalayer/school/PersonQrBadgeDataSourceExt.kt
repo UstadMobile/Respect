@@ -12,8 +12,10 @@ fun PersonQrBadgeDataSource.findByPersonGuidAsFlow(
 ): Flow<DataLoadState<PersonQrBadge>> {
     return listAllAsFlow(
         listParams = PersonQrBadgeDataSource.GetListParams(
-            common = GetListCommonParams(guid = guid),
-            includeDeleted = false
+            common = GetListCommonParams(
+                guid = guid,
+                includeDeleted = false,
+            ),
         )
     ).map {
         it.firstOrNotLoaded()

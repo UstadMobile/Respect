@@ -48,10 +48,8 @@ import world.respect.app.util.ext.toImageVector
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
-import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
-import world.respect.shared.util.ext.fullName
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.generated.resources.more_options
 import world.respect.shared.util.ext.isLoading

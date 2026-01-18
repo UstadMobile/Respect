@@ -11,25 +11,14 @@ import world.respect.datalayer.db.school.entities.PersonQrBadgeEntity
 interface PersonQrBadgeEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(personQrCodeEntity: PersonQrBadgeEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAsyncList(list: List<PersonQrBadgeEntity>)
 
-    @Query("SELECT * FROM PersonQrBadgeEntity")
-    suspend fun getAll(): List<PersonQrBadgeEntity>
-
-    @Query(
-        """
-        SELECT PersonQrBadgeEntity.*
-          FROM PersonQrBadgeEntity
-         WHERE PersonQrBadgeEntity.pqrGuidNum = :personGuidNum
-         AND (:includeDeleted OR PersonQrBadgeEntity.pqrStatus = 1) 
-    """
-    )
+    @Query(LIST_SQL)
     suspend fun findAll(
+        authenticatedPersonUidNum: Long,
         personGuidNum: Long,
-        includeDeleted: Boolean = false
+        includeDeleted: Boolean = false,
+        qrCodeUrl: String?,
     ): List<PersonQrBadgeEntity>
 
     @Query(
@@ -72,29 +61,12 @@ interface PersonQrBadgeEntityDao {
         uids: List<Long>
     ): List<PersonQrBadgeEntity>
 
-    @Query(
-        """
-        SELECT PersonQrBadgeEntity.*
-          FROM PersonQrBadgeEntity
-         WHERE PersonQrBadgeEntity.pqrGuid = :personGuid
-    """
-    )
-    suspend fun findAllByPersonGuid(
-        personGuid: String
-    ): List<PersonQrBadgeEntity>
-
-    @Query(
-        """
-        SELECT PersonQrBadgeEntity.*
-          FROM PersonQrBadgeEntity
-         WHERE PersonQrBadgeEntity.pqrGuidNum = :personGuid
-         AND (:includeDeleted OR PersonQrBadgeEntity.pqrStatus = 1)  
-
-    """
-    )
-    fun findAllByPersonGuidAsFlow(
-        personGuid: Long,
-        includeDeleted: Boolean = false
+    @Query(LIST_SQL)
+    fun findAllAsFlow(
+        authenticatedPersonUidNum: Long,
+        personGuidNum: Long,
+        includeDeleted: Boolean = false,
+        qrCodeUrl: String?,
     ): Flow<List<PersonQrBadgeEntity>>
 
     @Query(
@@ -114,14 +86,6 @@ interface PersonQrBadgeEntityDao {
 
     @Query(
         """
-        DELETE FROM PersonQrBadgeEntity 
-         WHERE pqrGuid = :guidNum
-    """
-    )
-    suspend fun deleteByGuid(guidNum: Long)
-
-    @Query(
-        """
         SELECT * 
          FROM PersonQrBadgeEntity
         WHERE pqrGuidNum = :guidnum
@@ -129,5 +93,23 @@ interface PersonQrBadgeEntityDao {
     )
     fun findByGuidHashAsFlow(guidnum: Long): Flow<PersonQrBadgeEntity?>
 
+    companion object {
+
+        const val LIST_SQL = """
+            WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},  
+                 ${PersonEntityDao.AUTHENTICATED_PERSON_CLASS_PERMISSIONS}
+                 
+          SELECT PersonQrBadgeEntity.*
+            FROM PersonQrBadgeEntity
+                 JOIN PersonEntity 
+                      ON PersonEntity.pGuidHash = PersonQrBadgeEntity.pqrGuidNum
+
+           WHERE PersonQrBadgeEntity.pqrGuidNum = :personGuidNum
+             AND (:includeDeleted OR PersonQrBadgeEntity.pqrStatus = 1)        
+             AND (:qrCodeUrl IS NULL OR PersonQrBadgeEntity.pqrQrCodeUrl = :qrCodeUrl)
+             AND (${PersonEntityDao.AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL})    
+        """
+
+    }
 
 }

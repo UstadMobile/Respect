@@ -4,10 +4,11 @@ import io.ktor.http.Url
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 
 object UrlParser {
-    fun extractBadgeNumberFromUrl(url: String): String? {
+    fun extractBadgeNumberFromUrl(url: Url): String? {
+        val urlStr = url.toString()
         val idSegment = "/id/"
-        if (!url.contains(idSegment)) return null
-        val afterId = url.substringAfter(idSegment)
+        if (!urlStr.contains(idSegment)) return null
+        val afterId = urlStr.substringAfter(idSegment)
         val badgeId = afterId
             .substringBefore('?')
             .substringBefore('#')

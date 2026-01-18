@@ -81,7 +81,7 @@ class PersonQrCodeBadgeDataSourceRepository(
         remoteWriteQueue.add(
             list.map {
                 WriteQueueItem(
-                    model = WriteQueueItem.Model.PERSON_QRCODE,
+                    model = WriteQueueItem.Model.PERSON_QRBADGE,
                     uid = it.personGuid,
                     timeQueued = timeNow,
                 )

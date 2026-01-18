@@ -1,7 +1,6 @@
 package world.respect.shared.viewmodel.scanqrcode
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
@@ -9,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -36,8 +34,6 @@ import world.respect.shared.util.extractSchoolUrl
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppActionButton
 import world.respect.shared.viewmodel.app.appstate.AppStateIcon
-import world.respect.shared.viewmodel.app.appstate.Snack
-import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class ScanQRCodeUiState(
     val errorMessage: UiText? = null,
@@ -46,7 +42,6 @@ data class ScanQRCodeUiState(
 
 class ScanQRCodeViewModel(
     savedStateHandle: SavedStateHandle,
-    private val snackBarDispatcher: SnackBarDispatcher,
     private val resultReturner: NavResultReturner,
     private val respectAccountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinComponent {
@@ -90,15 +85,13 @@ class ScanQRCodeViewModel(
                 } else {
                     authenticateWithQrCode(Url(url))
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Napier.e("Error processing QR Code", e)
                 _uiState.update {
                     it.copy(
                         errorMessage = e.getUiTextOrGeneric()
                     )
                 }
-
-                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
             }
         }
     }
@@ -109,56 +102,47 @@ class ScanQRCodeViewModel(
         }
     }
 
-    fun handleScanError(errorMessage: String) {
+    fun onQrCodeScanError(exception: Exception) {
+        Napier.w("QR Code Scan error", exception)
         _uiState.update {
             it.copy(
-                errorMessage = errorMessage.asUiText(),
-                showManualEntryDialog = false
+                errorMessage = exception.getUiTextOrGeneric(),
             )
         }
     }
 
-    private fun authenticateWithQrCode(url: Url) {
-        try {
-            val credential = RespectQRBadgeCredential(qrCodeUrl = url)
-            val schoolUrl = credential.extractSchoolUrl()
+    private suspend fun authenticateWithQrCode(url: Url) {
+        val credential = RespectQRBadgeCredential(qrCodeUrl = url)
+        val schoolUrl = credential.extractSchoolUrl()
 
-            if (schoolUrl == null) {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = Res.string.qr_code_invalid_format.asUiText(),
-                        showManualEntryDialog = false
-                    )
-                }
-                _appUiState.update { prev ->
-                    prev.copy(
-                        actions = emptyList()
-                    )
-                }
-                return
-            }
-
-            viewModelScope.launch {
-                respectAccountManager.login(
-                    credential = credential,
-                    schoolUrl = schoolUrl
-                )
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        destination = RespectAppLauncher(),
-                        clearBackStack = true,
-                    )
-                )
-            }
-            _uiState.update { it.copy(showManualEntryDialog = false) }
-
-        } catch (e: Exception) {
+        if (schoolUrl == null) {
             _uiState.update {
                 it.copy(
-                    errorMessage = e.getUiTextOrGeneric()
+                    errorMessage = Res.string.qr_code_invalid_format.asUiText(),
+                    showManualEntryDialog = false
                 )
             }
+
+            _appUiState.update { prev ->
+                prev.copy(
+                    actions = emptyList()
+                )
+            }
+            return
         }
+
+        respectAccountManager.login(
+            credential = credential,
+            schoolUrl = schoolUrl
+        )
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = RespectAppLauncher(),
+                clearBackStack = true,
+            )
+        )
+
     }
 
     private fun handleQrCodeForAccountManagement(
@@ -192,37 +176,29 @@ class ScanQRCodeViewModel(
                     showManualEntryDialog = false
                 )
             }
-            try {
-                if (route.resultDest != null) {
-                    // Coming from ManageAccount
-                    resultReturner.sendResultIfResultExpected(
-                        route = route,
-                        navCommandFlow = _navCommandFlow,
-                        result = url,
+
+            if (
+                //If sending result using nav result returner, then return/pop as normal
+                !resultReturner.sendResultIfResultExpected(
+                    route = route,
+                    navCommandFlow = _navCommandFlow,
+                    result = url,
+                )
+            ) {
+                // Else - user is coming from CreateAccountSetUserName and needs to go forward to
+                // ManageAccount
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = ManageAccount(
+                            guid = personGuid,
+                            qrUrlStr = url,
+                            username = route.username
+                        ),
+                        popUpToClass = CreateAccountSetUsername::class,
+                        popUpToInclusive = true
                     )
-                } else {
-                    // Coming from CreateAccountSetUserName
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            destination = ManageAccount(
-                                guid = personGuid,
-                                qrUrlStr = url,
-                                username = route.username
-                            ),
-                            popUpToClass = CreateAccountSetUsername::class,
-                            popUpToInclusive = true
-                        )
-                    )
-                    _uiState.update { it.copy(showManualEntryDialog = false) }
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = e.getUiTextOrGeneric(),
-                    )
-                }
-                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
-                throw e
+                )
+                _uiState.update { it.copy(showManualEntryDialog = false) }
             }
         }
     }

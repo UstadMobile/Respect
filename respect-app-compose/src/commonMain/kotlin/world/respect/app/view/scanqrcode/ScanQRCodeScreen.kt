@@ -111,17 +111,12 @@ fun ScanQRCodeScreen(
                     when (result) {
                         is BarcodeResult.OnSuccess -> {
                             showScanner = false
-                            coroutineScope.launch {
-                                viewModel.onQrCodeScanned(result.barcode.data)
-                            }
+                            viewModel.onQrCodeScanned(result.barcode.data)
                         }
 
                         is BarcodeResult.OnFailed -> {
-                            result.exception.printStackTrace()
                             showScanner = false
-                            coroutineScope.launch {
-                                viewModel.handleScanError(result.exception?.message ?: "Scan failed")
-                            }
+                            viewModel.onQrCodeScanError(result.exception)
                         }
 
                         BarcodeResult.OnCanceled -> {

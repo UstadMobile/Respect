@@ -184,7 +184,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Scan QR code badge"
-- tapOn: "More Info"
+- tapOn: "more_options"
 - tapOn: "Paste URL"
 - tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121

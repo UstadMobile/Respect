@@ -115,7 +115,7 @@ fun Url.schoolUrlOrNull(): Url? {
     return if(schoolUrl == "") {
         null
     }else {
-        Url(urlStr.requirePostfix("/"))
+        Url(schoolUrl.requirePostfix("/"))
     }
 }
 

@@ -64,7 +64,10 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Date of birth"
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
@@ -90,7 +93,10 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
 - inputText: "21255543268"
 - runFlow:
     when:
@@ -99,7 +105,10 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- eraseText: 20
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "ParentAuser@gm"
@@ -110,7 +119,10 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Email"
 - inputText: "ParentAuser@gmail.com"
 - runFlow:
     when:
@@ -162,7 +174,10 @@ onFlowComplete:
 - inputText: "test"
 - tapOn: "Save"
 - assertVisible: "Password must be at least 6 characters"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Username"
 - inputText: "test123"
 - tapOn: "Save"
 - assertVisible: "Manage account"

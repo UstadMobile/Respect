@@ -111,6 +111,8 @@
     <string name="username_label">Username</string>
     <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>
+    <string name="error_assign_qr_code">Failed to assign QR code</string>
+    <string name="error_qr_already_assigned">This QR code is already assigned to another student</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
     <string name="date_later">Start date cannot be later than end date*</string>

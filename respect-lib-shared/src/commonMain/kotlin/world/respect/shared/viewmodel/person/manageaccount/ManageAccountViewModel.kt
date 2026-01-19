@@ -32,6 +32,8 @@ import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.error_assign_qr_code
+import world.respect.shared.generated.resources.error_qr_already_assigned
 import world.respect.shared.generated.resources.manage_account
 import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.HowPasskeyWorks
@@ -305,11 +307,11 @@ class ManageAccountViewModel(
             if (qrCodeAlreadyAssignedToAnotherPerson) {
                 _uiState.update { prev ->
                     prev.copy(
-                        errorText = StringUiText("This QR code is already assigned to another student")
+                        errorText = Res.string.error_qr_already_assigned.asUiText()
                     )
                 }
                 snackBarDispatcher.showSnackBar(
-                    Snack("This QR code is already assigned to another student".asUiText())
+                    Snack(Res.string.error_qr_already_assigned.asUiText())
                 )
             } else {
                 val now = Clock.System.now()
@@ -331,8 +333,7 @@ class ManageAccountViewModel(
         } catch (e: Exception) {
             _uiState.update { prev ->
                 prev.copy(
-                    errorText = StringUiText("Failed to assign QR code: ${e.message}")
-                )
+                    errorText = "${Res.string.error_assign_qr_code}: ${e.message ?: "Unknown error"}".asUiText()                )
             }
             throw e
         }

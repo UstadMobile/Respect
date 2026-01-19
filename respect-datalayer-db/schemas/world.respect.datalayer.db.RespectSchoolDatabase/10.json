@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "8a625ce28f04c5a5d8f58c81c69650b8",
+    "identityHash": "3329166ed9cd86ace1d6562a3ff51ee4",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1096,12 +1096,23 @@
           "columnNames": [
             "pqrGuidNum"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_PersonQrBadgeEntity_pqrQrCodeUrl",
+            "unique": false,
+            "columnNames": [
+              "pqrQrCodeUrl"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonQrBadgeEntity_pqrQrCodeUrl` ON `${TABLE_NAME}` (`pqrQrCodeUrl`)"
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8a625ce28f04c5a5d8f58c81c69650b8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3329166ed9cd86ace1d6562a3ff51ee4')"
     ]
   }
 }

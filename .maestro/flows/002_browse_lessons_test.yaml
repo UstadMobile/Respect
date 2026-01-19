@@ -17,7 +17,6 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"

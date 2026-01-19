@@ -1,0 +1,16 @@
+appId: world.respect.app
+
+---
+# eraseText command got a known issue on Maestro, reference:  https://docs.maestro.dev/api-reference/commands/erasetext
+- longPressOn: ${TEXT}
+- runFlow:
+    when:
+      notVisible: 'Select all'
+    commands:
+      - tapOn: 'Cut'   #On Phone field Select All option not visible, so instead use cut to remove the text
+- runFlow:
+    when:
+      visible: "Select all"
+    commands:
+      - tapOn: 'Select all'
+- eraseText

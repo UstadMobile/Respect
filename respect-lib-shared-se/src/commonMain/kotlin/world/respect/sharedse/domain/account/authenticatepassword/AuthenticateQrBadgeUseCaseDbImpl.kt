@@ -22,11 +22,6 @@ class AuthenticateQrBadgeUseCaseDbImpl(
         val qrCodeEntity = schoolDb.getPersonQrBadgeEntityDao().findByQrCodeUrl(credential.qrCodeUrl.toString())
             ?: throw ForbiddenException("QR badge not found")
 
-        // Verify the URL matches exactly
-        if (qrCodeEntity.pqrQrCodeUrl != credential.qrCodeUrl) {
-            throw ForbiddenException("QR badge URL mismatch")
-        }
-
         // Find the person using the GUID from the QR code entity
         val personEntity = schoolDb.getPersonEntityDao().findByGuidNum(
             uidNumberMapper(qrCodeEntity.pqrGuid)

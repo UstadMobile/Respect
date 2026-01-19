@@ -36,8 +36,10 @@ onFlowComplete:
 - assertVisible: "Invite multiple people"
 - assertVisible: "Allow multiple people to use this invite"  #switch is off
 - assertVisible: "Approval required"    #switch is off
-- tapOn: "Role"
-- tapOn: "Teacher"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
 - assertVisible: "Copy link"
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via email"
@@ -197,8 +199,9 @@ onFlowComplete:
     id: "app_title"
     text: "Invite person"
 - tapOn: "Approval required"  #switch is ON
-- assertVisible:
+- tapOn:
     id: "role"
+- tapOn:
     text: "Parent"
 - copyTextFrom:
     id: "copy_link"

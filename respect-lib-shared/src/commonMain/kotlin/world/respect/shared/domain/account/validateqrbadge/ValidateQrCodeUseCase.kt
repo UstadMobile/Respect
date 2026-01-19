@@ -32,7 +32,7 @@ class ValidateQrCodeUseCase(
         // 2. Validate starts with school URL
         if (!isValidSchoolUrl(qrCodeUrl)) return QrValidationResult.InvalidUrl
 
-        // 3. Validate contains /respect_qr_badge section
+        // 3. Validate contains /personqrbadge section
         if (!hasValidBadgeSection(qrCodeUrl)) return QrValidationResult.InvalidUrl
 
         return QrValidationResult.Valid
@@ -56,6 +56,6 @@ class ValidateQrCodeUseCase(
     }
 
     private fun hasValidBadgeSection(qrCodeUrl: String): Boolean {
-        return qrCodeUrl.contains("/respect_qr_badge", ignoreCase = true)
+        return qrCodeUrl.contains("/personqrbadge", ignoreCase = true)
     }
 }

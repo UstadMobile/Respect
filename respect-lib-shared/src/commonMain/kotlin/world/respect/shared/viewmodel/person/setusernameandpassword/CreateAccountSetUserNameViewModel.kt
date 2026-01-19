@@ -17,6 +17,7 @@ import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.ext.NextAfterScan
@@ -64,6 +65,8 @@ class CreateAccountSetUserNameViewModel(
 
     private val route: CreateAccountSetUsername = savedStateHandle.toRoute()
 
+    private val usernameSuggestionUseCase: UsernameSuggestionUseCase by inject()
+
     private val _uiState = MutableStateFlow(CreateAccountSetUserNameUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -82,10 +85,23 @@ class CreateAccountSetUserNameViewModel(
             ).collect { personResult ->
                 val person = personResult.dataOrNull()
                 val isStudent = person?.isStudent() == true
+                val suggestedUsername = person?.let { personData ->
+                    val fullName = listOfNotNull(
+                        personData.givenName,
+                        personData.familyName
+                    ).joinToString(" ").trim()
+
+                    if (fullName.isNotBlank()) {
+                        usernameSuggestionUseCase(fullName)
+                    } else {
+                        ""
+                    }
+                } ?: ""
 
                 _uiState.update { prev ->
                     prev.copy(
-                        showQrBadgeInfoBox = isStudent
+                        showQrBadgeInfoBox = isStudent,
+                        username = suggestedUsername
                     )
                 }
                 _appUiState.update { appUiState ->

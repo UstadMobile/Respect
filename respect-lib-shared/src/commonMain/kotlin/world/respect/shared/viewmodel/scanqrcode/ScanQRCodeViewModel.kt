@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.ext.NextAfterScan
@@ -30,7 +31,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.extractSchoolUrl
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppActionButton
 import world.respect.shared.viewmodel.app.appstate.AppStateIcon
@@ -113,7 +113,7 @@ class ScanQRCodeViewModel(
 
     private suspend fun authenticateWithQrCode(url: Url) {
         val credential = RespectQRBadgeCredential(qrCodeUrl = url)
-        val schoolUrl = credential.extractSchoolUrl()
+        val schoolUrl = url.schoolUrlOrNull()
 
         if (schoolUrl == null) {
             _uiState.update {

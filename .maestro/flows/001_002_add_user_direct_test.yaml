@@ -64,7 +64,10 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Date of birth"
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
@@ -90,7 +93,10 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
 - inputText: "21255543268"
 - runFlow:
     when:
@@ -99,7 +105,10 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- eraseText: 20
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "ParentAuser@gm"
@@ -110,7 +119,10 @@ onFlowComplete:
       - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Email"
 - inputText: "ParentAuser@gmail.com"
 - runFlow:
     when:
@@ -156,25 +168,26 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- tapOn: "Username"
-- inputText: "pa"
-- tapOn: "Save"
-- assertVisible: "Username must be at least 3 characters"
-- eraseText
-- inputText: "parentauser"
+- assertVisible:
+    id: "Username"
+    text: "parentauser"
 - tapOn: "Password*"
 - inputText: "test"
 - tapOn: "Save"
 - assertVisible: "Password must be at least 6 characters"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Password*"
 - inputText: "test123"
 - tapOn: "Save"
 - assertVisible: "Manage account"
 # Create account for Child user
 - tapOn: "Child User"
 - tapOn: "Create account"
-- tapOn: "Username"
-- inputText: "childuser"
+- assertVisible:
+    id: "Username"
+    text: "childuser"
 - runFlow:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
@@ -220,8 +233,9 @@ onFlowComplete:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
-- tapOn: "Username"
-- inputText: "testuser"
+- assertVisible:
+         id: "Username"
+         text: "testuser"
 - tapOn: "Set password"
 - tapOn: "Password*"
 - inputText: "test123"

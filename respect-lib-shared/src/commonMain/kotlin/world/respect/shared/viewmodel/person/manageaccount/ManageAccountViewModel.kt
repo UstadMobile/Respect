@@ -23,8 +23,8 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
-import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.school.model.PersonPassword
+import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
@@ -48,7 +48,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.UrlParser
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.time.Clock
 
@@ -310,9 +309,6 @@ class ManageAccountViewModel(
                         errorText = Res.string.error_qr_already_assigned.asUiText()
                     )
                 }
-                snackBarDispatcher.showSnackBar(
-                    Snack(Res.string.error_qr_already_assigned.asUiText())
-                )
             } else {
                 val now = Clock.System.now()
                 schoolDataSource.personQrBadgeDataSource.store(

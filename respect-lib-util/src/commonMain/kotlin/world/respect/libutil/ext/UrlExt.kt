@@ -126,3 +126,25 @@ fun Url.schoolUrlOrNull(): Url? {
  */
 fun Url.requireSchoolUrl(): Url = schoolUrlOrNull()
     ?: throw IllegalArgumentException("Not a valid school URL: does not contain divider '$RESPECT_SCHOOL_LINK_DIVIDER'")
+
+/**
+ * Where the given URL is an endpoint, we normalize it to:
+ *
+ * a) convert the host into lower case
+ * b) require a trailing slash
+ *
+ * This is necessary because there are instances where we use the URL as a key e.g. in database
+ * lookups to find configuration.
+ *
+ * This does not handle any use of ../ ./ etc.
+ */
+fun Url.normalizeForEndpoint(): Url {
+    return URLBuilder(this).apply {
+        host = host.lowercase()
+
+        if(pathSegments.lastOrNull()?.endsWith("/") != true) {
+            appendPathSegments("/")
+        }
+    }.build()
+}
+

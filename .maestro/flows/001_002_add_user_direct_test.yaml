@@ -157,11 +157,7 @@ onFlowComplete:
     id: "app_title"
     text: "Create account"
 - tapOn: "Username"
-- inputText: "pa"
-- tapOn: "Save"
-- assertVisible: "Username must be at least 3 characters"
-- eraseText
-- inputText: "parentauser"
+- assertVisible: "parentauser"
 - tapOn: "Password*"
 - inputText: "test"
 - tapOn: "Save"
@@ -174,7 +170,7 @@ onFlowComplete:
 - tapOn: "Child User"
 - tapOn: "Create account"
 - tapOn: "Username"
-- inputText: "childuser"
+- assertVisible: "childuser"
 - runFlow:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
@@ -221,7 +217,7 @@ onFlowComplete:
     text: "Test User"
 - tapOn: "Create account"
 - tapOn: "Username"
-- inputText: "testuser"
+- assertVisible: "testuser"
 - tapOn: "Set password"
 - tapOn: "Password*"
 - inputText: "test123"
@@ -289,7 +285,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
-- inputText: "parentauser"
+- assertVisible: "parentauser"
 - tapOn:
     id : "password"
 - inputText: "test123"

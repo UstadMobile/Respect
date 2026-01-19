@@ -71,21 +71,6 @@ interface PersonQrBadgeEntityDao {
 
     @Query(
         """
-        SELECT EXISTS(
-            SELECT 1 
-            FROM PersonQrBadgeEntity 
-            WHERE pqrQrCodeUrl = :qrCodeUrl
-              AND pqrGuid != :excludePersonGuid
-        )
-    """
-    )
-    suspend fun existsByQrCodeUrlExcludingPerson(
-        qrCodeUrl: String,
-        excludePersonGuid: Long
-    ): Boolean
-
-    @Query(
-        """
         SELECT * 
          FROM PersonQrBadgeEntity
         WHERE pqrGuidNum = :guidnum

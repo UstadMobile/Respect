@@ -158,8 +158,9 @@ class ManageAccountViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.personQrBadgeDataSource.findByPersonGuidAsFlow(
-                route.guid
+            schoolDataSource.personQrBadgeDataSource.findByGuidAsFlow(
+                loadParams = DataLoadParams(),
+                guid = route.guid
             ).collect { qrBadgeState ->
                 _uiState.update {
                     it.copy(

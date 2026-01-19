@@ -100,6 +100,7 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
+
     override val personQrBadgeDataSource: PersonQrBadgeDataSource by lazy {
         PersonQrBadgeDataSourceHttp(
             schoolUrl = schoolUrl,

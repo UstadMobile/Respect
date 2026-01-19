@@ -285,7 +285,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
-- assertVisible: "parentauser"
+- inputText: "parentauser"
 - tapOn:
     id : "password"
 - inputText: "test123"

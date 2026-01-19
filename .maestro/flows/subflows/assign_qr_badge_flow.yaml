@@ -5,7 +5,7 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Scan QR code badge"
-- tapOn: "More Info"
+- tapOn: "More Options"
 - tapOn: "Paste URL"
 - tapOn: "Url"
 - inputText: ${QR_BADGE_LINK}

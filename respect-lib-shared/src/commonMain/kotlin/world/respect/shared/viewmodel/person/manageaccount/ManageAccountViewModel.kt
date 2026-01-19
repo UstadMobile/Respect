@@ -310,9 +310,6 @@ class ManageAccountViewModel(
                         errorText = Res.string.error_qr_already_assigned.asUiText()
                     )
                 }
-                snackBarDispatcher.showSnackBar(
-                    Snack(Res.string.error_qr_already_assigned.asUiText())
-                )
             } else {
                 val now = Clock.System.now()
                 schoolDataSource.personQrBadgeDataSource.store(

@@ -134,7 +134,7 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreenForViewModel
-import world.respect.app.view.playlists.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
 import world.respect.app.view.playlists.mapping.share.PlaylistShareScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
@@ -546,7 +546,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            CurriculumMappingEditScreenForViewModel(
+            PlaylistEditScreenForViewModel(
                 viewModel = viewModel
             )
         }

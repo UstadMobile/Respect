@@ -51,12 +51,12 @@ import androidx.compose.ui.draw.alpha
 
 
 @Composable
-fun CurriculumMappingEditScreenForViewModel(
+fun PlaylistEditScreenForViewModel(
     viewModel: PlaylistEditViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    CurriculumMappingEditScreen(
+    PlaylistEditScreen(
         uiState = uiState,
         sectionLinkUiState = viewModel::sectionLinkUiStateFor,
         onTitleChanged = viewModel::onTitleChanged,
@@ -73,7 +73,7 @@ fun CurriculumMappingEditScreenForViewModel(
 }
 
 @Composable
-fun CurriculumMappingEditScreen(
+fun PlaylistEditScreen(
     uiState: PlaylistEditUiState = PlaylistEditUiState(),
     sectionLinkUiState: (PlaylistsSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     onTitleChanged: (String) -> Unit = {},

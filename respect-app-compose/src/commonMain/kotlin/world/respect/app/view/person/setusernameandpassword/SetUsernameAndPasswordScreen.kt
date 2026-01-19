@@ -91,7 +91,7 @@ fun CreateAccountSetUsernameScreen(
                 },
         )
 
-        if (uiState.isStudent) {
+        if (uiState.showQrBadgeInfoBox) {
             RespectQrBadgeInfoBox(
                 onClickQrBadgeLearnMore,
                 onClickAssignQrCodeBadge,
@@ -104,9 +104,10 @@ fun CreateAccountSetUsernameScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (uiState.isStudent) {
+        if (uiState.showQrBadgeInfoBox) {
             Button(
                 onClick = onClickSetPassword,
+                enabled = !appUiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),

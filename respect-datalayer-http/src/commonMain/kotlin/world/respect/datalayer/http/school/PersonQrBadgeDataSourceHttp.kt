@@ -18,6 +18,7 @@ import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
+import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonQrBadgeDataSource
@@ -36,6 +37,7 @@ class PersonQrBadgeDataSourceHttp(
     private suspend fun PersonQrBadgeDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(PersonQrBadgeDataSource.ENDPOINT_NAME)).apply {
             parameters.appendCommonListParams(common)
+            parameters.appendIfNotNull(PersonQrBadgeDataSource.PARAM_QRCODE_URL, qrCodeUrl?.toString())
         }.build()
     }
 
@@ -83,10 +85,6 @@ class PersonQrBadgeDataSourceHttp(
         }.map {
             it.firstOrNotLoaded()
         }
-    }
-
-    override suspend fun existsByQrCodeUrl(url: String,uidNum: Long): Boolean {
-        TODO("Not yet implemented")
     }
 
     override suspend fun store(list: List<PersonQrBadge>) {

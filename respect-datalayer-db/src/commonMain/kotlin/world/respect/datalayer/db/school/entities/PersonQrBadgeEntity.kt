@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import io.ktor.http.Url
@@ -13,6 +14,7 @@ data class PersonQrBadgeEntity(
     val pqrGuid: String,
     val pqrLastModified: Instant,
     val pqrStored: Instant,
+    @ColumnInfo(index = true)
     val pqrQrCodeUrl: Url,
     val pqrStatus: StatusEnum = StatusEnum.ACTIVE,
 )

@@ -35,6 +35,7 @@ interface PersonQrBadgeEntityDao {
         SELECT PersonQrBadgeEntity.*
           FROM PersonQrBadgeEntity
          WHERE PersonQrBadgeEntity.pqrQrCodeUrl = :qrCodeUrl
+           AND PersonQrBadgeEntity.pqrStatus = 1
     """
     )
     suspend fun findByQrCodeUrl(qrCodeUrl: String): PersonQrBadgeEntity?
@@ -71,24 +72,10 @@ interface PersonQrBadgeEntityDao {
 
     @Query(
         """
-        SELECT EXISTS(
-            SELECT 1 
-            FROM PersonQrBadgeEntity 
-            WHERE pqrQrCodeUrl = :qrCodeUrl
-              AND pqrGuid != :excludePersonGuid
-        )
-    """
-    )
-    suspend fun existsByQrCodeUrlExcludingPerson(
-        qrCodeUrl: String,
-        excludePersonGuid: Long
-    ): Boolean
-
-    @Query(
-        """
         SELECT * 
          FROM PersonQrBadgeEntity
         WHERE pqrGuidNum = :guidnum
+          AND pqrStatus = 1
     """
     )
     fun findByGuidHashAsFlow(guidnum: Long): Flow<PersonQrBadgeEntity?>

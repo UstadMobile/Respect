@@ -23,8 +23,8 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.findByPersonGuidAsFlow
-import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.school.model.PersonPassword
+import world.respect.datalayer.school.model.PersonQrBadge
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
@@ -32,6 +32,8 @@ import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.error_assign_qr_code
+import world.respect.shared.generated.resources.error_qr_already_assigned
 import world.respect.shared.generated.resources.manage_account
 import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.HowPasskeyWorks
@@ -46,7 +48,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.UrlParser
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.time.Clock
 
@@ -158,8 +159,9 @@ class ManageAccountViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.personQrBadgeDataSource.findByPersonGuidAsFlow(
-                route.guid
+            schoolDataSource.personQrBadgeDataSource.findByGuidAsFlow(
+                loadParams = DataLoadParams(),
+                guid = route.guid
             ).collect { qrBadgeState ->
                 _uiState.update {
                     it.copy(
@@ -304,12 +306,9 @@ class ManageAccountViewModel(
             if (qrCodeAlreadyAssignedToAnotherPerson) {
                 _uiState.update { prev ->
                     prev.copy(
-                        errorText = StringUiText("This QR code is already assigned to another student")
+                        errorText = Res.string.error_qr_already_assigned.asUiText()
                     )
                 }
-                snackBarDispatcher.showSnackBar(
-                    Snack("This QR code is already assigned to another student".asUiText())
-                )
             } else {
                 val now = Clock.System.now()
                 schoolDataSource.personQrBadgeDataSource.store(
@@ -330,8 +329,7 @@ class ManageAccountViewModel(
         } catch (e: Exception) {
             _uiState.update { prev ->
                 prev.copy(
-                    errorText = StringUiText("Failed to assign QR code: ${e.message}")
-                )
+                    errorText = "${Res.string.error_assign_qr_code}: ${e.message ?: "Unknown error"}".asUiText()                )
             }
             throw e
         }

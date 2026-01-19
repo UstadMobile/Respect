@@ -168,8 +168,9 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- tapOn: "Username"
-- assertVisible: "parentauser"
+- assertVisible:
+    id: "Username"
+    text: "parentauser"
 - tapOn: "Password*"
 - inputText: "test"
 - tapOn: "Save"
@@ -177,15 +178,16 @@ onFlowComplete:
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
-      TEXT: "Username"
+      TEXT: "Password*"
 - inputText: "test123"
 - tapOn: "Save"
 - assertVisible: "Manage account"
 # Create account for Child user
 - tapOn: "Child User"
 - tapOn: "Create account"
-- tapOn: "Username"
-- assertVisible: "childuser"
+- assertVisible:
+    id: "Username"
+    text: "childuser"
 - runFlow:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
@@ -231,8 +233,9 @@ onFlowComplete:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
-- tapOn: "Username"
-- assertVisible: "testuser"
+- assertVisible:
+         id: "Username"
+         text: "testuser"
 - tapOn: "Set password"
 - tapOn: "Password*"
 - inputText: "test123"

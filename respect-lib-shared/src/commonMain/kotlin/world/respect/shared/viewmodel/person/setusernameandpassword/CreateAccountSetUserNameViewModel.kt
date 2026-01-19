@@ -43,8 +43,7 @@ data class CreateAccountSetUserNameUiState(
     val password: String = "",
     val isPasswordSet: Boolean = false,
     val isQrBadgeSet: Boolean = false,
-    val isStudent: Boolean = false,
-    val isQrAlreadyAssigned: Boolean = false
+    val showQrBadgeInfoBox: Boolean = false
 )
 
 /**
@@ -86,7 +85,7 @@ class CreateAccountSetUserNameViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        isStudent = isStudent
+                        showQrBadgeInfoBox = isStudent
                     )
                 }
                 _appUiState.update { appUiState ->

@@ -41,11 +41,6 @@ interface PersonQrBadgeDataSource : WritableDataSource<PersonQrBadge> {
     ): Flow<DataLoadState<PersonQrBadge>>
 
 
-    suspend fun existsByQrCodeUrl(
-        url: String,
-        uidNum: Long
-    ): Boolean
-
     companion object {
 
         const val ENDPOINT_NAME = "personqrbadge"

@@ -85,10 +85,6 @@ class PersonQrBadgeDataSourceHttp(
         }
     }
 
-    override suspend fun existsByQrCodeUrl(url: String,uidNum: Long): Boolean {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun store(list: List<PersonQrBadge>) {
         httpClient.post(
             respectEndpointUrl(PersonQrBadgeDataSource.ENDPOINT_NAME)

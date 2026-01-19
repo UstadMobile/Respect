@@ -101,16 +101,6 @@ class PersonQrBadgeDataSourceDb(
         }
     }
 
-
-    override suspend fun existsByQrCodeUrl(url: String, uidNum: Long): Boolean {
-        return schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                schoolDb.getPersonQrBadgeEntityDao().existsByQrCodeUrlExcludingPerson(url, uidNum)
-            }
-        }
-    }
-
-
     override suspend fun updateLocal(
         list: List<PersonQrBadge>,
         forceOverwrite: Boolean

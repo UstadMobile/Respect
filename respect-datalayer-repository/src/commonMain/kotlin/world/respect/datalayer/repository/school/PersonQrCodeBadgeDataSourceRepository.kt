@@ -71,10 +71,6 @@ class PersonQrCodeBadgeDataSourceRepository(
         )
     }
 
-    override suspend fun existsByQrCodeUrl(url: String, uidNum: Long): Boolean {
-        return local.existsByQrCodeUrl(url, uidNum)
-    }
-
     override suspend fun store(list: List<PersonQrBadge>) {
         local.store(list)
         val timeNow = systemTimeInMillis()

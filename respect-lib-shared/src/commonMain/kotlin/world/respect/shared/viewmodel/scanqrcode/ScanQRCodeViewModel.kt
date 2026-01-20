@@ -188,8 +188,8 @@ class ScanQRCodeViewModel(
                     NavCommand.Navigate(
                         destination = ManageAccount(
                             guid = personGuid,
-                            qrUrlStr = url,
-                            username = route.username
+                            setPersonQrBadgeUrlStr = url,
+                            setPersonQrBadgeUsername = route.username
                         ),
                         popUpToClass = CreateAccountSetUsername::class,
                         popUpToInclusive = true

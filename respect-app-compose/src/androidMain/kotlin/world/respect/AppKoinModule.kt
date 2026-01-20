@@ -1,4 +1,3 @@
-@file:Suppress("UnusedImport")
 
 package world.respect
 
@@ -200,6 +199,8 @@ import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
 import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
+import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
@@ -648,7 +649,13 @@ val appKoinModule = module {
         CustomDeepLinkToUrlUseCase(customProtocol = androidApplication().packageName)
     }
 
+    single {
+        BiometricAuthUseCaseAndroidImpl()
+    }
 
+    single<BiometricAuthUseCase> {
+        get<BiometricAuthUseCaseAndroidImpl>()
+    }
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.

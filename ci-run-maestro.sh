@@ -200,7 +200,7 @@ else
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \
-      .maestro/flows/000_000_hello_world.yaml
+      .maestro/flows/*.yaml
     MAESTRO_STATUS=$?
 fi
 

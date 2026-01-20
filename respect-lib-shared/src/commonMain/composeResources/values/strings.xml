@@ -362,6 +362,8 @@
     <string name="delete">Delete</string>
 
     <string name="accounts">Accounts</string>
+    <string name="parents_only">Parents only</string>
+    <string name="continue_using_fingerprint_or">Continue using fingerprint, biometrics, or device PIN</string>
 
     <string name="people">People</string>
     <string name="person">Person</string>
@@ -477,8 +479,8 @@
     <string name="invite_multiple_allowed">Invite multiple people</string>
     <string name="approval_required">Approval required</string>
     <string name="allow_multiple_people_to_use_this_invite">Allow multiple people to use this invite</string>
-    <string name="invite_via_sms">Send invite via SMS</string>
-    <string name="invite_via_email">Send invite via Email</string>
+    <string name="invite_via_sms">Send link via SMS</string>
+    <string name="invite_via_email">Send link via Email</string>
     <string name="invite_via_share">Share link</string>
     <string name="qr_code">QR code</string>
     <string name="code">Code</string>

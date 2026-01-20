@@ -17,9 +17,8 @@ onFlowComplete:
       file: "scripts/teardown.js"
 
 ---
-- runFlow: "subflows/school_admin_login_flow.yaml"
-
 # Invite new user:
+- runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"
     text: "Apps"
@@ -32,13 +31,15 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "Class name or school name"
-- assertVisible: "TestSchool"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "Invite multiple people"
 - assertVisible: "Allow multiple people to use this invite"  #switch is off
 - assertVisible: "Approval required"    #switch is off
-- tapOn: "Role"
-- tapOn: "Student"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
 - assertVisible: "Copy link"
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via email"
@@ -71,7 +72,7 @@ onFlowComplete:
     id: "app_title"
     text: "Your profile"
 - tapOn: "Your name*"
-- inputText: "Student User"
+- inputText: "TeacherA User"
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
@@ -82,21 +83,17 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- assertVisible: "studentuser"  #use
+- assertVisible: "teacherauser"
 - tapOn: "Next"
 - tapOn: "Password*"
-- inputText: "tests1"
+- inputText: "test123"
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
     text: "Apps"
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
-- assertVisible: "Classes"
 - assertVisible: "People"
-
-# Admin invite Teacher user to a class
-- runFlow: "subflows/school_admin_login_flow.yaml"
 - runFlow:
     file: "subflows/admin_add_class.yaml"
     env:
@@ -104,23 +101,27 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "New Class"
-- tapOn: "Add Teacher"
+- tapOn: "Add Student"
 - tapOn: "Invite person"
 - assertVisible:
     id: "app_title"
     text: "Invite person"
+- assertVisible: "Class name"
+- assertVisible: "New Class"
 - tapOn: "Approval required"  #switch is ON
-- assertVisible:
-      id: "role"
-      text: "Teacher"
+- tapOn:
+      id: role
+- tapOn:
+     text: Student
+     index: 1
 - tapOn: "Invite code"
 - assertVisible:
     id: "app_title"
     text: "Code"
 - copyTextFrom:
-    id: "invite_code"
+      id: "copy_code"
 
-# C) Teacher sign-up via invite code to the class
+# C) Student sign-up via invite code to the class
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -136,70 +137,33 @@ onFlowComplete:
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
-    text: "Invitation"
-- assertVisible: "New Class"
-- tapOn: "Next"
-- assertVisible:
-    id: "app_title"
-    text: "Terms and conditions"
-- tapOn: "Accept"
+- tapOn: "I’m a Student"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
-- tapOn: "Next"
-- assertVisible: "Required field" # Name is mandatory field
 - tapOn: "Your name*"
-- inputText: "Teacher User"
-- tapOn: "Next"
-- assertVisible: "Required field" # Gender is mandatory field
+- inputText: "Student User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Next"
-- assertVisible: "Required field" # DOB is mandatory field
 - tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
-- inputText: ${output.futureDate}
-- tapOn: "Next"
-- assertVisible: "Date of Birth cannot be in the future."
-- eraseText
-- tapOn: "Your date of birth*"
-- runScript:
-    file: "scripts/setDate.js"
-- inputText: ${output.pastYearDateP}
+- inputText: ${output.pastYearDateC}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- extendedWaitUntil:
-    visible: "teacheruser" #username
-    timeout: 10000      # Timeout in milliseconds
+- assertVisible: "studentuser"  #username
 - tapOn: "Next"
-# passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
-- assertVisible: "Password*"
-- tapOn: "Sign-up"
-- assertVisible: "Required field" # Password is mandatory field
 - tapOn: "Password*"
-- inputText: "testt1"
+- inputText: "tests1"
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
 - assertVisible: "Please wait"
 
-# D) Admin approve teacher's request to join the class
-- clearState: world.respect.app
-- runFlow: "subflows/school_admin_login_flow.yaml"
-- tapOn: "Classes"
-- assertVisible:
-    id: "app_title"
-    text: "Classes"
-- tapOn: "New Class"
-- assertVisible: "Pending requests.*"
-- assertVisible: "Teacher User.*"
-- tapOn: "Accept Invite"
-
-# E) Teacher login to the class and share invite link to Parent to join as a family member of student user
+# H) Teacher approve student's request to join the class
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -216,7 +180,17 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
-- tapOn: "People"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn: "New Class"
+- assertVisible: "Pending requests.*"
+- assertVisible: "Student User.*"
+- tapOn: "Accept Invite"
+
+# E) Teacher share invite link to Parent to join as a family member of student user
 - tapOn: "Student User"
 - tapOn: "Edit"
 - tapOn: "New member"
@@ -225,18 +199,18 @@ onFlowComplete:
     id: "app_title"
     text: "Invite person"
 - tapOn: "Approval required"  #switch is ON
-- assertVisible:
+- tapOn:
     id: "role"
+- tapOn:
     text: "Parent"
 - copyTextFrom:
     id: "copy_link"
-- runFlow:
-    file: "subflows/message_paste_invite_link.yaml"
 
-# Parent sign-up their child to the class using invite code
+# Parent sign-up to the app using invite link
 - clearState: world.respect.app
-- runFlow:
-    file: "subflows/message_open_invite_link.yaml"
+- openLink:
+    link: pasteText
+    autoVerify: true
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -266,7 +240,7 @@ onFlowComplete:
 - tapOn: "Next"
 # passkeys are not supported on the school domain being used for end to end test so signup flow is bit different
 - tapOn: "Password*"
-- inputText: "testp1"
+- inputText: "test123"
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
@@ -282,6 +256,8 @@ onFlowComplete:
 # 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
 - tapOn:
     text: "Done"
+
+
 - clearState: world.respect.app
 - launchApp:
     arguments:

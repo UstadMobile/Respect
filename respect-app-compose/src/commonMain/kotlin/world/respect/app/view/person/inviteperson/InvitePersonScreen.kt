@@ -37,6 +37,7 @@ import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.code
 import world.respect.shared.generated.resources.copy_link
 import world.respect.shared.generated.resources.enter_school_name
+import world.respect.shared.generated.resources.invite_code_label
 import world.respect.shared.generated.resources.invite_multiple_allowed
 import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
@@ -91,14 +92,14 @@ fun InvitePersonScreen(
                 .defaultItemPadding()
 
         ) {
-           val res =  if (uiState.className!=null){
-               Res.string.class_name
-            }else{
-               Res.string.enter_school_name
-           }
-            Text(text = stringResource(res))
-            Text(
-                text = uiState.className ?: uiState.schoolName?: "",
+            val res = if (uiState.className != null) {
+                Res.string.class_name
+            } else {
+                Res.string.enter_school_name
+            }
+            ListItem(
+                headlineContent = { Text(stringResource(res)) },
+                supportingContent = { Text(text = uiState.className ?: uiState.schoolName ?: "") }
             )
         }
 
@@ -178,7 +179,7 @@ fun InvitePersonScreen(
         ListItem(
             modifier = Modifier.clickable { onClickGetCode() },
             leadingContent = { Icon(Icons.Default.Code, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.code)) }
+            headlineContent = { Text(stringResource(Res.string.invite_code_label)) }
         )
 
 

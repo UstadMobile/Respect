@@ -81,9 +81,6 @@ data class PlaylistEditUiState(
 
     val selectedGrade: String?
         get() = mapping?.grade
-
-    val selectedLanguage: String?
-        get() = mapping?.language
 }
 
 data class PlaylistSectionUiState(

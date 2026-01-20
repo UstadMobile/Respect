@@ -200,7 +200,7 @@ onFlowComplete:
 - tapOn: "More Options"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
+- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - tapOn: "Ok"
 - assertVisible:
     id: "app_title"
@@ -247,7 +247,7 @@ onFlowComplete:
 - runFlow:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
-      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_qr_badge/id/123121     #Validation to ensure that one QR badge is assigned to one, and only one, student.
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312    #Validation to ensure that one QR badge is assigned to one, and only one, student.
 - assertVisible:
     id: "app_title"
     text: "Manage account"
@@ -256,7 +256,7 @@ onFlowComplete:
 - runFlow:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
-      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_qr_badge/id/983123 #Unique QR
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12345 #Unique QR
 - assertVisible: "QR code badge"
 - assertVisible: "Badge.*"
 - tapOn:
@@ -272,7 +272,7 @@ onFlowComplete:
 - runFlow:
     file: "subflows/assign_qr_badge_flow.yaml"
     env:
-      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_qr_badge/id/983123
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12345
 - assertVisible:
     id: "app_title"
     text: "Manage account"
@@ -362,7 +362,7 @@ onFlowComplete:
 - tapOn: "More Options"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- inputText:  ${output.SCHOOL_URL}respect_qr_badge/id/123121
+- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - tapOn: "OK"
 - assertVisible: "Apps"
 - assertVisible:

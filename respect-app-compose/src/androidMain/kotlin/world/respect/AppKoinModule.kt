@@ -735,12 +735,6 @@ val appKoinModule = module {
                 uidNumberMapper = get(),
             )
         }
-        scoped<AuthenticateQrBadgeUseCase> {
-            AuthenticateQrBadgeUseCaseDbImpl(
-                schoolDb = get(),
-                uidNumberMapper = get(),
-            )
-        }
         scoped<ValidateQrCodeUseCase> {
             ValidateQrCodeUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl

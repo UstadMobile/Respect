@@ -1,4 +1,4 @@
-package world.respect.app.view.settings
+package world.respect.app.view.sharedschooldevice
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,7 +17,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.shared_school_devices
-import world.respect.shared.viewmodel.settings.SchoolSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
 
 @Composable
 fun SchoolSettingsScreen(

@@ -232,9 +232,9 @@ import world.respect.shared.domain.sendinvite.ShareLinkLauncherAndroid
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
-import world.respect.shared.viewmodel.settings.SchoolSettingsViewModel
-import world.respect.shared.viewmodel.settings.SharedDevicesSettingsViewmodel
-import world.respect.shared.viewmodel.settings.SharedSchoolDeviceEnableViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"

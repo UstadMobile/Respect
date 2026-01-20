@@ -1,25 +1,35 @@
-package world.respect.shared.viewmodel.settings
+package world.respect.shared.viewmodel.sharedschooldevice
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.shared.paging.EmptyPagingSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
 import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class SharedDevicesSettingsUiState(
-    val school: List<Person> = emptyList(),
+    val devices: IPagingSourceFactory<Int, Person> = IPagingSourceFactory {
+        EmptyPagingSource()
+    },
     val error: UiText? = null,
     val selfSelectEnabled: Boolean = true,
     val rollNumberLoginEnabled: Boolean = true,
@@ -29,12 +39,24 @@ data class SharedDevicesSettingsUiState(
 
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
-    private val json: Json,
-    private val resultReturner: NavResultReturner,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
+        schoolDataSource.personDataSource.listAsPagingSource(
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
+            )
+        )
+    }
 
     init {
         _appUiState.update {
@@ -48,6 +70,12 @@ class SharedDevicesSettingsViewmodel(
                     visible = true,
                 ),
                 showBackButton = false,
+            )
+        }
+
+        _uiState.update {
+            it.copy(
+                devices = pagingSourceFactoryHolder,
             )
         }
     }

@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.settings
+package world.respect.shared.viewmodel.sharedschooldevice
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -597,15 +597,27 @@ data class PasskeyList(
     val guid: String,
 ) : RespectAppRoute
 
+
+/**
+ * @param guid the Uid of the Person account to manage as person Person.guid
+ * @param setPersonQrBadgeUrlStr see setPersonQrBadgeUrl
+ * @param setPersonQrBadgeUsername When setPersonQrBadgeUrl is non-null, this is the username that
+ *        should be assigned to the person as per guid.
+ */
 @Serializable
 data class ManageAccount(
     val guid: String,
-    val username: String? = null,
-    private val qrUrlStr: String? = null,
+    val setPersonQrBadgeUsername: String? = null,
+    private val setPersonQrBadgeUrlStr: String? = null,
 ) : RespectAppRoute {
 
+    /**
+     * When a QR badge is first assigned as part of creating an account, this is the URL for the
+     * badge. When the user flow is PersonDetail, CreateAccountSetUsername, ScanQRCode, ManageAccount.
+     * ScanQRCode is not scoped to a particular school and cannot handle saving the QR code badge.
+     */
     @Transient
-    val qrUrl: Url? = qrUrlStr?.let { Url(it) }
+    val setPersonQrBadgeUrl: Url? = setPersonQrBadgeUrlStr?.let { Url(it) }
 
 
     companion object {
@@ -615,8 +627,8 @@ data class ManageAccount(
             username: String? = null,
         ) = ManageAccount(
             guid = guid,
-            qrUrlStr = qrUrl?.toString(),
-            username = username,
+            setPersonQrBadgeUrlStr = qrUrl?.toString(),
+            setPersonQrBadgeUsername = username,
         )
     }
 }

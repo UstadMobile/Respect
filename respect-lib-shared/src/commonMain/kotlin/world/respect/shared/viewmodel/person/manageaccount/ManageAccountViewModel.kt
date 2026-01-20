@@ -126,9 +126,9 @@ class ManageAccountViewModel(
          * then go to ManageAccount (pop up to CreateAccountSetUsername inclusive).
          */
         viewModelScope.launch {
-            val qrCodeUrl = route.qrUrl
-            if (qrCodeUrl != null && route.username != null) {
-                saveUsername(route.username)
+            val qrCodeUrl = route.setPersonQrBadgeUrl
+            if (qrCodeUrl != null && route.setPersonQrBadgeUsername != null) {
+                saveUsername(route.setPersonQrBadgeUsername)
                 storeQrCodeForPerson(personGuid = personGuid, url = qrCodeUrl)
             }
         }
@@ -322,7 +322,7 @@ class ManageAccountViewModel(
                     )
                 )
                 _uiState.update { prev ->
-                    prev.copy(errorText = null) // Clear error on success
+                    prev.copy(errorText = null)
                 }
             }
         } catch (e: Exception) {

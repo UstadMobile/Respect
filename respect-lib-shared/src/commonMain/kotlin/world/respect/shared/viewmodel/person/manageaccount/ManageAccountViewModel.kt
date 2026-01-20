@@ -46,9 +46,9 @@ import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.UrlParser
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.time.Clock
 
 data class ManageAccountUiState(
@@ -83,7 +83,6 @@ class ManageAccountViewModel(
     private val accountManager: RespectAccountManager,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val json: Json,
-    private val snackBarDispatcher: SnackBarDispatcher,
     private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -286,7 +285,7 @@ class ManageAccountViewModel(
             } catch (e: Exception) {
                 _uiState.update { prev ->
                     prev.copy(
-                        errorText = StringUiText("Failed to remove QR badge: ${e.message}")
+                        errorText = e.getUiTextOrGeneric()
                     )
                 }
             }

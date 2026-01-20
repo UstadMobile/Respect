@@ -197,7 +197,6 @@ class CreateAccountSetUserNameViewModel(
             } catch (e: Throwable) {
                 Napier.e("Error saving username and password", e)
             }
-
         }
     }
 

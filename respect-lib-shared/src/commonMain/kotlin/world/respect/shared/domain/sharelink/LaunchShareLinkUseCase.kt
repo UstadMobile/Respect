@@ -1,6 +1,6 @@
 package world.respect.shared.domain.sharelink
 
-interface ShareLinkLauncher {
+interface LaunchShareLinkUseCase {
     suspend fun launch(body: String)
 
     companion object {

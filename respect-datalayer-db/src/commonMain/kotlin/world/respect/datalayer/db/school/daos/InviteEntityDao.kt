@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.InviteEntity
+import world.respect.datalayer.school.model.InviteStatusEnum
 import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
@@ -30,7 +31,7 @@ interface InviteEntityDao {
     """)
     suspend fun updateInviteStatus(
         guid: String,
-        status: Int = InviteEntity.STATUS_ACCEPTED,
+        status: InviteStatusEnum = InviteStatusEnum.ACCEPTED,
         lastModified: Long = systemTimeInMillis()
     )
     @Query("""
@@ -68,12 +69,16 @@ interface InviteEntityDao {
         SELECT InviteEntity.* 
          FROM InviteEntity
         WHERE (:guidHash = 0 OR InviteEntity.iGuidHash = :guidHash)
-          AND (:code IS NULL 
-                OR InviteEntity.iCode = :code)
+          AND (:code IS NULL OR InviteEntity.iCode = :code)
+          AND (:inviteRequired IS NULL OR iApprovalRequired = :inviteRequired)
+          AND (:inviteStatus IS NULL OR iInviteStatus = :inviteStatus)
           """)
+
     fun findAllAsPagingSource(
         guidHash: Long = 0,
         code: String? = null,
+        inviteRequired: Boolean? = null,
+        inviteStatus: InviteStatusEnum? = null,
     ): PagingSource<Int, InviteEntity>
 
     @Query("""
@@ -83,9 +88,4 @@ interface InviteEntityDao {
     """)
     suspend fun findByUidList(uidNums: List<Long>): List<InviteEntity>
 
-    @Query("""
-        DELETE FROM InviteEntity
-         WHERE iGuidHash = :guidHash
-    """)
-    suspend fun deleteByGuidHash(guidHash: Long)
 }

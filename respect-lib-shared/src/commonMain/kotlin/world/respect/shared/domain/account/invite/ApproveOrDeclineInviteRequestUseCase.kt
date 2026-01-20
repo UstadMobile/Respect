@@ -23,31 +23,48 @@ class ApproveOrDeclineInviteRequestUseCase(
      */
     suspend operator fun invoke(
         personUid: String,
-        classUid: String,
+        classUid: String?,
         approved: Boolean,
     ) {
         val person = schoolDataSource.personDataSource.findByGuid(
             DataLoadParams(), personUid
-        ).dataOrNull() ?: throw IllegalArgumentException("Cant find person")
-
-        val enrollments = schoolDataSource.enrollmentDataSource.listAsPagingSource(
-            DataLoadParams(),
-            EnrollmentDataSource.GetListParams(
-                classUid = classUid,
-                personUid = personUid,
-            )
-        ).invoke().load(PagingSource.LoadParams.Refresh(0, 20, false))
-            as? PagingSource.LoadResult.Page
-        val pendingEnrollment = enrollments?.data?.firstOrNull {
-            it.role == EnrollmentRoleEnum.PENDING_TEACHER || it.role == EnrollmentRoleEnum.PENDING_STUDENT
-        } ?: throw IllegalArgumentException("Can't find pending enrollment")
+        ).dataOrNull() ?: throw IllegalArgumentException("Can't find person")
 
         val timeModified = Clock.System.now()
-        schoolDataSource.personDataSource.store(
-            listOf(
-                person.copy(status = PersonStatusEnum.ACTIVE, lastModified = timeModified)
+
+        if (approved) {
+            schoolDataSource.personDataSource.store(
+                listOf(
+                    person.copy(
+                        status = PersonStatusEnum.ACTIVE,
+                        lastModified = timeModified,
+                    )
+                )
             )
-        )
+        }
+
+        if (classUid == null) {
+            return
+        }
+
+        val enrollments = schoolDataSource.enrollmentDataSource
+            .listAsPagingSource(
+                DataLoadParams(),
+                EnrollmentDataSource.GetListParams(
+                    classUid = classUid,
+                    personUid = personUid,
+                )
+            )
+            .invoke()
+            .load(PagingSource.LoadParams.Refresh(0, 20, false))
+                as? PagingSource.LoadResult.Page
+            ?: throw IllegalStateException("Enrollment load failed")
+
+        val pendingEnrollment = enrollments.data.firstOrNull {
+            it.role == EnrollmentRoleEnum.PENDING_TEACHER ||
+                    it.role == EnrollmentRoleEnum.PENDING_STUDENT
+        } ?: throw IllegalArgumentException("Can't find pending enrollment")
+
         schoolDataSource.enrollmentDataSource.store(
             listOf(
                 pendingEnrollment.copy(

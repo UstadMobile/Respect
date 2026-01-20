@@ -1,6 +1,6 @@
 package world.respect.shared.domain.sharelink
 
-interface SmsLinkLauncher {
+interface LaunchSendSmsUseCase {
     suspend fun sendLink(body: String)
 
     companion object {

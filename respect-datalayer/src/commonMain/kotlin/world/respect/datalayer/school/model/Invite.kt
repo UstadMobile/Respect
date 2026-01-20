@@ -28,18 +28,16 @@ data class Invite(
     val inviteMultipleAllowed: Boolean = false,
     val approvalRequired: Boolean = false,
     val firstUser: Boolean = false,
-    val expiration: Long = 0,
+    val expiration: InstantAsISO8601,
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
-    val inviteStatus :Int = STATUS_PENDING
+    val inviteStatus :InviteStatusEnum = InviteStatusEnum.PENDING
 ) : ModelWithTimes {
 
     companion object {
         const val TABLE_ID = 17
 
-        const val STATUS_PENDING = 0
-        const val STATUS_ACCEPTED = 1
-        const val STATUS_REVOKED = 2
-        const val EXPIRATION_TIME = (7 * 24 * 60 * 60 * 1000)
+        const val EXPIRATION_TIME:Long = (7 * 24 * 60 * 60 * 1000)
+
     }
 }

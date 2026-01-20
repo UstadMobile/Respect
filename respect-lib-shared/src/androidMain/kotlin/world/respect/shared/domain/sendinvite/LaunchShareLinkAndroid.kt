@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import world.respect.shared.domain.sharelink.ShareLinkLauncher
-import world.respect.shared.domain.sharelink.ShareLinkLauncher.Companion.MIME_TYPE
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase.Companion.MIME_TYPE
 
-class ShareLinkLauncherAndroid(
+class LaunchShareLinkAndroid(
     private val context: Context
-) : ShareLinkLauncher {
+) : LaunchShareLinkUseCase {
 
 
     override suspend fun launch(body: String) = withContext(Dispatchers.Main) {

@@ -69,21 +69,8 @@ abstract class AbstractAppActivity : AppCompatActivity() {
             }
 
 
-            intent.data?.let { uri ->
-                val deeplinkUrl = try {
-                    Url(uri.toString())
-                } catch (_: Exception) {
-                    null
-                }
-                if (deeplinkUrl == null) return@let
-                val url = customDeepLinkToUrlUseCase(deeplinkUrl)
-                val navCommand = resolveUrlToNavCommandUseCase(url)
-                navCommand?.let {
-                    _navCommandFlow.tryEmit(
-                        it
-                    )
-                }
-            }
+            handleDeepLink(intent)
+
             RespectAppTheme {
                 Surface(
                     modifier = Modifier
@@ -105,23 +92,25 @@ abstract class AbstractAppActivity : AppCompatActivity() {
             }
         }
     }
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        intent.data?.let { uri ->
+    private fun handleDeepLink(intent: Intent?) {
+        intent?.data?.let { uri ->
             val deeplinkUrl = try {
                 Url(uri.toString())
             } catch (_: Exception) {
                 null
-            }
-            if (deeplinkUrl == null) return@let
+            } ?: return
+
             val url = customDeepLinkToUrlUseCase(deeplinkUrl)
             val navCommand = resolveUrlToNavCommandUseCase(url)
-            navCommand?.let {
-                _navCommandFlow.tryEmit(
-                    it
-                )
-            }
 
+            navCommand?.let {
+                _navCommandFlow.tryEmit(it)
+            }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
     }
 }

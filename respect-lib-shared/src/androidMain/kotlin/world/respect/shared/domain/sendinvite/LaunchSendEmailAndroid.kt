@@ -7,11 +7,11 @@ import android.net.Uri
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import world.respect.shared.domain.sharelink.EmailLinkLauncher
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 
-class EmailLinkLauncherAndroid(
+class LaunchSendEmailAndroid(
     private val context: Context
-) : EmailLinkLauncher {
+) : LaunchSendEmailUseCase {
 
     override suspend fun sendEmail(subject: String, body: String) {
         withContext(Dispatchers.Main) {

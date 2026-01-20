@@ -23,7 +23,7 @@ fun InviteEntity.toModel(): Invite {
         firstUser = iIsFirstUser,
         inviteMultipleAllowed = iInviteMultipleAllowed,
         approvalRequired = iApprovalRequired,
-        expiration = iExpiration,
+        expiration = Instant.fromEpochMilliseconds(iExpiration),
         lastModified = Instant.fromEpochMilliseconds(iLastModified),
         stored = Instant.fromEpochMilliseconds(systemTimeInMillis()),
         inviteStatus = iInviteStatus
@@ -43,7 +43,7 @@ fun InviteEntities.toModel(): Invite {
         inviteMultipleAllowed = inviteEntity.iInviteMultipleAllowed,
         approvalRequired = inviteEntity.iApprovalRequired,
         firstUser = inviteEntity.iIsFirstUser,
-        expiration = inviteEntity.iExpiration,
+        expiration = Instant.fromEpochMilliseconds(inviteEntity.iExpiration),
         inviteStatus = inviteEntity.iInviteStatus,
         lastModified = Instant.fromEpochMilliseconds(inviteEntity.iLastModified),
         stored = Instant.fromEpochMilliseconds(systemTimeInMillis())
@@ -72,7 +72,7 @@ fun Invite.toEntities(uidNumberMapper: UidNumberMapper): InviteEntities {
             iInviteMultipleAllowed = inviteMultipleAllowed,
             iApprovalRequired = approvalRequired,
             iLastModified = lastModified.toEpochMilliseconds(),
-            iExpiration = expiration,
+            iExpiration = expiration.toEpochMilliseconds(),
             iInviteStatus =inviteStatus
         )
     )

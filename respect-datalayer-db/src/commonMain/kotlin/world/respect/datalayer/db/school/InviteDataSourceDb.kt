@@ -56,6 +56,8 @@ class InviteDataSourceDb(
             schoolDb.getInviteEntityDao().findAllAsPagingSource(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,
+                inviteRequired = params.inviteRequired,
+                inviteStatus = params.inviteStatus
             ).map {
                 InviteEntities(it).toModel()
             }

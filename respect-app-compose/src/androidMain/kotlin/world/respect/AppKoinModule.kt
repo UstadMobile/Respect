@@ -223,14 +223,14 @@ import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingL
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.domain.sharelink.EmailLinkLauncher
-import world.respect.shared.domain.sharelink.ShareLinkLauncher
-import world.respect.shared.domain.sharelink.SmsLinkLauncher
-import world.respect.shared.domain.sendinvite.SmsLinkLauncherAndroid
-import world.respect.shared.domain.sendinvite.EmailLinkLauncherAndroid
-import world.respect.shared.domain.sendinvite.ShareLinkLauncherAndroid
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
+import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
+import world.respect.shared.domain.sendinvite.LaunchSendSmsAndroid
+import world.respect.shared.domain.sendinvite.LaunchSendEmailAndroid
+import world.respect.shared.domain.sendinvite.LaunchShareLinkAndroid
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
-import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseDataSource
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -255,14 +255,14 @@ val appKoinModule = module {
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
     }
-    single<SmsLinkLauncher> {
-        SmsLinkLauncherAndroid(androidContext())
+    single<LaunchSendSmsUseCase> {
+        LaunchSendSmsAndroid(androidContext())
     }
-    single<EmailLinkLauncher> {
-        EmailLinkLauncherAndroid(androidContext())
+    single<LaunchSendEmailUseCase> {
+        LaunchSendEmailAndroid(androidContext())
     }
-    single<ShareLinkLauncher> {
-        ShareLinkLauncherAndroid(androidContext())
+    single<LaunchShareLinkUseCase> {
+        LaunchShareLinkAndroid(androidContext())
     }
     single<UidNumberMapper> {
         XXHashUidNumberMapper(xxStringHasher = get())
@@ -710,13 +710,6 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-        scoped<CreateInviteUseCase> {
-            CreateInviteUseCaseClient(
-                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
-                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
-                httpClient = get(),
-            )
-        }
         scoped<CreateLinkUseCase> {
             CreateLinkUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -864,6 +857,13 @@ val appKoinModule = module {
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),
+            )
+        }
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseDataSource(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDataSource = get(),
+                urlToCustomDeepLinkUseCase = get(),
             )
         }
         scoped<AddChildAccountUseCase> {

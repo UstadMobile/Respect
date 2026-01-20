@@ -4,6 +4,7 @@ import io.ktor.util.StringValues
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.InviteStatusEnum
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -13,7 +14,9 @@ interface InviteDataSource : WritableDataSource<Invite> {
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
         val inviteCode:String? = null,
-    ) {
+        val inviteRequired: Boolean? = null,
+        val inviteStatus: InviteStatusEnum? = null,
+        ) {
         companion object {
             fun fromParams(stringValues: StringValues): GetListParams {
                 return GetListParams(
@@ -26,7 +29,7 @@ interface InviteDataSource : WritableDataSource<Invite> {
 
     fun listAsPagingSource(
         loadParams: DataLoadParams,
-        params: InviteDataSource.GetListParams,
+        params: GetListParams,
     ): IPagingSourceFactory<Int, Invite>
     suspend fun findByGuid(guid: String): DataLoadState<Invite>
     suspend fun findByCode(code: String): DataLoadState<Invite>

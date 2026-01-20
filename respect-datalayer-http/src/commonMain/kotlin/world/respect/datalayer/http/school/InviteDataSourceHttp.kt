@@ -9,6 +9,8 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.DataLayerParams.INVITE_REQUIRED
+import world.respect.datalayer.DataLayerParams.INVITE_STATUS
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
@@ -19,7 +21,6 @@ import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.InviteDataSource
 import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
@@ -38,6 +39,11 @@ class InviteDataSourceHttp(
         return URLBuilder(respectEndpointUrl(InviteDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
+
+                parameters.append(INVITE_REQUIRED, inviteRequired.toString())
+
+                parameters.append(INVITE_STATUS, inviteStatus.toString())
+
             }
             .build()
     }

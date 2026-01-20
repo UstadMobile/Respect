@@ -12,6 +12,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.adapters.inviteOrNull
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
@@ -37,8 +38,10 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
-import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
@@ -50,9 +53,12 @@ data class PersonListUiState(
         EmptyPagingSource()
     },
     val showAddPersonItem: Boolean = false,
+    val isPendingExpanded: Boolean = true,
     val showInviteCode: String? = null,
     val showInviteButton: Boolean = false,
-)
+    val pendingPersons: IPagingSourceFactory<Int, Person> =
+        IPagingSourceFactory { EmptyPagingSource() },
+    )
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
@@ -75,12 +81,24 @@ class PersonListViewModel(
 
     private val checkPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
 
+    private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
+
+    private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
+        schoolDataSource.personDataSource.listAsPagingSource(
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
+            )
+        )
+    }
+
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
             DataLoadParams(),
             PersonDataSource.GetListParams(
                 filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
                 filterByPersonRole = route.filterByRole,
+                filterByPersonStatus = PersonStatusEnum.ACTIVE,
             )
         )
     }
@@ -144,9 +162,15 @@ class PersonListViewModel(
 
         _uiState.update {
             it.copy(
+                pendingPersons = pendingPersonsPagingSource,
                 persons = pagingSourceFactoryHolder,
                 showInviteButton = route.filterByRole != null||route.classUidStr!=null
             )
+        }
+    }
+    fun onTogglePendingInvites() {
+        _uiState.update {
+            it.copy(isPendingExpanded = !it.isPendingExpanded)
         }
     }
 
@@ -184,6 +208,25 @@ class PersonListViewModel(
             }
         }
     }
+
+
+    fun onClickAcceptInvite(user: Person) {
+        val metadata = user.metadata ?: return
+        val invite = user.inviteOrNull(metadata) ?: return
+        viewModelScope.launch {
+            try {
+                approveOrDeclineInviteRequestUseCase(
+                    personUid = user.guid,
+                    classUid = invite.forClassGuid,
+                    approved = true,
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun onClickDismissInvite(user: Person) {}
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(

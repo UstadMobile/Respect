@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.InviteStatusEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.util.time.systemTimeInMillis
 
@@ -25,12 +26,6 @@ data class InviteEntity(
     val iIsFirstUser: Boolean = false,
     val iApprovalRequired: Boolean = false,
     val iLastModified: Long = systemTimeInMillis(),
-    val iExpiration: Long = 0,
-    var iInviteStatus: Int = STATUS_PENDING,
-){
-    companion object {
-        const val STATUS_PENDING = 0
-        const val STATUS_ACCEPTED = 1
-        const val STATUS_REVOKED = 2
-    }
-}
+    val iExpiration: Long = systemTimeInMillis(),
+    val iInviteStatus: InviteStatusEnum = InviteStatusEnum.PENDING
+)

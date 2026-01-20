@@ -1,5 +1,5 @@
 package world.respect.shared.domain.sharelink
 
-interface EmailLinkLauncher {
+interface LaunchSendEmailUseCase {
     suspend fun sendEmail(subject: String, body: String)
 }

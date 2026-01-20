@@ -2,6 +2,7 @@ package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
@@ -13,13 +14,16 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
+import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.InviteStatusEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -53,11 +57,11 @@ class RedeemInviteUseCaseDb(
         val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(redeemRequest.code)
             ?: throw IllegalArgumentException("invite not found for code: ${redeemRequest.code}")
                 .withHttpStatus(404)
-        if (invite.iInviteStatus == Invite.STATUS_REVOKED) {
+        if (invite.iInviteStatus == InviteStatusEnum.REVOKED) {
             throw IllegalArgumentException("invite is revoked")
                 .withHttpStatus(400)
         }
-        if (invite.iInviteStatus != Invite.STATUS_PENDING) {
+        if (invite.iInviteStatus != InviteStatusEnum.PENDING) {
             throw IllegalArgumentException("invite is already used")
                 .withHttpStatus(400)
         }
@@ -74,10 +78,18 @@ class RedeemInviteUseCaseDb(
         val isFamilyInvite = invite.iForFamilyOfGuid != null
         val accountGuid = redeemRequest.account.guid
 
+        val inviteMetadata = json.encodeToJsonElement(
+                Invite.serializer(),
+        invite.toModel()
+        ).jsonObject
+
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
             role = redeemRequest.role,
             username = redeemRequest.account.username,
             guid = accountGuid,
+        ).copy(
+            status = PersonStatusEnum.PENDING_APPROVAL,
+            metadata = inviteMetadata
         )
         when {
             isDirectJoin -> {

@@ -23,6 +23,7 @@ import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -38,7 +39,6 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import java.lang.System.currentTimeMillis
 import kotlin.random.Random
 import kotlin.time.Clock
 
@@ -192,7 +192,7 @@ class ClazzEditViewModel(
             approvalRequired = true,
             forClassGuid = uiState.value.clazz.dataOrNull()?.guid,
             forClassName = uiState.value.clazz.dataOrNull()?.title,
-            expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
+            expiration = Clock.System.now().plusMillis(Invite.EXPIRATION_TIME)
         )
     }
     private fun generateCode(): String {

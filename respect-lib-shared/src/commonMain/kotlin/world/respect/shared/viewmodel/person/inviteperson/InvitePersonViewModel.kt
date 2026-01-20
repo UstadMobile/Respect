@@ -2,9 +2,9 @@ package world.respect.shared.viewmodel.person.inviteperson
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import world.respect.shared.domain.sharelink.EmailLinkLauncher
-import world.respect.shared.domain.sharelink.ShareLinkLauncher
-import world.respect.shared.domain.sharelink.SmsLinkLauncher
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
+import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -21,6 +21,7 @@ import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -36,7 +37,6 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.getTitle
-import java.lang.System.currentTimeMillis
 import kotlin.random.Random
 import kotlin.time.Clock
 
@@ -59,9 +59,9 @@ class InvitePersonViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val setClipboardStringUseCase: SetClipboardStringUseCase,
-    private val smsLinkLauncher: SmsLinkLauncher,
-    private val shareLinkLauncher: ShareLinkLauncher,
-    private val emailLinkLauncher: EmailLinkLauncher
+    private val smsLinkLauncher: LaunchSendSmsUseCase,
+    private val shareLinkLauncher: LaunchShareLinkUseCase,
+    private val emailLinkLauncher: LaunchSendEmailUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: InvitePerson = savedStateHandle.toRoute()
@@ -259,7 +259,8 @@ class InvitePersonViewModel(
                 schoolName = uiState.value.schoolName,
                 forClassName = uiState.value.className,
                 forFamilyOfGuid = uiState.value.familyPersonGuid,
-                expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
+                expiration = Clock.System.now().plusMillis(Invite.EXPIRATION_TIME)
+
             )
             return storeInvite(invite)
         } else {

@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
@@ -112,7 +112,7 @@ class PlaylistListViewModel(
     fun onClickAddNew() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                CurriculumMappingEdit.create(uid = 0L, mappingData = null)
+                PlaylistEdit.create(uid = 0L, mappingData = null)
             )
         )
     }

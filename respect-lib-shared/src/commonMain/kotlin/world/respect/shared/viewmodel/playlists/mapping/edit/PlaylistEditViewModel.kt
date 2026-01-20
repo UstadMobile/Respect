@@ -22,7 +22,6 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.opds.model.ReadiumSubjectObject
@@ -35,7 +34,7 @@ import world.respect.shared.generated.resources.create_playlist
 import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
-import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
@@ -106,7 +105,7 @@ class PlaylistEditViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
+    private val route: PlaylistEdit = savedStateHandle.toRoute()
 
     private val mappingUid = route.textbookUid
     private val mappingData = route.mappingData
@@ -263,14 +262,6 @@ class PlaylistEditViewModel(
         updateUiStateAndCommit { prev ->
             prev.copy(
                 mapping = prev.mapping?.copy(grade = grade)
-            )
-        }
-    }
-
-    fun onLanguageSelected(language: String?) {
-        updateUiStateAndCommit { prev ->
-            prev.copy(
-                mapping = prev.mapping?.copy(language = language)
             )
         }
     }

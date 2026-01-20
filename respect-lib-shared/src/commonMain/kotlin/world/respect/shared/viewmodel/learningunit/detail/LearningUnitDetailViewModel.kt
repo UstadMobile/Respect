@@ -30,7 +30,7 @@ import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
@@ -396,7 +396,7 @@ class LearningUnitDetailViewModel(
         val mapping = _uiState.value.mapping ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                CurriculumMappingEdit.create(
+                PlaylistEdit.create(
                     uid = mapping.uid,
                     mappingData = mapping
                 )

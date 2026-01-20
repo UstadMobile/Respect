@@ -141,7 +141,7 @@ import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.navigation.Settings
 
-import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
@@ -541,7 +541,7 @@ fun AppNavHost(
             )
         }
 
-        composable<CurriculumMappingEdit> {
+        composable<PlaylistEdit> {
             val viewModel: PlaylistEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController

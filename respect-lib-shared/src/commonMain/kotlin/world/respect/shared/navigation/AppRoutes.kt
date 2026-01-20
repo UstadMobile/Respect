@@ -732,7 +732,7 @@ data object Settings : RespectAppRoute
 
 
 @Serializable
-data class CurriculumMappingEdit(
+data class PlaylistEdit(
     val textbookUid: Long = 0L,
     private val mappingDataJson: String? = null
 ) : RespectAppRoute {
@@ -750,7 +750,7 @@ data class CurriculumMappingEdit(
         fun create(
             uid: Long,
             mappingData: Playlists? = null
-        ) = CurriculumMappingEdit(
+        ) = PlaylistEdit(
             textbookUid = uid,
             mappingDataJson = mappingData?.let { mapping ->
                 try {

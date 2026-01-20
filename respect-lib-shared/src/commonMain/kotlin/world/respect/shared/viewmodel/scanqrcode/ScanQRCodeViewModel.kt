@@ -2,7 +2,6 @@ package world.respect.shared.viewmodel.scanqrcode
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
-import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,7 +85,6 @@ class ScanQRCodeViewModel(
                     authenticateWithQrCode(Url(url))
                 }
             } catch (e: Throwable) {
-                Napier.e("Error processing QR Code", e)
                 _uiState.update {
                     it.copy(
                         errorMessage = e.getUiTextOrGeneric()
@@ -103,7 +101,6 @@ class ScanQRCodeViewModel(
     }
 
     fun onQrCodeScanError(exception: Exception) {
-        Napier.w("QR Code Scan error", exception)
         _uiState.update {
             it.copy(
                 errorMessage = exception.getUiTextOrGeneric(),

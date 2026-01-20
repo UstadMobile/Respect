@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -13,6 +14,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
@@ -20,6 +22,7 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
+import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
@@ -56,7 +59,8 @@ class CreateAccountSetUserNameViewModel(
     private val accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
-    private val validateUsernameUseCase: ValidateUsernameUseCase
+    private val validateUsernameUseCase: ValidateUsernameUseCase,
+    private val validatePasswordUseCase: ValidatePasswordUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -82,47 +86,42 @@ class CreateAccountSetUserNameViewModel(
         viewModelScope.launch {
             schoolDataSource.personDataSource.findByGuidAsFlow(
                 route.guid
-            ).collect { personResult ->
+            ).collectLatest { personResult ->
                 val person = personResult.dataOrNull()
                 val isStudent = person?.isStudent() == true
-                val suggestedUsername = person?.let { personData ->
-                    val fullName = listOfNotNull(
-                        personData.givenName,
-                        personData.familyName
-                    ).joinToString(" ").trim()
 
-                    if (fullName.isNotBlank()) {
-                        usernameSuggestionUseCase(fullName)
-                    } else {
-                        ""
-                    }
-                } ?: ""
+
+                val currentUsername = _uiState.value.username
+
+                val suggestedUsername = person?.fullName()?.takeIf { currentUsername.isEmpty() }?.let {
+                    usernameSuggestionUseCase(it)
+                }
 
                 _uiState.update { prev ->
                     prev.copy(
                         showQrBadgeInfoBox = isStudent,
-                        username = suggestedUsername
+                        username = prev.username.ifEmpty {
+                            suggestedUsername ?: ""
+                        }
                     )
                 }
+
                 _appUiState.update { appUiState ->
-                    if (!isStudent) {
-                        appUiState.copy(
-                            actionBarButtonState = ActionBarButtonUiState(
+                    appUiState.copy(
+                        actionBarButtonState = if(!isStudent) {
+                            ActionBarButtonUiState(
                                 text = Res.string.save.asUiText(),
                                 visible = true,
                                 onClick = ::onClickSave
                             )
-                        )
-                    } else {
-                        appUiState.copy(
-                            actionBarButtonState = ActionBarButtonUiState(
-                                visible = false
-                            )
-                        )
-                    }
+                        }else {
+                            ActionBarButtonUiState(visible = false)
+                        }
+                    )
                 }
             }
         }
+
         viewModelScope.launch {
             schoolDataSource.personQrBadgeDataSource.findByGuidAsFlow(
                 DataLoadParams(), route.guid
@@ -140,18 +139,10 @@ class CreateAccountSetUserNameViewModel(
         _uiState.update { it.copy(username = filterUsernameUseCase(username, "")) }
     }
 
-    private fun validatePassword(): UiText? {
-        return when {
-            uiState.value.password.isEmpty() -> Res.string.required_field.asUiText()
-            uiState.value.password.length < MIN_PASSWORD_LENGTH -> Res.string.password_must_be_at_least.asUiText()
-            else -> null
-        }
-    }
-
     fun onClickSave() {
         launchWithLoadingIndicator {
             try {
-                val username = uiState.value.username.trim()
+                val username = uiState.value.username
                 val usernameValidation = validateUsernameUseCase(username)
                 _uiState.update {
                     it.copy(
@@ -162,10 +153,10 @@ class CreateAccountSetUserNameViewModel(
                 if (usernameValidation.errorMessage != null)
                     return@launchWithLoadingIndicator
 
-                val error = validatePassword()
-
-                if (error != null) {
-                    _uiState.update { it.copy(passwordErr = error) }
+                try {
+                    validatePasswordUseCase(uiState.value.password)
+                }catch(e: Throwable) {
+                    _uiState.update { it.copy(passwordErr = e.message?.asUiText()) }
                     return@launchWithLoadingIndicator
                 }
 
@@ -239,6 +230,7 @@ class CreateAccountSetUserNameViewModel(
                     usernameErr = usernameValidation.errorMessage?.asUiText()
                 )
             }
+
             if (usernameValidation.errorMessage == null) {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(

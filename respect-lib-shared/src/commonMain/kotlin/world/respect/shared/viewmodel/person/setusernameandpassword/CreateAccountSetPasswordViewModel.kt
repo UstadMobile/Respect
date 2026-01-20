@@ -14,6 +14,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.password_must_be_at_least
 import world.respect.shared.generated.resources.required_field
@@ -24,6 +25,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
@@ -37,6 +39,7 @@ data class CreateAccountSetPasswordUiState(
 class CreateAccountSetPasswordViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -73,19 +76,11 @@ class CreateAccountSetPasswordViewModel(
         _uiState.update { it.copy(password = password) }
     }
 
-    private fun validatePassword(): UiText? {
-        return when {
-            uiState.value.password.isEmpty() -> Res.string.required_field.asUiText()
-            uiState.value.password.length < MIN_PASSWORD_LENGTH -> Res.string.password_must_be_at_least.asUiText()
-            else -> null
-        }
-    }
-
     fun onClickSave() {
-        val error = validatePassword()
-
-        if (error != null) {
-            _uiState.update { it.copy(passwordErr = error) }
+        try {
+            validatePasswordUseCase(uiState.value.password)
+        } catch (t: Throwable) {
+            _uiState.update { it.copy(passwordErr = t.getUiTextOrGeneric()) }
             return
         }
 

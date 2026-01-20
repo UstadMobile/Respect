@@ -15,12 +15,17 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.findIcons
+import world.respect.lib.opds.model.ReadiumSubjectObject
 import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex
 import world.respect.libutil.ext.resolve
@@ -36,17 +41,17 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.KEY_LEARNING_UNIT
 import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSection
 import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.navigation.RouteResultDest
-import world.respect.shared.viewmodel.app.appstate.getTitle
 
 data class PlaylistEditUiState(
     val mapping: Playlists? = null,
@@ -55,6 +60,9 @@ data class PlaylistEditUiState(
     val titleError: UiText? = null,
     val error: UiText? = null,
     val pendingLessonSectionIndex: Int? = null,
+    val availableSubjects: List<ReadiumSubjectObject> = emptyList(),
+    val availableGrades: List<String> = emptyList(),
+    val availableLanguages: List<String> = emptyList(),
     val sectionUiState: (PlaylistsSection) -> Flow<PlaylistSectionUiState> = { emptyFlow() },
 ) {
     val fieldsEnabled: Boolean
@@ -68,6 +76,15 @@ data class PlaylistEditUiState(
 
     val sections: List<PlaylistsSection>
         get() = mapping?.sections ?: emptyList()
+
+    val selectedSubject: ReadiumSubjectObject?
+        get() = mapping?.subject
+
+    val selectedGrade: String?
+        get() = mapping?.grade
+
+    val selectedLanguage: String?
+        get() = mapping?.language
 }
 
 data class PlaylistSectionUiState(
@@ -86,6 +103,9 @@ class PlaylistEditViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
     private val route: CurriculumMappingEdit = savedStateHandle.toRoute()
 
     private val mappingUid = route.textbookUid
@@ -117,6 +137,9 @@ class PlaylistEditViewModel(
                 hideBottomNavigation = true
             )
         }
+        viewModelScope.launch {
+            loadSubjectsAndGrades()
+        }
 
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(
@@ -145,6 +168,64 @@ class PlaylistEditViewModel(
         }
     }
 
+    private fun loadSubjectsAndGrades() {
+        viewModelScope.launch {
+            try {
+                val session = accountManager.selectedAccountAndPersonFlow.first()
+                val catalogUrl = session?.session?.account?.school?.respectExt ?: return@launch
+
+                respectAppDataSource.opdsDataSource.loadOpdsFeed(
+                    url = catalogUrl,
+                    params = DataLoadParams()
+                ).collect { feedState ->
+                    if (feedState is DataReadyState) {
+                        val allSubjects = mutableListOf<ReadiumSubjectObject>()
+                        val allGrades = mutableSetOf<String>()
+                        val allLanguages = mutableSetOf<String>()
+
+                        feedState.data.publications?.forEach { publication ->
+                            publication.metadata.subject?.forEach { subject ->
+                                if (subject is ReadiumSubjectObject && subject.code != null) {
+                                    allSubjects.add(subject)
+                                }
+                            }
+                            publication.metadata.language?.forEach { language ->
+                                allLanguages.add(language)
+                            }
+                        }
+
+                        feedState.data.groups?.forEach { group ->
+                            group.publications?.forEach { publication ->
+                                publication.metadata.subject?.forEach { subject ->
+                                    if (subject is ReadiumSubjectObject && subject.code != null) {
+                                        allSubjects.add(subject)
+                                    }
+                                }
+                                publication.metadata.language?.forEach { language ->
+                                    allLanguages.add(language)
+                                }
+                            }
+                        }
+
+                        val uniqueSubjects = allSubjects
+                            .distinctBy { subject -> subject.code }
+                            .sortedBy { subject -> subject.name.getTitle() }
+
+                        _uiState.update { prev ->
+                            prev.copy(
+                                availableSubjects = uniqueSubjects,
+                                availableGrades = allGrades.toList().sorted(),
+                                availableLanguages = allLanguages.toList().sorted()
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun updateUiStateAndCommit(block: (PlaylistEditUiState) -> PlaylistEditUiState) {
         val mappingToCommit = _uiState.updateAndGet(block).mapping ?: return
 
@@ -152,7 +233,6 @@ class PlaylistEditViewModel(
             Playlists.serializer(), mappingToCommit
         )
     }
-
 
     fun onTitleChanged(title: String) {
         updateUiStateAndCommit { prev ->
@@ -167,6 +247,30 @@ class PlaylistEditViewModel(
         updateUiStateAndCommit { prev ->
             prev.copy(
                 mapping = prev.mapping?.copy(description = description)
+            )
+        }
+    }
+
+    fun onSubjectSelected(subject: ReadiumSubjectObject?) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(subject = subject)
+            )
+        }
+    }
+
+    fun onGradeSelected(grade: String?) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(grade = grade)
+            )
+        }
+    }
+
+    fun onLanguageSelected(language: String?) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(language = language)
             )
         }
     }
@@ -287,7 +391,7 @@ class PlaylistEditViewModel(
                 mapping = prev.mapping?.copy(
                     sections = prev.mapping.sections.updateAtIndex(sectionIndex) { section ->
                         section.copy(
-                            items = section.items.filterIndexed { index, _ ->  index != linkIndex }
+                            items = section.items.filterIndexed { index, _ -> index != linkIndex }
                         )
                     }
                 )
@@ -330,6 +434,7 @@ class PlaylistEditViewModel(
             }
         }
     }
+
     fun onClickSave() {
         val mapping = _uiState.value.mapping ?: return
         if (mapping.title.isBlank()) {
@@ -344,7 +449,7 @@ class PlaylistEditViewModel(
                 mapping.copy(
                     uid = System.currentTimeMillis(),
                     createdBy = currentSession?.person?.guid,
-                    schoolUrl= currentSession?.session?.account?.school?.self
+                    schoolUrl = currentSession?.session?.account?.school?.self
                 )
             } else {
                 mapping
@@ -365,6 +470,7 @@ class PlaylistEditViewModel(
             )
         }
     }
+
     fun onClearError() {
         _uiState.update { it.copy(titleError = null) }
     }

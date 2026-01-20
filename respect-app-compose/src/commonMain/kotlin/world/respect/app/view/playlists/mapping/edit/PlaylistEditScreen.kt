@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.outlined.ContentPaste
@@ -13,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -29,26 +31,15 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.drag
-import world.respect.shared.generated.resources.lesson
-import world.respect.shared.generated.resources.no_sections_yet
-import world.respect.shared.generated.resources.remove_chapter
-import world.respect.shared.generated.resources.remove_lesson
-import world.respect.shared.generated.resources.required
-import world.respect.shared.generated.resources.section
-import world.respect.shared.generated.resources.sections
-import world.respect.shared.generated.resources.title
-import world.respect.shared.generated.resources.section_name
+import world.respect.lib.opds.model.ReadiumSubjectObject
+import world.respect.shared.generated.resources.*
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionUiState
 import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSection
 import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
-import androidx.compose.ui.draw.alpha
-
 
 @Composable
 fun PlaylistEditScreenForViewModel(
@@ -61,6 +52,8 @@ fun PlaylistEditScreenForViewModel(
         sectionLinkUiState = viewModel::sectionLinkUiStateFor,
         onTitleChanged = viewModel::onTitleChanged,
         onDescriptionChanged = viewModel::onDescriptionChanged,
+        onSubjectSelected = viewModel::onSubjectSelected,
+        onGradeSelected = viewModel::onGradeSelected,
         onClickAddSection = viewModel::onClickAddSection,
         onClickRemoveSection = viewModel::onClickRemoveSection,
         onSectionTitleChanged = viewModel::onSectionTitleChanged,
@@ -72,12 +65,15 @@ fun PlaylistEditScreenForViewModel(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistEditScreen(
     uiState: PlaylistEditUiState = PlaylistEditUiState(),
     sectionLinkUiState: (PlaylistsSectionLink) -> Flow<DataLoadState<PlaylistSectionUiState>>,
     onTitleChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
+    onSubjectSelected: (ReadiumSubjectObject?) -> Unit = {},
+    onGradeSelected: (String?) -> Unit = {},
     onClickAddSection: () -> Unit = {},
     onClickRemoveSection: (Int) -> Unit = {},
     onSectionTitleChanged: (Int, String) -> Unit = { _, _ -> },
@@ -91,10 +87,13 @@ fun PlaylistEditScreen(
     val lazyListState = rememberLazyListState()
     var draggingSectionIndex by remember { mutableStateOf<Int?>(null) }
     var isDraggingAnySection by remember { mutableStateOf(false) }
+    var subjectExpanded by remember { mutableStateOf(false) }
+    var gradeExpanded by remember { mutableStateOf(false) }
+
     val reorderableLazyListState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         onMove = { from, to ->
-            val headerItemCount = 4 //TODO: This MUST be explained
+            val headerItemCount = 5
             val fromIndex = from.index - headerItemCount
             val toIndex = to.index - headerItemCount
 
@@ -159,7 +158,6 @@ fun PlaylistEditScreen(
         }
     )
 
-
     LazyColumn(
         state = lazyListState,
         modifier = Modifier.fillMaxWidth(),
@@ -168,7 +166,7 @@ fun PlaylistEditScreen(
             OutlinedTextField(
                 value = uiState.mapping?.title ?: "",
                 onValueChange = onTitleChanged,
-                label = { Text(stringResource(Res.string.title)+ "*") },
+                label = { Text(stringResource(Res.string.title) + "*") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultItemPadding()
@@ -197,7 +195,93 @@ fun PlaylistEditScreen(
             )
         }
 
-        item("mapping_title") {
+        item("subject_grade_language_row") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultItemPadding(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = subjectExpanded,
+                    onExpandedChange = { subjectExpanded = it },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    OutlinedTextField(
+                        value = uiState.selectedSubject?.name?.getTitle() ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(Res.string.subject)) },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Filled.ArrowDropDown,
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                            .testTag("subject_dropdown"),
+                        singleLine = true
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = subjectExpanded,
+                        onDismissRequest = { subjectExpanded = false }
+                    ) {
+                        uiState.availableSubjects.forEach { subject ->
+                            DropdownMenuItem(
+                                text = { Text(subject.name.getTitle()) },
+                                onClick = {
+                                    onSubjectSelected(subject)
+                                    subjectExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                ExposedDropdownMenuBox(
+                    expanded = gradeExpanded,
+                    onExpandedChange = { gradeExpanded = it },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    OutlinedTextField(
+                        value = uiState.selectedGrade ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(Res.string.grade)) },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Filled.ArrowDropDown,
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                            .testTag("grade_dropdown"),
+                        singleLine = true
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = gradeExpanded,
+                        onDismissRequest = { gradeExpanded = false }
+                    ) {
+                        uiState.availableGrades.forEach { grade ->
+                            DropdownMenuItem(
+                                text = { Text(grade) },
+                                onClick = {
+                                    onGradeSelected(grade)
+                                    gradeExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        item("sections_title") {
             Text(
                 modifier = Modifier.defaultItemPadding(),
                 text = stringResource(Res.string.sections),
@@ -312,7 +396,6 @@ fun PlaylistEditScreen(
     }
 }
 
-
 @Composable
 private fun SectionItem(
     section: PlaylistsSection,
@@ -346,8 +429,7 @@ private fun SectionItem(
                     Icon(
                         Icons.Filled.DragHandle,
                         contentDescription = stringResource(Res.string.drag),
-                        modifier = dragModifier
-                            .size(24.dp),
+                        modifier = dragModifier.size(24.dp),
                         tint = if (isDragging) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -387,8 +469,7 @@ private fun SectionItem(
             ) {
                 OutlinedButton(
                     onClick = { onClickAddLesson(sectionIndex) },
-                    modifier = Modifier.fillMaxWidth()
-                    .testTag("add_item"),
+                    modifier = Modifier.fillMaxWidth().testTag("add_item"),
                     enabled = !isDragging
                 ) {
                     Icon(
@@ -416,7 +497,6 @@ private fun LessonItem(
     isParentSectionDragging: Boolean = false,
     dragModifier: Modifier = Modifier
 ) {
-
     val stateFlow = remember(link.href) {
         sectionLinkUiState(link)
     }
@@ -453,7 +533,9 @@ private fun LessonItem(
                 contentDescription = stringResource(Res.string.drag),
                 modifier = dragModifier.size(20.dp),
                 tint = if (isDragging) MaterialTheme.colorScheme.primary
-                else if (isParentSectionDragging) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                else if (isParentSectionDragging) MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                    alpha = 0.5f
+                )
                 else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -464,8 +546,7 @@ private fun LessonItem(
                     uri = iconUrl.toString(),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(36.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             }
 

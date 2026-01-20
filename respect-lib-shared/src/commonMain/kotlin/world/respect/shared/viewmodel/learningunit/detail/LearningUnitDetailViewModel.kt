@@ -414,7 +414,14 @@ class LearningUnitDetailViewModel(
     }
 
     fun onClickCopy() {
-        _uiState.update { it.copy(showCopyDialog = true) }
+        val mapping = _uiState.value.mapping ?: return
+        val defaultName = "Copy of ${mapping.title}"
+        _uiState.update {
+            it.copy(
+                showCopyDialog = true,
+                copyDialogName = defaultName
+            )
+        }
     }
 
     fun onCopyDialogDismiss() {

@@ -122,17 +122,13 @@ private fun CopyPlaylistDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(
-                        onClick = onDismiss
-                    ) {
+                    TextButton(onClick = onDismiss) {
                         Text(
                             text = stringResource(Res.string.cancel),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    TextButton(
-                        onClick = onConfirm
-                    ) {
+                    TextButton(onClick = onConfirm) {
                         Text(
                             text = stringResource(Res.string.copy_playlist),
                             color = MaterialTheme.colorScheme.primary
@@ -199,9 +195,7 @@ private fun SingleLessonDetailScreen(
 
                             Spacer(modifier = Modifier.width(12.dp))
 
-                            Text(
-                                text = stringResource(Res.string.app_name),
-                            )
+                            Text(text = stringResource(Res.string.app_name))
                         }
 
                         Text(
@@ -229,15 +223,13 @@ private fun SingleLessonDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RespectQuickActionButton(
-                    labelText = when(uiState.pinState.status) {
+                    labelText = when (uiState.pinState.status) {
                         PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
                         PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
                         else -> stringResource(Res.string.download)
                     },
                     iconContent = {
-                        RespectOfflineItemStatusIcon(
-                            state = uiState.pinState,
-                        )
+                        RespectOfflineItemStatusIcon(state = uiState.pinState)
                     },
                     onClick = onClickDownload,
                     enabled = uiState.buttonsEnabled,
@@ -320,6 +312,38 @@ private fun PlaylistDetailScreen(
                                         color = MaterialTheme.colorScheme.onSurface,
                                         lineHeight = 18.sp,
                                     )
+                                }
+
+                                if (mapping?.subject != null || mapping?.grade != null || mapping?.language != null) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        mapping.subject?.let { subject ->
+                                            Text(
+                                                text = subject.name.getTitle(),
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+
+                                        mapping.grade?.let { grade ->
+                                            Text(
+                                                text = grade,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+
+                                        mapping.language?.let { language ->
+                                            Text(
+                                                text = language,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
 
                                 if (uiState.isSelectionMode && uiState.selectedLessons.isNotEmpty()) {
@@ -429,9 +453,7 @@ private fun PlaylistDetailScreen(
                         if (uiState.isSelectionMode) {
                             Checkbox(
                                 checked = allSectionLessonsSelected,
-                                onCheckedChange = { checked ->
-                                    onClickToggleSectionSelection(section.uid)
-                                },
+                                onCheckedChange = { onClickToggleSectionSelection(section.uid) },
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))

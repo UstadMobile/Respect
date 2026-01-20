@@ -496,4 +496,5 @@
     <string name="copy_link">Copy link</string>
     <string name="send_link_via_sms">Send link via SMS</string>
     <string name="send_link_via_email">Send link via email</string>
+    <string name="grade">Grade</string>
 </resources>

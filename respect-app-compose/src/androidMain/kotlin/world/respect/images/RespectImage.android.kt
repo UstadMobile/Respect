@@ -11,8 +11,8 @@ private val nameMap = mapOf(
     RespectImage.DIGITAL_LIBRARY to R.drawable.digital_library,
     RespectImage.WORKS_OFFLINE to R.drawable.works_offline,
     RespectImage.DATA_REPORTING to R.drawable.data_reporting,
-    RespectImage.ASSIGNMENTS to R.drawable.assignments,
-)
+    RespectImage.ASSIGNMENTS to R.drawable.assignments
+    )
 
 @Composable
 actual fun respectImagePainter(image: RespectImage): Painter {

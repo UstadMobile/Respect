@@ -91,7 +91,7 @@ interface PersonQrBadgeEntityDao {
                  JOIN PersonEntity 
                       ON PersonEntity.pGuidHash = PersonQrBadgeEntity.pqrGuidNum
 
-           WHERE PersonQrBadgeEntity.pqrGuidNum = :personGuidNum
+           WHERE (:personGuidNum = 0 OR PersonQrBadgeEntity.pqrGuidNum = :personGuidNum)
              AND (:includeDeleted OR PersonQrBadgeEntity.pqrStatus = 1)        
              AND (:qrCodeUrl IS NULL OR PersonQrBadgeEntity.pqrQrCodeUrl = :qrCodeUrl)
              AND (${PersonEntityDao.AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL})    

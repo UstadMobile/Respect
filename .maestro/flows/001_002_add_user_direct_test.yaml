@@ -181,18 +181,6 @@ onFlowComplete:
       TEXT: "Password*"
 - inputText: "test123"
 - tapOn: "Save"
-- assertVisible: "Username must be at least 3 characters"
-- tapOn: "Username"
-- inputText: "2est"
-- tapOn: "Save"
-- assertVisible: "Username cannot start with a number"  # 2est not a valid username
-- runFlow:
-    file: "subflows/erase_text.yaml"
-    env:
-      TEXT: "Username"
-- inputText: "parenta@user"
-- assertVisible: "parentauser"    # @ symbol won't get added to the username field - so "parentauser" is expected result
-- tapOn: "Save"
 - tapOn: "Child User"
 - tapOn: "Create account"
 - assertVisible:

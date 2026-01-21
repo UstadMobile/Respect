@@ -14,6 +14,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
@@ -60,6 +62,12 @@ fun InviteQrScreen(
                 painter = rememberQrCodePainter(link),
                 contentDescription = "QR Code",
                 modifier = Modifier.size(400.dp).padding(horizontal = 50.dp)
+            )
+            Text(
+                text = link,
+                modifier = Modifier
+                    .testTag("invite_qr_link") ,
+                color = Color.Transparent
             )
         }
 

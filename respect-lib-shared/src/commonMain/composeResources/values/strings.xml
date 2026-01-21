@@ -446,6 +446,7 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Assignment tasks</string>
+    <string name="assignment_name">Assignment name</string>
     <string name="lesson_assessment">Lesson/assessment</string>
 
     <string name="due_date">Due date</string>

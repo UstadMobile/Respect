@@ -74,7 +74,7 @@ data class LoginScreen(
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(realmUrl: Url) = LoginScreen(realmUrl.toString())
+        fun create(schoolUrl: Url) = LoginScreen(schoolUrl.toString())
     }
 
 }

@@ -71,8 +71,7 @@ appId: world.respect.app
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"

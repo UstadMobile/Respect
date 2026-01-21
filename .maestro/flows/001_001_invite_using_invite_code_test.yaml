@@ -1,4 +1,3 @@
-appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -15,10 +14,7 @@ onFlowStart:
 onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
-
 ---
-
-#  A) Admin add new class
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"

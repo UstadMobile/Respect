@@ -26,18 +26,15 @@ import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseC
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
-import world.respect.shared.generated.resources.password_must_be_at_least
-import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
-import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel.Companion.MIN_PASSWORD_LENGTH
 import kotlin.time.Clock
 
 data class CreateAccountSetUserNameUiState(

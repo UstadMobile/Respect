@@ -49,7 +49,7 @@ onFlowComplete:
     id: "app_title"
     text: "QR code"
 - copyTextFrom:
-      id: "qr_code_link"
+      id: "invite_qr_link"
 
 # Student user joining using invite QR code
 - clearState: world.respect.app

@@ -1,7 +1,6 @@
 package world.respect.app.view.manageuser.accountlist
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.ChatBubble
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -26,6 +26,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
+import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 
@@ -40,6 +41,7 @@ fun AccountListScreen(
         onClickAddAccount = viewModel::onClickAddAccount,
         onClickLogout = viewModel::onClickLogout,
         onClickProfile = viewModel::onClickProfile,
+        onClickShareFeedback = viewModel::onClickShareFeedback
     )
 }
 
@@ -50,6 +52,7 @@ fun AccountListScreen(
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
+    onClickShareFeedback: () -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize())
       {
@@ -105,6 +108,18 @@ fun AccountListScreen(
           }
           item {
               HorizontalDivider()
+          }
+          item {
+              ListItem(
+                  modifier = Modifier.clickable {
+                      onClickShareFeedback()
+                  },
+                  headlineContent = {
+                      Text(stringResource(Res.string.share_feedback))
+                  },
+                  leadingContent = {
+                      Icon(Icons.Outlined.ChatBubble, contentDescription = "Share Feedback")                  }
+              )
           }
           item {
               RespectLongVersionInfoItem()

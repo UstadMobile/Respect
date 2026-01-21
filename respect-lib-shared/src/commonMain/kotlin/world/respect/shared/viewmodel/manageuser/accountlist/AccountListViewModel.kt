@@ -23,6 +23,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
 import world.respect.shared.viewmodel.RespectViewModel
@@ -176,4 +177,9 @@ class AccountListViewModel(
         }
     }
 
+    fun onClickShareFeedback(){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(ShareFeedback)
+        )
+    }
 }

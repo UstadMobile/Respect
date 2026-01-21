@@ -136,12 +136,14 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
@@ -479,6 +481,15 @@ fun AppNavHost(
 
         composable<AccountList> {
             AccountListScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
+            )
+        }
+
+        composable<ShareFeedback> {
+            ShareFeedbackScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController

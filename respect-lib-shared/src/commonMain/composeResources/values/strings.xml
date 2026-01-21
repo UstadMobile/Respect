@@ -171,8 +171,12 @@
     <string name="create_passkey">Create passkey</string>
     <string name="passkey">Passkey</string>
 
-
     <string name="add_account">Add account</string>
+    <string name="share_feedback">Share feedback</string>
+    <string name="quick_contact">Quick Contact</string>
+    <string name="whatsapp_support">WhatsApp Support</string>
+    <string name="email_support">Email Support</string>
+    <string name="public_forum">Public forum</string>
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 

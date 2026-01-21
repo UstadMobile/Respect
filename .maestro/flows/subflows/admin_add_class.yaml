@@ -14,7 +14,7 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Add class"
-- tapOn: "Name*"
+- tapOn: "Class name*"
 - inputText: "New Class"
 - tapOn: "Save"
 - assertVisible:

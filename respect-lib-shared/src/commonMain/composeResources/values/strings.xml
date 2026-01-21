@@ -355,6 +355,8 @@
     <string name="delete">Delete</string>
 
     <string name="accounts">Accounts</string>
+    <string name="parents_only">Parents only</string>
+    <string name="continue_using_fingerprint_or">Continue using fingerprint, biometrics, or device PIN</string>
 
     <string name="people">People</string>
     <string name="person">Person</string>
@@ -445,6 +447,7 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Assignment tasks</string>
+    <string name="assignment_name">Assignment name</string>
     <string name="lesson_assessment">Lesson/assessment</string>
 
     <string name="due_date">Due date</string>

@@ -55,7 +55,7 @@ onFlowComplete:
     text: "Add assignment"
 - tapOn: "Save"
 - assertVisible: "Required field"
-- tapOn: "Name*"
+- tapOn: "Assignment name*"
 - inputText: "Homework 1"
 - tapOn: "Class"
 - tapOn: "New Class"

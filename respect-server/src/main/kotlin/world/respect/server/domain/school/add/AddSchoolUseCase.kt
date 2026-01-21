@@ -13,6 +13,7 @@ import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrants
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
+import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -42,22 +43,26 @@ class AddSchoolUseCase(
         requests: List<AddSchoolRequest>
     ) {
         requests.forEach { request ->
-            schoolDirectoryEntryDataSource.updateLocal(listOf(request.school))
+            val schoolToAdd = request.school.copy(
+                self = request.school.self.normalizeForEndpoint()
+            )
+
+            schoolDirectoryEntryDataSource.updateLocal(listOf(schoolToAdd))
 
             directoryDataSource.setServerManagedSchoolConfig(
-                request.school,  request.dbUrl
+                schoolToAdd,  request.dbUrl
             )
 
             val adminGuid = "1"
             val schoolScope = getKoin().createScope<SchoolDirectoryEntry>(
                 SchoolDirectoryEntryScopeId(
-                    request.school.self, null
+                    schoolToAdd.self, null
                 ).scopeId
             )
 
             val accountScope = getKoin().createScope<RespectAccount>(
                 RespectAccountScopeId(
-                    request.school.self, AuthenticatedUserPrincipalId(adminGuid)
+                    schoolToAdd.self, AuthenticatedUserPrincipalId(adminGuid)
                 ).scopeId
             )
 

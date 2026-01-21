@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_code
@@ -70,7 +71,7 @@ class OtherOptionsViewModel(
 
          launchWithLoadingIndicator {
              try {
-                 val schoolUrl = Url(link)
+                 val schoolUrl = Url(link).normalizeForEndpoint()
                  val schoolEntry = respectAppDataSource.schoolDirectoryEntryDataSource
                      .getSchoolDirectoryEntryByUrl(schoolUrl).dataOrNull()
 
@@ -78,9 +79,7 @@ class OtherOptionsViewModel(
                      throw IllegalStateException()
 
                  _navCommandFlow.tryEmit(
-                     NavCommand.Navigate(
-                         LoginScreen.create(Url(link))
-                     )
+                     NavCommand.Navigate(LoginScreen.create(schoolUrl))
                  )
              }catch(_: Throwable){
                  _uiState.update {

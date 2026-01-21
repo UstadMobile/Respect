@@ -34,7 +34,7 @@ onFlowComplete:
     text: "Add class"
 - tapOn: "Save"
 - assertVisible: "Required field"
-- tapOn: "Name*"
+- tapOn: "Class name*"
 - inputText: "New Class"
 - tapOn: "Description"
 - inputText: "New Course"
@@ -92,7 +92,10 @@ onFlowComplete:
 - inputText: ${output.futureDate}
 - tapOn: "Next"
 - assertVisible: "Date of Birth cannot be in the future."
-- eraseText
+- runFlow:
+     file: "subflows/erase_text.yaml"
+     env:
+       TEXT: "Your date of birth*"
 - tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
@@ -395,6 +398,7 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: "testp1"
+- hideKeyboard
 - tapOn: "Login"
 - assertVisible: "Apps"
 - tapOn: "Classes"

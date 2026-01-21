@@ -21,4 +21,7 @@ data class RespectSessionAndPerson(
     val session: RespectSession,
     val person: Person,
     val relatedPersons: List<Person> = emptyList(),
-)
+){
+    val isChild: Boolean
+        get() = session.account.userGuid != person.guid
+}

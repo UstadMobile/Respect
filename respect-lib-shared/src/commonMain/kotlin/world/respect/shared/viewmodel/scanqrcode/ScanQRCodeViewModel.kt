@@ -85,7 +85,7 @@ class ScanQRCodeViewModel(
         ) {
             when {
                 //If a result was requested to be returned via NavResultReturner, then do that
-                !resultReturner.sendResultIfResultExpected(
+                resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
                     result = url,

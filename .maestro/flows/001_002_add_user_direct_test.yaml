@@ -174,7 +174,7 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "test"
 - tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
+- assertVisible: "Password too short"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
@@ -323,7 +323,7 @@ onFlowComplete:
 - tapOn: "New password*"
 - inputText: "t2"
 - tapOn: "Save"
-- assertVisible: "Password must be at least 6 characters"
+- assertVisible: "Password too short"
 - tapOn: "New password*"
 - eraseText
 - inputText: "test234"

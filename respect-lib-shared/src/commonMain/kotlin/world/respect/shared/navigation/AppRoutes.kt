@@ -752,9 +752,14 @@ data class InvitePerson(
             presetRoleStr = presetRole?.value,
             inviteCodeStr = inviteCode
         )
-
     }
 }
+
+@Serializable
+data class QrCode(
+    val inviteLink:String?=null,
+    val schoolOrClass:String?=null
+): RespectAppRoute
 
 @Serializable
 data class CopyCode(

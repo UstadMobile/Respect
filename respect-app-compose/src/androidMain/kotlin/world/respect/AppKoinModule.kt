@@ -204,6 +204,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
+import world.respect.shared.viewmodel.person.qrcode.InviteQrViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
@@ -359,6 +360,7 @@ val appKoinModule = module {
     viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
+    viewModelOf(::InviteQrViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {

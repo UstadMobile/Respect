@@ -33,6 +33,7 @@ import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.QrCode
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
@@ -163,11 +164,11 @@ class InvitePersonViewModel(
         }
     }
 
-    fun copyInviteCodeToClipboard() {
+    fun copyInviteLinkToClipboard() {
         viewModelScope.launch {
           createOrEditInvite()
-            _uiState.value.inviteCode?.also { code ->
-                setClipboardStringUseCase(code)
+            _uiState.value.shareLink?.also { link ->
+                setClipboardStringUseCase(link)
             }
         }
     }
@@ -219,7 +220,18 @@ class InvitePersonViewModel(
         }
     }
 
-
+    fun onClickQrCode(){
+        viewModelScope.launch {
+            createOrEditInvite()
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    QrCode(
+                        inviteLink = uiState.value.shareLink,
+                        schoolOrClass = uiState.value.className?:uiState.value.schoolName)
+                )
+            )
+        }
+    }
     private fun generateCode(): String {
         return Random.nextInt(DEFAULT_INVITE_CODE_MAX)
             .toString()

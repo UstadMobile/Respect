@@ -34,7 +34,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.allow_multiple_people_to_use_this_invite
 import world.respect.shared.generated.resources.approval_required
 import world.respect.shared.generated.resources.class_name
-import world.respect.shared.generated.resources.code
 import world.respect.shared.generated.resources.copy_link
 import world.respect.shared.generated.resources.enter_school_name
 import world.respect.shared.generated.resources.invite_code_label
@@ -56,10 +55,11 @@ fun InvitePersonScreen(
     val uiState by viewModel.uiState.collectAsState(Dispatchers.Main.immediate)
     InvitePersonScreen(
         uiState = uiState,
-        onCopyCode = viewModel::copyInviteCodeToClipboard,
+        onCopyLink = viewModel::copyInviteLinkToClipboard,
         onInviteViaSms = viewModel::onSendLinkViaSms,
         onInviteViaEmail = viewModel::onSendLinkViaEmail,
         onInviteViaShare = viewModel::onShareLink,
+        onClickQrCode = viewModel::onClickQrCode,
         onInviteMultipleAllowedChanged = viewModel::setInviteMultipleAllowed,
         onApprovalRequiredChanged = viewModel::setApprovalRequired,
         onRoleChange = viewModel::onRoleChange,
@@ -70,10 +70,11 @@ fun InvitePersonScreen(
 @Composable
 fun InvitePersonScreen(
     uiState: InvitePersonUiState,
-    onCopyCode: () -> Unit,
+    onCopyLink: () -> Unit,
     onInviteViaSms: () -> Unit,
     onInviteViaEmail: () -> Unit,
     onInviteViaShare: () -> Unit,
+    onClickQrCode: () -> Unit,
     onClickGetCode: () -> Unit,
     onInviteMultipleAllowedChanged: (Boolean) -> Unit,
     onApprovalRequiredChanged: (Boolean) -> Unit,
@@ -148,7 +149,7 @@ fun InvitePersonScreen(
         HorizontalDivider()
 
         ListItem(
-            modifier = Modifier.clickable { onCopyCode() },
+            modifier = Modifier.clickable { onCopyLink() },
             leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.copy_link)) }
         )
@@ -171,7 +172,7 @@ fun InvitePersonScreen(
             headlineContent = { Text(stringResource(Res.string.invite_via_share)) }
         )
         ListItem(
-            modifier = Modifier.clickable { onInviteViaShare() },
+            modifier = Modifier.clickable { onClickQrCode() },
             leadingContent = { Icon(Icons.Default.QrCode, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.qr_code)) }
         )

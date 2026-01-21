@@ -484,5 +484,6 @@
 
 
     <string name="section_name">Section name</string>
+    <string name="qr_code_private_screen">This QR code is private. If it is shared with someone, they can scan to join.</string>
 
 </resources>

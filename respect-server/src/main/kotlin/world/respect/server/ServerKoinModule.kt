@@ -42,6 +42,7 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb

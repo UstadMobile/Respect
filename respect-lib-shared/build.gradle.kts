@@ -57,6 +57,8 @@ kotlin {
 
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
+            implementation(libs.qrose)
+
         }
 
         androidMain.dependencies {

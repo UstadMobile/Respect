@@ -91,7 +91,12 @@ class CreateAccountSetUserNameViewModel(
                 val currentUsername = _uiState.value.username
 
                 val suggestedUsername = person?.fullName()?.takeIf { currentUsername.isEmpty() }?.let {
-                    usernameSuggestionUseCase(it)
+                    try {
+                        usernameSuggestionUseCase(it)
+                    }catch(e: Throwable) {
+                        Napier.w("Could not get suggested username", e)
+                        null
+                    }
                 }
 
                 _uiState.update { prev ->

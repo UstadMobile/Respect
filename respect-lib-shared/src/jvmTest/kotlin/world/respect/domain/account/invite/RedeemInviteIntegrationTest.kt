@@ -13,6 +13,7 @@ import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.serializers.plusMillis
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
@@ -23,6 +24,7 @@ import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePa
 import java.lang.System.currentTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
 
 class RedeemInviteIntegrationTest {
 
@@ -79,7 +81,7 @@ class RedeemInviteIntegrationTest {
                     guid = "12345",
                     inviteMultipleAllowed = false,
                     approvalRequired = false,
-                    expiration =  currentTimeMillis() + Invite.EXPIRATION_TIME
+                    expiration = Clock.System.now().plusMillis(Invite.EXPIRATION_TIME)
                 )
                 serverSchoolDataSource.classDataSource.store(listOf(clazz))
                 serverSchoolDataSource.inviteDataSource.store(listOf(invite))

@@ -11,6 +11,8 @@
     <string name="example_url_placeholder">e.g. https://</string>
     <string name="next">Next</string>
     <string name="save">Save</string>
+    <string name="qr_or_password_required">QR code badge or password required</string>
+    <string name="password_not_set_error">Password is required before saving</string>
     <string name="done">Done</string>
     <string name="try_it">Try it</string>
     <string name="add_app">Add App</string>
@@ -64,6 +66,24 @@
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
+
+    <string name="qr_badge_options">QR Badge Options</string>
+    <string name="assign_new_badge_replace">Assign new badge (replace)</string>
+    <string name="revoke_badge">Revoke badge</string>
+
+    <string name="quick_easy_sign_in">Quick and easy sign-in for students</string>
+    <string name="qr_code_badge_description">QR code badges enable students to quickly and safely sign-in, even on shared devices, without needing to use usernames and passwords</string>
+    <string name="assign_qr_code_badge">Assign QR code badge</string>
+    <string name="change_qr_code_badge">Change QR code badge</string>
+    <string name="or">OR</string>
+    <string name="set_password">Set password</string>
+    <string name="require_password">Require Password</string>
+    <string name="password_too_short">Password must be at least %d characters</string>
+    <string name="save_password">Save Password</string>
+    <string name="creating_account_for">Creating account for %s</string>
+    <string name="password_cannot_be_empty">Password cannot be empty</string>
+    <string name="learn_more">Learn More</string>
+
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
@@ -89,15 +109,21 @@
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
+    <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>
+    <string name="error_assign_qr_code">Failed to assign QR code</string>
+    <string name="error_qr_already_assigned">This QR code is already assigned to another student</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
     <string name="date_later">Start date cannot be later than end date*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
+    <string name="url">Url</string>
+    <string name="paste_url">Paste Url</string>
     <string name="ok">Ok</string>
     <string name="name">Name</string>
     <string name="other_options">Other options</string>
+    <string name="scan_qr_code_badge">Scan QR code/badge</string>
     <string name="something_went_wrong">Something went wrong.</string>
     <string name="waiting_title">Waiting for approval</string>
     <string name="please_wait">Please wait</string>
@@ -127,6 +153,8 @@
     <string name="remove_picture">Remove picture</string>
     <string name="select_date">Select date</string>
     <string name="first_name">First name</string>"
+    <string name="next_button">Next</string>
+    <string name="shared_device_login_title">Enter Roll Number</string>
     <string name="last_name">Last name</string>"
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
@@ -135,6 +163,12 @@
     <string name="edit_clazz">Edit class</string>
     <string name="add_clazz">Add class</string>
     <string name="settings">Settings</string>
+    <string name="select_class">Select Class</string>
+    <string name="select_student">Select Student</string>
+    <string name="enter_roll_number">Enter Roll Number</string>
+    <string name="shared_device_setting">Shared device setting</string>
+    <string name="scan_qr_code">Scan QR code badge</string>
+    <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
     <string name="enter_school_name">School name</string>
@@ -144,6 +178,20 @@
     <string name="school_not_found">School not found: please ask your admin to add your school.</string>
     <string name="add_directory">Add Directory</string>
     <string name="edit_directory">Edit Directory</string>
+
+    <string name="school_wise_setting">School-wise setting</string>
+    <string name="allow_students_select_account">Allow students to select their account on a shared device</string>
+    <string name="allow_students_select_description">This will allow students to select their account</string>
+    <string name="require_roll_number">Require students to enter their roll number</string>
+    <string name="require_roll_number_description">This will make students to enter their roll number after selecting their name</string>
+    <string name="shared_device_settings">Shared device settings</string>
+
+    <string name="shared_school_device">Shared school device</string>
+    <string name="shared_school_device_description">Mark to make a device a shared school mode</string>
+    <string name="shared_device_warning">This device will change to shared device once this setting is on</string>
+    <string name="shared_device_confirm_dialog">Are you sure to make this device as a shared school device?</string>
+    <string name="close_button">Close</string>
+    <string name="device_settings">Device settings</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>
@@ -400,6 +448,8 @@
     <string name="change_password">Change password</string>
     <string name="created">Created</string>
     <string name="last_updated">Last Updated</string>
+    <string name="badge">Badge</string>
+    <string name="assigned">assigned</string>
     <string name="delete_this_passkey">Delete this passkey?</string>
     <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
 
@@ -427,6 +477,9 @@
 
     <string name="password_must_be_at_least">Password must be at least 6 characters</string>
     <string name="saved">Saved</string>
+
+    <string name="qr_code_invalid_format">Invalid QR code Scanned</string>
+    <string name="try_again">Try again</string>
 
     <string name="manage_school_directories">Manage school directories</string>
     <string name="school_directories">School directories</string>
@@ -464,5 +517,7 @@
     <string name="edit_enrollment">Edit enrollment</string>
 
     <string name="section_name">Section name</string>
+
+    <string name="not_set">Not set</string>
 
 </resources>

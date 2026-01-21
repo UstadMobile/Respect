@@ -3,7 +3,6 @@
 
 package world.respect.shared.navigation
 
-import androidx.lifecycle.SavedStateHandle
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -63,7 +62,7 @@ data class LoginScreen(
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(realmUrl: Url) = LoginScreen(realmUrl.toString())
+        fun create(schoolUrl: Url) = LoginScreen(schoolUrl.toString())
     }
 
 }

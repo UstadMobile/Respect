@@ -158,7 +158,8 @@ fun AccountListScreen(
                     Text(stringResource(Res.string.share_feedback))
                 },
                 leadingContent = {
-                    Icon(Icons.Outlined.ChatBubble, contentDescription = "Share Feedback")                  }
+                    Icon(Icons.Outlined.ChatBubble, contentDescription = "Share Feedback")
+                }
             )
         }
 

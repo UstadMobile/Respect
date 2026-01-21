@@ -63,7 +63,6 @@ fun ShareFeedbackScreen(
             FeedbackItem(
                 title = stringResource(Res.string.whatsapp_support),
                 leadingIcon = Icons.Outlined.Whatsapp,
-                contentDescription = "Open Whatsapp Support",
                 onClick = onClickWhatsApp
             )
         }
@@ -72,7 +71,6 @@ fun ShareFeedbackScreen(
             FeedbackItem(
                 title = stringResource(Res.string.email_support),
                 leadingIcon = Icons.Outlined.Email,
-                contentDescription = "Open Email Support",
                 onClick = onClickEmail
             )
         }
@@ -81,7 +79,6 @@ fun ShareFeedbackScreen(
             FeedbackItem(
                 title = stringResource(Res.string.public_forum),
                 leadingIcon = Icons.Outlined.People,
-                contentDescription = "Open Public Forum",
                 onClick = onClickPublicForum,
             )
         }
@@ -92,7 +89,6 @@ fun ShareFeedbackScreen(
 private fun FeedbackItem(
     title: String,
     leadingIcon: ImageVector,
-    contentDescription: String,
     onClick: () -> Unit
 ) {
     ListItem(
@@ -102,13 +98,13 @@ private fun FeedbackItem(
         leadingContent = {
             Icon(
                 imageVector = leadingIcon,
-                contentDescription = title
+                contentDescription = null
             )
         },
         trailingContent = {
             Icon(
                 imageVector = Icons.Outlined.OpenInNew,
-                contentDescription = contentDescription
+                contentDescription = null
             )
         },
         modifier = Modifier

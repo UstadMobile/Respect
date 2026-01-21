@@ -323,7 +323,7 @@ onFlowComplete:
 - tapOn: "New password*"
 - inputText: "t2"
 - tapOn: "Save"
-- assertVisible: "Password too short"
+- assertVisible: "Password must be at least 6 characters"
 - tapOn: "New password*"
 - eraseText
 - inputText: "test234"

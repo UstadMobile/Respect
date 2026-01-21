@@ -1,3 +1,4 @@
+appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
   - runScript:

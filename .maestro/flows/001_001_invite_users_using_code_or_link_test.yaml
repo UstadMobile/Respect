@@ -75,7 +75,7 @@ onFlowComplete:
 - inputText: "TeacherA User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Your date of birth*"
+- tapOn: "Date of birth*"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
@@ -137,7 +137,16 @@ onFlowComplete:
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
-- tapOn: "I’m a Student"
+    text: "Invitation"
+- assertVisible:
+    text: "School name"
+- assertVisible:
+    text: "Class name"
+- assertVisible:
+      text: "Role: Student"
+- assertVisible:
+    text: "Server link: "${output.SCHOOL_URL}
+- tapOn: "Accept"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
@@ -145,7 +154,7 @@ onFlowComplete:
 - inputText: "Student User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Your date of birth*"
+- tapOn: "Date of birth*"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
@@ -214,7 +223,13 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- tapOn: "Next"
+- assertVisible:
+    text: "School name"
+- assertVisible:
+     text: "Role: "
+- assertVisible:
+      text: "Server link:"
+- tapOn: "Accept"
 - assertVisible:
     id: "app_title"
     text: "Terms and conditions"
@@ -226,7 +241,7 @@ onFlowComplete:
 - inputText: "Parent User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Your date of birth*"
+- tapOn: "Date of birth*"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateP}
@@ -242,21 +257,6 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "test123"
 - tapOn: "Sign-up"
-- assertVisible:
-    id: "app_title"
-    text: "Child Profile"
-- assertVisible: "Child's name*"
-- assertVisible: "Student User"
-- assertVisible: "Gender*"
-- assertVisible: "Male"
-- assertVisible: "Child's date of birth*"
-- runScript:
-    file: "scripts/setDate.js"
-- assertVisible: ${output.pastYearDateC}
-# 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
-- tapOn:
-    text: "Done"
-
 
 - clearState: world.respect.app
 - launchApp:
@@ -269,7 +269,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
-- inputText: "studentuser"
+- inputText: "teacherauser"
 - tapOn:
     id : "password"
 - inputText: "test123"
@@ -277,4 +277,12 @@ onFlowComplete:
 - assertVisible: "Apps"
 - tapOn: "People"
 - tapOn: "Student User"
+- assertVisible: "Pending request to join"
+- assertVisible: "Parent User"
+- tapOn:
+      id: "accept_btn"
+- assertNotVisible: "Pending request to join"
+- tapOn: "Save"
+- assertVisible: "Create account"
+- assertVisible: "Family Member"
 - assertVisible: "Parent User"

@@ -1,6 +1,5 @@
 package world.respect.sharedse.domain.account.authenticatepassword
 
-import io.ktor.http.Url
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -19,8 +18,9 @@ class AuthenticateQrBadgeUseCaseDbImpl(
     ): AuthenticateQrBadgeUseCase.Response {
 
         // First, find the QR badge by the URL from the credential
-        val qrCodeEntity = schoolDb.getPersonQrBadgeEntityDao().findByQrCodeUrl(credential.qrCodeUrl.toString())
-            ?: throw ForbiddenException("QR badge not found")
+        val qrCodeEntity = schoolDb.getPersonQrBadgeEntityDao().findByQrCodeUrl(
+            qrCodeUrl = credential.qrCodeUrl.toString()
+        ) ?: throw ForbiddenException("QR badge not found")
 
         // Find the person using the GUID from the QR code entity
         val personEntity = schoolDb.getPersonEntityDao().findByGuidNum(

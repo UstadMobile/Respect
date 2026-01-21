@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "3329166ed9cd86ace1d6562a3ff51ee4",
+    "identityHash": "643876ed69a2a63d294e5b3f3134a90e",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1052,7 +1052,7 @@
       },
       {
         "tableName": "PersonQrBadgeEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pqrGuidNum` INTEGER NOT NULL, `pqrGuid` TEXT NOT NULL, `pqrLastModified` INTEGER NOT NULL, `pqrStored` INTEGER NOT NULL, `pqrQrCodeUrl` TEXT NOT NULL, `pqrStatus` INTEGER NOT NULL, PRIMARY KEY(`pqrGuidNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pqrGuidNum` INTEGER NOT NULL, `pqrGuid` TEXT NOT NULL, `pqrLastModified` INTEGER NOT NULL, `pqrStored` INTEGER NOT NULL, `pqrQrCodeUrl` TEXT, `pqrStatus` INTEGER NOT NULL, PRIMARY KEY(`pqrGuidNum`))",
         "fields": [
           {
             "fieldPath": "pqrGuidNum",
@@ -1081,8 +1081,7 @@
           {
             "fieldPath": "pqrQrCodeUrl",
             "columnName": "pqrQrCodeUrl",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "pqrStatus",
@@ -1112,7 +1111,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3329166ed9cd86ace1d6562a3ff51ee4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '643876ed69a2a63d294e5b3f3134a90e')"
     ]
   }
 }

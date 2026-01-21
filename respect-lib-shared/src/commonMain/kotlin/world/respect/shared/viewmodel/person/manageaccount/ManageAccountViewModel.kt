@@ -30,7 +30,6 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
-import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.error_assign_qr_code
 import world.respect.shared.generated.resources.error_qr_already_assigned
@@ -125,11 +124,19 @@ class ManageAccountViewModel(
          * Flow: PersonDetail (no username/credential set): go to set username, scan QR code,
          * then go to ManageAccount (pop up to CreateAccountSetUsername inclusive).
          */
-        viewModelScope.launch {
-            val qrCodeUrl = route.setPersonQrBadgeUrl
-            if (qrCodeUrl != null && route.setPersonQrBadgeUsername != null) {
+        val qrCodeUrl = route.setPersonQrBadgeUrl
+        val setUsername = route.setPersonQrBadgeUsername
+        if(qrCodeUrl != null && setUsername != null &&
+            savedStateHandle.get<String>(KEY_QRCODE_SET) == null
+        ) {
+            launchWithLoadingIndicator(
+                onShowError = { errorMsg ->
+                    _uiState.update { it.copy(errorText = errorMsg) }
+                }
+            ) {
                 saveUsername(route.setPersonQrBadgeUsername)
                 storeQrCodeForPerson(personGuid = personGuid, url = qrCodeUrl)
+                savedStateHandle[KEY_QRCODE_SET] = route.setPersonQrBadgeUsername
             }
         }
 
@@ -244,17 +251,13 @@ class ManageAccountViewModel(
     }
 
     fun onClickQRCodeBadge() {
-        val schoolUrl = accountManager.activeAccount?.school?.self
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 ScanQRCode.create(
-                    guid = personGuid,
-                    schoolUrl = schoolUrl,
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = QR_SELECT_RESULT
                     ),
-                    nextAfterScan = NextAfterScan.GoToManageAccount
                 )
             )
         )
@@ -269,14 +272,14 @@ class ManageAccountViewModel(
     }
 
     fun onRemoveQRBadge() {
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
             try {
                 val currentQrBadge = uiState.value.qrBadge.dataOrNull()
                 if (currentQrBadge != null) {
                     schoolDataSource.personQrBadgeDataSource.store(
                         listOf(
                             currentQrBadge.copy(
-                                status = StatusEnum.TO_BE_DELETED,
+                                qrCodeUrl = null,
                                 lastModified = Clock.System.now(),
                             )
                         )
@@ -309,14 +312,12 @@ class ManageAccountViewModel(
                     )
                 }
             } else {
-                val now = Clock.System.now()
                 schoolDataSource.personQrBadgeDataSource.store(
                     listOf(
                         PersonQrBadge(
                             personGuid = personGuid,
                             qrCodeUrl = url,
-                            lastModified = now,
-                            stored = now,
+                            lastModified = Clock.System.now(),
                             status = StatusEnum.ACTIVE,
                         )
                     )
@@ -328,7 +329,8 @@ class ManageAccountViewModel(
         } catch (e: Exception) {
             _uiState.update { prev ->
                 prev.copy(
-                    errorText = "${Res.string.error_assign_qr_code}: ${e.message ?: "Unknown error"}".asUiText()                )
+                    errorText = "${Res.string.error_assign_qr_code}: ${e.message ?: "Unknown error"}".asUiText()
+                )
             }
             throw e
         }
@@ -400,6 +402,10 @@ class ManageAccountViewModel(
     }
 
     companion object {
+
         const val QR_SELECT_RESULT = "qr_select_result"
+
+        const val KEY_QRCODE_SET = "qr_code_set"
+
     }
 }

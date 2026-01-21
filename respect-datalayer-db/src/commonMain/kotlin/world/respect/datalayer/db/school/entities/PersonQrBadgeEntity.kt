@@ -15,6 +15,6 @@ data class PersonQrBadgeEntity(
     val pqrLastModified: Instant,
     val pqrStored: Instant,
     @ColumnInfo(index = true)
-    val pqrQrCodeUrl: Url,
+    val pqrQrCodeUrl: Url?,
     val pqrStatus: StatusEnum = StatusEnum.ACTIVE,
 )

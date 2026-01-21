@@ -58,7 +58,7 @@ onFlowComplete:
     id: "app_title"
     text: "Code"
 - copyTextFrom:
-    id: "invite_code"
+    id: "invite_code_field"
 
 # C) Teacher sign-up via invite code to the class
 - clearState: world.respect.app
@@ -185,7 +185,7 @@ onFlowComplete:
     id: "app_title"
     text: "Code"
 - copyTextFrom:
-    id: "invite_code"
+    id: "invite_code_field"
 
 # G) Student sign-up via invite code to the class
 - clearState: world.respect.app

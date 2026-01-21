@@ -79,9 +79,7 @@ class OtherOptionsViewModel(
                      throw IllegalStateException()
 
                  _navCommandFlow.tryEmit(
-                     NavCommand.Navigate(
-                         LoginScreen.create(Url(link))
-                     )
+                     NavCommand.Navigate(LoginScreen.create(schoolUrl))
                  )
              }catch(_: Throwable){
                  _uiState.update {

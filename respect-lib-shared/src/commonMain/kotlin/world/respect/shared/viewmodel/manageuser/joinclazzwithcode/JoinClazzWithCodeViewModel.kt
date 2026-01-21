@@ -77,11 +77,14 @@ class JoinClazzWithCodeViewModel(
             }
             try {
                 val inviteInfo = getInviteInfoUseCase(uiState.value.inviteCode)
+                println("hfghfgdf${inviteInfo.invite}")
+                println("hfghfgdf${inviteInfo.userInviteType}")
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         ConfirmationScreen.create(
                             route.schoolUrl,
-                            inviteInfo.code
+                            inviteInfo.code,
+                            type = 6
                         )
                     )
                 )

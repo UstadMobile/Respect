@@ -138,7 +138,7 @@ class ConfirmationViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 SignupScreen.create(
-                    route.schoolUrl, profileType,redeemRequest
+                    route.schoolUrl, profileType,redeemRequest,route.inviteType
                 )
             )
         )

@@ -19,6 +19,8 @@
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
     <string name="assignment">Assignment</string>
+    <string name="device">Device</string>
+    <string name="devices">Devices</string>
     <string name="add_assignment">Add assignment</string>
     <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
@@ -67,6 +69,8 @@
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
+    <string name="congratulation">Congratulations</string>
+    <string name="successfully_registered_school">You have successfully registered the school</string>
     <string name="i_am_student">I’m a Student</string>
     <string name="i_am_parent">I’m a Parent</string>
     <string name="accept">Accept</string>
@@ -303,6 +307,13 @@
     <string name="grade_level">Grade Level</string>
     <string name="assessment_type">Assessment Type (Self/Assignment)</string>
 
+    <string name="school_name">School name</string>
+    <string name="shared_school_devices">Shared school devices</string>
+    <string name="device_name">device name</string>
+    <string name="enable_shared_device_mode">Enable shared device mode</string>
+    <string name="students_must_enter_their_roll_number">Students must enter their roll number to login</string>
+    <string name="student_can_self_select_their_class_name">Student can self-select their class and name</string>
+
 
     <!-- Demographic Dimensions -->
     <string name="age_group">Age Group</string>
@@ -461,6 +472,24 @@
     <string name="pending_teacher">Pending teacher</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
+
+    <string name="regenerate_invite_code">Regenerate invite code</string>
+    <string name="copy_link">Copy link</string>
+    <string name="invite_settings">Invite settings</string>
+    <string name="invite_multiple_allowed">Invite multiple people</string>
+    <string name="approval_required">Approval required</string>
+    <string name="allow_multiple_people_to_use_this_invite">Allow multiple people to use this invite</string>
+    <string name="invite_via_sms">Send link via SMS</string>
+    <string name="invite_via_email">Send link via Email</string>
+    <string name="invite_via_share">Share link</string>
+    <string name="qr_code">QR code</string>
+    <string name="code">Code</string>
+    <string name="copy">Copy</string>
+    <string name="code_private_info">
+        This code is private. If it is shared with someone, they can enter this code here to join.
+    </string>
+    <string name="class_name_or_school_name">Class name or school name</string>
+
 
     <string name="section_name">Section name</string>
 

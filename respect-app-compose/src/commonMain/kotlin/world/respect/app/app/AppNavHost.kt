@@ -36,8 +36,10 @@ import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScr
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.onboarding.OnboardingScreen
 import world.respect.app.view.person.changepassword.ChangePasswordScreen
+import world.respect.app.view.person.copycode.CopyInviteCodeScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
+import world.respect.app.view.person.inviteperson.InvitePersonScreen
 import world.respect.app.view.person.list.PersonListScreen
 import world.respect.app.view.person.manageaccount.ManageAccountScreen
 import world.respect.app.view.person.passkeyList.PasskeyListScreen
@@ -71,6 +73,7 @@ import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.IndicatorDetail
 import world.respect.shared.navigation.IndicatorList
@@ -97,6 +100,7 @@ import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.HowPasskeyWorks
+import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.OtherOption
@@ -136,12 +140,18 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
+import world.respect.app.view.sharedschooldevice.SchoolSettingsScreen
+import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
+import world.respect.app.view.sharedschooldevice.SharedSchoolDeviceEnableScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
+import world.respect.shared.navigation.SchoolSettings
+import world.respect.shared.navigation.SharedDevicesEnable
+import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
@@ -159,7 +169,7 @@ fun AppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Acknowledgement,
+        startDestination = Acknowledgement(),
         modifier = modifier,
     ) {
 
@@ -548,6 +558,32 @@ fun AppNavHost(
                 viewModel = viewModel
             )
         }
+        composable<SchoolSettings> {
+            SchoolSettingsScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<SharedDevicesSettings> {
+            SharedDevicesSettingsScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<SharedDevicesEnable> {
+            SharedSchoolDeviceEnableScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
 
         composable<CurriculumMappingEdit> {
             val viewModel: CurriculumMappingEditViewModel = respectViewModel(
@@ -594,6 +630,23 @@ fun AppNavHost(
             )
         }
 
+        composable<InvitePerson> {
+            InvitePersonScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<CopyCode> {
+            CopyInviteCodeScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
     }
 }
 

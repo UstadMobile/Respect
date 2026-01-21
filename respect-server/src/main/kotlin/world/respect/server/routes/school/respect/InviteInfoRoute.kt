@@ -8,11 +8,16 @@ import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 
 fun Route.InviteInfoRoute(
-    getInviteInfoUseCase:  (ApplicationCall) -> GetInviteInfoUseCase,
+    getInviteInfoUseCase: (ApplicationCall) -> GetInviteInfoUseCase,
 ) {
-    get("info"){
+    get("info") {
         val code = call.request.queryParameters["code"]
             ?: throw IllegalArgumentException("missing code param").withHttpStatus(400)
-        call.respond(getInviteInfoUseCase(call).invoke(code))
+
+        call.respond(
+            getInviteInfoUseCase(call).invoke(
+                code
+            )
+        )
     }
 }

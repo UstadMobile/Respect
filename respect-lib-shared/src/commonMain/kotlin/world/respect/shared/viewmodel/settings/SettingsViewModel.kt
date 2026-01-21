@@ -10,6 +10,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SchoolSettings
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -44,6 +45,11 @@ class SettingsViewModel(
     fun onNavigateToMapping() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(CurriculumMappingList)
+        )
+    }
+    fun onClickSchool() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(SchoolSettings)
         )
     }
 }

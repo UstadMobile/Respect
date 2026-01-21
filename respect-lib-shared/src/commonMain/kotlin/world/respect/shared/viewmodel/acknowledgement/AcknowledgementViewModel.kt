@@ -2,14 +2,18 @@ package world.respect.shared.viewmodel.acknowledgement
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.datalayer.respect.model.invite.RespectInviteInfo.Companion.INVITE_TYPE_GENERIC
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.navigation.Acknowledgement
+import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
@@ -28,6 +32,7 @@ class AcknowledgementViewModel(
     private val _uiState = MutableStateFlow(AcknowledgementUiState())
 
     val uiState = _uiState.asStateFlow()
+    private val route: Acknowledgement = savedStateHandle.toRoute()
 
     init {
         viewModelScope.launch {
@@ -48,6 +53,11 @@ class AcknowledgementViewModel(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
                         hasAccount -> if (isChild) AssignmentList else RespectAppLauncher()
+                        route.schoolUrl != null -> ConfirmationScreen.create(
+                            route.schoolUrl,
+                            route.inviteCode.toString(),
+                            INVITE_TYPE_GENERIC
+                        )
                         else -> GetStartedScreen()
                     },
                     clearBackStack = true,

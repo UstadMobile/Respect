@@ -67,7 +67,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- tapOn: "Next"
+- tapOn: "Accept"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
@@ -118,6 +118,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Code"
+- assertVisible:
+      text: "This code is private. If it is shared with someone, they can enter this code to join"
 - copyTextFrom:
       id: "invite_code_field"
 

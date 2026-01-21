@@ -54,7 +54,7 @@ appId: world.respect.app
       id: "app_title"
       text: "Code"
 - copyTextFrom:
-      id: "invite_code"
+      id: "invite_code_field"
 
 
 # Teacher sign-up via invite code to the class

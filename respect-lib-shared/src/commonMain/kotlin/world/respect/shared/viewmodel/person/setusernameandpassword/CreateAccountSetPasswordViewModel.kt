@@ -16,14 +16,12 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.password_must_be_at_least
-import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.set_password
+import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
-import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
@@ -52,11 +50,6 @@ class CreateAccountSetPasswordViewModel(
     private val _uiState = MutableStateFlow(CreateAccountSetPasswordUiState())
 
     val uiState = _uiState.asStateFlow()
-
-    companion object {
-        const val PASSWORD_SET_RESULT = "password_set_result"
-        const val MIN_PASSWORD_LENGTH = 6
-    }
 
     init {
         _appUiState.update {

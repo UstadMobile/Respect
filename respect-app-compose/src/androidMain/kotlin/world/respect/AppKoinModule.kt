@@ -101,6 +101,8 @@ import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
+import world.respect.shared.domain.account.deleteaccount.DeleteAccountUseCase
+import world.respect.shared.domain.account.deleteaccount.DeleteAccountUseCaseClient
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -202,6 +204,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
+import world.respect.shared.viewmodel.person.deleteaccount.DeleteAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
@@ -338,6 +341,7 @@ val appKoinModule = module {
     viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
+    viewModelOf(::DeleteAccountViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -760,6 +764,15 @@ val appKoinModule = module {
 
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
+        }
+
+        factory<DeleteAccountUseCase> {
+            DeleteAccountUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+                tokenProvider = get(),
+            )
         }
 
         scoped<RemoteWriteQueue> {

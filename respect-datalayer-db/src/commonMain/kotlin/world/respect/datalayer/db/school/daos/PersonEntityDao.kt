@@ -258,6 +258,11 @@ interface PersonEntityDao {
         authenticatedPersonUidNum: Long
     ): Long
 
+    @Query("""
+      DELETE FROM PersonEntity
+      WHERE pGuid = :id
+      """)
+    suspend fun deletePerson(id: String): Int
 
     companion object {
 

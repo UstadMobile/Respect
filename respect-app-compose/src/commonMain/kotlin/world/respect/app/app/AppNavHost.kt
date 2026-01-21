@@ -36,6 +36,7 @@ import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScr
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.onboarding.OnboardingScreen
 import world.respect.app.view.person.changepassword.ChangePasswordScreen
+import world.respect.app.view.person.deleteaccount.DeleteAccountScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
 import world.respect.app.view.person.list.PersonListScreen
@@ -92,6 +93,7 @@ import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.navigation.CreateAccount
+import world.respect.shared.navigation.DeleteAccount
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.EnterPasswordSignup
@@ -506,6 +508,15 @@ fun AppNavHost(
 
         composable<ManageAccount> {
             ManageAccountScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
+            )
+        }
+
+        composable<DeleteAccount> {
+            DeleteAccountScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController

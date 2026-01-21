@@ -602,6 +602,11 @@ data class ManageAccount(
 ) : RespectAppRoute
 
 @Serializable
+data class DeleteAccount(
+    val guid: String,
+) : RespectAppRoute
+
+@Serializable
 data class PersonEdit(
     val guid: String?,
     private val resultDestStr: String? = null,

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
@@ -43,8 +44,8 @@ fun ManageAccountScreen(
         onClickManagePasskey = viewModel::onClickManagePasskey,
         onClickChangePassword = viewModel::onClickChangePassword,
         onClickHowPasskeysWork = viewModel::onClickHowPasskeysWork,
+        onDeleteAccountClick = viewModel::onDeleteAccount
     )
-
 }
 
 @Composable
@@ -54,6 +55,7 @@ fun ManageAccountScreen(
     onClickHowPasskeysWork: () -> Unit = {},
     onClickManagePasskey: () -> Unit = {},
     onClickChangePassword: () -> Unit = {},
+    onDeleteAccountClick:()-> Unit={}
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -154,6 +156,19 @@ fun ManageAccountScreen(
             }
         )
 
-
+        ListItem(
+            modifier = Modifier.clickable {
+                onDeleteAccountClick()
+            },
+            leadingContent = {
+                Icon(Icons.Default.Delete, contentDescription = null)
+            },
+            headlineContent = {
+                Text(
+                    text = stringResource(Res.string.delete_account),
+                    maxLines = 1,
+                )
+            }
+        )
     }
 }

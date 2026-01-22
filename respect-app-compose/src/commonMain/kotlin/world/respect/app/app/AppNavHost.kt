@@ -33,6 +33,7 @@ import world.respect.app.view.manageuser.joinclazzwithcode.JoinClazzWithCodeScre
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
+import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
 import world.respect.app.view.manageuser.signup.SignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
@@ -107,6 +108,7 @@ import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.navigation.Settings
+import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -146,19 +148,6 @@ import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewMode
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
-import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
-import world.respect.app.view.settings.SettingsScreenForViewModel
-import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
-import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
-import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
-import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.navigation.Settings
-import world.respect.shared.navigation.CurriculumMappingList
-import world.respect.shared.navigation.CurriculumMappingEdit
-import world.respect.shared.navigation.ShareFeedback
-import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel

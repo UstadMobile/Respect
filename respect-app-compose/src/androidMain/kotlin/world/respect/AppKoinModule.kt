@@ -222,14 +222,10 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
-import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
-import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
-import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
+
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -337,10 +333,7 @@ val appKoinModule = module {
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::PlaylistEditViewModel)
-    viewModelOf(::SetUsernameAndPasswordViewModel)
     viewModelOf(::ScanQRCodeViewModel)
-    viewModelOf(::CurriculumMappingListViewModel)
-    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)

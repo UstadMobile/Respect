@@ -14,7 +14,6 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 import world.respect.shared.ext.NextAfterScan
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 

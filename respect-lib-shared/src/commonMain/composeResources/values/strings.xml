@@ -496,7 +496,6 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Tasks</string>
-    <string name="assignment_tasks">Assignment tasks</string>
     <string name="assignment_name">Assignment name</string>
     <string name="lesson_assessment">Lesson/assessment</string>
 
@@ -552,7 +551,6 @@
     <string name="send_link_via_sms">Send link via SMS</string>
     <string name="send_link_via_email">Send link via email</string>
     <string name="grade">Grade</string>
-    <string name="section_name">Section name</string>
 
     <string name="not_set">Not set</string>
 

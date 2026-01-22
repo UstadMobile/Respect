@@ -17,8 +17,6 @@ import world.respect.app.view.assignment.list.AssignmentListScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
-import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
-import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
@@ -70,8 +68,6 @@ import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.CreateAccount
-import world.respect.shared.navigation.CurriculumMappingEdit
-import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.EnterLink
@@ -106,7 +102,6 @@ import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
-import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -119,8 +114,6 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
@@ -146,8 +139,6 @@ import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewMode
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
-import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
-import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
 import world.respect.app.view.playlists.mapping.share.PlaylistShareScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
@@ -157,11 +148,9 @@ import world.respect.shared.navigation.Settings
 
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistShare
-import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.settings.SettingsViewModel
 
 
 @Composable

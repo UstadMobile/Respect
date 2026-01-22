@@ -71,34 +71,35 @@ fun SignupScreen(
                 )
             }
         )
+        if (!uiState.isDeviceInvite) {
+            Spacer(Modifier.height(16.dp))
 
-        Spacer(Modifier.height(16.dp))
+            RespectGenderExposedDropDownMenuField(
+                value = uiState.personInfo.gender,
+                onValueChanged = onGenderChanged,
+                modifier = Modifier.testTag("gender").fillMaxWidth(),
+                isError = uiState.genderError != null,
+                errorText = uiState.genderError
+            )
 
-        RespectGenderExposedDropDownMenuField(
-            value = uiState.personInfo.gender,
-            onValueChanged = onGenderChanged,
-            modifier = Modifier.testTag("gender").fillMaxWidth(),
-            isError = uiState.genderError != null,
-            errorText = uiState.genderError
-        )
+            Spacer(Modifier.height(16.dp))
 
-        Spacer(Modifier.height(16.dp))
-
-        RespectLocalDateField(
-            modifier = Modifier.fillMaxWidth().testTag("dateOfBirth"),
-            value = uiState.personInfo.dateOfBirth.takeIf {
-                it != RespectRedeemInviteRequest.DATE_OF_BIRTH_EPOCH
-            },
-            onValueChange = {onDateOfBirthChanged(it) },
-            isError = uiState.dateOfBirthError!=null,
-            label = {
-                uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it) + "*") }
-            },
-            supportingText = {
-                Text(uiState.dateOfBirthError?.let { uiTextStringResource(it) }
-                    ?: stringResource(Res.string.required))
-            }
-        )
+            RespectLocalDateField(
+                modifier = Modifier.fillMaxWidth().testTag("dateOfBirth"),
+                value = uiState.personInfo.dateOfBirth.takeIf {
+                    it != RespectRedeemInviteRequest.DATE_OF_BIRTH_EPOCH
+                },
+                onValueChange = { onDateOfBirthChanged(it) },
+                isError = uiState.dateOfBirthError != null,
+                label = {
+                    uiState.dateOfBirthLabel?.let { Text(uiTextStringResource(it) + "*") }
+                },
+                supportingText = {
+                    Text(uiState.dateOfBirthError?.let { uiTextStringResource(it) }
+                        ?: stringResource(Res.string.required))
+                }
+            )
+        }
     }
 
 }

@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.ChatBubble
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -158,7 +158,7 @@ fun AccountListScreen(
                     Text(stringResource(Res.string.share_feedback))
                 },
                 leadingContent = {
-                    Icon(Icons.Outlined.ChatBubble, contentDescription = "Share Feedback")
+                    Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Share Feedback")
                 }
             )
         }

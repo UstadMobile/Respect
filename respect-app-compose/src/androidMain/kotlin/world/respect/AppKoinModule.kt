@@ -136,6 +136,10 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.launchers.WhatsAppLauncher
+import world.respect.shared.domain.launchers.WhatsAppLauncherAndroid
+import world.respect.shared.domain.launchers.WebLauncher
+import world.respect.shared.domain.launchers.WebLauncherAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -288,6 +292,7 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
+
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -341,6 +346,14 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
 
+
+    single<WhatsAppLauncher> {
+        WhatsAppLauncherAndroid(androidContext())
+    }
+
+    single<WebLauncher> {
+        WebLauncherAndroid(androidContext())
+    }
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

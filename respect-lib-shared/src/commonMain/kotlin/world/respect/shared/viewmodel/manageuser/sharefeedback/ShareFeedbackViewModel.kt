@@ -1,9 +1,13 @@
 package world.respect.shared.viewmodel.manageuser.sharefeedback
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.launchers.WebLauncher
+import world.respect.shared.domain.launchers.WhatsAppLauncher
 import world.respect.shared.viewmodel.RespectViewModel
 
 data class ShareFeedbackUiState(
@@ -12,7 +16,9 @@ data class ShareFeedbackUiState(
 
 class ShareFeedbackViewModel(
     private val respectAccountManager: RespectAccountManager,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val whatsAppLauncher: WhatsAppLauncher,
+    private val webLauncher: WebLauncher
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(ShareFeedbackUiState())
@@ -21,7 +27,9 @@ class ShareFeedbackViewModel(
 
 
     fun onClickWhatsApp() {
-        // Open WhatsApp
+        viewModelScope.launch {
+            whatsAppLauncher.launchWhatsApp()
+        }
     }
 
     fun onClickEmail() {
@@ -29,6 +37,8 @@ class ShareFeedbackViewModel(
     }
 
     fun onClickPublicForum() {
-        // Open forum
+        viewModelScope.launch {
+            webLauncher.launchWeb()
+        }
     }
 }

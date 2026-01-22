@@ -1,0 +1,12 @@
+appId: world.respect.app
+---
+
+- tapOn: "Assign QR code badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Options"
+- tapOn: "Paste URL"
+- tapOn: "Url"
+- inputText: ${QR_BADGE_LINK}
+- tapOn: "OK"

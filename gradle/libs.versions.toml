@@ -42,6 +42,7 @@ androidx-credentials =  "1.5.0"
 androidx-work = "2.10.4"
 jvm-toolchain = "17"
 acra = "5.13.1"
+kscan = "0.5.0"
 
 # Compose material3 as per https://developer.android.com/jetpack/androidx/releases/compose-material3
 # Required to use material3 window sizes
@@ -117,6 +118,7 @@ androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 koalaplot = {module = "io.github.koalaplot:koalaplot-core",version.ref = "koalaplot-version"}
+kscan = { module = "io.github.ismai117:KScan", version.ref = "kscan" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }

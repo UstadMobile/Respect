@@ -100,6 +100,7 @@ import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
@@ -124,6 +125,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseCli
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
+import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -203,7 +205,6 @@ import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
-import world.respect.shared.viewmodel.person.setusernameandpassword.SetUsernameAndPasswordViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
@@ -221,6 +222,14 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
+import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
+import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -329,6 +338,10 @@ val appKoinModule = module {
     viewModelOf(::SettingsViewModel)
     viewModelOf(::PlaylistEditViewModel)
     viewModelOf(::SetUsernameAndPasswordViewModel)
+    viewModelOf(::ScanQRCodeViewModel)
+    viewModelOf(::CurriculumMappingListViewModel)
+    viewModelOf(::CurriculumMappingEditViewModel)
+    viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
@@ -340,6 +353,7 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::PlaylistListViewModel)
     viewModelOf(::PlaylistShareViewModel)
+    viewModelOf(::CreateAccountSetPasswordViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -728,6 +742,11 @@ val appKoinModule = module {
                 schoolDb = get(),
                 encryptPersonPasswordUseCase = get(),
                 uidNumberMapper = get(),
+            )
+        }
+        scoped<ValidateQrCodeUseCase> {
+            ValidateQrCodeUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
     }

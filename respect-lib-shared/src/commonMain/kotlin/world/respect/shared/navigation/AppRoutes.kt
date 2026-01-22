@@ -13,6 +13,8 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
+import world.respect.shared.ext.NextAfterScan
+import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
@@ -692,10 +694,41 @@ data class PasskeyList(
     val guid: String,
 ) : RespectAppRoute
 
+
+/**
+ * @param guid the Uid of the Person account to manage as person Person.guid
+ * @param setPersonQrBadgeUrlStr see setPersonQrBadgeUrl
+ * @param setPersonQrBadgeUsername When setPersonQrBadgeUrl is non-null, this is the username that
+ *        should be assigned to the person as per guid.
+ */
 @Serializable
 data class ManageAccount(
     val guid: String,
-) : RespectAppRoute
+    val setPersonQrBadgeUsername: String? = null,
+    private val setPersonQrBadgeUrlStr: String? = null,
+) : RespectAppRoute {
+
+    /**
+     * When a QR badge is first assigned as part of creating an account, this is the URL for the
+     * badge. When the user flow is PersonDetail, CreateAccountSetUsername, ScanQRCode, ManageAccount.
+     * ScanQRCode is not scoped to a particular school and cannot handle saving the QR code badge.
+     */
+    @Transient
+    val setPersonQrBadgeUrl: Url? = setPersonQrBadgeUrlStr?.let { Url(it) }
+
+
+    companion object {
+        fun create(
+            guid: String,
+            qrUrl: Url? = null,
+            username: String? = null,
+        ) = ManageAccount(
+            guid = guid,
+            setPersonQrBadgeUrlStr = qrUrl?.toString(),
+            setPersonQrBadgeUsername = username,
+        )
+    }
+}
 
 @Serializable
 data class PersonEdit(
@@ -730,6 +763,45 @@ data class PersonEdit(
 @Serializable
 data object Settings : RespectAppRoute
 
+@Serializable
+data class ScanQRCode(
+    val guid: String? = null,
+    val resultDestStr: String? = null,
+    private val schoolUrlStr: String? = null,
+    val username: String? = null,
+    private val nextAfterScanStr: String? = null
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    @Transient
+    val schoolUrl: Url? = schoolUrlStr?.let { Url(it) }
+
+    @Transient
+    val nextAfterScan: NextAfterScan? = nextAfterScanStr?.let {
+        NextAfterScan.valueOf(it)
+    }
+
+    companion object {
+        fun create(
+            guid: String? = null,
+            resultDest: ResultDest? = null,
+            schoolUrl: Url? = null,
+            username: String? = null,
+            nextAfterScan: NextAfterScan? = null
+        ) = ScanQRCode(
+            guid = guid,
+            resultDestStr = resultDest?.encodeToJsonStringOrNull(),
+            username = username,
+            schoolUrlStr = schoolUrl?.toString(),
+            nextAfterScanStr = nextAfterScan?.name
+        )
+    }
+}
+
+@Serializable
+data object CurriculumMappingList : RespectAppRoute
 
 @Serializable
 data class PlaylistEdit(
@@ -763,9 +835,16 @@ data class PlaylistEdit(
     }
 }
 @Serializable
-data class SetUsernameAndPassword(
+data class CreateAccountSetUsername(
     val guid: String
 ): RespectAppRoute
+
+@Serializable
+data class CreateAccountSetPassword(
+    val guid: String,
+    val username: String? = null,
+) : RespectAppRoute
+
 
 
 @Serializable

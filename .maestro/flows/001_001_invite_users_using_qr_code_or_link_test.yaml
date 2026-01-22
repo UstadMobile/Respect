@@ -57,13 +57,15 @@ onFlowComplete:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
 - tapOn: "Get Started"
-- tapOn: "Scan QR code"
-- tapOn:
-    id: "more_options"
-- tapOn: "Paste url"
-- tapOn: "URL"
+- tapOn: "Scan QR code/badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Options"
+- tapOn: "Paste URL"
+- tapOn: "Url"
 - pasteText
-- tapOn: "Next"
+- tapOn: "OK"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

@@ -23,17 +23,7 @@ interface InviteEntityDao {
          LIMIT 1
     """)
     suspend fun getLastModifiedByGuid(guidHash: Long): Long?
-    @Query("""
-        UPDATE InviteEntity
-        SET iInviteStatus = :status,
-            iLastModified = :lastModified
-        WHERE iGuid = :guid
-    """)
-    suspend fun updateInviteStatus(
-        guid: String,
-        status: InviteStatusEnum = InviteStatusEnum.ACCEPTED,
-        lastModified: Long = systemTimeInMillis()
-    )
+
     @Query("""
         SELECT * 
           FROM InviteEntity
@@ -70,15 +60,11 @@ interface InviteEntityDao {
          FROM InviteEntity
         WHERE (:guidHash = 0 OR InviteEntity.iGuidHash = :guidHash)
           AND (:code IS NULL OR InviteEntity.iCode = :code)
-          AND (:inviteRequired IS NULL OR iApprovalRequired = :inviteRequired)
-          AND (:inviteStatus IS NULL OR iInviteStatus = :inviteStatus)
           """)
 
     fun findAllAsPagingSource(
         guidHash: Long = 0,
         code: String? = null,
-        inviteRequired: Boolean? = null,
-        inviteStatus: InviteStatusEnum? = null,
     ): PagingSource<Int, InviteEntity>
 
     @Query("""

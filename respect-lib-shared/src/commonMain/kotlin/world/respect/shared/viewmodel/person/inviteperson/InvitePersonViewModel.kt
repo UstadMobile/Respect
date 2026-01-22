@@ -23,7 +23,6 @@ import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateLinkUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -72,9 +71,6 @@ class InvitePersonViewModel(
     private val createLinkUseCase: CreateLinkUseCase by lazy {
         scope.get()
     }
-    private val createInviteUseCase: CreateInviteUseCase by lazy {
-        scope.get()
-    }
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
     private val guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
@@ -108,6 +104,7 @@ class InvitePersonViewModel(
         launchWithLoadingIndicator {
             val currentPersonRole = accountManager.selectedAccountAndPersonFlow.first()
                 ?.person?.roles?.first()?.roleEnum
+
             _uiState.value.classRole?.let { classRole ->
                 val role =
                     when (classRole) {

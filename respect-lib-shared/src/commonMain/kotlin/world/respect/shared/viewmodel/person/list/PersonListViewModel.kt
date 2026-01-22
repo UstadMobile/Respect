@@ -120,12 +120,12 @@ class PersonListViewModel(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
                             text =  Res.string.invite_person.asUiText(),
-                            onClick = { onClickInvitePerson()}
+                            onClick = ::onClickInvitePerson,
                         ),
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.ADD,
                             text = Res.string.add_new_person.asUiText(),
-                            onClick = { onClickAdd() }
+                            onClick = ::onClickAdd,
                         )
                     )
                 ),

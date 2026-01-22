@@ -23,6 +23,7 @@ import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.InviteDataSource
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -33,24 +34,19 @@ class InviteDataSourceHttp(
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
-    ) : InviteDataSource, SchoolUrlBasedDataSource {
+) : InviteDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun InviteDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(InviteDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-
-                parameters.append(INVITE_REQUIRED, inviteRequired.toString())
-
-                parameters.append(INVITE_STATUS, inviteStatus.toString())
-
             }
             .build()
     }
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: InviteDataSource.GetListParams
-    ): IPagingSourceFactory<Int, Invite> {
+    ): IPagingSourceFactory<Int, Invite2> {
         return IPagingSourceFactory {
             OffsetLimitHttpPagingSource(
                 baseUrlProvider = { params.urlWithParams() },
@@ -86,7 +82,7 @@ class InviteDataSourceHttp(
         }.firstOrNotLoaded()
     }
 
-    override suspend fun store(list: List<Invite>) {
+    override suspend fun store(list: List<Invite2>) {
         httpClient.post(
             url = respectEndpointUrl(InviteDataSource.ENDPOINT_NAME)
         ) {

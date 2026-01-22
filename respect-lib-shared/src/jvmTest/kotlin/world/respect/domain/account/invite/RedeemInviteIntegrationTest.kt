@@ -21,6 +21,7 @@ import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 import java.lang.System.currentTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,11 +53,15 @@ class RedeemInviteIntegrationTest {
                         schoolDb = serverSchoolSourceAndDb.first,
                         xxHash = xxStringHasher,
                         schoolUrl = schoolUrl,
-                        respectAppDataSource = mock {  },
-                        verifyPasskeyUseCase = mock {  },
+                        respectAppDataSource = mock { },
+                        verifyPasskeyUseCase = mock { },
                         authenticatePasswordUseCase = AuthenticatePasswordUseCaseDbImpl(
                             schoolDb = serverSchoolSourceAndDb.first,
                             encryptPersonPasswordUseCase = EncryptPersonPasswordUseCaseImpl(),
+                            uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
+                        ),
+                        authenticateQrBadgeUseCase = AuthenticateQrBadgeUseCaseDbImpl(
+                            schoolDb = serverSchoolSourceAndDb.first,
                             uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
                         )
                     ),

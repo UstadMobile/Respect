@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +26,8 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.libutil.util.time.systemTimeInMillis
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 
@@ -200,10 +203,13 @@ abstract class RespectViewModel(
      *
      * @param runIfAlreadyLoading by default, if loading is already in progress, the block will not
      *        be run.
+     * @param onShowError optional function that will show an error message to the user e.g. by
+     *        updating the UiState.
      * @param block suspended function to run
      */
     fun launchWithLoadingIndicator(
         runIfAlreadyLoading: Boolean = false,
+        onShowError: ((UiText) -> Unit)? = null,
         block: suspend () -> Unit,
     ) {
         if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE)
@@ -213,6 +219,16 @@ abstract class RespectViewModel(
             loadingState = LoadingUiState.INDETERMINATE
             try {
                 block()
+            }catch(e: Throwable) {
+                if(onShowError != null) {
+                    Napier.w(
+                        message = "Error in launchWithLoadingIndicator - displaying to user",
+                        throwable = e
+                    )
+                    onShowError(e.getUiTextOrGeneric())
+                }else {
+                    throw e
+                }
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }

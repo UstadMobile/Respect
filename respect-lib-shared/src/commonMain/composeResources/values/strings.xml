@@ -121,6 +121,9 @@
     <string name="url">Url</string>
     <string name="paste_url">Paste Url</string>
     <string name="ok">Ok</string>
+    <string name="request_permission">Request Permission</string>
+    <string name="camera_permission">Camera permission is permanently denied Please enable it in app settings to scan QR codes.</string>
+    <string name="camera_access_required">Camera Access Required</string>
     <string name="name">Name</string>
     <string name="other_options">Other options</string>
     <string name="scan_qr_code_badge">Scan QR code/badge</string>

@@ -140,6 +140,8 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.launchers.WhatsAppLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncherAndroid
+import world.respect.shared.domain.launchers.EmailLauncher
+import world.respect.shared.domain.launchers.EmailLauncherAndroid
 import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WebLauncherAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
@@ -358,6 +360,9 @@ val appKoinModule = module {
         WhatsAppLauncherAndroid(androidContext())
     }
 
+    single<EmailLauncher> {
+        EmailLauncherAndroid(androidContext())
+    }
     single<WebLauncher> {
         WebLauncherAndroid(androidContext())
     }

@@ -33,7 +33,7 @@ data class ShareFeedbackUiState(
 )
 
 class ShareFeedbackViewModel(
-    private val accountManager: RespectAccountManager,
+    accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle,
     private val whatsAppLauncher: WhatsAppLauncher,
     private val emailLauncher: EmailLauncher,

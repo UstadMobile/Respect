@@ -220,11 +220,24 @@
     <string name="passkey">Passkey</string>
 
     <string name="add_account">Add account</string>
+
     <string name="share_feedback">Share feedback</string>
     <string name="quick_contact">Quick Contact</string>
-    <string name="whatsapp_support">WhatsApp Support</string>
-    <string name="email_support">Email Support</string>
+    <string name="whatsapp_respect">WhatsApp Respect</string>
+    <string name="email_respect">Email Respect</string>
     <string name="public_forum">Public forum</string>
+    <string name="category">Category</string>
+    <string name="your_feedback">Your feedback</string>
+    <string name="describe_feedback_placeholder">Describe your issue or feedback in detail</string>
+    <string name="want_response_from_team">I want a response from the Respect team</string>
+    <string name="submit_feedback">Submit feedback</string>
+
+    <string name="category_launcher">Respect launcher related issues</string>
+    <string name="category_integrated_apps">Integrated Apps related issues</string>
+    <string name="category_question">Question</string>
+    <string name="category_rate_us">Rate us</string>
+    <string name="category_other">Other</string>
+
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 

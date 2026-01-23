@@ -74,15 +74,14 @@ fun ScanQRCodeScreen(
     var showScanner by remember { mutableStateOf(true) }
 
     val cameraPermissionState = rememberCameraPermissionState()
-    var hasRequestedPermissionOnThisScreen by remember { mutableStateOf(false) }
+    var hasDeniedOnce by remember { mutableStateOf(false) }
 
-    LaunchedEffect(hasRequestedPermissionOnThisScreen) {
-        if (cameraPermissionState.status !is PermissionStatus.Granted && !hasRequestedPermissionOnThisScreen) {
+    LaunchedEffect(Unit) {
+        if (cameraPermissionState.status is PermissionStatus.Denied) {
             cameraPermissionState.launchPermissionRequest()
-            hasRequestedPermissionOnThisScreen = true
+            hasDeniedOnce = true
         }
     }
-
     when (cameraPermissionState.status) {
         PermissionStatus.Granted -> {
             when {
@@ -131,8 +130,8 @@ fun ScanQRCodeScreen(
                         ) { result ->
                             when (result) {
                                 is BarcodeResult.OnSuccess -> {
-                                    showScanner = false
                                     viewModel.onQrCodeScanned(result.barcode.data)
+                                    showScanner = false
                                 }
 
                                 is BarcodeResult.OnFailed -> {
@@ -175,11 +174,32 @@ fun ScanQRCodeScreen(
         }
 
         is PermissionStatus.Denied -> {
-            PermissionDeniedScreen(
-                onGrandPermission = {
-                    cameraPermissionState.launchPermissionRequest()
-                },
-            )
+            val deniedStatus = cameraPermissionState.status as PermissionStatus.Denied
+            if (deniedStatus.shouldShowRationale) {
+                PermissionDeniedScreen(
+                    onGrandPermission = {
+                        cameraPermissionState.launchPermissionRequest()
+                    },
+                )
+            } else {
+                if (hasDeniedOnce) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.camera_permission),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -208,15 +228,6 @@ fun PermissionDeniedScreen(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
-        Text(
-            text = stringResource(Res.string.camera_permission),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7F),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-
         Button(
             onClick = { onGrandPermission() },
             modifier = Modifier.fillMaxWidth(0.8f)

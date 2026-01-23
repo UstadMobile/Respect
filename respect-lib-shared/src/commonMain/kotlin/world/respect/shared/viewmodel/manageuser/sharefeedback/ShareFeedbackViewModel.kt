@@ -6,6 +6,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.sharefeedback.model.FeedbackTicket
+import world.respect.datalayer.sharefeedback.FeedBackDataSource
+import world.respect.datalayer.sharefeedback.model.Article
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchers.EmailLauncher
 import world.respect.shared.domain.launchers.WebLauncher
@@ -14,6 +20,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import kotlin.getValue
 
 data class ShareFeedbackUiState(
     val categories: List<String> = emptyList(),
@@ -26,16 +33,20 @@ data class ShareFeedbackUiState(
 )
 
 class ShareFeedbackViewModel(
-    private val respectAccountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle,
     private val whatsAppLauncher: WhatsAppLauncher,
     private val emailLauncher: EmailLauncher,
-    private val webLauncher: WebLauncher
-) : RespectViewModel(savedStateHandle) {
+    private val webLauncher: WebLauncher,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(ShareFeedbackUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val feedBackDataSource: FeedBackDataSource by inject()
 
     init {
         _appUiState.update {
@@ -103,7 +114,24 @@ class ShareFeedbackViewModel(
     }
 
     fun onClickSubmit() {
-        //submit feedback click
+        //testing
+        val userEmail = "mandvi2346verma@gmail.com"
+
+        val ticket = FeedbackTicket(
+            title = "Ticket 1",
+            groupId = "1",
+            customerId = "guess:$userEmail",
+            article = Article(
+                subject = "Test Ticket",
+                body = "Testing the ticket",
+            )
+
+        )
+        viewModelScope.launch {
+          val response = feedBackDataSource.createTicket(ticket)
+        }
+
+
     }
 
 }

@@ -9,8 +9,6 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLayerParams.INVITE_REQUIRED
-import world.respect.datalayer.DataLayerParams.INVITE_STATUS
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
@@ -18,6 +16,7 @@ import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
+import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -40,6 +39,7 @@ class InviteDataSourceHttp(
         return URLBuilder(respectEndpointUrl(InviteDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
+                parameters.appendIfNotNull(InviteDataSource.PARAM_NAME_INVITE_CODE, inviteCode)
             }
             .build()
     }
@@ -60,8 +60,8 @@ class InviteDataSourceHttp(
             )
         }
     }
-    override suspend fun findByGuid(guid: String): DataLoadState<Invite>{
-            return httpClient.getAsDataLoadState<List<Invite>>(
+    override suspend fun findByGuid(guid: String): DataLoadState<Invite2>{
+            return httpClient.getAsDataLoadState<List<Invite2>>(
                 InviteDataSource.GetListParams(
                     GetListCommonParams(guid = guid)
                 ).urlWithParams()
@@ -71,8 +71,8 @@ class InviteDataSourceHttp(
             }.firstOrNotLoaded()
         }
 
-    override suspend fun findByCode(code: String): DataLoadState<Invite> {
-        return httpClient.getAsDataLoadState<List<Invite>>(
+    override suspend fun findByCode(code: String): DataLoadState<Invite2> {
+        return httpClient.getAsDataLoadState<List<Invite2>>(
             InviteDataSource.GetListParams(
                 inviteCode = code
             ).urlWithParams()

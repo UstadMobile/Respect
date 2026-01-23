@@ -55,6 +55,7 @@ data class NewUserInvite(
     override val stored: InstantAsISO8601 = Clock.System.now(),
     override val status: StatusEnum = StatusEnum.ACTIVE,
     val role: PersonRoleEnum,
+    val firstUser: Boolean = false,
 ): Invite2
 
 @Serializable

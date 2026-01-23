@@ -2,6 +2,7 @@ package world.respect.datalayer.respect.model.invite
 
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.Invite2
 
 /**
  * @property code the invite code (as provided by the user). An invite code includes a
@@ -16,13 +17,14 @@ class RespectInviteInfo(
     val classGuid: String?=null,
     val className: String?=null,
     val userInviteType: UserInviteType?=null,
-    val invite: Invite?=null
+    val invite: Invite2? = null
 ) {
 
     @Suppress("unused")
     enum class UserInviteType {
         TEACHER, STUDENT_OR_PARENT
     }
+
     companion object {
         val INVITE_TYPE_CLASS_CODE = 1
         val INVITE_TYPE_GENERIC = 2

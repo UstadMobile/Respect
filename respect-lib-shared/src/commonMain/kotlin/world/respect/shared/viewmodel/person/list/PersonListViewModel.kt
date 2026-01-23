@@ -115,7 +115,7 @@ class PersonListViewModel(
                     Res.string.select_person.asUiText()
                 },
                 expandableFabState = ExpandableFabUiState(
-                    visible = !(route.filterByRole != null||route.classUidStr!=null),
+                    visible = !(route.filterByRole != null||route.addToClassUid!=null),
                     items = listOf(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
@@ -164,7 +164,7 @@ class PersonListViewModel(
             it.copy(
                 pendingPersons = pendingPersonsPagingSource,
                 persons = pagingSourceFactoryHolder,
-                showInviteButton = route.filterByRole != null||route.classUidStr!=null
+                showInviteButton = route.filterByRole != null||route.addToClassUid!=null
             )
         }
     }
@@ -250,12 +250,7 @@ class PersonListViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 InvitePerson.create(
-                    classUid = route.classUidStr,
-                    className = route.classNameStr,
-                    role = route.role,
-                    familyPersonGuid = route.personGuidStr,
-                    presetRole = route.filterByRole,
-                    inviteCode = route.showInviteCode
+                    invitePersonOptions = InvitePerson.NewUserInviteOptions(null)
                 )
             )
         )

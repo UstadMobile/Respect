@@ -107,17 +107,6 @@ fun InvitePersonScreen(
         HorizontalDivider()
 
         val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.invite_multiple_allowed)) },
-            trailingContent = {
-                Switch(
-                    checked = uiState.inviteMultipleAllowed,
-                    onCheckedChange = { onInviteMultipleAllowedChanged(it) }
-                )
-            },
-            leadingContent = { Icon(Icons.Default.Person4, contentDescription = null) },
-            supportingContent = { Text(stringResource(Res.string.allow_multiple_people_to_use_this_invite)) }
-        )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.approval_required)) },

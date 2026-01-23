@@ -160,7 +160,7 @@ class ClazzEditViewModel(
                         teacherInviteGuid = teacherInvite.guid
                     )
 
-                    schoolDataSource.inviteDataSource.store(listOf(studentInvite, teacherInvite))
+//                    schoolDataSource.inviteDataSource.store(listOf(studentInvite, teacherInvite))
                     schoolDataSource.classDataSource.store(listOf(newClazz))
 
                     _navCommandFlow.tryEmit(

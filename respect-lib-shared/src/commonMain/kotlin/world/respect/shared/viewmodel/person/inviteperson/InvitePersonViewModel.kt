@@ -79,19 +79,19 @@ class InvitePersonViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(InvitePersonUiState())
+
     val uiState = _uiState.asStateFlow()
 
     init {
-
-        _uiState.update { prev ->
-            prev.copy(
-                classGuid = route.classGuid,
-                familyPersonGuid = route.familyPersonGuid,
-                className = route.className,
-                classRole = route.role,
-                schoolName = accountManager.activeAccount?.school?.name?.getTitle()
-            )
-        }
+//        _uiState.update { prev ->
+//            prev.copy(
+//                classGuid = route.classGuid,
+//                familyPersonGuid = route.familyPersonGuid,
+//                className = route.className,
+//                classRole = route.role,
+//                schoolName = accountManager.activeAccount?.school?.name?.getTitle()
+//            )
+//        }
         _appUiState.update {
             it.copy(
                 title = Res.string.invite_person.asUiText(),
@@ -114,49 +114,49 @@ class InvitePersonViewModel(
                     }
 
                 role?.let { role ->
-                 val invite=
-                     schoolDataSource.inviteDataSource.findByCode(route.inviteCodeStr.toString()).dataOrNull()
-                    _uiState.update { prev ->
-                        prev.copy(
-                            selectedRole = role,
-                            roleOptions = listOf(role),
-                            invite = invite,
-                            inviteCode = invite?.code,
-                            inviteMultipleAllowed = invite?.inviteMultipleAllowed == true,
-                            approvalRequired = invite?.approvalRequired == true,
-                            classGuid = invite?.forClassGuid,
-                            className = invite?.forClassName,
-                            classRole = invite?.forClassRole,
-                            schoolName = invite?.schoolName,
-                            familyPersonGuid = invite?.forFamilyOfGuid
-                        )
-                    }
+//                 val invite=
+//                     schoolDataSource.inviteDataSource.findByCode(route.inviteCodeStr.toString()).dataOrNull()
+//                    _uiState.update { prev ->
+//                        prev.copy(
+//                            selectedRole = role,
+//                            roleOptions = listOf(role),
+//                            invite = invite,
+//                            inviteCode = invite?.code,
+//                            inviteMultipleAllowed = invite?.inviteMultipleAllowed == true,
+//                            approvalRequired = invite?.approvalRequired == true,
+//                            classGuid = invite?.forClassGuid,
+//                            className = invite?.forClassName,
+//                            classRole = invite?.forClassRole,
+//                            schoolName = invite?.schoolName,
+//                            familyPersonGuid = invite?.forFamilyOfGuid
+//                        )
+//                    }
                     return@launchWithLoadingIndicator
                 }
             }
-            _uiState.update { prev ->
-                prev.copy(
-                    roleOptions = if (route.presetRole != null) {
-                            listOf(route.presetRole)
-                        } else {
-                            when (currentPersonRole) {
-                                PersonRoleEnum.TEACHER -> listOf(
-                                    PersonRoleEnum.STUDENT,
-                                    PersonRoleEnum.PARENT,
-                                    PersonRoleEnum.TEACHER,
-                                )
-                                PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
-                                    PersonRoleEnum.STUDENT,
-                                    PersonRoleEnum.PARENT,
-                                    PersonRoleEnum.TEACHER,
-                                    PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-                                )
-                                else -> emptyList()
-                            }
-                        }
-                )
-            }
-            onRoleChange(uiState.value.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT)
+//            _uiState.update { prev ->
+//                prev.copy(
+//                    roleOptions = if (route.presetRole != null) {
+//                            listOf(route.presetRole)
+//                        } else {
+//                            when (currentPersonRole) {
+//                                PersonRoleEnum.TEACHER -> listOf(
+//                                    PersonRoleEnum.STUDENT,
+//                                    PersonRoleEnum.PARENT,
+//                                    PersonRoleEnum.TEACHER,
+//                                )
+//                                PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
+//                                    PersonRoleEnum.STUDENT,
+//                                    PersonRoleEnum.PARENT,
+//                                    PersonRoleEnum.TEACHER,
+//                                    PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+//                                )
+//                                else -> emptyList()
+//                            }
+//                        }
+//                )
+//            }
+//            onRoleChange(uiState.value.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT)
 
         }
     }
@@ -236,7 +236,7 @@ class InvitePersonViewModel(
     }
 
     private suspend fun storeInvite(invite: Invite): Invite {
-        schoolDataSource.inviteDataSource.store(listOf(invite))
+        //schoolDataSource.inviteDataSource.store(listOf(invite))
         return invite
     }
 

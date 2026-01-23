@@ -54,6 +54,8 @@ class RedeemInviteUseCaseDb(
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
     ): AuthResponse {
+        TODO()
+        /*
         val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(redeemRequest.code)
             ?: throw IllegalArgumentException("invite not found for code: ${redeemRequest.code}")
                 .withHttpStatus(404)
@@ -246,6 +248,6 @@ class RedeemInviteUseCaseDb(
             }
         }
         return authResponse
+         */
     }
-
 }

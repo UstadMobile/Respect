@@ -4,6 +4,7 @@
 package world.respect.shared.navigation
 
 import io.ktor.http.Url
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
@@ -578,6 +579,12 @@ class LearningUnitViewer(
 object AccountList : RespectAppRoute
 
 
+/**
+ * @property addToClassUid if the PersonList screen has been navigated when the user clicks
+ *           add student or add teacher on the ClassDetail screen, then the classUid.
+ * @property addToClassRoleStr if the PersonList screen has been navigated when the user clicks
+ *  *           add student or add teacher on the ClassDetail screen, then the role
+ */
 @Serializable
 data class PersonList(
     private val filterByRoleStr: String? = null,
@@ -585,8 +592,8 @@ data class PersonList(
     private val resultDestStr: String? = null,
     val showInviteCode: String? = null,
     val classNameStr: String? = null,
-    val classUidStr: String? = null,
-    val roleStr: String? = null,
+    val addToClassUid: String? = null,
+    val addToClassRoleStr: String? = null,
     val personGuidStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
@@ -595,7 +602,7 @@ data class PersonList(
         PersonRoleEnum.fromValue(it)
     }
     @Transient
-    val role: EnrollmentRoleEnum? = roleStr?.let {
+    val role: EnrollmentRoleEnum? = addToClassRoleStr?.let {
         EnrollmentRoleEnum.fromValue(it)
     }
     @Transient
@@ -617,9 +624,9 @@ data class PersonList(
             isTopLevel = isTopLevel,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
             showInviteCode = showInviteCode,
-            classUidStr = classUid,
+            addToClassUid = classUid,
             classNameStr = className,
-            roleStr = role?.value,
+            addToClassRoleStr = role?.value,
             personGuidStr = personGuid
         )
 
@@ -796,37 +803,35 @@ data class ChangePassword(
 
 @Serializable
 data class InvitePerson(
-    val familyPersonGuid: String? = null,
-    val classGuid: String? = null,
-    val className:String?=null,
-    val roleStr: String? = null,
-    val inviteCodeStr: String? = null,
-    private val presetRoleStr: String? = null,
+    val invitePersonOptionsStr: String,
 ) : RespectAppRoute {
+
+    /**
+     * As there are three types of invitations, so there are three different types of invite options
+     */
+    @Serializable
+    sealed interface InvitePersonOptions
+
+    /**
+     * @property if presetRole is set - then dropdown will not be displayed.
+     */
+    @Serializable
+    @SerialName("newuser")
+    data class NewUserInviteOptions(
+        val presetRole: PersonRoleEnum?
+    ): InvitePersonOptions
+
     @Transient
-    val role: EnrollmentRoleEnum? = roleStr?.let {
-        EnrollmentRoleEnum.fromValue(it)
-    }
-    @Transient
-    val presetRole: PersonRoleEnum? = presetRoleStr?.let {
-        PersonRoleEnum.fromValue(it)
-    }
+    val invitePersonOptions: InvitePersonOptions = Json.decodeFromString(
+        invitePersonOptionsStr
+    )
+
     companion object {
 
         fun create(
-            className: String? = null,
-            classUid: String? = null,
-            familyPersonGuid: String? = null,
-            role: EnrollmentRoleEnum? = null,
-            presetRole: PersonRoleEnum? = null,
-            inviteCode: String?
-            ) = InvitePerson(
-            familyPersonGuid = familyPersonGuid,
-            classGuid = classUid,
-            className = className,
-            roleStr = role?.value,
-            presetRoleStr = presetRole?.value,
-            inviteCodeStr = inviteCode
+            invitePersonOptions: InvitePersonOptions
+        ) = InvitePerson(
+            invitePersonOptionsStr = Json.encodeToString(invitePersonOptions)
         )
     }
 }

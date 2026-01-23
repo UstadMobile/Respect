@@ -53,6 +53,7 @@ fun ConfirmationScreen(
             .fillMaxSize()
             .defaultScreenPadding()
     ) {
+        /*
         Text(
             text = if (uiState.inviteInfo?.invite?.firstUser == true)
                 stringResource(Res.string.successfully_registered_school)
@@ -60,10 +61,11 @@ fun ConfirmationScreen(
                 stringResource(Res.string.invitation_for),
             Modifier.defaultItemPadding()
         )
+         */
 
         ListItem(
             headlineContent = {
-                Text(text = uiState.inviteInfo?.className ?: uiState.inviteInfo?.invite?.schoolName?:"")
+                Text(text = uiState.inviteInfo?.className ?: "")
             },
             supportingContent = {
                 Column(
@@ -76,6 +78,7 @@ fun ConfirmationScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
 
+        /*
         if (!uiState.isTeacherInvite&&
             uiState.inviteInfo?.invite?.newRole== PersonRoleEnum.STUDENT&&
             uiState.inviteInfo?.invite?.forFamilyOfGuid==null) {
@@ -105,6 +108,8 @@ fun ConfirmationScreen(
                 Text(stringResource(Res.string.next))
             }
         }
+
+         */
     }
 
 }

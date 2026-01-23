@@ -18,26 +18,14 @@ class GetInviteInfoUseCaseServer(
         val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(code)
             ?: throw IllegalArgumentException("invite not found for code: $code")
                 .withHttpStatus(404)
-        if (invite.iInviteStatus == InviteStatusEnum.REVOKED) {
-            throw IllegalArgumentException("invite is revoked")
-                .withHttpStatus(400)
-        }
-        if (invite.iInviteStatus != InviteStatusEnum.PENDING) {
-            throw IllegalArgumentException("invite is already used")
-                .withHttpStatus(400)
-        }
-        if (invite.iExpiration < systemTimeInMillis()) {
-            throw IllegalArgumentException("invite is expired")
-                .withHttpStatus(400)
 
-        } else {
-            return RespectInviteInfo(
-                code = code,
-                classGuid = invite.iForClassGuid,
-                className = invite.iForClassName,
-                invite = invite.toModel(),
-            )
-        }
+        return RespectInviteInfo(
+            code = code,
+            classGuid = invite.iForClassGuid,
+            className = invite.iForClassName,
+            invite = invite.toModel(),
+        )
+
 
     }
 }

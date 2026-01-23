@@ -15,6 +15,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -81,7 +82,7 @@ class ConfirmationViewModel(
 
         _appUiState.update {
             it.copy(
-                title =if (uiState.value.inviteInfo?.invite?.firstUser == true)
+                title =if ((uiState.value.inviteInfo?.invite as? NewUserInvite)?.firstUser == true)
                     Res.string.congratulation.asUiText()
                 else
                     Res.string.invitation.asUiText(),
@@ -114,8 +115,9 @@ class ConfirmationViewModel(
             return
         }
 
+        /*
         val redeemRequest = makeBlankRedeemInviteRequest(
-            route.code, profileType, inviteInfo.classGuid?:inviteInfo.invite?.forClassGuid,inviteInfo.invite
+            route.code, profileType, classUid = "TODO", invite = TODO()//inviteInfo.classGuid?:inviteInfo.invite?.forClassGuid,inviteInfo.invite
         )
 
         if (profileType == ProfileType.STUDENT) {
@@ -133,6 +135,7 @@ class ConfirmationViewModel(
                 )
             )
         }
+         */
     }
     fun gotToSignUpScreen(profileType: ProfileType, redeemRequest: RespectRedeemInviteRequest) {
         _navCommandFlow.tryEmit(

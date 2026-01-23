@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncher
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.share_feedback
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -18,8 +20,11 @@ data class ShareFeedbackUiState(
     val categories: List<String> = emptyList(),
     val selectedCategory: String = "",
     val feedbackText: String = "",
-    val isCheckBoxSelected: Boolean = false
-)
+    val isCheckBoxSelected: Boolean = false,
+    val phoneNumber: String = "",
+    val email: String = "",
+    val nationalPhoneNumSet: Boolean = false,
+    )
 
 class ShareFeedbackViewModel(
     private val respectAccountManager: RespectAccountManager,
@@ -87,7 +92,11 @@ class ShareFeedbackViewModel(
                 isCheckBoxSelected = !prev.isCheckBoxSelected
             )
         }
-
+    }
+    fun onNationalPhoneNumSetChanged(phoneNumSet: Boolean) {
+        _uiState.takeIf { it.value.nationalPhoneNumSet != phoneNumSet }?.update { prev ->
+            prev.copy(nationalPhoneNumSet = phoneNumSet)
+        }
     }
 
     fun onClickSubmit() {

@@ -36,8 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.shared.generated.resources.Res
@@ -47,6 +49,8 @@ import world.respect.shared.generated.resources.quick_contact
 import world.respect.shared.generated.resources.whatsapp_respect
 import world.respect.shared.generated.resources.category
 import world.respect.shared.generated.resources.describe_feedback_placeholder
+import world.respect.shared.generated.resources.email
+import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.generated.resources.submit_feedback
 import world.respect.shared.generated.resources.your_feedback
@@ -65,7 +69,8 @@ fun ShareFeedbackScreen(
         onCategorySelected = viewModel::onCategorySelected,
         onFeedbackTextChanged = viewModel::onFeedbackTextChanged,
         onClickCheckBox = viewModel::onClickCheckBox,
-        onClickSubmit = viewModel::onClickSubmit
+        onClickSubmit = viewModel::onClickSubmit,
+        onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged
     )
 }
 
@@ -78,7 +83,8 @@ fun ShareFeedbackScreen(
     onCategorySelected: (String) -> Unit,
     onFeedbackTextChanged: (String) -> Unit,
     onClickSubmit: () -> Unit,
-    onClickCheckBox: () -> Unit
+    onClickCheckBox: () -> Unit,
+    onNationalNumberSetChanged: (Boolean) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -164,6 +170,17 @@ fun ShareFeedbackScreen(
                 )
             }
         }
+        if (uiState.isCheckBoxSelected) {
+            item {
+                ContactFields(
+                    uiState,
+                    onPhoneChange = { /* viewModel::onPhoneChanged */ },
+                    onEmailChange = { /* viewModel::onEmailChanged */ },
+                    onNationalNumberSetChanged = onNationalNumberSetChanged
+                )
+            }
+        }
+
         item {
             Button(
                 onClick = {
@@ -290,6 +307,35 @@ fun FeedbackDescription(
                 Text(text = stringResource(Res.string.describe_feedback_placeholder))
             },
             shape = RoundedCornerShape(8.dp)
+        )
+    }
+}
+
+@Composable
+fun ContactFields(
+    uiState: ShareFeedbackUiState,
+    onPhoneChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onNationalNumberSetChanged: (Boolean) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth())
+    {
+        RespectPhoneNumberTextField(
+            value = uiState.phoneNumber,
+            modifier = Modifier.testTag("phone_number").fillMaxWidth().defaultItemPadding(),
+            label = { Text(stringResource(Res.string.phone_number)) },
+            onValueChange = onPhoneChange,
+            onNationalNumberSetChanged = onNationalNumberSetChanged,
+            countryCodeTestTag = "phone_countrycode",
+            numberTextFieldTestTag = "phone_number"
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.testTag("email").fillMaxWidth().defaultItemPadding(),
+            value = uiState.email,
+            label = { Text(stringResource(Res.string.email)) },
+            singleLine = true,
+            onValueChange = onEmailChange
         )
     }
 }

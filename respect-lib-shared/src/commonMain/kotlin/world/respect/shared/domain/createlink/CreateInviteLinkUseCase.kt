@@ -2,7 +2,7 @@ package world.respect.shared.domain.createlink
 
 import io.ktor.http.Url
 
-class CreateLinkUseCase(
+class CreateInviteLinkUseCase(
     private val schoolUrl: Url
 ) {
     operator fun invoke(

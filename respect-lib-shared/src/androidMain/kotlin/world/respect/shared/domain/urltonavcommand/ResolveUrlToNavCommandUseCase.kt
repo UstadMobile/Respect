@@ -3,7 +3,7 @@ package world.respect.shared.domain.urltonavcommand
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.encodedPath
-import world.respect.shared.domain.createlink.CreateLinkUseCase.Companion.QUERY_PARAM
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase.Companion.QUERY_PARAM
 import world.respect.shared.navigation.Acknowledgement
 import world.respect.shared.navigation.NavCommand
 

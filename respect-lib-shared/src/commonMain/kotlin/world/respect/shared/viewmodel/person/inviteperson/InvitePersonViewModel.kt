@@ -29,11 +29,9 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
-import world.respect.shared.domain.createlink.CreateLinkUseCase
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
@@ -45,12 +43,10 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import kotlin.random.Random
-import kotlin.time.Clock
 
 data class InvitePersonUiState(
     val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
     val invite2: DataLoadState<Invite2> = DataLoadingState(),
-    val inviteMultipleAllowed: Boolean = false,
     val approvalRequired: Boolean = false,
     val selectedRole: PersonRoleEnum? = null,
     val shareLink: String? = null,
@@ -79,14 +75,9 @@ class InvitePersonViewModel(
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
-    private val createLinkUseCase: CreateLinkUseCase by lazy {
+    private val createInviteLinkUseCase: CreateInviteLinkUseCase by lazy {
         scope.get()
     }
-    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
-
-    private val guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Invite.TABLE_ID
-    ).toString()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -94,6 +85,12 @@ class InvitePersonViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    /**
+     * This ViewModel is a little different to the "normal" case. When the user selects a new user
+     * role from the dropdown, this changes the uid of the invite that we want to actually show
+     *
+     * Hence the inviteUid is modelled as a flow, which is then collected.
+     */
     private val _inviteUid = MutableStateFlow<String?>(null)
 
     private val getWritableRolesListUseCase: GetWritableRolesListUseCase by inject()
@@ -124,7 +121,13 @@ class InvitePersonViewModel(
                 ?.person?.roles?.first()?.roleEnum ?: return@launch
 
             val writableRoles = getWritableRolesListUseCase(currentPersonRole)
-            _uiState.update { it.copy(roleOptions =  writableRoles) }
+
+            _uiState.update {
+                it.copy(
+                    roleOptions =  writableRoles,
+                    selectedRole = writableRoles.first()
+                )
+            }
 
             _inviteUid.collectLatest { inviteUid ->
                 if(inviteUid != null) {
@@ -150,9 +153,6 @@ class InvitePersonViewModel(
         }
     }
 
-    fun setInviteMultipleAllowed(enabled: Boolean) {
-        _uiState.update { it.copy(inviteMultipleAllowed = enabled) }
-    }
 
     fun setApprovalRequired(enabled: Boolean) {
         _uiState.update { it.copy(approvalRequired = enabled) }
@@ -219,53 +219,5 @@ class InvitePersonViewModel(
         //schoolDataSource.inviteDataSource.store(listOf(invite))
         return invite
     }
-
-    private suspend fun createOrEditInvite(): String {
-        val newInvite = createOrUpdateInviteInternal()
-        val link = createLinkUseCase(newInvite.code)
-        _uiState.update {
-            it.copy(
-                shareLink = link,
-                invite = newInvite,
-            )
-        }
-        return link
-    }
-
-    private suspend fun createOrUpdateInviteInternal(): Invite {
-        val current =uiState.value.invite
-        if (current == null) {
-            val code = uiState.value.inviteCode ?: generateCode()
-            val invite = Invite(
-                guid = guid,
-                code = code,
-                newRole = uiState.value.selectedRole,
-                forClassRole = uiState.value.classRole,
-                inviteMultipleAllowed = uiState.value.inviteMultipleAllowed,
-                approvalRequired = uiState.value.approvalRequired,
-                forClassGuid = uiState.value.classGuid,
-                schoolName = uiState.value.schoolName,
-                forClassName = uiState.value.className,
-                forFamilyOfGuid = uiState.value.familyPersonGuid,
-                expiration = Clock.System.now().plusMillis(Invite.EXPIRATION_TIME)
-
-            )
-            return storeInvite(invite)
-        } else {
-            val changed = (current.approvalRequired != uiState.value.approvalRequired)
-                    || (current.newRole !=uiState.value.selectedRole)
-                    || (current.inviteMultipleAllowed != uiState.value.inviteMultipleAllowed)
-            if (!changed) return current
-            val updated = current.copy(
-                newRole =uiState.value.selectedRole,
-                inviteMultipleAllowed =uiState.value.inviteMultipleAllowed,
-                approvalRequired =uiState.value.approvalRequired,
-                lastModified = Clock.System.now(),
-                stored = Clock.System.now()
-            )
-            return storeInvite(updated)
-        }
-    }
-
 
 }

@@ -131,7 +131,7 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
-import world.respect.shared.domain.createlink.CreateLinkUseCase
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -718,8 +718,8 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-        scoped<CreateLinkUseCase> {
-            CreateLinkUseCase(
+        scoped<CreateInviteLinkUseCase> {
+            CreateInviteLinkUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
             )
         }

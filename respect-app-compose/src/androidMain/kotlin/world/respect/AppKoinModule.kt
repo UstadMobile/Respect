@@ -190,7 +190,7 @@ import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewMo
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
-import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
+import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
@@ -323,7 +323,7 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
     viewModelOf(::AcknowledgementViewModel)
-    viewModelOf(::JoinClazzWithCodeViewModel)
+    viewModelOf(::EnterInviteCodeViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::ConfirmationViewModel)
     viewModelOf(::SignupViewModel)

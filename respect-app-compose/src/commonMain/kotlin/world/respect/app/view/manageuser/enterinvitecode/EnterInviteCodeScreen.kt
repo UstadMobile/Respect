@@ -1,4 +1,4 @@
-package world.respect.app.view.manageuser.joinclazzwithcode
+package world.respect.app.view.manageuser.enterinvitecode
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,16 +24,16 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_invite_code_message
 import world.respect.shared.generated.resources.invite_code_label
 import world.respect.shared.generated.resources.next
-import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeUiState
-import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
+import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeUiState
+import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 
 @Composable
-fun JoinClazzWithCodeScreen(
-    viewModel: JoinClazzWithCodeViewModel
+fun EnterInviteCodeScreen(
+    viewModel: EnterInviteCodeViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    JoinClazzWithCodeScreen(
+    EnterInviteCodeScreen(
         uiState = uiState,
         onCodeChanged = viewModel::onCodeChanged,
         onClickNext = viewModel::onClickNext
@@ -41,8 +41,8 @@ fun JoinClazzWithCodeScreen(
 }
 
 @Composable
-fun JoinClazzWithCodeScreen(
-    uiState: JoinClazzWithCodeUiState,
+fun EnterInviteCodeScreen(
+    uiState: EnterInviteCodeUiState,
     onCodeChanged: (String) -> Unit,
     onClickNext: () -> Unit
 ) {

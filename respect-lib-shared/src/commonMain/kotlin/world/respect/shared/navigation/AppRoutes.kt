@@ -45,7 +45,7 @@ data class Acknowledgement (
 
 }
 @Serializable
-data class JoinClazzWithCode(
+data class EnterInviteCode(
     val schoolUrlStr: String
 ) : RespectAppRoute {
 
@@ -53,7 +53,7 @@ data class JoinClazzWithCode(
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = JoinClazzWithCode(schoolUrl.toString())
+        fun create(schoolUrl: Url) = EnterInviteCode(schoolUrl.toString())
     }
 
 }

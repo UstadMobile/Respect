@@ -29,7 +29,7 @@ import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
 import world.respect.app.view.manageuser.enterpasswordsignup.EnterPasswordSignupScreen
 import world.respect.app.view.manageuser.getstarted.GetStartedScreen
 import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
-import world.respect.app.view.manageuser.joinclazzwithcode.JoinClazzWithCodeScreen
+import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
@@ -88,7 +88,7 @@ import world.respect.shared.navigation.IndicatorDetail
 import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
-import world.respect.shared.navigation.JoinClazzWithCode
+import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
@@ -135,7 +135,7 @@ import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewMo
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
-import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
+import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
@@ -197,12 +197,12 @@ fun AppNavHost(
             LoginScreen(viewModel)
         }
 
-        composable<JoinClazzWithCode> {
-            val viewModel: JoinClazzWithCodeViewModel = respectViewModel(
+        composable<EnterInviteCode> {
+            val viewModel: EnterInviteCodeViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            JoinClazzWithCodeScreen(viewModel)
+            EnterInviteCodeScreen(viewModel)
         }
 
         composable<RespectAppLauncher> {

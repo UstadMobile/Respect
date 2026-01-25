@@ -76,13 +76,14 @@ class EnterInviteCodeViewModel(
                 return@launch
             }
             try {
-                val inviteInfo = getInviteInfoUseCase(uiState.value.inviteCode)
+                val inviteCode = uiState.value.inviteCode.trim()
+                getInviteInfoUseCase(inviteCode)
 
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         ConfirmationScreen.create(
-                            route.schoolUrl,
-                            inviteInfo.code
+                            schoolUrl = route.schoolUrl,
+                            code = inviteCode
                         )
                     )
                 )

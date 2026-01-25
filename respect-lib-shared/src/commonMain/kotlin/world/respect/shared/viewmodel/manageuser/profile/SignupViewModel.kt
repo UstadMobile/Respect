@@ -191,13 +191,14 @@ class SignupViewModel(
                         val scope: Scope = accountManager.requireActiveAccountScope()
                         val addChildAccountUseCase: AddChildAccountUseCase = scope.get()
 
+                        /*
                         addChildAccountUseCase(
                             personInfo = personInfo,
                             parentUsername = route.respectRedeemInviteRequest.account.username,
                             classUid = route.respectRedeemInviteRequest.classUid ?: "",
                             inviteCode = route.respectRedeemInviteRequest.code,
                             familyPersonGuid = route.respectRedeemInviteRequest.invite.forFamilyOfGuid,
-                            )
+                        )*/
 
                         Napier.d("SignupViewModel: Navigating to wait for approval")
                         _navCommandFlow.tryEmit(

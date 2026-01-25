@@ -33,7 +33,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.approval_required
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.copy_link
-import world.respect.shared.generated.resources.enter_school_name
+import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.invite_code_label
 import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
@@ -111,7 +111,7 @@ fun InvitePersonScreen(
             val res = if (uiState.className != null) {
                 Res.string.class_name
             } else {
-                Res.string.enter_school_name
+                Res.string.school_name
             }
             ListItem(
                 headlineContent = { Text(stringResource(res)) },

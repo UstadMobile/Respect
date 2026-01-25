@@ -90,11 +90,8 @@ class EnterPasswordSignupViewModel(
                     redeemInviteRequest = redeemRequest,
                     schoolUrl = route.schoolUrl,
                 )
-                savePasswordUseCase(
-                    username = route.respectRedeemInviteRequest.account.username,
-                    password = password
-                )
 
+                /*
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = if(redeemRequest.role == PersonRoleEnum.PARENT) {
@@ -124,6 +121,8 @@ class EnterPasswordSignupViewModel(
                         clearBackStack = true
                     )
                 )
+
+                 */
             }catch(e: Throwable) {
                 e.printStackTrace()
                 _uiState.update {

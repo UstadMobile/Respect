@@ -384,7 +384,6 @@ class OtherOptionsSignup private constructor(
 class ConfirmationScreen(
     val schoolUrlStr: String,
     val code: String,
-    val inviteType: Int?=null,
 ) : RespectAppRoute {
 
     @Transient
@@ -393,12 +392,10 @@ class ConfirmationScreen(
     companion object {
         fun create(
             schoolUrl: Url,
-            code: String,
-            type: Int?=null
+            code: String
         ) = ConfirmationScreen(
             schoolUrlStr = schoolUrl.toString(),
-            code = code,
-            inviteType = type
+            code = code
         )
     }
 }
@@ -412,7 +409,7 @@ class SignupScreen(
     private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
     val inviteType: Int?=null,
-    ) : RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val type: ProfileType = ProfileType.fromValue(profileTypeStr)

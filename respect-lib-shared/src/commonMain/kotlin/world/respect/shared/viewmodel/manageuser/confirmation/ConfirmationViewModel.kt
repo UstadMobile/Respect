@@ -4,6 +4,7 @@ package world.respect.shared.viewmodel.manageuser.confirmation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,40 +12,47 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectPasswordCredential
-import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.model.Invite
-import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.lib.opds.model.LangMap
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
-import world.respect.shared.generated.resources.congratulation
 import world.respect.shared.navigation.ConfirmationScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class ConfirmationUiState(
     val inviteInfo: RespectInviteInfo? = null,
-    val inviteInfoError: StringResourceUiText? = null,
+    val errorText: UiText? = null,
     val isTeacherInvite: Boolean = false,
+    val schoolName: LangMap? = null,
+    val schoolUrl: Url? = null,
 )
 
 class ConfirmationViewModel(
     savedStateHandle: SavedStateHandle,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
+    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: ConfirmationScreen = savedStateHandle.toRoute()
@@ -58,37 +66,44 @@ class ConfirmationViewModel(
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator = scope.get()
 
-    private val _uiState = MutableStateFlow(ConfirmationUiState())
+    private val _uiState = MutableStateFlow(
+        ConfirmationUiState(schoolUrl = route.schoolUrl)
+    )
 
     val uiState = _uiState.asStateFlow()
 
-
     init {
-
-        viewModelScope.launch {
-            val inviteInfo = getInviteInfoUseCase(route.code)
-
-            try {
-                _uiState.update {
-                    it.copy(
-                        inviteInfo = inviteInfo,
-                        isTeacherInvite = inviteInfo.userInviteType == RespectInviteInfo.UserInviteType.TEACHER
-                    )
-                }
-            } catch (e: Exception) {
-                println(e)
-            }
-        }
-
         _appUiState.update {
             it.copy(
-                title =if ((uiState.value.inviteInfo?.invite as? NewUserInvite)?.firstUser == true)
-                    Res.string.congratulation.asUiText()
-                else
-                    Res.string.invitation.asUiText(),
+                title = Res.string.invitation.asUiText(),
                 hideBottomNavigation = true,
                 userAccountIconVisible = false
             )
+        }
+
+        launchWithLoadingIndicator(
+            onShowError = { errText ->
+                _uiState.update { it.copy(errorText = errText) }
+            }
+        ) {
+            val inviteInfo = getInviteInfoUseCase(route.code)
+
+            _uiState.update {
+                it.copy(
+                    inviteInfo = inviteInfo,
+                    isTeacherInvite = false
+                )
+            }
+        }
+
+        viewModelScope.launch {
+            val schoolDirEntry = respectAppDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+                route.schoolUrl
+            ).dataOrNull() ?: return@launch
+
+            _uiState.update {
+                it.copy(schoolName = schoolDirEntry.name)
+            }
         }
     }
 
@@ -109,7 +124,7 @@ class ConfirmationViewModel(
 
         if (inviteInfo==null) {
             _uiState.update {
-                it.copy(inviteInfoError = StringResourceUiText(Res.string.invalid_invite_code))
+                it.copy(errorText = StringResourceUiText(Res.string.invalid_invite_code))
             }
 
             return
@@ -146,6 +161,8 @@ class ConfirmationViewModel(
             )
         )
     }
+
+    /*
     fun makeBlankRedeemInviteRequest(
         inviteCode: String,
         profileType: ProfileType,
@@ -171,11 +188,10 @@ class ConfirmationViewModel(
             classUid = classUid,
             role = role,
             accountPersonInfo = RespectRedeemInviteRequest.PersonInfo(),
-            parentOrGuardianRole = null,
             account = blankAccount,
             deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
-    }
+    }*/
 }

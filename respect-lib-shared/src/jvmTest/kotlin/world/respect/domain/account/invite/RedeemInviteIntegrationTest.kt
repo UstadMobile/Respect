@@ -22,7 +22,6 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
-import java.lang.System.currentTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
@@ -100,7 +99,6 @@ class RedeemInviteIntegrationTest {
                         dateOfBirth = LocalDate.parse("1997-05-01"),
                     ),
                     role = PersonRoleEnum.TEACHER,
-                    parentOrGuardianRole = null,
                     account = RespectRedeemInviteRequest.Account(
                         guid = "1",
                         username = "username",

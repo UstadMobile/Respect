@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.datalayer.respect.model.invite.RespectInviteInfo.Companion.INVITE_TYPE_GENERIC
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.Acknowledgement
@@ -54,9 +53,8 @@ class AcknowledgementViewModel(
                         shouldShowOnboardingUseCase() -> Onboarding
                         hasAccount -> if (isChild) AssignmentList else RespectAppLauncher()
                         route.schoolUrl != null -> ConfirmationScreen.create(
-                            route.schoolUrl,
-                            route.inviteCode.toString(),
-                            INVITE_TYPE_GENERIC
+                            schoolUrl = route.schoolUrl,
+                            code = route.inviteCode.toString()
                         )
                         else -> GetStartedScreen()
                     },

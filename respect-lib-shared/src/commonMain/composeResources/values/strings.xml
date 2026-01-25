@@ -174,7 +174,7 @@
     <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
-    <string name="enter_school_name">School name</string>
+    <string name="school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
@@ -542,4 +542,5 @@
 
     <string name="not_set">Not set</string>
 
+    <string name="school_server_url">School server URL</string>
 </resources>

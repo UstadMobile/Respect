@@ -4,7 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.datalayer.school.model.DeviceInfo
-import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 
@@ -17,17 +17,11 @@ data class RespectRedeemInviteRequest(
     val classUid: String?,
     val role: PersonRoleEnum,
     val accountPersonInfo: PersonInfo,
-    val parentOrGuardianRole: GuardianRole?,
     val account: Account,
     val deviceName: String? = null,
     val deviceInfo: DeviceInfo? = null,
-    val invite: Invite,
+    val invite: Invite2,
 ) {
-
-    @Serializable
-    enum class GuardianRole {
-        FATHER, MOTHER, OTHER_GUARDIAN
-    }
 
     @Serializable
     data class PersonInfo(

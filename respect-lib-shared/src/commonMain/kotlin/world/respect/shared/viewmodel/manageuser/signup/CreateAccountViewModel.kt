@@ -186,6 +186,7 @@ class CreateAccountViewModel(
                                 schoolUrl = route.schoolUrl
                             )
 
+                            /*
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = if(
@@ -208,6 +209,7 @@ class CreateAccountViewModel(
                                     clearBackStack = true,
                                 )
                             )
+                             */
                         }
 
                         is CreatePasskeyUseCase.Error -> {

@@ -4,9 +4,7 @@ import org.koin.core.component.KoinComponent
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.datalayer.school.model.InviteStatusEnum
 import world.respect.libutil.util.throwable.withHttpStatus
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 
 class GetInviteInfoUseCaseServer(
@@ -20,7 +18,6 @@ class GetInviteInfoUseCaseServer(
                 .withHttpStatus(404)
 
         return RespectInviteInfo(
-            code = code,
             classGuid = invite.iForClassGuid,
             className = invite.iForClassName,
             invite = invite.toModel(),

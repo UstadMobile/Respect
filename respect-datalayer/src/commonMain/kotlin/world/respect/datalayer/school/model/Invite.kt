@@ -44,6 +44,8 @@ sealed interface Invite2: ModelWithTimes {
 
         const val TYPE_FAMILY_MEMBER = "familymember"
 
+        const val TABLE_ID = 17
+
         fun uidForInvite(
             invite2: Invite2
         ): String {

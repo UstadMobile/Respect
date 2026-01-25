@@ -22,6 +22,7 @@ import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
@@ -68,10 +69,10 @@ class ClazzEditViewModel(
     ).toString()
 
     private val studentInviteGuid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Invite.TABLE_ID
+        Invite2.TABLE_ID
     ).toString()
     private val teacherInviteGuid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Invite.TABLE_ID
+        Invite2.TABLE_ID
     ).toString()
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 

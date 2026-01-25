@@ -10,7 +10,7 @@ import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase.Companion.EXTR
 import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase.Companion.SMS_URI_SCHEME
 
 class LaunchSendSmsAndroid(private val context: Context) : LaunchSendSmsUseCase {
-    override suspend fun sendLink(body: String) = withContext(Dispatchers.Main) {
+    override suspend fun invoke(body: String) = withContext(Dispatchers.Main) {
         try {
             val intent = Intent(Intent.ACTION_SENDTO, SMS_URI_SCHEME.toUri()).apply {
                 putExtra(EXTRA_SMS_BODY, body)

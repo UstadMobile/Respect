@@ -12,7 +12,7 @@ class LaunchShareLinkAndroid(
 ) : LaunchShareLinkUseCase {
 
 
-    override suspend fun launch(body: String) = withContext(Dispatchers.Main) {
+    override suspend fun invoke(body: String) = withContext(Dispatchers.Main) {
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = MIME_TYPE

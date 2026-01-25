@@ -1,7 +1,8 @@
 package world.respect.shared.domain.sharelink
 
 interface LaunchSendSmsUseCase {
-    suspend fun sendLink(body: String)
+
+    suspend operator fun invoke(body: String)
 
     companion object {
         const val SMS_URI_SCHEME = "smsto:"

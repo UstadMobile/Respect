@@ -13,7 +13,7 @@ class LaunchSendEmailAndroid(
     private val context: Context
 ) : LaunchSendEmailUseCase {
 
-    override suspend fun sendEmail(subject: String, body: String) {
+    override suspend fun invoke(subject: String, body: String) {
         withContext(Dispatchers.Main) {
             val uri = buildMailToUri(subject, body)
             val intent = Intent(Intent.ACTION_SENDTO, uri)

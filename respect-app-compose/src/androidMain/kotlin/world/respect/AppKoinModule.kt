@@ -82,6 +82,8 @@ import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueu
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCaseImpl
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -100,7 +102,6 @@ import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
-import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
@@ -233,11 +234,8 @@ import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import world.respect.shared.domain.sendinvite.LaunchSendSmsAndroid
 import world.respect.shared.domain.sendinvite.LaunchSendEmailAndroid
 import world.respect.shared.domain.sendinvite.LaunchShareLinkAndroid
-import world.respect.shared.domain.account.invite.CreateInviteUseCase
-import world.respect.shared.domain.account.invite.CreateInviteUseCaseDataSource
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
-import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -874,13 +872,6 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
-        scoped<CreateInviteUseCase> {
-            CreateInviteUseCaseDataSource(
-                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
-                schoolDataSource = get(),
-                urlToCustomDeepLinkUseCase = get(),
-            )
-        }
         scoped<AddChildAccountUseCase> {
             AddChildAccountUseCaseDataSource(
                 schoolDataSource = get(),
@@ -944,6 +935,10 @@ val appKoinModule = module {
                 schoolDataSource = get(),
                 authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
             )
+        }
+
+        scoped<GetWritableRolesListUseCase> {
+            GetWritableRolesListUseCaseImpl()
         }
 
     }

@@ -2,12 +2,14 @@ package world.respect.datalayer.school.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_CLASS
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_FAMILY_MEMBER
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_NEW_USER
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * An invitation for RESPECT can be one of three types.
@@ -42,6 +44,17 @@ sealed interface Invite2: ModelWithTimes {
 
         const val TYPE_FAMILY_MEMBER = "familymember"
 
+        fun uidForInvite(
+            invite2: Invite2
+        ): String {
+            return when (invite2) {
+                is NewUserInvite -> invite2.role.newUserInviteUid
+                is ClassInvite -> "$TYPE_CLASS:${invite2.role.value}/${invite2.classUid}"
+                is FamilyMemberInvite -> "$TYPE_FAMILY_MEMBER:${invite2.personUid}"
+            }
+        }
+
+
     }
 }
 
@@ -50,7 +63,7 @@ sealed interface Invite2: ModelWithTimes {
 data class NewUserInvite(
     override val uid: String,
     override val code: String,
-    override val approvalRequiredAfter: InstantAsISO8601,
+    override val approvalRequiredAfter: InstantAsISO8601 = Instant.fromEpochMilliseconds(0),
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
     override val status: StatusEnum = StatusEnum.ACTIVE,

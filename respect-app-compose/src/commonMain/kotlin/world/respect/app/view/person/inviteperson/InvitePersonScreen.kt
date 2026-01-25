@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person4
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Share
@@ -31,13 +30,11 @@ import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.allow_multiple_people_to_use_this_invite
 import world.respect.shared.generated.resources.approval_required
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.copy_link
 import world.respect.shared.generated.resources.enter_school_name
 import world.respect.shared.generated.resources.invite_code_label
-import world.respect.shared.generated.resources.invite_multiple_allowed
 import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
 import world.respect.shared.generated.resources.invite_via_sms
@@ -60,7 +57,6 @@ fun InvitePersonScreen(
         onInviteViaEmail = viewModel::onSendLinkViaEmail,
         onInviteViaShare = viewModel::onShareLink,
         onClickQrCode = viewModel::onClickQrCode,
-        onInviteMultipleAllowedChanged = viewModel::setInviteMultipleAllowed,
         onApprovalRequiredChanged = viewModel::setApprovalRequired,
         onRoleChange = viewModel::onRoleChange,
         onClickGetCode = viewModel::onClickGetCode
@@ -76,7 +72,6 @@ fun InvitePersonScreen(
     onInviteViaShare: () -> Unit,
     onClickQrCode: () -> Unit,
     onClickGetCode: () -> Unit,
-    onInviteMultipleAllowedChanged: (Boolean) -> Unit,
     onApprovalRequiredChanged: (Boolean) -> Unit,
     onRoleChange: (PersonRoleEnum) -> Unit
 ) {
@@ -86,6 +81,26 @@ fun InvitePersonScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+
+        val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull()
+            ?: PersonRoleEnum.STUDENT
+
+        RespectExposedDropDownMenuField(
+            value = selectedRole,
+            modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
+            label = {
+                Text(stringResource(Res.string.role) + "*")
+            },
+            onOptionSelected = { newRole ->
+                onRoleChange(newRole)
+            },
+            options = uiState.roleOptions,
+            itemText = { stringResource(it.label) },
+            enabled = true,
+            supportingText = {
+                Text(stringResource(Res.string.required))
+            }
+        )
 
         Column(
             modifier = Modifier
@@ -106,8 +121,6 @@ fun InvitePersonScreen(
 
         HorizontalDivider()
 
-        val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT
-
         ListItem(
             headlineContent = { Text(stringResource(Res.string.approval_required)) },
             trailingContent = {
@@ -117,25 +130,11 @@ fun InvitePersonScreen(
                 )
             },
             leadingContent = { Icon(Icons.Default.PersonAdd, contentDescription = null) }
+        )
 
-        )
-        RespectExposedDropDownMenuField(
-            value = selectedRole,
-            modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
-            label = {
-                Text(stringResource(Res.string.role) + "*")
-            },
-            onOptionSelected = { newRole ->
-                onRoleChange(newRole)
-            },
-            options = uiState.roleOptions,
-            itemText = { stringResource(it.label) },
-            enabled = true,
-            supportingText = {
-                Text(stringResource(Res.string.required))
-            }
-        )
         HorizontalDivider()
+
+        Text(uiState.inviteCode ?: "")
 
         ListItem(
             modifier = Modifier.clickable { onCopyLink() },

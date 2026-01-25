@@ -1,6 +1,7 @@
 package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Invite2
@@ -28,6 +29,12 @@ interface InviteDataSource : WritableDataSource<Invite2> {
         loadParams: DataLoadParams,
         params: GetListParams,
     ): IPagingSourceFactory<Int, Invite2>
+
+
+    fun findByUidAsFlow(
+        uid: String,
+        loadParams: DataLoadParams,
+    ): Flow<DataLoadState<Invite2>>
 
     suspend fun findByGuid(guid: String): DataLoadState<Invite2>
 

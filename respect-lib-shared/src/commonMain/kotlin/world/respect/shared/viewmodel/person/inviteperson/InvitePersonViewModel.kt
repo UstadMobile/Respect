@@ -7,6 +7,7 @@ import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -14,12 +15,19 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
+import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
+import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
@@ -36,12 +44,12 @@ import world.respect.shared.navigation.QrCode
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import kotlin.random.Random
 import kotlin.time.Clock
 
 data class InvitePersonUiState(
-    val inviteCode: String? = null,
+    val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
+    val invite2: DataLoadState<Invite2> = DataLoadingState(),
     val inviteMultipleAllowed: Boolean = false,
     val approvalRequired: Boolean = false,
     val selectedRole: PersonRoleEnum? = null,
@@ -53,7 +61,10 @@ data class InvitePersonUiState(
     val familyPersonGuid: String? = null,
     val roleOptions: List<PersonRoleEnum> = emptyList(),
     val invite: Invite? = null
-)
+) {
+    val inviteCode: String?
+        get() = invite2.dataOrNull()?.code
+}
 
 class InvitePersonViewModel(
     savedStateHandle: SavedStateHandle,
@@ -76,22 +87,18 @@ class InvitePersonViewModel(
     private val guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
         Invite.TABLE_ID
     ).toString()
+
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(InvitePersonUiState())
 
     val uiState = _uiState.asStateFlow()
 
+    private val _inviteUid = MutableStateFlow<String?>(null)
+
+    private val getWritableRolesListUseCase: GetWritableRolesListUseCase by inject()
+
     init {
-//        _uiState.update { prev ->
-//            prev.copy(
-//                classGuid = route.classGuid,
-//                familyPersonGuid = route.familyPersonGuid,
-//                className = route.className,
-//                classRole = route.role,
-//                schoolName = accountManager.activeAccount?.school?.name?.getTitle()
-//            )
-//        }
         _appUiState.update {
             it.copy(
                 title = Res.string.invite_person.asUiText(),
@@ -101,63 +108,36 @@ class InvitePersonViewModel(
                 userAccountIconVisible = false
             )
         }
-        launchWithLoadingIndicator {
+
+        _inviteUid.update {
+            when(route.invitePersonOptions) {
+                is InvitePerson.NewUserInviteOptions -> {
+                    route.invitePersonOptions.presetRole?.newUserInviteUid
+                }
+
+                //else -> null
+            }
+        }
+
+        viewModelScope.launch {
             val currentPersonRole = accountManager.selectedAccountAndPersonFlow.first()
-                ?.person?.roles?.first()?.roleEnum
+                ?.person?.roles?.first()?.roleEnum ?: return@launch
 
-            _uiState.value.classRole?.let { classRole ->
-                val role =
-                    when (classRole) {
-                        EnrollmentRoleEnum.TEACHER -> PersonRoleEnum.TEACHER
-                        EnrollmentRoleEnum.STUDENT -> PersonRoleEnum.STUDENT
-                        else -> null
+            val writableRoles = getWritableRolesListUseCase(currentPersonRole)
+            _uiState.update { it.copy(roleOptions =  writableRoles) }
+
+            _inviteUid.collectLatest { inviteUid ->
+                if(inviteUid != null) {
+                    schoolDataSource.inviteDataSource.findByUidAsFlow(
+                        uid = inviteUid,
+                        loadParams = DataLoadParams()
+                    ).collect { invite ->
+                        _uiState.update { it.copy(invite2 = invite) }
                     }
-
-                role?.let { role ->
-//                 val invite=
-//                     schoolDataSource.inviteDataSource.findByCode(route.inviteCodeStr.toString()).dataOrNull()
-//                    _uiState.update { prev ->
-//                        prev.copy(
-//                            selectedRole = role,
-//                            roleOptions = listOf(role),
-//                            invite = invite,
-//                            inviteCode = invite?.code,
-//                            inviteMultipleAllowed = invite?.inviteMultipleAllowed == true,
-//                            approvalRequired = invite?.approvalRequired == true,
-//                            classGuid = invite?.forClassGuid,
-//                            className = invite?.forClassName,
-//                            classRole = invite?.forClassRole,
-//                            schoolName = invite?.schoolName,
-//                            familyPersonGuid = invite?.forFamilyOfGuid
-//                        )
-//                    }
-                    return@launchWithLoadingIndicator
+                }else {
+                    _uiState.update { it.copy(invite2 = NoDataLoadedState.notFound()) }
                 }
             }
-//            _uiState.update { prev ->
-//                prev.copy(
-//                    roleOptions = if (route.presetRole != null) {
-//                            listOf(route.presetRole)
-//                        } else {
-//                            when (currentPersonRole) {
-//                                PersonRoleEnum.TEACHER -> listOf(
-//                                    PersonRoleEnum.STUDENT,
-//                                    PersonRoleEnum.PARENT,
-//                                    PersonRoleEnum.TEACHER,
-//                                )
-//                                PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
-//                                    PersonRoleEnum.STUDENT,
-//                                    PersonRoleEnum.PARENT,
-//                                    PersonRoleEnum.TEACHER,
-//                                    PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-//                                )
-//                                else -> emptyList()
-//                            }
-//                        }
-//                )
-//            }
-//            onRoleChange(uiState.value.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT)
-
         }
     }
 
@@ -191,8 +171,8 @@ class InvitePersonViewModel(
     }
 
     fun onRoleChange(role: PersonRoleEnum) {
+        _inviteUid.update { role.newUserInviteUid }
         _uiState.update { it.copy(selectedRole = role) }
-
     }
 
     fun onSendLinkViaSms() {
@@ -247,7 +227,6 @@ class InvitePersonViewModel(
             it.copy(
                 shareLink = link,
                 invite = newInvite,
-                inviteCode = newInvite.code
             )
         }
         return link

@@ -31,6 +31,28 @@ class InviteDataSourceDb(
     private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
 ) : InviteDataSourceLocal {
 
+
+    override suspend fun findByGuid(guid: String): DataLoadState<Invite2> {
+        return schoolDb.getInviteEntityDao().findByGuidHash(
+            uidNumberMapper(guid)
+        )?.let {
+            DataReadyState(it.toModel())
+        } ?: NoDataLoadedState.notFound()
+    }
+
+    override fun findByUidAsFlow(
+        uid: String,
+        loadParams: DataLoadParams
+    ): Flow<DataLoadState<Invite2>> {
+        return schoolDb.getInviteEntityDao().findByGuidHashAsFlow(
+            guidHash = uidNumberMapper(uid)
+        ).map {
+            it?.let {
+                DataReadyState(it.toModel())
+            } ?: NoDataLoadedState.notFound()
+        }
+    }
+
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: InviteDataSource.GetListParams
@@ -104,14 +126,6 @@ class InviteDataSourceDb(
         val uidNums = uids.map { uidNumberMapper(it) }
         return schoolDb.getInviteEntityDao().findByUidList(uidNums)
             .map { it.toModel() }
-    }
-
-    override suspend fun findByGuid(guid: String): DataLoadState<Invite2> {
-        return schoolDb.getInviteEntityDao().findByGuidHash(
-            uidNumberMapper(guid)
-        )?.let {
-            DataReadyState(it.toModel())
-        } ?: NoDataLoadedState.notFound()
     }
 
     override suspend fun findByCode(code: String): DataLoadState<Invite2> {

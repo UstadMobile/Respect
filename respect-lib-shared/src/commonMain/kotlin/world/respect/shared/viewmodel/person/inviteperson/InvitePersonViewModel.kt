@@ -3,6 +3,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.ktor.http.Url
+import kotlinx.coroutines.delay
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
@@ -30,6 +31,7 @@ import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.ext.CHAR_POOL_NUMBERS
 import world.respect.libutil.ext.randomString
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
@@ -45,9 +47,15 @@ import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
+/**
+ * @property approvalRequired is true when the time is after the approval required time on the invite
+ *           This cannot be handled without a backing property, because we need to update it after
+ *           the time runs out, even though the invite itself hasn't changed.
+ */
 data class InvitePersonUiState(
     val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
     val invite: DataLoadState<Invite2> = DataLoadingState(),
+    val approvalRequired: Boolean = true,
     val inviteUrl: Url? = null,
     val selectedRole: PersonRoleEnum? = null,
     val className: String? = null,
@@ -56,9 +64,6 @@ data class InvitePersonUiState(
 ) {
     val inviteCode: String?
         get() = invite.dataOrNull()?.code
-
-    val approvalRequired: Boolean
-        get() = invite.dataOrNull()?.isApprovalRequiredNow() ?: true
 
 }
 
@@ -125,14 +130,29 @@ class InvitePersonViewModel(
                     schoolDataSource.inviteDataSource.findByUidAsFlow(
                         uid = inviteUid,
                         loadParams = DataLoadParams()
-                    ).collect { invite ->
+                    ).collectLatest { invite ->
                         _uiState.update { prev ->
                             prev.copy(
                                 invite = invite,
+                                approvalRequired = invite.dataOrNull()?.isApprovalRequiredNow() ?: true,
                                 inviteUrl = invite.dataOrNull()?.let {
                                     createInviteLinkUseCase(it.code)
                                 },
                             )
+                        }
+
+                        invite.dataOrNull()?.approvalRequiredAfter?.also { approvalRequiredInstant ->
+                            val timeUntilApprovalRequired =
+                                approvalRequiredInstant.toEpochMilliseconds() - systemTimeInMillis()
+
+                            if(timeUntilApprovalRequired > 0) {
+                                delay(timeUntilApprovalRequired)
+                                _uiState.update { prev ->
+                                    prev.copy(
+                                        approvalRequired = true,
+                                    )
+                                }
+                            }
                         }
                     }
                 }else {
@@ -157,13 +177,15 @@ class InvitePersonViewModel(
 
     fun onApprovalEnabledChanged(enabled: Boolean) {
         val currentInvite = _uiState.value.invite.dataOrNull() ?: return
+        val now = Clock.System.now()
         launchUpdateInvite(
             currentInvite.copyInvite(
                 approvalRequiredAfter = if(!enabled) {
-                    Clock.System.now() + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes
+                    now + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes
                 }else {
-                    Clock.System.now()
-                }
+                    now
+                },
+                lastModified = now
             )
         )
     }
@@ -218,6 +240,7 @@ class InvitePersonViewModel(
             launchUpdateInvite(
                 currentInvite.copyInvite(
                     code = randomString(10, CHAR_POOL_NUMBERS),
+                    lastModified = Clock.System.now(),
                 )
             )
         }

@@ -13,7 +13,7 @@ import kotlin.time.Instant
 fun Invite2.copyInvite(
     approvalRequiredAfter: Instant = this.approvalRequiredAfter,
     code: String = this.code,
-    lastModified: Instant = Clock.System.now(),
+    lastModified: Instant = this.lastModified,
 ): Invite2 {
     return when(this) {
         is NewUserInvite -> copy(

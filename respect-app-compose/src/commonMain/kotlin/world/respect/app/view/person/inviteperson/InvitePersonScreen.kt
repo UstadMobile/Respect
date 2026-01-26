@@ -44,7 +44,6 @@ import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
 import world.respect.shared.generated.resources.invite_via_sms
 import world.respect.shared.generated.resources.qr_code
-import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.reset_code
 import world.respect.shared.generated.resources.role
 import world.respect.shared.util.ext.isLoading
@@ -149,23 +148,22 @@ fun InvitePersonScreen(
 
         HorizontalDivider()
 
-        val approvalRequired = uiState.approvalRequired
         val approvalRequiredAfter = invite?.approvalRequiredAfter
 
         ListItem(
             modifier = Modifier.clickable(enabled = fieldsEnabled) {
-                onApprovalRequiredChanged(!approvalRequired)
+                onApprovalRequiredChanged(!uiState.approvalRequired)
             },
             headlineContent = { Text(stringResource(Res.string.approval_required)) },
             trailingContent = {
                 Switch(
-                    checked = approvalRequired,
+                    checked = uiState.approvalRequired,
                     enabled = fieldsEnabled,
                     onCheckedChange = { onApprovalRequiredChanged(it) }
                 )
             },
             leadingContent = { Icon(Icons.Default.PersonAdd, contentDescription = null) },
-            supportingContent = if(!approvalRequired && approvalRequiredAfter != null) {
+            supportingContent = if(!uiState.approvalRequired && approvalRequiredAfter != null) {
                 {
                     val approvalOffUntil = rememberFormattedTime(approvalRequiredAfter)
                     Text(stringResource(Res.string.approval_not_required_until) + " " + approvalOffUntil)

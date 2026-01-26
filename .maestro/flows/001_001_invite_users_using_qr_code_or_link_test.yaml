@@ -43,6 +43,7 @@ onFlowComplete:
 - scroll
 - assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off
+- assertVisible: "Approval not required until:.*"
 - copyTextFrom:
       id: "invite_url"
 # Student user joining using invite QR code
@@ -63,11 +64,13 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Teacher"
+- assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "Role: Teacher"
-- assertVisible: "Server link:"
+- assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
-- tapOn: "Accept"
+- tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
@@ -117,11 +120,6 @@ onFlowComplete:
 - tapOn:
     text: "Student"
 - assertVisible: "Approval required"    #switch is On
-- assertVisible: "Copy link"
-- assertVisible: "Send link via SMS"
-- assertVisible: "Send link via Email"
-- assertVisible: "Share link"
-- assertVisible: "Reset code"
 - copyTextFrom:
     id: "invite_code"
 
@@ -142,15 +140,15 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible:
-    text: "School name"
-- assertVisible:
-    text: "Class name"
-- assertVisible:
-      text: "Role: Student"
-- assertVisible:
-    text: "Server link:"
-- tapOn: "Accept"
+- assertVisible: "Role"
+- assertVisible: "Student"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Class name"
+- assertVisible: "New Class"
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
@@ -215,19 +213,11 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible:
-    id: "app_title"
-    text: "Invite person"
 - tapOn:
     id: "role"
 - tapOn:
     text: "Parent"
 - assertVisible: "Approval required"    #switch is On
-- assertVisible: "Copy link"
-- assertVisible: "Send link via SMS"
-- assertVisible: "Send link via Email"
-- assertVisible: "Share link"
-- assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off
 - copyTextFrom:
       text: "Copy link"
@@ -240,13 +230,15 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible:
-    text: "School name"
-- assertVisible:
-     text: "Role: "
-- assertVisible:
-      text: "Server link:"
-- tapOn: "Accept"
+- assertVisible: "Role"
+- assertVisible: "Parent"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Class name"
+- assertVisible: "New Class"
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Terms and conditions"

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -17,6 +18,11 @@ import world.respect.shared.domain.launchers.EmailLauncher
 import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncher
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.category_integrated_apps
+import world.respect.shared.generated.resources.category_launcher
+import world.respect.shared.generated.resources.category_other
+import world.respect.shared.generated.resources.category_question
+import world.respect.shared.generated.resources.category_rate_us
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -54,21 +60,23 @@ class ShareFeedbackViewModel(
                 title = Res.string.share_feedback.asUiText(),
             )
         }
-        // Initialize the categories list
-        val categoryList = listOf(
-            "Respect launcher related issues",
-            "Integrated Apps related issues",
-            "Question",
-            "Rate us",
-            "Other"
-        )
-
-        _uiState.update { currentState ->
-            currentState.copy(
-                categories = categoryList,
-                selectedCategory = categoryList.first()
+        viewModelScope.launch {
+            val categoryList: List<String> = listOf(
+                getString(Res.string.category_launcher),
+                getString(Res.string.category_integrated_apps),
+                getString(Res.string.category_question),
+                getString(Res.string.category_rate_us),
+                getString(Res.string.category_other)
             )
+
+            _uiState.update { currentState ->
+                currentState.copy(
+                    categories = categoryList,
+                    selectedCategory = categoryList.first()
+                )
+            }
         }
+
     }
 
     fun onFeedbackTextChanged(text: String) {
@@ -128,10 +136,7 @@ class ShareFeedbackViewModel(
 
         )
         viewModelScope.launch {
-          val response = feedBackDataSource.createTicket(ticket)
+            val response = feedBackDataSource.createTicket(ticket)
         }
-
-
     }
-
 }

@@ -154,7 +154,7 @@ fun InvitePersonScreen(
                 Text(
                     text = it.code,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.testTag("invite_code")
+                    modifier = Modifier.testTag("invite_code"),
                 )
             }
         }

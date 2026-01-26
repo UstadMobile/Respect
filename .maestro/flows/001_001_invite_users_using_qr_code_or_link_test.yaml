@@ -40,11 +40,11 @@ onFlowComplete:
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via Email"
 - assertVisible: "Share link"
+- scroll
 - assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off
 - copyTextFrom:
-      id: "invite_qr_link"
-
+      id: "invite_url"
 # Student user joining using invite QR code
 - clearState: world.respect.app
 - launchApp:
@@ -123,7 +123,7 @@ onFlowComplete:
 - assertVisible: "Share link"
 - assertVisible: "Reset code"
 - copyTextFrom:
-      id: "invite_code_field"
+    id: "invite_code"
 
 # C) Student sign-up via invite code to the class
 - clearState: world.respect.app
@@ -230,7 +230,7 @@ onFlowComplete:
 - assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off
 - copyTextFrom:
-    id: "copy_link"
+      text: "Copy link"
 
 # Parent sign-up to the app using invite link
 - clearState: world.respect.app

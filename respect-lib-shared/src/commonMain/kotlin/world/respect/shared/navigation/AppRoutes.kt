@@ -443,7 +443,7 @@ class TermsAndCondition(
     private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
     val inviteType: Int?=null,
-    ) : RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val type: ProfileType = ProfileType.fromValue(profileTypeStr)
@@ -477,8 +477,7 @@ class CreateAccount(
     private val schoolUrlStr: String,
     private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
-    val inviteType: Int?=null,
-    ) : RespectAppRoute {
+) : RespectAppRoute {
 
     @Transient
     val type = ProfileType.fromValue(profileTypeStr)
@@ -501,7 +500,6 @@ class CreateAccount(
             return CreateAccount(
                 schoolUrlStr = schoolUrl.toString(),
                 profileTypeStr = profileType.value,
-                inviteType = type,
                 inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
             )
         }

@@ -543,4 +543,7 @@
     <string name="not_set">Not set</string>
 
     <string name="school_server_url">School server URL</string>
+
+    <string name="approval_not_required_until">Approval not required until:</string>
+
 </resources>

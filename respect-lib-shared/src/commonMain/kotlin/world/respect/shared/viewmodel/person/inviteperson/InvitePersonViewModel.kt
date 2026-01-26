@@ -22,6 +22,8 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
+import world.respect.datalayer.school.ext.copyWithNewApprovalRequiredAfter
+import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -39,6 +41,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
 data class InvitePersonUiState(
     val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
@@ -52,7 +55,7 @@ data class InvitePersonUiState(
         get() = invite.dataOrNull()?.code
 
     val approvalRequired: Boolean
-        get() = (invite.dataOrNull()?.approvalRequiredAfter?.let { it > Clock.System.now() }) ?: true
+        get() = invite.dataOrNull()?.isApprovalRequiredNow() ?: true
 
 }
 
@@ -135,18 +138,22 @@ class InvitePersonViewModel(
         }
     }
 
-    fun setApprovalRequired(enabled: Boolean) {
+    fun onApprovalEnabledChanged(enabled: Boolean) {
         val currentInvite = _uiState.value.invite.dataOrNull() ?: return
 
-//        launchWithLoadingIndicator {
-//            schoolDataSource.inviteDataSource.store(
-//                listOf(
-//                    currentInvite
-//                )
-//            )
-//        }
-
-        //_uiState.update { it.copy(approvalRequired = enabled) }
+        launchWithLoadingIndicator {
+            schoolDataSource.inviteDataSource.store(
+                listOf(
+                    currentInvite.copyWithNewApprovalRequiredAfter(
+                        approvalRequiredAfter = if(!enabled) {
+                            Clock.System.now() + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes
+                        }else {
+                            Clock.System.now()
+                        }
+                    )
+                )
+            )
+        }
     }
 
 

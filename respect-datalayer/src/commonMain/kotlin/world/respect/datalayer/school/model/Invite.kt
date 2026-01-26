@@ -46,6 +46,8 @@ sealed interface Invite2: ModelWithTimes {
 
         const val TABLE_ID = 17
 
+        const val APPROVAL_NOT_REQUIRED_INTERVAL_MINS = 15
+
         fun uidForInvite(
             invite2: Invite2
         ): String {

@@ -28,7 +28,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import org.jetbrains.compose.resources.stringResource
@@ -117,7 +120,7 @@ fun InvitePersonScreen(
         uiState.inviteUrl?.also { link ->
             val linkStr = link.toString()
             Image(
-                painter = rememberQrCodePainter(link.toString()),
+                painter = rememberQrCodePainter(linkStr),
                 contentDescription = stringResource(Res.string.qr_code),
                 modifier = Modifier
                     .size(240.dp)
@@ -126,7 +129,13 @@ fun InvitePersonScreen(
             )
 
             Text(
-                text = linkStr,
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(color = MaterialTheme.colorScheme.primary)
+                    ) {
+                        append(linkStr)
+                    }
+                },
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
@@ -189,6 +198,12 @@ fun InvitePersonScreen(
         HorizontalDivider()
 
         ListItem(
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaShare() },
+            leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
+            headlineContent = { Text(stringResource(Res.string.invite_via_share)) }
+        )
+
+        ListItem(
             modifier = Modifier.clickable(enabled = fieldsEnabled) { onCopyLink() },
             leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.copy_link)) }
@@ -206,11 +221,6 @@ fun InvitePersonScreen(
             headlineContent = { Text(stringResource(Res.string.invite_via_email)) }
         )
 
-        ListItem(
-            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaShare() },
-            leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.invite_via_share)) }
-        )
 
         ListItem(
             modifier = Modifier.clickable(enabled = fieldsEnabled) { onClickResetCode() },

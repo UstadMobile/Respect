@@ -28,6 +28,7 @@ import world.respect.app.app.SizeClass
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
+import world.respect.shared.ext.withClearBackstack
 import world.respect.shared.navigation.NavCommand
 
 
@@ -84,15 +85,22 @@ abstract class AbstractAppActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Activity uses singleTop mode - so a new intent will not trigger destruction/recreation
+     *
+     * We don't want this because the RespectAccountManager is modelled as using a single account at
+     * a time.
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         val intentUri = intent.data ?: return
 
         try {
             val url = customDeepLinkToUrlUseCase(Url(intentUri.toString()))
-            resolveUrlToNavCommandUseCase(url, canGoBack = false)?.also {
-                _navCommandFlow.tryEmit(it)
-            }
+            resolveUrlToNavCommandUseCase(url, canGoBack = false)
+                ?.withClearBackstack(true)?.also {
+                    _navCommandFlow.tryEmit(it)
+                }
         }catch(e: Throwable) {
             Napier.w("Exception handling link", e)
         }

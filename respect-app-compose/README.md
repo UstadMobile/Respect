@@ -18,3 +18,21 @@ https://digitalassetlinks.googleapis.com/v1/assetlinks:check?source.web.site=htt
   for a subdomain e.g. rpId=school.example.org, then https://school.example.org/.well-known/assetlinks.json 
   itself must return an HTTP 200 OK response (in addition to https://example.org/.well-known/assetlinks.json ). 
 
+
+### Local Android link testing:
+
+The AndroidManifest includes intent filters for specific domains (e.g. *.onrespect.app). This won't
+match the URLs used during local testing (e.g. IP addresses).
+
+ADB command line:
+```
+adb shell am start -a android.intent.action.VIEW -d "http://192.168.1.2:8098/respect_school_link/AcceptInvite?inviteCode=8848544737" world.respect.app
+```
+
+Maestro launchApp argument:
+```
+- launchApp:
+    appId: "world.respect.app"
+    arguments: 
+       launchUrl: "http://192.168.1.2:8098/respect_school_link/AcceptInvite?inviteCode=8848544737"
+```

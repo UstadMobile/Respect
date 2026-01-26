@@ -246,4 +246,10 @@ class InvitePersonViewModel(
         }
     }
 
+    fun onClickInviteCode() {
+        _uiState.value.invite.dataOrNull()?.also {
+            setClipboardStringUseCase(it.code)
+        }
+    }
+
 }

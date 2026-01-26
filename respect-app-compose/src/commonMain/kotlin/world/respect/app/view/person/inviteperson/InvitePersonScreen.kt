@@ -3,6 +3,7 @@ package world.respect.app.view.person.inviteperson
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -63,6 +64,7 @@ fun InvitePersonScreen(
     InvitePersonScreen(
         uiState = uiState,
         appUiState = appUiState,
+        onClickInviteCode = viewModel::onClickInviteCode,
         onCopyLink = viewModel::copyInviteLinkToClipboard,
         onInviteViaSms = viewModel::onSendLinkViaSms,
         onInviteViaEmail = viewModel::onSendLinkViaEmail,
@@ -77,6 +79,7 @@ fun InvitePersonScreen(
 fun InvitePersonScreen(
     uiState: InvitePersonUiState,
     appUiState: AppUiState,
+    onClickInviteCode: () -> Unit,
     onCopyLink: () -> Unit,
     onInviteViaSms: () -> Unit,
     onInviteViaEmail: () -> Unit,
@@ -136,14 +139,24 @@ fun InvitePersonScreen(
         }
 
         invite?.also {
-            Text(
-                text = "${stringResource(Res.string.invite_code_label)}: ${it.code}",
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .testTag("invite_code")
-                    .align(Alignment.CenterHorizontally)
-                    .defaultItemPadding()
-            )
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally).defaultItemPadding()
+                    .clickable(enabled = fieldsEnabled) {
+                        onClickInviteCode()
+                    },
+            ) {
+                Text(
+                    text = stringResource(Res.string.invite_code_label) + ": ",
+                    textAlign = TextAlign.Center,
+                )
+
+                //Separated out for easier automated testing.
+                Text(
+                    text = it.code,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.testTag("invite_code")
+                )
+            }
         }
 
         HorizontalDivider()

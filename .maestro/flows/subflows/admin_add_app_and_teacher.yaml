@@ -105,6 +105,10 @@ appId: world.respect.app
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"

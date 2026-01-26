@@ -31,26 +31,20 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "School name"
-- assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "Invite multiple people"
-- assertVisible: "Allow multiple people to use this invite"  #switch is off
-- assertVisible: "Approval required"    #switch is off
 - tapOn:
     id: "role"
 - tapOn:
     text: "Teacher"
+- assertVisible: "Approval required"    #switch is On
 - assertVisible: "Copy link"
 - assertVisible: "Send link via SMS"
-- assertVisible: "Send link via email"
+- assertVisible: "Send link via Email"
 - assertVisible: "Share link"
-- tapOn: "QR code"
-- assertVisible:
-    id: "app_title"
-    text: "QR code"
+- scroll
+- assertVisible: "Reset code"
+- tapOn: "Approval required" # turn the switch off
 - copyTextFrom:
-      id: "invite_qr_link"
-
+      id: "invite_url"
 # Student user joining using invite QR code
 - clearState: world.respect.app
 - launchApp:
@@ -115,19 +109,21 @@ onFlowComplete:
 - assertVisible: "Class name"
 - assertVisible: "New Class"
 - tapOn: "Approval required"  #switch is ON
-- tapOn:
-      id: role
-- tapOn:
-     text: Student
-     index: 1
-- tapOn: "Invite code"
 - assertVisible:
     id: "app_title"
-    text: "Code"
-- assertVisible:
-      text: "This code is private. If it is shared with someone, they can enter this code to join"
+    text: "Invite person"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Student"
+- assertVisible: "Approval required"    #switch is On
+- assertVisible: "Copy link"
+- assertVisible: "Send link via SMS"
+- assertVisible: "Send link via Email"
+- assertVisible: "Share link"
+- assertVisible: "Reset code"
 - copyTextFrom:
-      id: "invite_code_field"
+    id: "invite_code"
 
 # C) Student sign-up via invite code to the class
 - clearState: world.respect.app
@@ -175,6 +171,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "tests1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -215,13 +215,22 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- tapOn: "Approval required"  #switch is ON
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
 - tapOn:
     id: "role"
 - tapOn:
     text: "Parent"
+- assertVisible: "Approval required"    #switch is On
+- assertVisible: "Copy link"
+- assertVisible: "Send link via SMS"
+- assertVisible: "Send link via Email"
+- assertVisible: "Share link"
+- assertVisible: "Reset code"
+- tapOn: "Approval required" # turn the switch off
 - copyTextFrom:
-    id: "copy_link"
+      text: "Copy link"
 
 # Parent sign-up to the app using invite link
 - clearState: world.respect.app

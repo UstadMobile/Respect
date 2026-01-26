@@ -204,6 +204,8 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
+import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
@@ -604,6 +606,14 @@ val appKoinModule = module {
 
     single<ResolveUrlToNavCommandUseCase> {
         ResolveUrlToNavCommandUseCase()
+    }
+
+    single<InitDeepLinkUriProviderUseCaseAndroid> {
+        InitDeepLinkUriProviderUseCaseAndroid()
+    }
+
+    single<InitDeepLinkUriProviderUseCase> {
+        get<InitDeepLinkUriProviderUseCaseAndroid>()
     }
 
     single<PhoneNumValidatorUseCase> {

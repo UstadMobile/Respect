@@ -32,7 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -43,6 +42,7 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
@@ -120,15 +120,20 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
 )
+
+/**
+ * @param activityNavCommandFlow a flow that is received from the activity. When a link is opened
+ *        and the app is already running, the Activity's onNewIntent will be invoked. If the app is
+ *        started cold then InitDeepLinkUriProviderUseCase should be used.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
-    navController: NavHostController,
     activityNavCommandFlow: Flow<NavCommand>,
-    respectNavController:  RespectComposeNavController,
     widthClass: SizeClass = SizeClass.MEDIUM,
     useBottomBar: Boolean = true,
-    onAppStateChanged: (AppUiState) -> Unit = { }) {
+    onAppStateChanged: (AppUiState) -> Unit = { }
+) {
     val appUiState = remember {
         mutableStateOf(
             AppUiState(
@@ -139,6 +144,10 @@ fun App(
     }
 
     val navController = rememberNavController()
+    val respectNavController = remember(Unit) {
+        RespectComposeNavController(navController)
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     val accountManager: RespectAccountManager = koinInject()
@@ -153,11 +162,11 @@ fun App(
 
     NavControllerLogEffect(navController)
 
-    LaunchedEffect(Unit){
-        activityNavCommandFlow.collect {
-            respectNavController.onCollectNavCommand(it)
-        }
-    }
+    NavCommandEffect(
+        navHostController = respectNavController,
+        navCommandFlow = activityNavCommandFlow,
+    )
+
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
@@ -295,6 +304,7 @@ fun App(
         ) { innerPadding ->
             AppNavHost(
                 navController = navController,
+                respectNavController = respectNavController,
                 onSetAppUiState = {
                     appUiStateVal = it
                 },

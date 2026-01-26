@@ -13,7 +13,10 @@ import world.respect.shared.navigation.NavCommand
  */
 class ResolveUrlToNavCommandUseCase {
 
-    operator fun invoke(url: Url): NavCommand? {
+    operator fun invoke(
+        url: Url,
+        canGoBack: Boolean = true,
+    ): NavCommand? {
         val schoolUrl = url.schoolUrlOrNull() ?: return null
 
         val lastSegment = url.segments.lastOrNull() ?: return null
@@ -24,7 +27,8 @@ class ResolveUrlToNavCommandUseCase {
                     NavCommand.Navigate(
                         destination = AcceptInvite.create(
                             schoolUrl = schoolUrl,
-                            code = inviteCode
+                            code = inviteCode,
+                            canGoBack = canGoBack,
                         ), clearBackStack = false
                     )
                 }

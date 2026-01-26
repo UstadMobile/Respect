@@ -160,12 +160,12 @@ import world.respect.shared.viewmodel.settings.SettingsViewModel
 @Composable
 fun AppNavHost(
     navController: NavHostController,
+    respectNavController: RespectComposeNavController = remember(Unit) {
+        RespectComposeNavController(navController)
+    },
     onSetAppUiState: (AppUiState) -> Unit,
     modifier: Modifier,
 ) {
-    val respectNavController = remember {
-        RespectComposeNavController(navController)
-    }
 
     NavHost(
         navController = navController,

@@ -69,7 +69,8 @@ class AcceptInviteViewModel(
             it.copy(
                 title = Res.string.invitation.asUiText(),
                 hideBottomNavigation = true,
-                userAccountIconVisible = false
+                userAccountIconVisible = false,
+                showBackButton = route.canGoBack,
             )
         }
 

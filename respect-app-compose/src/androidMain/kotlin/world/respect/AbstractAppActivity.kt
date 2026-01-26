@@ -11,31 +11,33 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.navigation.compose.rememberNavController
 import com.ustadmobile.libuicompose.theme.RespectAppTheme
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.android.inject
 import world.respect.app.app.App
 import world.respect.app.app.SizeClass
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
+import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectComposeNavController
 
 
 abstract class AbstractAppActivity : AppCompatActivity() {
 
-    private val customDeepLinkToUrlUseCase = getKoin().get<CustomDeepLinkToUrlUseCase>()
-    private val resolveUrlToNavCommandUseCase = getKoin().get<ResolveUrlToNavCommandUseCase>()
+    private val customDeepLinkToUrlUseCase: CustomDeepLinkToUrlUseCase by inject()
+
+    private val resolveUrlToNavCommandUseCase: ResolveUrlToNavCommandUseCase by inject()
+
+    private val initDeepLinkUriProviderAndroid: InitDeepLinkUriProviderUseCaseAndroid by inject()
 
     val WindowWidthSizeClass.multiplatformSizeClass: SizeClass
         get() = when (this) {
@@ -50,7 +52,7 @@ abstract class AbstractAppActivity : AppCompatActivity() {
         extraBufferCapacity = 0,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-    val navCommandFlow: SharedFlow<NavCommand> = _navCommandFlow.asSharedFlow()
+    private val navCommandFlow: SharedFlow<NavCommand> = _navCommandFlow.asSharedFlow()
 
     @OptIn(
         ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
@@ -59,17 +61,10 @@ abstract class AbstractAppActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        initDeepLinkUriProviderAndroid.onSetDeepLink(intent)
+
         setContent {
-            val navController = rememberNavController()
-
             val windowSizeClass = calculateWindowSizeClass(this)
-
-            val respectNavController = remember(navController) {
-                RespectComposeNavController(navController)
-            }
-
-
-            handleDeepLink(intent)
 
             RespectAppTheme {
                 Surface(
@@ -82,35 +77,24 @@ abstract class AbstractAppActivity : AppCompatActivity() {
                 ) {
                     App(
                         widthClass = windowSizeClass.widthSizeClass.multiplatformSizeClass,
-                        navController = navController,
                         activityNavCommandFlow = navCommandFlow,
-                        respectNavController = respectNavController
                     )
-
                 }
-
-            }
-        }
-    }
-    private fun handleDeepLink(intent: Intent?) {
-        intent?.data?.let { uri ->
-            val deeplinkUrl = try {
-                Url(uri.toString())
-            } catch (_: Exception) {
-                null
-            } ?: return
-
-            val url = customDeepLinkToUrlUseCase(deeplinkUrl)
-            val navCommand = resolveUrlToNavCommandUseCase(url)
-
-            navCommand?.let {
-                _navCommandFlow.tryEmit(it)
             }
         }
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleDeepLink(intent)
+        val intentUri = intent.data ?: return
+
+        try {
+            val url = customDeepLinkToUrlUseCase(Url(intentUri.toString()))
+            resolveUrlToNavCommandUseCase(url, canGoBack = false)?.also {
+                _navCommandFlow.tryEmit(it)
+            }
+        }catch(e: Throwable) {
+            Napier.w("Exception handling link", e)
+        }
     }
 }

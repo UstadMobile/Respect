@@ -384,6 +384,7 @@ class OtherOptionsSignup private constructor(
 class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
+    val canGoBack: Boolean = true,
 ) : RespectAppRoute {
 
     @Transient
@@ -392,10 +393,12 @@ class AcceptInvite(
     companion object {
         fun create(
             schoolUrl: Url,
-            code: String
+            code: String,
+            canGoBack: Boolean = true,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
-            code = code
+            code = code,
+            canGoBack = canGoBack,
         )
     }
 }

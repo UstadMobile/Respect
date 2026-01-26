@@ -102,7 +102,7 @@ fun InvitePersonScreen(
             value = selectedRole,
             modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
             label = {
-                Text(stringResource(Res.string.role) + "*")
+                Text(stringResource(Res.string.role))
             },
             onOptionSelected = { newRole ->
                 onRoleChange(newRole)
@@ -110,9 +110,6 @@ fun InvitePersonScreen(
             options = uiState.roleOptions,
             itemText = { stringResource(it.label) },
             enabled = fieldsEnabled,
-            supportingText = {
-                Text(stringResource(Res.string.required))
-            }
         )
 
         uiState.inviteUrl?.also { link ->

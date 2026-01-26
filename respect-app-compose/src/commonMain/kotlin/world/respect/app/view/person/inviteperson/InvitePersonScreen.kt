@@ -140,7 +140,9 @@ fun InvitePersonScreen(
             Text(
                 text = "${stringResource(Res.string.invite_code_label)}: ${it.code}",
                 textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .testTag("invite_code")
+                    .align(Alignment.CenterHorizontally)
                     .defaultItemPadding()
             )
         }

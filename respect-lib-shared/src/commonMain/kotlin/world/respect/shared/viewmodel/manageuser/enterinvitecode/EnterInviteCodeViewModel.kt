@@ -16,7 +16,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_code_label
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.something_went_wrong
-import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.StringResourceUiText
@@ -81,7 +81,7 @@ class EnterInviteCodeViewModel(
 
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        ConfirmationScreen.create(
+                        AcceptInvite.create(
                             schoolUrl = route.schoolUrl,
                             code = inviteCode
                         )

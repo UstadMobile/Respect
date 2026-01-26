@@ -381,7 +381,7 @@ class OtherOptionsSignup private constructor(
 }
 
 @Serializable
-class ConfirmationScreen(
+class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
 ) : RespectAppRoute {
@@ -393,7 +393,7 @@ class ConfirmationScreen(
         fun create(
             schoolUrl: Url,
             code: String
-        ) = ConfirmationScreen(
+        ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code
         )

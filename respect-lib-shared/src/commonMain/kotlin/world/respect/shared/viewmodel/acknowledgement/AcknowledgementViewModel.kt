@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.Acknowledgement
-import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
@@ -52,7 +52,7 @@ class AcknowledgementViewModel(
                     destination = when {
                         shouldShowOnboardingUseCase() -> Onboarding
                         hasAccount -> if (isChild) AssignmentList else RespectAppLauncher()
-                        route.schoolUrl != null -> ConfirmationScreen.create(
+                        route.schoolUrl != null -> AcceptInvite.create(
                             schoolUrl = route.schoolUrl,
                             code = route.inviteCode.toString()
                         )

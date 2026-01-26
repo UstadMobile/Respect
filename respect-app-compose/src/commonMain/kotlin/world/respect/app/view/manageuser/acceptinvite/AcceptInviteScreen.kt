@@ -1,4 +1,4 @@
-package world.respect.app.view.manageuser.confirmation
+package world.respect.app.view.manageuser.acceptinvite
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,15 +20,15 @@ import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.school_server_url
 import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.app.appstate.getTitle
-import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationUiState
-import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteUiState
+import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 
 @Composable
-fun ConfirmationScreen(
-    viewModel: ConfirmationViewModel
+fun AcceptInviteScreen(
+    viewModel: AcceptInviteViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    ConfirmationScreen(
+    AcceptInviteScreen(
         uiState = uiState,
         onClickStudent = viewModel::onClickStudent,
         onClickParent = viewModel::onClickParent,
@@ -37,8 +37,8 @@ fun ConfirmationScreen(
 }
 
 @Composable
-fun ConfirmationScreen(
-    uiState: ConfirmationUiState,
+fun AcceptInviteScreen(
+    uiState: AcceptInviteUiState,
     onClickStudent: () -> Unit,
     onClickParent: () -> Unit,
     onClickNext: () -> Unit

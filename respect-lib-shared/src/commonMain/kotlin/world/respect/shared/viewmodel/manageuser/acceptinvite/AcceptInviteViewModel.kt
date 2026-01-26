@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.manageuser.confirmation
+package world.respect.shared.viewmodel.manageuser.acceptinvite
 
 
 import androidx.lifecycle.SavedStateHandle
@@ -11,26 +11,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
-import world.respect.credentials.passkey.RespectPasswordCredential
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.datalayer.school.model.Invite
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.opds.model.LangMap
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
-import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
-import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.resources.StringResourceUiText
@@ -38,10 +31,9 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
-data class ConfirmationUiState(
+data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
     val errorText: UiText? = null,
     val isTeacherInvite: Boolean = false,
@@ -49,13 +41,13 @@ data class ConfirmationUiState(
     val schoolUrl: Url? = null,
 )
 
-class ConfirmationViewModel(
+class AcceptInviteViewModel(
     savedStateHandle: SavedStateHandle,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    private val route: ConfirmationScreen = savedStateHandle.toRoute()
+    private val route: AcceptInvite = savedStateHandle.toRoute()
 
     override val scope: Scope
         get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
@@ -67,7 +59,7 @@ class ConfirmationViewModel(
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator = scope.get()
 
     private val _uiState = MutableStateFlow(
-        ConfirmationUiState(schoolUrl = route.schoolUrl)
+        AcceptInviteUiState(schoolUrl = route.schoolUrl)
     )
 
     val uiState = _uiState.asStateFlow()

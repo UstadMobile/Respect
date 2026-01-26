@@ -24,7 +24,7 @@ import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
-import world.respect.app.view.manageuser.confirmation.ConfirmationScreen
+import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
 import world.respect.app.view.manageuser.enterpasswordsignup.EnterPasswordSignupScreen
 import world.respect.app.view.manageuser.getstarted.GetStartedScreen
@@ -71,7 +71,7 @@ import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzList
-import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.CreateAccountSetPassword
@@ -131,7 +131,7 @@ import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
@@ -447,12 +447,12 @@ fun AppNavHost(
             )
         }
 
-        composable<ConfirmationScreen> {
-            val viewModel: ConfirmationViewModel = respectViewModel(
+        composable<AcceptInvite> {
+            val viewModel: AcceptInviteViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ConfirmationScreen(
+            AcceptInviteScreen(
                 viewModel = viewModel
             )
         }

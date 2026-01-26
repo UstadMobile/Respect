@@ -11,6 +11,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_code
 import world.respect.shared.generated.resources.invalid_url
@@ -33,6 +34,7 @@ class OtherOptionsViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
+    private val resolveUrlToNavCommandUseCase: ResolveUrlToNavCommandUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OtherOptionsUiState())
@@ -71,7 +73,14 @@ class OtherOptionsViewModel(
 
          launchWithLoadingIndicator {
              try {
-                 val schoolUrl = Url(link).normalizeForEndpoint()
+                 val url = Url(link)
+                 val navCommand = resolveUrlToNavCommandUseCase(url)
+                 if(navCommand != null) {
+                     _navCommandFlow.tryEmit(navCommand)
+                     return@launchWithLoadingIndicator
+                 }
+
+                 val schoolUrl = url.normalizeForEndpoint()
                  val schoolEntry = respectAppDataSource.schoolDirectoryEntryDataSource
                      .getSchoolDirectoryEntryByUrl(schoolUrl).dataOrNull()
 

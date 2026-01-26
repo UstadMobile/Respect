@@ -70,7 +70,9 @@ fun ShareFeedbackScreen(
         onFeedbackTextChanged = viewModel::onFeedbackTextChanged,
         onClickCheckBox = viewModel::onClickCheckBox,
         onClickSubmit = viewModel::onClickSubmit,
-        onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged
+        onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
+        onPhoneChanged = viewModel::onPhoneChanged,
+        onEmailChanged = viewModel::onEmailChanged,
     )
 }
 
@@ -84,7 +86,9 @@ fun ShareFeedbackScreen(
     onFeedbackTextChanged: (String) -> Unit,
     onClickSubmit: () -> Unit,
     onClickCheckBox: () -> Unit,
-    onNationalNumberSetChanged: (Boolean) -> Unit
+    onNationalNumberSetChanged: (Boolean) -> Unit,
+    onPhoneChanged: (String) -> Unit,
+    onEmailChanged: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -174,8 +178,8 @@ fun ShareFeedbackScreen(
             item {
                 ContactFields(
                     uiState,
-                    onPhoneChange = { /* viewModel::onPhoneChanged */ },
-                    onEmailChange = { /* viewModel::onEmailChanged */ },
+                    onPhoneChange = onPhoneChanged ,
+                    onEmailChange = onEmailChanged,
                     onNationalNumberSetChanged = onNationalNumberSetChanged
                 )
             }

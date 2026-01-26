@@ -23,6 +23,7 @@ import world.respect.shared.generated.resources.category_launcher
 import world.respect.shared.generated.resources.category_other
 import world.respect.shared.generated.resources.category_question
 import world.respect.shared.generated.resources.category_rate_us
+import world.respect.shared.generated.resources.feedback_respect
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -91,7 +92,7 @@ class ShareFeedbackViewModel(
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncher.sendEmail()
+            emailLauncher.sendEmail( )
         }
     }
 
@@ -121,17 +122,22 @@ class ShareFeedbackViewModel(
         }
     }
 
-    fun onClickSubmit() {
-        //testing
-        val userEmail = "mandvi2346verma@gmail.com"
+    fun onPhoneChanged(phone: String) {
+        _uiState.update { it.copy(phoneNumber = phone) }
+    }
 
+    fun onEmailChanged(email: String) {
+        _uiState.update { it.copy(email = email) }
+    }
+
+    fun onClickSubmit() {
         val ticket = FeedbackTicket(
-            title = "Ticket 1",
+            title = Res.string.feedback_respect.asUiText().toString(),
             groupId = "1",
-            customerId = "guess:$userEmail",
+            customerId = "guess:${_uiState.value.email}",
             article = Article(
-                subject = "Test Ticket",
-                body = "Testing the ticket",
+                subject = _uiState.value.selectedCategory,
+                body = _uiState.value.feedbackText,
             )
 
         )

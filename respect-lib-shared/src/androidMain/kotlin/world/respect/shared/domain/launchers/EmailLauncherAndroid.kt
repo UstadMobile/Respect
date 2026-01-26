@@ -7,6 +7,9 @@ import android.net.Uri
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.feedback_respect
+import world.respect.shared.util.ext.asUiText
 
 class EmailLauncherAndroid(
     private val context: Context
@@ -26,11 +29,17 @@ class EmailLauncherAndroid(
     }
     private fun buildMailToUri(): Uri {
         val recipient = "manvi2346verma@gmail.com"
-        val subject ="Feedback about RESPECT"
+        val subject = Res.string.feedback_respect.asUiText().toString()
         return Uri.Builder()
-            .scheme("mailto")
+            .scheme(MAIL_TO_URI)
             .opaquePart(recipient)
-            .appendQueryParameter("subject", subject)
+            .appendQueryParameter(MAIL_TO_SUBJECT, subject)
             .build()
     }
+
+    companion object{
+        const val MAIL_TO_URI = "mailto:"
+        const val MAIL_TO_SUBJECT = "?subject="
+    }
 }
+

@@ -546,4 +546,6 @@
 
     <string name="approval_not_required_until">Approval not required until:</string>
 
+    <string name="reset_code">Reset code</string>
+
 </resources>

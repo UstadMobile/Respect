@@ -10,21 +10,25 @@ import kotlin.time.Instant
 /**
  * Make a copy of the given invite with an updated approval required after time.
  */
-fun Invite2.copyWithNewApprovalRequiredAfter(
-    approvalRequiredAfter: Instant,
+fun Invite2.copyInvite(
+    approvalRequiredAfter: Instant = this.approvalRequiredAfter,
+    code: String = this.code,
     lastModified: Instant = Clock.System.now(),
 ): Invite2 {
     return when(this) {
         is NewUserInvite -> copy(
             approvalRequiredAfter = approvalRequiredAfter,
+            code = code,
             lastModified = lastModified
         )
         is FamilyMemberInvite -> copy(
             approvalRequiredAfter = approvalRequiredAfter,
+            code = code,
             lastModified = lastModified
         )
         is ClassInvite -> copy(
             approvalRequiredAfter = approvalRequiredAfter,
+            code = code,
             lastModified = lastModified
         )
     }

@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.person.inviteperson
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.ktor.http.Url
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
@@ -22,11 +23,13 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
-import world.respect.datalayer.school.ext.copyWithNewApprovalRequiredAfter
+import world.respect.datalayer.school.ext.copyInvite
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.libutil.ext.CHAR_POOL_NUMBERS
+import world.respect.libutil.ext.randomString
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
@@ -36,7 +39,6 @@ import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.QrCode
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
@@ -46,6 +48,7 @@ import kotlin.time.Duration.Companion.minutes
 data class InvitePersonUiState(
     val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
     val invite: DataLoadState<Invite2> = DataLoadingState(),
+    val inviteUrl: Url? = null,
     val selectedRole: PersonRoleEnum? = null,
     val className: String? = null,
     val schoolName: String? = null,
@@ -123,7 +126,14 @@ class InvitePersonViewModel(
                         uid = inviteUid,
                         loadParams = DataLoadParams()
                     ).collect { invite ->
-                        _uiState.update { it.copy(invite = invite) }
+                        _uiState.update { prev ->
+                            prev.copy(
+                                invite = invite,
+                                inviteUrl = invite.dataOrNull()?.let {
+                                    createInviteLinkUseCase(it.code)
+                                },
+                            )
+                        }
                     }
                 }else {
                     _uiState.update { it.copy(invite = NoDataLoadedState.notFound()) }
@@ -131,6 +141,13 @@ class InvitePersonViewModel(
             }
         }
     }
+
+    private fun launchUpdateInvite(invite: Invite2) {
+        launchWithLoadingIndicator {
+            schoolDataSource.inviteDataSource.store(listOf(invite))
+        }
+    }
+
 
     fun copyInviteLinkToClipboard() {
         _uiState.value.invite.dataOrNull()?.code?.also { code ->
@@ -140,20 +157,15 @@ class InvitePersonViewModel(
 
     fun onApprovalEnabledChanged(enabled: Boolean) {
         val currentInvite = _uiState.value.invite.dataOrNull() ?: return
-
-        launchWithLoadingIndicator {
-            schoolDataSource.inviteDataSource.store(
-                listOf(
-                    currentInvite.copyWithNewApprovalRequiredAfter(
-                        approvalRequiredAfter = if(!enabled) {
-                            Clock.System.now() + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes
-                        }else {
-                            Clock.System.now()
-                        }
-                    )
-                )
+        launchUpdateInvite(
+            currentInvite.copyInvite(
+                approvalRequiredAfter = if(!enabled) {
+                    Clock.System.now() + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes
+                }else {
+                    Clock.System.now()
+                }
             )
-        }
+        )
     }
 
 
@@ -201,18 +213,14 @@ class InvitePersonViewModel(
         }
     }
 
-    fun onClickQrCode(){
-        val code = _uiState.value.invite.dataOrNull()?.code ?: return
-        val linkUrl = createInviteLinkUseCase(code)
-
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                QrCode(
-                    inviteLink = linkUrl.toString(),
-                    schoolOrClass = uiState.value.className?:uiState.value.schoolName
+    fun onClickResetCode() {
+        _uiState.value.invite.dataOrNull()?.also { currentInvite ->
+            launchUpdateInvite(
+                currentInvite.copyInvite(
+                    code = randomString(10, CHAR_POOL_NUMBERS),
                 )
             )
-        )
+        }
     }
 
 }

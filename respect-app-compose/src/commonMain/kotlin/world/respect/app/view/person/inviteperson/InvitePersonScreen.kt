@@ -1,30 +1,35 @@
 package world.respect.app.view.person.inviteperson
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import kotlinx.coroutines.Dispatchers
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.defaultItemPadding
@@ -33,15 +38,14 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.approval_not_required_until
 import world.respect.shared.generated.resources.approval_required
-import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.copy_link
-import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.invite_code_label
 import world.respect.shared.generated.resources.invite_via_email
 import world.respect.shared.generated.resources.invite_via_share
 import world.respect.shared.generated.resources.invite_via_sms
 import world.respect.shared.generated.resources.qr_code
 import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.reset_code
 import world.respect.shared.generated.resources.role
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.util.ext.label
@@ -64,10 +68,9 @@ fun InvitePersonScreen(
         onInviteViaSms = viewModel::onSendLinkViaSms,
         onInviteViaEmail = viewModel::onSendLinkViaEmail,
         onInviteViaShare = viewModel::onShareLink,
-        onClickQrCode = viewModel::onClickQrCode,
         onApprovalRequiredChanged = viewModel::onApprovalEnabledChanged,
         onRoleChange = viewModel::onRoleChange,
-        onClickGetCode = viewModel::onClickGetCode
+        onClickResetCode = viewModel::onClickResetCode,
     )
 }
 
@@ -79,13 +82,12 @@ fun InvitePersonScreen(
     onInviteViaSms: () -> Unit,
     onInviteViaEmail: () -> Unit,
     onInviteViaShare: () -> Unit,
-    onClickQrCode: () -> Unit,
-    onClickGetCode: () -> Unit,
     onApprovalRequiredChanged: (Boolean) -> Unit,
-    onRoleChange: (PersonRoleEnum) -> Unit
+    onRoleChange: (PersonRoleEnum) -> Unit,
+    onClickResetCode: () -> Unit,
 ) {
     val invite = uiState.invite.dataOrNull()
-    val isLoading = appUiState.isLoading
+    val fieldsEnabled = !appUiState.isLoading && invite != null
 
     Column(
         modifier = Modifier
@@ -107,26 +109,42 @@ fun InvitePersonScreen(
             },
             options = uiState.roleOptions,
             itemText = { stringResource(it.label) },
-            enabled = !isLoading,
+            enabled = fieldsEnabled,
             supportingText = {
                 Text(stringResource(Res.string.required))
             }
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding()
+        uiState.inviteUrl?.also { link ->
+            val linkStr = link.toString()
+            Image(
+                painter = rememberQrCodePainter(link.toString()),
+                contentDescription = stringResource(Res.string.qr_code),
+                modifier = Modifier
+                    .size(240.dp)
+                    .defaultItemPadding()
+                    .align(Alignment.CenterHorizontally),
+            )
 
-        ) {
-            val res = if (uiState.className != null) {
-                Res.string.class_name
-            } else {
-                Res.string.school_name
-            }
-            ListItem(
-                headlineContent = { Text(stringResource(res)) },
-                supportingContent = { Text(text = uiState.className ?: uiState.schoolName ?: "") }
+            Text(
+                text = linkStr,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .testTag("invite_url")
+                    .clickable(enabled = fieldsEnabled) { onInviteViaShare() }
+                    .defaultItemPadding()
+                    .align(Alignment.CenterHorizontally)
+            )
+
+        }
+
+        invite?.also {
+            Text(
+                text = "${stringResource(Res.string.invite_code_label)}: ${it.code}",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+                    .defaultItemPadding()
             )
         }
 
@@ -136,14 +154,14 @@ fun InvitePersonScreen(
         val approvalRequiredAfter = invite?.approvalRequiredAfter
 
         ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) {
+            modifier = Modifier.clickable(enabled = fieldsEnabled) {
                 onApprovalRequiredChanged(!approvalRequired)
             },
             headlineContent = { Text(stringResource(Res.string.approval_required)) },
             trailingContent = {
                 Switch(
                     checked = approvalRequired,
-                    enabled = !isLoading,
+                    enabled = fieldsEnabled,
                     onCheckedChange = { onApprovalRequiredChanged(it) }
                 )
             },
@@ -160,41 +178,34 @@ fun InvitePersonScreen(
 
         HorizontalDivider()
 
-        Text(uiState.inviteCode ?: "")
-
         ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) { onCopyLink() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onCopyLink() },
             leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.copy_link)) }
         )
 
         ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) { onInviteViaSms() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaSms() },
             leadingContent = { Icon(Icons.Default.Sms, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.invite_via_sms)) }
         )
 
         ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) { onInviteViaEmail() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaEmail() },
             leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.invite_via_email)) }
         )
 
         ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) { onInviteViaShare() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaShare() },
             leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.invite_via_share)) }
         )
-        ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) { onClickQrCode() },
-            leadingContent = { Icon(Icons.Default.QrCode, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.qr_code)) }
-        )
 
         ListItem(
-            modifier = Modifier.clickable(enabled = !isLoading) { onClickGetCode() },
-            leadingContent = { Icon(Icons.Default.Code, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.invite_code_label)) }
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onClickResetCode() },
+            leadingContent = { Icon(Icons.Default.Refresh, contentDescription = null) },
+            headlineContent = { Text(stringResource(Res.string.reset_code)) }
         )
     }
 }

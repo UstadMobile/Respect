@@ -125,6 +125,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -224,6 +228,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "tests1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"
@@ -327,6 +335,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "test123"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 # 4-Jan-2026 Maestro cloud is repeatedly missing below without using retryTapIfNoChange
 - tapOn:
     text: "Done"

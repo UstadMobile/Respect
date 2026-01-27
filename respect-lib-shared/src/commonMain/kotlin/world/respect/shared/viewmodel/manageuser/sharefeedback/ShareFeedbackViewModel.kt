@@ -55,7 +55,7 @@ class ShareFeedbackViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    var ticketTitle=""
+    var subject = ""
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -66,7 +66,7 @@ class ShareFeedbackViewModel(
             )
         }
         viewModelScope.launch {
-            ticketTitle = getString(Res.string.feedback_respect)
+            subject = getString(Res.string.feedback_respect)
 
             val categoryList: List<String> = listOf(
                 getString(Res.string.category_launcher),
@@ -98,7 +98,7 @@ class ShareFeedbackViewModel(
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncher.sendEmail(ticketTitle)
+            emailLauncher.sendEmail(subject)
         }
     }
 
@@ -139,11 +139,11 @@ class ShareFeedbackViewModel(
     fun onClickSubmit() {
         viewModelScope.launch {
             val ticket = FeedbackTicket(
-                title = ticketTitle,
+                title = _uiState.value.selectedCategory,
                 groupId = DEFAULT_GROUP_ID,
                 customerId = "${getString(Res.string.guess)}${_uiState.value.email}",
                 article = Article(
-                    subject = _uiState.value.selectedCategory,
+                    subject = subject,
                     body = _uiState.value.feedbackText,
                 )
             )

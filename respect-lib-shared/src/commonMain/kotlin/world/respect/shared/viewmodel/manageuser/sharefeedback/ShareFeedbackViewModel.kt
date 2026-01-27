@@ -150,6 +150,7 @@ class ShareFeedbackViewModel(
             schoolDataSource.feedBackDataSource.createTicket(ticket)
         }
     }
+
     companion object{
         const val WHATSAPP_URL = "https://wa.me/"
         const val WHATSAPP_PHONE_NUMBER = "+919828932811"

@@ -126,7 +126,7 @@ class AcceptInviteViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = if(invite.isChildUser()) {
+                destination = if(!invite.isChildUser()) {
                     TermsAndCondition.create(
                         schoolUrl = route.schoolUrl,
                         profileType = ProfileType.TEACHER,

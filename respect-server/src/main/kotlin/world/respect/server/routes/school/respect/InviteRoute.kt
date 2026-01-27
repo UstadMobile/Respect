@@ -12,7 +12,6 @@ import io.ktor.server.routing.post
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.InviteDataSource
-import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope

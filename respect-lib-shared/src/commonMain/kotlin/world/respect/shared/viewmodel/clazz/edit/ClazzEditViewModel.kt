@@ -20,11 +20,7 @@ import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.Invite2
-import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.lib.serializers.plusMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
@@ -153,15 +149,8 @@ class ClazzEditViewModel(
         launchWithLoadingIndicator {
             try {
                 if (route.guid == null) {
-                    val studentInvite = createInvite(PersonRoleEnum.STUDENT)
-                    val teacherInvite = createInvite(PersonRoleEnum.TEACHER)
+                    val newClazz = clazz.copy()
 
-                    val newClazz = clazz.copy(
-                        studentInviteGuid = studentInvite.guid,
-                        teacherInviteGuid = teacherInvite.guid
-                    )
-
-//                    schoolDataSource.inviteDataSource.store(listOf(studentInvite, teacherInvite))
                     schoolDataSource.classDataSource.store(listOf(newClazz))
 
                     _navCommandFlow.tryEmit(
@@ -180,22 +169,6 @@ class ClazzEditViewModel(
         }
     }
 
-    fun createInvite(role: PersonRoleEnum): Invite {
-        val inviteGuid = if (role == PersonRoleEnum.STUDENT) studentInviteGuid else teacherInviteGuid
-        val classRole = if (role == PersonRoleEnum.STUDENT) EnrollmentRoleEnum.PENDING_STUDENT
-        else EnrollmentRoleEnum.PENDING_TEACHER
-        return Invite(
-            guid = inviteGuid,
-            code = generateCode(),
-            newRole = role ,
-            forClassRole = classRole,
-            inviteMultipleAllowed = true,
-            approvalRequired = true,
-            forClassGuid = uiState.value.clazz.dataOrNull()?.guid,
-            forClassName = uiState.value.clazz.dataOrNull()?.title,
-            expiration = Clock.System.now().plusMillis(Invite.EXPIRATION_TIME)
-        )
-    }
     private fun generateCode(): String {
         return Random.nextInt(DEFAULT_INVITE_CODE_MAX)
             .toString()

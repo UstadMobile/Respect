@@ -6,7 +6,6 @@ import world.respect.credentials.passkey.RespectCredential
 import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
 
 /**
  *
@@ -14,8 +13,6 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 @Serializable
 data class RespectRedeemInviteRequest(
     val code: String,
-    val classUid: String?,
-    val role: PersonRoleEnum,
     val accountPersonInfo: PersonInfo,
     val account: Account,
     val deviceName: String? = null,

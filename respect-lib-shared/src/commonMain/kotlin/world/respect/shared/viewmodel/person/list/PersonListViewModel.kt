@@ -12,7 +12,6 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.db.school.adapters.inviteOrNull
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
@@ -210,23 +209,21 @@ class PersonListViewModel(
     }
 
 
-    fun onClickAcceptInvite(user: Person) {
-        val metadata = user.metadata ?: return
-        val invite = user.inviteOrNull(metadata) ?: return
+    fun onClickAcceptOrDismissInvite(
+        person: Person,
+        approved: Boolean,
+    ) {
         viewModelScope.launch {
             try {
                 approveOrDeclineInviteRequestUseCase(
-                    personUid = user.guid,
-                    classUid = invite.forClassGuid,
-                    approved = true,
+                    personUid = person.guid,
+                    approved = approved,
                 )
             }catch(e: Throwable) {
                 e.printStackTrace()
             }
         }
     }
-
-    fun onClickDismissInvite(user: Person) {}
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
@@ -238,12 +235,6 @@ class PersonListViewModel(
                 )
             )
         )
-    }
-
-    fun onClickInviteCode() {
-        _uiState.value.showInviteCode?.also {
-            setClipboardStringUseCase(it)
-        }
     }
 
     fun onClickInvitePerson() {

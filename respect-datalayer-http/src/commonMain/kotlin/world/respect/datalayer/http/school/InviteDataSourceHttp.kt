@@ -24,7 +24,6 @@ import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.InviteDataSource
-import world.respect.datalayer.school.model.Invite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -86,7 +85,7 @@ class InviteDataSourceHttp(
                 baseUrlProvider = { params.urlWithParams() },
                 httpClient = httpClient,
                 validationHelper = validationHelper,
-                typeInfo = typeInfo<List<Invite>>(),
+                typeInfo = typeInfo<List<Invite2>>(),
                 requestBuilder = {
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)

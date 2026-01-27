@@ -56,7 +56,7 @@ data class SignupUiState(
 
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
-   private val accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle)  {
 
     private val route: SignupScreen = savedStateHandle.toRoute()

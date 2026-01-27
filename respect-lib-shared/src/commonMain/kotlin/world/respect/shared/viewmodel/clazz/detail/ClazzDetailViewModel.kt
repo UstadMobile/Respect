@@ -274,7 +274,6 @@ class ClazzDetailViewModel(
             try {
                 approveOrDeclineInviteRequestUseCase(
                     personUid = user.guid,
-                    classUid = route.guid,
                     approved = true,
                 )
             }catch(e: Throwable) {

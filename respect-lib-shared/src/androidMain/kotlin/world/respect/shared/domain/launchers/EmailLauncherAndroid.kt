@@ -7,16 +7,13 @@ import android.net.Uri
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.feedback_respect
-import world.respect.shared.util.ext.asUiText
 
 class EmailLauncherAndroid(
     private val context: Context
 ) : EmailLauncher {
-    override suspend fun sendEmail() {
+    override suspend fun sendEmail(subject: String) {
         withContext(Dispatchers.Main) {
-            val uri = buildMailToUri()
+            val uri = buildMailToUri(subject)
             val intent = Intent(Intent.ACTION_SENDTO, uri)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             try {
@@ -27,9 +24,8 @@ class EmailLauncherAndroid(
             }
         }
     }
-    private fun buildMailToUri(): Uri {
+    private fun buildMailToUri(subject: String): Uri {
         val recipient = "manvi2346verma@gmail.com"
-        val subject = Res.string.feedback_respect.asUiText().toString()
         return Uri.Builder()
             .scheme(MAIL_TO_URI)
             .opaquePart(recipient)

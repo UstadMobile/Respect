@@ -12,6 +12,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
 import world.respect.datalayer.sharefeedback.FeedBackDataSource
+import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
 import world.respect.datalayer.sharefeedback.model.Article
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchers.EmailLauncher
@@ -24,6 +25,7 @@ import world.respect.shared.generated.resources.category_other
 import world.respect.shared.generated.resources.category_question
 import world.respect.shared.generated.resources.category_rate_us
 import world.respect.shared.generated.resources.feedback_respect
+import world.respect.shared.generated.resources.guess
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -53,6 +55,8 @@ class ShareFeedbackViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    var ticketTitle=""
+
     private val feedBackDataSource: FeedBackDataSource by inject()
 
     init {
@@ -62,6 +66,8 @@ class ShareFeedbackViewModel(
             )
         }
         viewModelScope.launch {
+            ticketTitle = getString(Res.string.feedback_respect)
+
             val categoryList: List<String> = listOf(
                 getString(Res.string.category_launcher),
                 getString(Res.string.category_integrated_apps),
@@ -92,7 +98,7 @@ class ShareFeedbackViewModel(
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncher.sendEmail()
+            emailLauncher.sendEmail(ticketTitle)
         }
     }
 
@@ -133,9 +139,9 @@ class ShareFeedbackViewModel(
     fun onClickSubmit() {
         viewModelScope.launch {
             val ticket = FeedbackTicket(
-                title = getString(Res.string.feedback_respect),
-                groupId = "1",
-                customerId = "guess:${_uiState.value.email}",
+                title = ticketTitle,
+                groupId = DEFAULT_GROUP_ID,
+                customerId = "${getString(Res.string.guess)}${_uiState.value.email}",
                 article = Article(
                     subject = _uiState.value.selectedCategory,
                     body = _uiState.value.feedbackText,

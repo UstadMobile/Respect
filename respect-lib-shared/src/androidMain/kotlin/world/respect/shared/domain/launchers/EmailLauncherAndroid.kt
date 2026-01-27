@@ -8,6 +8,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.net.toUri
+import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.EMAIL_RECIPIENT
 
 class EmailLauncherAndroid(
     private val context: Context
@@ -28,9 +29,8 @@ class EmailLauncherAndroid(
     }
 
     private fun buildMailToUri(subject: String): Uri {
-        val recipient = "mandvi2346verma@gmail.com"
         val encodedSubject = Uri.encode(subject)
-        return "mailto:$recipient?subject=$encodedSubject".toUri()
+        return "mailto:$EMAIL_RECIPIENT?subject=$encodedSubject".toUri()
     }
 }
 

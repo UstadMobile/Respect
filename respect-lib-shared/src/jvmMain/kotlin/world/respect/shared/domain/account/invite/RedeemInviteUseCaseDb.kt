@@ -2,7 +2,6 @@ package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
@@ -15,18 +14,13 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
 import world.respect.datalayer.db.school.adapters.toModel
-import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.school.adapters.toPersonPasskey
+import world.respect.datalayer.school.ext.accepterPersonRole
+import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
-import world.respect.datalayer.school.model.Enrollment
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.Invite
-import world.respect.datalayer.school.model.InviteStatusEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
@@ -54,77 +48,27 @@ class RedeemInviteUseCaseDb(
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
     ): AuthResponse {
-        TODO()
-        /*
-        val invite = schoolDb.getInviteEntityDao().getInviteByInviteCode(redeemRequest.code)
+        val inviteFromDb = schoolDb.getInviteEntityDao().getInviteByInviteCode(
+            redeemRequest.code
+        )?.toModel()
             ?: throw IllegalArgumentException("invite not found for code: ${redeemRequest.code}")
                 .withHttpStatus(404)
-        if (invite.iInviteStatus == InviteStatusEnum.REVOKED) {
-            throw IllegalArgumentException("invite is revoked")
-                .withHttpStatus(400)
-        }
-        if (invite.iInviteStatus != InviteStatusEnum.PENDING) {
-            throw IllegalArgumentException("invite is already used")
-                .withHttpStatus(400)
-        }
-        if (invite.iExpiration < systemTimeInMillis()) {
-            throw IllegalArgumentException("invite is expired")
-                .withHttpStatus(400)
-        }
 
-        val isDirectJoin = invite.iForClassGuid == null &&
-                invite.iForFamilyOfGuid == null
-
-        val isClassInvite = invite.iForClassGuid != null
-
-        val isFamilyInvite = invite.iForFamilyOfGuid != null
         val accountGuid = redeemRequest.account.guid
 
-        val inviteMetadata = json.encodeToJsonElement(
-                Invite.serializer(),
-        invite.toModel()
-        ).jsonObject
+        val approvalRequired = inviteFromDb.isApprovalRequiredNow()
 
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
-            role = redeemRequest.role,
+            role = redeemRequest.invite.accepterPersonRole,
             username = redeemRequest.account.username,
             guid = accountGuid,
         ).copy(
-            status = PersonStatusEnum.PENDING_APPROVAL,
-            metadata = inviteMetadata
+            status = if(approvalRequired){
+                PersonStatusEnum.PENDING_APPROVAL
+            }else {
+                PersonStatusEnum.ACTIVE
+            },
         )
-        when {
-            isDirectJoin -> {
-            }
-
-            isClassInvite -> {
-                val classUid = redeemRequest.invite.forClassGuid
-                    ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
-                schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
-                    ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
-                val clazzInvite = schoolDb.getInviteEntityDao().findByGuid(redeemRequest.invite.guid)
-                    ?: throw IllegalArgumentException("No invite found")
-                        .withHttpStatus(400)
-                if (!redeemRequest.code.endsWith(clazzInvite.iCode)) {
-                    throw IllegalArgumentException("Bad code${redeemRequest.role} ${redeemRequest.code} ${clazzInvite.iCode}").withHttpStatus(400)
-                }
-            }
-
-            isFamilyInvite -> {
-                val childGuid = invite.iForFamilyOfGuid
-                    ?: throw IllegalArgumentException("Family invite missing child guid")
-                        .withHttpStatus(400)
-
-                schoolDb.getPersonEntityDao()
-                    .findByGuidNum(uidNumberMapper(childGuid))
-                    ?: throw IllegalArgumentException("child not found")
-                        .withHttpStatus(404)
-
-
-
-
-            }
-        }
 
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
@@ -196,58 +140,7 @@ class RedeemInviteUseCaseDb(
                 throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
             }
         }
-        if (isFamilyInvite){
-            val childGuid = invite.iForFamilyOfGuid
-                ?: throw IllegalArgumentException("Family invite missing child guid")
-                    .withHttpStatus(400)
 
-            val parentGuid = accountPerson.guid
-            schoolDb.getPersonRelatedPersonEntityDao().upsert(
-                listOf(
-                    PersonRelatedPersonEntity(
-                        prpPersonUidNum = uidNumberMapper(childGuid),
-                        prpOtherPersonUid = parentGuid,
-                        prpOtherPersonUidNum = uidNumberMapper(parentGuid),
-                    ),
-                    PersonRelatedPersonEntity(
-                        prpPersonUidNum = uidNumberMapper(parentGuid),
-                        prpOtherPersonUid = childGuid,
-                        prpOtherPersonUidNum = uidNumberMapper(childGuid),
-                    )
-                )
-            )
-        }
-        //If a teacher/student, make the pending enrollment now
-
-        if (isClassInvite) {
-
-            val classUid = redeemRequest.invite.forClassGuid
-                ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
-
-            if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-                schoolDataSourceVal.enrollmentDataSource.updateLocal(
-                    listOf(
-                        Enrollment(
-                            uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                                Enrollment.TABLE_ID
-                            ).toString(),
-                            classUid = classUid,
-                            personUid = accountPerson.guid,
-                            role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
-                                EnrollmentRoleEnum.PENDING_TEACHER
-                            } else {
-                                EnrollmentRoleEnum.PENDING_STUDENT
-                            },
-                            inviteCode = redeemRequest.code,
-                        )
-                    )
-                )
-            }
-            if (!invite.iInviteMultipleAllowed) {
-                schoolDb.getInviteEntityDao().updateInviteStatus(invite.iGuid)
-            }
-        }
         return authResponse
-         */
     }
 }

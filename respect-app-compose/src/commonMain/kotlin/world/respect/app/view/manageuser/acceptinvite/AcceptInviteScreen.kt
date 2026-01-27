@@ -30,8 +30,6 @@ fun AcceptInviteScreen(
     val uiState by viewModel.uiState.collectAsState()
     AcceptInviteScreen(
         uiState = uiState,
-        onClickStudent = viewModel::onClickStudent,
-        onClickParent = viewModel::onClickParent,
         onClickNext = viewModel::onClickNext
     )
 }
@@ -39,8 +37,6 @@ fun AcceptInviteScreen(
 @Composable
 fun AcceptInviteScreen(
     uiState: AcceptInviteUiState,
-    onClickStudent: () -> Unit,
-    onClickParent: () -> Unit,
     onClickNext: () -> Unit
 ) {
     val invite = uiState.inviteInfo?.invite
@@ -74,7 +70,8 @@ fun AcceptInviteScreen(
 
         Button(
             onClick = onClickNext,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            enabled = uiState.nextButtonEnabled,
         ) {
             Text(stringResource(Res.string.next))
         }

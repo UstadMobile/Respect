@@ -1,11 +1,8 @@
 package world.respect.shared.domain.account.invite
 
-import androidx.paging.PagingSource
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.EnrollmentDataSource
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import kotlin.time.Clock
 
@@ -23,57 +20,23 @@ class ApproveOrDeclineInviteRequestUseCase(
      */
     suspend operator fun invoke(
         personUid: String,
-        classUid: String?,
         approved: Boolean,
     ) {
         val person = schoolDataSource.personDataSource.findByGuid(
             DataLoadParams(), personUid
         ).dataOrNull() ?: throw IllegalArgumentException("Can't find person")
 
-        val timeModified = Clock.System.now()
+        val timeNow = Clock.System.now()
 
-        if (approved) {
-            schoolDataSource.personDataSource.store(
-                listOf(
-                    person.copy(
-                        status = PersonStatusEnum.ACTIVE,
-                        lastModified = timeModified,
-                    )
-                )
-            )
-        }
-
-        if (classUid == null) {
-            return
-        }
-
-        val enrollments = schoolDataSource.enrollmentDataSource
-            .listAsPagingSource(
-                DataLoadParams(),
-                EnrollmentDataSource.GetListParams(
-                    classUid = classUid,
-                    personUid = personUid,
-                )
-            )
-            .invoke()
-            .load(PagingSource.LoadParams.Refresh(0, 20, false))
-                as? PagingSource.LoadResult.Page
-            ?: throw IllegalStateException("Enrollment load failed")
-
-        val pendingEnrollment = enrollments.data.firstOrNull {
-            it.role == EnrollmentRoleEnum.PENDING_TEACHER ||
-                    it.role == EnrollmentRoleEnum.PENDING_STUDENT
-        } ?: throw IllegalArgumentException("Can't find pending enrollment")
-
-        schoolDataSource.enrollmentDataSource.store(
+        schoolDataSource.personDataSource.store(
             listOf(
-                pendingEnrollment.copy(
-                    role = if(pendingEnrollment.role == EnrollmentRoleEnum.PENDING_TEACHER) {
-                        EnrollmentRoleEnum.TEACHER
-                    } else {
-                        EnrollmentRoleEnum.STUDENT
+                person.copy(
+                    status = if(approved) {
+                        PersonStatusEnum.ACTIVE
+                    }else {
+                        PersonStatusEnum.TO_BE_DELETED
                     },
-                    lastModified = timeModified,
+                    lastModified = timeNow,
                 )
             )
         )

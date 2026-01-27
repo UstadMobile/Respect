@@ -211,13 +211,10 @@ class PersonListViewModel(
 
 
     fun onClickAcceptInvite(user: Person) {
-        val metadata = user.metadata ?: return
-        val invite = user.inviteOrNull(metadata) ?: return
         viewModelScope.launch {
             try {
                 approveOrDeclineInviteRequestUseCase(
                     personUid = user.guid,
-                    classUid = invite.forClassGuid,
                     approved = true,
                 )
             }catch(e: Throwable) {
@@ -226,7 +223,9 @@ class PersonListViewModel(
         }
     }
 
-    fun onClickDismissInvite(user: Person) {}
+    fun onClickDismissInvite(
+        user: Person
+    ) {}
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(

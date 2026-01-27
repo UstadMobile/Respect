@@ -11,22 +11,26 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
+import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.ext.isChildUser
+import world.respect.datalayer.school.model.Person
 import world.respect.lib.opds.model.LangMap
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest.PersonInfo
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
+import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
@@ -39,7 +43,11 @@ data class AcceptInviteUiState(
     val isTeacherInvite: Boolean = false,
     val schoolName: LangMap? = null,
     val schoolUrl: Url? = null,
-)
+) {
+    val nextButtonEnabled: Boolean
+        get() = inviteInfo?.invite != null
+
+}
 
 class AcceptInviteViewModel(
     savedStateHandle: SavedStateHandle,
@@ -100,91 +108,41 @@ class AcceptInviteViewModel(
         }
     }
 
-    fun onClickStudent() {
-        navigateToAppropriateScreen(ProfileType.STUDENT)
-    }
-
-    fun onClickParent() {
-        navigateToAppropriateScreen(ProfileType.PARENT)
-    }
-
     fun onClickNext() {
-        navigateToAppropriateScreen(ProfileType.TEACHER)
-    }
+        val invite = uiState.value.inviteInfo?.invite ?: return
 
-    private fun navigateToAppropriateScreen(profileType: ProfileType){
-        val inviteInfo = uiState.value.inviteInfo
-
-        if (inviteInfo==null) {
-            _uiState.update {
-                it.copy(errorText = StringResourceUiText(Res.string.invalid_invite_code))
-            }
-
-            return
-        }
-
-        /*
-        val redeemRequest = makeBlankRedeemInviteRequest(
-            route.code, profileType, classUid = "TODO", invite = TODO()//inviteInfo.classGuid?:inviteInfo.invite?.forClassGuid,inviteInfo.invite
-        )
-
-        if (profileType == ProfileType.STUDENT) {
-
-           gotToSignUpScreen(profileType,redeemRequest)
-        }else {
-            if (redeemRequest.invite.forFamilyOfGuid!=null &&redeemRequest.invite.newRole== PersonRoleEnum.STUDENT){
-                gotToSignUpScreen(ProfileType.CHILD,redeemRequest)
-                return
-            }
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    TermsAndCondition.create(route.schoolUrl, profileType,redeemRequest,route.inviteType
-                    )
-                )
-            )
-        }
-         */
-    }
-    fun gotToSignUpScreen(profileType: ProfileType, redeemRequest: RespectRedeemInviteRequest) {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                SignupScreen.create(
-                    route.schoolUrl, profileType,redeemRequest
-                )
-            )
-        )
-    }
-
-    /*
-    fun makeBlankRedeemInviteRequest(
-        inviteCode: String,
-        profileType: ProfileType,
-        classUid: String?,
-        invite: Invite?,
-    ): RespectRedeemInviteRequest {
-        val role = when (profileType) {
-                ProfileType.STUDENT -> PersonRoleEnum.STUDENT
-                ProfileType.PARENT -> PersonRoleEnum.PARENT
-                ProfileType.TEACHER -> invite?.newRole ?: PersonRoleEnum.STUDENT
-                else -> throw IllegalArgumentException("Cannot use CHILD here")
-            }
-
-
-        val blankAccount = RespectRedeemInviteRequest.Account(
-            guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID).toString(),
-            username = "",
-            credential = RespectPasswordCredential(username = "", password = ""),
-        )
-        if (invite==null) throw IllegalStateException("invite is null")
-        return RespectRedeemInviteRequest(
-            code = inviteCode,
-            classUid = classUid,
-            role = role,
-            accountPersonInfo = RespectRedeemInviteRequest.PersonInfo(),
-            account = blankAccount,
+        val inviteRedeemRequest = RespectRedeemInviteRequest(
+            code = invite.code,
+            accountPersonInfo = PersonInfo(),
+            account = RespectRedeemInviteRequest.Account(
+                guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID).toString(),
+                username = "",
+                credential = RespectPasswordCredential(username = "", password = ""),
+            ),
             deviceName = getDeviceInfoUseCase().toUserFriendlyString(),
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
-    }*/
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = if(invite.isChildUser()) {
+                    TermsAndCondition.create(
+                        schoolUrl = route.schoolUrl,
+                        profileType = ProfileType.TEACHER,
+                        inviteRequest = inviteRedeemRequest,
+                        type = null,
+                    )
+                }else {
+                    SignupScreen.create(
+                        schoolUrl = route.schoolUrl,
+                        profileType = ProfileType.STUDENT,
+                        inviteRequest = inviteRedeemRequest,
+                        type = null,
+                    )
+                }
+            )
+        )
+    }
+
 }

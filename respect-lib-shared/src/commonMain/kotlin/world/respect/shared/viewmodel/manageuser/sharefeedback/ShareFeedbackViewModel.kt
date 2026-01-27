@@ -10,8 +10,8 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
 import world.respect.datalayer.sharefeedback.model.Article
 import world.respect.shared.domain.account.RespectAccountManager
@@ -57,7 +57,7 @@ class ShareFeedbackViewModel(
 
     var ticketTitle=""
 
-    private val feedBackDataSource: FeedBackDataSource by inject()
+    private val schoolDataSource: SchoolDataSource by inject()
 
     init {
         _appUiState.update {
@@ -147,7 +147,7 @@ class ShareFeedbackViewModel(
                     body = _uiState.value.feedbackText,
                 )
             )
-            feedBackDataSource.createTicket(ticket)
+            schoolDataSource.feedBackDataSource.createTicket(ticket)
         }
     }
 }

@@ -27,6 +27,7 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.sharefeedback.FeedBackDataSource
 
 /**
  * SchoolDataSource implementation based on a local (Room) database
@@ -99,4 +100,6 @@ class SchoolDataSourceDb(
     override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
         AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
+    override val feedBackDataSource: FeedBackDataSource
+        get() = TODO("Not yet implemented")
 }

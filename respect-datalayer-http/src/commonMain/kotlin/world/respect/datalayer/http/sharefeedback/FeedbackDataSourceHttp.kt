@@ -11,8 +11,7 @@ import world.respect.datalayer.sharefeedback.FeedBackDataSource
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.ZAMMAD_TICKET_TOKEN
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.ZAMMAD_TICKET_URL
 
-class FeedbackDataSourceHttp(
-    private val httpClient: HttpClient
+class FeedbackDataSourceHttp(private val httpClient: HttpClient
 ) : FeedBackDataSource {
 
     override suspend fun createTicket(ticket: FeedbackTicket) {

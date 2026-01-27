@@ -204,6 +204,7 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.getplaystorereferrer.GetPlayStoreReferrer
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -238,6 +239,8 @@ import world.respect.shared.domain.sendinvite.LaunchSendEmailAndroid
 import world.respect.shared.domain.sendinvite.LaunchShareLinkAndroid
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
+import world.respect.shared.domain.getplaystorereferrer.GetPlayStoreReferrerAndroid
+
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -268,6 +271,14 @@ val appKoinModule = module {
     single<LaunchSendEmailUseCase> {
         LaunchSendEmailAndroid(androidContext())
     }
+
+    single<GetPlayStoreReferrer> {
+        GetPlayStoreReferrerAndroid(
+            context = androidContext(),
+            settings = get()
+        )
+    }
+
     single<LaunchShareLinkUseCase> {
         LaunchShareLinkAndroid(androidContext())
     }

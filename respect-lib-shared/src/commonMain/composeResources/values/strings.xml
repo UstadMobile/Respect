@@ -63,6 +63,7 @@
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
+    <string name="either_number_or_email">Enter phone number or email</string>
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
@@ -234,7 +235,6 @@
     <string name="describe_feedback_placeholder">Describe your issue or feedback in detail</string>
     <string name="want_response_from_team">I want a response from the Respect team</string>
     <string name="submit_feedback">Submit feedback</string>
-    <string name="guess">guess:</string>
     <string name="feedback_respect">Feedback about RESPECT</string>
 
 

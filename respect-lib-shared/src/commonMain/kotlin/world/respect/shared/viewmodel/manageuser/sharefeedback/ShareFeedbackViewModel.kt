@@ -25,8 +25,10 @@ import world.respect.shared.generated.resources.category_other
 import world.respect.shared.generated.resources.category_question
 import world.respect.shared.generated.resources.category_rate_us
 import world.respect.shared.generated.resources.feedback_respect
-import world.respect.shared.generated.resources.guess
+import world.respect.shared.generated.resources.either_number_or_email
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.share_feedback
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.getValue
@@ -34,11 +36,13 @@ import kotlin.getValue
 data class ShareFeedbackUiState(
     val categories: List<String> = emptyList(),
     val selectedCategory: String = "",
-    val feedbackText: String = "",
+    val feedbackDescription: String = "",
     val isCheckBoxSelected: Boolean = false,
     val phoneNumber: String = "",
     val email: String = "",
     val nationalPhoneNumSet: Boolean = false,
+    val feedbackDescriptionError: UiText? = null,
+    val contactError: UiText? = null,
 )
 
 class ShareFeedbackViewModel(
@@ -86,8 +90,8 @@ class ShareFeedbackViewModel(
 
     }
 
-    fun onFeedbackTextChanged(text: String) {
-        _uiState.update { it.copy(feedbackText = text) }
+    fun onFeedbackDescriptionChanged(text: String) {
+        _uiState.update { it.copy(feedbackDescription = text, feedbackDescriptionError = null) }
     }
 
     fun onClickWhatsApp() {
@@ -129,33 +133,59 @@ class ShareFeedbackViewModel(
     }
 
     fun onPhoneChanged(phone: String) {
-        _uiState.update { it.copy(phoneNumber = phone) }
+        _uiState.update { it.copy(phoneNumber = phone, contactError = null) }
     }
 
     fun onEmailChanged(email: String) {
-        _uiState.update { it.copy(email = email) }
+        _uiState.update { it.copy(email = email, contactError = null) }
     }
 
     fun onClickSubmit() {
+        val feedbackDescriptionError = if (_uiState.value.feedbackDescription.isBlank()) {
+            Res.string.required_field.asUiText()
+        } else null
+
+        val isContactProvided = _uiState.value.email.isNotBlank() || _uiState.value.phoneNumber.isNotBlank()
+
+        val contactReqError = if (_uiState.value.isCheckBoxSelected && !isContactProvided) {
+            Res.string.either_number_or_email.asUiText()
+        } else null
+        _uiState.update { it.copy(
+            feedbackDescriptionError = feedbackDescriptionError,
+            contactError = contactReqError
+        )}
+
         viewModelScope.launch {
+            val customerEmail = if (_uiState.value.isCheckBoxSelected) {
+                _uiState.value.email.ifBlank {
+                    "${_uiState.value.phoneNumber}$DEFAULT_CUSTOMER_ENDPOINT"
+                }
+            } else {
+                DEFAULT_CUSTOMER_ID
+            }
+
             val ticket = FeedbackTicket(
                 title = _uiState.value.selectedCategory,
                 groupId = DEFAULT_GROUP_ID,
-                customerId = "${getString(Res.string.guess)}${_uiState.value.email}",
+                customerId = "$GUESS$customerEmail",
                 article = Article(
                     subject = subject,
-                    body = _uiState.value.feedbackText,
+                    body = _uiState.value.feedbackDescription,
                 )
             )
+
             schoolDataSource.feedBackDataSource.createTicket(ticket)
         }
     }
 
     companion object{
+        const val DEFAULT_CUSTOMER_ENDPOINT= "@ustadmobile.com"
+        const val DEFAULT_CUSTOMER_ID= "info@ustadmobile.com"
         const val WHATSAPP_URL = "https://wa.me/"
         const val WHATSAPP_PHONE_NUMBER = "+919828932811"
         const val WEB_URL="https://respect.world/"
         const val EMAIL_RECIPIENT="mandvi2346verma@gmail.com"
+        const val GUESS="guess:"
     }
 }
 

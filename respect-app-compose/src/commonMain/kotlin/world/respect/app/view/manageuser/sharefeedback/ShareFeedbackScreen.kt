@@ -42,6 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.email_respect
 import world.respect.shared.generated.resources.public_forum
@@ -51,10 +52,13 @@ import world.respect.shared.generated.resources.category
 import world.respect.shared.generated.resources.describe_feedback_placeholder
 import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.phone_number
+import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.generated.resources.submit_feedback
 import world.respect.shared.generated.resources.your_feedback
 import world.respect.shared.generated.resources.want_response_from_team
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.ext.asUiText
 
 @Composable
 fun ShareFeedbackScreen(
@@ -67,7 +71,7 @@ fun ShareFeedbackScreen(
         onClickEmail = viewModel::onClickEmail,
         onClickPublicForum = viewModel::onClickPublicForum,
         onCategorySelected = viewModel::onCategorySelected,
-        onFeedbackTextChanged = viewModel::onFeedbackTextChanged,
+        onFeedbackDescriptionChanged = viewModel::onFeedbackDescriptionChanged,
         onClickCheckBox = viewModel::onClickCheckBox,
         onClickSubmit = viewModel::onClickSubmit,
         onNationalNumberSetChanged = viewModel::onNationalPhoneNumSetChanged,
@@ -83,7 +87,7 @@ fun ShareFeedbackScreen(
     onClickEmail: () -> Unit,
     onClickPublicForum: () -> Unit,
     onCategorySelected: (String) -> Unit,
-    onFeedbackTextChanged: (String) -> Unit,
+    onFeedbackDescriptionChanged: (String) -> Unit,
     onClickSubmit: () -> Unit,
     onClickCheckBox: () -> Unit,
     onNationalNumberSetChanged: (Boolean) -> Unit,
@@ -149,8 +153,9 @@ fun ShareFeedbackScreen(
 
         item {
             FeedbackDescription(
-                text = uiState.feedbackText,
-                onValueChange = onFeedbackTextChanged
+                text = uiState.feedbackDescription,
+                onValueChange = onFeedbackDescriptionChanged,
+                error = uiState.feedbackDescriptionError
             )
         }
         item {
@@ -289,7 +294,8 @@ fun CategoryDropdown(
 @Composable
 fun FeedbackDescription(
     text: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    error: UiText?
 ) {
     Column(
         modifier = Modifier
@@ -310,7 +316,11 @@ fun FeedbackDescription(
             placeholder = {
                 Text(text = stringResource(Res.string.describe_feedback_placeholder))
             },
-            shape = RoundedCornerShape(8.dp)
+            isError = error != null,
+            shape = RoundedCornerShape(8.dp),
+            supportingText = {
+                Text(uiTextStringResource(error ?: Res.string.required.asUiText()))
+            }
         )
     }
 }
@@ -324,6 +334,8 @@ fun ContactFields(
 ) {
     Column(modifier = Modifier.fillMaxWidth())
     {
+        val error = uiState.contactError != null
+
         RespectPhoneNumberTextField(
             value = uiState.phoneNumber,
             modifier = Modifier.testTag("phone_number").fillMaxWidth().defaultItemPadding(),
@@ -331,7 +343,11 @@ fun ContactFields(
             onValueChange = onPhoneChange,
             onNationalNumberSetChanged = onNationalNumberSetChanged,
             countryCodeTestTag = "phone_countrycode",
-            numberTextFieldTestTag = "phone_number"
+            numberTextFieldTestTag = "phone_number",
+            isError = uiState.contactError != null,
+            supportingText = uiState.contactError?.let {
+                { Text(uiTextStringResource(it)) }
+            },
         )
 
         OutlinedTextField(
@@ -339,7 +355,11 @@ fun ContactFields(
             value = uiState.email,
             label = { Text(stringResource(Res.string.email)) },
             singleLine = true,
-            onValueChange = onEmailChange
+            onValueChange = onEmailChange,
+            isError = uiState.contactError != null,
+            supportingText = uiState.contactError?.let {
+                { Text(uiTextStringResource(it)) }
+            },
         )
     }
 }

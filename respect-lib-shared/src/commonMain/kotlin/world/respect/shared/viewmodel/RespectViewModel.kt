@@ -204,7 +204,8 @@ abstract class RespectViewModel(
      * @param runIfAlreadyLoading by default, if loading is already in progress, the block will not
      *        be run.
      * @param onShowError optional function that will show an error message to the user e.g. by
-     *        updating the UiState.
+     *        updating the UiState. If this is non-null, the exception will be considered handled
+     *        and WILL NOT be rethrown.
      * @param block suspended function to run
      */
     fun launchWithLoadingIndicator(

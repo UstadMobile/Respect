@@ -46,19 +46,13 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "Class name"
-- assertVisible: "New Class"
-- tapOn: "Approval required"  #switch is ON
 - tapOn:
-    id: role
+    id: "role"
 - tapOn:
-    text: Teacher
-- tapOn: "Invite code"
-- assertVisible:
-    id: "app_title"
-    text: "Code"
+    text: "Teacher"
+- assertVisible: "Approval required"    #switch is On
 - copyTextFrom:
-    id: "invite_code_field"
+    id: "invite_code"
 
 # C) Teacher sign-up via invite code to the class
 - clearState: world.respect.app
@@ -176,20 +170,13 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "Class name"
-- assertVisible: "New Class"
-- tapOn: "Approval required"  #switch is ON
 - tapOn:
-    id: role
+    id: "role"
 - tapOn:
-    text: Student
-    index: 1
-- tapOn: "Invite code"
-- assertVisible:
-    id: "app_title"
-    text: "Code"
+    text: "Student"
+- assertVisible: "Approval required"    #switch is On
 - copyTextFrom:
-    id: "invite_code_field"
+    id: "invite_code"
 
 # G) Student sign-up via invite code to the class
 - clearState: world.respect.app

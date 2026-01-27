@@ -40,21 +40,15 @@ appId: world.respect.app
 - tapOn: "Add Teacher"
 - tapOn: "Invite person"
 - assertVisible:
-      id: "app_title"
-      text: "Invite person"
-- assertVisible: "Class name"
-- assertVisible: "New Class"
-- tapOn: "Approval required"  #switch is ON
+    id: "app_title"
+    text: "Invite person"
 - tapOn:
-      id: role
+    id: "role"
 - tapOn:
-      text: Teacher
-- tapOn: "Invite code"
-- assertVisible:
-      id: "app_title"
-      text: "Code"
+    text: "Teacher"
+- assertVisible: "Approval required"    #switch is On
 - copyTextFrom:
-      id: "invite_code_field"
+    id: "invite_code"
 
 
 # Teacher sign-up via invite code to the class
@@ -76,7 +70,14 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Teacher"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Class name"
 - assertVisible: "New Class"
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"

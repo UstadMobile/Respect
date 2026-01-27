@@ -46,7 +46,7 @@ onFlowComplete:
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
       id: "invite_url"
-# Student user joining using invite QR code
+## Teacher user joining using invite QR code
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -71,6 +71,10 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
 - assertVisible:
     id: "app_title"
     text: "Your profile"
@@ -211,16 +215,17 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Parent"
-- assertVisible: "Approval required"    #switch is On
 - tapOn: "Approval required" # turn the switch off
+- assertVisible: "Approval not required until:.*"
 - copyTextFrom:
       text: "Copy link"
 
 # Parent sign-up to the app using invite link
 - clearState: world.respect.app
-- openLink:
-    link: pasteText
-    autoVerify: true
+- launchApp:
+    appId: "world.respect.app"
+    arguments:
+      launchUrl: pasteText
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -261,6 +266,7 @@ onFlowComplete:
 - inputText: "test123"
 - tapOn: "Sign-up"
 
+#teacher login and verify family that member got added to student profile
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -280,12 +286,5 @@ onFlowComplete:
 - assertVisible: "Apps"
 - tapOn: "People"
 - tapOn: "Student User"
-- assertVisible: "Pending request to join"
-- assertVisible: "Parent User"
-- tapOn:
-      id: "accept_btn"
-- assertNotVisible: "Pending request to join"
-- tapOn: "Save"
-- assertVisible: "Create account"
 - assertVisible: "Family Member"
 - assertVisible: "Parent User"

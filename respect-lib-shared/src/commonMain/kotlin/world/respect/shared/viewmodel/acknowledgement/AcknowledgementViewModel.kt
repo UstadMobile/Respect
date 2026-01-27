@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.acknowledgement
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.russhwolf.settings.Settings
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.delay
@@ -11,8 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.component.KoinComponent
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.getplaystorereferrer.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
@@ -36,8 +40,14 @@ class AcknowledgementViewModel(
     private val initDeepLinkUriProvider: InitDeepLinkUriProviderUseCase,
     private val customDeepLinkToUrlUseCase: CustomDeepLinkToUrlUseCase,
     private val resolveUrlToNavCommandUseCase: ResolveUrlToNavCommandUseCase,
-) : RespectViewModel(savedStateHandle) {
+    private val settings: Settings,
+) : RespectViewModel(savedStateHandle), KoinComponent {
+
     private val _uiState = MutableStateFlow(AcknowledgementUiState())
+
+    private val getDeferredDeepLinkUseCase: GetDeferredDeepLinkUseCase? by lazy {
+        getKoin().getOrNull()
+    }
 
     val uiState = _uiState.asStateFlow()
 
@@ -53,9 +63,21 @@ class AcknowledgementViewModel(
             }
 
             delay(2000)
+            val deferredDeepLink = if(
+                getDeferredDeepLinkUseCase != null &&
+                !settings.getBoolean(KEY_DEFERRED_DEEP_LINK_CHECK_DONE, false)
+            ) {
+                withTimeoutOrNull(GET_DEFERRED_LINK_TIMEOUT) {
+                    getDeferredDeepLinkUseCase?.invoke().also {
+                        settings.putBoolean(KEY_DEFERRED_DEEP_LINK_CHECK_DONE, true)
+                    }
+                }
+            }else{
+                null
+            }
 
             val initLinkNavCommand: NavCommand? = try {
-                initDeepLinkUriProvider()?.let { initDeepLink ->
+                (deferredDeepLink ?: initDeepLinkUriProvider())?.let { initDeepLink ->
                     resolveUrlToNavCommandUseCase(
                         url = customDeepLinkToUrlUseCase(Url(initDeepLink)),
                         canGoBack = false,
@@ -84,5 +106,13 @@ class AcknowledgementViewModel(
                 )
             )
         }
+    }
+
+    companion object {
+
+        private const val GET_DEFERRED_LINK_TIMEOUT = 1_000L
+
+        const val KEY_DEFERRED_DEEP_LINK_CHECK_DONE = "deferredDeepLinkCheckDone"
+
     }
 }

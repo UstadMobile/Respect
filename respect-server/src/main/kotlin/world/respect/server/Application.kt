@@ -33,6 +33,7 @@ import org.koin.ktor.ext.inject
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
@@ -50,6 +51,7 @@ import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
@@ -181,6 +183,10 @@ fun Application.module() {
             path = "swagger",
             swaggerFile = "openapi/openapi.yaml",
         )
+
+        route(RESPECT_SCHOOL_LINK_SEGMENT) {
+            SchoolLinkRoute()
+        }
 
         route("api") {
             route("passkey"){

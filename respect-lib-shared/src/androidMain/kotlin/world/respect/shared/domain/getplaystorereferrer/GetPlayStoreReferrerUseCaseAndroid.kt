@@ -6,12 +6,12 @@ import com.android.installreferrer.api.InstallReferrerStateListener
 import com.russhwolf.settings.Settings
 
 
-class GetPlayStoreReferrerAndroid(
+class GetPlayStoreReferrerUseCaseAndroid(
     private val context: Context,
     private val settings: Settings
-) : GetPlayStoreReferrer {
+) : GetPlayStoreReferrerUseCase {
 
-    override fun fetchOnce() {
+    override fun invoke() {
         if (settings.getBoolean(FETCHED, false)) {
             return
         }
@@ -23,14 +23,21 @@ class GetPlayStoreReferrerAndroid(
         client.startConnection(object : InstallReferrerStateListener {
 
             override fun onInstallReferrerSetupFinished(code: Int) {
+                var success = false
                 try {
                     if (code == InstallReferrerClient.InstallReferrerResponse.OK) {
                         val referrerUrl = client.installReferrer.installReferrer
 
                         settings.putString(REFERRER_URL, referrerUrl)
                     }
+
+                    success = true
+                } catch (t: Throwable) {
+                    println("Failed to fetch install referrer $t")
                 } finally {
-                    settings.putBoolean(FETCHED, true)
+                    if (success) {
+                        settings.putBoolean(FETCHED, true)
+                    }
                     client.endConnection()
                 }
             }

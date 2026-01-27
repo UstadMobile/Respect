@@ -1,6 +1,6 @@
 package world.respect.shared.domain.getplaystorereferrer
 
-interface GetPlayStoreReferrer {
+interface GetPlayStoreReferrerUseCase {
 
-    fun fetchOnce()
+    fun invoke()
 }

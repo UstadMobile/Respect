@@ -204,7 +204,7 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
-import world.respect.shared.domain.getplaystorereferrer.GetPlayStoreReferrer
+import world.respect.shared.domain.getplaystorereferrer.GetPlayStoreReferrerUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -239,7 +239,7 @@ import world.respect.shared.domain.sendinvite.LaunchSendEmailAndroid
 import world.respect.shared.domain.sendinvite.LaunchShareLinkAndroid
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
-import world.respect.shared.domain.getplaystorereferrer.GetPlayStoreReferrerAndroid
+import world.respect.shared.domain.getplaystorereferrer.GetPlayStoreReferrerUseCaseAndroid
 
 
 
@@ -272,8 +272,8 @@ val appKoinModule = module {
         LaunchSendEmailAndroid(androidContext())
     }
 
-    single<GetPlayStoreReferrer> {
-        GetPlayStoreReferrerAndroid(
+    single<GetPlayStoreReferrerUseCase> {
+        GetPlayStoreReferrerUseCaseAndroid(
             context = androidContext(),
             settings = get()
         )

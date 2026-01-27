@@ -110,6 +110,7 @@ import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
+import world.respect.shared.domain.account.navigateonaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.passkey.EncodeUserHandleUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysClient
@@ -614,6 +615,10 @@ val appKoinModule = module {
 
     single<InitDeepLinkUriProviderUseCase> {
         get<InitDeepLinkUriProviderUseCaseAndroid>()
+    }
+
+    single<NavigateOnAccountCreatedUseCase> {
+        NavigateOnAccountCreatedUseCase()
     }
 
     single<PhoneNumValidatorUseCase> {

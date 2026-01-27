@@ -209,22 +209,21 @@ class PersonListViewModel(
     }
 
 
-    fun onClickAcceptInvite(user: Person) {
+    fun onClickAcceptOrDismissInvite(
+        person: Person,
+        approved: Boolean,
+    ) {
         viewModelScope.launch {
             try {
                 approveOrDeclineInviteRequestUseCase(
-                    personUid = user.guid,
-                    approved = true,
+                    personUid = person.guid,
+                    approved = approved,
                 )
             }catch(e: Throwable) {
                 e.printStackTrace()
             }
         }
     }
-
-    fun onClickDismissInvite(
-        user: Person
-    ) {}
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
@@ -236,12 +235,6 @@ class PersonListViewModel(
                 )
             )
         )
-    }
-
-    fun onClickInviteCode() {
-        _uiState.value.showInviteCode?.also {
-            setClipboardStringUseCase(it)
-        }
     }
 
     fun onClickInvitePerson() {

@@ -36,12 +36,12 @@ import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.add_person
-import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.gender_literal
 import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.generated.resources.pending_requests_to_join
 import world.respect.shared.util.ext.fullName
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.list.PersonListUiState
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 
@@ -54,10 +54,8 @@ fun PersonListScreen(
         uiState = uiState,
         onClickItem = viewModel::onClickItem,
         onClickAddPerson = viewModel::onClickAdd,
-        onClickInviteCode = viewModel::onClickInviteCode,
         onClickInvitePerson = viewModel::onClickInvitePerson,
-        onClickAcceptInvite = viewModel::onClickAcceptInvite,
-        onClickDismissInvite = viewModel::onClickDismissInvite,
+        onClickAcceptOrDismissInvite = viewModel::onClickAcceptOrDismissInvite,
         onTogglePendingInvites = viewModel::onTogglePendingInvites,
     )
 }
@@ -67,9 +65,7 @@ fun PersonListScreen(
     uiState: PersonListUiState,
     onClickItem: (PersonListDetails) -> Unit,
     onClickAddPerson: () -> Unit,
-    onClickInviteCode: () -> Unit,
-    onClickAcceptInvite: (Person) -> Unit,
-    onClickDismissInvite: (Person) -> Unit,
+    onClickAcceptOrDismissInvite: (Person, Boolean) -> Unit,
     onClickInvitePerson: () -> Unit,
     onTogglePendingInvites: () -> Unit,
 ) {
@@ -154,12 +150,11 @@ fun PersonListScreen(
                         )
                     },
                     supportingContent = {
-                        val gender = person?.gender?.value
-                        val dob = person?.dateOfBirth ?: ""
+                        val gender = person?.gender
                         Text(
                             text =
-                                "${stringResource(Res.string.gender_literal)}: $gender, " +
-                                        "${stringResource(Res.string.date_of_birth)}: $dob"
+                                "${stringResource(Res.string.gender_literal)}: " +
+                                        "${gender?.label?.let { stringResource(it) }}}"
                         )
 
                     },
@@ -168,7 +163,7 @@ fun PersonListScreen(
                             Icon(
                                 modifier = Modifier.size(24.dp)
                                     .clickable {
-                                        person?.also { onClickAcceptInvite(it) }
+                                        person?.also { onClickAcceptOrDismissInvite(it, true) }
                                     },
                                 imageVector = Icons.Outlined.CheckCircle,
                                 contentDescription = stringResource(resource = Res.string.accept_invite)
@@ -178,7 +173,7 @@ fun PersonListScreen(
 
                             Icon(
                                 modifier = Modifier.size(24.dp).clickable {
-                                    person?.also{onClickDismissInvite(it)}
+                                    person?.also{onClickAcceptOrDismissInvite(it, false)}
                                 },
                                 imageVector = Icons.Outlined.Cancel,
                                 contentDescription = stringResource(resource = Res.string.dismiss_invite)

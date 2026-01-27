@@ -73,6 +73,10 @@ onFlowComplete:
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "TeacherA User"
@@ -143,10 +147,6 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"
-- assertVisible:
-    id: "app_title"
-    text: "Terms and conditions"
-- tapOn: "Accept"
 - assertVisible:
     id: "app_title"
     text: "Your profile"

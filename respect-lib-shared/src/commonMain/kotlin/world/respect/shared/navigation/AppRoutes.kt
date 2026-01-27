@@ -6,13 +6,14 @@ package world.respect.shared.navigation
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 import world.respect.shared.ext.NextAfterScan
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
@@ -93,33 +94,80 @@ data class AssignmentDetail(
     val uid: String,
 ) : RespectAppRoute
 
+
 @Serializable
 data class AssignmentEdit(
-    val guid: String?,
-    private val learningUnitStr: String? = null,
-): RespectAppRoute {
+    val guid: String? = null,
+    private val learningUnitsJson: String? = null,
+    private val availablePlaylistsJson: String? = null,
+) : RespectAppRoute {
 
     @Transient
-    val learningUnitSelected: LearningUnitSelection? = learningUnitStr?.let {
-        Json.decodeFromString(LearningUnitSelection.serializer(), it)
+    val learningUnitSelectedList: List<LearningUnitSelection>? = learningUnitsJson?.let { jsonStr ->
+        try {
+            Json.decodeFromString<List<LearningUnitSelection>>(jsonStr)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    @Transient
+    val availablePlaylists: List<Playlists>? = availablePlaylistsJson?.let { jsonStr ->
+        try {
+            Json.decodeFromString(
+                ListSerializer(Playlists.serializer()),
+                jsonStr
+            )
+        } catch (e: Exception) {
+            null
+        }
     }
 
     companion object {
-
         fun create(
             uid: String?,
             learningUnitSelected: LearningUnitSelection? = null,
-        ) = AssignmentEdit(
-            guid = uid,
-            learningUnitStr = learningUnitSelected?.let {
-                Json.encodeToString(LearningUnitSelection.serializer(), it)
-            },
-        )
+            availablePlaylists: List<Playlists>? = null,
+        ): AssignmentEdit {
+            val learningUnits = learningUnitSelected?.let { listOf(it) }
+            return AssignmentEdit(
+                guid = uid,
+                learningUnitsJson = learningUnits?.let {
+                    Json.encodeToString(
+                        ListSerializer(LearningUnitSelection.serializer()),
+                        it
+                    )
+                },
+                availablePlaylistsJson = availablePlaylists?.let {
+                    Json.encodeToString(
+                        ListSerializer(Playlists.serializer()),
+                        it
+                    )
+                }
+            )
+        }
 
+        fun createWithMultipleLessons(
+            uid: String?,
+            learningUnits: List<LearningUnitSelection>,
+            availablePlaylists: List<Playlists>? = null,
+        ): AssignmentEdit {
+            return AssignmentEdit(
+                guid = uid,
+                learningUnitsJson = Json.encodeToString(
+                    ListSerializer(LearningUnitSelection.serializer()),
+                    learningUnits
+                ),
+                availablePlaylistsJson = availablePlaylists?.let {
+                    Json.encodeToString(
+                        ListSerializer(Playlists.serializer()),
+                        it
+                    )
+                }
+            )
+        }
     }
-
 }
-
 @Serializable
 object ClazzList : RespectAppRoute
 
@@ -230,7 +278,21 @@ class IndictorEdit(val indicatorId: String?) : RespectAppRoute
 object RespectAppList : RespectAppRoute
 
 @Serializable
-object EnterLink : RespectAppRoute
+data class EnterLink(
+    private val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+        fun create(
+            resultDest: ResultDest? = null,
+        ) = EnterLink(
+            resultDestStr = resultDest.encodeToJsonStringOrNull()
+        )
+    }
+}
 
 @Serializable
 data class GetStartedScreen(
@@ -497,22 +559,34 @@ class CreateAccount(
  * @property expectedIdentifier (optional), where a refererUrl is provided, to use cached feed
  *           metadata as above, the identifier of the publication within the feed.
  */
+
 @Serializable
-class LearningUnitDetail(
+class LearningUnitDetail (
     private val learningUnitManifestUrlStr: String,
     private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
-    val expectedIdentifier: String? = null
+    val expectedIdentifier: String? = null,
+    private val mappingDataJson: String? = null,
+    val isSelectionMode: Boolean = false,
 ) : RespectAppRoute {
 
-    @Transient
-    val learningUnitManifestUrl = Url(learningUnitManifestUrlStr)
+    val learningUnitManifestUrl: Url
+        get() = Url(learningUnitManifestUrlStr)
 
-    @Transient
-    val refererUrl = refererUrlStr?.let { Url(it) }
+    val appManifestUrl: Url
+        get() = Url(appManifestUrlStr)
 
-    @Transient
-    val appManifestUrl = Url(appManifestUrlStr)
+    val refererUrl: Url?
+        get() = refererUrlStr?.let { Url(it) }
+
+    val mappingData: Playlists?
+        get() = mappingDataJson?.let {
+            try {
+                Json.decodeFromString(Playlists.serializer(), it)
+            } catch (e: Exception) {
+                null
+            }
+        }
 
     companion object {
 
@@ -526,11 +600,33 @@ class LearningUnitDetail(
             appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
+            mappingDataJson = null,
+            isSelectionMode = false,
         )
 
-    }
+        fun createFromMapping(
+            mapping: Playlists,
+            isSelectionMode: Boolean = false
+        ): LearningUnitDetail {
+            val mappingJson = try {
+                Json.encodeToString(Playlists.serializer(), mapping)
+            } catch (e: Exception) {
+                null
+            }
 
+            return LearningUnitDetail(
+                learningUnitManifestUrlStr = "",
+                appManifestUrlStr = "",
+                refererUrlStr = null,
+                expectedIdentifier = null,
+                mappingDataJson = mappingJson,
+                isSelectionMode = isSelectionMode,
+            )
+        }
+    }
 }
+
+
 
 @Serializable
 class LearningUnitViewer(
@@ -707,15 +803,15 @@ data class ScanQRCode(
 data object CurriculumMappingList : RespectAppRoute
 
 @Serializable
-data class CurriculumMappingEdit(
+data class PlaylistEdit(
     val textbookUid: Long = 0L,
     private val mappingDataJson: String? = null
 ) : RespectAppRoute {
 
     @Transient
-    val mappingData: CurriculumMapping? = mappingDataJson?.let { jsonString ->
+    val mappingData: Playlists? = mappingDataJson?.let { jsonString ->
         try {
-            Json.decodeFromString(CurriculumMapping.serializer(), jsonString)
+            Json.decodeFromString(Playlists.serializer(), jsonString)
         } catch (e: Exception) {
             null
         }
@@ -724,12 +820,12 @@ data class CurriculumMappingEdit(
     companion object {
         fun create(
             uid: Long,
-            mappingData: CurriculumMapping? = null
-        ) = CurriculumMappingEdit(
+            mappingData: Playlists? = null
+        ) = PlaylistEdit(
             textbookUid = uid,
             mappingDataJson = mappingData?.let { mapping ->
                 try {
-                    Json.encodeToString(CurriculumMapping.serializer(), mapping)
+                    Json.encodeToString(Playlists.serializer(), mapping)
                 } catch (e: Exception) {
                     null
                 }
@@ -754,4 +850,13 @@ data class CreateAccountSetPassword(
 data class ChangePassword(
     val guid: String,
 ): RespectAppRoute
+
+@Serializable
+data class PlaylistShare(
+    val playlistUid: Long
+) : RespectAppRoute {
+    companion object {
+        fun create(playlistUid: Long) = PlaylistShare(playlistUid)
+    }
+}
 

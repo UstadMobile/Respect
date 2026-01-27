@@ -22,7 +22,7 @@ onFlowComplete:
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -152,7 +152,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -228,7 +228,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -261,7 +261,7 @@ onFlowComplete:
     id : "password"
 - inputText: "tests1"
 - tapOn: "Login"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -366,7 +366,7 @@ onFlowComplete:
     id : "password"
 - inputText: "testt1"
 - tapOn: "Login"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "People"
 - assertVisible: "Parent User"
 - assertVisible: "Child User"
@@ -400,7 +400,7 @@ onFlowComplete:
 - inputText: "testp1"
 - hideKeyboard
 - tapOn: "Login"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

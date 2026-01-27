@@ -82,10 +82,10 @@ onFlowComplete:
 - inputText: "TeacherA User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Date of birth*"
+- tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
-- inputText: ${output.pastYearDateC}
+- inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -154,7 +154,7 @@ onFlowComplete:
 - inputText: "Student User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Date of birth*"
+- tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
@@ -249,7 +249,7 @@ onFlowComplete:
 - inputText: "Parent User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn: "Date of birth*"
+- tapOn: "Your date of birth*"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateP}

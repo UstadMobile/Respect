@@ -73,6 +73,7 @@ import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.http.sharefeedback.FeedbackDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
@@ -80,6 +81,7 @@ import world.respect.datalayer.repository.school.pullsync.EnqueueRunPullSyncUseC
 import world.respect.datalayer.repository.school.pullsync.RunPullSyncUseCase
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
+import world.respect.datalayer.repository.sharefeedback.FeedBackDataSourceRepository
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
@@ -88,6 +90,7 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.datalayer.sharefeedback.FeedBackDataSource
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
@@ -773,6 +776,15 @@ val appKoinModule = module {
          * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
          * dependency that all dependencies on RespectAccountScope require.
          */
+
+        // 1. Provide the raw HTTP implementation
+        scoped { FeedbackDataSourceHttp(get()) }
+
+        // 2. Provide the Repository and bind it to the Interface
+        // We tell Koin to use the 'FeedbackDataSourceHttp' we just defined for the 'remote' parameter
+        scoped<FeedBackDataSource> {
+            FeedBackDataSourceRepository(remote = get<FeedbackDataSourceHttp>())
+        }
         scoped<RespectAccountSchoolScopeLink> {
             val accountScopeId = RespectAccountScopeId.parse(id)
             val schoolDirectoryScope = SchoolDirectoryEntryScopeId(

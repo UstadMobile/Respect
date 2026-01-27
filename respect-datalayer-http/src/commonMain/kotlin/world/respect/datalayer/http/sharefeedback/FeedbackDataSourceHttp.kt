@@ -1,8 +1,6 @@
 package world.respect.datalayer.http.sharefeedback
 
-
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -19,12 +17,10 @@ class FeedbackDataSourceHttp(
 
     override suspend fun createTicket(ticket: FeedbackTicket) {
 
-        return httpClient.post(
-            ZAMMAD_TICKET_URL
-        ) {
+        httpClient.post(ZAMMAD_TICKET_URL) {
             headers[HttpHeaders.Authorization] = ZAMMAD_TICKET_TOKEN
             contentType(ContentType.Application.Json)
             setBody(ticket)
-        }.body()
+        }
     }
 }

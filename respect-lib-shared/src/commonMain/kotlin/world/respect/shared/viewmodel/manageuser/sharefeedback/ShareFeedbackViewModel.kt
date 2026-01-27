@@ -92,7 +92,7 @@ class ShareFeedbackViewModel(
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncher.sendEmail( )
+            emailLauncher.sendEmail()
         }
     }
 
@@ -131,18 +131,17 @@ class ShareFeedbackViewModel(
     }
 
     fun onClickSubmit() {
-        val ticket = FeedbackTicket(
-            title = Res.string.feedback_respect.asUiText().toString(),
-            groupId = "1",
-            customerId = "guess:${_uiState.value.email}",
-            article = Article(
-                subject = _uiState.value.selectedCategory,
-                body = _uiState.value.feedbackText,
-            )
-
-        )
         viewModelScope.launch {
-            val response = feedBackDataSource.createTicket(ticket)
+            val ticket = FeedbackTicket(
+                title = getString(Res.string.feedback_respect),
+                groupId = "1",
+                customerId = "guess:${_uiState.value.email}",
+                article = Article(
+                    subject = _uiState.value.selectedCategory,
+                    body = _uiState.value.feedbackText,
+                )
+            )
+            feedBackDataSource.createTicket(ticket)
         }
     }
 }

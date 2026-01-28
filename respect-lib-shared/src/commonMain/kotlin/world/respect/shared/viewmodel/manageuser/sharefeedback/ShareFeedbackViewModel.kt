@@ -201,7 +201,9 @@ class ShareFeedbackViewModel(
                     customerId = "$GUESS$customerEmail",
                     article = Article(
                         subject = subject,
-                        body = _uiState.value.feedbackDescription,
+                        body = "${_uiState.value.feedbackDescription}\n\n" +
+                                "${getString(Res.string.phone_number)}: " +
+                                _uiState.value.phoneNumber,
                     )
                 )
                 schoolDataSource.feedBackDataSource.createTicket(ticket)

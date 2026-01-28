@@ -21,13 +21,7 @@ import world.respect.shared.domain.launchers.EmailLauncher
 import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncher
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.category_integrated_apps
-import world.respect.shared.generated.resources.category_launcher
-import world.respect.shared.generated.resources.category_other
-import world.respect.shared.generated.resources.category_question
-import world.respect.shared.generated.resources.category_rate_us
 import world.respect.shared.generated.resources.feedback_respect
-import world.respect.shared.generated.resources.either_number_or_email
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.resources.UiText

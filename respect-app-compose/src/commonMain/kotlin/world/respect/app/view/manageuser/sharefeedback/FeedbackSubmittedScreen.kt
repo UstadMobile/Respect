@@ -46,7 +46,5 @@ fun FeedbackSubmittedScreen(
                 textAlign = TextAlign.Center
             )
         }
-
     }
-
 }

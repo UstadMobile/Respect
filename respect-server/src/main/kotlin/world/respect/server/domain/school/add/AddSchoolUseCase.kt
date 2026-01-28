@@ -55,7 +55,7 @@ class AddSchoolUseCase(
             schoolDirectoryEntryDataSource.updateLocal(listOf(schoolToAdd))
 
             directoryDataSource.setServerManagedSchoolConfig(
-                schoolToAdd,  request.dbUrl
+                schoolToAdd, request.dbUrl
             )
             if (request.adminUsername != null && request.adminPassword != null) {
                 val adminGuid = "1"
@@ -88,33 +88,34 @@ class AddSchoolUseCase(
                     )
                 )
 
-            //Use updateLocal to bypass permission check for adding first user
-            schoolDataSource.personDataSource.updateLocal(listOf(adminPerson))
-            schoolDataSource.personPasswordDataSource.store(
-                listOf(
-                    encryptPasswordUseCase(
-                        EncryptPersonPasswordUseCase.Request(
-                            personGuid = adminPerson.guid,
-                            password = request.adminPassword,
+                //Use updateLocal to bypass permission check for adding first user
+                schoolDataSource.personDataSource.updateLocal(listOf(adminPerson))
+                schoolDataSource.personPasswordDataSource.store(
+                    listOf(
+                        encryptPasswordUseCase(
+                            EncryptPersonPasswordUseCase.Request(
+                                personGuid = adminPerson.guid,
+                                password = request.adminPassword,
+                            )
                         )
                     )
                 )
-            )
 
-            //insert default SchoolPermissionGrants
-            addDefaultGrantsUseCase(schoolDataSource).invoke()
+                //insert default SchoolPermissionGrants
+                addDefaultGrantsUseCase(schoolDataSource).invoke()
 
-            val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
+                val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
 
-            //Create invites for system roles
-            PersonRoleEnum.entries.forEach { personRole ->
-                createInviteUseCase(
-                    invite = NewUserInvite(
-                        uid = personRole.newUserInviteUid,
-                        code = randomString(10, CHAR_POOL_NUMBERS),
-                        role = personRole,
+                //Create invites for system roles
+                PersonRoleEnum.entries.forEach { personRole ->
+                    createInviteUseCase(
+                        invite = NewUserInvite(
+                            uid = personRole.newUserInviteUid,
+                            code = randomString(10, CHAR_POOL_NUMBERS),
+                            role = personRole,
+                        )
                     )
-                )
+                }
             }
         }
     }

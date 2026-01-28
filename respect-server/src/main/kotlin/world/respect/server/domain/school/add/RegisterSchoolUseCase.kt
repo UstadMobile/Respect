@@ -1,19 +1,23 @@
 package world.respect.server.domain.school.add
 
+import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.ext.newUserInviteUid
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.server.SchoolConfig
 import world.respect.server.util.ext.HttpStatusException
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
-import java.util.UUID
 import kotlin.time.Clock
 
 class RegisterSchoolUseCase : KoinComponent {
@@ -26,12 +30,13 @@ class RegisterSchoolUseCase : KoinComponent {
 
     @Serializable
     data class RegisterSchoolResponse(
-        val schoolUrl: String,
-        val redirectUrl: String
+        val schoolUrl: Url,
+        val redirectUrl: Url
     )
 
     private val addSchoolUseCase: AddSchoolUseCase by inject()
     private val schoolConfig: SchoolConfig by inject()
+    private val urlToCustomDeepLinkUseCase: UrlToCustomDeepLinkUseCase  by inject()
 
     suspend operator fun invoke(request: RegisterSchoolRequest): RegisterSchoolResponse {
         // Check if registration is enabled
@@ -54,19 +59,16 @@ class RegisterSchoolUseCase : KoinComponent {
             )
         }
 
-
         // Extract subdomain from URL for use as dbUrl and rpId
         val schoolSubdomain = when (schoolConfig.registration.mode) {
             SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
                 parsedUrl.host.removeSuffix(".${schoolConfig.registration.topLevelDomain}")
             }
-
             else -> {
                 // For any-url mode, use a sanitized version of the host as subdomain
                 parsedUrl.host
             }
         }
-
 
         // Create school using AddSchoolUseCase
         addSchoolUseCase(
@@ -93,27 +95,35 @@ class RegisterSchoolUseCase : KoinComponent {
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
 
         val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
+        val createInviteLinkUseCase: CreateInviteLinkUseCase = schoolScope.get()
 
-        // Create an invite for the new school admin
-        val invite = Invite(
-            guid = UUID.randomUUID().toString(),
-            code = generateInviteCode(),
-            newRole = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-            forClassGuid = null,
-            forFamilyOfGuid = null,
-            forClassRole = null,
-            inviteMultipleAllowed = false,
-            approvalRequired = false,
-            expiration = Clock.System.now().toEpochMilliseconds() + Invite.EXPIRATION_TIME,
+
+        val inviteCode = generateInviteCode()
+
+        val invite = NewUserInvite(
+            uid = PersonRoleEnum.SYSTEM_ADMINISTRATOR.newUserInviteUid,
+            code = inviteCode,
+            role = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+            firstUser = true,
+            status = StatusEnum.ACTIVE,
             lastModified = Clock.System.now(),
-            stored = Clock.System.now(),
-            inviteStatus = Invite.STATUS_PENDING
+            stored = Clock.System.now()
         )
-        val properInviteUrl = createInviteUseCase(invite)
+
+        createInviteUseCase(invite)
+
+        // Create the regular invite URL first
+        val regularInviteUrl = createInviteLinkUseCase(inviteCode)
+
+        // Convert to custom deep link so it opens directly in the app
+        val customDeepLinkUrl = urlToCustomDeepLinkUseCase(regularInviteUrl)
+
+        Napier.i("Regular invite URL: $regularInviteUrl")
+        Napier.i("Custom deep link URL: $customDeepLinkUrl")
 
         return RegisterSchoolResponse(
-            schoolUrl = request.schoolUrl,
-            redirectUrl = properInviteUrl
+            schoolUrl = Url(request.schoolUrl),
+            redirectUrl = customDeepLinkUrl
         )
     }
 

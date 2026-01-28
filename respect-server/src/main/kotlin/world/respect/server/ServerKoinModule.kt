@@ -63,6 +63,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -304,6 +305,11 @@ fun serverKoinModule(
             CreateInviteUseCaseDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
+            )
+        }
+        scoped<CreateInviteLinkUseCase> {
+            CreateInviteLinkUseCase(
+                schoolUrl = schoolUrl(),
             )
         }
     }

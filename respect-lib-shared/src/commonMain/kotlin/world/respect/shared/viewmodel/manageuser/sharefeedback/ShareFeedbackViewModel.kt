@@ -21,6 +21,7 @@ import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncher
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.feedback_respect
+import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.resources.UiText
@@ -167,7 +168,9 @@ class ShareFeedbackViewModel(
                 customerId = "$GUESS$customerEmail",
                 article = Article(
                     subject = subject,
-                    body = _uiState.value.feedbackDescription,
+                    body = "${_uiState.value.feedbackDescription}\n\n" +
+                            "${getString(Res.string.phone_number)}: " +
+                            _uiState.value.phoneNumber
                 )
             )
             schoolDataSource.feedBackDataSource.createTicket(ticket)

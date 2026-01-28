@@ -132,10 +132,4 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
-
-    override val feedBackDataSource: FeedBackDataSource by lazy {
-        FeedbackDataSourceHttp(
-            httpClient = httpClient
-        )
-    }
 }

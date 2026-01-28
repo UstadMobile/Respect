@@ -10,7 +10,7 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.sharefeedback.FeedBackDataSource
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
 import world.respect.datalayer.sharefeedback.model.Article
@@ -48,7 +48,12 @@ data class ShareFeedbackUiState(
     val feedbackDescriptionError: UiText? = null,
     val phoneNumberError: UiText? = null,
     val emailError: UiText? = null
-)
+) {
+    val hasErrors: Boolean
+        get() = feedbackDescriptionError != null ||
+                phoneNumberError != null ||
+                emailError != null
+}
 
 class ShareFeedbackViewModel(
     accountManager: RespectAccountManager,
@@ -68,7 +73,7 @@ class ShareFeedbackViewModel(
 
     var subject = ""
 
-    private val schoolDataSource: SchoolDataSource by inject()
+    private val feedBackDataSource: FeedBackDataSource by inject()
 
     init {
         _appUiState.update {
@@ -182,6 +187,8 @@ class ShareFeedbackViewModel(
                 emailError = emailError
             )
         }
+        if(_uiState.value.hasErrors)
+            return
 
         viewModelScope.launch {
             try {
@@ -195,7 +202,7 @@ class ShareFeedbackViewModel(
                 }
 
                 val ticket = FeedbackTicket(
-                    title = _uiState.value.selectedCategory.name,
+                    title = getString(_uiState.value.selectedCategory.resource),
                     groupId = DEFAULT_GROUP_ID,
                     customerId = "$GUESS$customerEmail",
                     article = Article(
@@ -205,7 +212,7 @@ class ShareFeedbackViewModel(
                                 _uiState.value.phoneNumber,
                     )
                 )
-                schoolDataSource.feedBackDataSource.createTicket(ticket)
+               // feedBackDataSource.createTicket(ticket)
                 loadingState = LoadingUiState.NOT_LOADING
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
@@ -224,7 +231,7 @@ class ShareFeedbackViewModel(
         const val WHATSAPP_URL = "https://wa.me/"
         const val WHATSAPP_PHONE_NUMBER = "+919828932811"
         const val WEB_URL = "https://respect.world/"
-        const val EMAIL_RECIPIENT = "mandvi2346verma@gmail.com"
+        const val EMAIL_RECIPIENT = "respect.app.tester2026@gmail.com"
         const val GUESS = "guess:"
     }
 }

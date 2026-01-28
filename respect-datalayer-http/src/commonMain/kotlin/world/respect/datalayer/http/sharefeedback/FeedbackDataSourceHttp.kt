@@ -8,16 +8,17 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
 import world.respect.datalayer.sharefeedback.FeedBackDataSource
-import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.ZAMMAD_TICKET_TOKEN
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.ZAMMAD_TICKET_URL
 
-class FeedbackDataSourceHttp(private val httpClient: HttpClient
+class FeedbackDataSourceHttp(
+    private val httpClient: HttpClient,
+    private val zammadToken: String,
 ) : FeedBackDataSource {
 
     override suspend fun createTicket(ticket: FeedbackTicket) {
 
         httpClient.post(ZAMMAD_TICKET_URL) {
-            headers[HttpHeaders.Authorization] = ZAMMAD_TICKET_TOKEN
+            headers[HttpHeaders.Authorization] = zammadToken
             contentType(ContentType.Application.Json)
             setBody(ticket)
         }

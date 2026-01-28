@@ -224,6 +224,8 @@
     <string name="passkey">Passkey</string>
     <string name="add_account">Add account</string>
     <string name="share_feedback">Share feedback</string>
+    <string name="feedback_submitted">Feedback submitted</string>
+    <string name="feedback_submitted_message">Thank you for your feedback. Respect team will review it internally.</string>
     <string name="quick_contact">Quick Contact</string>
     <string name="whatsapp_respect">WhatsApp Respect</string>
     <string name="email_respect">Email Respect</string>

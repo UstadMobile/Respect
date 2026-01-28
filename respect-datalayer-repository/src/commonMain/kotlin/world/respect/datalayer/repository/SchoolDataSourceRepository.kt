@@ -111,10 +111,4 @@ class SchoolDataSourceRepository(
             remoteWriteQueue = remoteWriteQueue,
         )
     }
-
-    override val feedBackDataSource: FeedBackDataSource by lazy {
-        FeedBackDataSourceRepository(
-            remote=remote.feedBackDataSource
-        )
-    }
 }

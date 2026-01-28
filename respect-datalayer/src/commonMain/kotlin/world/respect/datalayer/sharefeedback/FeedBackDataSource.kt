@@ -10,6 +10,5 @@ interface FeedBackDataSource {
     companion object{
         const val DEFAULT_GROUP_ID = "1"
         const val ZAMMAD_TICKET_URL = "https://respect.zammad.com/api/v1/tickets"
-        const val ZAMMAD_TICKET_TOKEN =""
     }
 }

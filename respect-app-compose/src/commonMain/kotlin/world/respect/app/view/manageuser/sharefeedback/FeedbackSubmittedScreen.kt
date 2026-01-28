@@ -31,11 +31,11 @@ fun FeedbackSubmittedScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        item{
+        item {
             Image(
                 painter = painterResource(Res.drawable.feedback_sent),
                 contentDescription = null,
-                modifier = Modifier
+                modifier = Modifier.defaultScreenPadding()
                     .size(100.dp, 120.dp)
             )
         }

@@ -19,12 +19,16 @@ import world.respect.shared.domain.feedback.FeedbackCategory
 import world.respect.shared.domain.launchers.EmailLauncher
 import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncher
+import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
+import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.feedback_respect
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.generated.resources.enter_one_field
+import world.respect.shared.generated.resources.invalid
+import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -39,7 +43,8 @@ data class ShareFeedbackUiState(
     val email: String = "",
     val nationalPhoneNumSet: Boolean = false,
     val feedbackDescriptionError: UiText? = null,
-    val contactError: UiText? = null,
+    val phoneNumberError: UiText? = null,
+    val emailError: UiText? = null
 )
 
 class ShareFeedbackViewModel(
@@ -48,6 +53,8 @@ class ShareFeedbackViewModel(
     private val whatsAppLauncher: WhatsAppLauncher,
     private val emailLauncher: EmailLauncher,
     private val webLauncher: WebLauncher,
+    private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
+    private val validateEmailUseCase: ValidateEmailUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -120,18 +127,22 @@ class ShareFeedbackViewModel(
 
     fun onPhoneChanged(phone: String) {
         _uiState.update {
+            val isRequiredError = it.emailError == Res.string.enter_one_field.asUiText()
             it.copy(
                 phoneNumber = phone,
-                contactError = null
+                phoneNumberError = null,
+                emailError = if (isRequiredError) null else it.emailError
             )
         }
     }
 
     fun onEmailChanged(email: String) {
         _uiState.update {
+            val isRequiredError = it.emailError == Res.string.enter_one_field.asUiText()
             it.copy(
                 email = email,
-                contactError = null
+                emailError = null,
+                phoneNumberError = if (isRequiredError) null else it.phoneNumberError
             )
         }
     }
@@ -142,18 +153,30 @@ class ShareFeedbackViewModel(
                 Res.string.required_field.asUiText()
             } else null
 
-        val contactProvided =
-            _uiState.value.phoneNumber.isNotBlank() || _uiState.value.phoneNumber.isNotBlank()
+        var phoneNumberError: UiText? = null
+        var emailError: UiText? = null
 
-        val contactReqError =
-            if (_uiState.value.isCheckBoxSelected && !contactProvided) {
-                Res.string.enter_one_field.asUiText()
-            } else null
+        if (_uiState.value.isCheckBoxSelected) {
+            if (_uiState.value.phoneNumber.isBlank() && _uiState.value.email.isBlank()) {
+                phoneNumberError = "".asUiText()
+                emailError = Res.string.enter_one_field.asUiText()
+            } else {
+                if (_uiState.value.phoneNumber.isNotBlank() && _uiState.value.nationalPhoneNumSet &&
+                    !phoneNumValidatorUseCase.isValid(_uiState.value.phoneNumber)
+                ) {
+                    phoneNumberError = Res.string.invalid.asUiText()
+                }
+                if (_uiState.value.email.isNotBlank() && !validateEmailUseCase(_uiState.value.email)) {
+                    emailError = Res.string.invalid_email.asUiText()
+                }
+            }
+        }
 
         _uiState.update {
             it.copy(
                 feedbackDescriptionError = feedbackDescriptionError,
-                contactError = contactReqError
+                phoneNumberError = phoneNumberError,
+                emailError = emailError
             )
         }
 

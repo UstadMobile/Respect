@@ -63,7 +63,6 @@
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
-    <string name="either_number_or_email">Enter phone number or email</string>
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>

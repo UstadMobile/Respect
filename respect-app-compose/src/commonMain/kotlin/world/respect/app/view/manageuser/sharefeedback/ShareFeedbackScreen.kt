@@ -62,7 +62,7 @@ import world.respect.shared.util.ext.asUiText
 
 @Composable
 fun ShareFeedbackScreen(
-    viewModel: ShareFeedbackViewModel,
+    viewModel: ShareFeedbackViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     ShareFeedbackScreen(
@@ -354,10 +354,6 @@ fun ContactFields(
             label = { Text(stringResource(Res.string.email)) },
             singleLine = true,
             onValueChange = onEmailChange,
-            isError = uiState.contactError != null,
-            supportingText = uiState.contactError?.let {
-                { Text(uiTextStringResource(it)) }
-            },
         )
     }
 }

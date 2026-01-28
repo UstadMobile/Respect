@@ -132,16 +132,16 @@ class ShareFeedbackViewModel(
     }
 
     fun onClickSubmit() {
-        val feedbackDescriptionError = if (_uiState.value.feedbackDescription.isBlank()) {
-            Res.string.required_field.asUiText()
-        } else null
+        val feedbackDescriptionError =
+            if (_uiState.value.feedbackDescription.isBlank()) {
+                Res.string.required_field.asUiText()
+            } else null
 
-        val isContactProvided =
-            _uiState.value.email.isNotBlank() || _uiState.value.phoneNumber.isNotBlank()
+        val contactReqError =
+            if (_uiState.value.isCheckBoxSelected && _uiState.value.phoneNumber.isNotBlank()) {
+                Res.string.required_field.asUiText()
+            } else null
 
-        val contactReqError = if (_uiState.value.isCheckBoxSelected && !isContactProvided) {
-            Res.string.either_number_or_email.asUiText()
-        } else null
         _uiState.update {
             it.copy(
                 feedbackDescriptionError = feedbackDescriptionError,

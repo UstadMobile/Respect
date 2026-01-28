@@ -24,6 +24,7 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
@@ -129,6 +130,7 @@ class OtherOptionsSignupViewModel(
                                 schoolUrl = route.schoolUrl
                             )
 
+                            /*
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = if(
@@ -140,11 +142,18 @@ class OtherOptionsSignupViewModel(
                                             inviteRequest = redeemRequest
                                         )
                                     }else {
-                                        WaitingForApproval()
+                                        if (redeemRequest.invite.forClassGuid == null &&
+                                            redeemRequest.invite.forFamilyOfGuid == null){
+                                            RespectAppLauncher()
+                                        }else{
+                                            WaitingForApproval()
+
+                                        }
                                     },
                                     clearBackStack = true,
                                 )
                             )
+                            */
                         }
 
                         is CreatePasskeyUseCase.Error -> {

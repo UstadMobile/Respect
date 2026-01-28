@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.manageuser.joinclazzwithcode
+package world.respect.shared.viewmodel.manageuser.enterinvitecode
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -16,8 +16,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_code_label
 import world.respect.shared.generated.resources.invalid_invite_code
 import world.respect.shared.generated.resources.something_went_wrong
-import world.respect.shared.navigation.ConfirmationScreen
-import world.respect.shared.navigation.JoinClazzWithCode
+import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
@@ -26,16 +26,16 @@ import world.respect.shared.util.exception.getUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
-data class JoinClazzWithCodeUiState(
+data class EnterInviteCodeUiState(
     val inviteCode: String = "",
     val errorMessage:  UiText? = null,
 )
 
-class JoinClazzWithCodeViewModel(
+class EnterInviteCodeViewModel(
     savedStateHandle: SavedStateHandle,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    val route: JoinClazzWithCode = savedStateHandle.toRoute()
+    val route: EnterInviteCode = savedStateHandle.toRoute()
 
     override val scope: Scope
         get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
@@ -44,7 +44,7 @@ class JoinClazzWithCodeViewModel(
 
     private val getInviteInfoUseCase: GetInviteInfoUseCase by inject()
 
-    private val _uiState = MutableStateFlow(JoinClazzWithCodeUiState())
+    private val _uiState = MutableStateFlow(EnterInviteCodeUiState())
 
     val uiState = _uiState.asStateFlow()
 
@@ -76,12 +76,14 @@ class JoinClazzWithCodeViewModel(
                 return@launch
             }
             try {
-                val inviteInfo = getInviteInfoUseCase(uiState.value.inviteCode)
+                val inviteCode = uiState.value.inviteCode.trim()
+                getInviteInfoUseCase(inviteCode)
+
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        ConfirmationScreen.create(
-                            route.schoolUrl,
-                            inviteInfo.code
+                        AcceptInvite.create(
+                            schoolUrl = route.schoolUrl,
+                            code = inviteCode
                         )
                     )
                 )

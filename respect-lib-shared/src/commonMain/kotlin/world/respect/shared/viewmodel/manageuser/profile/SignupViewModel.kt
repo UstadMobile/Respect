@@ -30,6 +30,7 @@ import world.respect.shared.generated.resources.your_name_label
 import world.respect.shared.generated.resources.your_profile_title
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
@@ -55,7 +56,7 @@ data class SignupUiState(
 
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
-   private val accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle)  {
 
     private val route: SignupScreen = savedStateHandle.toRoute()
@@ -190,12 +191,14 @@ class SignupViewModel(
                         val scope: Scope = accountManager.requireActiveAccountScope()
                         val addChildAccountUseCase: AddChildAccountUseCase = scope.get()
 
+                        /*
                         addChildAccountUseCase(
                             personInfo = personInfo,
                             parentUsername = route.respectRedeemInviteRequest.account.username,
                             classUid = route.respectRedeemInviteRequest.classUid ?: "",
-                            inviteCode = route.respectRedeemInviteRequest.code
-                        )
+                            inviteCode = route.respectRedeemInviteRequest.code,
+                            familyPersonGuid = route.respectRedeemInviteRequest.invite.forFamilyOfGuid,
+                        )*/
 
                         Napier.d("SignupViewModel: Navigating to wait for approval")
                         _navCommandFlow.tryEmit(
@@ -214,6 +217,7 @@ class SignupViewModel(
                                 destination = CreateAccount.create(
                                     profileType = route.type,
                                     schoolUrl = route.schoolUrl,
+                                    type = route.inviteType,
                                     inviteRequest = route.respectRedeemInviteRequest.copy(
                                         accountPersonInfo = personInfo
                                     )

@@ -77,7 +77,7 @@ class ClassDatasourceDb(
                 authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                code = params.inviteCode,
+                code = params.inviteGuid,
             ).map {
                 it.toClassEntities().toModel()
             }
@@ -93,7 +93,7 @@ class ClassDatasourceDb(
                 authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 since = params.common.since?.toEpochMilliseconds() ?: 0,
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
-                code = params.inviteCode,
+                code = params.inviteGuid,
             ).map {
                 it.toClassEntities().toModel()
             }

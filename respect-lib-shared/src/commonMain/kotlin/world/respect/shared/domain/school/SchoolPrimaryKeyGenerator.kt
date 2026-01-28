@@ -7,6 +7,7 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Report
 
 /**
@@ -25,6 +26,7 @@ data class SchoolPrimaryKeyGenerator(
             Clazz.TABLE_ID,
             PersonPasskeyEntity.TABLE_ID,
             Assignment.TABLE_ID,
+            Invite2.TABLE_ID,
         )
     }
 }

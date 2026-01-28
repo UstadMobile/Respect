@@ -43,6 +43,8 @@ import world.respect.shared.domain.account.authenticatepassword.AuthenticatePass
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
@@ -60,6 +62,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -69,6 +72,7 @@ import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQr
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
+const val CUSTOM_PROTO = "world.respect.app"
 
 fun serverKoinModule(
     config: ApplicationConfig,
@@ -136,7 +140,9 @@ fun serverKoinModule(
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
     }
-
+    single<UrlToCustomDeepLinkUseCase> {
+        UrlToCustomDeepLinkUseCase(customProtocol = CUSTOM_PROTO)
+    }
     single<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseJvm(
             json = get(),
@@ -284,6 +290,13 @@ fun serverKoinModule(
                 json = get(),
                 getPasskeyProviderInfoUseCase = get(),
                 encryptPersonPasswordUseCase = get(),
+            )
+        }
+
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
             )
         }
     }

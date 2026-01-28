@@ -145,6 +145,7 @@ kotlin {
             implementation(libs.androidx.paging.compose)
             implementation(libs.reorderable)
             implementation(libs.kscan)
+            implementation(libs.qrose)
         }
 
         desktopMain.dependencies {
@@ -180,8 +181,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 16
-        versionName = "1.0.16"
+        versionCode = 120
+        versionName = "1.0.20"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

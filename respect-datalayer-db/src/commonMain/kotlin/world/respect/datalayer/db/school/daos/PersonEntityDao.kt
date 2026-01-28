@@ -117,6 +117,7 @@ interface PersonEntityDao {
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
+        filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
     ): Flow<List<PersonEntityWithRoles>>
@@ -143,6 +144,7 @@ interface PersonEntityDao {
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
+        filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
     ): List<PersonEntityWithRoles>
@@ -185,6 +187,7 @@ interface PersonEntityDao {
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
+        filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
     ): PagingSource<Int, PersonEntityWithRoles>
@@ -214,6 +217,7 @@ interface PersonEntityDao {
         filterByName: String? = null,
         timeNow: Long = systemTimeInMillis(),
         filterByPersonRole: Int = 0,
+        filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
     ): PagingSource<Int, PersonListDetails>
@@ -415,6 +419,7 @@ interface PersonEntityDao {
                            (SELECT PersonRoleEntity.prRoleEnum
                               FROM PersonRoleEntity
                              WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
+                      AND (:filterByPersonStatus = 0 OR PersonEntity.pStatus = :filterByPersonStatus)
                       AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT})       
             ),
                 

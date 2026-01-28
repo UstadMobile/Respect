@@ -25,8 +25,8 @@ fun ClassEntities.toModel(): Clazz {
         description = clazz.cDescription,
         lastModified = clazz.cLastModified,
         stored = clazz.cStored,
-        teacherInviteCode = clazz.cTeacherInviteCode,
-        studentInviteCode = clazz.cStudentInviteCode,
+        teacherInviteGuid = clazz.cTeacherInviteGuid,
+        studentInviteGuid = clazz.cStudentInviteGuid,
         permissions = permissionEntities.map { permissionEntity ->
             val toEnrollmentRole = permissionEntity.cpeToEnrollmentRole
             val toRef = when  {
@@ -57,8 +57,8 @@ fun Clazz.toEntities(
             cDescription = description,
             cLastModified = lastModified,
             cStored = stored,
-            cStudentInviteCode = studentInviteCode,
-            cTeacherInviteCode = teacherInviteCode,
+            cStudentInviteGuid = studentInviteGuid,
+            cTeacherInviteGuid = teacherInviteGuid,
         ),
         permissionEntities = permissions.map {
             ClassPermissionEntity(

@@ -1,17 +1,17 @@
 package world.respect.shared.viewmodel.onboarding
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.viewmodel.RespectViewModel
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
-import world.respect.shared.navigation.GetStartedScreen
-import world.respect.shared.navigation.NavCommand
 
 data class OnboardingUiState(
     val isLoading: Boolean = false,
@@ -20,10 +20,10 @@ data class OnboardingUiState(
 
 class OnboardingViewModel(
     savedStateHandle: SavedStateHandle,
-    private val accountManager: RespectAccountManager,
     private val settings: Settings,
     private val setUsageReportingEnabledUseCase: SetUsageReportingEnabledUseCase,
     private val getUsageReportingEnabledUseCase: GetUsageReportingEnabledUseCase,
+    private val navigateOnAppStartUseCase: NavigateOnAppStartUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -39,6 +39,7 @@ class OnboardingViewModel(
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
     }
+
     fun onToggleUsageStatsOptIn() {
         _uiState.update { prev ->
             prev.copy(
@@ -46,19 +47,16 @@ class OnboardingViewModel(
             )
         }
     }
+
     fun onClickGetStartedButton() {
 
         settings.putString(ShouldShowOnboardingUseCase.KEY_ONBOARDING_SHOWN, true.toString())
         setUsageReportingEnabledUseCase(_uiState.value.usageStatsOptInChecked)
 
-        val hasAccount = accountManager.activeAccount != null
+        viewModelScope.launch {
+            _navCommandFlow.tryEmit(navigateOnAppStartUseCase())
+        }
 
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                destination = GetStartedScreen(),
-                clearBackStack = hasAccount,
-            )
-        )
     }
 
 }

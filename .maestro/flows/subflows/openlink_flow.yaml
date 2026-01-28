@@ -1,0 +1,17 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+---
+- launchApp:
+    appId: "world.respect.app"
+    arguments:
+      launchUrl: pasteText
+#
+#- launchApp:
+#    arguments:
+#      respect_directory: ${output.SCHOOL_URL}
+#- tapOn: "Get Started"
+#- tapOn: "Other options"
+#- tapOn: "Paste the link here"
+#- inputText: ${URL}
+#- tapOn: "Next"

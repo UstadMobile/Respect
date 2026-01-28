@@ -36,7 +36,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.enter_school_name
+import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.scan_qr_code_badge
 import world.respect.shared.generated.resources.school_name_placeholder
@@ -94,7 +94,7 @@ fun GetStartedScreen(
             value = uiState.schoolName,
             onValueChange = onSchoolNameChanged,
             label = {
-                Text(text = stringResource(Res.string.enter_school_name))
+                Text(text = stringResource(Res.string.school_name))
             },
             placeholder = {
                 Text(text = stringResource(Res.string.school_name_placeholder))

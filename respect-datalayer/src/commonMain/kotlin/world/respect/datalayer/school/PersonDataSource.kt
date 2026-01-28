@@ -9,11 +9,11 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
-import world.respect.libutil.util.time.localDateInCurrentTimeZone
 
 interface PersonDataSource: WritableDataSource<Person> {
 
@@ -35,6 +35,7 @@ interface PersonDataSource: WritableDataSource<Person> {
         val filterByClazzUid: String? = null,
         val filterByEnrolmentRole: EnrollmentRoleEnum? = null,
         val filterByName: String? = null,
+        val filterByPersonStatus: PersonStatusEnum? = null,
         val filterByPersonRole: PersonRoleEnum? = null,
         val includeRelated: Boolean = false,
         val inClassOnDay: LocalDate? = null,
@@ -50,6 +51,9 @@ interface PersonDataSource: WritableDataSource<Person> {
                     },
                     inClassOnDay = stringValues[DataLayerParams.IN_CLASS_ON_DAY]?.let {
                         LocalDate.parse(it)
+                    },
+                    filterByPersonStatus = stringValues[DataLayerParams.FILTER_BY_PERSON_STATUS]?.let {
+                        PersonStatusEnum.fromValue(it)
                     },
                     filterByName = stringValues[DataLayerParams.SEARCH_QUERY],
                     filterByPersonRole = stringValues[FILTER_BY_PERSON_ROLE]?.let {

@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPhoneNumberTextField
@@ -199,6 +200,15 @@ fun ShareFeedbackScreen(
                     .defaultItemPadding()
             ) {
                 Text(stringResource(Res.string.submit_feedback))
+            }
+        }
+        item{
+            uiState.errorMessage?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                    text = it,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

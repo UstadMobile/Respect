@@ -27,6 +27,7 @@ import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.generated.resources.enter_one_field
+import world.respect.shared.generated.resources.error_message
 import world.respect.shared.generated.resources.invalid
 import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.navigation.FeedbackSubmitted
@@ -47,7 +48,8 @@ data class ShareFeedbackUiState(
     val nationalPhoneNumSet: Boolean = false,
     val feedbackDescriptionError: UiText? = null,
     val phoneNumberError: UiText? = null,
-    val emailError: UiText? = null
+    val emailError: UiText? = null,
+    val errorMessage: String? = null,
 ) {
     val hasErrors: Boolean
         get() = feedbackDescriptionError != null ||
@@ -187,7 +189,7 @@ class ShareFeedbackViewModel(
                 emailError = emailError
             )
         }
-        if(_uiState.value.hasErrors)
+        if (_uiState.value.hasErrors)
             return
 
         viewModelScope.launch {
@@ -212,8 +214,11 @@ class ShareFeedbackViewModel(
                                 _uiState.value.phoneNumber,
                     )
                 )
-               // feedBackDataSource.createTicket(ticket)
+
+                feedBackDataSource.createTicket(ticket)
+
                 loadingState = LoadingUiState.NOT_LOADING
+
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         FeedbackSubmitted
@@ -221,6 +226,9 @@ class ShareFeedbackViewModel(
                 )
             } catch (e: Exception) {
                 loadingState = LoadingUiState.NOT_LOADING
+                _uiState.update {
+                    it.copy( errorMessage = getString(Res.string.error_message))
+                }
             }
         }
     }

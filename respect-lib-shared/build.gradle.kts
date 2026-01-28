@@ -57,6 +57,8 @@ kotlin {
 
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
+            implementation(libs.qrose)
+
         }
 
         androidMain.dependencies {
@@ -65,6 +67,9 @@ kotlin {
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
             implementation(libs.androidx.biometric.ktx)
+            implementation(libs.installreferrer)
+
+            implementation(libs.androidx.browser)
         }
 
         jvmMain.dependencies {

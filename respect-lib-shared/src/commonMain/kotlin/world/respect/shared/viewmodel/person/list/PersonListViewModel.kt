@@ -22,9 +22,11 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_new_person
+import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.generated.resources.people
-import world.respect.shared.generated.resources.person
 import world.respect.shared.generated.resources.select_person
+import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PersonDetail
@@ -35,9 +37,14 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
-import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
 
 
 data class PersonListUiState(
@@ -45,8 +52,12 @@ data class PersonListUiState(
         EmptyPagingSource()
     },
     val showAddPersonItem: Boolean = false,
+    val isPendingExpanded: Boolean = true,
     val showInviteCode: String? = null,
-)
+    val showInviteButton: Boolean = false,
+    val pendingPersons: IPagingSourceFactory<Int, Person> =
+        IPagingSourceFactory { EmptyPagingSource() },
+    )
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
@@ -69,12 +80,24 @@ class PersonListViewModel(
 
     private val checkPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
 
+    private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
+
+    private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
+        schoolDataSource.personDataSource.listAsPagingSource(
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
+            )
+        )
+    }
+
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
             DataLoadParams(),
             PersonDataSource.GetListParams(
                 filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
                 filterByPersonRole = route.filterByRole,
+                filterByPersonStatus = PersonStatusEnum.ACTIVE,
             )
         )
     }
@@ -90,10 +113,20 @@ class PersonListViewModel(
                 }else {
                     Res.string.select_person.asUiText()
                 },
-                fabState = it.fabState.copy(
-                    onClick = ::onClickAdd,
-                    text = Res.string.person.asUiText(),
-                    icon = FabUiState.FabIcon.ADD,
+                expandableFabState = ExpandableFabUiState(
+                    visible = !(route.filterByRole != null||route.addToClassUid!=null),
+                    items = listOf(
+                        ExpandableFabItem(
+                            icon = ExpandableFabIcon.INVITE,
+                            text =  Res.string.invite_person.asUiText(),
+                            onClick = ::onClickInvitePerson,
+                        ),
+                        ExpandableFabItem(
+                            icon = ExpandableFabIcon.ADD,
+                            text = Res.string.add_new_person.asUiText(),
+                            onClick = ::onClickAdd,
+                        )
+                    )
                 ),
                 searchState = AppBarSearchUiState(
                     visible = true,
@@ -127,7 +160,16 @@ class PersonListViewModel(
         }
 
         _uiState.update {
-            it.copy(persons = pagingSourceFactoryHolder)
+            it.copy(
+                pendingPersons = pendingPersonsPagingSource,
+                persons = pagingSourceFactoryHolder,
+                showInviteButton = route.filterByRole != null||route.addToClassUid!=null
+            )
+        }
+    }
+    fun onTogglePendingInvites() {
+        _uiState.update {
+            it.copy(isPendingExpanded = !it.isPendingExpanded)
         }
     }
 
@@ -166,8 +208,24 @@ class PersonListViewModel(
         }
     }
 
+
+    fun onClickAcceptOrDismissInvite(
+        person: Person,
+        approved: Boolean,
+    ) {
+        viewModelScope.launch {
+            try {
+                approveOrDeclineInviteRequestUseCase(
+                    personUid = person.guid,
+                    approved = approved,
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun onClickAdd() {
-        print(""+route.filterByRole)
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 PersonEdit.create(
@@ -179,10 +237,14 @@ class PersonListViewModel(
         )
     }
 
-    fun onClickInviteCode() {
-        _uiState.value.showInviteCode?.also {
-            setClipboardStringUseCase(it)
-        }
+    fun onClickInvitePerson() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                InvitePerson.create(
+                    invitePersonOptions = InvitePerson.NewUserInviteOptions(null)
+                )
+            )
+        )
     }
 
 }

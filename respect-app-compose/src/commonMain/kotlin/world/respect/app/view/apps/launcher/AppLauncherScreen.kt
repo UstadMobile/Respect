@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,6 +48,7 @@ import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.downloaded_lessons
 import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
 import world.respect.shared.generated.resources.more_info
@@ -65,6 +67,7 @@ fun AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
+        onClickDownloads = { viewModel.onClickDownloads() },
     )
 }
 
@@ -74,10 +77,29 @@ fun AppLauncherScreen(
     uiState: AppLauncherUiState,
     onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
     onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
+    onClickDownloads: () -> Unit = {},
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onClickDownloads) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = stringResource(resource = Res.string.downloaded_lessons),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
     Box(
         modifier = Modifier.fillMaxSize()
     ) {

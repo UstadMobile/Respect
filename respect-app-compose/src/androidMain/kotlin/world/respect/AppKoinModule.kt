@@ -354,11 +354,9 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
 
-
     single<WhatsAppLauncher> {
         WhatsAppLauncherAndroid(androidContext())
     }
-
     single<EmailLauncher> {
         EmailLauncherAndroid(androidContext())
     }

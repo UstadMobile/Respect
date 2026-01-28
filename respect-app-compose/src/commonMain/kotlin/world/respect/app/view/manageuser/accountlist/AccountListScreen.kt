@@ -73,7 +73,7 @@ fun AccountListScreen(
                     extras = {
                         Row {
                             OutlinedButton(
-                                onClick = { onClickProfile() },
+                                onClick =  {onClickProfile()},
                             ) {
                                 Text(stringResource(Res.string.profile))
                             }

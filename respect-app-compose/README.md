@@ -21,7 +21,7 @@ https://digitalassetlinks.googleapis.com/v1/assetlinks:check?source.web.site=htt
 
 ### Android link testing and debugging:
 
-Android will only open http or https links in an app by default when they are [https verified app links](https://developer.android.com/training/app-links/create-deeplinks).
+Android will only open http or https links in an app by default when they are [https verified app links](https://developer.android.com/training/app-links/about).
 Those links must be declared in the Android manifest using intent filters.
 
 When developing and testing, the server is typically running on the developer's laptop local IP

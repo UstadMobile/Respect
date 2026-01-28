@@ -47,11 +47,6 @@ onFlowComplete:
 - copyTextFrom:
       id: "invite_url"
 
-- runFlow:
-    file: "subflows/openlink_flow.yaml"
-    env:
-      URL: ${maestro.copiedText}
-
 # Teacher user joining using invite QR code
 - clearState: world.respect.app
 - launchApp:

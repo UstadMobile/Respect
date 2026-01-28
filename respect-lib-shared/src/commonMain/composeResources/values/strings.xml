@@ -224,6 +224,8 @@
     <string name="passkey">Passkey</string>
     <string name="add_account">Add account</string>
     <string name="share_feedback">Share feedback</string>
+    <string name="feedback_submitted">Feedback submitted</string>
+    <string name="feedback_submitted_message">Thank you for your feedback. Respect team will review it internally.</string>
     <string name="quick_contact">Quick Contact</string>
     <string name="whatsapp_respect">WhatsApp Respect</string>
     <string name="email_respect">Email Respect</string>
@@ -239,7 +241,7 @@
     <string name="category_question">Question</string>
     <string name="category_rate_us">Rate us</string>
     <string name="category_other">Other</string>
-
+    <string name="error_message">"Error: try again"</string>
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 

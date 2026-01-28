@@ -100,6 +100,4 @@ class SchoolDataSourceDb(
     override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
         AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
-    override val feedBackDataSource: FeedBackDataSource
-        get() = TODO("Not yet implemented")
 }

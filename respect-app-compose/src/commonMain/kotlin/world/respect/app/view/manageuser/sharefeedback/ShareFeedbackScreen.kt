@@ -342,9 +342,7 @@ fun ContactFields(
             onValueChange = onPhoneChange,
             onNationalNumberSetChanged = onNationalNumberSetChanged,
             isError = uiState.contactError != null,
-            supportingText = uiState.contactError?.let {
-                { Text(uiTextStringResource(it)) }
-            },
+
         )
 
         OutlinedTextField(
@@ -353,6 +351,10 @@ fun ContactFields(
             label = { Text(stringResource(Res.string.email)) },
             singleLine = true,
             onValueChange = onEmailChange,
+            isError = uiState.contactError != null,
+            supportingText = uiState.contactError?.let {
+                { Text(uiTextStringResource(it)) }
+            },
         )
     }
 }

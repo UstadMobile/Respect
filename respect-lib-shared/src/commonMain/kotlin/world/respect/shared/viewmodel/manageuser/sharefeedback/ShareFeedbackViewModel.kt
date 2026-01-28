@@ -24,6 +24,7 @@ import world.respect.shared.generated.resources.feedback_respect
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.share_feedback
+import world.respect.shared.generated.resources.enter_one_field
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -129,7 +130,8 @@ class ShareFeedbackViewModel(
     fun onEmailChanged(email: String) {
         _uiState.update {
             it.copy(
-                email = email
+                email = email,
+                contactError = null
             )
         }
     }
@@ -140,9 +142,12 @@ class ShareFeedbackViewModel(
                 Res.string.required_field.asUiText()
             } else null
 
+        val contactProvided =
+            _uiState.value.phoneNumber.isNotBlank() || _uiState.value.phoneNumber.isNotBlank()
+
         val contactReqError =
-            if (_uiState.value.isCheckBoxSelected && _uiState.value.phoneNumber.isBlank()) {
-                Res.string.required_field.asUiText()
+            if (_uiState.value.isCheckBoxSelected && !contactProvided) {
+                Res.string.enter_one_field.asUiText()
             } else null
 
         _uiState.update {
@@ -167,9 +172,8 @@ class ShareFeedbackViewModel(
                 customerId = "$GUESS$customerEmail",
                 article = Article(
                     subject = subject,
-                    body = "${_uiState.value.feedbackDescription}\n\n" +
-                            "${getString(Res.string.phone_number)}: " +
-                            _uiState.value.phoneNumber
+                    body = _uiState.value.feedbackDescription,
+                    type = "${getString(Res.string.phone_number)}: ${_uiState.value.phoneNumber}"
                 )
             )
             schoolDataSource.feedBackDataSource.createTicket(ticket)

@@ -33,6 +33,7 @@ import world.respect.app.view.manageuser.joinclazzwithcode.JoinClazzWithCodeScre
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
+import world.respect.app.view.manageuser.sharefeedback.FeedbackSubmittedScreen
 import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
 import world.respect.app.view.manageuser.signup.SignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
@@ -107,6 +108,7 @@ import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
+import world.respect.shared.navigation.FeedbackSubmitted
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.navigation.SignupScreen
@@ -136,6 +138,7 @@ import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
+import world.respect.shared.viewmodel.manageuser.sharefeedback.FeedbackSubmittedViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
@@ -494,6 +497,15 @@ fun AppNavHost(
 
         composable<ShareFeedback> {
             ShareFeedbackScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
+            )
+        }
+
+        composable<FeedbackSubmitted> {
+            FeedbackSubmittedScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController

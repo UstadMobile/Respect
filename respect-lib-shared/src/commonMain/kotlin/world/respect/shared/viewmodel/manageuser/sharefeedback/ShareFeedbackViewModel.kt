@@ -29,9 +29,13 @@ import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.generated.resources.enter_one_field
 import world.respect.shared.generated.resources.invalid
 import world.respect.shared.generated.resources.invalid_email
+import world.respect.shared.navigation.FeedbackSubmitted
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 import kotlin.getValue
 
 data class ShareFeedbackUiState(
@@ -181,25 +185,35 @@ class ShareFeedbackViewModel(
         }
 
         viewModelScope.launch {
-            val customerEmail = if (_uiState.value.isCheckBoxSelected) {
-                _uiState.value.email.ifBlank {
-                    "${_uiState.value.phoneNumber}$DEFAULT_CUSTOMER_ENDPOINT"
+            try {
+                loadingState = LoadingUiState.INDETERMINATE
+                val customerEmail = if (_uiState.value.isCheckBoxSelected) {
+                    _uiState.value.email.ifBlank {
+                        "${_uiState.value.phoneNumber}$DEFAULT_CUSTOMER_ENDPOINT"
+                    }
+                } else {
+                    DEFAULT_CUSTOMER_ID
                 }
-            } else {
-                DEFAULT_CUSTOMER_ID
-            }
 
-            val ticket = FeedbackTicket(
-                title = _uiState.value.selectedCategory.name,
-                groupId = DEFAULT_GROUP_ID,
-                customerId = "$GUESS$customerEmail",
-                article = Article(
-                    subject = subject,
-                    body = _uiState.value.feedbackDescription,
-                    type = "${getString(Res.string.phone_number)}: ${_uiState.value.phoneNumber}"
+                val ticket = FeedbackTicket(
+                    title = _uiState.value.selectedCategory.name,
+                    groupId = DEFAULT_GROUP_ID,
+                    customerId = "$GUESS$customerEmail",
+                    article = Article(
+                        subject = subject,
+                        body = _uiState.value.feedbackDescription,
+                    )
                 )
-            )
-            schoolDataSource.feedBackDataSource.createTicket(ticket)
+                schoolDataSource.feedBackDataSource.createTicket(ticket)
+                loadingState = LoadingUiState.NOT_LOADING
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        FeedbackSubmitted
+                    )
+                )
+            } catch (e: Exception) {
+                loadingState = LoadingUiState.NOT_LOADING
+            }
         }
     }
 

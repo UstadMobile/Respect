@@ -557,6 +557,9 @@ object AccountList : RespectAppRoute
 object ShareFeedback : RespectAppRoute
 
 @Serializable
+object FeedbackSubmitted : RespectAppRoute
+
+@Serializable
 data class PersonList(
     private val filterByRoleStr: String? = null,
     val isTopLevel: Boolean = false,

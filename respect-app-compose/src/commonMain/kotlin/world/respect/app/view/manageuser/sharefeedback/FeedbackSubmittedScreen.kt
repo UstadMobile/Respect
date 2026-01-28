@@ -1,4 +1,12 @@
 package world.respect.app.view.manageuser.sharefeedback
 
-class FeedbackSubmittedScreen {
+import androidx.compose.runtime.Composable
+import world.respect.shared.viewmodel.manageuser.sharefeedback.FeedbackSubmittedViewModel
+import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
+
+@Composable
+fun FeedbackSubmittedScreen(
+    viewModel: FeedbackSubmittedViewModel
+) {
+
 }

@@ -20,5 +20,5 @@ data class FeedbackTicket(
 data class Article(
     val subject: String,
     val body: String,
-    val type: String = "",
+    val type: String = "note"
 )

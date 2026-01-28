@@ -24,6 +24,7 @@ class WebLauncherAndroid(
                 }
 
                 context.startActivity(intent)
+
             } catch (e: ActivityNotFoundException) {
                 Log.e("WebLauncherAndroid", "No browser found to open web URL", e)
             }

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -15,6 +16,7 @@ import world.respect.datalayer.sharefeedback.model.FeedbackTicket
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
 import world.respect.datalayer.sharefeedback.model.Article
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.feedback.FeedbackCategory
 import world.respect.shared.domain.launchers.EmailLauncher
 import world.respect.shared.domain.launchers.WebLauncher
 import world.respect.shared.domain.launchers.WhatsAppLauncher
@@ -34,8 +36,8 @@ import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.getValue
 
 data class ShareFeedbackUiState(
-    val categories: List<String> = emptyList(),
-    val selectedCategory: String = "",
+    val categories: List<FeedbackCategory> = FeedbackCategory.entries,
+    val selectedCategory: FeedbackCategory = FeedbackCategory.LAUNCHER,
     val feedbackDescription: String = "",
     val isCheckBoxSelected: Boolean = false,
     val phoneNumber: String = "",
@@ -71,27 +73,16 @@ class ShareFeedbackViewModel(
         }
         viewModelScope.launch {
             subject = getString(Res.string.feedback_respect)
-
-            val categoryList: List<String> = listOf(
-                getString(Res.string.category_launcher),
-                getString(Res.string.category_integrated_apps),
-                getString(Res.string.category_question),
-                getString(Res.string.category_rate_us),
-                getString(Res.string.category_other)
-            )
-
-            _uiState.update { currentState ->
-                currentState.copy(
-                    categories = categoryList,
-                    selectedCategory = categoryList.first()
-                )
-            }
         }
-
     }
 
     fun onFeedbackDescriptionChanged(text: String) {
-        _uiState.update { it.copy(feedbackDescription = text, feedbackDescriptionError = null) }
+        _uiState.update {
+            it.copy(
+                feedbackDescription = text,
+                feedbackDescriptionError = null
+            )
+        }
     }
 
     fun onClickWhatsApp() {
@@ -112,7 +103,7 @@ class ShareFeedbackViewModel(
         }
     }
 
-    fun onCategorySelected(category: String) {
+    fun onCategorySelected(category: FeedbackCategory) {
         _uiState.value = _uiState.value.copy(
             selectedCategory = category
         )
@@ -145,15 +136,18 @@ class ShareFeedbackViewModel(
             Res.string.required_field.asUiText()
         } else null
 
-        val isContactProvided = _uiState.value.email.isNotBlank() || _uiState.value.phoneNumber.isNotBlank()
+        val isContactProvided =
+            _uiState.value.email.isNotBlank() || _uiState.value.phoneNumber.isNotBlank()
 
         val contactReqError = if (_uiState.value.isCheckBoxSelected && !isContactProvided) {
             Res.string.either_number_or_email.asUiText()
         } else null
-        _uiState.update { it.copy(
-            feedbackDescriptionError = feedbackDescriptionError,
-            contactError = contactReqError
-        )}
+        _uiState.update {
+            it.copy(
+                feedbackDescriptionError = feedbackDescriptionError,
+                contactError = contactReqError
+            )
+        }
 
         viewModelScope.launch {
             val customerEmail = if (_uiState.value.isCheckBoxSelected) {
@@ -165,7 +159,7 @@ class ShareFeedbackViewModel(
             }
 
             val ticket = FeedbackTicket(
-                title = _uiState.value.selectedCategory,
+                title = _uiState.value.selectedCategory.name,
                 groupId = DEFAULT_GROUP_ID,
                 customerId = "$GUESS$customerEmail",
                 article = Article(
@@ -173,19 +167,18 @@ class ShareFeedbackViewModel(
                     body = _uiState.value.feedbackDescription,
                 )
             )
-
             schoolDataSource.feedBackDataSource.createTicket(ticket)
         }
     }
 
-    companion object{
-        const val DEFAULT_CUSTOMER_ENDPOINT= "@ustadmobile.com"
-        const val DEFAULT_CUSTOMER_ID= "info@ustadmobile.com"
+    companion object {
+        const val DEFAULT_CUSTOMER_ENDPOINT = "@ustadmobile.com"
+        const val DEFAULT_CUSTOMER_ID = "info@ustadmobile.com"
         const val WHATSAPP_URL = "https://wa.me/"
         const val WHATSAPP_PHONE_NUMBER = "+919828932811"
-        const val WEB_URL="https://respect.world/"
-        const val EMAIL_RECIPIENT="mandvi2346verma@gmail.com"
-        const val GUESS="guess:"
+        const val WEB_URL = "https://respect.world/"
+        const val EMAIL_RECIPIENT = "mandvi2346verma@gmail.com"
+        const val GUESS = "guess:"
     }
 }
 

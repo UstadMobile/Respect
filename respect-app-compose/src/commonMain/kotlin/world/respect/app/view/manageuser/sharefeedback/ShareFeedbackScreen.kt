@@ -36,13 +36,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPhoneNumberTextField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.shared.domain.feedback.FeedbackCategory
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.email_respect
 import world.respect.shared.generated.resources.public_forum
@@ -86,7 +86,7 @@ fun ShareFeedbackScreen(
     onClickWhatsApp: () -> Unit,
     onClickEmail: () -> Unit,
     onClickPublicForum: () -> Unit,
-    onCategorySelected: (String) -> Unit,
+    onCategorySelected: (FeedbackCategory) -> Unit,
     onFeedbackDescriptionChanged: (String) -> Unit,
     onClickSubmit: () -> Unit,
     onClickCheckBox: () -> Unit,
@@ -183,7 +183,7 @@ fun ShareFeedbackScreen(
             item {
                 ContactFields(
                     uiState,
-                    onPhoneChange = onPhoneChanged ,
+                    onPhoneChange = onPhoneChanged,
                     onEmailChange = onEmailChanged,
                     onNationalNumberSetChanged = onNationalNumberSetChanged
                 )
@@ -237,9 +237,9 @@ private fun FeedbackItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdown(
-    categories: List<String>,
-    selectedCategory: String,
-    onCategorySelected: (String) -> Unit
+    categories: List<FeedbackCategory>,
+    selectedCategory: FeedbackCategory,
+    onCategorySelected: (FeedbackCategory) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -265,7 +265,7 @@ fun CategoryDropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(),
-                value = selectedCategory,
+                value = stringResource(selectedCategory.resource),
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
@@ -279,7 +279,7 @@ fun CategoryDropdown(
             ) {
                 categories.forEach { category ->
                     DropdownMenuItem(
-                        text = { Text(category) },
+                        text = { Text(stringResource(category.resource)) },
                         onClick = {
                             onCategorySelected(category)
                             expanded = false
@@ -338,12 +338,10 @@ fun ContactFields(
 
         RespectPhoneNumberTextField(
             value = uiState.phoneNumber,
-            modifier = Modifier.testTag("phone_number").fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             label = { Text(stringResource(Res.string.phone_number)) },
             onValueChange = onPhoneChange,
             onNationalNumberSetChanged = onNationalNumberSetChanged,
-            countryCodeTestTag = "phone_countrycode",
-            numberTextFieldTestTag = "phone_number",
             isError = uiState.contactError != null,
             supportingText = uiState.contactError?.let {
                 { Text(uiTextStringResource(it)) }
@@ -351,7 +349,7 @@ fun ContactFields(
         )
 
         OutlinedTextField(
-            modifier = Modifier.testTag("email").fillMaxWidth().defaultItemPadding(),
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
             value = uiState.email,
             label = { Text(stringResource(Res.string.email)) },
             singleLine = true,

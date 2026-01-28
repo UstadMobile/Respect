@@ -14,7 +14,6 @@ class WhatsAppLauncherAndroid(
     private val context: Context
 ) : WhatsAppLauncher {
 
-    // once whatsapp support number is available will change the default used
     override suspend fun launchWhatsApp() {
         withContext(Dispatchers.Main) {
             try {
@@ -32,6 +31,4 @@ class WhatsAppLauncherAndroid(
             }
         }
     }
-
-
 }

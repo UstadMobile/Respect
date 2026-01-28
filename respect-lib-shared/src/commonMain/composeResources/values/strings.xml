@@ -222,9 +222,7 @@
     <string name="sign_up_with_passkey">Sign up with a passkey</string>
     <string name="create_passkey">Create passkey</string>
     <string name="passkey">Passkey</string>
-
     <string name="add_account">Add account</string>
-
     <string name="share_feedback">Share feedback</string>
     <string name="quick_contact">Quick Contact</string>
     <string name="whatsapp_respect">WhatsApp Respect</string>
@@ -236,8 +234,6 @@
     <string name="want_response_from_team">I want a response from the Respect team</string>
     <string name="submit_feedback">Submit feedback</string>
     <string name="feedback_respect">Feedback about RESPECT</string>
-
-
     <string name="category_launcher">Respect launcher related issues</string>
     <string name="category_integrated_apps">Integrated Apps related issues</string>
     <string name="category_question">Question</string>

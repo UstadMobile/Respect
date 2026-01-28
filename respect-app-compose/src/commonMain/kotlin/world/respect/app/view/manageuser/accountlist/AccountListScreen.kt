@@ -73,7 +73,7 @@ fun AccountListScreen(
                     extras = {
                         Row {
                             OutlinedButton(
-                                onClick =  {onClickProfile()},
+                                onClick = { onClickProfile() },
                             ) {
                                 Text(stringResource(Res.string.profile))
                             }
@@ -155,10 +155,17 @@ fun AccountListScreen(
                     onClickShareFeedback()
                 },
                 headlineContent = {
-                    Text(stringResource(Res.string.share_feedback))
+                    Text(
+                        stringResource(
+                            Res.string.share_feedback
+                        )
+                    )
                 },
                 leadingContent = {
-                    Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Share Feedback")
+                    Icon(
+                        imageVector = Icons.Outlined.ChatBubbleOutline,
+                        contentDescription = ""
+                    )
                 }
             )
         }

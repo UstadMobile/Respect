@@ -1,0 +1,17 @@
+package world.respect.shared.domain.feedback
+
+import org.jetbrains.compose.resources.StringResource
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.category_integrated_apps
+import world.respect.shared.generated.resources.category_launcher
+import world.respect.shared.generated.resources.category_other
+import world.respect.shared.generated.resources.category_question
+import world.respect.shared.generated.resources.category_rate_us
+
+enum class FeedbackCategory(val resource: StringResource) {
+    LAUNCHER(Res.string.category_launcher),
+    INTEGRATED_APPS(Res.string.category_integrated_apps),
+    QUESTION(Res.string.category_question),
+    RATE_US(Res.string.category_rate_us),
+    OTHER(Res.string.category_other)
+}

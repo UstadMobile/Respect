@@ -31,7 +31,6 @@ import world.respect.shared.generated.resources.invalid
 import world.respect.shared.generated.resources.invalid_email
 import world.respect.shared.navigation.FeedbackSubmitted
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel

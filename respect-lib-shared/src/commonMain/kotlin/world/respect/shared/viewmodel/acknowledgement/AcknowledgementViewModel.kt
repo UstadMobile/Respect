@@ -63,19 +63,25 @@ class AcknowledgementViewModel(
             }
 
             delay(2000)
+            val getDeferredDeepLinkUseCaseVal = getDeferredDeepLinkUseCase
+
             val deferredDeepLink = if(
-                getDeferredDeepLinkUseCase != null &&
+                getDeferredDeepLinkUseCaseVal != null &&
                 !settings.getBoolean(KEY_DEFERRED_DEEP_LINK_CHECK_DONE, false)
             ) {
+                Napier.i("DeferredDeepLink: AcknowledgementViewModel checking for deferred deep link")
                 withTimeoutOrNull(GET_DEFERRED_LINK_TIMEOUT) {
-                    getDeferredDeepLinkUseCase?.invoke().also {
+                    getDeferredDeepLinkUseCaseVal().also { deferredDeepLink ->
+                        Napier.i("DeferredDeepLink: AcknowledgementViewModel invoked: deferredDeepLink=$deferredDeepLink")
                         settings.putBoolean(KEY_DEFERRED_DEEP_LINK_CHECK_DONE, true)
                     }
                 }
             }else{
+                Napier.i("DeferredDeepLink: AcknowledgementViewModel : no use case available")
                 null
             }
 
+            Napier.i("DeferredDeepLink: AcknowledgementViewModel creating initLinkNavCommand: deferredDeepLink=$deferredDeepLink")
             val initLinkNavCommand: NavCommand? = try {
                 (deferredDeepLink ?: initDeepLinkUriProvider())?.let { initDeepLink ->
                     resolveUrlToNavCommandUseCase(
@@ -88,6 +94,7 @@ class AcknowledgementViewModel(
                 null
             }
 
+            Napier.i("DeferredDeepLink: AcknowledgementViewModel: init nav command=$initLinkNavCommand")
             val isChild = accountManager.selectedAccountAndPersonFlow.first()?.isChild == true
             val hasAccount = accountManager.activeAccount != null
 

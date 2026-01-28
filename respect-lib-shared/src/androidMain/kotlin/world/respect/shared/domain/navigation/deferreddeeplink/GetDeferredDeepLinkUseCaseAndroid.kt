@@ -1,4 +1,4 @@
-package world.respect.shared.domain.getplaystorereferrer
+package world.respect.shared.domain.navigation.deferreddeeplink
 
 import android.content.Context
 import com.android.installreferrer.api.InstallReferrerClient
@@ -8,8 +8,7 @@ import com.russhwolf.settings.Settings
 import io.github.aakira.napier.Napier
 import io.ktor.http.parseQueryString
 import kotlinx.coroutines.CompletableDeferred
-import world.respect.shared.domain.getplaystorereferrer.GetDeferredDeepLinkUseCase.Companion.PARAM_NAME_DEFERRED_DEEP_LINK
-
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase.Companion.PARAM_NAME_DEFERRED_DEEP_LINK
 
 class GetDeferredDeepLinkUseCaseAndroid(
     context: Context,

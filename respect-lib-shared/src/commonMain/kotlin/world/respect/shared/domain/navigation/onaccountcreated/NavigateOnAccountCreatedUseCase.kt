@@ -1,4 +1,4 @@
-package world.respect.shared.domain.account.navigateonaccountcreated
+package world.respect.shared.domain.navigation.onaccountcreated
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import world.respect.datalayer.school.model.Person

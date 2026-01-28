@@ -47,21 +47,26 @@ onFlowComplete:
 - copyTextFrom:
       id: "invite_url"
 
+- runFlow:
+    file: "subflows/openlink_flow.yaml"
+    env:
+      URL: ${maestro.copiedText}
+
 # Teacher user joining using invite QR code
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
-- tapOn: "Scan QR code/badge"
-- assertVisible:
-    id: "app_title"
-    text: "Scan QR code badge"
-- tapOn: "More Options"
-- tapOn: "Paste URL"
-- tapOn: "Url"
-- pasteText
-- tapOn: "OK"
+#- clearState: world.respect.app
+#- launchApp:
+#    arguments:
+#      respect_directory: ${output.SCHOOL_URL}
+#- tapOn: "Get Started"
+#- tapOn: "Scan QR code/badge"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Scan QR code badge"
+#- tapOn: "More Options"
+#- tapOn: "Paste URL"
+#- tapOn: "Url"
+#- pasteText
+#- tapOn: "OK"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

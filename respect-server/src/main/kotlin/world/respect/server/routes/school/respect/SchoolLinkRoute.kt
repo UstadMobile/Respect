@@ -42,7 +42,7 @@ fun Route.SchoolLinkRoute() {
             text = """
                 <html>
                 <head>
-                <meta http-equiv="refresh" content="100; url=${redirectToUrl}" />
+                <meta http-equiv="refresh" content="1; url=${redirectToUrl}" />
                 </head>
                 <body>
                 

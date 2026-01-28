@@ -24,7 +24,25 @@ https://digitalassetlinks.googleapis.com/v1/assetlinks:check?source.web.site=htt
 The AndroidManifest includes intent filters for specific domains (e.g. *.onrespect.app). This won't
 match the URLs used during local testing (e.g. IP addresses).
 
-ADB command line:
+It is possible to use Android Studio, ADB command line, or Maestro to start the RESPECT app the same
+as if a link had been opened from any other app (e.g. Chrome, WhatsApp, SMS, etc).
+
+**Android Studio:**
+
+![Screenshot of Android Studio run dropdown](doc/app-config-dropdown.png)
+
+Select edit configurations
+
+![Screenshot of Android Studio run configuration](doc/run-config-settings.png)
+
+Set the Launch Options launch flags e.g.
+
+```
+-a android.intent.action.VIEW -d "http://192.168.1.2:8098/respect_school_link/AcceptInvite?inviteCode=8848544737" "world.respect.app/world.respect.MainActivity"
+```
+Where the argument after -d is the link you want the app to open.
+
+**ADB command line:**
 ```
 adb shell am start -a android.intent.action.VIEW -d "http://192.168.1.2:8098/respect_school_link/AcceptInvite?inviteCode=8848544737" world.respect.app
 ```

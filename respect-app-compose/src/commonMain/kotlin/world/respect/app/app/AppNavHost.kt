@@ -138,7 +138,6 @@ import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
-import world.respect.shared.viewmodel.manageuser.sharefeedback.FeedbackSubmittedViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel

@@ -152,7 +152,6 @@ class ShareFeedbackViewModel(
             )
         }
 
-
         viewModelScope.launch {
             val customerEmail = if (_uiState.value.isCheckBoxSelected) {
                 _uiState.value.email.ifBlank {

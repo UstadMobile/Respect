@@ -2,7 +2,6 @@ package world.respect.app.app
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -28,19 +27,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.navigation.NavHostController
+import kotlin.Boolean
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.getKoin
+import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.navigation.NavCommandEffect
+import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
+import world.respect.shared.generated.resources.parents_only
+import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.continue_using_fingerprint_or
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList
@@ -95,16 +106,34 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         routeName = "$routeNamePrefix.PersonList",
     ),
 )
+val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
+    TopNavigationItem(
+        destRoute = AssignmentList,
+        icon = Icons.Filled.ImportContacts,
+        label = Res.string.assignments,
+        routeName = "$routeNamePrefix.Assignment"
+    ),
+    TopNavigationItem(
+        destRoute = RespectAppLauncher(),
+        icon = Icons.Filled.GridView,
+        label = Res.string.apps,
+        routeName = "$routeNamePrefix.RespectAppLauncher",
+    ),
+)
 
+/**
+ * @param activityNavCommandFlow a flow that is received from the activity. When a link is opened
+ *        and the app is already running, the Activity's onNewIntent will be invoked. If the app is
+ *        started cold then InitDeepLinkUriProviderUseCase should be used.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
-    navController: NavHostController,
     activityNavCommandFlow: Flow<NavCommand>,
-    respectNavController:  RespectComposeNavController,
     widthClass: SizeClass = SizeClass.MEDIUM,
     useBottomBar: Boolean = true,
-    onAppStateChanged: (AppUiState) -> Unit = { }) {
+    onAppStateChanged: (AppUiState) -> Unit = { }
+) {
     val appUiState = remember {
         mutableStateOf(
             AppUiState(
@@ -113,13 +142,31 @@ fun App(
             )
         )
     }
+
+    val navController = rememberNavController()
+    val respectNavController = remember(Unit) {
+        RespectComposeNavController(navController)
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val accountManager: RespectAccountManager = koinInject()
+    val biometricAuthUseCase : BiometricAuthUseCase = koinInject()
+    val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
+    val topLevelNavItems = if (activeAccount?.isChild == true) {
+        APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD
+    } else {
+        APP_TOP_LEVEL_NAV_ITEMS
+    }
+
+
     NavControllerLogEffect(navController)
 
-    LaunchedEffect(Unit){
-        activityNavCommandFlow.collect {
-            respectNavController.onCollectNavCommand(it)
-        }
-    }
+    NavCommandEffect(
+        navHostController = respectNavController,
+        navCommandFlow = activityNavCommandFlow,
+    )
+
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
         onAppStateChanged(appUiStateVal)
@@ -152,9 +199,27 @@ fun App(
                         compactHeader = (widthClass != SizeClass.EXPANDED),
                         appUiState = appUiStateVal,
                         navController = navController,
+                        topLevelItems = topLevelNavItems,
                         onProfileClick = {
-                            navController.navigate(AccountList)
-                        }
+                            if (activeAccount?.isChild == false) {
+                                navController.navigate(AccountList)
+                            }else {
+                                coroutineScope.launch {
+                                    val result = biometricAuthUseCase(
+                                        BiometricAuthUseCase.BiometricPromptData(
+                                            title = getString(Res.string.parents_only),
+                                            subtitle = getString(Res.string.continue_using_fingerprint_or),
+                                            useDeviceCredential = true,
+                                            negativeButtonText = getString(Res.string.cancel),
+                                        )
+                                    )
+
+                                    if(result is BiometricAuthUseCase.BiometricResult.Success) {
+                                        navController.navigate(AccountList)
+                                    }
+                                }
+                            }
+                        },
                     )
                 }
             },
@@ -163,13 +228,14 @@ fun App(
                 if (useBottomBar) {
                     if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                         NavigationBar {
-                            APP_TOP_LEVEL_NAV_ITEMS.forEachIndexed { index, item ->
-                                val label = stringResource(item.label)
+                            topLevelNavItems.forEachIndexed { index, item ->
                                 NavigationBarItem(
                                     icon = {
                                         Icon(item.icon, contentDescription = null)
                                     },
-                                    label = { Text(label, maxLines = 1) },
+                                    label = {
+                                        Text(stringResource(item.label), maxLines = 1)
+                                    },
                                     selected = selectedTopLevelItemIndex == index,
                                     onClick = {
                                         navController.navigate(item.destRoute)  {
@@ -238,6 +304,7 @@ fun App(
         ) { innerPadding ->
             AppNavHost(
                 navController = navController,
+                respectNavController = respectNavController,
                 onSetAppUiState = {
                     appUiStateVal = it
                 },

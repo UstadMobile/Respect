@@ -46,7 +46,7 @@ class IndicatorEditViewModel(
     private val json: Json
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
     private val _uiState = MutableStateFlow(IndicatorEditUiState())
     val uiState = _uiState.asStateFlow()

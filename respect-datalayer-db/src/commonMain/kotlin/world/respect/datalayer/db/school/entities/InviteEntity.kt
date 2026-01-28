@@ -4,7 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.libutil.util.time.systemTimeInMillis
+import world.respect.datalayer.school.model.StatusEnum
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Entity
 data class InviteEntity(
@@ -12,7 +14,12 @@ data class InviteEntity(
     @PrimaryKey
     val iGuidHash: Long,
     val iCode: String,
-    val iNewRole: PersonRoleEnum? = null,
+    val iApprovalRequiredAfter: Instant,
+    val iLastModified: Instant = Clock.System.now(),
+    val iStored: Instant = Clock.System.now(),
+    val iStatus: StatusEnum,
+
+    val iNewUserRole: PersonRoleEnum? = null,
     val iForFamilyOfGuid: String? = null,
     val iForFamilyOfGuidHash: Long? = null,
     val iForClassGuid: String? = null,
@@ -20,15 +27,4 @@ data class InviteEntity(
     val iSchoolName: String? = null,
     val iForClassGuidHash: Long? = null,
     val iForClassRole: EnrollmentRoleEnum ?=null,
-    val iInviteMultipleAllowed: Boolean = false,
-    val iApprovalRequired: Boolean = false,
-    val iLastModified: Long = systemTimeInMillis(),
-    val iExpiration: Long = 0,
-    var iInviteStatus: Int = STATUS_PENDING,
-){
-    companion object {
-        const val STATUS_PENDING = 0
-        const val STATUS_ACCEPTED = 1
-        const val STATUS_REVOKED = 2
-    }
-}
+)

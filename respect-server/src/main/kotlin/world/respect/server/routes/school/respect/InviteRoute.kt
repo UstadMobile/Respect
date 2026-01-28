@@ -12,7 +12,7 @@ import io.ktor.server.routing.post
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.InviteDataSource
-import world.respect.datalayer.school.model.Invite
+import world.respect.datalayer.school.model.Invite2
 import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondOffsetLimitPaging
@@ -38,7 +38,7 @@ fun Route.InviteRoute(
 
     post(InviteDataSource.ENDPOINT_NAME) {
         val schoolDataSource = schoolDataSource(call)
-        val invites: List<Invite> = call.receive()
+        val invites: List<Invite2> = call.receive()
         schoolDataSource.inviteDataSource.store(invites)
         call.respond(HttpStatusCode.NoContent)
     }

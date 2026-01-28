@@ -19,8 +19,8 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditUiState
@@ -56,7 +56,7 @@ fun ClazzEditScreen(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("name"),
             value = clazz?.title ?: "",
             label = {
-                Text(stringResource(Res.string.name) + "*")
+                Text(stringResource(Res.string.class_name) + "*")
             },
             onValueChange = { value ->
                 clazz?.also {

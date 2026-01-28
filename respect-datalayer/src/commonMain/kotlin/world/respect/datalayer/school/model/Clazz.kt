@@ -16,6 +16,18 @@ data class Clazz(
     override val stored: InstantAsISO8601 = Clock.System.now(),
     val teacherInviteGuid: String? = null,
     val studentInviteGuid: String? = null,
+    val permissions: List<ClassPermission> = listOf(
+        ClassPermission(
+            permissionToRef = ClassPermission.PermissionToEnrollmentRole(EnrollmentRoleEnum.TEACHER),
+            permissions = PermissionFlags.CLASS_WRITE
+        ),
+        ClassPermission(
+            permissionToRef = ClassPermission.PermissionToEnrollmentRole(EnrollmentRoleEnum.STUDENT),
+            permissions = PermissionFlags.CLASS_READ
+                .or(PermissionFlags.PERSON_TEACHER_READ)
+                .or(PermissionFlags.PERSON_STUDENT_READ)
+        ),
+    )
 ): ModelWithTimes {
 
     companion object {

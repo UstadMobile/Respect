@@ -1,5 +1,6 @@
 package world.respect.shared.domain.account.child
 
+import io.github.aakira.napier.Napier
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
@@ -23,11 +24,13 @@ class AddChildAccountUseCaseDataSource(
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
         classUid: String?,
-        inviteCode: String
+        inviteCode: String,
+        familyPersonGuid: String?,
     ) {
+        Napier.d("AddChildAccountUseCase: adding child ${personInfo.name} for parent $parentUsername")
         val parentPerson = schoolDataSource.personDataSource.findByGuid(
             loadParams = DataLoadParams(),
-            guid = authenticatedUser.guid,
+            guid = familyPersonGuid?:authenticatedUser.guid,
         ).dataOrNull() ?: throw IllegalStateException("Parent person not found: $authenticatedUser")
 
         val childUid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
@@ -42,7 +45,7 @@ class AddChildAccountUseCaseDataSource(
             role = PersonRoleEnum.STUDENT,
             guid = childUid
         ).copy(
-            relatedPersonUids = listOf(authenticatedUser.guid)
+            relatedPersonUids = listOf(familyPersonGuid?:authenticatedUser.guid)
         )
 
         schoolDataSource.personDataSource.store(

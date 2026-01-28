@@ -21,15 +21,18 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
+import world.respect.datalayer.db.school.domain.GetPermissionLastModifiedUseCaseDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import world.respect.server.account.invite.CreateInviteUseCaseServer
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
@@ -38,9 +41,11 @@ import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
@@ -64,6 +69,7 @@ import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
@@ -230,6 +236,7 @@ fun serverKoinModule(
                 verifyPasskeyUseCase = get(),
                 respectAppDataSource = get(),
                 authenticatePasswordUseCase = get(),
+                authenticateQrBadgeUseCase  = get()
             )
         }
 
@@ -237,6 +244,13 @@ fun serverKoinModule(
             AuthenticatePasswordUseCaseDbImpl(
                 schoolDb = get(),
                 encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<AuthenticateQrBadgeUseCase> {
+            AuthenticateQrBadgeUseCaseDbImpl(
+                schoolDb = get(),
                 uidNumberMapper = get(),
             )
         }
@@ -267,15 +281,6 @@ fun serverKoinModule(
             )
         }
 
-        scoped<CreateInviteUseCase> {
-            CreateInviteUseCaseServer(
-                schoolDb = get(),
-                uidNumberMapper = get(),
-                schoolUrl = schoolUrl(),
-                urlToCustomDeepLinkUseCase = get()
-            )
-        }
-
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
             val accountScopeManager: ServerAccountScopeManager = get()
@@ -294,6 +299,13 @@ fun serverKoinModule(
                 encryptPersonPasswordUseCase = get(),
             )
         }
+
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
     }
 
     /*
@@ -310,18 +322,39 @@ fun serverKoinModule(
      * be done in a way that is thread safe.
      */
     scope<RespectAccount> {
+        factory<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
         factory<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             SchoolDataSourceDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
-                authenticatedUser = accountScopeId.accountPrincipalId
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                checkPersonPermissionUseCase = get(),
             )
         }
 
         factory<SchoolDataSource> {
             get<SchoolDataSourceLocal>()
+        }
+
+        factory<GetPermissionLastModifiedUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetPermissionLastModifiedUseCaseDbImpl(
+                schoolDb = get(),
+                numberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId,
+            )
         }
     }
 

@@ -12,12 +12,15 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
-import world.respect.shared.domain.account.RespectAccountAndPerson
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.RespectSession
+import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
@@ -32,8 +35,8 @@ import world.respect.shared.viewmodel.RespectViewModel
  *           (not including the selectedAccount)
  */
 data class AccountListUiState(
-    val selectedAccount: RespectAccountAndPerson? = null,
-    val accounts: List<RespectAccountAndPerson> = emptyList(),
+    val selectedAccount: RespectSessionAndPerson? = null,
+    val accounts: List<RespectSessionAndPerson> = emptyList(),
 )
 
 class AccountListViewModel(
@@ -95,8 +98,8 @@ class AccountListViewModel(
                 _uiState.update { prev ->
                     prev.copy(
                         accounts = storedAccountList.map {
-                            RespectAccountAndPerson(
-                                account = it,
+                            RespectSessionAndPerson(
+                                session = RespectSession(it, null),
                                 person = Person(
                                     guid = it.userGuid,
                                     givenName = "",
@@ -119,8 +122,8 @@ class AccountListViewModel(
                             _uiState.update { prev ->
                                 prev.copy(
                                     accounts = prev.accounts.replaceOrAppend(
-                                        RespectAccountAndPerson(
-                                            account = account,
+                                        RespectSessionAndPerson(
+                                            session = RespectSession(account, null),
                                             person = person.dataOrNull() ?: Person(
                                                 guid = account.userGuid,
                                                 givenName = "",
@@ -130,7 +133,7 @@ class AccountListViewModel(
                                             )
                                         )
                                     ) {
-                                        it.account.isSameAccount(account)
+                                        it.session.account.isSameAccount(account)
                                     }
                                 )
                             }
@@ -142,10 +145,26 @@ class AccountListViewModel(
     }
 
     fun onClickAccount(account: RespectAccount) {
-        respectAccountManager.selectedAccount = account
+        respectAccountManager.switchAccount(account)
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
         )
+    }
+
+    fun onClickFamilyPerson(person: Person) {
+        viewModelScope.launch {
+            respectAccountManager.switchProfile(person.guid)
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = if(person.roles.firstOrNull()?.roleEnum == PersonRoleEnum.PARENT) {
+                        RespectAppLauncher()
+                    } else {
+                        AssignmentList
+                    },
+                    clearBackStack = true
+                )
+            )
+        }
     }
 
     fun onClickAddAccount() {
@@ -153,12 +172,13 @@ class AccountListViewModel(
             NavCommand.Navigate(GetStartedScreen(canGoBack = true))
         )
     }
+
     fun onClickProfile() {
         uiState.value.selectedAccount?.also {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     PersonDetail(
-                        guid = it.account.userGuid
+                        guid = it.session.account.userGuid
                     )
                 )
             )
@@ -169,7 +189,7 @@ class AccountListViewModel(
     fun onClickLogout() {
         uiState.value.selectedAccount?.also {
             viewModelScope.launch {
-                respectAccountManager.endSession(it.account)
+                respectAccountManager.removeAccount(it.session.account)
             }
         }
     }

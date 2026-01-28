@@ -17,7 +17,6 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"
@@ -28,7 +27,6 @@ onFlowComplete:
     id: "app_title"
     text: "App detail"
 - assertVisible: "My app"
-- assertVisible: "Try it"
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"

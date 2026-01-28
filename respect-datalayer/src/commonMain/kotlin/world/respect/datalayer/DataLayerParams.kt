@@ -8,6 +8,8 @@ object DataLayerParams {
 
     const val SINCE = "since"
 
+    const val SINCE_IF_PERMISSIONS_NOT_CHANGED_SINCE = "sinceIfPermissionsNotChangedSince"
+
     const val GUID = "guid"
 
     const val INCLUDE_RELATED = "includeRelated"
@@ -23,7 +25,15 @@ object DataLayerParams {
     const val FILTER_BY_CLASS_UID = "filterByClassUid"
 
     const val FILTER_BY_ENROLLMENT_ROLE = "filterByEnrollmentRole"
+    const val FILTER_BY_PERSON_STATUS = "filterByEnrollmentStatus"
 
     const val FILTER_BY_NAME = "filterByName"
+
+    const val ORDER_BY = "orderBy"
+
+    const val INVITE_REQUIRED = "inviteRequired"
+
+    const val INVITE_STATUS = "inviteStatus"
+
 
 }

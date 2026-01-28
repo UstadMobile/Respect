@@ -7,6 +7,7 @@ interface AddChildAccountUseCase{
         personInfo: RespectRedeemInviteRequest.PersonInfo,
         parentUsername: String,
         classUid: String?,
-        inviteCode: String
+        inviteCode: String,
+        familyPersonGuid:String?
     )
 }

@@ -17,6 +17,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.BasicWebView
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
+import world.respect.datalayer.respect.model.USTADMOBILE_RESPECT_DATA_POLICY_URL
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accept
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionUiState
@@ -43,7 +44,7 @@ fun TermsAndConditionScreen(
             .defaultScreenPadding()
     ) {
         BasicWebView(
-            url = Url("https://www.ustadmobile.com/policies/ustad.html"),
+            url = Url(USTADMOBILE_RESPECT_DATA_POLICY_URL),
             modifier = Modifier.weight(1f)
         )
 

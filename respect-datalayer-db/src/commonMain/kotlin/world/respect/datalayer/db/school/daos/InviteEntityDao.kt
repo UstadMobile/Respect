@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.InviteEntity
+import world.respect.datalayer.school.model.InviteStatusEnum
 import world.respect.libutil.util.time.systemTimeInMillis
 
 @Dao
@@ -22,17 +23,7 @@ interface InviteEntityDao {
          LIMIT 1
     """)
     suspend fun getLastModifiedByGuid(guidHash: Long): Long?
-    @Query("""
-        UPDATE InviteEntity
-        SET iInviteStatus = :status,
-            iLastModified = :lastModified
-        WHERE iGuid = :guid
-    """)
-    suspend fun updateInviteStatus(
-        guid: String,
-        status: Int = InviteEntity.STATUS_ACCEPTED,
-        lastModified: Long = systemTimeInMillis()
-    )
+
     @Query("""
         SELECT * 
           FROM InviteEntity
@@ -68,9 +59,9 @@ interface InviteEntityDao {
         SELECT InviteEntity.* 
          FROM InviteEntity
         WHERE (:guidHash = 0 OR InviteEntity.iGuidHash = :guidHash)
-          AND (:code IS NULL 
-                OR InviteEntity.iCode = :code)
+          AND (:code IS NULL OR InviteEntity.iCode = :code)
           """)
+
     fun findAllAsPagingSource(
         guidHash: Long = 0,
         code: String? = null,
@@ -83,9 +74,4 @@ interface InviteEntityDao {
     """)
     suspend fun findByUidList(uidNums: List<Long>): List<InviteEntity>
 
-    @Query("""
-        DELETE FROM InviteEntity
-         WHERE iGuidHash = :guidHash
-    """)
-    suspend fun deleteByGuidHash(guidHash: Long)
 }

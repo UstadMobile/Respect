@@ -31,7 +31,7 @@ import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -46,7 +46,7 @@ class AssignmentListViewModel(
     private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
 

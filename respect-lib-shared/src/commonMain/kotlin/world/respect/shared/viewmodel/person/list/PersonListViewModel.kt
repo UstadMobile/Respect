@@ -35,9 +35,13 @@ import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
@@ -48,9 +52,12 @@ data class PersonListUiState(
         EmptyPagingSource()
     },
     val showAddPersonItem: Boolean = false,
+    val isPendingExpanded: Boolean = true,
     val showInviteCode: String? = null,
     val showInviteButton: Boolean = false,
-)
+    val pendingPersons: IPagingSourceFactory<Int, Person> =
+        IPagingSourceFactory { EmptyPagingSource() },
+    )
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
@@ -59,7 +66,7 @@ class PersonListViewModel(
     private val setClipboardStringUseCase: SetClipboardStringUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -71,12 +78,26 @@ class PersonListViewModel(
 
     private val route: PersonList = savedStateHandle.toRoute()
 
+    private val checkPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
+
+    private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
+
+    private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
+        schoolDataSource.personDataSource.listAsPagingSource(
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
+            )
+        )
+    }
+
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listDetailsAsPagingSource(
             DataLoadParams(),
             PersonDataSource.GetListParams(
                 filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
                 filterByPersonRole = route.filterByRole,
+                filterByPersonStatus = PersonStatusEnum.ACTIVE,
             )
         )
     }
@@ -93,17 +114,17 @@ class PersonListViewModel(
                     Res.string.select_person.asUiText()
                 },
                 expandableFabState = ExpandableFabUiState(
-                    visible = !(route.filterByRole != null||route.classUidStr!=null),
+                    visible = !(route.filterByRole != null||route.addToClassUid!=null),
                     items = listOf(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
                             text =  Res.string.invite_person.asUiText(),
-                            onClick = { onClickInvitePerson()}
+                            onClick = ::onClickInvitePerson,
                         ),
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.ADD,
                             text = Res.string.add_new_person.asUiText(),
-                            onClick = { onClickAdd() }
+                            onClick = ::onClickAdd,
                         )
                     )
                 ),
@@ -119,8 +140,11 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
+            val canAddPerson = checkPermissionUseCase(
+                PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
+            ).isNotEmpty()
+
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
-                val canAddPerson = selectedAcct?.person?.isAdminOrTeacher() == true
                 _appUiState.update { prev ->
                     prev.copy(
                         fabState = prev.fabState.copy(
@@ -137,9 +161,15 @@ class PersonListViewModel(
 
         _uiState.update {
             it.copy(
+                pendingPersons = pendingPersonsPagingSource,
                 persons = pagingSourceFactoryHolder,
-                showInviteButton = route.filterByRole != null||route.classUidStr!=null
+                showInviteButton = route.filterByRole != null||route.addToClassUid!=null
             )
+        }
+    }
+    fun onTogglePendingInvites() {
+        _uiState.update {
+            it.copy(isPendingExpanded = !it.isPendingExpanded)
         }
     }
 
@@ -178,6 +208,23 @@ class PersonListViewModel(
         }
     }
 
+
+    fun onClickAcceptOrDismissInvite(
+        person: Person,
+        approved: Boolean,
+    ) {
+        viewModelScope.launch {
+            try {
+                approveOrDeclineInviteRequestUseCase(
+                    personUid = person.guid,
+                    approved = approved,
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -190,21 +237,11 @@ class PersonListViewModel(
         )
     }
 
-    fun onClickInviteCode() {
-        _uiState.value.showInviteCode?.also {
-            setClipboardStringUseCase(it)
-        }
-    }
-
     fun onClickInvitePerson() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 InvitePerson.create(
-                    classUid = route.classUidStr,
-                    className = route.classNameStr,
-                    role = route.role,
-                    presetRole = route.filterByRole,
-                    inviteCode = route.showInviteCode
+                    invitePersonOptions = InvitePerson.NewUserInviteOptions(null)
                 )
             )
         )

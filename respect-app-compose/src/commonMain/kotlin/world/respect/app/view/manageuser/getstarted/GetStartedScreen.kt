@@ -41,8 +41,9 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_my_school
-import world.respect.shared.generated.resources.enter_school_name
+import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.other_options
+import world.respect.shared.generated.resources.scan_qr_code_badge
 import world.respect.shared.generated.resources.school_name_placeholder
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedUiState
@@ -58,6 +59,7 @@ fun GetStartedScreen(
         uiState = uiState,
         onSchoolNameChanged = viewModel::onSchoolNameChanged,
         onClickOtherOptions = viewModel::onClickOtherOptions,
+        onClickScanQRBadge = viewModel::onClickScanQRBadge,
         onSchoolSelected = viewModel::onSchoolSelected,
         onAddMySchool = viewModel::onClickAddMySchool
     )
@@ -69,6 +71,7 @@ fun GetStartedScreen(
     onSchoolNameChanged: (String) -> Unit,
     onSchoolSelected: (SchoolDirectoryEntry) -> Unit,
     onClickOtherOptions: () -> Unit,
+    onClickScanQRBadge: () -> Unit,
     onAddMySchool: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -98,7 +101,7 @@ fun GetStartedScreen(
             value = uiState.schoolName,
             onValueChange = onSchoolNameChanged,
             label = {
-                Text(text = stringResource(Res.string.enter_school_name))
+                Text(text = stringResource(Res.string.school_name))
             },
             placeholder = {
                 Text(text = stringResource(Res.string.school_name_placeholder))
@@ -171,6 +174,14 @@ fun GetStartedScreen(
 
         if (uiState.showButtons){
             Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedButton(
+                onClick = onClickScanQRBadge,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(Res.string.scan_qr_code_badge))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(
                 onClick = onClickOtherOptions,

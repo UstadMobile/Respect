@@ -130,6 +130,7 @@ class OtherOptionsSignupViewModel(
                                 schoolUrl = route.schoolUrl
                             )
 
+                            /*
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = if(
@@ -152,6 +153,7 @@ class OtherOptionsSignupViewModel(
                                     clearBackStack = true,
                                 )
                             )
+                            */
                         }
 
                         is CreatePasskeyUseCase.Error -> {

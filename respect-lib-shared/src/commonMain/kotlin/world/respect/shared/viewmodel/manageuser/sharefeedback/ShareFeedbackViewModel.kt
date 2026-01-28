@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -118,11 +117,20 @@ class ShareFeedbackViewModel(
     }
 
     fun onPhoneChanged(phone: String) {
-        _uiState.update { it.copy(phoneNumber = phone, contactError = null) }
+        _uiState.update {
+            it.copy(
+                phoneNumber = phone,
+                contactError = null
+            )
+        }
     }
 
     fun onEmailChanged(email: String) {
-        _uiState.update { it.copy(email = email, contactError = null) }
+        _uiState.update {
+            it.copy(
+                email = email
+            )
+        }
     }
 
     fun onClickSubmit() {
@@ -132,7 +140,7 @@ class ShareFeedbackViewModel(
             } else null
 
         val contactReqError =
-            if (_uiState.value.isCheckBoxSelected && _uiState.value.phoneNumber.isNotBlank()) {
+            if (_uiState.value.isCheckBoxSelected && _uiState.value.phoneNumber.isBlank()) {
                 Res.string.required_field.asUiText()
             } else null
 
@@ -142,6 +150,7 @@ class ShareFeedbackViewModel(
                 contactError = contactReqError
             )
         }
+
 
         viewModelScope.launch {
             val customerEmail = if (_uiState.value.isCheckBoxSelected) {

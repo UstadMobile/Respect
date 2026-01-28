@@ -334,7 +334,6 @@ fun ContactFields(
 ) {
     Column(modifier = Modifier.fillMaxWidth())
     {
-        val error = uiState.contactError != null
 
         RespectPhoneNumberTextField(
             value = uiState.phoneNumber,

@@ -172,12 +172,14 @@ class ShareFeedbackViewModel(
                 phoneNumberError = "".asUiText()
                 emailError = Res.string.enter_one_field.asUiText()
             } else {
-                if (_uiState.value.phoneNumber.isNotBlank() && _uiState.value.nationalPhoneNumSet &&
-                    !phoneNumValidatorUseCase.isValid(_uiState.value.phoneNumber)
+                if (_uiState.value.phoneNumber.isNotBlank() && _uiState.value.nationalPhoneNumSet
+                    && !phoneNumValidatorUseCase.isValid(_uiState.value.phoneNumber)
                 ) {
                     phoneNumberError = Res.string.invalid.asUiText()
                 }
-                if (_uiState.value.email.isNotBlank() && !validateEmailUseCase(_uiState.value.email)) {
+                if (_uiState.value.email.isNotBlank() &&
+                    !validateEmailUseCase(_uiState.value.email)
+                ) {
                     emailError = Res.string.invalid_email.asUiText()
                 }
             }
@@ -230,7 +232,7 @@ class ShareFeedbackViewModel(
             } catch (e: Exception) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update {
-                    it.copy( errorMessage = getString(Res.string.error_message))
+                    it.copy(errorMessage = getString(Res.string.error_message))
                 }
             }
         }

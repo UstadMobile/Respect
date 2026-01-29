@@ -207,7 +207,9 @@ fun ShareFeedbackScreen(
                 Text(
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                     text = it,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
@@ -344,7 +346,6 @@ fun ContactFields(
 ) {
     Column(modifier = Modifier.fillMaxWidth())
     {
-
         RespectPhoneNumberTextField(
             value = uiState.phoneNumber,
             modifier = Modifier.fillMaxWidth().defaultItemPadding(),

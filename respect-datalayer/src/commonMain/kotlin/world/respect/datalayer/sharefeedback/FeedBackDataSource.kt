@@ -1,11 +1,12 @@
 package world.respect.datalayer.sharefeedback
 
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
+import io.ktor.client.statement.HttpResponse
 
 interface FeedBackDataSource {
     suspend fun createTicket(
         ticket: FeedbackTicket
-    )
+    ): HttpResponse
 
     companion object{
         const val DEFAULT_GROUP_ID = "1"

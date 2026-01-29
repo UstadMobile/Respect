@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.manageuser.sharefeedback
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -82,7 +83,7 @@ class ShareFeedbackViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.share_feedback.asUiText(),
-                hideBottomNavigation=true
+                hideBottomNavigation = true
             )
         }
         viewModelScope.launch {
@@ -219,17 +220,23 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                schoolDataSource.feedBackDataSource.createTicket(ticket)
+                val response = schoolDataSource.feedBackDataSource.createTicket(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        destination = FeedbackSubmitted,
-                        popUpToClass = ShareFeedback::class,
-                        popUpToInclusive = true
+                if (response.status.isSuccess()) {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = FeedbackSubmitted,
+                            popUpToClass = ShareFeedback::class,
+                            popUpToInclusive = true
+                        )
                     )
-                )
+                } else {
+                    _uiState.update {
+                        it.copy(errorMessage = getString(Res.string.error_message))
+                    }
+                }
             } catch (e: Exception) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update {

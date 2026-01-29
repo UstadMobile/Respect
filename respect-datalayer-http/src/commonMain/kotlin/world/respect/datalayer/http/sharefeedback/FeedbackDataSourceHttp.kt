@@ -3,6 +3,7 @@ package world.respect.datalayer.http.sharefeedback
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -15,12 +16,13 @@ class FeedbackDataSourceHttp(
     private val zammadUrl: String
 ) : FeedBackDataSource {
 
-    override suspend fun createTicket(ticket: FeedbackTicket) {
+    override suspend fun createTicket(ticket: FeedbackTicket): HttpResponse {
 
-        httpClient.post(zammadUrl) {
+        val response =httpClient.post(zammadUrl) {
             headers[HttpHeaders.Authorization] = zammadToken
             contentType(ContentType.Application.Json)
             setBody(ticket)
         }
+        return response
     }
 }

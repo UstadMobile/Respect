@@ -34,7 +34,9 @@ class SchoolDataSourceHttp(
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    private val validationHelper: ExtendedDataSourceValidationHelper
+    private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val zammadUrl: String,
+    private val zammadToken: String
 ) : SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSource by lazy {
@@ -130,6 +132,13 @@ class SchoolDataSourceHttp(
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
+        )
+    }
+    override val feedBackDataSource: FeedBackDataSource by lazy {
+        FeedbackDataSourceHttp(
+            httpClient=httpClient,
+            zammadToken=zammadToken,
+            zammadUrl=zammadUrl
         )
     }
 }

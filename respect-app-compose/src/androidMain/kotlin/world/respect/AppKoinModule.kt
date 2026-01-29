@@ -851,6 +851,8 @@ val appKoinModule = module {
                     httpClient = get(),
                     tokenProvider = get(),
                     validationHelper = get(),
+                    zammadUrl = RespectBuildConfig.RESPECT_ZAMMAD_URL,
+                    zammadToken = RespectBuildConfig.RESPECT_ZAMMAD_TOKEN
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),

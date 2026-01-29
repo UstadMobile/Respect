@@ -10,7 +10,7 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
 import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
 import world.respect.datalayer.sharefeedback.model.Article
@@ -76,12 +76,13 @@ class ShareFeedbackViewModel(
 
     var subject = ""
 
-    //private val feedBackDataSource: FeedBackDataSource by inject()
+    private val schoolDataSource: SchoolDataSource by inject()
 
     init {
         _appUiState.update {
             it.copy(
                 title = Res.string.share_feedback.asUiText(),
+                hideBottomNavigation=true
             )
         }
         viewModelScope.launch {
@@ -218,7 +219,7 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                //feedBackDataSource.createTicket(ticket)
+                schoolDataSource.feedBackDataSource.createTicket(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 

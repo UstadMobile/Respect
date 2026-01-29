@@ -43,4 +43,6 @@ interface SchoolDataSource {
 
     val assignmentDataSource: AssignmentDataSource
 
+    val feedBackDataSource: FeedBackDataSource
+
 }

@@ -1,5 +1,5 @@
 package world.respect.shared.domain.launchers
 
-interface EmailLauncher {
+interface EmailLauncherUseCase {
     suspend fun sendEmail(subject: String)
 }

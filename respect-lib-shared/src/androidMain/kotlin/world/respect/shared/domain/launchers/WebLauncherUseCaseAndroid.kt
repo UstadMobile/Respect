@@ -4,22 +4,21 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WHATSAPP_URL
-import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WHATSAPP_PHONE_NUMBER
-import androidx.core.net.toUri
+import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WEB_URL
 
-class WhatsAppLauncherAndroid(
+class WebLauncherUseCaseAndroid(
     private val context: Context
-) : WhatsAppLauncher {
+) : WebLauncherUseCase {
 
-    override suspend fun launchWhatsApp() {
+    override suspend fun launchWeb() {
         withContext(Dispatchers.Main) {
             try {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "$WHATSAPP_URL$WHATSAPP_PHONE_NUMBER".toUri()
+                    WEB_URL.toUri()
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
@@ -27,7 +26,7 @@ class WhatsAppLauncherAndroid(
                 context.startActivity(intent)
 
             } catch (e: ActivityNotFoundException) {
-                Log.w("WhatsAppLauncher", "WhatsApp not installed", e)
+                Log.e("WebLauncherAndroid", "No browser found to open web URL", e)
             }
         }
     }

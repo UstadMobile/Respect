@@ -17,9 +17,9 @@ import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAUL
 import world.respect.datalayer.sharefeedback.model.Article
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.feedback.FeedbackCategory
-import world.respect.shared.domain.launchers.EmailLauncher
-import world.respect.shared.domain.launchers.WebLauncher
-import world.respect.shared.domain.launchers.WhatsAppLauncher
+import world.respect.shared.domain.launchers.EmailLauncherUseCase
+import world.respect.shared.domain.launchers.WebLauncherUseCase
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
@@ -62,9 +62,9 @@ data class ShareFeedbackUiState(
 class ShareFeedbackViewModel(
     accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle,
-    private val whatsAppLauncher: WhatsAppLauncher,
-    private val emailLauncher: EmailLauncher,
-    private val webLauncher: WebLauncher,
+    private val whatsAppLauncherUseCase: WhatsAppLauncherUseCase,
+    private val emailLauncherUseCase: EmailLauncherUseCase,
+    private val webLauncherUseCase: WebLauncherUseCase,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
@@ -102,19 +102,19 @@ class ShareFeedbackViewModel(
 
     fun onClickWhatsApp() {
         viewModelScope.launch {
-            whatsAppLauncher.launchWhatsApp()
+            whatsAppLauncherUseCase.launchWhatsApp()
         }
     }
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncher.sendEmail(subject)
+            emailLauncherUseCase.sendEmail(subject)
         }
     }
 
     fun onClickPublicForum() {
         viewModelScope.launch {
-            webLauncher.launchWeb()
+            webLauncherUseCase.launchWeb()
         }
     }
 

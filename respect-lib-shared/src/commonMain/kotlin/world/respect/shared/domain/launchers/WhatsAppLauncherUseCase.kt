@@ -1,6 +1,6 @@
 package world.respect.shared.domain.launchers
 
-interface WhatsAppLauncher {
+interface WhatsAppLauncherUseCase {
     suspend fun launchWhatsApp()
 }
 

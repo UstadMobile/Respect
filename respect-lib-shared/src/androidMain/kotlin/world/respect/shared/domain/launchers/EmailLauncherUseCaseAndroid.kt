@@ -10,9 +10,9 @@ import kotlinx.coroutines.withContext
 import androidx.core.net.toUri
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.EMAIL_RECIPIENT
 
-class EmailLauncherAndroid(
+class EmailLauncherUseCaseAndroid(
     private val context: Context
-) : EmailLauncher {
+) : EmailLauncherUseCase {
 
     override suspend fun sendEmail(subject: String) {
         withContext(Dispatchers.Main) {

@@ -73,7 +73,6 @@ import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.http.SchoolDataSourceHttp
-import world.respect.datalayer.http.sharefeedback.FeedbackDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
@@ -89,7 +88,6 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
@@ -139,12 +137,12 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
-import world.respect.shared.domain.launchers.WhatsAppLauncher
-import world.respect.shared.domain.launchers.WhatsAppLauncherAndroid
-import world.respect.shared.domain.launchers.EmailLauncher
-import world.respect.shared.domain.launchers.EmailLauncherAndroid
-import world.respect.shared.domain.launchers.WebLauncher
-import world.respect.shared.domain.launchers.WebLauncherAndroid
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCaseAndroid
+import world.respect.shared.domain.launchers.EmailLauncherUseCase
+import world.respect.shared.domain.launchers.EmailLauncherUseCaseAndroid
+import world.respect.shared.domain.launchers.WebLauncherUseCase
+import world.respect.shared.domain.launchers.WebLauncherUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -233,7 +231,6 @@ import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccoun
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
-import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -357,14 +354,14 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
 
-    single<WhatsAppLauncher> {
-        WhatsAppLauncherAndroid(androidContext())
+    single<WhatsAppLauncherUseCase> {
+        WhatsAppLauncherUseCaseAndroid(androidContext())
     }
-    single<EmailLauncher> {
-        EmailLauncherAndroid(androidContext())
+    single<EmailLauncherUseCase> {
+        EmailLauncherUseCaseAndroid(androidContext())
     }
-    single<WebLauncher> {
-        WebLauncherAndroid(androidContext())
+    single<WebLauncherUseCase> {
+        WebLauncherUseCaseAndroid(androidContext())
     }
 
     single<GetOfflineStorageOptionsUseCase> {

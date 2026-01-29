@@ -31,22 +31,23 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Teacher"
 - assertVisible: "Approval required"    #switch is On
 - assertVisible: "Copy link"
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via Email"
 - assertVisible: "Share link"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
 - scroll
 - assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
       id: "invite_url"
-## Teacher user joining using invite QR code
+
+# Teacher user joining using invite QR code
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -218,14 +219,13 @@ onFlowComplete:
 - tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
-      text: "Copy link"
+     id: "invite_url"
 
 # Parent sign-up to the app using invite link
-- clearState: world.respect.app
-- launchApp:
-    appId: "world.respect.app"
-    arguments:
-      launchUrl: pasteText
+- runFlow:
+    file: "subflows/openlink_flow.yaml"
+    env:
+      URL: ${maestro.copiedText}
 - assertVisible:
     id: "app_title"
     text: "Invitation"

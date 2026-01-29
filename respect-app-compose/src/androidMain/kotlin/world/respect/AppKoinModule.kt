@@ -110,7 +110,7 @@ import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
-import world.respect.shared.domain.account.navigateonaccountcreated.NavigateOnAccountCreatedUseCase
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.passkey.EncodeUserHandleUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysClient
@@ -207,7 +207,7 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
-import world.respect.shared.domain.getplaystorereferrer.GetDeferredDeepLinkUseCase
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
@@ -242,8 +242,8 @@ import world.respect.shared.domain.sendinvite.LaunchSendEmailAndroid
 import world.respect.shared.domain.sendinvite.LaunchShareLinkAndroid
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
-import world.respect.shared.domain.getplaystorereferrer.GetDeferredDeepLinkUseCaseAndroid
-
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
+import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -689,6 +689,18 @@ val appKoinModule = module {
     single<BiometricAuthUseCase> {
         get<BiometricAuthUseCaseAndroidImpl>()
     }
+
+    single<NavigateOnAppStartUseCase> {
+        NavigateOnAppStartUseCase(
+            accountManager = get(),
+            initDeepLinkUriProvider = get(),
+            getDeferredDeepLinkUseCase = get(),
+            customDeepLinkToUrlUseCase = get(),
+            resolveUrlToNavCommandUseCase = get(),
+            settings = get(),
+        )
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.

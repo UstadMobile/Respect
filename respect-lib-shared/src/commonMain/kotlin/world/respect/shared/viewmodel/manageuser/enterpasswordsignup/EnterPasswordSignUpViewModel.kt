@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.navigateonaccountcreated.NavigateOnAccountCreatedUseCase
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.required_field

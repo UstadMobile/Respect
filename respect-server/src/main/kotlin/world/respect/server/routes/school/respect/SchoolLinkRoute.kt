@@ -9,8 +9,9 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import world.respect.datalayer.respect.model.APPSTORE_REDIRECT_BASE
+import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.server.util.ext.virtualHost
-import world.respect.shared.domain.getplaystorereferrer.GetDeferredDeepLinkUseCase
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 
 /**
  * Redirect and set the referrer parameter such that it will be picked up by hte
@@ -19,6 +20,7 @@ fun Route.SchoolLinkRoute() {
     get("{path...}") {
         val schoolUrl = call.request.virtualHost
         val thisUrl = URLBuilder(schoolUrl).apply {
+            appendEncodedPathSegments(RESPECT_SCHOOL_LINK_SEGMENT)
             call.parameters["path"]?.also { appendEncodedPathSegments(it) }
             parameters.appendAll(call.request.queryParameters)
         }.build()
@@ -40,7 +42,7 @@ fun Route.SchoolLinkRoute() {
             text = """
                 <html>
                 <head>
-                <meta http-equiv="refresh" content="100; url=${redirectToUrl}" />
+                <meta http-equiv="refresh" content="1; url=${redirectToUrl}" />
                 </head>
                 <body>
                 

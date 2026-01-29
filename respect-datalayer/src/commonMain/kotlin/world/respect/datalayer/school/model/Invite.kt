@@ -62,6 +62,11 @@ sealed interface Invite2: ModelWithTimes {
     }
 }
 
+/**
+ * @property firstUser - special property that will be set if the invite was created as part of
+ *           self-service add your school. This invite will not require approval (there would be no
+ *           one to approve it). After it is used, it will be deleted.
+ */
 @Serializable
 @SerialName(TYPE_NEW_USER)
 data class NewUserInvite(

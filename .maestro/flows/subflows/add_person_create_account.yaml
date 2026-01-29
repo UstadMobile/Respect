@@ -1,0 +1,34 @@
+appId: world.respect.app
+
+---
+# Add a person and create account
+- tapOn: "People"
+- assertVisible:
+      id: "app_title"
+      text: "People"
+- tapOn:
+      id: "floating_action_button"   #  +Person button
+- assertVisible:
+      id: "app_title"
+      text: "Add person"
+- tapOn: "First names*"
+- inputText: ${FIRSTNAME}
+- tapOn: "Last name*"
+- inputText: ${LASTNAME}
+- tapOn: "Gender*"
+- tapOn: ${GENDER}
+- tapOn:
+      id: "role"
+- tapOn: ${ROLE}
+- tapOn: "Save"
+- assertVisible:
+      id: "app_title"
+      text: ${FIRSTNAME} ${LASTNAME}
+- tapOn: "Create account"
+- assertVisible:
+      id: "Username"
+      text: ${USERNAME}
+- tapOn: "Set password"
+- tapOn: "Password*"
+- inputText: ${PASSWORD}
+- tapOn: "Save"

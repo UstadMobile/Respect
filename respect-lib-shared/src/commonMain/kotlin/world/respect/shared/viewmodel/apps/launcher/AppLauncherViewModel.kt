@@ -41,6 +41,7 @@ import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.shared.navigation.DownloadedLessons
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -48,7 +49,7 @@ data class AppLauncherUiState(
     val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
     val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
     val canRemove: Boolean = false,
-    val emptyListDescription: UiText?=null,
+    val emptyListDescription: UiText? = null,
 )
 
 class AppLauncherViewModel(
@@ -82,6 +83,8 @@ class AppLauncherViewModel(
             it.copy(
                 title = Res.string.apps.asUiText(),
                 onClickSettings = ::onClickSettings,
+                downloadIconVisible = true,
+                onClickDownload = ::onClickDownloads,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
@@ -103,7 +106,6 @@ class AppLauncherViewModel(
                 respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
                 apps = pagingSourceHolder
             )
-
         }
 
         viewModelScope.launch {
@@ -152,9 +154,16 @@ class AppLauncherViewModel(
             )
         )
     }
+
     fun onClickSettings() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(Settings)
+        )
+    }
+
+    fun onClickDownloads() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(DownloadedLessons)
         )
     }
 
@@ -180,4 +189,3 @@ class AppLauncherViewModel(
         )
     }
 }
-

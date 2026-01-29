@@ -13,7 +13,6 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
-import world.respect.datalayer.http.sharefeedback.FeedbackDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
@@ -27,16 +26,13 @@ import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
 
 class SchoolDataSourceHttp(
     private val schoolUrl: Url,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    private val validationHelper: ExtendedDataSourceValidationHelper,
-    private val zammadUrl: String,
-    private val zammadToken: String
+    private val validationHelper: ExtendedDataSourceValidationHelper
 ) : SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSource by lazy {
@@ -132,13 +128,6 @@ class SchoolDataSourceHttp(
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
-        )
-    }
-    override val feedBackDataSource: FeedBackDataSource by lazy {
-        FeedbackDataSourceHttp(
-            httpClient=httpClient,
-            zammadToken=zammadToken,
-            zammadUrl=zammadUrl
         )
     }
 }

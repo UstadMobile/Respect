@@ -13,7 +13,6 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.sharefeedback.model.FeedbackTicket
-import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
 import world.respect.datalayer.sharefeedback.model.Article
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.feedback.FeedbackCategory
@@ -220,23 +219,17 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                val response = schoolDataSource.feedBackDataSource.createTicket(ticket)
 
+                //have to make api call using token and url from zammad properties
                 loadingState = LoadingUiState.NOT_LOADING
-
-                if (response.status.isSuccess()) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            destination = FeedbackSubmitted,
-                            popUpToClass = ShareFeedback::class,
-                            popUpToInclusive = true
-                        )
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = FeedbackSubmitted,
+                        popUpToClass = ShareFeedback::class,
+                        popUpToInclusive = true
                     )
-                } else {
-                    _uiState.update {
-                        it.copy(errorMessage = getString(Res.string.error_message))
-                    }
-                }
+                )
+
             } catch (e: Exception) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update {
@@ -247,6 +240,7 @@ class ShareFeedbackViewModel(
     }
 
     companion object {
+        //will be adding values such as mobile number, email, etc to properties
         const val DEFAULT_CUSTOMER_ENDPOINT = "@ustadmobile.com"
         const val DEFAULT_CUSTOMER_ID = "info@ustadmobile.com"
         const val WHATSAPP_URL = "https://wa.me/"
@@ -254,6 +248,7 @@ class ShareFeedbackViewModel(
         const val WEB_URL = "https://respect.world/"
         const val EMAIL_RECIPIENT = "respect.app.tester2026@gmail.com"
         const val GUESS = "guess:"
+        const val DEFAULT_GROUP_ID = "1"
     }
 }
 

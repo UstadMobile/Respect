@@ -11,7 +11,6 @@ import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -42,7 +41,5 @@ interface SchoolDataSource {
     val enrollmentDataSource: EnrollmentDataSource
 
     val assignmentDataSource: AssignmentDataSource
-
-    val feedBackDataSource: FeedBackDataSource
 
 }

@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import shadow.bundletool.com.android.tools.r8.internal.za
 
 import java.util.Properties
 import java.io.FileInputStream
@@ -54,14 +55,6 @@ ZAMMAD_PROP_NAMES.forEach { propName ->
     }
 }
 
-val respectZammadToken = zammadProperties.getProperty("token")
-    ?: System.getenv("RESPECT_ZAMMAD_TOKEN")
-    ?: "Token token=d8DYXTdghwp8BWPEyA7ISI6Ds1uHuSjCGUiUT33ciHoeqyozLKJ3MVRPOhCrr4gB"
-
-val respectZammadUrl = zammadProperties.getProperty("url")
-    ?: System.getenv("RESPECT_ZAMMAD_URL")
-    ?: "https://respect.zammad.com/api/v1/tickets"
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -81,8 +74,6 @@ buildConfig {
     className("RespectBuildConfig")
 
     buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
-    buildConfigField<String>("RESPECT_ZAMMAD_TOKEN", respectZammadToken)
-    buildConfigField<String>("RESPECT_ZAMMAD_URL", respectZammadUrl)
 
 }
 
@@ -216,6 +207,14 @@ android {
                 type = "String",
                 name = "ACRA_${propName.uppercase()}",
                 value = "\"${acraProperties.getProperty(propName) ?: ""}\"   "
+            )
+        }
+
+        for(propName in ZAMMAD_PROP_NAMES) {
+            buildConfigField(
+                type = "String",
+                name = "ZAMMAD_${propName.uppercase()}",
+                value = "\"${zammadProperties.getProperty(propName) ?: ""}\"   "
             )
         }
     }

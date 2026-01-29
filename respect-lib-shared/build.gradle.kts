@@ -104,8 +104,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+        buildConfigField(
+            "String",
+            "ZAMMAD_URL",
+            project.findProperty("ZAMMAD_URL").toString())
+
+        buildConfigField(
+            "String",
+            "ZAMMAD_TOKEN",
+            project.findProperty("ZAMMAD_TOKEN").toString())
     }
 }
 dependencies {

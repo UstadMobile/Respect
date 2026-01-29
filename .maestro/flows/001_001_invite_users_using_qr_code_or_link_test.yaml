@@ -31,15 +31,15 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Teacher"
 - assertVisible: "Approval required"    #switch is On
 - assertVisible: "Copy link"
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via Email"
 - assertVisible: "Share link"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
 - scroll
 - assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off

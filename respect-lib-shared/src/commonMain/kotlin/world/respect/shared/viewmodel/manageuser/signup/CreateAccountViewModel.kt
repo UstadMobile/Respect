@@ -21,7 +21,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
-import world.respect.shared.domain.account.navigateonaccountcreated.NavigateOnAccountCreatedUseCase
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase

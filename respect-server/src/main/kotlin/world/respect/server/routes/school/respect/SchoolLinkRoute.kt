@@ -11,7 +11,7 @@ import io.ktor.server.routing.get
 import world.respect.datalayer.respect.model.APPSTORE_REDIRECT_BASE
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.server.util.ext.virtualHost
-import world.respect.shared.domain.getplaystorereferrer.GetDeferredDeepLinkUseCase
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 
 /**
  * Redirect and set the referrer parameter such that it will be picked up by hte

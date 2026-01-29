@@ -28,13 +28,13 @@ acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
 // Initialize Zammad properties
-val zammadProperties = Properties()
-val zammadPropertiesFile = System.getenv("ZAMMAD")?.let {
+val feedbackProperties = Properties()
+val feedbackPropertiesFile = System.getenv("FEEDBACK")?.let {
     File(it)
-} ?: rootProject.file("zammad.properties")
+} ?: rootProject.file("feedback.properties")
 
-zammadProperties.takeIf { zammadPropertiesFile.exists() }
-    ?.load(FileInputStream(zammadPropertiesFile))
+feedbackProperties.takeIf { feedbackPropertiesFile.exists() }
+    ?.load(FileInputStream(feedbackPropertiesFile))
 
 // The applist list - see main README
 val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
@@ -47,11 +47,11 @@ ACRA_PROP_NAMES.forEach { propName ->
     }
 }
 
-val ZAMMAD_PROP_NAMES = listOf("token", "url")
+val FEEDBACK_PROP_NAMES = listOf("zammadUrl","zammadToken","respectPhoneNumber","respectEmailId")
 
-ZAMMAD_PROP_NAMES.forEach { propName ->
-    System.getenv("ZAMMAD_${propName.uppercase()}")?.also {
-        zammadProperties.setProperty(propName, it)
+FEEDBACK_PROP_NAMES.forEach { propName ->
+    System.getenv("FEEDBACK_${propName.uppercase()}")?.also {
+        feedbackProperties.setProperty(propName, it)
     }
 }
 
@@ -210,11 +210,11 @@ android {
             )
         }
 
-        for(propName in ZAMMAD_PROP_NAMES) {
+        for(propName in FEEDBACK_PROP_NAMES) {
             buildConfigField(
                 type = "String",
                 name = "ZAMMAD_${propName.uppercase()}",
-                value = "\"${zammadProperties.getProperty(propName) ?: ""}\"   "
+                value = "\"${feedbackProperties.getProperty(propName) ?: ""}\"   "
             )
         }
     }

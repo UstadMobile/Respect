@@ -111,14 +111,23 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         buildConfigField(
             "String",
-            "ZAMMAD_URL",
-            project.findProperty("ZAMMAD_URL").toString())
+            "FEEDBACK_ZAMMADURL",
+            project.findProperty("FEEDBACK_ZAMMADURL").toString())
 
         buildConfigField(
             "String",
-            "ZAMMAD_TOKEN",
-            project.findProperty("ZAMMAD_TOKEN").toString())
+            "FEEDBACK_ZAMMADTOKEN",
+            project.findProperty("FEEDBACK_ZAMMADTOKEN").toString())
+        buildConfigField(
+            "String",
+            "FEEDBACK_RESPECTPHONENUMBER",
+            project.findProperty("FEEDBACK_RESPECTPHONENUMBER").toString())
+        buildConfigField(
+            "String",
+            "FEEDBACK_RESPECTEMAILID",
+            project.findProperty("FEEDBACK_RESPECTEMAILID").toString())
     }
+
 }
 dependencies {
     implementation(project(":respect-datalayer-repository"))

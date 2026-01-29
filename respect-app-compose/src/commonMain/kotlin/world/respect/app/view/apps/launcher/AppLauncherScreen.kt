@@ -63,11 +63,10 @@ fun AppLauncherScreen(
 
     AppLauncherScreen(
         uiState = uiState,
-        onClickApp = { viewModel.onClickApp(it) },
-        onClickRemove = { viewModel.onClickRemove(it) },
+        onClickApp = viewModel::onClickApp,
+        onClickRemove = viewModel::onClickRemove,
     )
 }
-
 
 @Composable
 fun AppLauncherScreen(
@@ -115,7 +114,6 @@ fun AppLauncherScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
                 items(
                     count = lazyPagingItems.itemCount,
                     key = { index ->

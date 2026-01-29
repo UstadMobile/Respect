@@ -522,5 +522,9 @@
     <string name="section_name">Section name</string>
 
     <string name="not_set">Not set</string>
+    <string name="downloaded_lessons">Downloaded lessons</string>
+    <string name="undo">Undo</string>
+    <string name="item_deleted">1 deleted</string>
+
 
 </resources>

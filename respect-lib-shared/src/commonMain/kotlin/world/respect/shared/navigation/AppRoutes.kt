@@ -44,6 +44,8 @@ data class JoinClazzWithCode(
     }
 
 }
+@Serializable
+object DownloadedLessons : RespectAppRoute
 
 @Serializable
 object Onboarding : RespectAppRoute

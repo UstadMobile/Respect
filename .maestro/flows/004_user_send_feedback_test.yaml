@@ -1,0 +1,89 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "004_user_send_feedback_test.yaml"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow:
+     file: "subflows/add_person_create_account.yaml"
+     env:
+       FIRSTNAME: TEST
+       LASTNAME: USER
+       GENDER: Male
+       ROLE: Student
+       USERNAME: testuser
+       PASSWORD: test123
+
+
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: testuser
+      PASSWORD: test123
+- assertVisible: "Apps"
+- tapOn:
+    id: "user_account_icon"
+- tapOn: "Share feedback"
+- assertVisible:
+    id: "app_title"
+    text: "Share feedback"
+- assertVisible: "Quick Contact"
+- assertVisible:
+        text: "Share feedback"
+        index: 1
+- assertVisible: "Category"
+- tapOn: "Respect launcher related issues"
+- assertVisible: "Integrated Apps related issues"
+- assertVisible: "Question"
+- tapOn: "Other"
+- assertVisible: "Your feedback"
+- tapOn: "Describe your issue or feedback in detail"
+- inputText: "Respect test feedback"
+- hideKeyboard
+- setAirplaneMode: enabled
+- tapOn: "Submit feedback"
+- assertVisible: "Error: try again"
+- setAirplaneMode: disabled
+- tapOn: "I want a response from the Respect team"
+- tapOn: "Submit feedback"
+- assertVisible: "If you need response, one of the field is required"
+- tapOn:
+    id: "phone_countrycode"
+- eraseText
+- inputText: "+1"
+- tapOn: "Phone number"
+- inputText: "21255543268"
+- tapOn: "Submit feedback"
+- assertVisible: "Invalid"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
+- inputText: "2125554326"
+- tapOn: "Email"
+- inputText: "teacheruser@gm"
+- tapOn: "Submit feedback"
+- assertVisible: "Enter valid email address."
+- inputText: "teacheruser@gmail.com"
+- tapOn: "Submit feedback"
+- assertVisible:
+    id: "app_title"
+    text: "Feedback submitted"
+- assertVisible: "Thank you for your feedback. Respect team will review it internally."
+- back
+- assertVisible:
+    id: "app_title"
+    text: "Accounts"

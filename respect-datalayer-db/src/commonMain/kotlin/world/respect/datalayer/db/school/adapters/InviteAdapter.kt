@@ -7,10 +7,6 @@ import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 
-data class InviteEntities(
-    val inviteEntity: InviteEntity
-)
-
 fun InviteEntity.toModel(): Invite2 {
     return when {
         iNewUserRole != null -> {
@@ -21,7 +17,8 @@ fun InviteEntity.toModel(): Invite2 {
                 lastModified = iLastModified,
                 stored = iStored,
                 status = iStatus,
-                role = iNewUserRole
+                role = iNewUserRole,
+                firstUser = iNewUserFirstInvite,
             )
         }
 
@@ -72,7 +69,8 @@ fun Invite2.toEntity(
     return when(this) {
         is NewUserInvite -> {
             baseInviteEntity.copy(
-                iNewUserRole = role
+                iNewUserRole = role,
+                iNewUserFirstInvite = firstUser,
             )
         }
 

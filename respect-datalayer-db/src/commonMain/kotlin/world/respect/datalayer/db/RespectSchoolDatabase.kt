@@ -72,7 +72,7 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
         PersonQrBadgeEntity::class,
         InviteEntity::class,
     ],
-    version = 10,
+    version = 11,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

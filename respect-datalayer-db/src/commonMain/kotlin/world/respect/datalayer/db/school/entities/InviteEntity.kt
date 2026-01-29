@@ -20,6 +20,7 @@ data class InviteEntity(
     val iStatus: StatusEnum,
 
     val iNewUserRole: PersonRoleEnum? = null,
+    val iNewUserFirstInvite: Boolean = false,
     val iForFamilyOfGuid: String? = null,
     val iForFamilyOfGuidHash: Long? = null,
     val iForClassGuid: String? = null,

@@ -80,4 +80,51 @@ onFlowComplete:
 - assertVisible: "Lesson 001"
 - back
 - assertVisible: "Homework 1"
-
+- tapOn:
+    id: "user_account_icon"
+- tapOn: "Share feedback"
+- assertVisible:
+    id: "app_title"
+    text: "Share feedback"
+- assertVisible: "Quick Contact"
+- assertVisible:
+        text: "Share feedback"
+        index: 1
+- assertVisible: "Category"
+- tapOn: "Respect launcher related issues"
+- assertVisible: "Integrated Apps related issues"
+- assertVisible: "Question"
+- tapOn: "Other"
+- assertVisible: "Your feedback"
+- tapOn: "Describe your issue or feedback in detail"
+- inputText: "Respect test feedback"
+- tapOn: "I want a response from Respect team"
+- tapOn: "Submit feedback"
+- assertVisible: "If you need response, one of the field is required"
+- tapOn:
+    id: "phone_countrycode"
+- eraseText
+- inputText: "+1"
+- tapOn: "Phone number"
+- inputText: "21255543268"
+- tapOn: "Submit feedback"
+- assertVisible: "Invalid"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
+- inputText: "2125554326"
+- tapOn: "Email"
+- inputText: "teacheruser@gm"
+- tapOn: "Submit feedback"
+- assertVisible: "Enter valid email address."
+- inputText: "teacheruser@gmail.com"
+- tapOn: "Submit feedback"
+- assertVisible:
+    id: "app_title"
+    text: "Feedback submitted"
+- assertVisible: "Thank you for your feedback. Respect team will review it internally"
+- back
+- assertVisible:
+    id: "app_title"
+    text: "Accounts"

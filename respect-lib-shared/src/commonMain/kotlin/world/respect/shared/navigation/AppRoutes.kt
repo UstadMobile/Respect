@@ -553,6 +553,11 @@ class LearningUnitViewer(
 @Serializable
 object AccountList : RespectAppRoute
 
+@Serializable
+object ShareFeedback : RespectAppRoute
+
+@Serializable
+object FeedbackSubmitted : RespectAppRoute
 
 @Serializable
 data class PersonList(

@@ -26,10 +26,17 @@ val acraPropertiesFile = System.getenv("ACRA")?.let {
 acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
+// Initialize Zammad properties
+val zammadProperties = Properties()
+val zammadPropertiesFile = System.getenv("ZAMMAD")?.let {
+    File(it)
+} ?: rootProject.file("zammad.properties")
+
+zammadProperties.takeIf { zammadPropertiesFile.exists() }
+    ?.load(FileInputStream(zammadPropertiesFile))
+
 // The applist list - see main README
 val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
-
-val defaultZammadToken = System.getenv("RESPECT_DEFAULT_APPLIST") ?:  "Token token=d8DYXTdghwp8BWPEyA7ISI6Ds1uHuSjCGUiUT33ciHoeqyozLKJ3MVRPOhCrr4gB"
 
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
@@ -38,6 +45,22 @@ ACRA_PROP_NAMES.forEach { propName ->
         acraProperties.setProperty(propName, it)
     }
 }
+
+val ZAMMAD_PROP_NAMES = listOf("token", "url")
+
+ZAMMAD_PROP_NAMES.forEach { propName ->
+    System.getenv("ZAMMAD_${propName.uppercase()}")?.also {
+        zammadProperties.setProperty(propName, it)
+    }
+}
+
+val respectZammadToken = zammadProperties.getProperty("token")
+    ?: System.getenv("RESPECT_ZAMMAD_TOKEN")
+    ?: "Token token=d8DYXTdghwp8BWPEyA7ISI6Ds1uHuSjCGUiUT33ciHoeqyozLKJ3MVRPOhCrr4gB"
+
+val respectZammadUrl = zammadProperties.getProperty("url")
+    ?: System.getenv("RESPECT_ZAMMAD_URL")
+    ?: "https://respect.zammad.com/api/v1/tickets"
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -58,7 +81,8 @@ buildConfig {
     className("RespectBuildConfig")
 
     buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
-    buildConfigField<String>("ZAMMAD_DEFAULT_TOKEN", defaultZammadToken)
+    buildConfigField<String>("RESPECT_ZAMMAD_TOKEN", respectZammadToken)
+    buildConfigField<String>("RESPECT_ZAMMAD_URL", respectZammadUrl)
 
 }
 

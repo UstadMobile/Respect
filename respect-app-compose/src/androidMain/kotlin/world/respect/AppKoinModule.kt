@@ -831,13 +831,6 @@ val appKoinModule = module {
                 dataSource = get(),
             )
         }
-        scoped<FeedBackDataSource> { params ->
-            val token: String =  RespectBuildConfig.ZAMMAD_DEFAULT_TOKEN
-            FeedbackDataSourceHttp(
-                httpClient = get(),
-                zammadToken = token
-            )
-        }
 
         scoped<SchoolDataSource> {
             val accountScopeId = RespectAccountScopeId.parse(id)

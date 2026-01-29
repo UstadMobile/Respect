@@ -76,7 +76,7 @@ class ShareFeedbackViewModel(
 
     var subject = ""
 
-    private val feedBackDataSource: FeedBackDataSource by inject()
+    //private val feedBackDataSource: FeedBackDataSource by inject()
 
     init {
         _appUiState.update {
@@ -218,7 +218,7 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                feedBackDataSource.createTicket(ticket)
+                //feedBackDataSource.createTicket(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 

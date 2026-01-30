@@ -109,23 +109,6 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
-        buildConfigField(
-            "String",
-            "FEEDBACK_ZAMMADURL",
-            project.findProperty("FEEDBACK_ZAMMADURL").toString())
-
-        buildConfigField(
-            "String",
-            "FEEDBACK_ZAMMADTOKEN",
-            project.findProperty("FEEDBACK_ZAMMADTOKEN").toString())
-        buildConfigField(
-            "String",
-            "FEEDBACK_RESPECTPHONENUMBER",
-            project.findProperty("FEEDBACK_RESPECTPHONENUMBER").toString())
-        buildConfigField(
-            "String",
-            "FEEDBACK_RESPECTEMAILID",
-            project.findProperty("FEEDBACK_RESPECTEMAILID").toString())
     }
 
 }

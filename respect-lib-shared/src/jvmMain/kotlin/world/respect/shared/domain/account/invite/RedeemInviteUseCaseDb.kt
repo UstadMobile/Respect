@@ -10,6 +10,7 @@ import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
@@ -18,7 +19,10 @@ import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
@@ -28,7 +32,7 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
-import java.lang.IllegalArgumentException
+import kotlin.time.Clock
 
 /**
  * Server-side use case that handles redeeming an invite
@@ -140,7 +144,27 @@ class RedeemInviteUseCaseDb(
                 throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
             }
         }
+        markFirstUserInviteAsDeleted(inviteFromDb, schoolDataSourceVal)
 
         return authResponse
+    }
+    /**
+     * Deletes the invite if it's a first user invite (firstUser = true)
+     * This ensures the first user invite can never be used again after the first user signs up
+     */
+    private suspend fun markFirstUserInviteAsDeleted(
+        redeemedInvite: Invite2,
+        schoolDataSourceVal: SchoolDataSourceLocal
+    ) {
+        // Check if this is a NewUserInvite with firstUser = true
+        if (redeemedInvite is NewUserInvite && redeemedInvite.firstUser) {
+
+            val deletedInvite = redeemedInvite.copy(
+                status = StatusEnum.TO_BE_DELETED,
+                lastModified = Clock.System.now()
+            )
+
+            schoolDataSourceVal.inviteDataSource.store(listOf(deletedInvite))
+        }
     }
 }

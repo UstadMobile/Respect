@@ -1,0 +1,1217 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 11,
+    "identityHash": "8989bfd140662f1429be5b020bfeabc0",
+    "entities": [
+      {
+        "tableName": "SchoolAppEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saUid` TEXT NOT NULL, `saUidNum` INTEGER NOT NULL, `saManifestUrl` TEXT NOT NULL, `saStatus` INTEGER NOT NULL, `saLastModified` INTEGER NOT NULL, `saStored` INTEGER NOT NULL, PRIMARY KEY(`saUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "saUid",
+            "columnName": "saUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saUidNum",
+            "columnName": "saUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saManifestUrl",
+            "columnName": "saManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saStatus",
+            "columnName": "saStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saLastModified",
+            "columnName": "saLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saStored",
+            "columnName": "saStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "saUidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pGuid` TEXT NOT NULL, `pGuidHash` INTEGER NOT NULL, `pActive` INTEGER NOT NULL, `pStatus` INTEGER NOT NULL, `pLastModified` INTEGER NOT NULL, `pStored` INTEGER NOT NULL, `pMetadata` TEXT, `pUsername` TEXT, `pGivenName` TEXT NOT NULL, `pFamilyName` TEXT NOT NULL, `pMiddleName` TEXT, `pGender` INTEGER NOT NULL, `pDateOfBirth` INTEGER, `pEmail` TEXT, `pPhoneNumber` TEXT, PRIMARY KEY(`pGuidHash`))",
+        "fields": [
+          {
+            "fieldPath": "pGuid",
+            "columnName": "pGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pGuidHash",
+            "columnName": "pGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pActive",
+            "columnName": "pActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pStatus",
+            "columnName": "pStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pLastModified",
+            "columnName": "pLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pStored",
+            "columnName": "pStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pMetadata",
+            "columnName": "pMetadata",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pUsername",
+            "columnName": "pUsername",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pGivenName",
+            "columnName": "pGivenName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pFamilyName",
+            "columnName": "pFamilyName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pMiddleName",
+            "columnName": "pMiddleName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pGender",
+            "columnName": "pGender",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pDateOfBirth",
+            "columnName": "pDateOfBirth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "pEmail",
+            "columnName": "pEmail",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pPhoneNumber",
+            "columnName": "pPhoneNumber",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "pGuidHash"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonRoleEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prPersonGuidHash` INTEGER NOT NULL, `prIsPrimaryRole` INTEGER NOT NULL, `prRoleEnum` INTEGER NOT NULL, `prBeginDate` INTEGER, `prEndDate` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "prUid",
+            "columnName": "prUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prPersonGuidHash",
+            "columnName": "prPersonGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prIsPrimaryRole",
+            "columnName": "prIsPrimaryRole",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prRoleEnum",
+            "columnName": "prRoleEnum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prBeginDate",
+            "columnName": "prBeginDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "prEndDate",
+            "columnName": "prEndDate",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "prUid"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonRelatedPersonEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`prpUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `prpPersonUidNum` INTEGER NOT NULL, `prpOtherPersonUid` TEXT NOT NULL, `prpOtherPersonUidNum` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "prpUid",
+            "columnName": "prpUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpPersonUidNum",
+            "columnName": "prpPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpOtherPersonUid",
+            "columnName": "prpOtherPersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prpOtherPersonUidNum",
+            "columnName": "prpOtherPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "prpUid"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonPasswordEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppwGuidNum` INTEGER NOT NULL, `ppwGuid` TEXT NOT NULL, `authAlgorithm` TEXT NOT NULL, `authEncoded` TEXT NOT NULL, `authSalt` TEXT NOT NULL, `authIterations` INTEGER NOT NULL, `authKeyLen` INTEGER NOT NULL, `ppwLastModified` INTEGER NOT NULL, `ppwStored` INTEGER NOT NULL, PRIMARY KEY(`ppwGuidNum`))",
+        "fields": [
+          {
+            "fieldPath": "ppwGuidNum",
+            "columnName": "ppwGuidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwGuid",
+            "columnName": "ppwGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authAlgorithm",
+            "columnName": "authAlgorithm",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authEncoded",
+            "columnName": "authEncoded",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authSalt",
+            "columnName": "authSalt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authIterations",
+            "columnName": "authIterations",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authKeyLen",
+            "columnName": "authKeyLen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwLastModified",
+            "columnName": "ppwLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppwStored",
+            "columnName": "ppwStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ppwGuidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonPasskeyEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppPersonUidNum` INTEGER NOT NULL, `ppCredentialId` TEXT NOT NULL, `ppLastModified` INTEGER NOT NULL, `ppStored` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, `ppDeviceName` TEXT NOT NULL DEFAULT '', `ppTimeCreated` INTEGER NOT NULL DEFAULT 0, `ppAaguid` TEXT NOT NULL DEFAULT '', `ppProviderName` TEXT NOT NULL DEFAULT '', `ppIconLight` TEXT NOT NULL DEFAULT '', `ppIconDark` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`ppPersonUidNum`, `ppCredentialId`))",
+        "fields": [
+          {
+            "fieldPath": "ppPersonUidNum",
+            "columnName": "ppPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppCredentialId",
+            "columnName": "ppCredentialId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppLastModified",
+            "columnName": "ppLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppStored",
+            "columnName": "ppStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppAttestationObj",
+            "columnName": "ppAttestationObj",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppClientDataJson",
+            "columnName": "ppClientDataJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppOriginString",
+            "columnName": "ppOriginString",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppChallengeString",
+            "columnName": "ppChallengeString",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ppPublicKey",
+            "columnName": "ppPublicKey",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isRevoked",
+            "columnName": "isRevoked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ppDeviceName",
+            "columnName": "ppDeviceName",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "ppTimeCreated",
+            "columnName": "ppTimeCreated",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "ppAaguid",
+            "columnName": "ppAaguid",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "ppProviderName",
+            "columnName": "ppProviderName",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "ppIconLight",
+            "columnName": "ppIconLight",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "ppIconDark",
+            "columnName": "ppIconDark",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ppPersonUidNum",
+            "ppCredentialId"
+          ]
+        }
+      },
+      {
+        "tableName": "AuthTokenEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`atUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `atPGuidHash` INTEGER NOT NULL, `atPGuid` TEXT NOT NULL, `atCode` TEXT, `atToken` TEXT NOT NULL, `atTimeCreated` INTEGER NOT NULL, `atTtl` INTEGER NOT NULL, `atPlatform` TEXT, `atAndroidSdkInt` INTEGER, `atVersion` TEXT, `atManufacturer` TEXT, `atModel` TEXT, `atRam` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "atUid",
+            "columnName": "atUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atPGuidHash",
+            "columnName": "atPGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atPGuid",
+            "columnName": "atPGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atCode",
+            "columnName": "atCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atToken",
+            "columnName": "atToken",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atTimeCreated",
+            "columnName": "atTimeCreated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atTtl",
+            "columnName": "atTtl",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atPlatform",
+            "columnName": "atPlatform",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atAndroidSdkInt",
+            "columnName": "atAndroidSdkInt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "atVersion",
+            "columnName": "atVersion",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atManufacturer",
+            "columnName": "atManufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atModel",
+            "columnName": "atModel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "atRam",
+            "columnName": "atRam",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "atUid"
+          ]
+        }
+      },
+      {
+        "tableName": "ReportEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rGuid` TEXT NOT NULL, `rOwnerGuid` TEXT NOT NULL, `rTitle` TEXT NOT NULL, `rOptions` TEXT NOT NULL, `rIsTemplate` INTEGER NOT NULL, `rActive` INTEGER NOT NULL, `rLastModified` INTEGER NOT NULL, `rStored` INTEGER NOT NULL, PRIMARY KEY(`rGuid`))",
+        "fields": [
+          {
+            "fieldPath": "rGuid",
+            "columnName": "rGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rOwnerGuid",
+            "columnName": "rOwnerGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rTitle",
+            "columnName": "rTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rOptions",
+            "columnName": "rOptions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rIsTemplate",
+            "columnName": "rIsTemplate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rActive",
+            "columnName": "rActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rLastModified",
+            "columnName": "rLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rStored",
+            "columnName": "rStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rGuid"
+          ]
+        }
+      },
+      {
+        "tableName": "IndicatorEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`indicatorId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, `sql` TEXT NOT NULL, PRIMARY KEY(`indicatorId`))",
+        "fields": [
+          {
+            "fieldPath": "indicatorId",
+            "columnName": "indicatorId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sql",
+            "columnName": "sql",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "indicatorId"
+          ]
+        }
+      },
+      {
+        "tableName": "ClassEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteGuid` TEXT, `cStudentInviteGuid` TEXT, PRIMARY KEY(`cGuidHash`))",
+        "fields": [
+          {
+            "fieldPath": "cGuid",
+            "columnName": "cGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cGuidHash",
+            "columnName": "cGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cTitle",
+            "columnName": "cTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cStatus",
+            "columnName": "cStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cDescription",
+            "columnName": "cDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cLastModified",
+            "columnName": "cLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cStored",
+            "columnName": "cStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cTeacherInviteGuid",
+            "columnName": "cTeacherInviteGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cStudentInviteGuid",
+            "columnName": "cStudentInviteGuid",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cGuidHash"
+          ]
+        }
+      },
+      {
+        "tableName": "ClassPermissionEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cpeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cpeClassUidNum` INTEGER NOT NULL, `cpeToEnrollmentRole` INTEGER, `cpePermissions` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "cpeId",
+            "columnName": "cpeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cpeClassUidNum",
+            "columnName": "cpeClassUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cpeToEnrollmentRole",
+            "columnName": "cpeToEnrollmentRole",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cpePermissions",
+            "columnName": "cpePermissions",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "cpeId"
+          ]
+        }
+      },
+      {
+        "tableName": "EnrollmentEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eUid` TEXT NOT NULL, `eUidNum` INTEGER NOT NULL, `eStatus` INTEGER NOT NULL, `eLastModified` INTEGER NOT NULL, `eStored` INTEGER NOT NULL, `eMetadata` TEXT, `eClassUid` TEXT NOT NULL, `eClassUidNum` INTEGER NOT NULL, `ePersonUid` TEXT NOT NULL, `ePersonUidNum` INTEGER NOT NULL, `eRole` INTEGER NOT NULL, `eBeginDate` INTEGER, `eEndDate` INTEGER, `eRemovedAt` INTEGER, `eInviteCode` TEXT, `eApprovedByPersonUidNum` INTEGER NOT NULL, `eApprovedByPersonUid` TEXT, PRIMARY KEY(`eUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "eUid",
+            "columnName": "eUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eUidNum",
+            "columnName": "eUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eStatus",
+            "columnName": "eStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eLastModified",
+            "columnName": "eLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eStored",
+            "columnName": "eStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eMetadata",
+            "columnName": "eMetadata",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eClassUid",
+            "columnName": "eClassUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eClassUidNum",
+            "columnName": "eClassUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ePersonUid",
+            "columnName": "ePersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ePersonUidNum",
+            "columnName": "ePersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eRole",
+            "columnName": "eRole",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eBeginDate",
+            "columnName": "eBeginDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eEndDate",
+            "columnName": "eEndDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eRemovedAt",
+            "columnName": "eRemovedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eInviteCode",
+            "columnName": "eInviteCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eApprovedByPersonUidNum",
+            "columnName": "eApprovedByPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eApprovedByPersonUid",
+            "columnName": "eApprovedByPersonUid",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "eUidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "AssignmentEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeClassUid` TEXT NOT NULL, `aeClassUidNum` INTEGER NOT NULL, `aeDeadline` INTEGER, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "aeUid",
+            "columnName": "aeUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeUidNum",
+            "columnName": "aeUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeTitle",
+            "columnName": "aeTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeDescription",
+            "columnName": "aeDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeClassUid",
+            "columnName": "aeClassUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeClassUidNum",
+            "columnName": "aeClassUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeDeadline",
+            "columnName": "aeDeadline",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "aeLastModified",
+            "columnName": "aeLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aeStored",
+            "columnName": "aeStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "aeUidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "AssignmentLearningResourceRefEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`alrrAeUidNum` INTEGER NOT NULL, `alrrLearningUnitManifestUrlHash` INTEGER NOT NULL, `alrrLearningUnitManifestUrl` TEXT NOT NULL, `alrrAppManifestUrl` TEXT NOT NULL, PRIMARY KEY(`alrrAeUidNum`, `alrrLearningUnitManifestUrlHash`))",
+        "fields": [
+          {
+            "fieldPath": "alrrAeUidNum",
+            "columnName": "alrrAeUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alrrLearningUnitManifestUrlHash",
+            "columnName": "alrrLearningUnitManifestUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alrrLearningUnitManifestUrl",
+            "columnName": "alrrLearningUnitManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alrrAppManifestUrl",
+            "columnName": "alrrAppManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "alrrAeUidNum",
+            "alrrLearningUnitManifestUrlHash"
+          ]
+        }
+      },
+      {
+        "tableName": "WriteQueueItemEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wqiQueueItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wqiModel` INTEGER NOT NULL, `wqiUid` TEXT NOT NULL, `wqiTimeQueued` INTEGER NOT NULL, `wqiAttemptCount` INTEGER NOT NULL, `wqiTimeWritten` INTEGER NOT NULL, `wqiAccountGuid` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "wqiQueueItemId",
+            "columnName": "wqiQueueItemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiModel",
+            "columnName": "wqiModel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiUid",
+            "columnName": "wqiUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiTimeQueued",
+            "columnName": "wqiTimeQueued",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiAttemptCount",
+            "columnName": "wqiAttemptCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiTimeWritten",
+            "columnName": "wqiTimeWritten",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wqiAccountGuid",
+            "columnName": "wqiAccountGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "wqiQueueItemId"
+          ]
+        }
+      },
+      {
+        "tableName": "SchoolPermissionGrantEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spgUid` TEXT NOT NULL, `spgUidNum` INTEGER NOT NULL, `spgStatusEnum` INTEGER NOT NULL, `spgToRole` INTEGER NOT NULL, `spgPermissions` INTEGER NOT NULL, `spgLastModified` INTEGER NOT NULL, `spgStored` INTEGER NOT NULL, PRIMARY KEY(`spgUidNum`))",
+        "fields": [
+          {
+            "fieldPath": "spgUid",
+            "columnName": "spgUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgUidNum",
+            "columnName": "spgUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgStatusEnum",
+            "columnName": "spgStatusEnum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgToRole",
+            "columnName": "spgToRole",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgPermissions",
+            "columnName": "spgPermissions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgLastModified",
+            "columnName": "spgLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spgStored",
+            "columnName": "spgStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "spgUidNum"
+          ]
+        }
+      },
+      {
+        "tableName": "PullSyncStatusEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pssAccountPersonUid` TEXT NOT NULL, `pssAccountPersonUidNum` INTEGER NOT NULL, `pssTableId` INTEGER NOT NULL, `pssLastConsistentThrough` INTEGER NOT NULL, `pssPermissionsLastModified` INTEGER NOT NULL, PRIMARY KEY(`pssAccountPersonUid`, `pssTableId`))",
+        "fields": [
+          {
+            "fieldPath": "pssAccountPersonUid",
+            "columnName": "pssAccountPersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pssAccountPersonUidNum",
+            "columnName": "pssAccountPersonUidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pssTableId",
+            "columnName": "pssTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pssLastConsistentThrough",
+            "columnName": "pssLastConsistentThrough",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pssPermissionsLastModified",
+            "columnName": "pssPermissionsLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "pssAccountPersonUid",
+            "pssTableId"
+          ]
+        }
+      },
+      {
+        "tableName": "PersonQrBadgeEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pqrGuidNum` INTEGER NOT NULL, `pqrGuid` TEXT NOT NULL, `pqrLastModified` INTEGER NOT NULL, `pqrStored` INTEGER NOT NULL, `pqrQrCodeUrl` TEXT, `pqrStatus` INTEGER NOT NULL, PRIMARY KEY(`pqrGuidNum`))",
+        "fields": [
+          {
+            "fieldPath": "pqrGuidNum",
+            "columnName": "pqrGuidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrGuid",
+            "columnName": "pqrGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrLastModified",
+            "columnName": "pqrLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrStored",
+            "columnName": "pqrStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrQrCodeUrl",
+            "columnName": "pqrQrCodeUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pqrStatus",
+            "columnName": "pqrStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "pqrGuidNum"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_PersonQrBadgeEntity_pqrQrCodeUrl",
+            "unique": false,
+            "columnNames": [
+              "pqrQrCodeUrl"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonQrBadgeEntity_pqrQrCodeUrl` ON `${TABLE_NAME}` (`pqrQrCodeUrl`)"
+          }
+        ]
+      },
+      {
+        "tableName": "InviteEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iApprovalRequiredAfter` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iStored` INTEGER NOT NULL, `iStatus` INTEGER NOT NULL, `iNewUserRole` INTEGER, `iNewUserFirstInvite` INTEGER NOT NULL, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, PRIMARY KEY(`iGuidHash`))",
+        "fields": [
+          {
+            "fieldPath": "iGuid",
+            "columnName": "iGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iGuidHash",
+            "columnName": "iGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iCode",
+            "columnName": "iCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iApprovalRequiredAfter",
+            "columnName": "iApprovalRequiredAfter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iLastModified",
+            "columnName": "iLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStored",
+            "columnName": "iStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStatus",
+            "columnName": "iStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iNewUserRole",
+            "columnName": "iNewUserRole",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iNewUserFirstInvite",
+            "columnName": "iNewUserFirstInvite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iForFamilyOfGuid",
+            "columnName": "iForFamilyOfGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForFamilyOfGuidHash",
+            "columnName": "iForFamilyOfGuidHash",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForClassGuid",
+            "columnName": "iForClassGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForClassName",
+            "columnName": "iForClassName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iSchoolName",
+            "columnName": "iSchoolName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForClassGuidHash",
+            "columnName": "iForClassGuidHash",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForClassRole",
+            "columnName": "iForClassRole",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "iGuidHash"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8989bfd140662f1429be5b020bfeabc0')"
+    ]
+  }
+}

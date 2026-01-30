@@ -19,6 +19,7 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 
 class RegisterSchoolUseCase : KoinComponent {
 
@@ -100,14 +101,18 @@ class RegisterSchoolUseCase : KoinComponent {
 
         val inviteCode = generateInviteCode()
 
+        val tenYearsFromNow = Clock.System.now() + (10 * 365).days
+        val firstUserInviteUid = "${PersonRoleEnum.SYSTEM_ADMINISTRATOR.newUserInviteUid}:first"
+
         val invite = NewUserInvite(
-            uid = PersonRoleEnum.SYSTEM_ADMINISTRATOR.newUserInviteUid,
+            uid = firstUserInviteUid,
             code = inviteCode,
             role = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
             firstUser = true,
             status = StatusEnum.ACTIVE,
             lastModified = Clock.System.now(),
-            stored = Clock.System.now()
+            stored = Clock.System.now(),
+            approvalRequiredAfter = tenYearsFromNow
         )
 
         createInviteUseCase(invite)

@@ -233,7 +233,7 @@
     <string name="category">Category</string>
     <string name="your_feedback">Your feedback</string>
     <string name="describe_feedback_placeholder">Describe your issue or feedback in detail</string>
-    <string name="want_response_from_team">I want a response from the Respect team</string>
+    <string name="want_response_from_team">I you need response, one of the field is required</string>
     <string name="submit_feedback">Submit feedback</string>
     <string name="feedback_respect">Feedback about RESPECT</string>
     <string name="category_launcher">Respect launcher related issues</string>

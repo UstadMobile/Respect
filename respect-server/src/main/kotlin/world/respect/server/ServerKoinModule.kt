@@ -91,6 +91,7 @@ fun serverKoinModule(
     single<Json> {
         Json {
             ignoreUnknownKeys = true
+            encodeDefaults = true
         }
     }
 
@@ -271,6 +272,7 @@ fun serverKoinModule(
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseServer(
                 schoolDb = get(),
+                uidNumberMapper = get(),
             )
         }
 

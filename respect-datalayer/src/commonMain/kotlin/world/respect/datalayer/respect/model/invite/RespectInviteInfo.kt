@@ -21,10 +21,4 @@ class RespectInviteInfo(
     enum class UserInviteType {
         TEACHER, STUDENT_OR_PARENT
     }
-
-    companion object {
-        val INVITE_TYPE_CLASS_CODE = 1
-        val INVITE_TYPE_GENERIC = 2
-    }
-
 }

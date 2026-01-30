@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.clazz
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.role
 import world.respect.shared.generated.resources.school_name
@@ -50,6 +52,21 @@ fun AcceptInviteScreen(
                     value = { Text(stringResource(invite.role.label)) }
                 )
             }
+
+            is ClassInvite -> {
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { Text(stringResource(Res.string.clazz)) },
+                    value = { Text(uiState.inviteInfo?.className ?: "") },
+                )
+
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { Text(stringResource(Res.string.role)) },
+                    value = { Text(stringResource(invite.role.label)) }
+                )
+            }
+
 
             else -> {
                 //Do nothing else

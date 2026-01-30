@@ -27,7 +27,6 @@ onFlowComplete:
        USERNAME: testuser
        PASSWORD: test123
 
-
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
@@ -58,6 +57,10 @@ onFlowComplete:
 - assertVisible: "Error: try again"
 - setAirplaneMode: disabled
 - tapOn: "I want a response from the Respect team"
+- scrollUntilVisible:
+    element:
+      text: "Submit feedback"
+    direction: DOWN
 - tapOn: "Submit feedback"
 - assertVisible: "If you need response, one of the field is required"
 - tapOn:
@@ -83,6 +86,14 @@ onFlowComplete:
     id: "app_title"
     text: "Feedback submitted"
 - assertVisible: "Thank you for your feedback. Respect team will review it internally."
+- copyTextFrom:
+    id: "zammad_case_id"
+- runScript:
+    file: "scripts/verifyZammadTicket.js"
+    env:
+      TICKET_ID: ${maestro.copiedText}
+      ZAMMAD_API_TOKEN: ZAMMAD_API_TOKEN
+      baseUrl: "https://respect.zammad.com/"
 - back
 - assertVisible:
     id: "app_title"

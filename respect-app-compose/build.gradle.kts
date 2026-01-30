@@ -29,8 +29,6 @@ acraProperties.takeIf { acraPropertiesFile.exists() }
 // The applist list - see main README
 val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
 
-val defaultZammadToken = System.getenv("RESPECT_DEFAULT_APPLIST") ?:  "Token token=d8DYXTdghwp8BWPEyA7ISI6Ds1uHuSjCGUiUT33ciHoeqyozLKJ3MVRPOhCrr4gB"
-
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
 ACRA_PROP_NAMES.forEach { propName ->
@@ -58,8 +56,6 @@ buildConfig {
     className("RespectBuildConfig")
 
     buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
-    buildConfigField<String>("ZAMMAD_DEFAULT_TOKEN", defaultZammadToken)
-
 }
 
 kotlin {

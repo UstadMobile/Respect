@@ -73,7 +73,6 @@ import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
 import world.respect.datalayer.http.SchoolDataSourceHttp
-import world.respect.datalayer.http.sharefeedback.FeedbackDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
@@ -89,7 +88,6 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
@@ -139,12 +137,12 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
-import world.respect.shared.domain.launchers.WhatsAppLauncher
-import world.respect.shared.domain.launchers.WhatsAppLauncherAndroid
-import world.respect.shared.domain.launchers.EmailLauncher
-import world.respect.shared.domain.launchers.EmailLauncherAndroid
-import world.respect.shared.domain.launchers.WebLauncher
-import world.respect.shared.domain.launchers.WebLauncherAndroid
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCaseAndroid
+import world.respect.shared.domain.launchers.EmailLauncherUseCase
+import world.respect.shared.domain.launchers.EmailLauncherUseCaseAndroid
+import world.respect.shared.domain.launchers.WebLauncherUseCase
+import world.respect.shared.domain.launchers.WebLauncherUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -210,6 +208,10 @@ import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewMo
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.feedback.CreateTicketUseCase
+import world.respect.shared.domain.feedback.CreateTicketUseCaseImpl
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCaseImpl
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
@@ -234,7 +236,6 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
-
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -357,14 +358,14 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
 
-    single<WhatsAppLauncher> {
-        WhatsAppLauncherAndroid(androidContext())
+    single<WhatsAppLauncherUseCase> {
+        WhatsAppLauncherUseCaseAndroid(androidContext())
     }
-    single<EmailLauncher> {
-        EmailLauncherAndroid(androidContext())
+    single<EmailLauncherUseCase> {
+        EmailLauncherUseCaseAndroid(androidContext())
     }
-    single<WebLauncher> {
-        WebLauncherAndroid(androidContext())
+    single<WebLauncherUseCase> {
+        WebLauncherUseCaseAndroid(androidContext())
     }
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -560,6 +561,15 @@ val appKoinModule = module {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
 
+    single<GetFeedbackInfoUseCase> {
+        GetFeedbackInfoUseCaseImpl()
+    }
+
+    single<CreateTicketUseCase>{
+        CreateTicketUseCaseImpl(
+            httpClient = get(),
+        )
+    }
     factory<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseAndroid(
             appContext = androidContext().applicationContext,
@@ -829,13 +839,6 @@ val appKoinModule = module {
             DrainRemoteWriteQueueUseCase(
                 remoteWriteQueue = get(),
                 dataSource = get(),
-            )
-        }
-        scoped<FeedBackDataSource> { params ->
-            val token: String =  RespectBuildConfig.ZAMMAD_DEFAULT_TOKEN
-            FeedbackDataSourceHttp(
-                httpClient = get(),
-                zammadToken = token
             )
         }
 

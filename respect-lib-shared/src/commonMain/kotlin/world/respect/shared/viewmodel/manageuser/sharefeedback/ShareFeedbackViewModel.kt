@@ -8,17 +8,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.sharefeedback.FeedBackDataSource
-import world.respect.datalayer.sharefeedback.model.FeedbackTicket
-import world.respect.datalayer.sharefeedback.FeedBackDataSource.Companion.DEFAULT_GROUP_ID
-import world.respect.datalayer.sharefeedback.model.Article
+import world.respect.shared.domain.feedback.FeedbackTicket
+import world.respect.shared.domain.feedback.Article
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.feedback.CreateTicketUseCase
 import world.respect.shared.domain.feedback.FeedbackCategory
-import world.respect.shared.domain.launchers.EmailLauncher
-import world.respect.shared.domain.launchers.WebLauncher
-import world.respect.shared.domain.launchers.WhatsAppLauncher
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
+import world.respect.shared.domain.launchers.EmailLauncherUseCase
+import world.respect.shared.domain.launchers.WebLauncherUseCase
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
@@ -37,7 +36,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
-import kotlin.getValue
 
 data class ShareFeedbackUiState(
     val categories: List<FeedbackCategory> = FeedbackCategory.entries,
@@ -61,11 +59,13 @@ data class ShareFeedbackUiState(
 class ShareFeedbackViewModel(
     accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle,
-    private val whatsAppLauncher: WhatsAppLauncher,
-    private val emailLauncher: EmailLauncher,
-    private val webLauncher: WebLauncher,
+    private val whatsAppLauncherUseCase: WhatsAppLauncherUseCase,
+    private val emailLauncherUseCase: EmailLauncherUseCase,
+    private val webLauncherUseCase: WebLauncherUseCase,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
-    private val validateEmailUseCase: ValidateEmailUseCase
+    private val validateEmailUseCase: ValidateEmailUseCase,
+    private val feedbackInfoUseCase: GetFeedbackInfoUseCase,
+    private val createTicketUseCase: CreateTicketUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -76,12 +76,12 @@ class ShareFeedbackViewModel(
 
     var subject = ""
 
-    private val feedBackDataSource: FeedBackDataSource by inject()
 
     init {
         _appUiState.update {
             it.copy(
                 title = Res.string.share_feedback.asUiText(),
+                hideBottomNavigation = true
             )
         }
         viewModelScope.launch {
@@ -100,19 +100,24 @@ class ShareFeedbackViewModel(
 
     fun onClickWhatsApp() {
         viewModelScope.launch {
-            whatsAppLauncher.launchWhatsApp()
+            whatsAppLauncherUseCase.launchWhatsApp(
+                feedbackInfoUseCase().respectPhoneNumber
+            )
         }
     }
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncher.sendEmail(subject)
+            emailLauncherUseCase.sendEmail(
+                feedbackInfoUseCase().respectEmailId,
+                subject
+            )
         }
     }
 
     fun onClickPublicForum() {
         viewModelScope.launch {
-            webLauncher.launchWeb()
+            webLauncherUseCase.launchWeb()
         }
     }
 
@@ -203,7 +208,7 @@ class ShareFeedbackViewModel(
                         "${_uiState.value.phoneNumber}$DEFAULT_CUSTOMER_ENDPOINT"
                     }
                 } else {
-                    DEFAULT_CUSTOMER_ID
+                    feedbackInfoUseCase().respectEmailId
                 }
 
                 val ticket = FeedbackTicket(
@@ -218,13 +223,15 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                feedBackDataSource.createTicket(ticket)
+                println("Zammad ticket $ticket")
+
+                val response=createTicketUseCase(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        destination = FeedbackSubmitted,
+                        destination = FeedbackSubmitted(response.id),
                         popUpToClass = ShareFeedback::class,
                         popUpToInclusive = true
                     )
@@ -240,12 +247,10 @@ class ShareFeedbackViewModel(
 
     companion object {
         const val DEFAULT_CUSTOMER_ENDPOINT = "@ustadmobile.com"
-        const val DEFAULT_CUSTOMER_ID = "info@ustadmobile.com"
         const val WHATSAPP_URL = "https://wa.me/"
-        const val WHATSAPP_PHONE_NUMBER = "+919828932811"
         const val WEB_URL = "https://respect.world/"
-        const val EMAIL_RECIPIENT = "respect.app.tester2026@gmail.com"
         const val GUESS = "guess:"
+        const val DEFAULT_GROUP_ID = "1"
     }
 }
 

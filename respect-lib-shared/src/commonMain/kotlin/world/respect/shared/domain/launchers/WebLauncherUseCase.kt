@@ -1,5 +1,5 @@
 package world.respect.shared.domain.launchers
 
-interface WebLauncher {
+interface WebLauncherUseCase {
     suspend fun launchWeb()
 }

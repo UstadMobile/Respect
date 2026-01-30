@@ -164,6 +164,11 @@ class ShareFeedbackViewModel(
     }
 
     fun onClickSubmit() {
+
+        _uiState.update {
+            it.copy(errorMessage = null)
+        }
+
         val feedbackDescriptionError =
             if (_uiState.value.feedbackDescription.isBlank()) {
                 Res.string.required_field.asUiText()

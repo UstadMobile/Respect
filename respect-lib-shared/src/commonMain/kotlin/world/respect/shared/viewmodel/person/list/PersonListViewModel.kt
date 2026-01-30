@@ -19,7 +19,6 @@ import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_new_person
@@ -52,18 +51,17 @@ data class PersonListUiState(
         EmptyPagingSource()
     },
     val showAddPersonItem: Boolean = false,
+    val showInvitePersonItem: Boolean = false,
     val isPendingExpanded: Boolean = true,
-    val showInviteCode: String? = null,
-    val showInviteButton: Boolean = false,
+    val showInvite: Boolean = false,
     val pendingPersons: IPagingSourceFactory<Int, Person> =
         IPagingSourceFactory { EmptyPagingSource() },
-    )
+)
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
-    private val setClipboardStringUseCase: SetClipboardStringUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -103,9 +101,6 @@ class PersonListViewModel(
     }
 
     init {
-        _uiState.takeIf { route.showInviteCode!= null }
-            ?.update { it.copy(showInviteCode = route.showInviteCode) }
-
         _appUiState.update {
             it.copy(
                 title = if(!route.resultExpected) {
@@ -114,7 +109,7 @@ class PersonListViewModel(
                     Res.string.select_person.asUiText()
                 },
                 expandableFabState = ExpandableFabUiState(
-                    visible = !(route.filterByRole != null||route.addToClassUid!=null),
+                    visible = !(route.filterByRole != null || route.addToClassUid != null),
                     items = listOf(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
@@ -144,6 +139,8 @@ class PersonListViewModel(
                 PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
             ).isNotEmpty()
 
+            val canInvitePerson = canAddPerson || route.inviteUid != null
+
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
                 _appUiState.update { prev ->
                     prev.copy(
@@ -154,7 +151,10 @@ class PersonListViewModel(
                 }
 
                 _uiState.update {
-                    it.copy(showAddPersonItem = canAddPerson && route.resultExpected)
+                    it.copy(
+                        showAddPersonItem = canAddPerson && route.resultExpected,
+                        showInvitePersonItem = canInvitePerson && route.resultExpected,
+                    )
                 }
             }
         }
@@ -163,7 +163,7 @@ class PersonListViewModel(
             it.copy(
                 pendingPersons = pendingPersonsPagingSource,
                 persons = pagingSourceFactoryHolder,
-                showInviteButton = route.filterByRole != null||route.addToClassUid!=null
+                showInvite = route.filterByRole != null||route.addToClassUid!=null
             )
         }
     }
@@ -241,7 +241,15 @@ class PersonListViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 InvitePerson.create(
-                    invitePersonOptions = InvitePerson.NewUserInviteOptions(null)
+                    invitePersonOptions = if(route.inviteUid != null) {
+                        InvitePerson.ClassInviteOptions(
+                            inviteUid = route.inviteUid
+                        )
+                    }else {
+                        InvitePerson.NewUserInviteOptions(
+                            presetRole = route.filterByRole
+                        )
+                    }
                 )
             )
         )

@@ -8,6 +8,8 @@ import world.respect.datalayer.school.model.Invite2.Companion.TYPE_FAMILY_MEMBER
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_NEW_USER
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
+import world.respect.libutil.ext.CHAR_POOL_NUMBERS
+import world.respect.libutil.ext.randomString
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -48,6 +50,8 @@ sealed interface Invite2: ModelWithTimes {
 
         const val APPROVAL_NOT_REQUIRED_INTERVAL_MINS = 15
 
+        const val DEFAULT_CODE_LEN = 10
+
         fun uidForInvite(
             invite2: Invite2
         ): String {
@@ -57,6 +61,11 @@ sealed interface Invite2: ModelWithTimes {
                 is FamilyMemberInvite -> "$TYPE_FAMILY_MEMBER:${invite2.personUid}"
             }
         }
+
+        fun newRandomCode(
+            codeLen: Int = DEFAULT_CODE_LEN,
+            charPool: String = CHAR_POOL_NUMBERS
+        ): String = randomString(codeLen, charPool)
 
 
     }
@@ -85,13 +94,25 @@ data class NewUserInvite(
 data class ClassInvite(
     override val uid: String,
     override val code: String,
-    override val approvalRequiredAfter: InstantAsISO8601,
+    override val approvalRequiredAfter: InstantAsISO8601 = Instant.fromEpochMilliseconds(0),
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
     override val status: StatusEnum = StatusEnum.ACTIVE,
     val classUid: String,
     val role: EnrollmentRoleEnum,
-): Invite2
+): Invite2 {
+
+    companion object {
+
+        fun uidFor(
+            classUid: String,
+            role: EnrollmentRoleEnum
+        ): String {
+            return "$TYPE_CLASS:${role.value}/$classUid"
+        }
+
+    }
+}
 
 @Serializable
 @SerialName(TYPE_FAMILY_MEMBER)

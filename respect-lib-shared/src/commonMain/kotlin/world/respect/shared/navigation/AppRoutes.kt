@@ -588,7 +588,7 @@ data class PersonList(
     private val filterByRoleStr: String? = null,
     val isTopLevel: Boolean = false,
     private val resultDestStr: String? = null,
-    val showInviteCode: String? = null,
+    val inviteUid: String? = null,
     val classNameStr: String? = null,
     val addToClassUid: String? = null,
     val addToClassRoleStr: String? = null,
@@ -612,7 +612,7 @@ data class PersonList(
             filterByRole: PersonRoleEnum? = null,
             isTopLevel: Boolean = false,
             resultDest: ResultDest? = null,
-            showInviteCode: String? = null,
+            inviteUid: String? = null,
             className: String? = null,
             classUid: String? = null,
             personGuid: String? = null,
@@ -621,7 +621,7 @@ data class PersonList(
             filterByRoleStr = filterByRole?.value,
             isTopLevel = isTopLevel,
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
-            showInviteCode = showInviteCode,
+            inviteUid = inviteUid,
             addToClassUid = classUid,
             classNameStr = className,
             addToClassRoleStr = role?.value,
@@ -818,6 +818,13 @@ data class InvitePerson(
     data class NewUserInviteOptions(
         val presetRole: PersonRoleEnum?
     ): InvitePersonOptions
+
+    @Serializable
+    @SerialName("class")
+    data class ClassInviteOptions(
+        val inviteUid: String,
+    ): InvitePersonOptions
+
 
     @Transient
     val invitePersonOptions: InvitePersonOptions = Json.decodeFromString(

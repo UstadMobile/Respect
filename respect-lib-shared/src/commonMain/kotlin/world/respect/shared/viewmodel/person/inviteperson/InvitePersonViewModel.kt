@@ -28,6 +28,7 @@ import world.respect.datalayer.school.ext.copyInvite
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.ext.CHAR_POOL_NUMBERS
 import world.respect.libutil.ext.randomString
@@ -64,6 +65,9 @@ data class InvitePersonUiState(
 ) {
     val inviteCode: String?
         get() = invite.dataOrNull()?.code
+
+    val showRoleSelection: Boolean
+        get() = invite.dataOrNull() is NewUserInvite
 
 }
 
@@ -123,7 +127,8 @@ class InvitePersonViewModel(
                 )
             }
 
-            _inviteUid.value = selectedRole.newUserInviteUid
+            _inviteUid.value = (route.invitePersonOptions as? InvitePerson.ClassInviteOptions)?.inviteUid
+                ?: selectedRole.newUserInviteUid
 
             _inviteUid.collectLatest { inviteUid ->
                 if(inviteUid != null) {

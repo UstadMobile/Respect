@@ -48,7 +48,7 @@ Where the argument after -d is the link you want the app to open.
 
 **ADB command line:**
 ```
-adb shell am start -a android.intent.action.VIEW -d "http://192.168.1.2:8098/respect_school_link/AcceptInvite?inviteCode=8848544737" world.respect.app
+adb shell am start -a android.intent.action.VIEW -d "http://192.168.1.2:8098/respect_school_link/AcceptInvite?inviteCode=8848544737" "world.respect.app/world.respect.MainActivity"
 ```
 
 **Maestro launchApp argument**:

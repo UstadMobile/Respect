@@ -236,7 +236,6 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
-
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 

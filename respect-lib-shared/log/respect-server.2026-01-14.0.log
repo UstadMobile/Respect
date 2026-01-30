@@ -1,3 +1,0 @@
-2026-01-14 13:17:24.305 [Test worker @coroutine#1] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
-2026-01-14 13:17:24.489 [Test worker @coroutine#1] INFO  io.ktor.server.Application - Application started in 3.667 seconds.
-2026-01-14 13:17:25.059 [DefaultDispatcher-worker-3 @coroutine#10] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:40829

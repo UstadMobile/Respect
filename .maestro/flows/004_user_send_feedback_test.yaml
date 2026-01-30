@@ -63,12 +63,14 @@ onFlowComplete:
     direction: DOWN
 - tapOn: "Submit feedback"
 - assertVisible: "If you need response, one of the field is required"
-- tapOn:
-    id: "phone_countrycode"
-- eraseText
-- inputText: "+1"
 - tapOn: "Phone number"
 - inputText: "21255543268"
+- runFlow:
+    when:
+      notVisible:
+        id: "Submit feedback"
+    commands:
+      - hideKeyboard
 - tapOn: "Submit feedback"
 - assertVisible: "Invalid"
 - runFlow:
@@ -78,9 +80,25 @@ onFlowComplete:
 - inputText: "2125554326"
 - tapOn: "Email"
 - inputText: "teacheruser@gm"
+- runFlow:
+    when:
+      notVisible:
+        id: "Submit feedback"
+    commands:
+      - hideKeyboard
 - tapOn: "Submit feedback"
 - assertVisible: "Enter valid email address."
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Email"
 - inputText: "teacheruser@gmail.com"
+- runFlow:
+    when:
+      notVisible:
+        id: "Submit feedback"
+    commands:
+      - hideKeyboard
 - tapOn: "Submit feedback"
 - assertVisible:
     id: "app_title"
@@ -88,12 +106,7 @@ onFlowComplete:
 - assertVisible: "Thank you for your feedback. Respect team will review it internally."
 - copyTextFrom:
     id: "zammad_case_id"
-#- runScript:
-#    file: "scripts/verifyZammadTicket.js"
-#    env:
-#      TICKET_ID: ${maestro.copiedText}
-#      ZAMMAD_API_TOKEN: ZAMMAD_API_TOKEN
-#      baseUrl: "https://respect.zammad.com/"
+
 - back
 - assertVisible:
     id: "app_title"

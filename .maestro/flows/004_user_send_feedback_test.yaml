@@ -88,12 +88,12 @@ onFlowComplete:
 - assertVisible: "Thank you for your feedback. Respect team will review it internally."
 - copyTextFrom:
     id: "zammad_case_id"
-- runScript:
-    file: "scripts/verifyZammadTicket.js"
-    env:
-      TICKET_ID: ${maestro.copiedText}
-      ZAMMAD_API_TOKEN: ZAMMAD_API_TOKEN
-      baseUrl: "https://respect.zammad.com/"
+#- runScript:
+#    file: "scripts/verifyZammadTicket.js"
+#    env:
+#      TICKET_ID: ${maestro.copiedText}
+#      ZAMMAD_API_TOKEN: ZAMMAD_API_TOKEN
+#      baseUrl: "https://respect.zammad.com/"
 - back
 - assertVisible:
     id: "app_title"

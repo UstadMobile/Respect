@@ -557,7 +557,9 @@ object AccountList : RespectAppRoute
 object ShareFeedback : RespectAppRoute
 
 @Serializable
-object FeedbackSubmitted : RespectAppRoute
+data class FeedbackSubmitted(
+    val ticketId: Int,
+) : RespectAppRoute
 
 @Serializable
 data class PersonList(

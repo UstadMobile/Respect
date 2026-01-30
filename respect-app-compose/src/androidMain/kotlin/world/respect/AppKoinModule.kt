@@ -208,6 +208,10 @@ import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewMo
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.feedback.CreateTicketUseCase
+import world.respect.shared.domain.feedback.CreateTicketUseCaseImpl
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCaseImpl
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
@@ -557,6 +561,15 @@ val appKoinModule = module {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
 
+    single<GetFeedbackInfoUseCase> {
+        GetFeedbackInfoUseCaseImpl()
+    }
+
+    single<CreateTicketUseCase>{
+        CreateTicketUseCaseImpl(
+            httpClient = get(),
+        )
+    }
     factory<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseAndroid(
             appContext = androidContext().applicationContext,

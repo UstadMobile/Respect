@@ -1,6 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import shadow.bundletool.com.android.tools.r8.internal.za
 
 import java.util.Properties
 import java.io.FileInputStream
@@ -27,15 +26,6 @@ val acraPropertiesFile = System.getenv("ACRA")?.let {
 acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
-// Initialize Zammad properties
-val feedbackProperties = Properties()
-val feedbackPropertiesFile = System.getenv("FEEDBACK")?.let {
-    File(it)
-} ?: rootProject.file("feedback.properties")
-
-feedbackProperties.takeIf { feedbackPropertiesFile.exists() }
-    ?.load(FileInputStream(feedbackPropertiesFile))
-
 // The applist list - see main README
 val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
 
@@ -44,14 +34,6 @@ val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 ACRA_PROP_NAMES.forEach { propName ->
     System.getenv("ACRA_${propName.uppercase()}")?.also {
         acraProperties.setProperty(propName, it)
-    }
-}
-
-val FEEDBACK_PROP_NAMES = listOf("zammadUrl","zammadToken","respectPhoneNumber","respectEmailId")
-
-FEEDBACK_PROP_NAMES.forEach { propName ->
-    System.getenv("FEEDBACK_${propName.uppercase()}")?.also {
-        feedbackProperties.setProperty(propName, it)
     }
 }
 
@@ -74,7 +56,6 @@ buildConfig {
     className("RespectBuildConfig")
 
     buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
-
 }
 
 kotlin {
@@ -207,14 +188,6 @@ android {
                 type = "String",
                 name = "ACRA_${propName.uppercase()}",
                 value = "\"${acraProperties.getProperty(propName) ?: ""}\"   "
-            )
-        }
-
-        for(propName in FEEDBACK_PROP_NAMES) {
-            buildConfigField(
-                type = "String",
-                name = "ZAMMAD_${propName.uppercase()}",
-                value = "\"${feedbackProperties.getProperty(propName) ?: ""}\"   "
             )
         }
     }

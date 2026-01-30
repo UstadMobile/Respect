@@ -7,19 +7,18 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WHATSAPP_URL
-import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WHATSAPP_PHONE_NUMBER
 import androidx.core.net.toUri
 
 class WhatsAppLauncherUseCaseAndroid(
     private val context: Context
 ) : WhatsAppLauncherUseCase {
 
-    override suspend fun launchWhatsApp() {
+    override suspend fun launchWhatsApp(respectPhoneNumber: String) {
         withContext(Dispatchers.Main) {
             try {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "$WHATSAPP_URL$WHATSAPP_PHONE_NUMBER".toUri()
+                    "$WHATSAPP_URL$respectPhoneNumber".toUri()
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

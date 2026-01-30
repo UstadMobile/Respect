@@ -1,4 +1,4 @@
-package world.respect.datalayer.sharefeedback.model
+package world.respect.shared.domain.feedback
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

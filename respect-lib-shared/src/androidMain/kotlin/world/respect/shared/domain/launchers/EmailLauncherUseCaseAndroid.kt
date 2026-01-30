@@ -8,15 +8,14 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.net.toUri
-import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.EMAIL_RECIPIENT
 
 class EmailLauncherUseCaseAndroid(
     private val context: Context
 ) : EmailLauncherUseCase {
 
-    override suspend fun sendEmail(subject: String) {
+    override suspend fun sendEmail(respectEmailId: String, subject: String) {
         withContext(Dispatchers.Main) {
-            val uri = buildMailToUri(subject)
+            val uri = buildMailToUri(respectEmailId, subject)
             val intent = Intent(Intent.ACTION_SENDTO, uri)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             try {
@@ -28,9 +27,9 @@ class EmailLauncherUseCaseAndroid(
         }
     }
 
-    private fun buildMailToUri(subject: String): Uri {
+    private fun buildMailToUri(respectEmailId: String, subject: String): Uri {
         val encodedSubject = Uri.encode(subject)
-        return "mailto:$EMAIL_RECIPIENT?subject=$encodedSubject".toUri()
+        return "mailto:$respectEmailId?subject=$encodedSubject".toUri()
     }
 }
 

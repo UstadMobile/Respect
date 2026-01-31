@@ -81,7 +81,8 @@ class ShareFeedbackViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.share_feedback.asUiText(),
-                hideBottomNavigation = true
+                hideBottomNavigation = true,
+                userAccountIconVisible = false
             )
         }
         viewModelScope.launch {
@@ -230,7 +231,7 @@ class ShareFeedbackViewModel(
 
                 println("Zammad ticket $ticket")
 
-                val response=createTicketUseCase(ticket)
+                val response = createTicketUseCase(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 

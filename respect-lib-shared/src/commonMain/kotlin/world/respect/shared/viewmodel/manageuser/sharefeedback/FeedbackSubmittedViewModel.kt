@@ -34,7 +34,8 @@ class FeedbackSubmittedViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.feedback_submitted.asUiText(),
-                hideBottomNavigation = true
+                hideBottomNavigation = true,
+                userAccountIconVisible = false
             )
         }
         _uiState.update {

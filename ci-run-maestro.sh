@@ -152,6 +152,8 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
+        --env zammadUrl="$zammadUrl" \
+        --env zammadToken="$zammadToken" \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -197,6 +199,8 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
+      --env zammadUrl="$zammadUrl" \
+      --env zammadToken="$zammadToken" \
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \

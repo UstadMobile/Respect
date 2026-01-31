@@ -113,8 +113,7 @@ onFlowComplete:
       zammadToken: ${zammadToken}
       zammadUrl: ${zammadUrl}
       CASE_ID: ${maestro.copiedText}
-#      ZAMMAD_API_TOKEN: d8DYXTdghwp8BWPEyA7ISI6Ds1uHuSjCGUiUT33ciHoeqyozLKJ3MVRPOhCrr4gB
-#      baseUrl: "https://respect.zammad.com/"
+
 - back
 - assertVisible:
     id: "app_title"

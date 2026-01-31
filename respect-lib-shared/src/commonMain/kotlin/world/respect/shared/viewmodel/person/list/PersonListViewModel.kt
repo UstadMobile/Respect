@@ -41,9 +41,11 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 
 data class PersonListUiState(
@@ -62,6 +64,7 @@ class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -214,13 +217,11 @@ class PersonListViewModel(
         approved: Boolean,
     ) {
         viewModelScope.launch {
-            try {
+            snackBarDispatcher.tryOrShowSnackbarOnError {
                 approveOrDeclineInviteRequestUseCase(
                     personUid = person.guid,
                     approved = approved,
                 )
-            }catch(e: Throwable) {
-                e.printStackTrace()
             }
         }
     }

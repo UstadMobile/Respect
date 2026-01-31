@@ -1,6 +1,8 @@
 package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
@@ -15,9 +17,13 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.adapters.toPersonPasskey
+import world.respect.datalayer.school.ext.accepterEnrollmentRole
 import world.respect.datalayer.school.ext.accepterPersonRole
+import world.respect.datalayer.school.ext.copyWithInviteCodeInMetadata
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
@@ -29,6 +35,7 @@ import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
 import java.lang.IllegalArgumentException
+import kotlin.time.Clock
 
 /**
  * Server-side use case that handles redeeming an invite
@@ -68,12 +75,31 @@ class RedeemInviteUseCaseDb(
             }else {
                 PersonStatusEnum.ACTIVE
             },
-        )
+        ).copyWithInviteCodeInMetadata(inviteCode = redeemRequest.code)
 
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
         )
         schoolDataSourceVal.personDataSource.updateLocal(listOf(accountPerson))
+
+        val enrollmentRole = inviteFromDb.accepterEnrollmentRole(approvalRequired)
+        if(enrollmentRole != null && inviteFromDb is ClassInvite) {
+            schoolDataSourceVal.enrollmentDataSource.updateLocal(
+                listOf(
+                    Enrollment(
+                        uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                            Enrollment.TABLE_ID
+                        ).toString(),
+                        classUid = inviteFromDb.classUid,
+                        personUid = accountPerson.guid,
+                        role = enrollmentRole,
+                        beginDate = Clock.System.now().toLocalDateTime(
+                            TimeZone.currentSystemDefault()
+                        ).date
+                    )
+                )
+            )
+        }
 
         val credential = redeemRequest.account.credential
 

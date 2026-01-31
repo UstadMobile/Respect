@@ -10,19 +10,19 @@ fun RespectRedeemInviteRequest.PersonInfo.toPerson(
     role: PersonRoleEnum,
     username: String?=null,
     guid: String,
-    ) : Person {
-        return Person(
-            guid =  guid,
-            status = PersonStatusEnum.PENDING_APPROVAL,
-            givenName = name.substringBeforeLast(" "),
-            familyName = name.substringAfterLast(" "),
-            username = username,
-            gender = gender,
-            roles = listOf(
-                PersonRole(
-                    isPrimaryRole = true,
-                    roleEnum = role,
-                )
+) : Person {
+    return Person(
+        guid =  guid,
+        status = PersonStatusEnum.PENDING_APPROVAL,
+        givenName = name.substringBeforeLast(" "),
+        familyName = name.substringAfterLast(" "),
+        username = username,
+        gender = gender,
+        roles = listOf(
+            PersonRole(
+                isPrimaryRole = true,
+                roleEnum = role,
             )
         )
-    }
+    )
+}

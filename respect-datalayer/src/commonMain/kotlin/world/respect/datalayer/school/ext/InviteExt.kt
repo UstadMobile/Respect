@@ -53,3 +53,16 @@ val Invite2.accepterPersonRole: PersonRoleEnum
         is FamilyMemberInvite -> PersonRoleEnum.PARENT
     }
 
+
+fun Invite2.accepterEnrollmentRole(
+    approvalRequired: Boolean = isApprovalRequiredNow()
+) : EnrollmentRoleEnum? {
+    if(this !is ClassInvite)
+        return null
+
+    return when {
+        approvalRequired && this.role == EnrollmentRoleEnum.STUDENT -> EnrollmentRoleEnum.PENDING_STUDENT
+        approvalRequired && this.role == EnrollmentRoleEnum.TEACHER -> EnrollmentRoleEnum.PENDING_TEACHER
+        else -> this.role
+    }
+}

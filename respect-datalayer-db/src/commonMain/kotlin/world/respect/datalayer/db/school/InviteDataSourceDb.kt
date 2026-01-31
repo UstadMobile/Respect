@@ -58,7 +58,7 @@ class InviteDataSourceDb(
         params: InviteDataSource.GetListParams
     ): IPagingSourceFactory<Int, Invite2> {
         return IPagingSourceFactory {
-            schoolDb.getInviteEntityDao().findAllAsPagingSource(
+            schoolDb.getInviteEntityDao().listAsPagingSource(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,
             ).map {

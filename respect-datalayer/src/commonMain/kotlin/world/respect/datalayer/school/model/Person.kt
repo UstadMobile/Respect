@@ -45,6 +45,9 @@ data class Person(
 
     companion object {
         const val TABLE_ID = 2
+
+        const val METADATA_KEY_INVITE_ID = "inviteCode"
+
     }
 
 }

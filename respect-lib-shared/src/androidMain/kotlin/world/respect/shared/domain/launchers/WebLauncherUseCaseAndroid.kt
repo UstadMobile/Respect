@@ -3,7 +3,6 @@ package world.respect.shared.domain.launchers
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

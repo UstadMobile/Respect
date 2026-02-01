@@ -240,7 +240,7 @@ class ShareFeedbackViewModel(
                         popUpToInclusive = true
                     )
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update {
                     it.copy(errorMessage = Res.string.error_message.asUiText())

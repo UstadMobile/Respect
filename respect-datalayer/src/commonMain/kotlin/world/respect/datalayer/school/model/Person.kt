@@ -48,6 +48,8 @@ data class Person(
 
         const val METADATA_KEY_INVITE_ID = "inviteCode"
 
+        const val METADATA_KEY_INVITE_UID = "inviteUid"
+
     }
 
 }

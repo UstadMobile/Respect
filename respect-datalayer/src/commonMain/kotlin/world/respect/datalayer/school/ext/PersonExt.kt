@@ -5,6 +5,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import world.respect.datalayer.exceptions.ForbiddenException
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 
@@ -23,20 +24,25 @@ fun Person.primaryRole(): PersonRoleEnum {
 /**
  * Put the invite code in the metadata of the Person
  */
-fun Person.copyWithInviteCodeInMetadata(
-    inviteCode: String
+fun Person.copyWithInviteInfo(
+    invite: Invite2
 ): Person {
     return copy(
         metadata = buildJsonObject {
-            this@copyWithInviteCodeInMetadata.metadata?.also {
+            this@copyWithInviteInfo.metadata?.also {
                 putAll(it)
             }
 
-            put(Person.METADATA_KEY_INVITE_ID, JsonPrimitive(inviteCode))
+            put(Person.METADATA_KEY_INVITE_ID, JsonPrimitive(invite.code))
+            put(Person.METADATA_KEY_INVITE_UID, JsonPrimitive(invite.uid))
         }
     )
 }
 
 fun Person.inviteCodeOrNull(): String? {
     return metadata?.get(Person.METADATA_KEY_INVITE_ID)?.jsonPrimitive?.contentOrNull
+}
+
+fun Person.inviteUidOrNull(): String? {
+    return metadata?.get(Person.METADATA_KEY_INVITE_UID)?.jsonPrimitive?.contentOrNull
 }

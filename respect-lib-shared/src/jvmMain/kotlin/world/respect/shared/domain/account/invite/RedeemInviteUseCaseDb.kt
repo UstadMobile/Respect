@@ -19,7 +19,7 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.ext.accepterEnrollmentRole
 import world.respect.datalayer.school.ext.accepterPersonRole
-import world.respect.datalayer.school.ext.copyWithInviteCodeInMetadata
+import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.ClassInvite
@@ -38,7 +38,9 @@ import java.lang.IllegalArgumentException
 import kotlin.time.Clock
 
 /**
- * Server-side use case that handles redeeming an invite
+ * Server-side use case that handles redeeming an invite: that is when a (new) user client signing up
+ * provies both a) invite info and code and b) information about the account they want to create (
+ * name, gender, username, password/passkey, etc).
  */
 class RedeemInviteUseCaseDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -75,7 +77,13 @@ class RedeemInviteUseCaseDb(
             }else {
                 PersonStatusEnum.ACTIVE
             },
-        ).copyWithInviteCodeInMetadata(inviteCode = redeemRequest.code)
+        ).let {
+            if(approvalRequired) {
+                it.copyWithInviteInfo(invite = redeemRequest.invite)
+            }else {
+                it
+            }
+        }
 
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)

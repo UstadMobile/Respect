@@ -64,7 +64,7 @@ interface InviteEntityDao {
     suspend fun list(
         guidHash: Long = 0,
         code: String? = null,
-    )
+    ): List<InviteEntity>
 
     @Query("""
         SELECT * 

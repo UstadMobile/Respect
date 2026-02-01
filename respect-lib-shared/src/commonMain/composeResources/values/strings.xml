@@ -551,4 +551,11 @@
 
     <string name="reset_code">Reset code</string>
 
+    <string name="invite_students_directly">Invite students directly</string>
+    <string name="students_register_themselves">Students register themselves</string>
+
+
+    <string name="invite_via_parents">Invite via parents</string>
+    <string name="parents_register_and">Parents register and student uses parents' device</string>
+
 </resources>

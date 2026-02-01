@@ -2,6 +2,7 @@ package world.respect.shared.domain.createclass
 
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite2
@@ -22,15 +23,21 @@ class CreateClassUseCase(
         clazz: Clazz
     ) {
         dataSource.classDataSource.store(listOf(clazz))
+
         dataSource.inviteDataSource.store(
             listOf(
-                EnrollmentRoleEnum.TEACHER, EnrollmentRoleEnum.STUDENT
-            ).map { role ->
+                Pair(EnrollmentRoleEnum.TEACHER, ClassInviteModeEnum.DIRECT),
+                Pair(EnrollmentRoleEnum.STUDENT, ClassInviteModeEnum.DIRECT),
+                Pair(EnrollmentRoleEnum.STUDENT, ClassInviteModeEnum.VIA_PARENT),
+            ).map { (role, inviteMode) ->
                 ClassInvite(
-                    uid = ClassInvite.uidFor(clazz.guid, role),
+                    uid = ClassInvite.uidFor(
+                        clazz.guid, role, inviteMode = inviteMode
+                    ),
                     code = Invite2.newRandomCode(),
                     classUid = clazz.guid,
                     role = role,
+                    inviteMode = inviteMode,
                 )
             }
         )

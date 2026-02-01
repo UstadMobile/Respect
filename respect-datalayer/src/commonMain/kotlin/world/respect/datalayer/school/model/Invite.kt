@@ -2,7 +2,6 @@ package world.respect.datalayer.school.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_CLASS
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_FAMILY_MEMBER
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_NEW_USER
@@ -52,15 +51,9 @@ sealed interface Invite2: ModelWithTimes {
 
         const val DEFAULT_CODE_LEN = 10
 
-        fun uidForInvite(
-            invite2: Invite2
-        ): String {
-            return when (invite2) {
-                is NewUserInvite -> invite2.role.newUserInviteUid
-                is ClassInvite -> "$TYPE_CLASS:${invite2.role.value}/${invite2.classUid}"
-                is FamilyMemberInvite -> "$TYPE_FAMILY_MEMBER:${invite2.personUid}"
-            }
-        }
+        const val VIA_PARENT_STR = "via_parent"
+
+        const val DIRECT_STR = "direct"
 
         fun newRandomCode(
             codeLen: Int = DEFAULT_CODE_LEN,
@@ -89,6 +82,12 @@ data class NewUserInvite(
     val firstUser: Boolean = false,
 ): Invite2
 
+/**
+ *
+ * @property inviteMode if set to VIA_PARENT, then the role when accepting this invite will be that
+ *           of parent. The parent will first enter their own information, then their child's
+ *           information.
+ */
 @Serializable
 @SerialName(TYPE_CLASS)
 data class ClassInvite(
@@ -100,15 +99,17 @@ data class ClassInvite(
     override val status: StatusEnum = StatusEnum.ACTIVE,
     val classUid: String,
     val role: EnrollmentRoleEnum,
+    val inviteMode: ClassInviteModeEnum = ClassInviteModeEnum.DIRECT,
 ): Invite2 {
 
     companion object {
 
         fun uidFor(
             classUid: String,
-            role: EnrollmentRoleEnum
+            role: EnrollmentRoleEnum,
+            inviteMode: ClassInviteModeEnum,
         ): String {
-            return "$TYPE_CLASS:${role.value}/$classUid"
+            return "$TYPE_CLASS:${role.value}/${inviteMode.value}/$classUid"
         }
 
     }

@@ -27,6 +27,9 @@ import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.ext.copyInvite
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.ext.newUserInviteUid
+import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -39,9 +42,7 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
-import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.InvitePerson
-import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
@@ -68,6 +69,9 @@ data class InvitePersonUiState(
 
     val showRoleSelection: Boolean
         get() = invite.dataOrNull() is NewUserInvite
+
+    val showClassInviteMode: Boolean
+        get() = (invite.dataOrNull() as? ClassInvite)?.role == EnrollmentRoleEnum.STUDENT
 
 }
 
@@ -196,12 +200,14 @@ class InvitePersonViewModel(
     }
 
 
-    fun onClickGetCode() {
-        viewModelScope.launch {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    CopyCode(inviteCode = uiState.value.inviteCode)
-                )
+    fun onSetClassInviteMode(mode: ClassInviteModeEnum) {
+        val currentClassInvite = _uiState.value.invite.dataOrNull() as? ClassInvite ?: return
+
+        _inviteUid.update {
+            ClassInvite.uidFor(
+                classUid = currentClassInvite.classUid,
+                role = currentClassInvite.role,
+                inviteMode = mode,
             )
         }
     }

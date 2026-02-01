@@ -3,7 +3,6 @@ package world.respect.shared.domain.launchers
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WHATSAPP_URL
@@ -26,7 +25,7 @@ class WhatsAppLauncherUseCaseAndroid(
                 context.startActivity(intent)
 
             } catch (e: ActivityNotFoundException) {
-                Log.w("WhatsAppLauncher", "WhatsApp not installed", e)
+                print("WhatsApp not installed + $e")
             }
         }
     }

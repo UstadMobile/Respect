@@ -48,7 +48,7 @@ data class ShareFeedbackUiState(
     val feedbackDescriptionError: UiText? = null,
     val phoneNumberError: UiText? = null,
     val emailError: UiText? = null,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
 ) {
     val hasErrors: Boolean
         get() = feedbackDescriptionError != null ||
@@ -218,7 +218,7 @@ class ShareFeedbackViewModel(
                 }
 
                 val ticket = FeedbackTicket(
-                    title = getString(_uiState.value.selectedCategory.resource),
+                    title = getString(FeedbackCategory.getStringResource(_uiState.value.selectedCategory)),
                     groupId = DEFAULT_GROUP_ID,
                     customerId = "$GUESS$customerEmail",
                     article = Article(
@@ -229,9 +229,7 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                println("Zammad ticket $ticket")
-
-                val response = createTicketUseCase(ticket)
+                val response=createTicketUseCase(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 
@@ -245,7 +243,7 @@ class ShareFeedbackViewModel(
             } catch (e: Exception) {
                 loadingState = LoadingUiState.NOT_LOADING
                 _uiState.update {
-                    it.copy(errorMessage = getString(Res.string.error_message))
+                    it.copy(errorMessage = Res.string.error_message.asUiText())
                 }
             }
         }

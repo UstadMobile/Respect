@@ -206,7 +206,7 @@ fun ShareFeedbackScreen(
             uiState.errorMessage?.let {
                 Text(
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-                    text = it,
+                    text = uiTextStringResource(it),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
@@ -277,7 +277,7 @@ fun CategoryDropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(),
-                value = stringResource(selectedCategory.resource),
+                value = uiTextStringResource(FeedbackCategory.getStringResourceUiText(selectedCategory)),
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
@@ -291,7 +291,7 @@ fun CategoryDropdown(
             ) {
                 categories.forEach { category ->
                     DropdownMenuItem(
-                        text = { Text(stringResource(category.resource)) },
+                        text = { Text(uiTextStringResource(FeedbackCategory.getStringResourceUiText(category))) },
                         onClick = {
                             onCategorySelected(category)
                             expanded = false

@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.net.toUri
@@ -21,8 +20,7 @@ class EmailLauncherUseCaseAndroid(
             try {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                Log.w("EmailLinkLauncher", "No email app installed")
-                throw e
+                print("No email app installed + $e")
             }
         }
     }

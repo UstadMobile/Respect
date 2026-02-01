@@ -2,13 +2,16 @@ package world.respect.shared.domain.account.invite
 
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.copyAsApproved
 import world.respect.datalayer.school.ext.inviteCodeOrNull
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import kotlin.time.Clock
 
 
@@ -27,10 +30,20 @@ class ApproveOrDeclineInviteRequestUseCase(
         personUid: String,
         approved: Boolean,
     ) {
-        val person = schoolDataSource.personDataSource.findByGuid(
-            DataLoadParams(), personUid
+        val persons = schoolDataSource.personDataSource.list(
+            loadParams = DataLoadParams(),
+            params = PersonDataSource.GetListParams(
+                common = GetListCommonParams(
+                    guid = personUid
+                ),
+                includeRelated = true,
+            )
         ).dataOrNull() ?: throw IllegalArgumentException("Can't find person")
-        val inviteCode = person.inviteCodeOrNull()
+
+        if(persons.isEmpty())
+            throw IllegalArgumentException("Could not find persons")
+
+        val inviteCode = persons.first().inviteCodeOrNull()
 
         val invite = if(inviteCode != null) {
             schoolDataSource.inviteDataSource.findByCode(code = inviteCode).dataOrNull()
@@ -39,13 +52,14 @@ class ApproveOrDeclineInviteRequestUseCase(
         }
 
         val timeNow = Clock.System.now()
+        val studentPerson = persons.firstOrNull { it.isStudent() }
 
-        when(invite) {
-            is ClassInvite -> {
+        when {
+            invite is ClassInvite && studentPerson != null -> {
                 val enrollmentsToUpdate = schoolDataSource.enrollmentDataSource.list(
                     loadParams = DataLoadParams(),
                     listParams = EnrollmentDataSource.GetListParams(
-                        personUid = personUid
+                        personUid = studentPerson.guid
                     )
                 ).dataOrNull() ?: emptyList()
 
@@ -69,7 +83,7 @@ class ApproveOrDeclineInviteRequestUseCase(
         }
 
         schoolDataSource.personDataSource.store(
-            listOf(
+            persons.map { person ->
                 person.copy(
                     status = if(approved) {
                         PersonStatusEnum.ACTIVE
@@ -78,7 +92,7 @@ class ApproveOrDeclineInviteRequestUseCase(
                     },
                     lastModified = timeNow,
                 )
-            )
+            }
         )
     }
 

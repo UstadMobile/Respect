@@ -186,7 +186,8 @@ class CreateAccountViewModel(
 
                             navigateOnAccountCreatedUseCase(
                                 personRegistered = personRegistered,
-                                navCommandFlow = _navCommandFlow
+                                navCommandFlow = _navCommandFlow,
+                                inviteRequest = redeemRequest,
                             )
                         }
 

@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.datalayer.db.school.ext.fullName
@@ -22,11 +23,11 @@ import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.gender_literal
-import world.respect.shared.generated.resources.teacher
 
 @Composable
 fun ClassPendingPersonListItem(
     person: Person?,
+    pendingRole: StringResource,
     onClickAcceptInvite: (Person) -> Unit,
     onClickDismissInvite: (Person) -> Unit,
 ) {
@@ -41,7 +42,7 @@ fun ClassPendingPersonListItem(
             Text(
                 text = "${
                     person?.fullName().orEmpty()
-                } (${stringResource(Res.string.teacher)})"
+                } (${stringResource(pendingRole)})"
             )
         },
         supportingContent = {

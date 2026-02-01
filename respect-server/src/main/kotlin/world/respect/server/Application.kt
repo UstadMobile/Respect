@@ -55,6 +55,7 @@ import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
+import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -209,9 +210,6 @@ fun Application.module() {
 
             route("school") {
                 route("respect") {
-                    AddChildAccountRoute(
-                        addChildAccountUseCase = { it.getSchoolKoinScope().get() }
-                    )
                     route("auth") {
                         AuthRoute()
                     }
@@ -241,6 +239,9 @@ fun Application.module() {
                         EnrollmentRoute()
                         AssignmentRoute()
                         PersonQrBadgeRoute()
+                        AddChildAccountRoute(
+                            addChildAccountUseCase = { it.requireAccountScope().get() }
+                        )
                     }
                 }
             }

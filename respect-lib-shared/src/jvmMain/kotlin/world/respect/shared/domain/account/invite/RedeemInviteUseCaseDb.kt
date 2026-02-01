@@ -23,6 +23,7 @@ import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.randomString
@@ -91,7 +92,9 @@ class RedeemInviteUseCaseDb(
         schoolDataSourceVal.personDataSource.updateLocal(listOf(accountPerson))
 
         val enrollmentRole = inviteFromDb.accepterEnrollmentRole(approvalRequired)
-        if(enrollmentRole != null && inviteFromDb is ClassInvite) {
+        if(enrollmentRole != null && inviteFromDb is ClassInvite
+                && inviteFromDb.inviteMode != ClassInviteModeEnum.VIA_PARENT
+        ) {
             schoolDataSourceVal.enrollmentDataSource.updateLocal(
                 listOf(
                     Enrollment(

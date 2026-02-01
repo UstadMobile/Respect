@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
@@ -411,6 +412,7 @@ class SignupScreen(
     private val schoolUrlStr: String,
     private val inviteRedeemRequestStr: String,
     private val signupModeStr: String,
+    private val parentPersonStr: String?,
 ) : RespectAppRoute {
 
     @Transient
@@ -423,16 +425,21 @@ class SignupScreen(
     @Transient
     val schoolUrl = Url(schoolUrlStr)
 
+    @Transient
+    val parentPerson: Person? = parentPersonStr?.let { Json.decodeFromString(it) }
+
     companion object {
         fun create(
             schoolUrl: Url,
             inviteRequest: RespectRedeemInviteRequest,
             signupMode: SignupScreenModeEnum = SignupScreenModeEnum.STANDARD,
+            parentPerson: Person? = null,
         ): SignupScreen {
             return SignupScreen(
                 schoolUrlStr = schoolUrl.toString(),
                 inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
                 signupModeStr = signupMode.value,
+                parentPersonStr = parentPerson?.let { Json.encodeToString(it) }
             )
         }
     }

@@ -200,6 +200,7 @@ fun ClazzDetailScreen(
                 ) { person ->
                     ClassPendingPersonListItem(
                         person = person,
+                        pendingRole = Res.string.teacher,
                         onClickAcceptInvite = onClickAcceptInvite,
                         onClickDismissInvite = onClickDismissInvite,
                     )
@@ -215,6 +216,7 @@ fun ClazzDetailScreen(
                 ) { person ->
                     ClassPendingPersonListItem(
                         person = person,
+                        pendingRole = Res.string.student,
                         onClickAcceptInvite = onClickAcceptInvite,
                         onClickDismissInvite = onClickDismissInvite,
                     )

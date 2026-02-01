@@ -35,7 +35,8 @@ class NavigateOnAccountCreatedUseCase(
                         SignupScreen.create(
                             schoolUrl = schoolUrl,
                             inviteRequest = inviteRequest,
-                            signupMode = SignupScreenModeEnum.ADD_CHILD_TO_PARENT
+                            signupMode = SignupScreenModeEnum.ADD_CHILD_TO_PARENT,
+                            parentPerson = personRegistered,
                         )
                     }
 

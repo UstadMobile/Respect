@@ -114,10 +114,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Student"
 - assertVisible: "Approval required"    #switch is On
 - copyTextFrom:
     id: "invite_code"

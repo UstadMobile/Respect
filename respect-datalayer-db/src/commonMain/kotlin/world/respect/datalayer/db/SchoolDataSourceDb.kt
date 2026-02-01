@@ -95,7 +95,7 @@ class SchoolDataSourceDb(
     }
 
     override val inviteDataSource: InviteDataSourceLocal by lazy {
-        InviteDataSourceDb(schoolDb, uidNumberMapper, checkPersonPermissionUseCase)
+        InviteDataSourceDb(schoolDb, uidNumberMapper, checkPersonPermissionUseCase, authenticatedUser)
     }
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal by lazy {

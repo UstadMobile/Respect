@@ -35,7 +35,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
@@ -129,16 +128,12 @@ class AcceptInviteViewModel(
                 destination = if(!invite.isChildUser()) {
                     TermsAndCondition.create(
                         schoolUrl = route.schoolUrl,
-                        profileType = ProfileType.TEACHER,
                         inviteRequest = inviteRedeemRequest,
-                        type = null,
                     )
                 }else {
                     SignupScreen.create(
                         schoolUrl = route.schoolUrl,
-                        profileType = ProfileType.STUDENT,
                         inviteRequest = inviteRedeemRequest,
-                        type = null,
                     )
                 }
             )

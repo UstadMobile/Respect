@@ -629,10 +629,6 @@ val appKoinModule = module {
         get<InitDeepLinkUriProviderUseCaseAndroid>()
     }
 
-    single<NavigateOnAccountCreatedUseCase> {
-        NavigateOnAccountCreatedUseCase()
-    }
-
     single<PhoneNumValidatorUseCase> {
         PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
     }
@@ -809,6 +805,13 @@ val appKoinModule = module {
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
+
+        scoped<NavigateOnAccountCreatedUseCase> {
+            NavigateOnAccountCreatedUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+            )
+        }
+
     }
 
     /**

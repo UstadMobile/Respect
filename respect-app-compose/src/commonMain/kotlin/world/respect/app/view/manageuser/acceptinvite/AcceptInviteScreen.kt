@@ -21,6 +21,7 @@ import world.respect.shared.generated.resources.role
 import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.school_server_url
 import world.respect.shared.util.ext.label
+import world.respect.shared.util.ext.roleLabel
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteUiState
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
@@ -63,10 +64,9 @@ fun AcceptInviteScreen(
                 RespectDetailField(
                     modifier = Modifier.defaultItemPadding(),
                     label = { Text(stringResource(Res.string.role)) },
-                    value = { Text(stringResource(invite.role.label)) }
+                    value = { Text(stringResource(invite.roleLabel)) }
                 )
             }
-
 
             else -> {
                 //Do nothing else

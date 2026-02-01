@@ -15,7 +15,7 @@ import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
+import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -409,16 +409,16 @@ class WaitingForApproval : RespectAppRoute
 @Serializable
 class SignupScreen(
     private val schoolUrlStr: String,
-    private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
-    val inviteType: Int?=null,
+    private val signupModeStr: String,
 ) : RespectAppRoute {
 
     @Transient
-    val type: ProfileType = ProfileType.fromValue(profileTypeStr)
-    @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest =
         Json.decodeFromString(inviteRedeemRequestStr)
+
+    @Transient
+    val signupMode: SignupScreenModeEnum = SignupScreenModeEnum.fromValue(signupModeStr)
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
@@ -426,15 +426,13 @@ class SignupScreen(
     companion object {
         fun create(
             schoolUrl: Url,
-            profileType: ProfileType,
             inviteRequest: RespectRedeemInviteRequest,
-            type: Int?=null
+            signupMode: SignupScreenModeEnum = SignupScreenModeEnum.STANDARD,
         ): SignupScreen {
             return SignupScreen(
                 schoolUrlStr = schoolUrl.toString(),
-                profileTypeStr = profileType.value,
-                inviteType = type,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
+                signupModeStr = signupMode.value,
             )
         }
     }
@@ -443,13 +441,8 @@ class SignupScreen(
 @Serializable
 class TermsAndCondition(
     private val schoolUrlStr: String,
-    private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
-    val inviteType: Int?=null,
 ) : RespectAppRoute {
-
-    @Transient
-    val type: ProfileType = ProfileType.fromValue(profileTypeStr)
 
     @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest =
@@ -461,15 +454,11 @@ class TermsAndCondition(
     companion object {
         fun create(
             schoolUrl: Url,
-            profileType: ProfileType,
-            inviteRequest: RespectRedeemInviteRequest,
-            type: Int?=null
+            inviteRequest: RespectRedeemInviteRequest
         ): TermsAndCondition {
             return TermsAndCondition(
                 schoolUrlStr = schoolUrl.toString(),
-                profileTypeStr = profileType.value,
-                inviteRedeemRequestStr = Json.encodeToString(inviteRequest),
-                inviteType = type
+                inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
             )
         }
     }
@@ -478,12 +467,8 @@ class TermsAndCondition(
 @Serializable
 class CreateAccount(
     private val schoolUrlStr: String,
-    private val profileTypeStr: String,
     private val inviteRedeemRequestStr: String,
 ) : RespectAppRoute {
-
-    @Transient
-    val type = ProfileType.fromValue(profileTypeStr)
 
     @Transient
     val respectRedeemInviteRequest : RespectRedeemInviteRequest = Json.decodeFromString(
@@ -496,13 +481,10 @@ class CreateAccount(
     companion object {
         fun create(
             schoolUrl: Url,
-            profileType: ProfileType,
-            inviteRequest: RespectRedeemInviteRequest,
-            type: Int?=null
+            inviteRequest: RespectRedeemInviteRequest
         ): CreateAccount {
             return CreateAccount(
                 schoolUrlStr = schoolUrl.toString(),
-                profileTypeStr = profileType.value,
                 inviteRedeemRequestStr = Json.encodeToString(inviteRequest)
             )
         }

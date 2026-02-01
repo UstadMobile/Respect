@@ -166,7 +166,7 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-        Napier.d("SignupViewModel: onClickSave: route type=")
+        Napier.d("SignupViewModel: onClickSave: route type=${route.signupMode.value}")
         launchWithLoadingIndicator(
             onShowError = { errMessage ->
                 _uiState.update { it.copy(otherError = errMessage) }

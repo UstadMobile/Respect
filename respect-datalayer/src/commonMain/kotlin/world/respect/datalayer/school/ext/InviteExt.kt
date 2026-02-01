@@ -40,8 +40,7 @@ fun Invite2.copyInvite(
 fun Invite2.isApprovalRequiredNow(): Boolean = approvalRequiredAfter < Clock.System.now()
 
 fun Invite2.isChildUser(): Boolean {
-    return (this as? NewUserInvite)?.role == PersonRoleEnum.STUDENT
-            || (this as? ClassInvite)?.role == EnrollmentRoleEnum.STUDENT
+    return this.accepterPersonRole == PersonRoleEnum.STUDENT
 }
 
 /**

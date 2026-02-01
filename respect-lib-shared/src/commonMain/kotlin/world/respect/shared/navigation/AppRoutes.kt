@@ -582,6 +582,7 @@ data class PersonList(
     val addToClassUid: String? = null,
     val addToClassRoleStr: String? = null,
     val personGuidStr: String? = null,
+    val hideInvite: Boolean = false,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -606,6 +607,7 @@ data class PersonList(
             classUid: String? = null,
             personGuid: String? = null,
             role: EnrollmentRoleEnum? = null,
+            hideInvite: Boolean = false,
         ) = PersonList(
             filterByRoleStr = filterByRole?.value,
             isTopLevel = isTopLevel,
@@ -614,7 +616,8 @@ data class PersonList(
             addToClassUid = classUid,
             classNameStr = className,
             addToClassRoleStr = role?.value,
-            personGuidStr = personGuid
+            personGuidStr = personGuid,
+            hideInvite = hideInvite,
         )
 
     }

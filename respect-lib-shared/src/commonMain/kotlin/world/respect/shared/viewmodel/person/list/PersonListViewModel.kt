@@ -156,7 +156,8 @@ class PersonListViewModel(
                 _uiState.update {
                     it.copy(
                         showAddPersonItem = canAddPerson && route.resultExpected,
-                        showInvitePersonItem = canInvitePerson && route.resultExpected,
+                        showInvitePersonItem = !route.hideInvite && canInvitePerson
+                                && route.resultExpected,
                     )
                 }
             }
@@ -166,7 +167,7 @@ class PersonListViewModel(
             it.copy(
                 pendingPersons = pendingPersonsPagingSource,
                 persons = pagingSourceFactoryHolder,
-                showInvite = route.filterByRole != null||route.addToClassUid!=null
+                showInvite = !route.hideInvite && (route.filterByRole != null||route.addToClassUid!=null)
             )
         }
     }

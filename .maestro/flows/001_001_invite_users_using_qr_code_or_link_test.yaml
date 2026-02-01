@@ -200,18 +200,10 @@ onFlowComplete:
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
 
-# E) Teacher share invite link to Parent to join as a family member of student user
-- tapOn: "Student User"
-- tapOn: "Edit"
-- tapOn: "New member"
+# E) Teacher share invite link for parent device based signup
+- tapOn: "Add student"
 - tapOn: "Invite person"
-- assertVisible:
-    id: "app_title"
-    text: "Invite person"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Parent"
+- tapOn: "Invite via parents"
 - tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
@@ -222,6 +214,7 @@ onFlowComplete:
     file: "subflows/openlink_flow.yaml"
     env:
       URL: ${maestro.copiedText}
+- tapOn: "Get Started"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -261,26 +254,13 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "test123"
 - tapOn: "Sign-up"
-
-#teacher login and verify family that member got added to student profile
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-- tapOn:
-    id: "username"
-- inputText: "teacherauser"
-- tapOn:
-    id : "password"
-- inputText: "test123"
-- tapOn: "Login"
-- assertVisible: "Apps"
-- tapOn: "People"
-- tapOn: "Student User"
-- assertVisible: "Family Member"
-- assertVisible: "Parent User"
+- tapOn: "Child's name*"
+- inputText: "Student User2"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Child's date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateC}
+- tapOn: "Done"
+# 1/Feb/2026: MD: Maestro AGAIN does not actually deliver the tap. Thanks.

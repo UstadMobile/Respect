@@ -213,8 +213,10 @@ abstract class RespectViewModel(
         onShowError: ((UiText) -> Unit)? = null,
         block: suspend () -> Unit,
     ) {
-        if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE)
+        if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE) {
+            Napier.d("launchWithLoadingIndicator: already loading")
             return
+        }
 
         viewModelScope.launch {
             loadingState = LoadingUiState.INDETERMINATE

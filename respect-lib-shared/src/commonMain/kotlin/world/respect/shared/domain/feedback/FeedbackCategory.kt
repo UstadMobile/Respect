@@ -23,7 +23,7 @@ enum class FeedbackCategory {
         fun getStringResource(category: FeedbackCategory): StringResource {
             entries.forEach { _ ->
                 return when (category) {
-                    LAUNCHER-> Res.string.category_launcher
+                    LAUNCHER -> Res.string.category_launcher
                     INTEGRATED_APPS -> Res.string.category_integrated_apps
                     QUESTION -> Res.string.category_question
                     RATE_US ->  Res.string.category_rate_us

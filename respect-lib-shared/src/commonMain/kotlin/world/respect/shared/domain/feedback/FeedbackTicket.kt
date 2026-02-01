@@ -19,6 +19,5 @@ data class FeedbackTicket(
 @Serializable
 data class Article(
     val subject: String,
-    val body: String,
-    val type: String = "note"
+    val body: String
 )

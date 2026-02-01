@@ -15,7 +15,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.role
 import world.respect.shared.generated.resources.school_name
@@ -56,7 +56,7 @@ fun AcceptInviteScreen(
             is ClassInvite -> {
                 RespectDetailField(
                     modifier = Modifier.defaultItemPadding(),
-                    label = { Text(stringResource(Res.string.clazz)) },
+                    label = { Text(stringResource(Res.string.class_name)) },
                     value = { Text(uiState.inviteInfo?.className ?: "") },
                 )
 

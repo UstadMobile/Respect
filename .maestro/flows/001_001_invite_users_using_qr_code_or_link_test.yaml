@@ -185,10 +185,10 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
-- inputText: "teacheruser"
+- inputText: "teacherauser"
 - tapOn:
     id : "password"
-- inputText: "testt1"
+- inputText: "test123"
 - tapOn: "Login"
 - assertVisible: "Apps"
 - tapOn: "Classes"

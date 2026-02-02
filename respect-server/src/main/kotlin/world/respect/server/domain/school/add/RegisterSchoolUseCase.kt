@@ -8,6 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.ext.newUserInviteUid
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
@@ -99,7 +100,7 @@ class RegisterSchoolUseCase : KoinComponent {
         val createInviteLinkUseCase: CreateInviteLinkUseCase = schoolScope.get()
 
 
-        val inviteCode = generateInviteCode()
+        val inviteCode = Invite2.newRandomCode()
 
         val tenYearsFromNow = Clock.System.now() + (10 * 365).days
         val firstUserInviteUid = "${PersonRoleEnum.SYSTEM_ADMINISTRATOR.newUserInviteUid}:first"
@@ -129,13 +130,6 @@ class RegisterSchoolUseCase : KoinComponent {
         )
     }
 
-    private fun generateInviteCode(): String {
-        // Generate a random 8-character invite code
-        val allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return (1..8)
-            .map { allowedChars.random() }
-            .joinToString("")
-    }
 }
 
 class SchoolRegistrationDisabledException(message: String) :

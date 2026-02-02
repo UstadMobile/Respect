@@ -4,6 +4,8 @@ import kotlin.random.Random
 
 private val CHAR_POOL_DEFAULT = "abcdefghikjmnpqrstuvxwyz23456789"
 
+val CHAR_POOL_NUMBERS = "0123456789"
+
 /**
  * Generate a random string (e.g. default password, class code, etc.
  */

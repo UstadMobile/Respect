@@ -87,6 +87,8 @@
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
+    <string name="congratulation">Congratulations</string>
+    <string name="successfully_registered_school">You have successfully registered the school</string>
     <string name="i_am_student">I’m a Student</string>
     <string name="i_am_parent">I’m a Parent</string>
     <string name="accept">Accept</string>
@@ -143,6 +145,7 @@
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
     <string name="pending_requests">Pending requests</string>">
+    <string name="pending_requests_to_join">Pending request to join</string>">
     <string name="copy_invite_code">Copy invite code : </string>">
     <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
     <string name="share_qr_code">Share QR code</string>">
@@ -174,7 +177,7 @@
     <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
-    <string name="enter_school_name">School name</string>
+    <string name="school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
@@ -519,12 +522,56 @@
 
     <string name="edit_enrollment">Edit enrollment</string>
 
+    <string name="regenerate_invite_code">Regenerate invite code</string>
+    <string name="copy_link">Copy link</string>
+    <string name="invite_settings">Invite settings</string>
+    <string name="invite_multiple_allowed">Invite multiple people</string>
+    <string name="approval_required">Approval required</string>
+    <string name="allow_multiple_people_to_use_this_invite">Allow multiple people to use this invite</string>
+    <string name="invite_via_sms">Send link via SMS</string>
+    <string name="invite_via_email">Send link via email</string>
+    <string name="invite_via_share">Share link</string>
+    <string name="qr_code">QR code</string>
+    <string name="code">Code</string>
+    <string name="copy">Copy</string>
+    <string name="code_private_info">
+        This code is private. If it is shared with someone, they can enter this code here to join.
+    </string>
+    <string name="class_name_or_school_name">Class name or school name</string>
+
+
     <string name="section_name">Section name</string>
+    <string name="qr_code_private_screen">This QR code is private. If it is shared with someone, they can scan to join.</string>
 
     <string name="not_set">Not set</string>
     <string name="downloaded_lessons">Downloaded lessons</string>
     <string name="undo">Undo</string>
     <string name="item_deleted">1 deleted</string>
 
+
+    <string name="school_server_url">School server URL</string>
+
+    <string name="approval_not_required_until">Approval not required until:</string>
+
+    <string name="reset_code">Reset code</string>
+
+    <string name="invite_students_directly">Invite students directly</string>
+    <string name="students_register_themselves">Students register themselves</string>
+
+
+    <string name="invite_via_parents">Invite via parents</string>
+    <string name="parents_register_and">Parents register and student uses parents' device</string>
+
+    <string name="something_wrong_with_invite">Something went wrong: please check invite code and connection</string>
+
+    <string name="developed_by">Developed by UstadMobile FZ-LLC</string>
+
+    <string name="license_text">RESPECT App. Copyright 2025-2026 UstadMobile FZ-LLC.</string>
+
+    <string name="respect_is_open_source">The RESPECT App is open-source software licensed under the AGPLv3 license. Contains open source libraries copyright respective contributors.</string>
+
+    <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
+
+    <string name="select_host">Select Host</string>
 
 </resources>

@@ -1,15 +1,22 @@
 package world.respect.app.app
 
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.ImportContacts
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
 import androidx.compose.material.icons.Icons
@@ -34,6 +42,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -43,6 +52,7 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
@@ -54,10 +64,12 @@ import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.continue_using_fingerprint_or
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -118,12 +130,20 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
 )
+
+/**
+ * @param activityNavCommandFlow a flow that is received from the activity. When a link is opened
+ *        and the app is already running, the Activity's onNewIntent will be invoked. If the app is
+ *        started cold then InitDeepLinkUriProviderUseCase should be used.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
+    activityNavCommandFlow: Flow<NavCommand>,
     widthClass: SizeClass = SizeClass.MEDIUM,
     useBottomBar: Boolean = true,
-    onAppStateChanged: (AppUiState) -> Unit = { }) {
+    onAppStateChanged: (AppUiState) -> Unit = { }
+) {
     val appUiState = remember {
         mutableStateOf(
             AppUiState(
@@ -134,6 +154,10 @@ fun App(
     }
 
     val navController = rememberNavController()
+    val respectNavController = remember(Unit) {
+        RespectComposeNavController(navController)
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     val accountManager: RespectAccountManager = koinInject()
@@ -147,6 +171,11 @@ fun App(
 
 
     NavControllerLogEffect(navController)
+
+    NavCommandEffect(
+        navHostController = respectNavController,
+        navCommandFlow = activityNavCommandFlow,
+    )
 
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
@@ -244,7 +273,27 @@ fun App(
                 }
             },
             floatingActionButton = {
-                if (appUiStateVal.fabState.visible) {
+                if (appUiStateVal.expandableFabState.visible) {
+                    ExpandableFab(
+                        state = appUiStateVal.expandableFabState,
+                        onToggle = {
+                            appUiStateVal = appUiStateVal.copy(
+                                expandableFabState = appUiStateVal.expandableFabState.copy(
+                                    expanded = !appUiStateVal.expandableFabState.expanded
+                                )
+                            )
+                        },
+                        onItemClick = { item ->
+                            item.onClick()
+                            appUiStateVal = appUiStateVal.copy(
+                                expandableFabState = appUiStateVal.expandableFabState.copy(
+                                    expanded = false
+                                )
+                            )
+                        }
+                    )
+                }
+                else if (appUiStateVal.fabState.visible) {
                     ExtendedFloatingActionButton(
                         modifier = Modifier.testTag("floating_action_button"),
                         onClick = appUiStateVal.fabState.onClick,
@@ -278,6 +327,7 @@ fun App(
         ) { innerPadding ->
             AppNavHost(
                 navController = navController,
+                respectNavController = respectNavController,
                 onSetAppUiState = {
                     appUiStateVal = it
                 },

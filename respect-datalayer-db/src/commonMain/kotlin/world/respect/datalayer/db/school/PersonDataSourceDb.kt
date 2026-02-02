@@ -27,14 +27,13 @@ import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
-import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
 
 class PersonDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-    private val checkPersonPermissionUseCase    : CheckPersonPermissionUseCase,
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
 ): PersonDataSourceLocal {
 
 
@@ -158,6 +157,7 @@ class PersonDataSourceDb(
             inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
             filterByName = params.filterByName,
             filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+            filterByPersonStatus = params.filterByPersonStatus?.flag ?: 0,
             includeRelated = params.includeRelated,
             includeDeleted = params.common.includeDeleted ?: false,
         ).map { list ->
@@ -183,6 +183,7 @@ class PersonDataSourceDb(
                 inClassOnDayInUtcMs = params.inClassOnDay?.atStartOfDayInMillisUtc() ?: 0,
                 filterByName = params.filterByName,
                 filterByPersonRole = params.filterByPersonRole?.flag ?: 0,
+                filterByPersonStatus = params.filterByPersonStatus?.flag ?: 0,
                 includeRelated = params.includeRelated,
                 includeDeleted = params.common.includeDeleted ?: false,
             ).map(tag = { "PersonDataSourceDb/listAsPagingSource(params=$params)" }) {
@@ -234,6 +235,7 @@ class PersonDataSourceDb(
                 inClazzRoleFlag = listParams.filterByEnrolmentRole?.flag ?: 0,
                 filterByName = listParams.filterByName,
                 filterByPersonRole = listParams.filterByPersonRole?.flag ?: 0,
+                filterByPersonStatus = listParams.filterByPersonStatus?.flag ?: 0,
                 includeRelated = listParams.includeRelated,
             )
         }

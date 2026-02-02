@@ -19,9 +19,9 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
@@ -35,15 +35,12 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
-import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class CreateAccountViewModelUiState(
     val username: String = "",
@@ -71,6 +68,8 @@ class CreateAccountViewModel(
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase by lazy {
         scope.get()
     }
+
+    private val navigateOnAccountCreatedUseCase: NavigateOnAccountCreatedUseCase by inject()
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? = scope.getOrNull()
 
@@ -145,11 +144,6 @@ class CreateAccountViewModel(
 
     fun onClickSignupWithPasskey() {
         viewModelScope.launch {
-            val inviteInfo = uiState.value.inviteInfo
-
-            if (inviteInfo == null)
-                throw IllegalStateException("inviteInfo is null")
-
             val usernameVal = _uiState.value.username
             val validationResult = validateUsernameUseCase(usernameVal)
             _uiState.update {
@@ -163,6 +157,7 @@ class CreateAccountViewModel(
             }
 
             val rpIdVal = schoolDirectoryEntry.await().rpId
+
             try {
                 if (createPasskeyUseCase != null && rpIdVal != null && passkeySupported.await()) {
                     val createPasskeyResult = createPasskeyUseCase(
@@ -184,26 +179,15 @@ class CreateAccountViewModel(
                                 )
                             )
 
-                            accountManager.register(
+                            val personRegistered = accountManager.register(
                                 redeemInviteRequest = redeemRequest,
                                 schoolUrl = route.schoolUrl
                             )
 
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(
-                                    destination = if(
-                                        route.respectRedeemInviteRequest.role == PersonRoleEnum.PARENT
-                                    ) {
-                                        SignupScreen.create(
-                                            schoolUrl = route.schoolUrl,
-                                            profileType = ProfileType.CHILD,
-                                            inviteRequest = redeemRequest
-                                        )
-                                    }else {
-                                        WaitingForApproval()
-                                    },
-                                    clearBackStack = true,
-                                )
+                            navigateOnAccountCreatedUseCase(
+                                personRegistered = personRegistered,
+                                navCommandFlow = _navCommandFlow,
+                                inviteRequest = redeemRequest,
                             )
                         }
 

@@ -1,5 +1,6 @@
 package world.respect.app.view.schooldirectory.list
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +21,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListUiState
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 
 @Composable
 fun SchoolDirectoryListScreen(
@@ -29,21 +30,24 @@ fun SchoolDirectoryListScreen(
     val uiState by viewModel.uiState.collectAsState()
     SchoolDirectoryListScreen(
         uiState = uiState,
-        onDeleteClick = { viewModel.onDeleteDirectory(it) }
+        onDeleteClick = { viewModel.onDeleteDirectory(it) },
+        onSelectClick = { viewModel.onSelectDirectory(it) }
     )
 }
 
 @Composable
 fun SchoolDirectoryListScreen(
     uiState: SchoolDirectoryListUiState,
-    onDeleteClick: (RespectSchoolDirectory) -> Unit
+    onDeleteClick: (RespectSchoolDirectory) -> Unit,
+    onSelectClick: (RespectSchoolDirectory) -> Unit
 ) {
-
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(uiState.schoolDirectory) { directory ->
             SchoolDirectoryListItem(
                 directory = directory,
-                onDeleteClick = { onDeleteClick(directory) }
+                mode = uiState.mode,
+                onDeleteClick = { onDeleteClick(directory) },
+                onSelectClick = { onSelectClick(directory) }
             )
         }
     }
@@ -52,20 +56,29 @@ fun SchoolDirectoryListScreen(
 @Composable
 fun SchoolDirectoryListItem(
     directory: RespectSchoolDirectory,
-    onDeleteClick: () -> Unit
+    mode: SchoolDirectoryMode,
+    onDeleteClick: () -> Unit,
+    onSelectClick: () -> Unit
 ) {
     ListItem(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = mode == SchoolDirectoryMode.SELECT) {
+                if (mode == SchoolDirectoryMode.SELECT) {
+                    onSelectClick()
+                }
+            },
         headlineContent = {
             Text(text = directory.baseUrl.toString())
         },
-
         trailingContent = {
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(Res.string.delete)
-                )
+            if (mode == SchoolDirectoryMode.MANAGE) {
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(Res.string.delete)
+                    )
+                }
             }
         }
     )

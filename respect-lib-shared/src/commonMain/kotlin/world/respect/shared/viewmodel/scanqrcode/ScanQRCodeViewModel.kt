@@ -11,6 +11,7 @@ import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.more_options
@@ -40,6 +41,7 @@ class ScanQRCodeViewModel(
     savedStateHandle: SavedStateHandle,
     private val resultReturner: NavResultReturner,
     private val respectAccountManager: RespectAccountManager,
+    private val resolveUrlToNavCommandUseCase: ResolveUrlToNavCommandUseCase,
 ) : RespectViewModel(savedStateHandle), KoinComponent {
 
     private val _uiState = MutableStateFlow(ScanQRCodeUiState())
@@ -83,6 +85,10 @@ class ScanQRCodeViewModel(
                 _uiState.update { it.copy(errorMessage = error) }
             }
         ) {
+            val urlObj = Url(url)
+
+            val navCommandForUrl = resolveUrlToNavCommandUseCase(urlObj)
+
             when {
                 //If a result was requested to be returned via NavResultReturner, then do that
                 resultReturner.sendResultIfResultExpected(
@@ -109,10 +115,14 @@ class ScanQRCodeViewModel(
                     )
                 }
 
+                navCommandForUrl != null -> {
+                    _navCommandFlow.tryEmit(navCommandForUrl)
+                }
+
                 //Else navigate based on the QR code. Right now, this is only authentication using
                 //QR Badge, could also be an invite, playlist link, etc.
                 else -> {
-                    authenticateWithQrCode(Url(url))
+                    authenticateWithQrCode(urlObj)
                 }
             }
         }

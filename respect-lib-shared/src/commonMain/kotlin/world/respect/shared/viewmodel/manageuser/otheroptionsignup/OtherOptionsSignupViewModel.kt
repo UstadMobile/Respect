@@ -24,13 +24,10 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
-import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class OtherOptionsSignupUiState(
     val passkeyError: String? = null,
@@ -129,6 +126,7 @@ class OtherOptionsSignupViewModel(
                                 schoolUrl = route.schoolUrl
                             )
 
+                            /*
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = if(
@@ -140,11 +138,18 @@ class OtherOptionsSignupViewModel(
                                             inviteRequest = redeemRequest
                                         )
                                     }else {
-                                        WaitingForApproval()
+                                        if (redeemRequest.invite.forClassGuid == null &&
+                                            redeemRequest.invite.forFamilyOfGuid == null){
+                                            RespectAppLauncher()
+                                        }else{
+                                            WaitingForApproval()
+
+                                        }
                                     },
                                     clearBackStack = true,
                                 )
                             )
+                            */
                         }
 
                         is CreatePasskeyUseCase.Error -> {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "643876ed69a2a63d294e5b3f3134a90e",
+    "identityHash": "abc95f2a1b30d153fbdb5ea52c15edf8",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -593,7 +593,7 @@
       },
       {
         "tableName": "ClassEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteCode` TEXT, `cStudentInviteCode` TEXT, PRIMARY KEY(`cGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cGuid` TEXT NOT NULL, `cGuidHash` INTEGER NOT NULL, `cTitle` TEXT NOT NULL, `cStatus` INTEGER NOT NULL, `cDescription` TEXT, `cLastModified` INTEGER NOT NULL, `cStored` INTEGER NOT NULL, `cTeacherInviteGuid` TEXT, `cStudentInviteGuid` TEXT, PRIMARY KEY(`cGuidHash`))",
         "fields": [
           {
             "fieldPath": "cGuid",
@@ -637,13 +637,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "cTeacherInviteCode",
-            "columnName": "cTeacherInviteCode",
+            "fieldPath": "cTeacherInviteGuid",
+            "columnName": "cTeacherInviteGuid",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "cStudentInviteCode",
-            "columnName": "cStudentInviteCode",
+            "fieldPath": "cStudentInviteGuid",
+            "columnName": "cStudentInviteGuid",
             "affinity": "TEXT"
           }
         ],
@@ -1107,11 +1107,105 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonQrBadgeEntity_pqrQrCodeUrl` ON `${TABLE_NAME}` (`pqrQrCodeUrl`)"
           }
         ]
+      },
+      {
+        "tableName": "InviteEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iApprovalRequiredAfter` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iStored` INTEGER NOT NULL, `iStatus` INTEGER NOT NULL, `iNewUserRole` INTEGER, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, PRIMARY KEY(`iGuidHash`))",
+        "fields": [
+          {
+            "fieldPath": "iGuid",
+            "columnName": "iGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iGuidHash",
+            "columnName": "iGuidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iCode",
+            "columnName": "iCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iApprovalRequiredAfter",
+            "columnName": "iApprovalRequiredAfter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iLastModified",
+            "columnName": "iLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStored",
+            "columnName": "iStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStatus",
+            "columnName": "iStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iNewUserRole",
+            "columnName": "iNewUserRole",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForFamilyOfGuid",
+            "columnName": "iForFamilyOfGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForFamilyOfGuidHash",
+            "columnName": "iForFamilyOfGuidHash",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForClassGuid",
+            "columnName": "iForClassGuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForClassName",
+            "columnName": "iForClassName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iSchoolName",
+            "columnName": "iSchoolName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "iForClassGuidHash",
+            "columnName": "iForClassGuidHash",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iForClassRole",
+            "columnName": "iForClassRole",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "iGuidHash"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '643876ed69a2a63d294e5b3f3134a90e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'abc95f2a1b30d153fbdb5ea52c15edf8')"
     ]
   }
 }

@@ -18,7 +18,10 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
+import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_clazz
@@ -33,6 +36,7 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import kotlin.random.Random
 import kotlin.time.Clock
 
 data class ClazzEditUiState(
@@ -55,6 +59,8 @@ class ClazzEditViewModel(
     private val route: ClazzEdit = savedStateHandle.toRoute()
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
+
+    private val createClassUseCase: CreateClassUseCase by inject()
 
     private val guid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
         Clazz.TABLE_ID
@@ -138,14 +144,18 @@ class ClazzEditViewModel(
 
         launchWithLoadingIndicator {
             try {
-                schoolDataSource.classDataSource.store(listOf(clazz))
                 if (route.guid == null) {
+                    val newClazz = clazz.copy()
+
+                    createClassUseCase(newClazz)
+
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             ClazzDetail(guid), popUpTo = route, popUpToInclusive = true
                         )
                     )
                 } else {
+                    schoolDataSource.classDataSource.store(listOf(clazz))
                     _navCommandFlow.tryEmit(NavCommand.PopUp())
                 }
             } catch (e: Throwable) {
@@ -155,6 +165,11 @@ class ClazzEditViewModel(
         }
     }
 
+    private fun generateCode(): String {
+        return Random.nextInt(DEFAULT_INVITE_CODE_MAX)
+            .toString()
+            .padStart(DEFAULT_INVITE_CODE_LEN, '0')
+    }
     fun onClearError() {
         _uiState.update { prev -> prev.copy(clazzNameError = null) }
     }

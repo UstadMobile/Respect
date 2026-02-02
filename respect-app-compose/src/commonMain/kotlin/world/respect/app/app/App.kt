@@ -165,10 +165,17 @@ fun App(
                 is StringResourceUiText -> getString(uiText.resource)
                 else -> ""
             }
+            val actionLabel = snack.action?.let { actionUiText ->
+                when (actionUiText) {
+                    is StringUiText -> actionUiText.text
+                    is StringResourceUiText -> getString(actionUiText.resource)
+                    else -> null
+                }
+            }
 
             val result = snackbarHostState.showSnackbar(
                 message = message,
-                actionLabel = snack.action,
+                actionLabel = actionLabel,
                 duration = SnackbarDuration.Short
             )
 

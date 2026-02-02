@@ -105,14 +105,14 @@ onFlowComplete:
     text: "Feedback submitted"
 - assertVisible: "Thank you for your feedback. Respect team will review it internally."
 
-#- copyTextFrom:
-#    id: "zammad_case_id"
-#- runScript:
-#    file: "scripts/verifyZammadTicket.js"
-#    env:
-#      zammadToken: ${zammadToken}
-#      zammadUrl: ${zammadUrl}
-#      CASE_ID: ${maestro.copiedText}
+- copyTextFrom:
+    id: "zammad_case_id"
+- runScript:
+    file: "scripts/verifyZammadTicket.js"
+    env:
+      zammadToken: ${zammadToken}
+      zammadUrl: ${zammadUrl}
+      CASE_ID: ${maestro.copiedText}
 
 - back
 - assertVisible:

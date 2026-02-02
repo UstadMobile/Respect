@@ -4,10 +4,35 @@
 # .maestro for test flows
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
-
 # Root directory for TestServerController to use (each server will get its own sub directory)
 # TestServerController will create the directory automatically.
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
+
+# Check if the FEEDBACK variable is set and the file exists
+if [ -n "$FEEDBACK" ] && [ -f "$FEEDBACK" ]; then
+    echo "ci-run-maestro: Reading properties from $FEEDBACK"
+
+    # Helper function to extract value by key, handling potential whitespace and Windows \r
+    get_prop() {
+        grep -E "^$1=" "$FEEDBACK" | cut -d'=' -f2- | tr -d '\r'
+    }
+
+    # Extract the specific variables
+    # We use := to only assign if the variable isn't already set in Jenkins env
+    : ${zammadUrl:=$(get_prop "zammadUrl")}
+    : ${zammadToken:=$(get_prop "zammadToken")}
+
+    echo "  > Extracted zammadUrl: $zammadUrl"
+else
+    echo "ci-run-maestro: FEEDBACK variable not set or file not found. Relying on Env Vars."
+fi
+
+# Ensure variables are exported so the next commands see them
+export zammadUrl
+export zammadToken
+
+echo "DEBUG: zammadUrl is set to: $zammadUrl"
+
 
 
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
@@ -152,8 +177,8 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
-        --env zammadUrl="${ZAMMAD_URL:-$zammadUrl}" \
-        --env zammadToken="${ZAMMAD_TOKEN:-$zammadToken}" \
+        --env zammadUrl="${zammadUrl}" \
+        --env zammadToken="${zammadToken}" \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -199,8 +224,8 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
-      --env zammadUrl="${ZAMMAD_URL:-$zammadUrl}" \
-      --env zammadToken="${ZAMMAD_TOKEN:-$zammadToken}" \
+      --env zammadUrl="${zammadUrl}" \
+      --env zammadToken="${zammadToken}" \
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \

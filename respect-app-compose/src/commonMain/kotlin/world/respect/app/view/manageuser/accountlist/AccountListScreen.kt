@@ -68,13 +68,15 @@ fun AccountListScreen(
                     onClickAccount = null,
                     extras = {
                         Row {
-                            OutlinedButton(
-                                onClick =  {onClickProfile()},
-                            ) {
-                                Text(stringResource(Res.string.profile))
-                            }
+                            if(uiState.showSelectedAccountProfileButton) {
+                                OutlinedButton(
+                                    onClick = onClickProfile,
+                                ) {
+                                    Text(stringResource(Res.string.profile))
+                                }
 
-                            Spacer(Modifier.width(16.dp))
+                                Spacer(Modifier.width(16.dp))
+                            }
 
                             OutlinedButton(onClick = onClickLogout) {
                                 Text(stringResource(Res.string.logout))

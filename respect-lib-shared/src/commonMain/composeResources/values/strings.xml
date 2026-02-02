@@ -568,4 +568,6 @@
 
     <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
 
+    <string name="select_host">Select Host</string>
+
 </resources>

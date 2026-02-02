@@ -172,7 +172,6 @@ fun AppNavHost(
         startDestination = Acknowledgement(),
         modifier = modifier,
     ) {
-
         composable<Acknowledgement> {
             val viewModel: AcknowledgementViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

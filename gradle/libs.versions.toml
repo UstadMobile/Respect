@@ -7,6 +7,7 @@ androidx-activityCompose = "1.11.0"
 androidx-appcompat = "1.7.1"
 androidx-lifecycle = "2.9.4"
 # As per https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html
+installreferrer = "2.2"
 libphonenumber-android = "9.0.16"
 libphonenumber-google = "9.0.16"
 navigation = "2.9.0"
@@ -44,6 +45,7 @@ jvm-toolchain = "17"
 acra = "5.13.1"
 kscan = "0.5.0"
 accompanist-permissions = "0.37.3"
+qrose = "1.0.1"
 
 # Compose material3 as per https://developer.android.com/jetpack/androidx/releases/compose-material3
 # Required to use material3 window sizes
@@ -70,6 +72,7 @@ argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil3" }
 coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
 coil3-coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil3" }
+installreferrer = { module = "com.android.installreferrer:installreferrer", version.ref = "installreferrer" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
@@ -115,6 +118,7 @@ jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 
 koalaplot = {module = "io.github.koalaplot:koalaplot-core",version.ref = "koalaplot-version"}
 kscan = { module = "io.github.ismai117:KScan", version.ref = "kscan" }

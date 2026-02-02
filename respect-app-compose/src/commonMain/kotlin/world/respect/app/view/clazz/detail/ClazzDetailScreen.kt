@@ -198,56 +198,14 @@ fun ClazzDetailScreen(
                         person.key(EnrollmentRoleEnum.PENDING_TEACHER, index)
                     }
                 ) { person ->
-                    ListItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingContent = {
-                            RespectPersonAvatar(
-                                name = person?.fullName() ?: ""
-                            )
-                        },
-                        headlineContent = {
-                            Text(
-                                text = "${
-                                    person?.fullName().orEmpty()
-                                } (${stringResource(Res.string.teacher)})"
-                            )
-                        },
-                        supportingContent = {
-                            val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth ?: ""
-                            Text(
-                                text =
-                                    "${stringResource(Res.string.gender_literal)}: $gender, " +
-                                            "${stringResource(Res.string.date_of_birth)}: $dob"
-                            )
-
-                        },
-                        trailingContent = {
-                            Row {
-                                Icon(
-                                    modifier = Modifier.size(24.dp)
-                                        .clickable {
-                                            person?.also(onClickAcceptInvite)
-                                        },
-                                    imageVector = Icons.Outlined.CheckCircle,
-                                    contentDescription = stringResource(resource = Res.string.accept_invite)
-                                )
-
-                                Spacer(Modifier.width(16.dp))
-
-                                Icon(
-                                    modifier = Modifier.size(24.dp).clickable {
-                                        person?.also(onClickDismissInvite)
-                                    },
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                                )
-                            }
-                        }
+                    ClassPendingPersonListItem(
+                        person = person,
+                        pendingRole = Res.string.teacher,
+                        onClickAcceptInvite = onClickAcceptInvite,
+                        onClickDismissInvite = onClickDismissInvite,
                     )
                 }
             }
-
 
             if (uiState.showAddStudent) {
                 respectPagingItems(
@@ -256,51 +214,11 @@ fun ClazzDetailScreen(
                         person.key(EnrollmentRoleEnum.PENDING_STUDENT, index)
                     }
                 ) { person ->
-                    ListItem(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        leadingContent = {
-                            RespectPersonAvatar(
-                                name = person?.fullName() ?: ""
-                            )
-                        },
-                        headlineContent = {
-                            Text(
-                                text = "${
-                                    person?.fullName().orEmpty()
-                                } (${stringResource(Res.string.student)})"
-                            )
-                        },
-                        supportingContent = {
-                            val gender = person?.gender?.value
-                            val dob = person?.dateOfBirth ?: ""
-                            Text(
-                                text = "${stringResource(Res.string.gender_literal)}:" +
-                                        " $gender, ${stringResource(Res.string.date_of_birth)}: $dob"
-                            )
-                        },
-                        trailingContent = {
-                            Row {
-                                Icon(
-                                    modifier = Modifier.size(24.dp)
-                                        .clickable {
-                                            person?.also(onClickAcceptInvite)
-                                        },
-                                    imageVector = Icons.Outlined.CheckCircle,
-                                    contentDescription = stringResource(resource = Res.string.accept_invite)
-                                )
-
-                                Spacer(Modifier.width(16.dp))
-
-                                Icon(
-                                    modifier = Modifier.size(24.dp).clickable {
-                                        person?.also(onClickDismissInvite)
-                                    },
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                                )
-                            }
-                        }
+                    ClassPendingPersonListItem(
+                        person = person,
+                        pendingRole = Res.string.student,
+                        onClickAcceptInvite = onClickAcceptInvite,
+                        onClickDismissInvite = onClickDismissInvite,
                     )
                 }
             }

@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
@@ -25,6 +27,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
 import world.respect.shared.viewmodel.RespectViewModel
@@ -37,7 +40,14 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
-)
+) {
+    val showSelectedAccountProfileButton: Boolean
+        get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
+
+    val familyMembersClickEnabled: Boolean
+        get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
+
+}
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
@@ -146,9 +156,27 @@ class AccountListViewModel(
 
     fun onClickAccount(account: RespectAccount) {
         respectAccountManager.switchAccount(account)
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(RespectAppLauncher(), clearBackStack = true)
-        )
+
+        viewModelScope.launch {
+            val accountScope = respectAccountManager.getOrCreateAccountScope(account)
+            val person = accountScope.get<SchoolDataSource>().personDataSource.findByGuid(
+                loadParams = DataLoadParams(onlyIfCached = true),
+                guid = account.userGuid
+            )
+
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = if(person.dataOrNull()?.status != PersonStatusEnum.PENDING_APPROVAL) {
+                        RespectAppLauncher()
+                    }else {
+                        WaitingForApproval()
+                    },
+                    clearBackStack = true
+                )
+            )
+        }
+
+
     }
 
     fun onClickFamilyPerson(person: Person) {

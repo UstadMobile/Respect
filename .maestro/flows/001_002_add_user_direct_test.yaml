@@ -23,7 +23,8 @@ onFlowComplete:
     id: "app_title"
     text: "People"
 - tapOn:
-    id: "floating_action_button"   #  +Person button
+    id: "ExpandableFab"   #  +Person button
+- tapOn: "Add new person"
 - assertVisible:
     id: "app_title"
     text: "Add person"
@@ -214,7 +215,8 @@ onFlowComplete:
     id: "app_title"
     text: "People"
 - tapOn:
-    id: "floating_action_button"   #  +Person button
+    id: "ExpandableFab"   #  +Person button
+- tapOn: "Add new person"
 - assertVisible:
     id: "app_title"
     text: "Add person"

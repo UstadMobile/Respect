@@ -9,3 +9,7 @@ val LEARNING_UNIT_MIME_TYPES = listOf("text/html", "application/xml", "applicati
  */
 val RESPECT_SCHOOL_JSON_PATH = ".well-known/respect-school.json"
 
+val USTADMOBILE_RESPECT_DATA_POLICY_URL = "https://www.ustadmobile.com/policies/ustad.html"
+
+val APPSTORE_REDIRECT_BASE = "https://play.google.com/store/apps/details?id=world.respect.app"
+

@@ -1,6 +1,7 @@
 package world.respect.app.view.manageuser.accountlist
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,9 +30,13 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
+import world.respect.shared.generated.resources.developed_by
 import world.respect.shared.generated.resources.family_members
+import world.respect.shared.generated.resources.license_text
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
+import world.respect.shared.generated.resources.respect_is_open_source
+import world.respect.shared.generated.resources.supported_by_spix_foundation
 import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
@@ -72,13 +77,15 @@ fun AccountListScreen(
                     onClickAccount = null,
                     extras = {
                         Row {
-                            OutlinedButton(
-                                onClick =  {onClickProfile()},
-                            ) {
-                                Text(stringResource(Res.string.profile))
-                            }
+                            if(uiState.showSelectedAccountProfileButton) {
+                                OutlinedButton(
+                                    onClick = onClickProfile,
+                                ) {
+                                    Text(stringResource(Res.string.profile))
+                                }
 
-                            Spacer(Modifier.width(16.dp))
+                                Spacer(Modifier.width(16.dp))
+                            }
 
                             OutlinedButton(onClick = onClickLogout) {
                                 Text(stringResource(Res.string.logout))
@@ -102,7 +109,9 @@ fun AccountListScreen(
                 key = { it.guid }
             ) { account ->
                 ListItem(
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(
+                        enabled = uiState.familyMembersClickEnabled,
+                    ) {
                         onClickFamilyPerson(account)
                     },
                     leadingContent = {
@@ -172,6 +181,22 @@ fun AccountListScreen(
 
         item("version_info") {
             RespectLongVersionInfoItem()
+        }
+
+        item("copyright_info") {
+            HorizontalDivider()
+            ListItem(
+                headlineContent = {
+                    Text(stringResource(Res.string.developed_by))
+                },
+                supportingContent = {
+                    Column {
+                        Text(stringResource(Res.string.supported_by_spix_foundation))
+                        Text(stringResource(Res.string.respect_is_open_source))
+                        Text(stringResource(Res.string.license_text))
+                    }
+                }
+            )
         }
     }
 }

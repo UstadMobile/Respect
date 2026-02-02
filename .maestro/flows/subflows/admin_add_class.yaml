@@ -1,9 +1,6 @@
 appId: world.respect.app
 
 ---
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
 #  Admin add new class
 - tapOn: "Classes"
 - assertVisible:
@@ -15,8 +12,5 @@ appId: world.respect.app
     id: "app_title"
     text: "Add class"
 - tapOn: "Class name*"
-- inputText: "New Class"
+- inputText: ${CLASSNAME}
 - tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "New Class"

@@ -52,6 +52,8 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -229,26 +231,27 @@ class ClazzDetailViewModel(
     }
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
-        val clazz = _uiState.value.clazz.dataOrNull() ?: return
+        viewModelScope.launch {
+            val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
 
-        val classInviteCode = when(roleType){
-            EnrollmentRoleEnum.TEACHER -> clazz.teacherInviteCode
-            EnrollmentRoleEnum.STUDENT -> clazz.studentInviteCode
-            else -> null
-        }
-
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                PersonList.create(
-                    isTopLevel = false,
-                    resultDest = RouteResultDest(
-                        resultKey = "$RESULT_KEY_PREFIX${roleType.value}",
-                        resultPopUpTo = route,
-                    ),
-                    showInviteCode = classInviteCode,
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    PersonList.create(
+                        isTopLevel = false,
+                        resultDest = RouteResultDest(
+                            resultKey = "$RESULT_KEY_PREFIX${roleType.value}",
+                            resultPopUpTo = route,
+                        ),
+                        inviteUid = ClassInvite.uidFor(
+                            route.guid, roleType, ClassInviteModeEnum.DIRECT
+                        ),
+                        classUid = clazz.guid,
+                        className = clazz.title,
+                        role = roleType,
+                    )
                 )
             )
-        )
+         }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -266,7 +269,6 @@ class ClazzDetailViewModel(
             try {
                 approveOrDeclineInviteRequestUseCase(
                     personUid = user.guid,
-                    classUid = route.guid,
                     approved = true,
                 )
             }catch(e: Throwable) {

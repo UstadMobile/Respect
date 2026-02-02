@@ -6,10 +6,16 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.encodedPath
 import io.ktor.http.toURI
 
+
+/**
+ * Constant for the school url link segment. See schoolUrlOrNull for details.
+ */
+const val RESPECT_SCHOOL_LINK_SEGMENT = "respect_school_link"
+
 /**
  * Constant for the school url link divider. See schoolUrlOrNull for details.
  */
-const val RESPECT_SCHOOL_LINK_DIVIDER = "/respect_school_link/"
+const val RESPECT_SCHOOL_LINK_DIVIDER = "/$RESPECT_SCHOOL_LINK_SEGMENT/"
 
 
 /**

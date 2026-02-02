@@ -558,4 +558,6 @@
     <string name="invite_via_parents">Invite via parents</string>
     <string name="parents_register_and">Parents register and student uses parents' device</string>
 
+    <string name="something_wrong_with_invite">Something went wrong: please check invite code and connection</string>
+
 </resources>

@@ -27,6 +27,7 @@ import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
+import world.respect.shared.generated.resources.something_wrong_with_invite
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -82,8 +83,8 @@ class AcceptInviteViewModel(
         }
 
         launchWithLoadingIndicator(
-            onShowError = { errText ->
-                _uiState.update { it.copy(errorText = errText) }
+            onShowError = {
+                _uiState.update { it.copy(errorText = Res.string.something_wrong_with_invite.asUiText()) }
             }
         ) {
             val inviteInfo = getInviteInfoUseCase(route.code)

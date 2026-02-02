@@ -90,15 +90,6 @@ class ShareFeedbackViewModel(
         }
     }
 
-    fun onFeedbackDescriptionChanged(text: String) {
-        _uiState.update {
-            it.copy(
-                feedbackDescription = text,
-                feedbackDescriptionError = null
-            )
-        }
-    }
-
     fun onClickWhatsApp() {
         viewModelScope.launch {
             whatsAppLauncherUseCase.launchWhatsApp(
@@ -126,6 +117,15 @@ class ShareFeedbackViewModel(
         _uiState.value = _uiState.value.copy(
             selectedCategory = category
         )
+    }
+
+    fun onFeedbackDescriptionChanged(text: String) {
+        _uiState.update {
+            it.copy(
+                feedbackDescription = text,
+                feedbackDescriptionError = null
+            )
+        }
     }
 
     fun onClickCheckBox() {
@@ -218,7 +218,7 @@ class ShareFeedbackViewModel(
                 }
 
                 val ticket = FeedbackTicket(
-                    title = getString(FeedbackCategory.getStringResource(_uiState.value.selectedCategory)),
+                    title = getString(_uiState.value.selectedCategory.resource),
                     groupId = DEFAULT_GROUP_ID,
                     customerId = "$GUESS$customerEmail",
                     article = Article(

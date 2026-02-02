@@ -123,9 +123,6 @@ class RegisterSchoolUseCase : KoinComponent {
         // Convert to custom deep link so it opens directly in the app
         val customDeepLinkUrl = urlToCustomDeepLinkUseCase(regularInviteUrl)
 
-        Napier.i("Regular invite URL: $regularInviteUrl")
-        Napier.i("Custom deep link URL: $customDeepLinkUrl")
-
         return RegisterSchoolResponse(
             schoolUrl = Url(request.schoolUrl),
             redirectUrl = customDeepLinkUrl

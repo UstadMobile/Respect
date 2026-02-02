@@ -27,6 +27,8 @@ import kotlinx.html.head
 import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
+import kotlinx.html.main
+import kotlinx.html.meta
 import kotlinx.html.p
 import kotlinx.html.style
 import kotlinx.html.title
@@ -58,76 +60,79 @@ fun Route.SchoolRegistrationRoute() {
         call.respondHtml {
             head {
                 title { +"Register New School" }
+                meta(name = "viewport", content = "width=device-width, initial-scale=1")
             }
             body {
-                h1 { +"Register New School" }
+                main(classes = "container") { // "container" centers the form and gives it padding
+                    h1 { +"Register New School" }
 
-                form(method = FormMethod.post, action = "/register-school") {
-                    div("form-group") {
-                        label {
-                            htmlFor = "schoolName"
-                            +"School Name"
+                    form(method = FormMethod.post, action = "/register-school") {
+                        div("form-group") {
+                            label {
+                                htmlFor = "schoolName"
+                                +"School Name"
+                            }
+                            input(type = InputType.text, name = "schoolName") {
+                                id = "schoolName"
+                                required = true
+                                placeholder = "Enter school name"
+                            }
                         }
-                        input(type = InputType.text, name = "schoolName") {
-                            id = "schoolName"
-                            required = true
-                            placeholder = "Enter school name"
-                        }
-                    }
 
-                    when (schoolConfig.registration.mode) {
-                        SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
-                            div("form-group") {
-                                label {
-                                    htmlFor = "schoolSubdomain"
-                                    +"School Link"
-                                }
-                                div {
-                                    input(type = InputType.text, name = "schoolSubdomain") {
-                                        id = "schoolSubdomain"
-                                        required = true
-                                        placeholder = "schoolSubdomain"
+                        when (schoolConfig.registration.mode) {
+                            SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
+                                div("form-group") {
+                                    label {
+                                        htmlFor = "schoolSubdomain"
+                                        +"School Link"
                                     }
-                                    // Show the suffix to the user
-                                    +".${schoolConfig.registration.topLevelDomain}"
+                                    div {
+                                        input(type = InputType.text, name = "schoolSubdomain") {
+                                            id = "schoolSubdomain"
+                                            required = true
+                                            placeholder = "schoolSubdomain"
+                                        }
+                                        // Show the suffix to the user
+                                        +".${schoolConfig.registration.topLevelDomain}"
+                                    }
                                 }
+                            }
+
+                            SchoolConfig.RegistrationConfig.RegistrationMode.ANY_URL -> {
+                                div("form-group") {
+                                    label {
+                                        htmlFor = "schoolUrl"
+                                        +"School URL"
+                                    }
+                                    input(type = InputType.text, name = "schoolUrl") {
+                                        id = "schoolUrl"
+                                        required = true
+                                        placeholder = "https://your-school.com"
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                // Should not reach here since registration is disabled
                             }
                         }
 
-                        SchoolConfig.RegistrationConfig.RegistrationMode.ANY_URL -> {
-                            div("form-group") {
-                                label {
-                                    htmlFor = "schoolUrl"
-                                    +"School URL"
-                                }
-                                input(type = InputType.text, name = "schoolUrl") {
-                                    id = "schoolUrl"
-                                    required = true
-                                    placeholder = "https://your-school.com"
-                                }
+                        // Hidden package name field
+                        packageName?.let { pkg ->
+                            input(type = InputType.hidden, name = "packageName") {
+                                value = pkg
                             }
                         }
 
-                        else -> {
-                            // Should not reach here since registration is disabled
+                        // Hidden redirect field for deep linking to app
+                        input(type = InputType.hidden, name = "redirect") {
+                            value = call.request.queryParameters["redirect"]
+                                ?: "world.respect.app://school-registered"
                         }
-                    }
 
-                    // Hidden package name field
-                    packageName?.let { pkg ->
-                        input(type = InputType.hidden, name = "packageName") {
-                            value = pkg
+                        button(type = ButtonType.submit, classes = "submit-btn") {
+                            +"Next"
                         }
-                    }
-
-                    // Hidden redirect field for deep linking to app
-                    input(type = InputType.hidden, name = "redirect") {
-                        value = call.request.queryParameters["redirect"]
-                            ?: "world.respect.app://school-registered"
-                    }
-
-                    button(type = ButtonType.submit, classes = "submit-btn") {
-                        +"Next"
                     }
                 }
             }
@@ -175,27 +180,33 @@ fun Route.SchoolRegistrationRoute() {
                         call.respondHtml(HttpStatusCode.ServiceUnavailable) {
                             head {
                                 title { +"Service Unavailable" }
+                                meta(
+                                    name = "viewport",
+                                    content = "width=device-width, initial-scale=1"
+                                )
                             }
                             body {
-                                h1 { +"Something Went Wrong" }
-                                div {
-                                    style =
-                                        "color: red; padding: 20px; background-color: #ffe6e6; border-radius: 5px;"
-                                    +"We're unable to register new schools at the moment. "
-                                    +"The required service (${schoolConfig.registration.topLevelDomain}) is not accessible."
-                                }
-                                p { +"Please try again later or contact support if the problem persists." }
+                                main(classes = "container") { // "container" centers the form and gives it padding
+                                    h1 { +"Something Went Wrong" }
+                                    div {
+                                        style =
+                                            "color: red; padding: 20px; background-color: #ffe6e6; border-radius: 5px;"
+                                        +"We're unable to register new schools at the moment. "
+                                        +"The required service (${schoolConfig.registration.topLevelDomain}) is not accessible."
+                                    }
+                                    p { +"Please try again later or contact support if the problem persists." }
 
-                                a(
-                                    href = "/register-school?packageName=${
-                                        packageName?.let {
-                                            URLEncoder.encode(
-                                                it,
-                                                "UTF-8"
-                                            )
-                                        } ?: ""
-                                    }") {
-                                    +"Try Again"
+                                    a(
+                                        href = "/register-school?packageName=${
+                                            packageName?.let {
+                                                URLEncoder.encode(
+                                                    it,
+                                                    "UTF-8"
+                                                )
+                                            } ?: ""
+                                        }") {
+                                        +"Try Again"
+                                    }
                                 }
                             }
                         }
@@ -269,24 +280,31 @@ fun Route.SchoolRegistrationRoute() {
             call.respondHtml(statusCode) {
                 head {
                     title { +"Registration Error" }
+                    meta(
+                        name = "viewport",
+                        content = "width=device-width, initial-scale=1"
+                    )
                 }
                 body {
-                    h1 { +"Registration Failed" }
-                    div {
-                        style =
-                            "color: red; padding: 20px; background-color: #ffe6e6; border-radius: 5px;"
-                        +errorMessage
-                    }
-                    a(
-                        href = "/register-school?packageName=${
-                            packageName?.let {
-                                URLEncoder.encode(
-                                    it,
-                                    "UTF-8"
-                                )
-                            } ?: ""
-                        }") {
-                        +"Try Again"
+                    main(classes = "container") { // "container" centers the form and gives it padding
+
+                        h1 { +"Registration Failed" }
+                        div {
+                            style =
+                                "color: red; padding: 20px; background-color: #ffe6e6; border-radius: 5px;"
+                            +errorMessage
+                        }
+                        a(
+                            href = "/register-school?packageName=${
+                                packageName?.let {
+                                    URLEncoder.encode(
+                                        it,
+                                        "UTF-8"
+                                    )
+                                } ?: ""
+                            }") {
+                            +"Try Again"
+                        }
                     }
                 }
             }

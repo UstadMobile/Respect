@@ -52,6 +52,7 @@ import world.respect.shared.generated.resources.whatsapp_respect
 import world.respect.shared.generated.resources.category
 import world.respect.shared.generated.resources.describe_feedback_placeholder
 import world.respect.shared.generated.resources.email
+import world.respect.shared.generated.resources.open
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.share_feedback
@@ -109,7 +110,7 @@ fun ShareFeedbackScreen(
         }
 
         item {
-            FeedbackItem(
+            QuickContactItem(
                 title = stringResource(Res.string.whatsapp_respect),
                 leadingIcon = Icons.Outlined.Whatsapp,
                 onClick = onClickWhatsApp
@@ -117,7 +118,7 @@ fun ShareFeedbackScreen(
         }
 
         item {
-            FeedbackItem(
+            QuickContactItem(
                 title = stringResource(Res.string.email_respect),
                 leadingIcon = Icons.Outlined.Email,
                 onClick = onClickEmail
@@ -125,7 +126,7 @@ fun ShareFeedbackScreen(
         }
 
         item {
-            FeedbackItem(
+            QuickContactItem(
                 title = stringResource(Res.string.public_forum),
                 leadingIcon = Icons.Outlined.People,
                 onClick = onClickPublicForum,
@@ -202,7 +203,7 @@ fun ShareFeedbackScreen(
                 Text(stringResource(Res.string.submit_feedback))
             }
         }
-        item{
+        item {
             uiState.errorMessage?.let {
                 Text(
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),
@@ -217,7 +218,7 @@ fun ShareFeedbackScreen(
 }
 
 @Composable
-private fun FeedbackItem(
+private fun QuickContactItem(
     title: String,
     leadingIcon: ImageVector,
     onClick: () -> Unit
@@ -235,7 +236,7 @@ private fun FeedbackItem(
         trailingContent = {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                contentDescription = null
+                contentDescription = stringResource(Res.string.open) + " " + title
             )
         },
         modifier = Modifier
@@ -277,7 +278,7 @@ fun CategoryDropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(),
-                value = uiTextStringResource(FeedbackCategory.getStringResourceUiText(selectedCategory)),
+                value = uiTextStringResource(selectedCategory.uiText),
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
@@ -291,7 +292,7 @@ fun CategoryDropdown(
             ) {
                 categories.forEach { category ->
                     DropdownMenuItem(
-                        text = { Text(uiTextStringResource(FeedbackCategory.getStringResourceUiText(category))) },
+                        text = { Text(uiTextStringResource(category.uiText)) },
                         onClick = {
                             onCategorySelected(category)
                             expanded = false

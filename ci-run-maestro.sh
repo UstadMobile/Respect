@@ -11,14 +11,11 @@ TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 # Check if the FEEDBACK variable is set and the file exists
 if [ -n "$FEEDBACK" ] && [ -f "$FEEDBACK" ]; then
     echo "ci-run-maestro: Reading properties from $FEEDBACK"
-
-    # Helper function to extract value by key, handling potential whitespace and Windows \r
     get_prop() {
         grep -E "^$1=" "$FEEDBACK" | cut -d'=' -f2- | tr -d '\r'
     }
 
     # Extract the specific variables
-    # We use := to only assign if the variable isn't already set in Jenkins env
     : ${zammadUrl:=$(get_prop "zammadUrl")}
     : ${zammadToken:=$(get_prop "zammadToken")}
 
@@ -32,8 +29,6 @@ export zammadUrl
 export zammadToken
 
 echo "DEBUG: zammadUrl is set to: $zammadUrl"
-
-
 
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"

@@ -12,25 +12,25 @@ function isSetUrl(value) {
 }
 
 // --- 1. Validate Zammad URL ---
-// We check if ZAMMAD_URL (passed from YAML env) is valid
+
 var baseUrl;
 if (typeof ZAMMAD_URL !== 'undefined' && isSetUrl(ZAMMAD_URL)) {
     baseUrl = ZAMMAD_URL;
 } else if (isSetUrl(output.zammadUrl)) {
-    // Fallback: check if it exists in output object
     baseUrl = output.zammadUrl;
 } else {
-    throw "ZAMMAD_URL not set or invalid. Run with -e zammadUrl=https://... or check YAML env mapping.";
+    throw "ZAMMAD_URL not set or invalid.";
 }
 
 // --- 2. Validate Token ---
+
 var token;
 if (typeof ZAMMAD_TOKEN !== 'undefined' && isSetString(ZAMMAD_TOKEN)) {
     token = ZAMMAD_TOKEN;
 } else if (isSetString(output.zammadToken)) {
     token = output.zammadToken;
 } else {
-    throw "ZAMMAD_TOKEN not set. Run with -e zammadToken=... or check YAML env mapping.";
+    throw "ZAMMAD_TOKEN not set.";
 }
 
 var caseNumber = CASE_ID;

@@ -1,12 +1,21 @@
 package world.respect.datalayer.db.school.domain
 
-import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.toEntity
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.SchoolPermissionGrant
 
+/**
+ * Add Default School Permission Grants for each person role.
+ *
+ * This is only used on the server side. It may be used before any user is
+ * created.
+ */
 class AddDefaultSchoolPermissionGrantsUseCase(
-    private val dataSource: SchoolDataSource
+    private val schoolDb: RespectSchoolDatabase,
+    private val uidNumberMapper: UidNumberMapper,
 ) {
 
     private fun PersonRoleEnum.newInitialGrant(
@@ -18,7 +27,7 @@ class AddDefaultSchoolPermissionGrantsUseCase(
     )
 
     suspend operator fun invoke() {
-        dataSource.schoolPermissionGrantDataSource.store(
+        schoolDb.getSchoolPermissionGrantDao().upsert(
             listOf(
                 PersonRoleEnum.SYSTEM_ADMINISTRATOR.newInitialGrant(
                     PermissionFlags.SYSADMIN_DEFAULT_SCHOOL_PERMISSIONS
@@ -32,7 +41,9 @@ class AddDefaultSchoolPermissionGrantsUseCase(
                 PersonRoleEnum.PARENT.newInitialGrant(
                     PermissionFlags.PARENT_DEFAULT_SCHOOL_PERMISSIONS
                 ),
-            )
+            ).map {
+                it.toEntity(uidNumberMapper)
+            }
         )
     }
 }

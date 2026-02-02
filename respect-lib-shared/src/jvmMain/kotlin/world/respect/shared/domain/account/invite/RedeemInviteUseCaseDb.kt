@@ -41,7 +41,6 @@ import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
 import java.lang.IllegalArgumentException
 import kotlin.time.Clock
-import kotlin.time.Clock
 
 /**
  * Server-side use case that handles redeeming an invite: that is when a (new) user client signing up

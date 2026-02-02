@@ -21,6 +21,7 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.domain.GetPermissionLastModifiedUseCaseDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
@@ -314,6 +315,13 @@ fun serverKoinModule(
         scoped<CreateInviteLinkUseCase> {
             CreateInviteLinkUseCase(
                 schoolUrl = schoolUrl(),
+            )
+        }
+
+        scoped<AddDefaultSchoolPermissionGrantsUseCase>() {
+            AddDefaultSchoolPermissionGrantsUseCase(
+                schoolDb = get(),
+                uidNumberMapper = get(),
             )
         }
     }

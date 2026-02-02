@@ -9,7 +9,6 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.ext.newUserInviteUid
@@ -19,7 +18,6 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
 import world.respect.libutil.ext.normalizeForEndpoint
-import world.respect.libutil.ext.randomString
 import world.respect.server.util.ext.HttpStatusException
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
@@ -36,9 +34,6 @@ class AddSchoolUseCase(
     private val directoryDataSource: SchoolDirectoryDataSourceLocal,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal,
     private val encryptPasswordUseCase: EncryptPersonPasswordUseCase,
-    private val addDefaultGrantsUseCase: (SchoolDataSource) -> AddDefaultSchoolPermissionGrantsUseCase = {
-        AddDefaultSchoolPermissionGrantsUseCase(it)
-    },
 ) : KoinComponent {
 
     @Serializable
@@ -80,33 +75,33 @@ class AddSchoolUseCase(
                 ).scopeId
             )
 
-            val accountScope = getKoin().createScope<RespectAccount>(
-                RespectAccountScopeId(
-                    schoolToAdd.self, AuthenticatedUserPrincipalId(adminGuid)
-                ).scopeId
-            )
+            if (request.adminPassword != null) {
+                val accountScope = getKoin().createScope<RespectAccount>(
+                    RespectAccountScopeId(
+                        schoolToAdd.self, AuthenticatedUserPrincipalId(adminGuid)
+                    ).scopeId
+                )
 
-            accountScope.linkTo(schoolScope)
+                accountScope.linkTo(schoolScope)
 
-            val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
-            val adminPerson = Person(
-                guid = adminGuid,
-                username = request.adminUsername,
-                givenName = "Admin",
-                familyName = "Admin",
-                gender = PersonGenderEnum.UNSPECIFIED,
-                roles = listOf(
-                    PersonRole(
-                        isPrimaryRole = true,
-                        roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                val schoolDataSource: SchoolDataSourceLocal = accountScope.get()
+                val adminPerson = Person(
+                    guid = adminGuid,
+                    username = request.adminUsername,
+                    givenName = "Admin",
+                    familyName = "Admin",
+                    gender = PersonGenderEnum.UNSPECIFIED,
+                    roles = listOf(
+                        PersonRole(
+                            isPrimaryRole = true,
+                            roleEnum = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                        )
                     )
                 )
-            )
 
-            //Use updateLocal to bypass permission check for adding first user
-            schoolDataSource.personDataSource.updateLocal(listOf(adminPerson))
+                //Use updateLocal to bypass permission check for adding first user
+                schoolDataSource.personDataSource.updateLocal(listOf(adminPerson))
 
-            if (request.adminPassword != null) {
                 schoolDataSource.personPasswordDataSource.store(
                     listOf(
                         encryptPasswordUseCase(
@@ -120,7 +115,8 @@ class AddSchoolUseCase(
             }
 
             //insert default SchoolPermissionGrants
-            addDefaultGrantsUseCase(schoolDataSource).invoke()
+            val addDefaultGrantsUseCase: AddDefaultSchoolPermissionGrantsUseCase = schoolScope.get()
+            addDefaultGrantsUseCase()
 
             val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
 

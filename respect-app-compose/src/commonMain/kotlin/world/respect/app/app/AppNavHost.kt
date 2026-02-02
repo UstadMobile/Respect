@@ -91,6 +91,7 @@ import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.EnterInviteCode
+import world.respect.shared.navigation.FeedbackSubmitted
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
@@ -114,9 +115,6 @@ import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
-import world.respect.shared.navigation.CreateAccountSetPassword
-import world.respect.shared.navigation.CreateAccountSetUsername
-import world.respect.shared.navigation.FeedbackSubmitted
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.navigation.SignupScreen

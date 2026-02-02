@@ -34,6 +34,7 @@ import world.respect.shared.generated.resources.downloaded_lessons
 import world.respect.shared.generated.resources.item_deleted
 import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.sort_by
+import world.respect.shared.generated.resources.undo
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
@@ -384,7 +385,7 @@ class LearningUnitListViewModel(
             snackBarDispatcher.showSnackBar(
                 Snack(
                     message = Res.string.item_deleted.asUiText(),
-                    action = "Undo",
+                    action = Res.string.undo.asUiText(),
                     onAction = {
                         _uiState.update { s ->
                             val mutableList = s.downloadedLessons.toMutableList()

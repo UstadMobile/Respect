@@ -11,7 +11,7 @@ function isSetUrl(value) {
     return isSetString(value) && value.startsWith("http");
 }
 
-// --- 1. Validate Zammad URL ---
+// Validate Zammad URL
 
 var baseUrl;
 if (typeof zammadUrl !== 'undefined' && isSetUrl(zammadUrl)) {
@@ -22,7 +22,7 @@ if (typeof zammadUrl !== 'undefined' && isSetUrl(zammadUrl)) {
     throw "zammadUrl not set or invalid.";
 }
 
-// --- 2. Validate Token ---
+// Validate Token
 
 var token;
 if (typeof zammadToken !== 'undefined' && isSetString(zammadToken)) {
@@ -39,7 +39,7 @@ console.log("baseUrl:", baseUrl);
 console.log("caseNumber:", caseNumber);
 
 
-// --- Retry logic ---
+// Retry logic
 const maxAttempts = 4;
 
 for (var i = 0; i < maxAttempts; i++) {

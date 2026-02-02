@@ -5,8 +5,6 @@
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 # Root directory for TestServerController to use (each server will get its own sub directory)
-# TestServerController will create the directory automatically.
-TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 # Fail if FEEDBACK file is not found
 if [ -z "$FEEDBACK" ] || [ ! -f "$FEEDBACK" ]; then
@@ -31,12 +29,10 @@ fi
 export zammadUrl="$zammadUrl"
 export zammadToken="$zammadToken"
 
-#export ZAMMAD_URL="$zammadUrl"
-#export ZAMMAD_TOKEN="$zammadToken"
-
-
 echo "ci-run-maestro: zammadUrl=$zammadUrl"
 
+# TestServerController will create the directory automatically.
+TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"
 

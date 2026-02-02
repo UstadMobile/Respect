@@ -31,8 +31,8 @@ fi
 export zammadUrl="$zammadUrl"
 export zammadToken="$zammadToken"
 
-export ZAMMAD_URL="$zammadUrl"
-export ZAMMAD_TOKEN="$zammadToken"
+#export ZAMMAD_URL="$zammadUrl"
+#export ZAMMAD_TOKEN="$zammadToken"
 
 
 echo "ci-run-maestro: zammadUrl=$zammadUrl"

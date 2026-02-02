@@ -17,7 +17,6 @@ import world.respect.shared.generated.resources.select_host
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
-import world.respect.shared.navigation.SchoolDirectoryMode
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -73,7 +72,7 @@ class SchoolDirectoryListViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = SchoolDirectoryEdit,
-                popUpTo = SchoolDirectoryList(SchoolDirectoryMode.MANAGE)
+                popUpTo = SchoolDirectoryList.create(SchoolDirectoryMode.MANAGE)
             )
         )
     }

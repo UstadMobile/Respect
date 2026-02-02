@@ -26,12 +26,12 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryList
-import world.respect.shared.navigation.SchoolDirectoryMode
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 
 
 data class GetStartedUiState(
@@ -128,7 +128,7 @@ class GetStartedViewModel(
     fun onClickAddMySchool() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                SchoolDirectoryList(SchoolDirectoryMode.SELECT)
+                SchoolDirectoryList.create(SchoolDirectoryMode.SELECT)
             )
         )
     }

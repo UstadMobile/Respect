@@ -19,9 +19,9 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete
-import world.respect.shared.navigation.SchoolDirectoryMode
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListUiState
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 
 @Composable
 fun SchoolDirectoryListScreen(

@@ -17,6 +17,7 @@ import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -64,13 +65,18 @@ object Onboarding : RespectAppRoute
 
 @Serializable
 data class SchoolDirectoryList(
-    val mode: SchoolDirectoryMode = SchoolDirectoryMode.MANAGE
-) : RespectAppRoute
+    val modeStr: String = SchoolDirectoryMode.MANAGE.value
+) : RespectAppRoute {
 
-@Serializable
-enum class SchoolDirectoryMode {
-    MANAGE,  // Shows edit/delete buttons
-    SELECT   // Shows clickable items for selection
+    @Transient
+    val mode: SchoolDirectoryMode = SchoolDirectoryMode.fromValue(modeStr)
+
+    companion object {
+        fun create(
+            mode: SchoolDirectoryMode = SchoolDirectoryMode.MANAGE
+        ) = SchoolDirectoryList(mode.value)
+    }
+
 }
 
 @Serializable

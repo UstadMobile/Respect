@@ -25,8 +25,8 @@ else
 fi
 
 # Ensure variables are exported so the next commands see them
-export zammadUrl
-export zammadToken
+export zammadUrl="$zammadUrl"
+export zammadToken="$zammadToken"
 
 echo "DEBUG: zammadUrl is set to: $zammadUrl"
 

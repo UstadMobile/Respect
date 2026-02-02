@@ -302,7 +302,8 @@ class PersonEditViewModel(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = PERSON_SELECT_RESULT
-                    )
+                    ),
+                    hideInvite = true,
                 )
             )
         )

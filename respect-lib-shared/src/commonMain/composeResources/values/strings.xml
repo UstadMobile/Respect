@@ -551,6 +551,23 @@
 
     <string name="reset_code">Reset code</string>
 
+    <string name="invite_students_directly">Invite students directly</string>
+    <string name="students_register_themselves">Students register themselves</string>
+
+
+    <string name="invite_via_parents">Invite via parents</string>
+    <string name="parents_register_and">Parents register and student uses parents' device</string>
+
+    <string name="something_wrong_with_invite">Something went wrong: please check invite code and connection</string>
+
+    <string name="developed_by">Developed by UstadMobile FZ-LLC</string>
+
+    <string name="license_text">RESPECT App. Copyright 2025-2026 UstadMobile FZ-LLC.</string>
+
+    <string name="respect_is_open_source">The RESPECT App is open-source software licensed under the AGPLv3 license. Contains open source libraries copyright respective contributors.</string>
+
+    <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
+
     <string name="select_host">Select Host</string>
 
 </resources>

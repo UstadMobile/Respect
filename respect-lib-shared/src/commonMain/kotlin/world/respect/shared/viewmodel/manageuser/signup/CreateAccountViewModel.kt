@@ -57,7 +57,6 @@ class CreateAccountViewModel(
     private val accountManager: RespectAccountManager,
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val validateUsernameUseCase: ValidateUsernameUseCase,
-    private val navigateOnAccountCreatedUseCase: NavigateOnAccountCreatedUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val route: CreateAccount = savedStateHandle.toRoute()
 
@@ -69,6 +68,8 @@ class CreateAccountViewModel(
     private val checkPasskeySupportUseCase: CheckPasskeySupportUseCase by lazy {
         scope.get()
     }
+
+    private val navigateOnAccountCreatedUseCase: NavigateOnAccountCreatedUseCase by inject()
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? = scope.getOrNull()
 
@@ -185,7 +186,8 @@ class CreateAccountViewModel(
 
                             navigateOnAccountCreatedUseCase(
                                 personRegistered = personRegistered,
-                                navCommandFlow = _navCommandFlow
+                                navCommandFlow = _navCommandFlow,
+                                inviteRequest = redeemRequest,
                             )
                         }
 

@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.adapters
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.InviteEntity
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
@@ -31,7 +32,8 @@ fun InviteEntity.toModel(): Invite2 {
                 stored = iStored,
                 status = iStatus,
                 classUid = iForClassGuid,
-                role = iForClassRole
+                role = iForClassRole,
+                inviteMode = iInviteMode ?: ClassInviteModeEnum.DIRECT,
             )
         }
 
@@ -79,6 +81,7 @@ fun Invite2.toEntity(
                 iForClassGuid = classUid,
                 iForClassGuidHash = uidNumberMapper(classUid),
                 iForClassRole = role,
+                iInviteMode = inviteMode,
             )
         }
 

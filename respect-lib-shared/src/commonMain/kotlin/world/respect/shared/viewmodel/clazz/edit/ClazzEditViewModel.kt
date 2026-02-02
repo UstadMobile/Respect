@@ -20,8 +20,8 @@ import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
 import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
-import world.respect.datalayer.school.model.Invite2
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_clazz
@@ -60,16 +60,12 @@ class ClazzEditViewModel(
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
+    private val createClassUseCase: CreateClassUseCase by inject()
+
     private val guid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
         Clazz.TABLE_ID
     ).toString()
 
-    private val studentInviteGuid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Invite2.TABLE_ID
-    ).toString()
-    private val teacherInviteGuid =  schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Invite2.TABLE_ID
-    ).toString()
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -151,7 +147,7 @@ class ClazzEditViewModel(
                 if (route.guid == null) {
                     val newClazz = clazz.copy()
 
-                    schoolDataSource.classDataSource.store(listOf(newClazz))
+                    createClassUseCase(newClazz)
 
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(

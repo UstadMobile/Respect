@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.manageuser.waitingforapproval
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +14,9 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.waiting_title
@@ -55,9 +58,18 @@ class WaitingForApprovalViewModel(
             val activeUserUid = accountManager.activeAccount?.userGuid ?: return@launch
 
             while(true) {
-                val personLoaded = schoolDataSource.personDataSource
-                    .findByGuid(DataLoadParams(), activeUserUid)
-                if(personLoaded.dataOrNull()?.status == PersonStatusEnum.ACTIVE) {
+                val personsLoaded = schoolDataSource.personDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        common = GetListCommonParams(
+                            guid = activeUserUid,
+                        ),
+                        includeRelated = true,
+                    )
+                ).dataOrNull()
+
+                val personLoaded = personsLoaded?.firstOrNull { it.guid == activeUserUid }
+                if(personLoaded?.status == PersonStatusEnum.ACTIVE) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(RespectAppLauncher())
                     )

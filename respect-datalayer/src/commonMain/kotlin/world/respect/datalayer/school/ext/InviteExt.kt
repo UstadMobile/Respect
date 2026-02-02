@@ -1,6 +1,7 @@
 package world.respect.datalayer.school.ext
 
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Invite2
@@ -39,8 +40,7 @@ fun Invite2.copyInvite(
 fun Invite2.isApprovalRequiredNow(): Boolean = approvalRequiredAfter < Clock.System.now()
 
 fun Invite2.isChildUser(): Boolean {
-    return (this as? NewUserInvite)?.role == PersonRoleEnum.STUDENT
-            || (this as? ClassInvite)?.role == EnrollmentRoleEnum.STUDENT
+    return this.accepterPersonRole == PersonRoleEnum.STUDENT
 }
 
 /**
@@ -49,7 +49,24 @@ fun Invite2.isChildUser(): Boolean {
 val Invite2.accepterPersonRole: PersonRoleEnum
     get() =when(this) {
         is NewUserInvite -> this.role
-        is ClassInvite -> this.role.relatedPersonRoleEnum
+        is ClassInvite -> if(inviteMode == ClassInviteModeEnum.VIA_PARENT) {
+            PersonRoleEnum.PARENT
+        }else {
+            this.role.relatedPersonRoleEnum
+        }
         is FamilyMemberInvite -> PersonRoleEnum.PARENT
     }
 
+
+fun Invite2.accepterEnrollmentRole(
+    approvalRequired: Boolean = isApprovalRequiredNow()
+) : EnrollmentRoleEnum? {
+    if(this !is ClassInvite)
+        return null
+
+    return when {
+        approvalRequired && this.role == EnrollmentRoleEnum.STUDENT -> EnrollmentRoleEnum.PENDING_STUDENT
+        approvalRequired && this.role == EnrollmentRoleEnum.TEACHER -> EnrollmentRoleEnum.PENDING_TEACHER
+        else -> this.role
+    }
+}

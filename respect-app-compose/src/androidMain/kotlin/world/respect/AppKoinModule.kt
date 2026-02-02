@@ -58,6 +58,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
@@ -102,7 +103,7 @@ import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
-import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseClient
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -207,6 +208,7 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -633,10 +635,6 @@ val appKoinModule = module {
         get<InitDeepLinkUriProviderUseCaseAndroid>()
     }
 
-    single<NavigateOnAccountCreatedUseCase> {
-        NavigateOnAccountCreatedUseCase()
-    }
-
     single<PhoneNumValidatorUseCase> {
         PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
     }
@@ -813,6 +811,13 @@ val appKoinModule = module {
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
+
+        scoped<NavigateOnAccountCreatedUseCase> {
+            NavigateOnAccountCreatedUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+            )
+        }
+
     }
 
     /**
@@ -885,19 +890,24 @@ val appKoinModule = module {
             )
         }
 
-        scoped<SchoolDataSource> {
+        scoped<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
+
+            SchoolDataSourceDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                checkPersonPermissionUseCase = get(),
+            )
+        }
+
+        scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
 
             SchoolDataSourceRepository(
-                local = SchoolDataSourceDb(
-                    schoolDb = get(),
-                    uidNumberMapper = get(),
-                    authenticatedUser = AuthenticatedUserPrincipalId(
-                        accountScopeId.accountPrincipalId.guid
-                    ),
-                    checkPersonPermissionUseCase = get(),
-                ),
+                local = get<SchoolDataSourceLocal>(),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
@@ -915,11 +925,14 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
+
         scoped<AddChildAccountUseCase> {
-            AddChildAccountUseCaseDataSource(
-                schoolDataSource = get(),
-                schoolPrimaryKeyGenerator = get(),
-                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            AddChildAccountUseCaseClient(
+                schoolUrl = RespectAccountScopeId.parse(id).schoolUrl,
+                authTokenProvider = get(),
+                httpClient = get(),
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                schoolDataSourceLocal = get(),
             )
         }
 
@@ -982,6 +995,10 @@ val appKoinModule = module {
 
         scoped<GetWritableRolesListUseCase> {
             GetWritableRolesListUseCaseImpl()
+        }
+
+        scoped<CreateClassUseCase> {
+            CreateClassUseCase(dataSource = get())
         }
 
     }

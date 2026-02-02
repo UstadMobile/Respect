@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "8989bfd140662f1429be5b020bfeabc0",
+    "identityHash": "9036274987c93dc6ce478999d085bbb7",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1110,7 +1110,7 @@
       },
       {
         "tableName": "InviteEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iApprovalRequiredAfter` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iStored` INTEGER NOT NULL, `iStatus` INTEGER NOT NULL, `iNewUserRole` INTEGER, `iNewUserFirstInvite` INTEGER NOT NULL, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, PRIMARY KEY(`iGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iApprovalRequiredAfter` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iStored` INTEGER NOT NULL, `iStatus` INTEGER NOT NULL, `iNewUserRole` INTEGER, `iNewUserFirstInvite` INTEGER NOT NULL, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iInviteMode` INTEGER, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, PRIMARY KEY(`iGuidHash`))",
         "fields": [
           {
             "fieldPath": "iGuid",
@@ -1186,6 +1186,11 @@
             "affinity": "TEXT"
           },
           {
+            "fieldPath": "iInviteMode",
+            "columnName": "iInviteMode",
+            "affinity": "INTEGER"
+          },
+          {
             "fieldPath": "iSchoolName",
             "columnName": "iSchoolName",
             "affinity": "TEXT"
@@ -1211,7 +1216,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8989bfd140662f1429be5b020bfeabc0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9036274987c93dc6ce478999d085bbb7')"
     ]
   }
 }

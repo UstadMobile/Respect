@@ -133,7 +133,7 @@ class RespectAccountManager(
     suspend fun login(
         credential: RespectCredential,
         schoolUrl: Url,
-    ) {
+    ) : AuthResponse {
         val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
             schoolScopeId.scopeId
@@ -152,6 +152,8 @@ class RespectAccountManager(
         )
 
         initSession(authResponse, RespectSession(respectAccount, null))
+
+        return authResponse
     }
 
     @Suppress("unused")

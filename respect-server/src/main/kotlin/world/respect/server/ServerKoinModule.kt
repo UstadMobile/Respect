@@ -43,6 +43,8 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.child.AddChildAccountUseCase
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseDb
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
@@ -93,6 +95,7 @@ fun serverKoinModule(
     single<Json> {
         Json {
             ignoreUnknownKeys = true
+            encodeDefaults = true
         }
     }
 
@@ -279,6 +282,7 @@ fun serverKoinModule(
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseServer(
                 schoolDb = get(),
+                uidNumberMapper = get(),
             )
         }
 
@@ -362,6 +366,17 @@ fun serverKoinModule(
                 authenticatedUser = accountScopeId.accountPrincipalId,
             )
         }
+
+        factory<AddChildAccountUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            AddChildAccountUseCaseDb(
+                schoolPrimaryKeyGenerator = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                schoolDataSource = get(),
+            )
+        }
+
     }
 
 

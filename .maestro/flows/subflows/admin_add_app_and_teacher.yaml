@@ -42,10 +42,6 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Teacher"
 - assertVisible: "Approval required"    #switch is On
 - copyTextFrom:
     id: "invite_code"

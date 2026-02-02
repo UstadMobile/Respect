@@ -27,6 +27,7 @@ import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
+import world.respect.shared.generated.resources.something_wrong_with_invite
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
@@ -35,7 +36,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
@@ -83,8 +83,8 @@ class AcceptInviteViewModel(
         }
 
         launchWithLoadingIndicator(
-            onShowError = { errText ->
-                _uiState.update { it.copy(errorText = errText) }
+            onShowError = {
+                _uiState.update { it.copy(errorText = Res.string.something_wrong_with_invite.asUiText()) }
             }
         ) {
             val inviteInfo = getInviteInfoUseCase(route.code)
@@ -129,16 +129,12 @@ class AcceptInviteViewModel(
                 destination = if(!invite.isChildUser()) {
                     TermsAndCondition.create(
                         schoolUrl = route.schoolUrl,
-                        profileType = ProfileType.TEACHER,
                         inviteRequest = inviteRedeemRequest,
-                        type = null,
                     )
                 }else {
                     SignupScreen.create(
                         schoolUrl = route.schoolUrl,
-                        profileType = ProfileType.STUDENT,
                         inviteRequest = inviteRedeemRequest,
-                        type = null,
                     )
                 }
             )

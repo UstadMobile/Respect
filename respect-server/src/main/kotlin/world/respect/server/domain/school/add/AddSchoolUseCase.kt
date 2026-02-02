@@ -13,11 +13,11 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.ext.newUserInviteUid
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
-import world.respect.libutil.ext.CHAR_POOL_NUMBERS
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.libutil.ext.randomString
 import world.respect.server.util.ext.HttpStatusException
@@ -129,7 +129,7 @@ class AddSchoolUseCase(
                 createInviteUseCase(
                     invite = NewUserInvite(
                         uid = personRole.newUserInviteUid,
-                        code = randomString(10, CHAR_POOL_NUMBERS),
+                        code = Invite2.newRandomCode(),
                         role = personRole,
                         firstUser = personRole == PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                         approvalRequiredAfter = if (personRole == PersonRoleEnum.SYSTEM_ADMINISTRATOR) {

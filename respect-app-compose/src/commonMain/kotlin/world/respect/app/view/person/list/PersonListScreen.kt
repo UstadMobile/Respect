@@ -94,7 +94,8 @@ fun PersonListScreen(
                 )
             }
         }
-        if(uiState.showInviteButton) {
+
+        if(uiState.showInvite) {
             item("invite_person") {
                 ListItem(
                     modifier = Modifier.clickable {
@@ -111,6 +112,7 @@ fun PersonListScreen(
                 )
             }
         }
+
         if (pendingItems.itemCount > 0) {
             item("pending_person_header") {
                 ListItem(

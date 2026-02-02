@@ -51,9 +51,7 @@ class TermsAndConditionViewModel(
             NavCommand.Navigate(
                 SignupScreen.create(
                     schoolUrl = route.schoolUrl,
-                    profileType = route.type,
-                    inviteRequest = route.respectRedeemInviteRequest,
-                    type = route.inviteType
+                    inviteRequest = route.respectRedeemInviteRequest
                 )
             )
         )

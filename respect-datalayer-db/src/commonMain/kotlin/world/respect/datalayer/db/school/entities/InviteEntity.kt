@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
@@ -25,6 +26,7 @@ data class InviteEntity(
     val iForFamilyOfGuidHash: Long? = null,
     val iForClassGuid: String? = null,
     val iForClassName: String? = null,
+    val iInviteMode: ClassInviteModeEnum? = null,
     val iSchoolName: String? = null,
     val iForClassGuidHash: Long? = null,
     val iForClassRole: EnrollmentRoleEnum ?=null,

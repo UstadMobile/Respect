@@ -2,12 +2,13 @@ package world.respect.datalayer.school.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_CLASS
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_FAMILY_MEMBER
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_NEW_USER
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
+import world.respect.libutil.ext.CHAR_POOL_NUMBERS
+import world.respect.libutil.ext.randomString
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -48,15 +49,16 @@ sealed interface Invite2: ModelWithTimes {
 
         const val APPROVAL_NOT_REQUIRED_INTERVAL_MINS = 15
 
-        fun uidForInvite(
-            invite2: Invite2
-        ): String {
-            return when (invite2) {
-                is NewUserInvite -> invite2.role.newUserInviteUid
-                is ClassInvite -> "$TYPE_CLASS:${invite2.role.value}/${invite2.classUid}"
-                is FamilyMemberInvite -> "$TYPE_FAMILY_MEMBER:${invite2.personUid}"
-            }
-        }
+        const val DEFAULT_CODE_LEN = 10
+
+        const val VIA_PARENT_STR = "via_parent"
+
+        const val DIRECT_STR = "direct"
+
+        fun newRandomCode(
+            codeLen: Int = DEFAULT_CODE_LEN,
+            charPool: String = CHAR_POOL_NUMBERS
+        ): String = randomString(codeLen, charPool)
 
 
     }
@@ -80,18 +82,38 @@ data class NewUserInvite(
     val firstUser: Boolean = false,
 ): Invite2
 
+/**
+ *
+ * @property inviteMode if set to VIA_PARENT, then the role when accepting this invite will be that
+ *           of parent. The parent will first enter their own information, then their child's
+ *           information.
+ */
 @Serializable
 @SerialName(TYPE_CLASS)
 data class ClassInvite(
     override val uid: String,
     override val code: String,
-    override val approvalRequiredAfter: InstantAsISO8601,
+    override val approvalRequiredAfter: InstantAsISO8601 = Instant.fromEpochMilliseconds(0),
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
     override val status: StatusEnum = StatusEnum.ACTIVE,
     val classUid: String,
     val role: EnrollmentRoleEnum,
-): Invite2
+    val inviteMode: ClassInviteModeEnum = ClassInviteModeEnum.DIRECT,
+): Invite2 {
+
+    companion object {
+
+        fun uidFor(
+            classUid: String,
+            role: EnrollmentRoleEnum,
+            inviteMode: ClassInviteModeEnum,
+        ): String {
+            return "$TYPE_CLASS:${role.value}/${inviteMode.value}/$classUid"
+        }
+
+    }
+}
 
 @Serializable
 @SerialName(TYPE_FAMILY_MEMBER)

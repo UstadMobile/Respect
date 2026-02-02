@@ -4,6 +4,7 @@ import androidx.room.Transactor
 import androidx.room.useWriterConnection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
@@ -16,11 +17,12 @@ import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.InviteDataSource
 import world.respect.datalayer.school.InviteDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
-import world.respect.datalayer.school.ext.relatedPersonRoleEnum
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
+import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
@@ -29,6 +31,7 @@ class InviteDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
+    private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : InviteDataSourceLocal {
 
 
@@ -58,7 +61,7 @@ class InviteDataSourceDb(
         params: InviteDataSource.GetListParams
     ): IPagingSourceFactory<Int, Invite2> {
         return IPagingSourceFactory {
-            schoolDb.getInviteEntityDao().findAllAsPagingSource(
+            schoolDb.getInviteEntityDao().listAsPagingSource(
                 guidHash = params.common.guid?.let { uidNumberMapper(it) } ?: 0,
                 code = params.inviteCode,
             ).map {
@@ -75,25 +78,44 @@ class InviteDataSourceDb(
                         guidHash = uidNumberMapper(inviteToStore.uid)
                     )?.toModel()
 
-                    //Could enforce uid pattern here
+                    when(inviteToStore) {
+                        is NewUserInvite -> {
+                            if(
+                                !checkPersonPermissionUseCase(
+                                    otherPersonUid = "0",
+                                    otherPersonKnownRole = inviteToStore.role,
+                                    permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS
+                                )
+                            ) {
+                                throw ForbiddenException(
+                                    "Authenticated user does not have write permission required for invite ${inviteToStore.uid}"
+                                )
+                            }
+                        }
 
-                    val knownPersonRole = when(inviteToStore) {
-                        is NewUserInvite -> inviteToStore.role
-                        is ClassInvite -> inviteToStore.role.relatedPersonRoleEnum
-                        else -> null
-                    }
-                    val knownPersonUid = (inviteToStore as? FamilyMemberInvite)?.personUid ?: "0"
+                        is ClassInvite -> {
+                            val hasRequiredClassPermission = schoolDb.getClassEntityDao().getLastModifiedAndHasPermission(
+                                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                                classUidNum = uidNumberMapper(inviteToStore.classUid),
+                                requiredPermission = when(inviteToStore.role) {
+                                    EnrollmentRoleEnum.STUDENT, EnrollmentRoleEnum.PENDING_STUDENT -> {
+                                        PermissionFlags.CLASS_WRITE_STUDENT_ENROLLMENT
+                                    }
+                                    else -> PermissionFlags.CLASS_WRITE_TEACHER_ENROLLMENT
+                                }
+                            ).hasPermission
 
-                    if(
-                        !checkPersonPermissionUseCase(
-                            otherPersonUid = knownPersonUid,
-                            otherPersonKnownRole = knownPersonRole,
-                            permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS
-                        )
-                    ) {
-                        throw ForbiddenException(
-                            "Authenticated user does not have write permission required for invite ${inviteToStore.uid}"
-                        )
+                            if(!hasRequiredClassPermission) {
+                                throw ForbiddenException(
+                                    "Authenticated user does not have write permission required for class invite ${inviteToStore.uid}"
+                                )
+                            }
+                        }
+
+                        else -> {
+                            //Family member invite
+                            val knownPersonUid = (inviteToStore as? FamilyMemberInvite)?.personUid ?: "0"
+                        }
                     }
                 }
 

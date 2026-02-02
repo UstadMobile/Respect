@@ -15,7 +15,8 @@ interface AddChildAccountUseCase {
 
     @Serializable
     data class AddChildAccountResponse(
-        val childPerson: Person
+        val childPerson: Person,
+        val parentPerson: Person,
     )
 
      suspend operator fun invoke(

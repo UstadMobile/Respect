@@ -58,6 +58,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
@@ -884,19 +885,24 @@ val appKoinModule = module {
             )
         }
 
-        scoped<SchoolDataSource> {
+        scoped<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
+
+            SchoolDataSourceDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                checkPersonPermissionUseCase = get(),
+            )
+        }
+
+        scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
 
             SchoolDataSourceRepository(
-                local = SchoolDataSourceDb(
-                    schoolDb = get(),
-                    uidNumberMapper = get(),
-                    authenticatedUser = AuthenticatedUserPrincipalId(
-                        accountScopeId.accountPrincipalId.guid
-                    ),
-                    checkPersonPermissionUseCase = get(),
-                ),
+                local = get<SchoolDataSourceLocal>(),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
@@ -914,12 +920,14 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
+
         scoped<AddChildAccountUseCase> {
             AddChildAccountUseCaseClient(
                 schoolUrl = RespectAccountScopeId.parse(id).schoolUrl,
                 authTokenProvider = get(),
                 httpClient = get(),
                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                schoolDataSourceLocal = get(),
             )
         }
 

@@ -100,7 +100,9 @@ fun AccountListScreen(
                 key = { it.guid }
             ) { account ->
                 ListItem(
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(
+                        enabled = uiState.familyMembersClickEnabled,
+                    ) {
                         onClickFamilyPerson(account)
                     },
                     leadingContent = {

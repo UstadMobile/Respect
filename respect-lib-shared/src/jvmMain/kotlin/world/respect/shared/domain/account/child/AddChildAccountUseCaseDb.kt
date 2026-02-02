@@ -91,7 +91,8 @@ class AddChildAccountUseCaseDb(
         }
 
         return AddChildAccountUseCase.AddChildAccountResponse(
-            childPerson = childPerson
+            childPerson = childPerson,
+            parentPerson = parentWithRel,
         )
     }
 }

@@ -44,6 +44,9 @@ data class AccountListUiState(
     val showSelectedAccountProfileButton: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
 
+    val familyMembersClickEnabled: Boolean
+        get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
+
 }
 
 class AccountListViewModel(

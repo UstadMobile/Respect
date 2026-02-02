@@ -225,7 +225,6 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
-import world.respect.shared.viewmodel.lessonslist.downloaded.DownloadedLessonsViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -346,7 +345,6 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
-    viewModelOf(::DownloadedLessonsViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {

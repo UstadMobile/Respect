@@ -23,7 +23,6 @@ import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
-import world.respect.app.view.lessonslist.downloaded.DownloadedLessonsScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.confirmation.ConfirmationScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -107,7 +106,6 @@ import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
-import world.respect.shared.navigation.DownloadedLessons
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
@@ -127,7 +125,6 @@ import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.lessonslist.downloaded.DownloadedLessonsViewModel
 import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -544,13 +541,6 @@ fun AppNavHost(
             SettingsScreenForViewModel(
                 viewModel = viewModel
             )
-        }
-        composable<DownloadedLessons> {
-            val viewModel: DownloadedLessonsViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            DownloadedLessonsScreen(viewModel)
         }
         composable<ScanQRCode> {
             ScanQRCodeScreen(

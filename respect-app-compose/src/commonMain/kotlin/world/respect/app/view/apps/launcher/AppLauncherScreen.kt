@@ -65,6 +65,7 @@ fun AppLauncherScreen(
         uiState = uiState,
         onClickApp = viewModel::onClickApp,
         onClickRemove = viewModel::onClickRemove,
+        onClickDownload = viewModel::onClickDownloads
     )
 }
 
@@ -73,6 +74,7 @@ fun AppLauncherScreen(
     uiState: AppLauncherUiState,
     onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
     onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
+    onClickDownload: () -> Unit
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()

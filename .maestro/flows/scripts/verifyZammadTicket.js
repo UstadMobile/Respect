@@ -14,23 +14,23 @@ function isSetUrl(value) {
 // --- 1. Validate Zammad URL ---
 
 var baseUrl;
-if (typeof ZAMMAD_URL !== 'undefined' && isSetUrl(ZAMMAD_URL)) {
-    baseUrl = ZAMMAD_URL;
+if (typeof zammadUrl !== 'undefined' && isSetUrl(zammadUrl)) {
+    baseUrl = zammadUrl;
 } else if (isSetUrl(output.zammadUrl)) {
     baseUrl = output.zammadUrl;
 } else {
-    throw "ZAMMAD_URL not set or invalid.";
+    throw "zammadUrl not set or invalid.";
 }
 
 // --- 2. Validate Token ---
 
 var token;
-if (typeof ZAMMAD_TOKEN !== 'undefined' && isSetString(ZAMMAD_TOKEN)) {
-    token = ZAMMAD_TOKEN;
+if (typeof zammadToken !== 'undefined' && isSetString(zammadToken)) {
+    token = zammadToken;
 } else if (isSetString(output.zammadToken)) {
     token = output.zammadToken;
 } else {
-    throw "ZAMMAD_TOKEN not set.";
+    throw "zammadToken not set.";
 }
 
 var caseNumber = CASE_ID;

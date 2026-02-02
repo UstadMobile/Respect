@@ -28,11 +28,12 @@ if [ -z "$zammadUrl" ] || [ -z "$zammadToken" ]; then
     exit 1
 fi
 
-# Export them for JS and Maestro
-export zammadUrl
-export zammadToken
+export zammadUrl="$zammadUrl"
+export zammadToken="$zammadToken"
+
 export ZAMMAD_URL="$zammadUrl"
 export ZAMMAD_TOKEN="$zammadToken"
+
 
 echo "ci-run-maestro: zammadUrl=$zammadUrl"
 

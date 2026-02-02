@@ -8,27 +8,33 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 # TestServerController will create the directory automatically.
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
-# Check if the FEEDBACK variable is set and the file exists
-if [ -n "$FEEDBACK" ] && [ -f "$FEEDBACK" ]; then
-    echo "ci-run-maestro: Reading properties from $FEEDBACK"
-    get_prop() {
-        grep -E "^$1=" "$FEEDBACK" | cut -d'=' -f2- | tr -d '\r'
-    }
-
-    # Extract the specific variables
-    : ${zammadUrl:=$(get_prop "zammadUrl")}
-    : ${zammadToken:=$(get_prop "zammadToken")}
-
-    echo "  > Extracted zammadUrl: $zammadUrl"
-else
-    echo "ci-run-maestro: FEEDBACK variable not set or file not found. Relying on Env Vars."
+# Fail if FEEDBACK file is not found
+if [ -z "$FEEDBACK" ] || [ ! -f "$FEEDBACK" ]; then
+    echo "ERROR: Feedback properties file not found at $FEEDBACK"
+    exit 1
 fi
 
-# Ensure variables are exported so the next commands see them
-export zammadUrl="$zammadUrl"
-export zammadToken="$zammadToken"
+# Function to read property
+get_prop() {
+    grep -E "^$1=" "$FEEDBACK" | cut -d'=' -f2- | tr -d '\r'
+}
 
-echo "DEBUG: zammadUrl is set to: $zammadUrl"
+# Extract required variables
+zammadUrl=$(get_prop "zammadUrl")
+zammadToken=$(get_prop "zammadToken")
+
+if [ -z "$zammadUrl" ] || [ -z "$zammadToken" ]; then
+    echo "ERROR: zammadUrl or zammadToken missing in feedback.properties"
+    exit 1
+fi
+
+# Export them for JS and Maestro
+export zammadUrl
+export zammadToken
+export ZAMMAD_URL="$zammadUrl"
+export ZAMMAD_TOKEN="$zammadToken"
+
+echo "ci-run-maestro: zammadUrl=$zammadUrl"
 
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"

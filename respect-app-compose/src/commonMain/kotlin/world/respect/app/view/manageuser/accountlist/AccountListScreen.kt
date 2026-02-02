@@ -1,6 +1,7 @@
 package world.respect.app.view.manageuser.accountlist
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,9 +29,13 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
+import world.respect.shared.generated.resources.developed_by
 import world.respect.shared.generated.resources.family_members
+import world.respect.shared.generated.resources.license_text
 import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
+import world.respect.shared.generated.resources.respect_is_open_source
+import world.respect.shared.generated.resources.supported_by_spix_foundation
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 
@@ -152,6 +157,22 @@ fun AccountListScreen(
 
         item("version_info") {
             RespectLongVersionInfoItem()
+        }
+
+        item("copyright_info") {
+            HorizontalDivider()
+            ListItem(
+                headlineContent = {
+                    Text(stringResource(Res.string.developed_by))
+                },
+                supportingContent = {
+                    Column {
+                        Text(stringResource(Res.string.supported_by_spix_foundation))
+                        Text(stringResource(Res.string.respect_is_open_source))
+                        Text(stringResource(Res.string.license_text))
+                    }
+                }
+            )
         }
     }
 }

@@ -48,5 +48,47 @@ onFlowComplete:
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
+- tapOn: "Download"
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 1000
+- extendedWaitUntil:
+    visible: "Downloaded"
+    timeout: 1000
+- tapOn: "My app"
+- assertVisible: "Lessons"
+- tapOn: "Lessons"
+- tapOn: "Grade 2"
+- tapOn: "Lesson 002"
+- assertVisible: "Lesson 002"
+- tapOn: "Download"
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 1000
+- extendedWaitUntil:
+    visible: "Downloaded"
+    timeout: 1000
+- setAirplaneMode: enabled
+- tapOn: "Apps"
+- tapOn:
+    id: "downloaded_icon"
+- assertVisible:
+    id: "app_title"
+    text: "Downloaded lessons"
+- assertVisible: "Sort by"
+- assertVisible: "Lesson 001"
+- assertVisible: "Lesson 002"
+- tapOn: "Lesson 002"
+- assertVisible: "Open"
+- assertVisible: "Downloaded"
+- tapOn: "Open"
+- assertVisible: "content visible"
+- tapOn: "Close"
+- back
+- tapOn:
+    id: "delete_icon"
+- assertVisible: "1 deleted"
+- tapOn: "Undo"
+- assertVisible: "Lesson 001"
 
 

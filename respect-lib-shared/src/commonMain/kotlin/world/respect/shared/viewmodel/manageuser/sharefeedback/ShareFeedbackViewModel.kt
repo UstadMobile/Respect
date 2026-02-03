@@ -15,10 +15,10 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.feedback.CreateTicketUseCase
 import world.respect.shared.domain.feedback.FeedbackCategory
 import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
-import world.respect.shared.domain.launchers.EmailLauncherUseCase
 import world.respect.shared.domain.launchers.WebLauncherUseCase
 import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.feedback_respect
@@ -60,7 +60,7 @@ class ShareFeedbackViewModel(
     accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle,
     private val whatsAppLauncherUseCase: WhatsAppLauncherUseCase,
-    private val emailLauncherUseCase: EmailLauncherUseCase,
+    private val emailLauncherUseCase: LaunchSendEmailUseCase,
     private val webLauncherUseCase: WebLauncherUseCase,
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
@@ -100,9 +100,10 @@ class ShareFeedbackViewModel(
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncherUseCase.sendEmail(
-                feedbackInfoUseCase().respectEmailId,
-                subject
+            emailLauncherUseCase.invoke(
+                subject = subject,
+                body = "",
+                emailId = feedbackInfoUseCase().respectEmailId
             )
         }
     }
@@ -229,7 +230,7 @@ class ShareFeedbackViewModel(
                     )
                 )
 
-                val response=createTicketUseCase(ticket)
+                val response = createTicketUseCase(ticket)
 
                 loadingState = LoadingUiState.NOT_LOADING
 

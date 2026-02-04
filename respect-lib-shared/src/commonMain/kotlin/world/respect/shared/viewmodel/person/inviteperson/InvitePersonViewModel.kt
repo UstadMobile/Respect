@@ -132,6 +132,7 @@ class InvitePersonViewModel(
             }
 
             _inviteUid.value = (route.invitePersonOptions as? InvitePerson.ClassInviteOptions)?.inviteUid
+                ?: (route.invitePersonOptions as? InvitePerson.FamilyInviteOptions)?.personUid
                 ?: selectedRole.newUserInviteUid
 
             _inviteUid.collectLatest { inviteUid ->

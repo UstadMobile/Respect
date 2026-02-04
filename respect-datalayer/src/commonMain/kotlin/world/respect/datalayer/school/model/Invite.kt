@@ -125,5 +125,10 @@ data class FamilyMemberInvite(
     override val stored: InstantAsISO8601 = Clock.System.now(),
     override val status: StatusEnum = StatusEnum.ACTIVE,
     val personUid: String,
-): Invite2
+): Invite2 {
+    companion object {
+        fun uidFor(personUid: String?): String = "$TYPE_FAMILY_MEMBER:$personUid"
+    }
+}
+
 

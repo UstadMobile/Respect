@@ -13,7 +13,9 @@ The RESPECT app follows an MVVM pattern and [Android Architecture Recommendation
 * Domain Layer that contains UseCase(s) as per [Android Architecture Recommendations](https://developer.android.com/topic/architecture/domain-layer)
     * [UseCase](#usecase): where a single class can work for all platforms then a single class can be added
       e.g. ```class AddNewPersonUseCase```. Where different implementations are needed for different
-      platforms then create an interface e..g. ```interface OpenExternalLinkUseCase```.
+      platforms then create an interface e..g. ```interface OpenExternalLinkUseCase``` and platform
+      specific implementations of the interface (eg ```OpenExternalLinkUseCaseAndroid```, 
+      ```OpenExternalLinkUseCaseJvm```, etc).
 * Data layer: this is an offline-first datalayer that includes a local datasource, remote datasource,
   and a repository to media between the two. See the [respect-datalayer](respect-datalayer/README.md)
   module.

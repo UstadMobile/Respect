@@ -1,5 +1,5 @@
 
-# Coding pattern
+# Coding Guidelines
 
 The RESPECT app follows an MVVM pattern and [Android Architecture Recommendations](https://developer.android.com/topic/architecture/).
 

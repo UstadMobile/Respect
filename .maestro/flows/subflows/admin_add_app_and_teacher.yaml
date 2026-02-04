@@ -122,3 +122,5 @@ appId: world.respect.app
 - assertVisible: "Pending requests.*"
 - assertVisible: "Teacher User.*"
 - tapOn: "Accept Invite"
+- assertNotVisible: "Pending requests.*"
+- assertVisible: "Teacher User.*"

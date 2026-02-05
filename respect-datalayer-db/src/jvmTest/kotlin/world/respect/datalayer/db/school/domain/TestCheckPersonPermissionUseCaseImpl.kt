@@ -35,7 +35,10 @@ class TestCheckPersonPermissionUseCaseImpl {
                 val studentUid = "2"
                 val adminSchoolDs = db.toDataSource(adminUid)
                 val adminPerson = adminSchoolDs.insertAdmin(adminUid)
-                AddDefaultSchoolPermissionGrantsUseCase(adminSchoolDs).invoke()
+                AddDefaultSchoolPermissionGrantsUseCase(
+                    schoolDb = db,
+                    uidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm())
+                ).invoke()
                 adminSchoolDs.personDataSource.store(
                     listOf(
                         Person(

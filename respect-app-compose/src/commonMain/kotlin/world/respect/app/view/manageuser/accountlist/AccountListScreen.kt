@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -36,6 +37,7 @@ import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
 import world.respect.shared.generated.resources.respect_is_open_source
 import world.respect.shared.generated.resources.supported_by_spix_foundation
+import world.respect.shared.generated.resources.share_feedback
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 
@@ -51,6 +53,7 @@ fun AccountListScreen(
         onClickLogout = viewModel::onClickLogout,
         onClickFamilyPerson = viewModel::onClickFamilyPerson,
         onClickProfile = viewModel::onClickProfile,
+        onClickShareFeedback = viewModel::onClickShareFeedback
     )
 }
 
@@ -62,6 +65,7 @@ fun AccountListScreen(
     onClickAddAccount: () -> Unit,
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
+    onClickShareFeedback: () -> Unit
 ) {
     val familyPersons = uiState.selectedAccount?.relatedPersons ?: emptyList()
 
@@ -153,6 +157,26 @@ fun AccountListScreen(
         }
         item("divider3") {
             HorizontalDivider()
+        }
+        item {
+            ListItem(
+                modifier = Modifier.clickable {
+                    onClickShareFeedback()
+                },
+                headlineContent = {
+                    Text(
+                        stringResource(
+                            Res.string.share_feedback
+                        )
+                    )
+                },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Outlined.ChatBubbleOutline,
+                        contentDescription = ""
+                    )
+                }
+            )
         }
 
         item("version_info") {

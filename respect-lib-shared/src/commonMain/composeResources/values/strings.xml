@@ -63,6 +63,7 @@
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
+    <string name="enter_one_field">If you need response, one of the field is required</string>
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
@@ -227,6 +228,25 @@
 
 
     <string name="add_account">Add account</string>
+    <string name="share_feedback">Share feedback</string>
+    <string name="feedback_submitted">Feedback submitted</string>
+    <string name="feedback_submitted_message">Thank you for your feedback. Respect team will review it internally.</string>
+    <string name="quick_contact">Quick Contact</string>
+    <string name="whatsapp_respect">WhatsApp Respect</string>
+    <string name="email_respect">Email Respect</string>
+    <string name="public_forum">Public forum</string>
+    <string name="category">Category</string>
+    <string name="your_feedback">Your feedback</string>
+    <string name="describe_feedback_placeholder">Describe your issue or feedback in detail</string>
+    <string name="want_response_from_team">I want a response from the Respect team</string>
+    <string name="submit_feedback">Submit feedback</string>
+    <string name="feedback_respect">Feedback about RESPECT</string>
+    <string name="category_launcher">Respect launcher related issues</string>
+    <string name="category_integrated_apps">Integrated Apps related issues</string>
+    <string name="category_question">Question</string>
+    <string name="category_rate_us">Rate us</string>
+    <string name="category_other">Other</string>
+    <string name="error_message">Error: try again</string>
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 

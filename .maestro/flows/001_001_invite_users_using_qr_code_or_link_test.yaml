@@ -17,7 +17,7 @@ onFlowComplete:
       file: "scripts/teardown.js"
 
 ---
-# Invite new user:
+# Invite Teacher as new user:
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"
@@ -96,6 +96,10 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "test123"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Apps"
@@ -118,7 +122,7 @@ onFlowComplete:
 - copyTextFrom:
     id: "invite_code"
 
-# C) Student sign-up via invite code to the class
+# Student sign-up via invite code to the class
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -173,7 +177,7 @@ onFlowComplete:
     text: "Waiting for approval"
 - assertVisible: "Please wait"
 
-# H) Teacher approve student's request to join the class
+# Teacher approve student's request to join the class
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -190,6 +194,10 @@ onFlowComplete:
     id : "password"
 - inputText: "test123"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -199,15 +207,49 @@ onFlowComplete:
 - assertVisible: "Pending requests.*"
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
+- assertNotVisible: "Pending requests.*"
+- assertVisible: "Student User"
 
-# E) Teacher share invite link for parent device based signup
-- tapOn: "Add student"
+
+# Teacher send Invite link to parent to join as a Family member for Student user
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "teacherauser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"
+- tapOn: "People"
+- tapOn: "Student User"
+- assertVisible:
+    id: "app_title"
+    text: "Student User"
+- tapOn:
+    id: "floating_action_button"
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Family member"
 - tapOn: "Invite person"
-- tapOn: "Invite via parents"
+- assertVisible: "Student User / Family member"
 - tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
-     id: "invite_url"
+    id: "invite_url"
 
 # Parent sign-up to the app using invite link
 - runFlow:
@@ -220,10 +262,10 @@ onFlowComplete:
     text: "Invitation"
 - assertVisible: "Role"
 - assertVisible: "Parent"
+- assertVisible: "Child"
+- assertVisible: "Student User"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "Class name"
-- assertVisible: "New Class"
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"
@@ -254,13 +296,13 @@ onFlowComplete:
 - tapOn: "Password*"
 - inputText: "test123"
 - tapOn: "Sign-up"
-- tapOn: "Child's name*"
-- inputText: "Student User2"
-- tapOn: "Gender*"
-- tapOn: "Female"
-- tapOn: "Child's date of birth*"
-- runScript:
-    file: "scripts/setDate.js"
-- inputText: ${output.pastYearDateC}
-- tapOn: "Done"
-# 1/Feb/2026: MD: Maestro AGAIN does not actually deliver the tap. Thanks.
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+- tapOn: "Student User"
+- assertVisible: "Parent User"

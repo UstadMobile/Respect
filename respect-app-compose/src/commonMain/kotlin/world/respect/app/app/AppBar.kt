@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -54,6 +55,7 @@ import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.shared.generated.resources.downloaded_lessons
 import world.respect.shared.generated.resources.more_options
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppActionButton
@@ -206,6 +208,17 @@ fun RespectAppBar(
                         Icon(
                             imageVector = action.icon.toImageVector(),
                             contentDescription = uiTextStringResource(action.contentDescription),
+                        )
+                    }
+                }
+                if (appUiState.downloadIconVisible == true) {
+                    IconButton(
+                        onClick = appUiState.onClickDownload ?: {},
+                        modifier = Modifier.testTag("download_icon")
+                    ) {
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = stringResource(Res.string.downloaded_lessons)
                         )
                     }
                 }

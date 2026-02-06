@@ -56,6 +56,10 @@ import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.collections.first
 import kotlin.getValue
 import kotlin.time.Clock
+import world.respect.datalayer.school.model.FamilyMemberInvite
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.StatusEnum
+import kotlin.time.Duration.Companion.minutes
 
 data class PersonEditUiState(
     val uid: String = "",
@@ -298,12 +302,12 @@ class PersonEditViewModel(
             NavCommand.Navigate(
                 PersonList.create(
                     filterByRole = filterByRole,
-                    personGuid = route.guid,
+                    personGuid = FamilyMemberInvite.uidFor(route.guid),
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = PERSON_SELECT_RESULT
                     ),
-                    hideInvite = true,
+                    hideInvite = false,
                 )
             )
         )
@@ -391,6 +395,19 @@ class PersonEditViewModel(
                 schoolDataSource.personDataSource.store(
                     familyMembersAdded + familyMembersRemoved + personToSave.copy(lastModified = modTime)
                 )
+
+                if (route.guid == null && personToSave.roles.any { it.roleEnum == PersonRoleEnum.STUDENT }) {
+                    val invite = FamilyMemberInvite(
+                        uid = FamilyMemberInvite.uidFor(personToSave.guid),
+                        code = Invite2.newRandomCode(),
+                         approvalRequiredAfter = modTime + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes,
+                        lastModified = modTime,
+                        stored = modTime,
+                        status = StatusEnum.ACTIVE,
+                        personUid = personToSave.guid
+                    )
+                    schoolDataSource.inviteDataSource.store(listOf(invite))
+                }
 
                 if(
                     !navResultReturner.sendResultIfResultExpected(

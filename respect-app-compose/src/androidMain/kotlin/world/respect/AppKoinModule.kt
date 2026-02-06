@@ -248,7 +248,7 @@ import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLi
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 
 import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
-import world.respect.shared.viewmodel.sharedschooldevice.SetSchoolSharedDevicePINViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewmodel
@@ -395,7 +395,7 @@ val appKoinModule = module {
     viewModelOf(::SchoolSettingsViewModel)
     viewModelOf(::SharedDevicesSettingsViewmodel)
     viewModelOf(::SharedSchoolDeviceEnableViewmodel)
-    viewModelOf(::SetSchoolSharedDevicePINViewmodel)
+    viewModelOf(::TeacherAndAdminLoginViewmodel)
     viewModelOf(::SelectClassViewmodel)
 
     single<GetOfflineStorageOptionsUseCase> {

@@ -108,9 +108,9 @@ class SharedDevicesSettingsViewmodel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 InvitePerson.create(
-                  invitePersonOptions =  InvitePerson.NewUserInviteOptions(
-                      presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
-                  )
+                    invitePersonOptions = InvitePerson.NewUserInviteOptions(
+                        presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                    )
                 )
             )
         )
@@ -124,11 +124,6 @@ class SharedDevicesSettingsViewmodel(
         )
     }
 
-    fun onClickEnableSharedSchoolDeviceMode() {
-        _uiState.update { currentState ->
-            currentState.copy(showEnableDialog = true)
-        }
-    }
 
     fun onDismissEnableDialog() {
         _uiState.update { currentState ->

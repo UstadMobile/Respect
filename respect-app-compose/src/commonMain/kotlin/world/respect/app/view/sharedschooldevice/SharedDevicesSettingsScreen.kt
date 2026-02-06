@@ -431,7 +431,6 @@ fun PinEntryDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Hidden TextField for actual input
                 BasicTextField(
                     value = pin,
                     onValueChange = { newPin ->

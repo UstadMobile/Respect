@@ -61,9 +61,9 @@ import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.sharedschooldevice.SchoolSettingsScreen
-import world.respect.app.view.sharedschooldevice.SetSchoolSharedDevicePINScreen
 import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
 import world.respect.app.view.sharedschooldevice.SharedSchoolDeviceEnableScreen
+import world.respect.app.view.sharedschooldevice.TeacherAndAdminLoginScreen
 import world.respect.app.view.sharedschooldevice.login.SelectClassScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AcceptInvite
@@ -119,11 +119,11 @@ import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.SchoolSettings
 import world.respect.shared.navigation.SelectClass
-import world.respect.shared.navigation.SetSchoolSharedDevicePin
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.TeacherAndAdminLogin
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -601,16 +601,16 @@ fun AppNavHost(
                 )
             )
         }
-        composable<SetSchoolSharedDevicePin> {
-            SetSchoolSharedDevicePINScreen(
+        composable<SelectClass> {
+            SelectClassScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
                 )
             )
         }
-        composable<SelectClass> {
-            SelectClassScreen(
+        composable<TeacherAndAdminLogin> {
+            TeacherAndAdminLoginScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

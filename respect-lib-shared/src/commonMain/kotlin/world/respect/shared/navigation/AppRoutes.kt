@@ -772,10 +772,10 @@ data object SharedDevicesSettings : RespectAppRoute
 data object SharedDevicesEnable : RespectAppRoute
 
 @Serializable
-data object SetSchoolSharedDevicePin : RespectAppRoute
+data object SelectClass : RespectAppRoute
 
 @Serializable
-data object  SelectClass : RespectAppRoute
+data object TeacherAndAdminLogin : RespectAppRoute
 
 @Serializable
 data class CurriculumMappingEdit(

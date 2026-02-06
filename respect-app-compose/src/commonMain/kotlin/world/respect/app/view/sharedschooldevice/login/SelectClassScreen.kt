@@ -57,13 +57,13 @@ fun SelectClassScreen(
             }
         }
         OutlinedButton(
-            onClick = {},
+            onClick = { viewModel.onClickScanQrCode() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Scan QR code badge")
         }
         OutlinedButton(
-            onClick = {},
+            onClick = { viewModel.onClickTeacherAdminLogin() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Teacher/admin login")

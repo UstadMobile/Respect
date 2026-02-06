@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.update
 import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_class
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.ScanQRCode
+import world.respect.shared.navigation.TeacherAndAdminLogin
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -34,14 +37,17 @@ class SelectClassViewmodel(
         }
     }
 
-    fun onClickScanQrCode(){
-//        _navCommandFlow.tryEmit(
-//            NavCommand.Navigate(SharedDevicesSettings)
-//        )
+    fun onClickScanQrCode() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                ScanQRCode.create()
+            )
+        )
     }
-    fun onClickTeacherAdminLogin(){
-//        _navCommandFlow.tryEmit(
-//            NavCommand.Navigate(SharedDevicesSettings)
-//        )
+
+    fun onClickTeacherAdminLogin() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(TeacherAndAdminLogin)
+        )
     }
 }

@@ -180,6 +180,7 @@
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
     <string name="school_name">School name</string>
+    <string name="enter_school_device_pin">Enter school device PIN</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
@@ -518,6 +519,7 @@
     <string name="select_family_person">Select family person</string>
     <string name="add_new_person">Add new person</string>
     <string name="invite_person">Invite person</string>
+    <string name="add_shared_school_device">Add shared school device</string>
 
     <string name="empty_list_description_admin">You haven't added any apps for your school yet.</string>
     <string name="empty_list_description_non_admin">No apps added for your school yet. Ask your admin to add some.</string>

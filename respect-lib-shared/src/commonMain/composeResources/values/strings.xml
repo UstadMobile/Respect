@@ -32,8 +32,6 @@
     <string name="report">Report</string>
     <string name="reports">Reports</string>
     <string name="select_app">Select app</string>
-    <string name="select_class">Select class</string>
-
     <string name="enter_link">Enter link</string>
     <string name="add">Add</string>
     <string name="apps_detail">App detail</string>
@@ -360,8 +358,6 @@
     <string name="school">School</string>
     <string name="grade_level">Grade Level</string>
     <string name="assessment_type">Assessment Type (Self/Assignment)</string>
-
-    <string name="school_name">School name</string>
     <string name="shared_school_devices">Shared school devices</string>
     <string name="device_name">device name</string>
     <string name="enable_shared_device_mode">Enable shared device mode</string>

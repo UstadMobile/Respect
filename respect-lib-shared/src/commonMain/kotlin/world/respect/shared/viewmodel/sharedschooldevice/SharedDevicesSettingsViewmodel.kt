@@ -108,8 +108,9 @@ class SharedDevicesSettingsViewmodel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 InvitePerson.create(
-                    inviteCode = null,
-                    presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                  invitePersonOptions =  InvitePerson.NewUserInviteOptions(
+                      presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                  )
                 )
             )
         )

@@ -57,7 +57,6 @@ data class SignupUiState(
     val genderError: UiText? = null,
     val dateOfBirthError: UiText? = null,
     val otherError: UiText? = null,
-    val isDeviceInvite: Boolean = false
 )
 
 class SignupViewModel(
@@ -100,13 +99,6 @@ class SignupViewModel(
                 }
 
 
-            }
-        }
-        if(route.inviteType == 6){
-            _uiState.update { prev ->
-                prev.copy(
-                    isDeviceInvite = true
-                )
             }
         }
 
@@ -187,51 +179,32 @@ class SignupViewModel(
             Napier.d("SignupViewModel: onClickSave.launch: name=${_uiState.value.personInfo.name}")
             val personInfo = _uiState.value.personInfo
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-            if (_uiState.value.isDeviceInvite) {
-                // Device invite: Only validate name
-                _uiState.update { prev ->
-                    prev.copy(
-                        fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required_field) else null,
-                        // Clear gender and date of birth errors for device invites
-                        genderError = null,
-                        dateOfBirthError = null
-                    )
-                }
 
-                val hasError = personInfo.name.isBlank()
-                if (hasError) {
-                    Napier.w("SignupViewModel: onClickSave.launch: name is required for device invite")
-                    return@launchWithLoadingIndicator
-                }
-            } else {
-                _uiState.update { prev ->
-                    prev.copy(
-                        fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required_field) else null,
-                        genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
-                            Res.string.required_field
-                        ) else null,
-                        dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {
-                            StringResourceUiText(Res.string.required_field)
-                        } else if (personInfo.dateOfBirth > today) {
-                            StringResourceUiText(Res.string.date_of_birth_in_future)
-                        } else null
+            _uiState.update { prev ->
+                prev.copy(
+                    fullNameError = if (personInfo.name.isEmpty()) StringResourceUiText(Res.string.required_field) else null,
+                    genderError = if (personInfo.gender == PersonGenderEnum.UNSPECIFIED) StringResourceUiText(
+                        Res.string.required_field) else null,
+                    dateOfBirthError = if (personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH) {
+                        StringResourceUiText(Res.string.required_field)
+                    } else if (personInfo.dateOfBirth > today) {
+                        StringResourceUiText(Res.string.date_of_birth_in_future)
+                    } else null
 
-                    )
-                }
-
-
-                val hasError = listOf(
-                    personInfo.name.isBlank(),
-                    personInfo.dateOfBirth > today,
-                    personInfo.gender == PersonGenderEnum.UNSPECIFIED,
-                    personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH
-                ).any { it }
-
-                if (hasError) {
-                    Napier.w("SignupViewModel: onClickSave.launch: haserrors")
-                    return@launchWithLoadingIndicator
-                }
+                )
             }
+
+            val hasError = listOf(
+                personInfo.name.isBlank(),
+                personInfo.dateOfBirth > today,
+                personInfo.gender == PersonGenderEnum.UNSPECIFIED,
+                personInfo.dateOfBirth == DATE_OF_BIRTH_EPOCH
+            ).any { it }
+
+            if (hasError) {
+                Napier.w("SignupViewModel: onClickSave.launch: haserrors")
+                return@launchWithLoadingIndicator
+            } else {
                 val parentPerson = route.parentPerson
                 when {
                     route.signupMode == SignupScreenModeEnum.ADD_CHILD_TO_PARENT && parentPerson != null -> {
@@ -271,7 +244,7 @@ class SignupViewModel(
                         )
                      }
                 }
-
+            }
         }
     }
 }

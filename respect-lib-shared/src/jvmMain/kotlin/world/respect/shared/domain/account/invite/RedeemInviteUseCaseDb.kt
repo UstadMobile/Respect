@@ -12,11 +12,13 @@ import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.ext.accepterEnrollmentRole
 import world.respect.datalayer.school.ext.accepterPersonRole
@@ -28,6 +30,7 @@ import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
@@ -115,6 +118,29 @@ class RedeemInviteUseCaseDb(
                 )
             )
         }
+
+        if (inviteFromDb is FamilyMemberInvite) {
+            val parentUid = inviteFromDb.personUid
+
+            val inviterPerson = schoolDataSourceVal.personDataSource.findByGuid(
+                loadParams = DataLoadParams(),
+                guid = parentUid
+            ).dataOrNull() ?: throw IllegalStateException("person not found: $parentUid")
+
+            val timeNow = Clock.System.now()
+
+            val updatedInviter = inviterPerson.copy(
+                relatedPersonUids = inviterPerson.relatedPersonUids + accountPerson.guid,
+                lastModified = timeNow
+            )
+
+            val updatedAccountPerson = accountPerson.copy(
+                relatedPersonUids = accountPerson.relatedPersonUids + parentUid,
+                lastModified = timeNow
+            )
+            schoolDataSourceVal.personDataSource.updateLocal(listOf(updatedInviter, updatedAccountPerson))
+        }
+
 
         val credential = redeemRequest.account.credential
 

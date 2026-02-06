@@ -12,6 +12,7 @@ import world.respect.datalayer.db.school.InviteDataSourceDb
 import world.respect.datalayer.db.school.PersonDataSourceDb
 import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
+import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
@@ -23,6 +24,7 @@ import world.respect.datalayer.school.InviteDataSourceLocal
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
+import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
@@ -75,6 +77,11 @@ class SchoolDataSourceDb(
         PersonPasswordDataSourceDb(schoolDb, uidNumberMapper, checkPersonPermissionUseCase, authenticatedUser)
     }
 
+
+    override val personQrBadgeDataSource: PersonQrCodeBadgeDataSourceLocal by lazy {
+        PersonQrBadgeDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, checkPersonPermissionUseCase)
+    }
+
     override val reportDataSource: ReportDataSourceLocal by lazy {
         ReportDataSourceDb(schoolDb)
     }
@@ -88,7 +95,7 @@ class SchoolDataSourceDb(
     }
 
     override val inviteDataSource: InviteDataSourceLocal by lazy {
-        InviteDataSourceDb(schoolDb, uidNumberMapper)
+        InviteDataSourceDb(schoolDb, uidNumberMapper, checkPersonPermissionUseCase, authenticatedUser)
     }
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal by lazy {

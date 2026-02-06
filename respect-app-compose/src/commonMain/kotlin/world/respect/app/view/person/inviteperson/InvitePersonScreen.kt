@@ -1,51 +1,70 @@
 package world.respect.app.view.person.inviteperson
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.RadioButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person4
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import kotlinx.coroutines.Dispatchers
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.allow_multiple_people_to_use_this_invite
+import world.respect.shared.generated.resources.approval_not_required_until
 import world.respect.shared.generated.resources.approval_required
-import world.respect.shared.generated.resources.class_name
-import world.respect.shared.generated.resources.code
 import world.respect.shared.generated.resources.copy_link
-import world.respect.shared.generated.resources.enter_school_name
 import world.respect.shared.generated.resources.invite_code_label
-import world.respect.shared.generated.resources.invite_multiple_allowed
+import world.respect.shared.generated.resources.invite_students_directly
 import world.respect.shared.generated.resources.invite_via_email
+import world.respect.shared.generated.resources.invite_via_parents
 import world.respect.shared.generated.resources.invite_via_share
 import world.respect.shared.generated.resources.invite_via_sms
+import world.respect.shared.generated.resources.parents_register_and
 import world.respect.shared.generated.resources.qr_code
-import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.reset_code
 import world.respect.shared.generated.resources.role
+import world.respect.shared.generated.resources.students_register_themselves
+import world.respect.shared.util.ext.isLoading
 import world.respect.shared.util.ext.label
+import world.respect.shared.util.rememberFormattedTime
+import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonUiState
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 
@@ -53,32 +72,40 @@ import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 fun InvitePersonScreen(
     viewModel: InvitePersonViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState(Dispatchers.Main.immediate)
+    val uiState by viewModel.uiState.collectAsState()
+    val appUiState by viewModel.appUiState.collectAsState()
+
     InvitePersonScreen(
         uiState = uiState,
-        onCopyCode = viewModel::copyInviteCodeToClipboard,
+        appUiState = appUiState,
+        onClickInviteCode = viewModel::onClickInviteCode,
+        onCopyLink = viewModel::copyInviteLinkToClipboard,
         onInviteViaSms = viewModel::onSendLinkViaSms,
         onInviteViaEmail = viewModel::onSendLinkViaEmail,
         onInviteViaShare = viewModel::onShareLink,
-        onInviteMultipleAllowedChanged = viewModel::setInviteMultipleAllowed,
-        onApprovalRequiredChanged = viewModel::setApprovalRequired,
+        onApprovalRequiredChanged = viewModel::onApprovalEnabledChanged,
         onRoleChange = viewModel::onRoleChange,
-        onClickGetCode = viewModel::onClickGetCode
+        onClickResetCode = viewModel::onClickResetCode,
+        onSetClassInviteMode = viewModel::onSetClassInviteMode,
     )
 }
 
 @Composable
 fun InvitePersonScreen(
     uiState: InvitePersonUiState,
-    onCopyCode: () -> Unit,
+    appUiState: AppUiState,
+    onClickInviteCode: () -> Unit,
+    onCopyLink: () -> Unit,
     onInviteViaSms: () -> Unit,
     onInviteViaEmail: () -> Unit,
     onInviteViaShare: () -> Unit,
-    onClickGetCode: () -> Unit,
-    onInviteMultipleAllowedChanged: (Boolean) -> Unit,
     onApprovalRequiredChanged: (Boolean) -> Unit,
-    onRoleChange: (PersonRoleEnum) -> Unit
+    onRoleChange: (PersonRoleEnum) -> Unit,
+    onClickResetCode: () -> Unit,
+    onSetClassInviteMode: (ClassInviteModeEnum) -> Unit = { },
 ) {
+    val invite = uiState.invite.dataOrNull()
+    val fieldsEnabled = !appUiState.isLoading && invite != null
 
     Column(
         modifier = Modifier
@@ -86,102 +113,181 @@ fun InvitePersonScreen(
             .verticalScroll(rememberScrollState())
     ) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding()
+        if(uiState.showRoleSelection) {
+            val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull()
+                ?: PersonRoleEnum.STUDENT
 
-        ) {
-            val res = if (uiState.className != null) {
-                Res.string.class_name
-            } else {
-                Res.string.enter_school_name
+            RespectExposedDropDownMenuField(
+                value = selectedRole,
+                modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
+                label = {
+                    Text(stringResource(Res.string.role))
+                },
+                onOptionSelected = { newRole ->
+                    onRoleChange(newRole)
+                },
+                options = uiState.roleOptions,
+                itemText = { stringResource(it.label) },
+                enabled = fieldsEnabled,
+            )
+        }
+
+
+        uiState.inviteUrl?.also { link ->
+            val linkStr = link.toString()
+            Image(
+                painter = rememberQrCodePainter(linkStr),
+                contentDescription = stringResource(Res.string.qr_code),
+                modifier = Modifier
+                    .background(Color.White)
+                    .size(240.dp)
+                    .defaultItemPadding()
+                    .align(Alignment.CenterHorizontally),
+            )
+
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(color = MaterialTheme.colorScheme.primary)
+                    ) {
+                        append(linkStr)
+                    }
+                },
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .testTag("invite_url")
+                    .clickable(enabled = fieldsEnabled) { onInviteViaShare() }
+                    .defaultItemPadding()
+                    .align(Alignment.CenterHorizontally)
+            )
+
+        }
+
+        invite?.also {
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally).defaultItemPadding()
+                    .clickable(enabled = fieldsEnabled) {
+                        onClickInviteCode()
+                    },
+            ) {
+                Text(
+                    text = stringResource(Res.string.invite_code_label) + ": ",
+                    textAlign = TextAlign.Center,
+                )
+
+                //Separated out for easier automated testing.
+                Text(
+                    text = it.code,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.testTag("invite_code"),
+                )
             }
+        }
+
+        HorizontalDivider()
+
+        val classInviteMode = (invite as? ClassInvite)?.inviteMode
+        if(uiState.showClassInviteMode) {
             ListItem(
-                headlineContent = { Text(stringResource(res)) },
-                supportingContent = { Text(text = uiState.className ?: uiState.schoolName ?: "") }
+                modifier = Modifier.selectable(
+                    selected = classInviteMode == ClassInviteModeEnum.DIRECT,
+                    onClick = { onSetClassInviteMode(ClassInviteModeEnum.DIRECT) },
+                    role = Role.RadioButton,
+                ),
+                leadingContent = {
+                    RadioButton(
+                        selected = classInviteMode == ClassInviteModeEnum.DIRECT,
+                        onClick = null,
+                    )
+                },
+                headlineContent = {
+                    Text(stringResource(Res.string.invite_students_directly))
+                },
+                supportingContent = {
+                    Text(stringResource(Res.string.students_register_themselves))
+                }
+            )
+
+            ListItem(
+                modifier = Modifier.selectable(
+                    selected = classInviteMode == ClassInviteModeEnum.VIA_PARENT,
+                    onClick = { onSetClassInviteMode(ClassInviteModeEnum.VIA_PARENT) },
+                    role = Role.RadioButton,
+                ),
+                leadingContent = {
+                    RadioButton(
+                        selected = classInviteMode == ClassInviteModeEnum.VIA_PARENT,
+                        onClick = null,
+                    )
+                },
+                headlineContent = {
+                    Text(stringResource(Res.string.invite_via_parents))
+                },
+                supportingContent = {
+                    Text(stringResource(Res.string.parents_register_and))
+                }
             )
         }
 
         HorizontalDivider()
 
-        val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull() ?: PersonRoleEnum.STUDENT
-        ListItem(
-            headlineContent = { Text(stringResource(Res.string.invite_multiple_allowed)) },
-            trailingContent = {
-                Switch(
-                    checked = uiState.inviteMultipleAllowed,
-                    onCheckedChange = { onInviteMultipleAllowedChanged(it) }
-                )
-            },
-            leadingContent = { Icon(Icons.Default.Person4, contentDescription = null) },
-            supportingContent = { Text(stringResource(Res.string.allow_multiple_people_to_use_this_invite)) }
-        )
+        val approvalRequiredAfter = invite?.approvalRequiredAfter
 
         ListItem(
+            modifier = Modifier.clickable(enabled = fieldsEnabled) {
+                onApprovalRequiredChanged(!uiState.approvalRequired)
+            },
             headlineContent = { Text(stringResource(Res.string.approval_required)) },
             trailingContent = {
                 Switch(
                     checked = uiState.approvalRequired,
+                    enabled = fieldsEnabled,
                     onCheckedChange = { onApprovalRequiredChanged(it) }
                 )
             },
-            leadingContent = { Icon(Icons.Default.PersonAdd, contentDescription = null) }
-
-        )
-        RespectExposedDropDownMenuField(
-            value = selectedRole,
-            modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
-            label = {
-                Text(stringResource(Res.string.role) + "*")
-            },
-            onOptionSelected = { newRole ->
-                onRoleChange(newRole)
-            },
-            options = uiState.roleOptions,
-            itemText = { stringResource(it.label) },
-            enabled = true,
-            supportingText = {
-                Text(stringResource(Res.string.required))
+            leadingContent = { Icon(Icons.Default.PersonAdd, contentDescription = null) },
+            supportingContent = if(!uiState.approvalRequired && approvalRequiredAfter != null) {
+                {
+                    val approvalOffUntil = rememberFormattedTime(approvalRequiredAfter)
+                    Text(stringResource(Res.string.approval_not_required_until) + " " + approvalOffUntil)
+                }
+            }else {
+                null
             }
         )
+
         HorizontalDivider()
 
         ListItem(
-            modifier = Modifier.clickable { onCopyCode() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaShare() },
+            leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
+            headlineContent = { Text(stringResource(Res.string.invite_via_share)) }
+        )
+
+        ListItem(
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onCopyLink() },
             leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.copy_link)) }
         )
 
         ListItem(
-            modifier = Modifier.clickable { onInviteViaSms() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaSms() },
             leadingContent = { Icon(Icons.Default.Sms, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.invite_via_sms)) }
         )
 
         ListItem(
-            modifier = Modifier.clickable { onInviteViaEmail() },
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onInviteViaEmail() },
             leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
             headlineContent = { Text(stringResource(Res.string.invite_via_email)) }
         )
 
-        ListItem(
-            modifier = Modifier.clickable { onInviteViaShare() },
-            leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.invite_via_share)) }
-        )
-        ListItem(
-            modifier = Modifier.clickable { onInviteViaShare() },
-            leadingContent = { Icon(Icons.Default.QrCode, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.qr_code)) }
-        )
 
         ListItem(
-            modifier = Modifier.clickable { onClickGetCode() },
-            leadingContent = { Icon(Icons.Default.Code, contentDescription = null) },
-            headlineContent = { Text(stringResource(Res.string.invite_code_label)) }
+            modifier = Modifier.clickable(enabled = fieldsEnabled) { onClickResetCode() },
+            leadingContent = { Icon(Icons.Default.Refresh, contentDescription = null) },
+            headlineContent = { Text(stringResource(Res.string.reset_code)) }
         )
-
-
     }
 }

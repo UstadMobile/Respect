@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "9cedac3906cd5d62360a23afb53b2ece",
+    "identityHash": "abc95f2a1b30d153fbdb5ea52c15edf8",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1051,8 +1051,66 @@
         }
       },
       {
+        "tableName": "PersonQrBadgeEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pqrGuidNum` INTEGER NOT NULL, `pqrGuid` TEXT NOT NULL, `pqrLastModified` INTEGER NOT NULL, `pqrStored` INTEGER NOT NULL, `pqrQrCodeUrl` TEXT, `pqrStatus` INTEGER NOT NULL, PRIMARY KEY(`pqrGuidNum`))",
+        "fields": [
+          {
+            "fieldPath": "pqrGuidNum",
+            "columnName": "pqrGuidNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrGuid",
+            "columnName": "pqrGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrLastModified",
+            "columnName": "pqrLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrStored",
+            "columnName": "pqrStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pqrQrCodeUrl",
+            "columnName": "pqrQrCodeUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pqrStatus",
+            "columnName": "pqrStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "pqrGuidNum"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_PersonQrBadgeEntity_pqrQrCodeUrl",
+            "unique": false,
+            "columnNames": [
+              "pqrQrCodeUrl"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonQrBadgeEntity_pqrQrCodeUrl` ON `${TABLE_NAME}` (`pqrQrCodeUrl`)"
+          }
+        ]
+      },
+      {
         "tableName": "InviteEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iNewRole` INTEGER, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, `iInviteMultipleAllowed` INTEGER NOT NULL, `iIsFirstUser` INTEGER NOT NULL, `iApprovalRequired` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iExpiration` INTEGER NOT NULL, `iInviteStatus` INTEGER NOT NULL, PRIMARY KEY(`iGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`iGuid` TEXT NOT NULL, `iGuidHash` INTEGER NOT NULL, `iCode` TEXT NOT NULL, `iApprovalRequiredAfter` INTEGER NOT NULL, `iLastModified` INTEGER NOT NULL, `iStored` INTEGER NOT NULL, `iStatus` INTEGER NOT NULL, `iNewUserRole` INTEGER, `iForFamilyOfGuid` TEXT, `iForFamilyOfGuidHash` INTEGER, `iForClassGuid` TEXT, `iForClassName` TEXT, `iSchoolName` TEXT, `iForClassGuidHash` INTEGER, `iForClassRole` INTEGER, PRIMARY KEY(`iGuidHash`))",
         "fields": [
           {
             "fieldPath": "iGuid",
@@ -1073,8 +1131,32 @@
             "notNull": true
           },
           {
-            "fieldPath": "iNewRole",
-            "columnName": "iNewRole",
+            "fieldPath": "iApprovalRequiredAfter",
+            "columnName": "iApprovalRequiredAfter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iLastModified",
+            "columnName": "iLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStored",
+            "columnName": "iStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iStatus",
+            "columnName": "iStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iNewUserRole",
+            "columnName": "iNewUserRole",
             "affinity": "INTEGER"
           },
           {
@@ -1111,42 +1193,6 @@
             "fieldPath": "iForClassRole",
             "columnName": "iForClassRole",
             "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "iInviteMultipleAllowed",
-            "columnName": "iInviteMultipleAllowed",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iIsFirstUser",
-            "columnName": "iIsFirstUser",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iApprovalRequired",
-            "columnName": "iApprovalRequired",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iLastModified",
-            "columnName": "iLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iExpiration",
-            "columnName": "iExpiration",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "iInviteStatus",
-            "columnName": "iInviteStatus",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -1159,7 +1205,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9cedac3906cd5d62360a23afb53b2ece')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'abc95f2a1b30d153fbdb5ea52c15edf8')"
     ]
   }
 }

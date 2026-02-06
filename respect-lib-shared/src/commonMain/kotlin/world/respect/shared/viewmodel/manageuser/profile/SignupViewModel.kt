@@ -9,12 +9,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest.Companion.DATE_OF_BIRTH_EPOCH
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.child_dob_label
 import world.respect.shared.generated.resources.child_gender_label
@@ -30,14 +34,15 @@ import world.respect.shared.generated.resources.your_name_label
 import world.respect.shared.generated.resources.your_profile_title
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
+import java.lang.IllegalStateException
 import kotlin.time.Clock
 
 data class SignupUiState(
@@ -51,14 +56,19 @@ data class SignupUiState(
     val fullNameError: UiText? = null,
     val genderError: UiText? = null,
     val dateOfBirthError: UiText? = null,
+    val otherError: UiText? = null,
     val isDeviceInvite: Boolean = false
 )
 
-
 class SignupViewModel(
     savedStateHandle: SavedStateHandle,
-   private val accountManager: RespectAccountManager,
-) : RespectViewModel(savedStateHandle)  {
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent{
+
+    override val scope: Scope
+        get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(route.schoolUrl, null).scopeId
+        )
 
     private val route: SignupScreen = savedStateHandle.toRoute()
 
@@ -66,12 +76,14 @@ class SignupViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    private val navigateOnAccountCreatedUseCase: NavigateOnAccountCreatedUseCase by inject()
+
     init {
-        Napier.d("SignupViewModel: init: route type=${route.type}")
+        Napier.d("SignupViewModel: init: route type=${route.signupMode.value}")
 
         _uiState.update { prev ->
-            when(route.type) {
-                ProfileType.CHILD -> {
+            when(route.signupMode) {
+                SignupScreenModeEnum.ADD_CHILD_TO_PARENT -> {
                     prev.copy(
                         nameLabel = Res.string.child_name_label.asUiText(),
                         genderLabel = Res.string.child_gender_label.asUiText(),
@@ -102,14 +114,14 @@ class SignupViewModel(
             prev.copy(
                 actionBarButtonState = ActionBarButtonUiState(
                     visible = true,
-                    text = when(route.type) {
-                        ProfileType.CHILD -> Res.string.done.asUiText()
+                    text = when(route.signupMode) {
+                        SignupScreenModeEnum.ADD_CHILD_TO_PARENT  -> Res.string.done.asUiText()
                         else -> Res.string.next.asUiText()
                     },
                     onClick = ::onClickSave
                 ),
-                title = when(route.type) {
-                    ProfileType.CHILD -> Res.string.child_profile_title.asUiText()
+                title = when(route.signupMode) {
+                    SignupScreenModeEnum.ADD_CHILD_TO_PARENT -> Res.string.child_profile_title.asUiText()
                     else -> Res.string.your_profile_title.asUiText()
                 },
                 hideBottomNavigation = true,
@@ -162,8 +174,16 @@ class SignupViewModel(
     }
 
     fun onClickSave() {
-        Napier.d("SignupViewModel: onClickSave: route type=${route.type}")
-        launchWithLoadingIndicator {
+        Napier.d("SignupViewModel: onClickSave: route type=${route.signupMode.value}")
+        launchWithLoadingIndicator(
+            onShowError = { errMessage ->
+                _uiState.update { it.copy(otherError = errMessage) }
+            }
+        ) {
+            _uiState.takeIf { it.value.otherError != null }?.update {
+                it.copy(otherError = null)
+            }
+
             Napier.d("SignupViewModel: onClickSave.launch: name=${_uiState.value.personInfo.name}")
             val personInfo = _uiState.value.personInfo
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -212,28 +232,29 @@ class SignupViewModel(
                     return@launchWithLoadingIndicator
                 }
             }
-                when (route.type) {
-                    ProfileType.CHILD -> {
+                val parentPerson = route.parentPerson
+                when {
+                    route.signupMode == SignupScreenModeEnum.ADD_CHILD_TO_PARENT && parentPerson != null -> {
                         Napier.d("SignupViewModel: adding child")
                         val scope: Scope = accountManager.requireActiveAccountScope()
+                        val parentPersonUid = accountManager.activeAccount?.userGuid
+                            ?: throw IllegalStateException()
+
                         val addChildAccountUseCase: AddChildAccountUseCase = scope.get()
-
                         addChildAccountUseCase(
-                            personInfo = personInfo,
-                            parentUsername = route.respectRedeemInviteRequest.account.username,
-                            classUid = route.respectRedeemInviteRequest.classUid ?: "",
-                            inviteCode = route.respectRedeemInviteRequest.code,
-                            familyPersonGuid = route.respectRedeemInviteRequest.invite.forFamilyOfGuid,
-                            )
-
-                        Napier.d("SignupViewModel: Navigating to wait for approval")
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                destination = WaitingForApproval(),
-                                clearBackStack = true,
+                            request = AddChildAccountUseCase.AddChildAccountRequest(
+                                childPersonInfo = personInfo,
+                                parentUid = parentPersonUid,
+                                inviteRedeemRequest = route.respectRedeemInviteRequest,
                             )
                         )
 
+                        Napier.d("SignupViewModel: Navigating to wait for approval if required")
+                        navigateOnAccountCreatedUseCase(
+                            personRegistered = parentPerson,
+                            navCommandFlow = _navCommandFlow,
+                            inviteRequest = null,//do not include the invite request anymore.
+                        )
                     }
 
                     else -> {
@@ -241,9 +262,7 @@ class SignupViewModel(
                         _navCommandFlow.tryEmit(
                             value = NavCommand.Navigate(
                                 destination = CreateAccount.create(
-                                    profileType = route.type,
                                     schoolUrl = route.schoolUrl,
-                                    type = route.inviteType,
                                     inviteRequest = route.respectRedeemInviteRequest.copy(
                                         accountPersonInfo = personInfo
                                     )

@@ -65,6 +65,8 @@ fun SignupScreen(
             label = { uiState.nameLabel?.let { Text(uiTextStringResource(it) + "*") } },
             isError = uiState.fullNameError != null,
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            maxLines = 1,
             supportingText = {
                 Text(uiState.fullNameError?.let { uiTextStringResource(it) }
                     ?: stringResource(Res.string.required)

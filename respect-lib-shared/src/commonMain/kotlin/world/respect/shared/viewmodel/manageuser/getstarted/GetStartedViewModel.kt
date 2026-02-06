@@ -24,11 +24,14 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOption
+import world.respect.shared.navigation.ScanQRCode
+import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
+import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 
 
 data class GetStartedUiState(
@@ -38,6 +41,7 @@ data class GetStartedUiState(
     val errorMessage: UiText? = null,
     val suggestions: List<SchoolDirectoryEntry> = emptyList(),
     val warning: UiText? = null,
+    val showAddMySchool: Boolean = false
 )
 
 
@@ -87,12 +91,14 @@ class GetStartedViewModel(
 
             flow.collect { dataState ->
                 dataState.dataOrNull()?.also { dataLoaded ->
+                    val hasSchoolNotFoundError =
+                        nameIsNotBlank && dataLoaded.isEmpty() && dataState.isReadyAndSettled()
                     _uiState.update {
                         it.copy(
                             suggestions = dataLoaded,
-                            errorText = Res.string.school_not_found.asUiText().takeIf {
-                                nameIsNotBlank && dataLoaded.isEmpty() && dataState.isReadyAndSettled()
-                            }
+                            errorText = Res.string.school_not_found.asUiText()
+                                .takeIf { hasSchoolNotFoundError },
+                            showAddMySchool = hasSchoolNotFoundError
                         )
                     }
                 }
@@ -119,6 +125,17 @@ class GetStartedViewModel(
         )
     }
 
+    fun onClickAddMySchool() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                SchoolDirectoryList.create(SchoolDirectoryMode.SELECT)
+            )
+        )
+    }
+
+    fun onClickScanQRBadge() {
+        _navCommandFlow.tryEmit(NavCommand.Navigate(ScanQRCode()))
+    }
     fun onClickOtherOptions() {
         _navCommandFlow.tryEmit(NavCommand.Navigate(OtherOption))
     }

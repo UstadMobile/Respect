@@ -35,10 +35,12 @@ class PersonDataSourceRepository(
         loadParams: DataLoadParams,
         guid: String
     ): DataLoadState<Person> {
-        val remote = remote.findByGuid(loadParams, guid)
-        local.updateFromRemoteIfNeeded(
-            remote, validationHelper
-        )
+        if(!loadParams.onlyIfCached) {
+            val remote = remote.findByGuid(loadParams, guid)
+            local.updateFromRemoteIfNeeded(
+                remote, validationHelper
+            )
+        }
 
         return local.findByGuid(loadParams, guid)
     }

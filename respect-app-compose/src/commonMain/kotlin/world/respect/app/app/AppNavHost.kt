@@ -141,8 +141,10 @@ import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
 import world.respect.app.view.sharedschooldevice.SchoolSettingsScreen
+import world.respect.app.view.sharedschooldevice.SetSchoolSharedDevicePINScreen
 import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
 import world.respect.app.view.sharedschooldevice.SharedSchoolDeviceEnableScreen
+import world.respect.app.view.sharedschooldevice.login.SelectClassScreen
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
@@ -150,6 +152,8 @@ import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.SchoolSettings
+import world.respect.shared.navigation.SelectClass
+import world.respect.shared.navigation.SetSchoolSharedDevicePin
 import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
@@ -578,6 +582,22 @@ fun AppNavHost(
 
         composable<SharedDevicesEnable> {
             SharedSchoolDeviceEnableScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<SetSchoolSharedDevicePin> {
+            SetSchoolSharedDevicePINScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<SelectClass> {
+            SelectClassScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

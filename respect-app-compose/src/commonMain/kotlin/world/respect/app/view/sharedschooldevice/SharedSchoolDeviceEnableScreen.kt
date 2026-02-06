@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,8 +27,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.empty
-import world.respect.shared.generated.resources.last_name
+import world.respect.shared.generated.resources.device_name
+import world.respect.shared.generated.resources.undraw_sync_pe2t_1
 import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
 
 @Composable
@@ -54,7 +53,7 @@ fun SharedSchoolDeviceEnableScreen(
             OutlinedTextField(
                 modifier = Modifier.testTag("last_name").fillMaxWidth(),
                 value = device,
-                label = { Text(stringResource(Res.string.last_name) + "*") },
+                label = { Text(stringResource(Res.string.device_name) + "*") },
                 onValueChange = { value ->
                     viewModel.updateDeviceName(value)
                 },
@@ -63,7 +62,7 @@ fun SharedSchoolDeviceEnableScreen(
         }
         item {
             SharedSchoolDeviceInfoBox(
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 16.dp),
                 onClickEnableSharedSchoolDeviceMode = {
                     viewModel.enableSharedDeviceMode()
                 }
@@ -88,7 +87,7 @@ fun SharedSchoolDeviceInfoBox(
         )
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
@@ -96,7 +95,7 @@ fun SharedSchoolDeviceInfoBox(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(
-                    painter = painterResource(Res.drawable.empty),
+                    painter = painterResource(Res.drawable.undraw_sync_pe2t_1),
                     contentDescription = "",
                     modifier = Modifier
                         .width(120.dp).height(100.dp)
@@ -107,7 +106,7 @@ fun SharedSchoolDeviceInfoBox(
 
                     Text(
                         text = " Shared device",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
@@ -119,17 +118,13 @@ fun SharedSchoolDeviceInfoBox(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
             Button(
                 onClick = onClickEnableSharedSchoolDeviceMode,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ),
-                border = ButtonDefaults.outlinedButtonBorder
             ) {
                 Text("Enable")
             }

@@ -686,6 +686,12 @@ data object SharedDevicesSettings : RespectAppRoute
 data object SharedDevicesEnable : RespectAppRoute
 
 @Serializable
+data object SetSchoolSharedDevicePin : RespectAppRoute
+
+@Serializable
+data object  SelectClass : RespectAppRoute
+
+@Serializable
 data class CurriculumMappingEdit(
     val textbookUid: Long = 0L,
     private val mappingDataJson: String? = null

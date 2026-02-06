@@ -1,9 +1,11 @@
 package world.respect.shared.viewmodel.sharedschooldevice
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -21,6 +23,7 @@ import world.respect.shared.generated.resources.device
 import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -34,13 +37,15 @@ data class SharedDevicesSettingsUiState(
     val selfSelectEnabled: Boolean = true,
     val rollNumberLoginEnabled: Boolean = true,
     val showEnableDialog: Boolean = false,
-    val deviceName: String = ""
+    val showPinDialog: Boolean = false,
+    val pin: String = "",
+    val showBottomSheetOptions: Boolean = false,
 )
 
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -94,12 +99,26 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onClickAdd() {
+        _uiState.update { currentState ->
+            currentState.copy(showBottomSheetOptions = true)
+        }
+    }
+
+    fun onClickAddAnotherDevice() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 InvitePerson.create(
                     inviteCode = null,
                     presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
                 )
+            )
+        )
+    }
+
+    fun onClickEnableOnThisDevice() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                SharedDevicesEnable
             )
         )
     }
@@ -118,5 +137,34 @@ class SharedDevicesSettingsViewmodel(
 
     fun onConfirmEnableDialog(localDeviceName: String) {
         onDismissEnableDialog()
+    }
+
+    // Inside SharedDevicesSettingsViewmodel
+    fun onShowPinDialog() {
+        _uiState.update { it.copy(showPinDialog = true) }
+    }
+
+    fun onDismissPinDialog() {
+        _uiState.update { it.copy(showPinDialog = false, pin = "") }
+    }
+
+    fun onPinChange(newPin: String) {
+        if (newPin.length <= 4) { // Assuming a 4-digit PIN
+            _uiState.update { it.copy(pin = newPin) }
+        }
+    }
+
+    fun onSavePin() {
+        val currentPin = _uiState.value.pin
+        viewModelScope.launch {
+            // schoolDataSource.savePin(currentPin)
+            onDismissPinDialog()
+        }
+    }
+
+    fun onDismissBottomSheet() {
+        _uiState.update { currentState ->
+            currentState.copy(showBottomSheetOptions = false)
+        }
     }
 }

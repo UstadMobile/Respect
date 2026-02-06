@@ -233,8 +233,10 @@ import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseClient
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.SetSchoolSharedDevicePINViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewmodel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -366,6 +368,8 @@ val appKoinModule = module {
     viewModelOf(::SchoolSettingsViewModel)
     viewModelOf(::SharedDevicesSettingsViewmodel)
     viewModelOf(::SharedSchoolDeviceEnableViewmodel)
+    viewModelOf(::SetSchoolSharedDevicePINViewmodel)
+    viewModelOf(::SelectClassViewmodel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

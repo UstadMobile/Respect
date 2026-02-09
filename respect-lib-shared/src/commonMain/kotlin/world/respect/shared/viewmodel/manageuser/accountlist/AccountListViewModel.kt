@@ -27,6 +27,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
@@ -63,9 +64,11 @@ class AccountListViewModel(
     init {
         _appUiState.update {
             it.copy(
+                onClickSettings=::onClickSettings,
                 title = Res.string.accounts.asUiText(),
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
+                settingsIconVisible = true
             )
         }
 
@@ -154,6 +157,12 @@ class AccountListViewModel(
         }
     }
 
+    fun onClickSettings() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(Settings)
+        )
+    }
+
     fun onClickAccount(account: RespectAccount) {
         respectAccountManager.switchAccount(account)
 
@@ -213,7 +222,6 @@ class AccountListViewModel(
         }
     }
 
-
     fun onClickLogout() {
         uiState.value.selectedAccount?.also {
             viewModelScope.launch {
@@ -221,5 +229,4 @@ class AccountListViewModel(
             }
         }
     }
-
 }

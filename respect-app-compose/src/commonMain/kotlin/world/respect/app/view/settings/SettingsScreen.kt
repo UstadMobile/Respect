@@ -5,27 +5,75 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import okhttp3.internal.http2.Settings
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.mappings
+import world.respect.shared.viewmodel.settings.SettingsUiState
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
-    onNavigateToMapping: () -> Unit = {},
+    viewModel: SettingsViewModel
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    SettingsScreen(
+        uiState = uiState,
+        onNavigateToMapping = viewModel::onNavigateToMapping,
+        onClickLang = viewModel::onClickLang,
+        onClickLanguage = viewModel::onClickLanguage,
+        onDismissLangDialog = viewModel::onDismissLangDialog
+    )
+}
+
+@Composable
+fun SettingsScreen(
+    uiState: SettingsUiState,
+    onNavigateToMapping: () -> Unit = {},
+    onClickLanguage: () -> Unit = {},
+    onDismissLangDialog: () -> Unit = {},
+    onClickLang: (world.respect.shared.viewmodel.settings.UiLanguage) -> Unit = {}
+) {
+
+    if(uiState.langDialogVisible) {
+        //As per https://developer.android.com/jetpack/compose/components/dialog
+        SettingsDialog(
+            onDismissRequest = onDismissLangDialog,
+        ) {
+
+            uiState.availableLanguages.forEach { lang ->
+                ListItem(
+                    modifier = Modifier.clickable { onClickLang(lang) },
+                    headlineContent = { Text(lang.langDisplay) }
+                )
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -37,6 +85,31 @@ fun SettingsScreen(
                 title = stringResource(Res.string.mappings),
                 onClick = onNavigateToMapping,
                 testTag = "mapping_setting_item"
+            )
+        }
+
+        item {
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(Res.string.language))
+                },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Filled.Language,
+                        contentDescription = stringResource(Res.string.language)
+                    )
+                },
+                supportingContent = {
+                    Text(text = uiState.currentLanguage)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        onClick = {
+                            onClickLanguage()
+
+                        }
+                    )
             )
         }
     }
@@ -74,11 +147,23 @@ private fun SettingsListItem(
     )
 }
 
+
 @Composable
-fun SettingsScreenForViewModel(
-    viewModel: SettingsViewModel
+fun SettingsDialog(
+    onDismissRequest: () -> Unit,
+    content: @Composable () -> Unit,
 ) {
-    SettingsScreen(
-        onNavigateToMapping = viewModel::onNavigateToMapping
-    )
+    Dialog(
+        onDismissRequest = onDismissRequest,
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            content()
+        }
+    }
 }

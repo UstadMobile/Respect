@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -78,6 +80,16 @@ fun AppLauncherScreen(
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    /**
+     * Maestro end to end tests can be flakey: When running the login sometimes the keyboard stays
+     * visible even after going from the login screen to the app launcher screen, which then
+     * hides the bottom navigation buttons.
+     */
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(Unit) {
+        keyboardController?.hide()
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()

@@ -9,7 +9,7 @@ import kotlinx.serialization.json.jsonObject
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
 
 /**
- * Sealed class that represents a password or passkey credential
+ * Sealed class that represents a password, passkey, or QR Code Badge credential
  */
 @Serializable(with = RespectCredentialSerializer::class)
 sealed class RespectCredential
@@ -25,6 +25,17 @@ data class RespectPasskeyCredential(
     val passkeyWebAuthNResponse: AuthenticationResponseJSON
 ): RespectCredential()
 
+/**
+ * A QR Code Badge is used by children who are too young to remember a username and password. They
+ * simply scan the badge to authenticate.
+ *
+ * The URL on the QR code is in the form of:
+ *
+ * https://school.example.org/respect_link/qr_badge/id/123125
+ *
+ * The URL MUST start with the school URL (so it will be possible for it to still work if scanned
+ * with a camera app).
+ */
 @Serializable
 data class RespectQRBadgeCredential(
     val qrCodeUrl: Url

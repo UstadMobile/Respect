@@ -20,7 +20,6 @@ import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.getKoin
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import world.respect.Greeting
 import world.respect.libutil.ext.randomString
 import world.respect.server.routes.AUTH_CONFIG_DIRECTORY_ADMIN_BASIC
 import world.respect.server.routes.AuthRoute
@@ -30,27 +29,34 @@ import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
 import org.koin.ktor.ext.inject
+import world.respect.Greeting
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.qrcode.PersonQrBadgeRoute
 import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
+import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolRegistrationRoute
+import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
+import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -166,7 +172,7 @@ fun Application.module() {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }
-
+        SchoolRegistrationRoute()
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
 
@@ -179,6 +185,10 @@ fun Application.module() {
             path = "swagger",
             swaggerFile = "openapi/openapi.yaml",
         )
+
+        route(RESPECT_SCHOOL_LINK_SEGMENT) {
+            SchoolLinkRoute()
+        }
 
         route("api") {
             route("passkey"){
@@ -201,9 +211,6 @@ fun Application.module() {
 
             route("school") {
                 route("respect") {
-                    AddChildAccountRoute(
-                        addChildAccountUseCase = { it.getSchoolKoinScope().get() }
-                    )
                     route("auth") {
                         AuthRoute()
                     }
@@ -226,11 +233,16 @@ fun Application.module() {
                         SchoolAppRoute()
                         SchoolPermissionGrantRoute()
                         PersonRoute()
+                        InviteRoute()
                         PersonPasskeyRoute()
                         PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
                         AssignmentRoute()
+                        PersonQrBadgeRoute()
+                        AddChildAccountRoute(
+                            addChildAccountUseCase = { it.requireAccountScope().get() }
+                        )
                     }
                 }
             }

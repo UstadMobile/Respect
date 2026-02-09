@@ -10,6 +10,8 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -58,7 +60,9 @@ class TestPersonStorage {
 
 
                 schoolDs.insertAdmin(adminUid)
-                AddDefaultSchoolPermissionGrantsUseCase(schoolDs).invoke()
+                AddDefaultSchoolPermissionGrantsUseCase(
+                    db, XXHashUidNumberMapper(XXStringHasherCommonJvm())
+                ).invoke()
                 schoolDs.personDataSource.store(listOf(parentPerson, childPerson))
                 val parentFromDb = schoolDs.personDataSource.findByGuid(DataLoadParams(), parentGuid).dataOrNull()
                 val childFromDb = schoolDs.personDataSource.findByGuid(DataLoadParams(), childGuid).dataOrNull()

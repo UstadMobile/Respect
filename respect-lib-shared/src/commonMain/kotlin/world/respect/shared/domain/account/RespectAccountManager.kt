@@ -29,6 +29,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
+import world.respect.datalayer.school.model.Person
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -132,7 +133,7 @@ class RespectAccountManager(
     suspend fun login(
         credential: RespectCredential,
         schoolUrl: Url,
-    ) {
+    ) : AuthResponse {
         val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
             schoolScopeId.scopeId
@@ -151,13 +152,15 @@ class RespectAccountManager(
         )
 
         initSession(authResponse, RespectSession(respectAccount, null))
+
+        return authResponse
     }
 
     @Suppress("unused")
     suspend fun register(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
-    ) {
+    ): Person {
         val schoolScopeId = SchoolDirectoryEntryScopeId(
             schoolUrl, null,
         )
@@ -181,6 +184,8 @@ class RespectAccountManager(
                 profilePersonUid = null,
             )
         )
+
+        return authResponse.person
     }
 
     private suspend fun initSession(
@@ -296,6 +301,28 @@ class RespectAccountManager(
             ?: throw IllegalStateException("require scope for selected account: no account selected")
     }
 
+    suspend fun switchProfile(personUid: String) {
+        val currentSession = _activeSession.value
+            ?: throw IllegalStateException("switchProfile: no active session")
+
+        if(!_storedAccounts.value.any { it.isSameAccount(currentSession.account) }) {
+            throw IllegalArgumentException("switchProfile: account not stored/available")
+        }
+
+        val accountScope = getOrCreateAccountScope(currentSession.account)
+        val schoolDataSource: SchoolDataSource = accountScope.get()
+        schoolDataSource.personDataSource.findByGuid(
+            DataLoadParams(),
+            personUid
+        )
+
+
+        val newSession = currentSession.copy(profilePersonUid = personUid)
+        _activeSession.value = newSession
+        settings[SETTINGS_KEY_ACTIVE_SESSION] = json.encodeToString(newSession)
+
+        putDebugCrashCustomData("SelectedAccount", activeAccount.toString())
+    }
 
 
     companion object {

@@ -15,6 +15,7 @@ import world.respect.shared.resources.UiText
  */
 data class AppUiState(
     val fabState: FabUiState = FabUiState(),
+    val expandableFabState: ExpandableFabUiState = ExpandableFabUiState(),
     val title: UiText? = null,
     val navigationVisible: Boolean = true,
     val hideBottomNavigation: Boolean = false,
@@ -22,7 +23,7 @@ data class AppUiState(
     val userAccountIconVisible: Boolean? = null,
     val hideAppBar: Boolean = false,
     val appBarColors: AppBarColors = AppBarColors.STANDARD,
-    val leadingActionButton: AppActionButton? = null,
+    val actions: List<AppActionButton> = emptyList(),
     val loadingState: LoadingUiState = LoadingUiState(),
     val showBackButton: Boolean? = null,
     val searchState: AppBarSearchUiState = AppBarSearchUiState(),

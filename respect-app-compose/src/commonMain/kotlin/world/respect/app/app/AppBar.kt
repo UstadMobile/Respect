@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,14 +44,19 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.uiTextStringResource
+import world.respect.app.util.ext.toImageVector
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
+import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.search
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.fullName
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.shared.generated.resources.more_options
 import world.respect.shared.util.ext.isLoading
+import world.respect.shared.viewmodel.app.appstate.AppActionButton
 import world.respect.shared.viewmodel.app.appstate.AppBarColors
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
@@ -61,11 +69,12 @@ fun RespectAppBar(
     appUiState: AppUiState,
     navController: NavController,
     onProfileClick: () -> Unit = {},
+    topLevelItems: List<TopNavigationItem>,
 ) {
     val currentBackStack by navController.currentBackStack.collectAsState()
     val currentRoute = currentBackStack.lastOrNull()?.destination?.route
     val isRootDest = remember(currentRoute) {
-        APP_TOP_LEVEL_NAV_ITEMS.any { it.routeName == currentRoute }
+        topLevelItems.any { it.routeName == currentRoute }
     }
 
     val canGoBack = appUiState.showBackButton ?: !isRootDest && currentBackStack.size > 1
@@ -89,6 +98,15 @@ fun RespectAppBar(
     LaunchedEffect(searchActive) {
         if(compactHeader && searchActive)
             focusRequester.requestFocus()
+    }
+
+    var showOverflowMenu by remember { mutableStateOf(false) }
+
+    val overflowActions = appUiState.actions.filter {
+        it.display == AppActionButton.Companion.ActionButtonDisplay.OVERFLOW_MENU
+    }
+    val iconActions = appUiState.actions.filter {
+        it.display == AppActionButton.Companion.ActionButtonDisplay.ICON
     }
 
     Box(
@@ -165,6 +183,7 @@ fun RespectAppBar(
                         }
                     }
                 }
+
                 if(appUiState.actionBarButtonState.visible) {
                     Button(
                         onClick = appUiState.actionBarButtonState.onClick,
@@ -178,6 +197,19 @@ fun RespectAppBar(
                         )
                     }
                 }
+
+                iconActions.forEach { action ->
+                    IconButton(
+                        onClick = action.onClick,
+                        modifier = Modifier.testTag("action_${action.id}"),
+                    ) {
+                        Icon(
+                            imageVector = action.icon.toImageVector(),
+                            contentDescription = uiTextStringResource(action.contentDescription),
+                        )
+                    }
+                }
+
                 if (appUiState.settingsIconVisible == true) {
                     IconButton(
                         onClick = appUiState.onClickSettings ?: {},
@@ -198,6 +230,35 @@ fun RespectAppBar(
                             RespectPersonAvatar(name = it.person.fullName())
                         }
 
+                    }
+                }
+
+                if (overflowActions.isNotEmpty()) {
+                    Box {
+                        IconButton(
+                            onClick = { showOverflowMenu = true },
+                            modifier = Modifier.testTag("more_options"),
+                        ) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = stringResource(Res.string.more_options)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false }
+                        ) {
+                            overflowActions.forEach { action ->
+                                DropdownMenuItem(
+                                    text = { Text(uiTextStringResource(action.text)) },
+                                    onClick = {
+                                        action.onClick()
+                                        showOverflowMenu = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             },

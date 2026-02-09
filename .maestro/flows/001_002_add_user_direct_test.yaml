@@ -23,14 +23,15 @@ onFlowComplete:
     id: "app_title"
     text: "People"
 - tapOn:
-    id: "floating_action_button"   #  +Person button
+    id: "ExpandableFab"   #  +Person button
+- tapOn: "Add new person"
 - assertVisible:
     id: "app_title"
     text: "Add person"
 - tapOn: "Save"
 - assertVisible: "Required field"   # First names* field is mandatory
 - tapOn: "First names*"
-- inputText: "Test"
+- inputText: "ParentA"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Last name* field is mandatory
 - tapOn: "Last name*"
@@ -39,10 +40,18 @@ onFlowComplete:
 - assertVisible: "Required field"   # Gender field is mandatory
 - tapOn: "Gender*"
 - tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Teacher"
+- assertNotVisible: "Family member"
+- tapOn:
+    id: "role"
+- tapOn: "Parent"
+- assertVisible: "Family member"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Test User"
+    text: "ParentA User"
 - tapOn:
     id: "floating_action_button"   # Edit button
 - assertVisible:
@@ -56,13 +65,20 @@ onFlowComplete:
 - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Date of Birth cannot be in the future."
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Date of birth"
 - tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
-- hideKeyboard
-
+- runFlow:
+    when:
+      notVisible:
+           id: "phone_countrycode"
+    commands:
+        - hideKeyboard
 # Validate Phone number
 - tapOn:
      id: "phone_countrycode"
@@ -70,64 +86,229 @@ onFlowComplete:
 - inputText: "+1"
 - tapOn: "Phone number"
 - inputText: "23"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
 - tapOn: "Phone number"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
 - inputText: "21255543268"
-- hideKeyboard
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Invalid"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Phone number"
 - inputText: "2125554326"
 - tapOn: "Email"
-- inputText: "Testuser@gm"
-- hideKeyboard
-- scrollUntilVisible:
-    element:
-      text: "Save" # or any other selector
-    direction: UP
-    timeout: 1000
+- inputText: "ParentAuser@gm"
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
 - tapOn: "Save"
 - assertVisible: "Enter valid email address."
-- eraseText
-- inputText: "Testuser@gmail.com"
-- assertVisible: "Testuser@gmail.com"
-- hideKeyboard
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Email"
+- inputText: "ParentAuser@gmail.com"
+- runFlow:
+    when:
+      notVisible: "Save"
+    commands:
+      - hideKeyboard
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+# Add Family member - as new person
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Family member"
+- tapOn: "Add person"
+- tapOn: "First names*"
+- inputText: "Child"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "Save"
+- assertVisible: "Child User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+- tapOn: "Child User"
+- assertVisible:
+    id: "app_title"
+    text: "Child User"
+- assertVisible: "Student"
+- assertVisible: "ParentA User"
+- tapOn: "ParentA User"
+# Create account for Parent user  -- only username and password fields available for parent user
+- tapOn: "Create account"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible:
+    id: "Username"
+    text: "parentauser"
+- tapOn: "Password*"
+- inputText: "test"
+- tapOn: "Save"
+- assertVisible: "Password too short"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Password*"
+- inputText: "test123"
+- tapOn: "Save"
+- tapOn: "Child User"
+- tapOn: "Create account"
+- assertVisible:
+    id: "Username"
+    text: "childuser"
+- runFlow:
+    file: "subflows/assign_qr_badge_flow.yaml"
+    env:
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
+# DISABLED temporarily 21/Jan/2026 by Mike - how this is handled is being changed
+#- assertVisible: "Invalid QR code scanned"
+#- tapOn: "Try again"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Scan QR code badge"
+#- tapOn: "More Options"
+#- tapOn: "Paste URL"
+#- tapOn: "Url"
+#- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
+#- tapOn: "Ok"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+- back
+
+# Create a student user for QR code validation
+- tapOn: "People"
+- assertVisible:
+    id: "app_title"
+    text: "People"
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn: "Add new person"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: "Test"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Student"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test User"
 - tapOn: "Create account"
-- tapOn: "Username"
-- inputText: "testuser"
-- tapOn: "Password"  # Password validations needs to be added
-- inputText: "test234"
+- assertVisible:
+         id: "Username"
+         text: "testuser"
+- tapOn: "Set password"
+- tapOn: "Password*"
+- inputText: "test123"
 - tapOn: "Save"
 - assertVisible:
+    id: "password_change_btn"  # Change password button
+- assertVisible: "Last updated:.*"
+# Assign QR code badge for the user
+- runFlow:
+    file: "subflows/assign_qr_badge_flow.yaml"
+    env:
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312    #Validation to ensure that one QR badge is assigned to one, and only one, student.
+- assertVisible:
     id: "app_title"
-    text: "Test User"
+    text: "Manage account"
+- assertVisible: "Assign QR code badge"
+- assertVisible: "This QR code is already assigned to another student"
+- runFlow:
+    file: "subflows/assign_qr_badge_flow.yaml"
+    env:
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12345 #Unique QR
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+- tapOn:
+    id: "qr_change_btn"
+- assertVisible: "Assign new badge (replace)"
+- assertVisible: "Revoke badge"
+# Verify the button - Revoke badge, it should remove the assigned badge
+- tapOn: "Revoke badge"
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "Assign QR code badge"
+- runFlow:
+    file: "subflows/assign_qr_badge_flow.yaml"
+    env:
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12345
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "QR code badge"
+- assertVisible: "Badge.*"
+# Verify the button Assign new badge (replace) takes user to Scan QR code screen
+- tapOn:
+    id: "qr_change_btn"
+- tapOn: "Assign new badge (replace)"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- back
+- assertVisible:
+    id: "app_title"
+    text: "Manage account"
+- assertVisible: "QR code badge"
 
-# Validate User login
+# Validate Parent User login
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
-- inputText: "testuser"
+- inputText: "parentauser"
 - tapOn:
     id : "password"
-- inputText: "test234"
+- inputText: "test123"
+- hideKeyboard
 - tapOn: "Login"
 - runFlow:
     when:
@@ -135,47 +316,59 @@ onFlowComplete:
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "People"
-- tapOn: "Test User"
+- tapOn: "ParentA User"
 - tapOn: "Manage account"
-- assertVisible: "testuser"
-- tapOn: "Change"
+- assertVisible: "parentauser"
+- tapOn:
+    id: "password_change_btn"  # Change password button
 - tapOn: "Old password*"
-- inputText: "test234"
+- inputText: "test123"
 - tapOn: "New password*"
 - inputText: "t2"
 - tapOn: "Save"
 - assertVisible: "Password must be at least 6 characters"
 - tapOn: "New password*"
 - eraseText
-- inputText: "test123"
+- inputText: "test234"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Manage account"
+- back
+- tapOn:
+    id: "user_account_icon"
+- assertVisible: "Profile"
+- assertVisible: "Logout"
+- assertVisible: "Family members"
+- tapOn: "Child User"
+# Verify simplified child mode
+- assertVisible: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- assertVisible: "Apps"
+- assertNotVisible: "Classes"
+- assertNotVisible: "People"
 
-
-# Validate User login after changing password
+# Validate Child User QR Login using Scan QR/badge
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-
-- tapOn:
-    id: "username"
-- inputText: "testuser"
-- tapOn:
-    id : "password"
-- inputText: "test123"
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
+- tapOn: "Scan QR code/badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Options"
+- tapOn: "Paste URL"
+- tapOn: "Url"
+- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
+- tapOn: "OK"
 - assertVisible: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- assertVisible: "Assignments"
+- assertVisible: "Classes"
+- assertVisible: "People"

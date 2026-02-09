@@ -56,6 +56,25 @@ interface ClassEntityDao {
     ): PagingSource<Int, ClassEntityWithPermissions>
 
 
+    @Query(
+        """
+        SELECT * 
+          FROM ClassEntity 
+        WHERE cTeacherInviteGuid = :inviteCode
+    """
+    )
+    suspend fun findByTeacherInviteCode(inviteCode: String): ClassEntity?
+
+    @Query(
+        """
+        SELECT * 
+          FROM ClassEntity 
+        WHERE cStudentInviteGuid = :inviteCode
+    """
+    )
+    suspend fun findByStudentInviteCode(inviteCode: String): ClassEntity?
+
+
     @Query(LIST_SQL)
     @Transaction
     suspend fun list(
@@ -76,8 +95,8 @@ interface ClassEntityDao {
     @Query("""
         SELECT ClassEntity.*
           FROM ClassEntity
-         WHERE ClassEntity.cStudentInviteCode = :code
-            OR ClassEntity.cTeacherInviteCode = :code 
+         WHERE ClassEntity.cStudentInviteGuid = :code
+            OR ClassEntity.cTeacherInviteGuid = :code 
     """)
     suspend fun findByInviteCode(code: String): List<ClassEntityWithPermissions>
 
@@ -178,8 +197,8 @@ interface ClassEntityDao {
           AND ($CLASS_PERMISSION_CHECK_SQL)
           
           AND (:code IS NULL 
-                OR ClassEntity.cStudentInviteCode = :code
-                OR ClassEntity.cTeacherInviteCode = :code)
+                OR ClassEntity.cStudentInviteGuid = :code
+                OR ClassEntity.cTeacherInviteGuid = :code)
      ORDER BY ClassEntity.cTitle
         """
 

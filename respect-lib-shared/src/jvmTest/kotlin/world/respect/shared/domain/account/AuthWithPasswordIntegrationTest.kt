@@ -24,6 +24,7 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -78,6 +79,10 @@ class AuthWithPasswordIntegrationTest {
             authenticatePasswordUseCase = AuthenticatePasswordUseCaseDbImpl(
                 schoolDb = schoolDb,
                 encryptPersonPasswordUseCase = EncryptPersonPasswordUseCaseImpl(),
+                uidNumberMapper = uidNumberMapper,
+            ),
+            authenticateQrBadgeUseCase = AuthenticateQrBadgeUseCaseDbImpl(
+                schoolDb = schoolDb,
                 uidNumberMapper = uidNumberMapper,
             )
         )

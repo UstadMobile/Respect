@@ -1,5 +1,6 @@
 package world.respect.datalayer.school.ext
 
+import world.respect.datalayer.school.model.Invite2.Companion.TYPE_NEW_USER
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.school.model.PersonRoleEnum
 
@@ -13,3 +14,10 @@ val PersonRoleEnum.writePermissionFlag: Long
         PersonRoleEnum.PARENT -> PermissionFlags.PERSON_PARENT_WRITE
         else -> PermissionFlags.SYSTEM_ADMIN
     }
+
+/**
+ * The uid to use for a new user invite.
+ */
+val PersonRoleEnum.newUserInviteUid: String
+    get() = "$TYPE_NEW_USER:${this.value}"
+

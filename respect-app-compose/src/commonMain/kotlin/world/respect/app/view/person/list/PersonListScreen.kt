@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CopyAll
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -19,19 +22,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.add_person
-import world.respect.shared.generated.resources.copy_invite_code
+import world.respect.shared.generated.resources.dismiss_invite
+import world.respect.shared.generated.resources.gender_literal
+import world.respect.shared.generated.resources.invite_person
+import world.respect.shared.generated.resources.pending_requests_to_join
 import world.respect.shared.util.ext.fullName
+import world.respect.shared.util.ext.label
 import world.respect.shared.viewmodel.person.list.PersonListUiState
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 
@@ -44,7 +54,9 @@ fun PersonListScreen(
         uiState = uiState,
         onClickItem = viewModel::onClickItem,
         onClickAddPerson = viewModel::onClickAdd,
-        onClickInviteCode = viewModel::onClickInviteCode,
+        onClickInvitePerson = viewModel::onClickInvitePerson,
+        onClickAcceptOrDismissInvite = viewModel::onClickAcceptOrDismissInvite,
+        onTogglePendingInvites = viewModel::onTogglePendingInvites,
     )
 }
 
@@ -53,9 +65,14 @@ fun PersonListScreen(
     uiState: PersonListUiState,
     onClickItem: (PersonListDetails) -> Unit,
     onClickAddPerson: () -> Unit,
-    onClickInviteCode: () -> Unit,
+    onClickAcceptOrDismissInvite: (Person, Boolean) -> Unit,
+    onClickInvitePerson: () -> Unit,
+    onTogglePendingInvites: () -> Unit,
 ) {
     val pager = respectRememberPager(uiState.persons)
+    val pendingPager = respectRememberPager(uiState.pendingPersons)
+    val pendingItems = pendingPager.flow.collectAsLazyPagingItems()
+
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
@@ -78,29 +95,97 @@ fun PersonListScreen(
             }
         }
 
-        uiState.showInviteCode?.also { inviteCode ->
-            item("invite_code") {
+        if(uiState.showInvite) {
+            item("invite_person") {
                 ListItem(
                     modifier = Modifier.clickable {
-                        onClickInviteCode()
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Filled.CopyAll,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp).padding(8.dp),
-                        )
+                        onClickInvitePerson()
                     },
                     headlineContent = {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(Res.string.copy_invite_code))
-                            Spacer(Modifier.width(8.dp))
-                            Text(inviteCode, modifier = Modifier.testTag("invite_code"))
-                        }
+                        Text(stringResource(Res.string.invite_person))
                     },
+                    leadingContent = {
+                        Icon(Icons.Default.Share,
+                            modifier = Modifier.size(40.dp).padding(8.dp),
+                            contentDescription = null)
+                    }
                 )
             }
         }
+
+        if (pendingItems.itemCount > 0) {
+            item("pending_person_header") {
+                ListItem(
+                    modifier = Modifier.clickable { onTogglePendingInvites() },
+                    headlineContent = {
+                        Text(stringResource(Res.string.pending_requests_to_join)+
+                                "(${pendingItems.itemCount})")
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.KeyboardArrowDown,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .rotate(if (uiState.isPendingExpanded) 0f else -90f),
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+        }
+
+        if (uiState.isPendingExpanded) {
+            respectPagingItems(
+                items = pendingItems,
+                key = { item, index -> (item?.guid + index.toString()) }
+            ) { person ->
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingContent = {
+                        RespectPersonAvatar(
+                            name = person?.fullName() ?: ""
+                        )
+                    },
+                    headlineContent = {
+                        Text(
+                            text = person?.fullName().orEmpty()
+                        )
+                    },
+                    supportingContent = {
+                        val gender = person?.gender
+                        Text(
+                            text =
+                                "${stringResource(Res.string.gender_literal)}: " +
+                                        "${gender?.label?.let { stringResource(it) }}}"
+                        )
+
+                    },
+                    trailingContent = {
+                        Row {
+                            Icon(
+                                modifier = Modifier.size(24.dp)
+                                    .clickable {
+                                        person?.also { onClickAcceptOrDismissInvite(it, true) }
+                                    },
+                                imageVector = Icons.Outlined.CheckCircle,
+                                contentDescription = stringResource(resource = Res.string.accept_invite)
+                            )
+
+                            Spacer(Modifier.width(16.dp))
+
+                            Icon(
+                                modifier = Modifier.size(24.dp).clickable {
+                                    person?.also{onClickAcceptOrDismissInvite(it, false)}
+                                },
+                                imageVector = Icons.Outlined.Cancel,
+                                contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
 
         respectPagingItems(
             items = lazyPagingItems,

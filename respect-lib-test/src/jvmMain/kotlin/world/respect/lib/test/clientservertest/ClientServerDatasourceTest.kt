@@ -79,6 +79,9 @@ class ClientServerDataSourceTestBuilder internal constructor(
         serverDir, stringHasher, adminUserId
     )
 
+    val serverDb: RespectSchoolDatabase
+        get() = serverSchoolSourceAndDb.first
+
     val serverAdminPerson = Person(
         guid = adminUserId.guid,
         givenName = "Admin",
@@ -90,6 +93,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
     )
 
     inner class DataSourceTestClient(
+        val schoolDb: RespectSchoolDatabase,
         val schoolDataSource: SchoolDataSource,
         val schoolDataSourceLocal: SchoolDataSourceLocal,
         val schoolDataSourceRemote: SchoolDataSource,
@@ -100,7 +104,10 @@ class ClientServerDataSourceTestBuilder internal constructor(
         suspend fun insertServerAdminAndDefaultGrants() {
             schoolDataSourceLocal.personDataSource.updateLocal(listOf(serverAdminPerson))
             if(useDefaultPermissions) {
-                AddDefaultSchoolPermissionGrantsUseCase(schoolDataSourceLocal).invoke()
+                AddDefaultSchoolPermissionGrantsUseCase(
+                    schoolDb = schoolDb,
+                    uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+                ).invoke()
             }
         }
 
@@ -142,14 +149,17 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
     val port = findFreePort()
 
-    val serverSchoolDataSource = serverSchoolSourceAndDb.second.also {
+    val serverSchoolDataSource = serverSchoolSourceAndDb.also { (database, datasource) ->
         runBlocking {
-            it.personDataSource.updateLocal(listOf(serverAdminPerson))
+            datasource.personDataSource.updateLocal(listOf(serverAdminPerson))
             if(useDefaultPermissions) {
-                AddDefaultSchoolPermissionGrantsUseCase(it).invoke()
+                AddDefaultSchoolPermissionGrantsUseCase(
+                    schoolDb = database,
+                    uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+                ).invoke()
             }
         }
-    }
+    }.second
 
     val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
 
@@ -266,6 +276,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         }
 
         DataSourceTestClient(
+            schoolDb = schoolDb,
             schoolDataSource = clientDataSource,
             schoolDataSourceLocal = schoolDataSourceLocal,
             schoolDataSourceRemote = schoolDataSourceRemote,

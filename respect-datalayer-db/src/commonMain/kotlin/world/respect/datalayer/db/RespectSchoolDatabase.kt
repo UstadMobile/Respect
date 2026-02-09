@@ -39,6 +39,8 @@ import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntit
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
+import world.respect.datalayer.db.school.daos.InviteEntityDao
+import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
 import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
@@ -47,6 +49,8 @@ import world.respect.datalayer.db.school.entities.AssignmentEntity
 import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
+import world.respect.datalayer.db.school.entities.PersonQrBadgeEntity
+import world.respect.datalayer.db.school.entities.InviteEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
@@ -85,6 +89,8 @@ import world.respect.datalayer.school.model.Report
         WriteQueueItemEntity::class,
         SchoolPermissionGrantEntity::class,
         PullSyncStatusEntity::class,
+        PersonQrBadgeEntity::class,
+        InviteEntity::class,
 
         //Shared (used by OPDS)
         LangMapEntity::class,
@@ -103,7 +109,7 @@ import world.respect.datalayer.school.model.Report
         // I'll keep the one from school.daos as it seems to be the intended one for SchoolDatabase.
         PersonPasskeyEntity::class,
     ],
-    version = 10,
+    version = 12,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -114,6 +120,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getPersonEntityDao(): PersonEntityDao
 
     abstract fun getPersonPasswordEntityDao(): PersonPasswordEntityDao
+
+    abstract fun getPersonQrBadgeEntityDao(): PersonQrBadgeEntityDao
 
     abstract fun getPersonPasskeyEntityDao(): PersonPasskeyEntityDao
 
@@ -138,6 +146,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getAssignmentLearningResourceRefEntityDao(): AssignmentLearningResourceRefEntityDao
 
     abstract fun getWriteQueueItemEntityDao(): WriteQueueItemEntityDao
+
+    abstract fun getInviteEntityDao(): InviteEntityDao
 
     abstract fun getSchoolPermissionGrantDao(): SchoolPermissionGrantDao
 

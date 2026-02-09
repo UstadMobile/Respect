@@ -16,10 +16,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.model.SchoolApp
 import world.respect.datalayer.school.model.StatusEnum
@@ -59,7 +56,6 @@ data class AppLauncherUiState(
 
 class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
@@ -187,8 +183,8 @@ class AppLauncherViewModel(
             referrerUrl = null,
             expectedPublicationId = null,
         ).map { dataLoad ->
-            dataLoad.map {
-                it.resolve(schoolApp.appManifestUrl)
+            dataLoad.map { publication ->
+                publication.resolve(schoolApp.appManifestUrl)
             }
         }
     }

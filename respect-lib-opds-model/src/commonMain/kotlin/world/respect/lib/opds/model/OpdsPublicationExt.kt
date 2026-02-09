@@ -2,6 +2,9 @@ package world.respect.lib.opds.model
 
 val LEARNING_UNIT_MIME_TYPES = listOf("text/html", "application/xml", "application/html+xml")
 
+/**
+ * Relationship for app opds link indicating a default lesson catalog
+ */
 const val REL_RESPECT_DEFAULT_CATALOG = "https://respect.ustadmobile.com/ns/default-lesson-catalog"
 
 fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {

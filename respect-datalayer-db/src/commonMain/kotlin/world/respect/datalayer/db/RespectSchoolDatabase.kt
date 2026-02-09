@@ -64,6 +64,7 @@ import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.Report
 
@@ -78,6 +79,7 @@ import world.respect.datalayer.school.model.Report
         PersonRoleEntity::class,
         PersonRelatedPersonEntity::class,
         PersonPasswordEntity::class,
+        PersonPasskeyEntity::class,
         AuthTokenEntity::class,
         ReportEntity::class,
         IndicatorEntity::class,
@@ -103,11 +105,6 @@ import world.respect.datalayer.school.model.Report
         OpdsGroupEntity::class,
         OpdsFeedEntity::class,
         OpdsFeedMetadataEntity::class,
-
-        // PersonPasskeyEntity exists in both db and opds.daos. It is specific to 'school', so I'll keep it under school and remove the opds.daos import.
-        // It seems there's a duplication in the import list for PersonPasskeyEntityDao from opds.daos and school.daos.
-        // I'll keep the one from school.daos as it seems to be the intended one for SchoolDatabase.
-        PersonPasskeyEntity::class,
     ],
     version = 12,
 )
@@ -176,6 +173,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
             Clazz.TABLE_ID,
             PersonPasskeyEntity.TABLE_ID,
             Assignment.TABLE_ID,
+            Invite2.TABLE_ID,
             ReadiumLinkEntity.TABLE_ID,
             OpdsPublicationEntity.TABLE_ID,
             OpdsFacetEntity.TABLE_ID,

@@ -177,12 +177,18 @@ android {
     namespace = "world.respect.app"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    androidResources{
+        generateLocaleConfig = true
+    }
+
     defaultConfig {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 121
         versionName = "1.0.21"
+
+        resConfigs("en", "hi")
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

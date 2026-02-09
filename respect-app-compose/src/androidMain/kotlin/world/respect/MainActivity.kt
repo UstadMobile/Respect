@@ -1,8 +1,12 @@
 package world.respect
 
+import android.app.LocaleManager
+import android.os.Build
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -12,7 +16,6 @@ import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
-import world.respect.app.app.App
 import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidChannelHost
 import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.credentials.passkey.GetCredentialUseCase
@@ -26,6 +29,7 @@ import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.domain.biometric.BiometricAuthProcessor
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.view.app.AbstractAppActivity
+import kotlin.jvm.java
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
@@ -38,6 +42,14 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
         checkNotNull(scope)
 
         val koin = getKoin()
+
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val localeManager = getSystemService(LocaleManager::class.java)
+            localeManager?.applicationLocales ?: LocaleListCompat.getEmptyLocaleList()
+        } else {
+            AppCompatDelegate.getApplicationLocales()
+        }
+
 
         val createPasskeyChannelHost = koin.get<CreatePasskeyUseCaseAndroidChannelHost>()
         val getCredentialUseCase = koin.get<GetCredentialUseCase>()

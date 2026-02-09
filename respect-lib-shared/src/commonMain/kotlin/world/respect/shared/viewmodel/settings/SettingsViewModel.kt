@@ -56,11 +56,7 @@ class SettingsViewModel(
         }
     }
 
-    fun onClickSettings() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(Settings)
-        )
-    }
+
     fun onNavigateToLanguage() {
         // TODO
     }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app">अनुप्रयोग</string>
+    <string name="successfully_registered_school">आपने स्कूल को सफलतापूर्वक रजिस्टर कर लिया है</string>
+    <string name="empty_list_description_admin">आपने अभी तक अपने स्कूल के लिए कोई ऐप नहीं जोड़ा है।</string>
+
+</resources>

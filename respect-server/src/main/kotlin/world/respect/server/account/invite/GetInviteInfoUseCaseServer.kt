@@ -28,8 +28,16 @@ class GetInviteInfoUseCaseServer(
         }
         val childUid = invite.iForFamilyOfGuid
         val childName = if(childUid != null) {
-           schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(childUid))
-               ?.person?.pGivenName
+           val child = schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(childUid))
+            buildString {
+                append(child?.person?.pGivenName)
+                append(" ")
+                child?.person?.pMiddleName?.also {
+                    append(it)
+                    append(" ")
+                }
+                append(child?.person?.pFamilyName)
+            }
         }else {
             null
         }

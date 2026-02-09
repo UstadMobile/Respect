@@ -31,6 +31,7 @@ import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.FamilyMemberInvite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
@@ -118,6 +119,7 @@ class RedeemInviteUseCaseDb(
                 )
             )
         }
+        val timeNow = Clock.System.now()
 
         if (inviteFromDb is FamilyMemberInvite) {
             val parentUid = inviteFromDb.personUid
@@ -127,7 +129,6 @@ class RedeemInviteUseCaseDb(
                 guid = parentUid
             ).dataOrNull() ?: throw IllegalStateException("person not found: $parentUid")
 
-            val timeNow = Clock.System.now()
 
             val updatedInviter = inviterPerson.copy(
                 relatedPersonUids = inviterPerson.relatedPersonUids + accountPerson.guid,
@@ -140,8 +141,20 @@ class RedeemInviteUseCaseDb(
             )
             schoolDataSourceVal.personDataSource.updateLocal(listOf(updatedInviter, updatedAccountPerson))
         }
-
-
+        if (inviteFromDb !is FamilyMemberInvite){
+            if ( accountPerson.roles.any { it.roleEnum == PersonRoleEnum.STUDENT }) {
+                val invite = FamilyMemberInvite(
+                    uid = FamilyMemberInvite.uidFor(accountPerson.guid),
+                    code = Invite2.newRandomCode(),
+                    approvalRequiredAfter = timeNow,
+                    lastModified = timeNow,
+                    stored = timeNow,
+                    status = StatusEnum.ACTIVE,
+                    personUid = accountPerson.guid
+                )
+                schoolDataSourceVal.inviteDataSource.store(listOf(invite))
+            }
+        }
         val credential = redeemRequest.account.credential
 
         val authResponse = when (credential) {

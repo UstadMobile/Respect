@@ -3,8 +3,6 @@ package world.respect.shared.domain.applanguage
 import android.content.Context
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.StringResource
-import java.util.Locale
-import java.util.Properties
 
 
 actual class RespectMobileSystemImpl(

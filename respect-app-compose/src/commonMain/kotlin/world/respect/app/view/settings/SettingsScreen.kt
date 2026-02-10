@@ -57,7 +57,6 @@ fun SettingsScreen(
 ) {
 
     if(uiState.langDialogVisible) {
-        //As per https://developer.android.com/jetpack/compose/components/dialog
         SettingsDialog(
             onDismissRequest = onDismissLangDialog,
         ) {

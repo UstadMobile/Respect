@@ -13,7 +13,6 @@ class LocaleSettingDelegateAndroid: SupportedLanguagesConfig.LocaleSettingDelega
             }else {
                 LocaleListCompat.forLanguageTags(value)
             }
-
             AppCompatDelegate.setApplicationLocales(localeList)
         }
 }

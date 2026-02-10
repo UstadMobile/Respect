@@ -292,11 +292,8 @@ val appKoinModule = module {
     single {
         SupportedLanguagesConfig(
             systemLocales = get(),
-            settings = get()
+            localeSettingDelegate = LocaleSettingDelegateAndroid()
         )
-    }
-    single<SupportedLanguagesConfig.LocaleSettingDelegate> {
-        LocaleSettingDelegateAndroid()
     }
     single<RespectMobileSystemCommon> {
         RespectMobileSystemImpl(

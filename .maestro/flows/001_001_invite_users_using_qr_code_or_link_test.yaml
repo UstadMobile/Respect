@@ -178,7 +178,6 @@ onFlowComplete:
 - assertVisible: "Please wait"
 
 # Teacher approve student's request to join the class
-
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
@@ -195,6 +194,8 @@ onFlowComplete:
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
 - assertNotVisible: "Pending requests.*"
+
+# Teacher send family member invite to Parent User
 - tapOn: "Student User"
 - assertVisible:
     id: "app_title"

@@ -146,6 +146,7 @@ kotlin {
             implementation(libs.reorderable)
             implementation(libs.kscan)
             implementation(libs.qrose)
+            implementation(compose.components.resources)
         }
 
         desktopMain.dependencies {

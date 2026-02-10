@@ -43,14 +43,6 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
         val koin = getKoin()
 
-       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val localeManager = getSystemService(LocaleManager::class.java)
-            localeManager?.applicationLocales ?: LocaleListCompat.getEmptyLocaleList()
-        } else {
-            AppCompatDelegate.getApplicationLocales()
-        }
-
-
         val createPasskeyChannelHost = koin.get<CreatePasskeyUseCaseAndroidChannelHost>()
         val getCredentialUseCase = koin.get<GetCredentialUseCase>()
                 as GetCredentialUseCaseAndroidImpl

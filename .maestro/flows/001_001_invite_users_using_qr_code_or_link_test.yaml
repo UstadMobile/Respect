@@ -178,26 +178,13 @@ onFlowComplete:
 - assertVisible: "Please wait"
 
 # Teacher approve student's request to join the class
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
+
 - runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
+    file: "subflows/school_user_login_flow.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-- tapOn:
-    id: "username"
-- inputText: "teacherauser"
-- tapOn:
-    id : "password"
-- inputText: "test123"
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
+      USER_NAME: "teacherauser"
+      USER_PASSWORD: "test123"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -208,32 +195,6 @@ onFlowComplete:
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
 - assertNotVisible: "Pending requests.*"
-- assertVisible: "Student User"
-
-
-# Teacher send Invite link to parent to join as a Family member for Student user
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-- tapOn:
-    id: "username"
-- inputText: "teacherauser"
-- tapOn:
-    id : "password"
-- inputText: "test123"
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
-- tapOn: "People"
 - tapOn: "Student User"
 - assertVisible:
     id: "app_title"

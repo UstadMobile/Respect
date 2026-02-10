@@ -36,11 +36,10 @@ class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     supportedLangConfig: SupportedLanguagesConfig,
-    systemImpl: RespectMobileSystemCommon,
     private val setLanguageUseCase: SetLanguageUseCase,
-    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    private  var availableLangs: List<RespectMobileSystemCommon.UiLanguage> = emptyList()
+    private var availableLangs: List<RespectMobileSystemCommon.UiLanguage> = emptyList()
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -59,8 +58,10 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-             availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(getString(Res.string.default_language))
-            val savedLangCode = supportedLangConfig.localeSetting ?: RespectMobileSystemCommon.LOCALE_USE_SYSTEM
+            availableLangs =
+                supportedLangConfig.supportedUiLanguagesAndSysDefault(getString(Res.string.default_language))
+            val savedLangCode =
+                supportedLangConfig.localeSetting ?: RespectMobileSystemCommon.LOCALE_USE_SYSTEM
 
             val currentLang = if (savedLangCode == RespectMobileSystemCommon.LOCALE_USE_SYSTEM) {
                 val resolvedLocale = supportedLangConfig.selectFirstSupportedLocale().langCode
@@ -69,16 +70,14 @@ class SettingsViewModel(
                 availableLangs.firstOrNull { it.langCode == savedLangCode }
             } ?: availableLangs.first()
 
-            _uiState.update { it.copy(
-                availableLanguages = availableLangs,
-                currentLanguage = currentLang.langDisplay
-            )}
+            _uiState.update {
+                it.copy(
+                    availableLanguages = availableLangs,
+                    currentLanguage = currentLang.langDisplay
+                )
+            }
         }
-
-
-
     }
-
 
     fun onClickLanguage() {
         _uiState.update { prev ->
@@ -104,14 +103,14 @@ class SettingsViewModel(
         )
 
         println("Result language $result $lang")
-        if(result.waitForRestart) {
+        if (result.waitForRestart) {
             _uiState.update { prev ->
                 prev.copy(
                     waitForRestartDialogVisible = true,
                     currentLanguage = lang.langDisplay
                 )
             }
-        }else {
+        } else {
             _uiState.update { prev ->
                 prev.copy(
                     currentLanguage = lang.langDisplay

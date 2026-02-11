@@ -1,7 +1,5 @@
 package world.respect.shared.domain.applanguage
 
-import com.russhwolf.settings.Settings
-
 import kotlin.concurrent.Volatile
 
 /**
@@ -26,36 +24,10 @@ class SupportedLanguagesConfig (
     private val fallbackLocaleCode: String = "en",
 ) {
 
-    constructor(
-        systemLocales: List<String>,
-        settings: Settings,
-        availableLanguagesConfig: String = DEFAULT_SUPPORTED_LANGUAGES,
-        fallbackLocaleCode: String = "en",
-    ): this(
-        systemLocales = systemLocales,
-        localeSettingDelegate = SettingsLocaleSettingDelegate(settings),
-        availableLanguagesConfig = availableLanguagesConfig,
-        fallbackLocaleCode = fallbackLocaleCode,
-    )
     interface LocaleSettingDelegate {
 
         var localeSetting: String?
 
-    }
-
-    class SettingsLocaleSettingDelegate(
-        private val settings: Settings
-    ) : LocaleSettingDelegate {
-        override var localeSetting: String?
-            get() = settings.getStringOrNull(PREFKEY_LOCALE)
-            set(value) {
-                println("Setting locale $value")
-                if(value != null) {
-                    settings.putString(PREFKEY_LOCALE, value)
-                }else {
-                    settings.remove(PREFKEY_LOCALE)
-                }
-            }
     }
 
 
@@ -133,8 +105,6 @@ class SupportedLanguagesConfig (
     }
 
     companion object {
-
-        const val PREFKEY_LOCALE = "locale"
 
         const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi,fa,ps,ar,tg,bn,ne,my,rw,ru"
 

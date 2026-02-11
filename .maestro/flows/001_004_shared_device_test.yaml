@@ -1,0 +1,236 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "001_004_shared_device_test.yaml"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+
+---
+# Admin enable shared school device mode on the same device
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow:
+     file: "subflows/admin_add_class.yaml"
+     env:
+       CLASS_NAME: New Class
+- runFlow:
+    file: "subflows/add_person_to_a_class.yaml"
+    env:
+
+      ADD_USER: "Add Student"
+      FIRSTNAME: "StudentA"
+      LASTNAME:  "User"
+      GENDER: "Male"
+      ROLE:  "Student"
+      CLASS_NAME: "New Class"
+      USERNAME: "studentauser"
+      PASSWORD: "test123"
+- back
+- runFlow:
+    file: "subflows/add_person_to_a_class.yaml"
+    env:
+      ADD_USER: "Add Teacher"
+      FIRSTNAME: "TeacherA"
+      LASTNAME:  "User"
+      GENDER: "Male"
+      ROLE:  "Teacher"
+      CLASS_NAME: "New Class"
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn:
+    id: "settings_icon"
+- assertVisible:
+    id: "app_title"
+    text: "Settings"
+- assertVisible: "School name, policies, shared device"
+- tapOn: "School"
+- assertVisible:
+    id: "app_title"
+    text: "School"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Shared school device"
+- assertVisible: "0 devices"
+- tapOn: "Shared school device"
+- assertVisible:
+    id: "app_title"
+    text: "Shared school device"
+- assertVisible: "No Shared Devices Available"
+- assertVisible: "Shared school devices allow multiple users to securely access the app on the same device using their profile."
+- assertVisible: "Student can self-select their class and name"
+- assertVisible: "Teacher/admin unlock PIN"
+- copyTextFrom:
+    id: "set_pin"
+- tapOn:
+    id: "set_pin"
+- assertVisible: "Set PIN"
+- tapOn:
+    id: "pin_text"
+- eraseText
+- inputText: "123"
+- tapOn: "Save"
+- assertVisible: "Error: please enter 4 digit number"
+- eraseText
+- inputText: "123a"
+- tapOn: "Save"
+- assertVisible: "Error: please enter 4 digit number"
+- tapOn: "Cancel"
+- assertVisible: ${maestro.copiedText}
+- tapOn:
+    id: "set_pin"
+- assertVisible: "Set PIN"
+- tapOn:
+    id: "pin_text"
+- eraseText
+- inputText: "1234"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Shared school device"
+- assertVisible: "1234"
+- tapOn:
+    id: "add_device"
+- assertVisible: "Add device"
+- assertVisible: "This device"
+- assertVisible: "Enable shared school device on mode on this device"
+- assertVisible: "Another device"
+- assertVisible: "Add using QR code, link, on invite code"
+- tapOn: "This device"
+- assertVisible:
+    id: "app_title"
+    text: "Enable shared school device mode"
+- tapOn: "Enable"
+- assertVisible: "Required field*" #mandatory field error
+- tapOn: "Device name"
+- inputText: "Test Device 1"
+- tapOn: "Enable"
+- assertVisible:
+    id: "app_title"
+    text: "Select class"
+- assertVisible: "New Class"
+- assertVisible: "Scan QR code badge"
+
+# Teacher login to shared school device
+- tapOn: "Teacher/admin login"
+- assertVisible:
+    id: "app_title"
+    text: "Teacher/admin login"
+- tapOn: "Enter school device PIN"
+- inputText: "1233"
+- tapOn: "Next"
+- assertVisible: "Incorrect device PIN"
+- eraseText
+- tapOn: "Enter school device PIN"
+- inputText: "1234"
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Select another school"
+- runFlow:
+    file: "get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "teacherauser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "save_password_prompt_cancel.yaml"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn:
+    id: "settings_icon"
+- assertVisible:
+    id: "app_title"
+    text: "Settings"
+- assertVisible: "School name, policies, shared device"
+- tapOn: "School"
+- assertVisible:
+    id: "app_title"
+    text: "School"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Shared school device"
+- assertVisible: "1 devices"
+- tapOn: "Shared school device"
+- assertVisible:
+    id: "app_title"
+    text: "Shared school device"
+- tapOn: "Student can self-select their class and name"  #switch is off
+- assertVisible: "Teacher/admin unlock PIN"
+- assertVisible: "Pending device request to join (1)"
+- assertVisible: "Test Device 1"
+- tapOn:
+    id: "approve_request"
+- assertNotVisible: "Pending device request to join (1)"
+- assertVisible: "Devices (1)"
+- assertVisible: "Test Device 1 (this device)"
+- tapOn:
+    id: "add_device"
+- assertVisible: "Add device"
+- tapOn: "Another device"
+- assertVisible:
+    id: "app_title"
+    text: "Add shared school device"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Approval required"    #switch is On
+- assertVisible: "Copy link"
+- assertVisible: "Send link via SMS"
+- assertVisible: "Send link via email"
+- assertVisible: "Share link"
+- assertVisible: "Reset"
+- tapOn: "Approval required" # turn the switch off
+- assertVisible: "Approval not required until:.*"
+- copyTextFrom:
+      id: "invite_url"
+
+# Student adding shared device using QR code
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Scan QR code badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Options"
+- tapOn: "Paste URL"
+- tapOn: "Url"
+- pasteText
+- tapOn: "OK"
+- assertVisible:
+    id: "app_title"
+    text: "Enable shared school device mode"
+- tapOn: "Device name"
+- inputText: "Test Device 2"
+- tapOn: "Enable"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+

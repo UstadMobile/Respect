@@ -20,7 +20,7 @@
 
 **Standard behavior unless noted otherwise**:
 
-Behaviors below do not need to be included in prototypes.
+Behaviors below do not need to be included in prototypes. They must be implemented by developers unless it is explicitly noted otherwise.
 
 * If a required field is left blank and the user clicks Save/Submit/Next etc, the field should show as red (as an error) with
   the supporting text (underneath field) that shows "Required field".

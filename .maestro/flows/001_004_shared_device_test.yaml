@@ -143,7 +143,7 @@ onFlowComplete:
     text: "Login"
 - tapOn: "Select another school"
 - runFlow:
-    file: "get_started_select_school_by_name.yaml"
+    file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:

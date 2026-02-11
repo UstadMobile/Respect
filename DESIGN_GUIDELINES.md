@@ -15,6 +15,11 @@ Final designs for development:
 * Should be unambiguous to any reasonable developer (covering all reasonably forseeable scenarios). It must be clear what behavior is expected.
 * Screens must be linked so that the developer can understand the flow.
 * Should not include existing screens that are not going to be modified within the scope of the task.
-  Exception: where a new or modified screen takes a user to an existing screen that is not going to
-  be modified, the existing screen that is not going to be modified may be linked so that the final
-  destination is clear.
+  Exception: where clicking on a new or modified screen (A) takes a user to an existing screen (B) that is not
+  going to be modified, screen B itself should be included. Nothing on screen B should be clickable.
+
+Assumed (and required) behavior unless noted otherwise:
+* If a required field is left blank and the user clicks Save/Submit/Next etc, the field should show as red (as an error) with
+  the supporting text (underneath field) that shows "Required field".
+
+

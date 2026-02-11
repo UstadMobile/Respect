@@ -57,17 +57,13 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            availableLangs =
-                supportedLangConfig.supportedUiLanguagesAndSysDefault(getString(Res.string.default_language))
-            val savedLangCode =
-                supportedLangConfig.localeSetting ?: RespectMobileSystemCommon.LOCALE_USE_SYSTEM
+            // 1. Get the list of languages (first item has the unique "system_default_internal" code)
+            availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(
+                getString(Res.string.default_language)
+            )
 
-            val currentLang = if (savedLangCode == RespectMobileSystemCommon.LOCALE_USE_SYSTEM) {
-                val resolvedLocale = supportedLangConfig.selectFirstSupportedLocale().langCode
-                availableLangs.firstOrNull { it.langCode == resolvedLocale }
-            } else {
-                availableLangs.firstOrNull { it.langCode == savedLangCode }
-            } ?: availableLangs.first()
+            // 2. Use the new domain function to find which one to display
+            val currentLang = supportedLangConfig.getCurrentUiLanguage(availableLangs)
 
             _uiState.update {
                 it.copy(

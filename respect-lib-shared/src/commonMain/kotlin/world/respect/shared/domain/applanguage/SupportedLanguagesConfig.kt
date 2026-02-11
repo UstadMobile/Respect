@@ -75,13 +75,23 @@ class SupportedLanguagesConfig(
         else
             setting
     }
+    fun getCurrentUiLanguage(
+        availableLangs: List<RespectMobileSystemCommon.UiLanguage>
+    ): RespectMobileSystemCommon.UiLanguage {
+        val savedLangCode = localeSetting
 
+        return if (savedLangCode == null || savedLangCode == RespectMobileSystemCommon.LOCALE_USE_SYSTEM) {
+            availableLangs.firstOrNull { it.langCode == SYSTEM_DEFAULT_CODE }
+        } else {
+            availableLangs.find { it.langCode == savedLangCode && it.langCode != SYSTEM_DEFAULT_CODE }
+        } ?: availableLangs.first()
+    }
     fun supportedUiLanguagesAndSysDefault(
         defaultLangDisplay: String,
     ): List<RespectMobileSystemCommon.UiLanguage> {
 
         val defaultEnglish = RespectMobileSystemCommon.UiLanguage(
-            langCode = "en",   // IMPORTANT: set to English
+            langCode = SYSTEM_DEFAULT_CODE,
             langDisplay = defaultLangDisplay
         )
 
@@ -109,6 +119,7 @@ class SupportedLanguagesConfig(
     companion object {
 
         const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi,fa,ps,ar,tg,bn,ne,my,rw,ru"
+        const val SYSTEM_DEFAULT_CODE = "system_default_internal"
 
     }
 

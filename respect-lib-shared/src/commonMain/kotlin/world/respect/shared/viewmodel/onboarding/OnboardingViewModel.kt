@@ -49,24 +49,11 @@ class OnboardingViewModel(
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
         viewModelScope.launch {
-            val availableLangs =
-                supportedLangConfig.supportedUiLanguagesAndSysDefault(
-                    getString(Res.string.default_language)
-                )
+           var availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(
+                getString(Res.string.default_language)
+            )
 
-            val savedLangCode =
-                supportedLangConfig.localeSetting
-                    ?: RespectMobileSystemCommon.LOCALE_USE_SYSTEM
-
-            val currentLang =
-                if (savedLangCode == RespectMobileSystemCommon.LOCALE_USE_SYSTEM) {
-                    val resolvedLocale =
-                        supportedLangConfig.selectFirstSupportedLocale().langCode
-
-                    availableLangs.firstOrNull { it.langCode == resolvedLocale }
-                } else {
-                    availableLangs.firstOrNull { it.langCode == savedLangCode }
-                } ?: availableLangs.first()
+            val currentLang = supportedLangConfig.getCurrentUiLanguage(availableLangs)
 
             _uiState.update {
                 it.copy(

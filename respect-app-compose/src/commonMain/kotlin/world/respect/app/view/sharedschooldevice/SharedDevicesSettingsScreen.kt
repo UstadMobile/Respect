@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -20,12 +21,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -42,11 +42,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -62,9 +61,24 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_device
+import world.respect.shared.generated.resources.another_device_add
+import world.respect.shared.generated.resources.arrow_down_icon
+import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.check_circle_icon
+import world.respect.shared.generated.resources.close_icon
 import world.respect.shared.generated.resources.devices
+import world.respect.shared.generated.resources.pending_device_requests
+import world.respect.shared.generated.resources.phone_android_icon
+import world.respect.shared.generated.resources.save
+import world.respect.shared.generated.resources.set_pin
+import world.respect.shared.generated.resources.share_icon
 import world.respect.shared.generated.resources.student_can_self_select_their_class_name
 import world.respect.shared.generated.resources.students_must_enter_their_roll_number
+import world.respect.shared.generated.resources.tablet_android_last_seen
+import world.respect.shared.generated.resources.teacher_admin_unlock_pin
+import world.respect.shared.generated.resources.this_device_enable
+import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsUiState
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
 
 @Composable
@@ -72,18 +86,62 @@ fun SharedDevicesSettingsScreen(
     viewModel: SharedDevicesSettingsViewmodel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    SharedDevicesSettingsContent(
+        uiState = uiState,
+        onToggleSelfSelect = viewModel::toggleSelfSelect,
+        onToggleRollNumberLogin = viewModel::toggleRollNumberLogin,
+        onShowPinDialog = viewModel::onShowPinDialog,
+        onTogglePendingInvites = viewModel::onTogglePendingInvites,
+        onApproveDevice = viewModel::onApproveDevice,
+        onRejectDevice = viewModel::onRejectDevice,
+        onRemoveDevice = viewModel::onRemoveDevice,
+        onPinChange = viewModel::onPinChange,
+        onSavePin = viewModel::onSavePin,
+        onDismissPinDialog = viewModel::onDismissPinDialog,
+        onAddAnotherDevice = {
+            viewModel.onClickAddAnotherDevice()
+            viewModel.onDismissBottomSheet()
+        },
+        onEnableOnThisDevice = {
+            viewModel.onClickEnableOnThisDevice()
+            viewModel.onDismissBottomSheet()
+        },
+        onDismissBottomSheet = viewModel::onDismissBottomSheet,
+        onClickAdd = viewModel::onClickAdd,
+    )
+}
+
+@Composable
+private fun SharedDevicesSettingsContent(
+    uiState: SharedDevicesSettingsUiState,
+    onToggleSelfSelect: (Boolean) -> Unit,
+    onToggleRollNumberLogin: (Boolean) -> Unit,
+    onShowPinDialog: () -> Unit,
+    onTogglePendingInvites: () -> Unit,
+    onApproveDevice: (String) -> Unit,
+    onRejectDevice: (String) -> Unit,
+    onRemoveDevice: (String) -> Unit,
+    onPinChange: (String) -> Unit,
+    onSavePin: () -> Unit,
+    onDismissPinDialog: () -> Unit,
+    onAddAnotherDevice: () -> Unit,
+    onEnableOnThisDevice: () -> Unit,
+    onDismissBottomSheet: () -> Unit,
+    onClickAdd: () -> Unit,
+) {
     val focusManager = LocalFocusManager.current
 
     val pager = respectRememberPager(uiState.devices)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
-    var showPendingRequests by remember { mutableStateOf(false) }
-    val pendingRequests = listOf("Device 4")
+    val pendingPager = respectRememberPager(uiState.pendingDevices)
+    val pendingItems = pendingPager.flow.collectAsLazyPagingItems()
 
     // Handle bottom sheet dismissal
     LaunchedEffect(uiState.showBottomSheetOptions) {
         if (uiState.showBottomSheetOptions) {
-            focusManager.clearFocus() // Clear focus to prevent keyboard issues
+            focusManager.clearFocus()
         }
     }
 
@@ -104,13 +162,7 @@ fun SharedDevicesSettingsScreen(
                     SettingsOptionRow(
                         title = stringResource(Res.string.student_can_self_select_their_class_name),
                         checked = uiState.selfSelectEnabled,
-                        onCheckedChange = { viewModel.toggleSelfSelect(it) }
-                    )
-
-                    SettingsOptionRow(
-                        title = stringResource(Res.string.students_must_enter_their_roll_number),
-                        checked = uiState.rollNumberLoginEnabled,
-                        onCheckedChange = { viewModel.toggleRollNumberLogin(it) }
+                        onCheckedChange = onToggleSelfSelect
                     )
                 }
             }
@@ -118,15 +170,15 @@ fun SharedDevicesSettingsScreen(
             item {
                 Row(
                     modifier = Modifier
-                        .clickable { viewModel.onShowPinDialog() }
+                        .clickable { onShowPinDialog() }
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Teacher/admin unlock PIN \n" +
-                                "5464",
+                        text = stringResource(Res.string.teacher_admin_unlock_pin) + "\n" +
+                                uiState.teacherPin,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
@@ -134,47 +186,92 @@ fun SharedDevicesSettingsScreen(
             }
 
             // Pending Requests Dropdown Section
-            item {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .clickable { showPendingRequests = !showPendingRequests }
-                            .padding(4.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Pending device request to join (${pendingRequests.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Icon(
-                            imageVector = if (showPendingRequests)
-                                Icons.Default.ArrowDropUp
-                            else
-                                Icons.Default.ArrowDropDown,
-                            contentDescription = if (showPendingRequests) "Hide" else "Show"
-                        )
-                    }
-
-                    if (showPendingRequests) {
-                        Column(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 16.dp)
-                        ) {
-                            pendingRequests.forEach { userName ->
-                                PendingRequestItem(userName)
-                            }
+            if (pendingItems.itemCount > 0) {
+                item("pending_person_header") {
+                    ListItem(
+                        modifier = Modifier.clickable { onTogglePendingInvites() },
+                        headlineContent = {
+                            Text(
+                                text = stringResource(Res.string.pending_device_requests) +
+                                        " (${pendingItems.itemCount})"
+                            )
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.Outlined.KeyboardArrowDown,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .rotate(if (uiState.isPendingExpanded) 0f else -90f),
+                                contentDescription = stringResource(Res.string.arrow_down_icon)
+                            )
                         }
+                    )
+                }
+            }
+
+            if (uiState.isPendingExpanded) {
+                respectPagingItems(
+                    items = pendingItems,
+                    key = { item, index -> (item?.guid ?: "") + index.toString() }
+                ) { device ->
+                    device?.let { device ->
+                        ListItem(
+                            modifier = Modifier.clickable { },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.PhoneAndroid,
+                                    contentDescription = stringResource(Res.string.phone_android_icon),
+                                )
+                            },
+                            headlineContent = {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Text(
+                                        text = device.givenName,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+
+                                    Text(
+                                        text = "${device.metadata} ${
+                                            stringResource(
+                                                Res.string.tablet_android_last_seen
+                                            )
+                                        }: ${device.lastModified}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            trailingContent = {
+                                Row {
+                                    IconButton(
+                                        onClick = { onApproveDevice(device.guid) }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = stringResource(Res.string.check_circle_icon),
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = { onRejectDevice(device.guid) }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(Res.string.close_icon),
+                                        )
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
 
             item {
                 Text(
-                    text = stringResource(Res.string.devices) + "(${lazyPagingItems.itemCount})",
+                    text = stringResource(Res.string.devices) + " (${lazyPagingItems.itemCount})",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -184,69 +281,69 @@ fun SharedDevicesSettingsScreen(
                 items = lazyPagingItems,
                 key = { item, index -> item?.guid ?: index.toString() },
                 contentType = { PersonDataSource.ENDPOINT_NAME },
-            ) { person ->
-                ListItem(
-                    modifier = Modifier.clickable { },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Default.PhoneAndroid,
-                            contentDescription = null,
-                        )
-                    },
-                    headlineContent = {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text(
-                                text = person?.givenName ?: "Device name",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
+            ) { personDetails ->
+                personDetails?.let { details ->
+                    ListItem(
+                        modifier = Modifier.clickable { },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Default.PhoneAndroid,
+                                contentDescription = stringResource(Res.string.phone_android_icon),
                             )
+                        },
+                        headlineContent = {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    text = details.givenName,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
 
-                            Text(
-                                text = "Tablet (Android 14), last seen: 9/12/25, 14:12",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                                Text(
+                                    text = "${details.metadata} ${
+                                        stringResource(
+                                            Res.string.tablet_android_last_seen
+                                        )
+                                    }: ${details.lastModified}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        trailingContent = {
+                            IconButton(
+                                onClick = { onRemoveDevice(details.guid) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(Res.string.close_icon),
+                                )
+                            }
                         }
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = null,
-                        )
-                    }
-                )
+                    )
+                }
             }
         }
 
-        // PIN Dialog - should be on top of everything
+        // PIN Dialog
         if (uiState.showPinDialog) {
             PinEntryDialog(
                 pin = uiState.pin,
-                onPinChange = viewModel::onPinChange,
-                onDismiss = viewModel::onDismissPinDialog,
-                onSave = viewModel::onSavePin
+                isPinValid = uiState.isPinValid,
+                onPinChange = onPinChange,
+                onDismiss = onDismissPinDialog,
+                onSave = onSavePin
             )
         }
 
-        // Bottom Sheet - should be separate from dialog
+        // Bottom Sheet
         if (uiState.showBottomSheetOptions && !uiState.showPinDialog) {
             AddDeviceBottomSheet(
-                onDismiss = {
-                    // Create a function in ViewModel to dismiss bottom sheet
-                    viewModel.onDismissBottomSheet()
-                },
-                onAddAnotherDevice = {
-                    viewModel.onClickAddAnotherDevice()
-                    // Dismiss after selection
-                    viewModel.onDismissBottomSheet()
-                },
-                onEnableOnThisDevice = {
-                    viewModel.onClickEnableOnThisDevice()
-                    // Dismiss after selection
-                    viewModel.onDismissBottomSheet()
-                }
+                onDismiss = onDismissBottomSheet,
+                onAddAnotherDevice = onAddAnotherDevice,
+                onEnableOnThisDevice = onEnableOnThisDevice
             )
         }
     }
@@ -298,7 +395,7 @@ fun AddDeviceBottomSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Add Device",
+                text = stringResource(Res.string.add_device),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
@@ -314,11 +411,11 @@ fun AddDeviceBottomSheet(
             ) {
                 Icon(
                     imageVector = Icons.Default.PhoneAndroid,
-                    contentDescription = "PhoneAndroid",
+                    contentDescription = stringResource(Res.string.phone_android_icon),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "This device Enable shared school device on mode on this device",
+                    text = stringResource(Res.string.this_device_enable),
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -333,59 +430,12 @@ fun AddDeviceBottomSheet(
             ) {
                 Icon(
                     imageVector = Icons.Default.Share,
-                    contentDescription = "Share",
+                    contentDescription = stringResource(Res.string.share_icon),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Another device Add using QR code, link, or invite code",
+                    text = stringResource(Res.string.another_device_add),
                     color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun PendingRequestItem(userName: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.PhoneAndroid,
-                contentDescription = null,
-            )
-            Text(
-                text = userName,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium
-            )
-        }
-
-        Row {
-            IconButton(
-                onClick = { /* Handle approve */ }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Approve",
-                )
-            }
-            IconButton(
-                onClick = { /* Handle reject */ }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Reject",
                 )
             }
         }
@@ -396,6 +446,7 @@ fun PendingRequestItem(userName: String) {
 @Composable
 fun PinEntryDialog(
     pin: String,
+    isPinValid: Boolean,
     onPinChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onSave: () -> Unit
@@ -403,7 +454,6 @@ fun PinEntryDialog(
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        // Auto-focus and open keyboard when dialog appears
         focusRequester.requestFocus()
     }
 
@@ -423,7 +473,7 @@ fun PinEntryDialog(
             ) {
                 // Title
                 Text(
-                    text = "Set PIN",
+                    text = stringResource(Res.string.set_pin),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -434,16 +484,18 @@ fun PinEntryDialog(
                 BasicTextField(
                     value = pin,
                     onValueChange = { newPin ->
-                        if (newPin.length <= 4 && newPin.all { it.isDigit() }) {
+                        if (newPin.length <= SharedDevicesSettingsUiState.MAX_PIN_LENGTH &&
+                            newPin.all { it.isDigit() }
+                        ) {
                             onPinChange(newPin)
                         }
                     },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
+                        keyboardType = KeyboardType.NumberPassword
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color(0xFFEEEEEE))
+                        .background(color = Color(SharedDevicesSettingsUiState.BACKGROUND_COLOR))
                         .focusRequester(focusRequester)
                         .focusable()
                         .padding(12.dp)
@@ -459,7 +511,7 @@ fun PinEntryDialog(
                 ) {
                     // Cancel Text
                     Text(
-                        text = "Cancel",
+                        text = stringResource(Res.string.cancel),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium,
@@ -472,13 +524,13 @@ fun PinEntryDialog(
 
                     // Save Text
                     Text(
-                        text = "Save",
+                        text = stringResource(Res.string.save),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .clickable(
-                                enabled = pin.length == 4,
+                                enabled = isPinValid,
                                 onClick = onSave
                             )
                             .padding(horizontal = 16.dp, vertical = 12.dp)

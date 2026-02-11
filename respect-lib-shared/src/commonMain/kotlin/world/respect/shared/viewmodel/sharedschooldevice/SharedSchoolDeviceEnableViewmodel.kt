@@ -2,7 +2,6 @@ package world.respect.shared.viewmodel.sharedschooldevice
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,9 +11,7 @@ import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SelectClass
-import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -25,7 +22,10 @@ data class SharedSchoolDeviceEnableUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val isEnabling: Boolean = false,
     val isSuccess: Boolean = false
-)
+){
+    val isDeviceNameValid: Boolean
+        get() = deviceName.isNotBlank()
+}
 
 class SharedSchoolDeviceEnableViewmodel(
     savedStateHandle: SavedStateHandle,

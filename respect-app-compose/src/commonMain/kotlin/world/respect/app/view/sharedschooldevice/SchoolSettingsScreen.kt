@@ -27,13 +27,13 @@ fun SchoolSettingsScreen(
     Column {
         SchoolSettingsScreen(
             title = stringResource(Res.string.school_name),
-            description = uiState.school ?: "My School",
-            testTag = "",
+            description = uiState.schoolName ?: "",
+            testTag = "my_school",
         )
         SchoolSettingsScreen(
             title = stringResource(Res.string.shared_school_devices),
-            description = uiState.sharedSchoolDeviceCount ?: "12 devices",
-            testTag = "",
+            description = "${uiState.sharedSchoolDeviceCount.toString()} devices",
+            testTag = "devices_count",
             onClick = viewModel::onClickSharedSchoolDevices
         )
     }

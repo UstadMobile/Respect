@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.mappings
+import world.respect.shared.generated.resources.policies_shared_devices
 import world.respect.shared.generated.resources.school
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
@@ -44,12 +45,12 @@ fun SettingsScreen(
             )
         }
         item {
-            SharedSchoolDeviceSettings(
+            SettingsListItem(
                 icon = Icons.Filled.School,
                 title = stringResource(Res.string.school),
-                description = "School name, policies, shared devices.",
                 onClick = onClickSchool,
-                testTag = "mapping_setting_item"
+                testTag = "shared_devices_item",
+                description = stringResource(Res.string.policies_shared_devices),
             )
         }
     }
@@ -60,14 +61,23 @@ private fun SettingsListItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     onClick: () -> Unit,
-    testTag: String
+    testTag: String,
+    description: String? = null
 ) {
     ListItem(
         headlineContent = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         },
         leadingContent = {
             Icon(
@@ -94,44 +104,5 @@ fun SettingsScreenForViewModel(
     SettingsScreen(
         onNavigateToMapping = viewModel::onNavigateToMapping,
         onClickSchool = viewModel::onClickSchool
-    )
-}
-
-@Composable
-fun SharedSchoolDeviceSettings(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    description: String,
-    onClick: () -> Unit,
-    testTag: String
-) {
-    ListItem(
-        headlineContent = {
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        },
-        leadingContent = {
-            Icon(
-                imageVector = icon,
-                contentDescription = stringResource(Res.string.loading),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        modifier = Modifier
-            .testTag(testTag)
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        tonalElevation = 0.dp
     )
 }

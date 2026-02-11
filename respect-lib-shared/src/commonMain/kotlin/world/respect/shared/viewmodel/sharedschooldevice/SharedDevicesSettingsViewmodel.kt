@@ -14,6 +14,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
@@ -33,14 +34,29 @@ data class SharedDevicesSettingsUiState(
     val devices: IPagingSourceFactory<Int, Person> = IPagingSourceFactory {
         EmptyPagingSource()
     },
+    val pendingDevices: IPagingSourceFactory<Int, Person> =
+        IPagingSourceFactory { EmptyPagingSource() },
     val error: UiText? = null,
+    val isPendingExpanded: Boolean = true,
     val selfSelectEnabled: Boolean = true,
     val rollNumberLoginEnabled: Boolean = true,
     val showEnableDialog: Boolean = false,
     val showPinDialog: Boolean = false,
     val pin: String = "",
     val showBottomSheetOptions: Boolean = false,
-)
+    val teacherPin: String = "5464", // Should come from actual data source
+) {
+    // Computed properties
+    val isPinValid: Boolean
+        get() = pin.length == PIN_LENGTH && pin.all { it.isDigit() }
+
+    companion object {
+        const val PIN_LENGTH = 4
+        const val MAX_PIN_LENGTH = 4
+        const val BACKGROUND_COLOR = 0xFFEEEEEE
+        const val DEFAULT_ANDROID_VERSION = "14"
+    }
+}
 
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
@@ -54,11 +70,23 @@ class SharedDevicesSettingsViewmodel(
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState())
     val uiState = _uiState.asStateFlow()
 
+    private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
+        schoolDataSource.personDataSource.listAsPagingSource(
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
+                filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            )
+        )
+    }
+
     private val pagingSourceFactoryHolder = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listAsPagingSource(
             DataLoadParams(),
             PersonDataSource.GetListParams(
                 filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
+                filterByPersonStatus = PersonStatusEnum.ACTIVE,
+                filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
             )
         )
     }
@@ -81,11 +109,11 @@ class SharedDevicesSettingsViewmodel(
         _uiState.update {
             it.copy(
                 devices = pagingSourceFactoryHolder,
+                pendingDevices = pendingPersonsPagingSource
             )
         }
     }
 
-    // Functions to handle toggles
     fun toggleSelfSelect(enabled: Boolean) {
         _uiState.update { currentState ->
             currentState.copy(selfSelectEnabled = enabled)
@@ -124,18 +152,6 @@ class SharedDevicesSettingsViewmodel(
         )
     }
 
-
-    fun onDismissEnableDialog() {
-        _uiState.update { currentState ->
-            currentState.copy(showEnableDialog = false)
-        }
-    }
-
-    fun onConfirmEnableDialog(localDeviceName: String) {
-        onDismissEnableDialog()
-    }
-
-    // Inside SharedDevicesSettingsViewmodel
     fun onShowPinDialog() {
         _uiState.update { it.copy(showPinDialog = true) }
     }
@@ -145,22 +161,51 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onPinChange(newPin: String) {
-        if (newPin.length <= 4) { // Assuming a 4-digit PIN
+        if (newPin.length <= SharedDevicesSettingsUiState.MAX_PIN_LENGTH && newPin.all { it.isDigit() }) {
             _uiState.update { it.copy(pin = newPin) }
         }
     }
 
     fun onSavePin() {
         val currentPin = _uiState.value.pin
-        viewModelScope.launch {
-            // schoolDataSource.savePin(currentPin)
-            onDismissPinDialog()
+        if (currentPin.length == SharedDevicesSettingsUiState.PIN_LENGTH) {
+            viewModelScope.launch {
+                // TODO: Implement actual pin saving
+                // schoolDataSource.savePin(currentPin)
+                onDismissPinDialog()
+            }
+        } else {
+            // Show error - pin length invalid
+        }
+    }
+
+    fun onTogglePendingInvites() {
+        _uiState.update {
+            it.copy(isPendingExpanded = !it.isPendingExpanded)
         }
     }
 
     fun onDismissBottomSheet() {
         _uiState.update { currentState ->
             currentState.copy(showBottomSheetOptions = false)
+        }
+    }
+
+    fun onApproveDevice(deviceGuid: String) {
+        viewModelScope.launch {
+            // TODO: Implement approve logic
+        }
+    }
+
+    fun onRejectDevice(deviceGuid: String) {
+        viewModelScope.launch {
+            // TODO: Implement reject logic
+        }
+    }
+
+    fun onRemoveDevice(deviceGuid: String) {
+        viewModelScope.launch {
+            // TODO: Implement remove logic
         }
     }
 }

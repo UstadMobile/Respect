@@ -28,9 +28,8 @@ data class SettingsUiState(
     val langDialogVisible: Boolean = false,
     val currentLanguage: String = "",
     val availableLanguages: List<RespectMobileSystemCommon.UiLanguage> = emptyList(),
-    val waitForRestartDialogVisible: Boolean = false,
-
-    )
+    val waitForRestartDialogVisible: Boolean = false
+)
 
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,

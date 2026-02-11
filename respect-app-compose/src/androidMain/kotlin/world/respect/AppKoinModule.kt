@@ -134,7 +134,6 @@ import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.domain.applanguage.LocaleSettingDelegateAndroid
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SetLanguageUseCaseAndroid
-import world.respect.shared.domain.applanguage.RespectMobileSystemImpl
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -295,13 +294,7 @@ val appKoinModule = module {
             localeSettingDelegate = LocaleSettingDelegateAndroid()
         )
     }
-    single<RespectMobileSystemCommon> {
-        RespectMobileSystemImpl(
-            context = androidContext(),
-            settings = get(),
-            langConfig = get()
-        )
-    }
+
     single<SetLanguageUseCase> {
         SetLanguageUseCaseAndroid(
             languagesConfig = get()

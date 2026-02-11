@@ -1,10 +1,6 @@
 package world.respect.shared.domain.applanguage
 
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.default_language
 import com.russhwolf.settings.Settings
-import com.ustadmobile.core.impl.RespectMobileConstants
-import world.respect.shared.generated.resources.language
 
 import kotlin.concurrent.Volatile
 
@@ -12,10 +8,6 @@ import kotlin.concurrent.Volatile
  * Manages language configuration
  *
  * @param availableLanguagesConfig comma separated list of languages supported by the app.
- * Specify as follows:
- *   Android: Set via meta-data supported-languages
- *   Web: ustad-config.json (in resources) in the property com.ustadmobile.uilanguages
- *
  * @param localeSettingDelegate Used to store the user selected language. On JVM and Web, this is a
  *        simple delegate to the settings. On Android this needs to delegate to the platform specific
  *        code, because the user can also change the setting in app settings.
@@ -111,12 +103,15 @@ class SupportedLanguagesConfig (
     }
 
     fun supportedUiLanguagesAndSysDefault(
-        useDeviceLangDisplay: String,
-    ) : List<RespectMobileSystemCommon.UiLanguage>{
-        return listOf(
-            RespectMobileSystemCommon.UiLanguage(RespectMobileSystemCommon.LOCALE_USE_SYSTEM,
-                useDeviceLangDisplay)
-        ) + supportedUiLanguages
+        defaultLangDisplay: String,
+    ): List<RespectMobileSystemCommon.UiLanguage> {
+
+        val defaultEnglish = RespectMobileSystemCommon.UiLanguage(
+            langCode = "en",   // IMPORTANT: set to English
+            langDisplay = defaultLangDisplay
+        )
+
+        return listOf(defaultEnglish) + supportedUiLanguages
     }
 
     /**

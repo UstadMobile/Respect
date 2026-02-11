@@ -35,6 +35,7 @@ onFlowComplete:
       CLASS_NAME: "New Class"
       USERNAME: "studentauser"
       PASSWORD: "test123"
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - back
 - runFlow:
     file: "subflows/add_person_to_a_class.yaml"
@@ -207,14 +208,17 @@ onFlowComplete:
       id: "invite_url"
 
 # Student adding shared device using QR code
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
+- runFlow:
+    file: "subflows/openlink_flow.yaml"
+    env:
+      URL: ${maestro.copiedText}
 - tapOn: "Get Started"
 - assertVisible:
     id: "app_title"
-    text: "Login"
+    text: "Enable shared school device mode"
+- tapOn: "Device name"
+- inputText: "Test Device 2"
+- tapOn: "Enable"
 - tapOn: "Scan QR code badge"
 - assertVisible:
     id: "app_title"
@@ -222,14 +226,24 @@ onFlowComplete:
 - tapOn: "More Options"
 - tapOn: "Paste URL"
 - tapOn: "Url"
-- pasteText
+- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - tapOn: "OK"
-- assertVisible:
-    id: "app_title"
-    text: "Enable shared school device mode"
-- tapOn: "Device name"
-- inputText: "Test Device 2"
-- tapOn: "Enable"
+
+# DISABLED temporarily 21/Jan/2026 by Mike - how this is handled is being changed
+# This part validate - When a device is in shared school device mode, if the user clicks scan a QR code badge button, then ONLY a QR code badge (student login badge) will be accepted.
+#- inputText: ${maestro.copiedText}
+#- tapOn: "OK"
+#- assertVisible: "Invalid QR code scanned"
+#- tapOn: "Try again"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Scan QR code badge"
+#- tapOn: "More Options"
+#- tapOn: "Paste URL"
+#- tapOn: "Url"
+#- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
+#- tapOn: "Ok"
+
 - assertVisible:
     id: "app_title"
     text: "Apps"

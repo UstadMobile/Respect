@@ -40,4 +40,11 @@ appId: world.respect.app
               - tapOn: "Password*"
               - inputText: ${PASSWORD}
               - tapOn: "Save"
+- runFlow:
+    when:
+      visible: 'Assign QR code badge'
+    file: "subflows/assign_qr_badge_flow.yaml"
+    env:
+      QR_BADGE_LINK: ${QR_BADGE_LINK}
+
 

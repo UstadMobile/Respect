@@ -7,7 +7,7 @@ class SetLanguageUseCaseAndroid(
     override fun invoke(
         uiLang: RespectMobileSystemCommon.UiLanguage,
     ): SetLanguageUseCase.SetLangResult {
-        //languagesConfig uses a delegate on Android that will use Android's per-app locale setting
+
         languagesConfig.localeSetting = uiLang.langCode
 
         return SetLanguageUseCase.SetLangResult(

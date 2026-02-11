@@ -17,7 +17,7 @@ import kotlin.concurrent.Volatile
  * @param fallbackLocaleCode the fallback locale code that will be used if the user does not
  *        explicitly set a language and none of their preferred longuages are supported
  */
-class SupportedLanguagesConfig (
+class SupportedLanguagesConfig(
     val systemLocales: List<String>,
     private val localeSettingDelegate: LocaleSettingDelegate,
     private val availableLanguagesConfig: String = DEFAULT_SUPPORTED_LANGUAGES,
@@ -25,21 +25,21 @@ class SupportedLanguagesConfig (
 ) {
 
     interface LocaleSettingDelegate {
-
         var localeSetting: String?
-
     }
-
 
     val supportedUiLanguages: List<RespectMobileSystemCommon.UiLanguage> = availableLanguagesConfig
         .split(",")
         .sorted()
         .map {
-            RespectMobileSystemCommon.UiLanguage(it, (RespectMobileConstants.LANGUAGE_NAMES[it] ?: it))
+            RespectMobileSystemCommon.UiLanguage(
+                it,
+                (RespectMobileConstants.LANGUAGE_NAMES[it] ?: it)
+            )
         }
-
-    private val supportedLangMap: Map<String, RespectMobileSystemCommon.UiLanguage> = supportedUiLanguages
-        .associateBy { it.langCode }
+    private val supportedLangMap: Map<String, RespectMobileSystemCommon.UiLanguage> =
+        supportedUiLanguages
+            .associateBy { it.langCode }
 
     /**
      * The user selected locale within the app (if any). This should be the language code as per
@@ -62,13 +62,15 @@ class SupportedLanguagesConfig (
         private set
 
     init {
-        if(!supportedLangMap.containsKey(fallbackLocaleCode))
-            throw IllegalStateException("available languages $availableLanguagesConfig does not " +
-                    "include fallback: '$fallbackLocaleCode'")
+        if (!supportedLangMap.containsKey(fallbackLocaleCode))
+            throw IllegalStateException(
+                "available languages $availableLanguagesConfig does not " +
+                        "include fallback: '$fallbackLocaleCode'"
+            )
     }
 
     private fun displayLocaleForLangSetting(setting: String?): String {
-        return if(setting.isNullOrEmpty())
+        return if (setting.isNullOrEmpty())
             selectFirstSupportedLocale().langCode
         else
             setting

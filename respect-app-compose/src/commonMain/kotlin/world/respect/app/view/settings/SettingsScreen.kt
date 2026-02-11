@@ -56,7 +56,7 @@ fun SettingsScreen(
     onClickLang: (RespectMobileSystemCommon.UiLanguage) -> Unit = {}
 ) {
 
-    if(uiState.langDialogVisible) {
+    if (uiState.langDialogVisible) {
         SettingsDialog(
             onDismissRequest = onDismissLangDialog,
         ) {
@@ -86,6 +86,7 @@ fun SettingsScreen(
 
         item {
             ListItem(
+
                 headlineContent = {
                     Text(text = stringResource(Res.string.language))
                 },
@@ -103,7 +104,6 @@ fun SettingsScreen(
                     .clickable(
                         onClick = {
                             onClickLanguage()
-
                         }
                     )
             )

@@ -75,7 +75,6 @@ fun OnboardingScreen(
         onClickGetStartedButton = viewModel::onClickGetStartedButton,
         onToggleUsageStatsOptIn = viewModel::onToggleUsageStatsOptIn,
         onLanguageSelected = viewModel::onLanguageSelected
-
     )
 }
 
@@ -85,7 +84,6 @@ fun OnboardingScreen(
     onClickGetStartedButton: () -> Unit,
     onToggleUsageStatsOptIn: () -> Unit,
     onLanguageSelected: (RespectMobileSystemCommon.UiLanguage) -> Unit
-
 ) {
 
     val onboardingItem = listOf(

@@ -426,13 +426,6 @@
     <string name="select_person">Select person</string>
     <string name="edit_person">Edit person</string>
 
-    <string name="monday">Monday</string>
-    <string name="tuesday">Tuesday</string>
-    <string name="wednesday">Wednesday</string>
-    <string name="thursday">Thursday</string>
-    <string name="friday">Friday</string>
-    <string name="saturday">Saturday</string>
-    <string name="sunday">Sunday</string>
     <string name="default_language">Use system default (English)</string>
 
     <string name="first_names">First names</string>

@@ -49,7 +49,6 @@ class OnboardingViewModel(
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
         viewModelScope.launch {
-
             val availableLangs =
                 supportedLangConfig.supportedUiLanguagesAndSysDefault(
                     getString(Res.string.default_language)
@@ -111,6 +110,4 @@ class OnboardingViewModel(
             }
         }
     }
-
-
 }

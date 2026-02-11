@@ -116,7 +116,6 @@ class SettingsViewModel(
                 )
             }
         }
-
     }
 
     fun onNavigateToMapping() {
@@ -124,5 +123,4 @@ class SettingsViewModel(
             NavCommand.Navigate(CurriculumMappingList)
         )
     }
-
 }

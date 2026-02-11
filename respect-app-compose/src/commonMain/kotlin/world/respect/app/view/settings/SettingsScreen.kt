@@ -1,12 +1,14 @@
 package world.respect.app.view.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -20,11 +22,14 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.mappings
+import world.respect.shared.generated.resources.policies_shared_devices
+import world.respect.shared.generated.resources.school
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
     onNavigateToMapping: () -> Unit = {},
+    onClickSchool: () -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -39,6 +44,15 @@ fun SettingsScreen(
                 testTag = "mapping_setting_item"
             )
         }
+        item {
+            SettingsListItem(
+                icon = Icons.Filled.School,
+                title = stringResource(Res.string.school),
+                onClick = onClickSchool,
+                testTag = "shared_devices_item",
+                description = stringResource(Res.string.policies_shared_devices),
+            )
+        }
     }
 }
 
@@ -47,14 +61,23 @@ private fun SettingsListItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     onClick: () -> Unit,
-    testTag: String
+    testTag: String,
+    description: String? = null
 ) {
     ListItem(
         headlineContent = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         },
         leadingContent = {
             Icon(
@@ -79,6 +102,7 @@ fun SettingsScreenForViewModel(
     viewModel: SettingsViewModel
 ) {
     SettingsScreen(
-        onNavigateToMapping = viewModel::onNavigateToMapping
+        onNavigateToMapping = viewModel::onNavigateToMapping,
+        onClickSchool = viewModel::onClickSchool
     )
 }

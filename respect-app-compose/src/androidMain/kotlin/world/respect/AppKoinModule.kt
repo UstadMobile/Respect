@@ -247,6 +247,12 @@ import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 
+import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewmodel
+
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -386,6 +392,11 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
 
+    viewModelOf(::SchoolSettingsViewModel)
+    viewModelOf(::SharedDevicesSettingsViewmodel)
+    viewModelOf(::SharedSchoolDeviceEnableViewmodel)
+    viewModelOf(::TeacherAndAdminLoginViewmodel)
+    viewModelOf(::SelectClassViewmodel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

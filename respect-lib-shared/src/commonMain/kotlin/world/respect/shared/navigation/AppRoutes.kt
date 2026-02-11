@@ -763,6 +763,21 @@ data class ScanQRCode(
 data object CurriculumMappingList : RespectAppRoute
 
 @Serializable
+data object SchoolSettings : RespectAppRoute
+
+@Serializable
+data object SharedDevicesSettings : RespectAppRoute
+
+@Serializable
+data object SharedDevicesEnable : RespectAppRoute
+
+@Serializable
+data object SelectClass : RespectAppRoute
+
+@Serializable
+data object TeacherAndAdminLogin : RespectAppRoute
+
+@Serializable
 data class CurriculumMappingEdit(
     val textbookUid: Long = 0L,
     private val mappingDataJson: String? = null

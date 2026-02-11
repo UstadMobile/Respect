@@ -8,14 +8,22 @@ import world.respect.shared.viewmodel.RespectViewModel
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
+import world.respect.shared.domain.applanguage.SetLanguageUseCase
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.default_language
 
 data class OnboardingUiState(
     val isLoading: Boolean = false,
     val usageStatsOptInChecked: Boolean = true,
+    val availableLanguages: List<RespectMobileSystemCommon.UiLanguage> = emptyList(),
+    val selectedLanguage: RespectMobileSystemCommon.UiLanguage? = null,
 )
 
 class OnboardingViewModel(
@@ -24,6 +32,8 @@ class OnboardingViewModel(
     private val setUsageReportingEnabledUseCase: SetUsageReportingEnabledUseCase,
     private val getUsageReportingEnabledUseCase: GetUsageReportingEnabledUseCase,
     private val navigateOnAppStartUseCase: NavigateOnAppStartUseCase,
+    private val supportedLangConfig: SupportedLanguagesConfig,
+    private val setLanguageUseCase: SetLanguageUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -38,6 +48,34 @@ class OnboardingViewModel(
             )
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
+        viewModelScope.launch {
+
+            val availableLangs =
+                supportedLangConfig.supportedUiLanguagesAndSysDefault(
+                    getString(Res.string.default_language)
+                )
+
+            val savedLangCode =
+                supportedLangConfig.localeSetting
+                    ?: RespectMobileSystemCommon.LOCALE_USE_SYSTEM
+
+            val currentLang =
+                if (savedLangCode == RespectMobileSystemCommon.LOCALE_USE_SYSTEM) {
+                    val resolvedLocale =
+                        supportedLangConfig.selectFirstSupportedLocale().langCode
+
+                    availableLangs.firstOrNull { it.langCode == resolvedLocale }
+                } else {
+                    availableLangs.firstOrNull { it.langCode == savedLangCode }
+                } ?: availableLangs.first()
+
+            _uiState.update {
+                it.copy(
+                    availableLanguages = availableLangs,
+                    selectedLanguage = currentLang
+                )
+            }
+        }
     }
 
     fun onToggleUsageStatsOptIn() {
@@ -58,5 +96,21 @@ class OnboardingViewModel(
         }
 
     }
+
+    fun onLanguageSelected(lang: RespectMobileSystemCommon.UiLanguage) {
+
+        val result = setLanguageUseCase(uiLang = lang)
+
+        if (result.waitForRestart) {
+            _uiState.update {
+                it.copy(selectedLanguage = lang)
+            }
+        } else {
+            _uiState.update {
+                it.copy(selectedLanguage = lang)
+            }
+        }
+    }
+
 
 }

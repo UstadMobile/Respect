@@ -18,19 +18,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,11 +33,11 @@ import world.respect.images.respectImagePainter
 import world.respect.shared.viewmodel.onboarding.OnboardingUiState
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.LanguageDropdown
 import world.respect.app.components.defaultItemPadding
 import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.get_started
-import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.onboardingDescription1
 import world.respect.shared.generated.resources.onboardingDescription2
 import world.respect.shared.generated.resources.onboardingDescription3
@@ -55,8 +47,7 @@ import world.respect.shared.generated.resources.onboardingTitle2
 import world.respect.shared.generated.resources.onboardingTitle3
 import world.respect.shared.generated.resources.onboardingTitle4
 import world.respect.shared.generated.resources.send_usage_stats_and_crash_reports
-import world.respect.shared.util.ext.isLoading
-import kotlin.collections.forEach
+
 
 
 data class OnboardingItem(
@@ -221,53 +212,6 @@ fun OnboardingScreen(
                 text = stringResource(Res.string.send_usage_stats_and_crash_reports),
                 style = MaterialTheme.typography.bodySmall,
             )
-        }
-    }
-}
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LanguageDropdown(
-    selected: RespectMobileSystemCommon.UiLanguage?,
-    languages: List<RespectMobileSystemCommon.UiLanguage>,
-    onSelected: (RespectMobileSystemCommon.UiLanguage) -> Unit,
-    enabled: Boolean
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { if (enabled) expanded = !expanded }
-    ) {
-        OutlinedTextField(
-            value = selected?.langDisplay ?: "",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(Res.string.language)) },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-            },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-                .defaultItemPadding()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            languages.forEach { lang ->
-                DropdownMenuItem(
-                    text = { Text(lang.langDisplay) },
-                    onClick = {
-                        onSelected(lang)
-                        expanded = false
-                    }
-                )
-            }
         }
     }
 }

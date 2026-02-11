@@ -7,5 +7,8 @@
     <string name="empty_list_description_admin">आपने अभी तक अपने स्कूल के लिए कोई ऐप नहीं जोड़ा है।</string>
     <string name="login">लॉग इन करें</string>
     <string name="get_started">शुरू हो जाओ</string>
+    <string name="settings">सेटिंग्स</string>
+    <string name="mappings">मानचित्रण</string>
+    <string name="apps">ऐप्स</string>
 
 </resources>

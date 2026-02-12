@@ -6,8 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
@@ -15,7 +13,6 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.default_language
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.NavCommand
@@ -26,7 +23,8 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class SettingsUiState(
     val loading: Boolean = false,
     val langDialogVisible: Boolean = false,
-    val currentLanguage: String = "",
+    val currentLanguage: SupportedLanguagesConfig.UiLanguage? = null,
+
     val availableLanguages: List<SupportedLanguagesConfig.UiLanguage> = emptyList(),
     val waitForRestartDialogVisible: Boolean = false
 )
@@ -34,7 +32,7 @@ data class SettingsUiState(
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    supportedLangConfig: SupportedLanguagesConfig,
+    private val supportedLangConfig: SupportedLanguagesConfig,
     private val setLanguageUseCase: SetLanguageUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -56,29 +54,7 @@ class SettingsViewModel(
             )
         }
 
-        viewModelScope.launch {
-            val resolvedSystemLang = supportedLangConfig.selectFirstSupportedLocale()
-
-            val systemDefaultLabel = getString(
-                Res.string.default_language,
-                resolvedSystemLang.langDisplay
-            )
-
-            val availableLangs = supportedLangConfig
-                .supportedUiLanguagesAndSysDefault(systemDefaultLabel)
-            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
-
-            val currentLang = availableLangs.first {
-                it.langCode == langSetting
-            }
-
-            _uiState.update {
-                it.copy(
-                    availableLanguages = availableLangs,
-                    currentLanguage = currentLang.langDisplay
-                )
-            }
-        }
+        loadLanguages()
     }
 
     fun onClickLanguage() {
@@ -100,25 +76,12 @@ class SettingsViewModel(
             prev.copy(langDialogVisible = false)
         }
 
-        val result = setLanguageUseCase(
+        setLanguageUseCase(
             uiLang = lang,
         )
 
-        println("Result language $result $lang")
-        if (result.waitForRestart) {
-            _uiState.update { prev ->
-                prev.copy(
-                    waitForRestartDialogVisible = true,
-                    currentLanguage = lang.langDisplay
-                )
-            }
-        } else {
-            _uiState.update { prev ->
-                prev.copy(
-                    currentLanguage = lang.langDisplay
-                )
-            }
-        }
+        loadLanguages()
+
     }
 
     fun onNavigateToMapping() {
@@ -126,4 +89,27 @@ class SettingsViewModel(
             NavCommand.Navigate(CurriculumMappingList)
         )
     }
+
+    fun loadLanguages() {
+        viewModelScope.launch {
+
+            val availableLangs = supportedLangConfig.getAvailableLanguages()
+
+            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
+
+            val currentLang = availableLangs.firstOrNull {
+                it.langCode == langSetting
+            } ?: availableLangs.first()
+
+            _uiState.update {
+                it.copy(
+                    availableLanguages = availableLangs,
+                    currentLanguage = currentLang
+
+                )
+            }
+
+        }
+    }
+
 }

@@ -53,7 +53,7 @@ class SupportedLanguagesConfig(
         .split(",")
         .sorted()
         .map {
-            UiLanguage(it, (RespectMobileConstants.LANGUAGE_NAMES[it] ?: it))
+            UiLanguage(it, (SupportedLanguageNames.LANGUAGE_NAMES[it] ?: it))
         }
 
     private val supportedLangMap: Map<String, UiLanguage> = supportedUiLanguages

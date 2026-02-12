@@ -1,7 +1,7 @@
 
 package world.respect.shared.domain.applanguage
 
-object RespectMobileConstants {
+object SupportedLanguageNames {
 
     val LANGUAGE_NAMES = mapOf(
         "en" to "English",

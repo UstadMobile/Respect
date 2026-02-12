@@ -76,12 +76,9 @@ class SettingsViewModel(
             prev.copy(langDialogVisible = false)
         }
 
-        setLanguageUseCase(
-            uiLang = lang,
-        )
+        setLanguageUseCase(uiLang = lang)
 
         loadLanguages()
-
     }
 
     fun onNavigateToMapping() {
@@ -108,8 +105,6 @@ class SettingsViewModel(
 
                 )
             }
-
         }
     }
-
 }

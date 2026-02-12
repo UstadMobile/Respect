@@ -4,8 +4,8 @@ interface SetLanguageUseCase {
     data class SetLangResult(
         val waitForRestart: Boolean
     )
-    
+
     operator fun invoke(
-        uiLang: RespectMobileSystemCommon.UiLanguage
+        uiLang: SupportedLanguagesConfig.UiLanguage
     ): SetLangResult
 }

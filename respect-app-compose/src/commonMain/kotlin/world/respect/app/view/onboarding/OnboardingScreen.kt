@@ -35,7 +35,7 @@ import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.LanguageDropdown
 import world.respect.app.components.defaultItemPadding
-import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.get_started
 import world.respect.shared.generated.resources.onboardingDescription1
@@ -74,7 +74,7 @@ fun OnboardingScreen(
     uiState: OnboardingUiState,
     onClickGetStartedButton: () -> Unit,
     onToggleUsageStatsOptIn: () -> Unit,
-    onLanguageSelected: (RespectMobileSystemCommon.UiLanguage) -> Unit
+    onLanguageSelected: (SupportedLanguagesConfig.UiLanguage) -> Unit
 ) {
 
     val onboardingItem = listOf(

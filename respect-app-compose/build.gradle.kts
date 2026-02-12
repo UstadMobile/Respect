@@ -180,6 +180,7 @@ android {
 
     androidResources{
         generateLocaleConfig = true
+        localeFilters.addAll(listOf("en", "hi", "ne"))
     }
 
     defaultConfig {
@@ -189,7 +190,6 @@ android {
         versionCode = 121
         versionName = "1.0.21"
 
-        resConfigs("en", "hi")
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

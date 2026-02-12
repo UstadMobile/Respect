@@ -8,7 +8,6 @@ import world.respect.shared.viewmodel.RespectViewModel
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
@@ -21,7 +20,8 @@ data class OnboardingUiState(
     val isLoading: Boolean = false,
     val usageStatsOptInChecked: Boolean = true,
     val availableLanguages: List<SupportedLanguagesConfig.UiLanguage> = emptyList(),
-    val selectedLanguage: SupportedLanguagesConfig.UiLanguage? = null)
+    val selectedLanguage: SupportedLanguagesConfig.UiLanguage? = null
+)
 
 class OnboardingViewModel(
     savedStateHandle: SavedStateHandle,
@@ -45,7 +45,7 @@ class OnboardingViewModel(
             )
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
-        refreshSystemDefaultLabel()
+        loadLanguages()
     }
 
     fun onToggleUsageStatsOptIn() {
@@ -71,7 +71,7 @@ class OnboardingViewModel(
         viewModelScope.launch {
             setLanguageUseCase(uiLang = lang)
 
-            refreshSystemDefaultLabel()
+            loadLanguages()
 
             _uiState.update {
                 it.copy(selectedLanguage = lang)
@@ -79,20 +79,16 @@ class OnboardingViewModel(
         }
     }
 
-    fun refreshSystemDefaultLabel() {
+    fun loadLanguages() {
         viewModelScope.launch {
 
-            val resolvedSystemLang = supportedLangConfig.selectFirstSupportedLocale()
-
-            val systemDefaultLabel = resolvedSystemLang.langDisplay
-
-            val availableLangs = supportedLangConfig
-                .supportedUiLanguagesAndSysDefault(systemDefaultLabel)
+            val availableLangs = supportedLangConfig.getAvailableLanguages()
 
             val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
 
-            val currentLang = availableLangs.firstOrNull { it.langCode == langSetting }
-                ?: availableLangs.first()
+            val currentLang = availableLangs.firstOrNull {
+                it.langCode == langSetting
+            } ?: availableLangs.first()
 
             _uiState.update {
                 it.copy(
@@ -100,6 +96,7 @@ class OnboardingViewModel(
                     selectedLanguage = currentLang
                 )
             }
+
         }
     }
 }

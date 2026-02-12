@@ -60,7 +60,6 @@ fun SettingsScreen(
         SettingsDialog(
             onDismissRequest = onDismissLangDialog,
         ) {
-
             uiState.availableLanguages.forEach { lang ->
                 ListItem(
                     modifier = Modifier.clickable { onClickLang(lang) },
@@ -86,7 +85,6 @@ fun SettingsScreen(
 
         item {
             ListItem(
-
                 headlineContent = {
                     Text(text = stringResource(Res.string.language))
                 },

@@ -118,11 +118,16 @@ class SupportedLanguagesConfig(
         }?.let { supportedLangMap[it.substring(0, 2)]!! } ?: supportedLangMap[fallbackLocaleCode]!!
     }
 
+    fun getAvailableLanguages(): List<UiLanguage> {
+        val resolvedSystemLang = selectFirstSupportedLocale()
+        val systemDefaultLabel = resolvedSystemLang.langDisplay
+
+        return supportedUiLanguagesAndSysDefault(systemDefaultLabel)
+    }
+
     companion object {
 
         const val PREFKEY_LOCALE = "locale"
-
-
         const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi,fa,ps,ar,tg,bn,ne,my,rw,ru"
         const val LOCALE_USE_SYSTEM = ""
 

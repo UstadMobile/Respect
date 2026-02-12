@@ -1,5 +1,6 @@
 package world.respect.shared.domain.applanguage
 
+import com.russhwolf.settings.Settings
 import kotlin.concurrent.Volatile
 
 /**
@@ -24,22 +25,39 @@ class SupportedLanguagesConfig(
     private val fallbackLocaleCode: String = "en",
 ) {
 
+
+    data class UiLanguage(val langCode: String, val langDisplay: String)
+
     interface LocaleSettingDelegate {
+
         var localeSetting: String?
+
     }
 
-    val supportedUiLanguages: List<RespectMobileSystemCommon.UiLanguage> = availableLanguagesConfig
+    class SettingsLocaleSettingDelegate(
+        private val settings: Settings
+    ) : LocaleSettingDelegate {
+        override var localeSetting: String?
+            get() = settings.getStringOrNull(PREFKEY_LOCALE)
+            set(value) {
+                if(value != null) {
+                    settings.putString(PREFKEY_LOCALE, value)
+                }else {
+                    settings.remove(PREFKEY_LOCALE)
+                }
+            }
+    }
+
+
+    val supportedUiLanguages: List<UiLanguage> = availableLanguagesConfig
         .split(",")
         .sorted()
         .map {
-            RespectMobileSystemCommon.UiLanguage(
-                it,
-                (RespectMobileConstants.LANGUAGE_NAMES[it] ?: it)
-            )
+            UiLanguage(it, (RespectMobileConstants.LANGUAGE_NAMES[it] ?: it))
         }
-    private val supportedLangMap: Map<String, RespectMobileSystemCommon.UiLanguage> =
-        supportedUiLanguages
-            .associateBy { it.langCode }
+
+    private val supportedLangMap: Map<String, UiLanguage> = supportedUiLanguages
+        .associateBy { it.langCode }
 
     /**
      * The user selected locale within the app (if any). This should be the language code as per
@@ -53,7 +71,6 @@ class SupportedLanguagesConfig(
             displayedLocale = displayLocaleForLangSetting(value)
         }
 
-
     /**
      * This is stored because it will be looked up every time a string lookup is done via systemImpl
      */
@@ -62,40 +79,25 @@ class SupportedLanguagesConfig(
         private set
 
     init {
-        if (!supportedLangMap.containsKey(fallbackLocaleCode))
-            throw IllegalStateException(
-                "available languages $availableLanguagesConfig does not " +
-                        "include fallback: '$fallbackLocaleCode'"
-            )
+        if(!supportedLangMap.containsKey(fallbackLocaleCode))
+            throw IllegalStateException("available languages $availableLanguagesConfig does not " +
+                    "include fallback: '$fallbackLocaleCode'")
     }
 
     private fun displayLocaleForLangSetting(setting: String?): String {
-        return if (setting.isNullOrEmpty())
+        return if(setting.isNullOrEmpty())
             selectFirstSupportedLocale().langCode
         else
             setting
     }
-    fun getCurrentUiLanguage(
-        availableLangs: List<RespectMobileSystemCommon.UiLanguage>
-    ): RespectMobileSystemCommon.UiLanguage {
-        val savedLangCode = localeSetting
 
-        return if (savedLangCode == null || savedLangCode == RespectMobileSystemCommon.LOCALE_USE_SYSTEM) {
-            availableLangs.firstOrNull { it.langCode == SYSTEM_DEFAULT_CODE }
-        } else {
-            availableLangs.find { it.langCode == savedLangCode && it.langCode != SYSTEM_DEFAULT_CODE }
-        } ?: availableLangs.first()
-    }
     fun supportedUiLanguagesAndSysDefault(
-        defaultLangDisplay: String,
-    ): List<RespectMobileSystemCommon.UiLanguage> {
-
-        val defaultEnglish = RespectMobileSystemCommon.UiLanguage(
-            langCode = SYSTEM_DEFAULT_CODE,
-            langDisplay = defaultLangDisplay
-        )
-
-        return listOf(defaultEnglish) + supportedUiLanguages
+        useDeviceLangDisplay: String,
+    ) : List<UiLanguage>{
+        return listOf(
+            UiLanguage(LOCALE_USE_SYSTEM,
+                useDeviceLangDisplay)
+        ) + supportedUiLanguages
     }
 
     /**
@@ -106,7 +108,7 @@ class SupportedLanguagesConfig(
      */
     fun selectFirstSupportedLocale(
         preferredLocales: List<String> = systemLocales,
-    ): RespectMobileSystemCommon.UiLanguage {
+    ): UiLanguage {
         val supportedLocaleCodes = supportedUiLanguages.map {
             it.langCode
         }
@@ -118,8 +120,11 @@ class SupportedLanguagesConfig(
 
     companion object {
 
+        const val PREFKEY_LOCALE = "locale"
+
+
         const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi,fa,ps,ar,tg,bn,ne,my,rw,ru"
-        const val SYSTEM_DEFAULT_CODE = "system_default_internal"
+        const val LOCALE_USE_SYSTEM = ""
 
     }
 

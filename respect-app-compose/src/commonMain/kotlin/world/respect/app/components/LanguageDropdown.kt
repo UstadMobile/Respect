@@ -16,16 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
-import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageDropdown(
-    selected: RespectMobileSystemCommon.UiLanguage?,
-    languages: List<RespectMobileSystemCommon.UiLanguage>,
-    onSelected: (RespectMobileSystemCommon.UiLanguage) -> Unit,
+    selected: SupportedLanguagesConfig.UiLanguage?,
+    languages: List<SupportedLanguagesConfig.UiLanguage>,
+    onSelected: (SupportedLanguagesConfig.UiLanguage) -> Unit,
     enabled: Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }

@@ -9,9 +9,9 @@ import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
-import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
@@ -22,8 +22,8 @@ import world.respect.shared.generated.resources.default_language
 data class OnboardingUiState(
     val isLoading: Boolean = false,
     val usageStatsOptInChecked: Boolean = true,
-    val availableLanguages: List<RespectMobileSystemCommon.UiLanguage> = emptyList(),
-    val selectedLanguage: RespectMobileSystemCommon.UiLanguage? = null,
+    val availableLanguages: List<SupportedLanguagesConfig.UiLanguage> = emptyList(),
+    val selectedLanguage: SupportedLanguagesConfig.UiLanguage? = null,
 )
 
 class OnboardingViewModel(
@@ -49,11 +49,20 @@ class OnboardingViewModel(
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
         viewModelScope.launch {
-           var availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(
-                getString(Res.string.default_language)
+            val resolvedSystemLang = supportedLangConfig.selectFirstSupportedLocale()
+
+            val systemDefaultLabel = getString(
+                Res.string.default_language,
+                resolvedSystemLang.langDisplay
             )
 
-            val currentLang = supportedLangConfig.getCurrentUiLanguage(availableLangs)
+            val availableLangs = supportedLangConfig
+                .supportedUiLanguagesAndSysDefault(systemDefaultLabel)
+            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
+
+            val currentLang = availableLangs.first {
+                it.langCode == langSetting
+            }
 
             _uiState.update {
                 it.copy(
@@ -83,7 +92,7 @@ class OnboardingViewModel(
 
     }
 
-    fun onLanguageSelected(lang: RespectMobileSystemCommon.UiLanguage) {
+    fun onLanguageSelected(lang: SupportedLanguagesConfig.UiLanguage) {
 
         val result = setLanguageUseCase(uiLang = lang)
 

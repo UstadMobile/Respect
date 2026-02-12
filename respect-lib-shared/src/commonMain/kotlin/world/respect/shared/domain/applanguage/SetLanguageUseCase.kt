@@ -6,6 +6,6 @@ interface SetLanguageUseCase {
     )
     
     operator fun invoke(
-        uiLang: RespectMobileSystemCommon.UiLanguage
+        uiLang: SupportedLanguagesConfig.UiLanguage
     ): SetLangResult
 }

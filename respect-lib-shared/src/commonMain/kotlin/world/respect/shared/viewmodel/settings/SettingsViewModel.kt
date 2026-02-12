@@ -11,9 +11,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
-import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.default_language
 import world.respect.shared.generated.resources.settings
@@ -27,7 +27,7 @@ data class SettingsUiState(
     val loading: Boolean = false,
     val langDialogVisible: Boolean = false,
     val currentLanguage: String = "",
-    val availableLanguages: List<RespectMobileSystemCommon.UiLanguage> = emptyList(),
+    val availableLanguages: List<SupportedLanguagesConfig.UiLanguage> = emptyList(),
     val waitForRestartDialogVisible: Boolean = false
 )
 
@@ -38,7 +38,7 @@ class SettingsViewModel(
     private val setLanguageUseCase: SetLanguageUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    private var availableLangs: List<RespectMobileSystemCommon.UiLanguage> = emptyList()
+    private var availableLangs: List<SupportedLanguagesConfig.UiLanguage> = emptyList()
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -57,13 +57,20 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            // 1. Get the list of languages (first item has the unique "system_default_internal" code)
-            availableLangs = supportedLangConfig.supportedUiLanguagesAndSysDefault(
-                getString(Res.string.default_language)
+            val resolvedSystemLang = supportedLangConfig.selectFirstSupportedLocale()
+
+            val systemDefaultLabel = getString(
+                Res.string.default_language,
+                resolvedSystemLang.langDisplay
             )
 
-            // 2. Use the new domain function to find which one to display
-            val currentLang = supportedLangConfig.getCurrentUiLanguage(availableLangs)
+            val availableLangs = supportedLangConfig
+                .supportedUiLanguagesAndSysDefault(systemDefaultLabel)
+            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
+
+            val currentLang = availableLangs.first {
+                it.langCode == langSetting
+            }
 
             _uiState.update {
                 it.copy(
@@ -88,7 +95,7 @@ class SettingsViewModel(
         }
     }
 
-    fun onClickLang(lang: RespectMobileSystemCommon.UiLanguage) {
+    fun onClickLang(lang: SupportedLanguagesConfig.UiLanguage) {
         _uiState.update { prev ->
             prev.copy(langDialogVisible = false)
         }

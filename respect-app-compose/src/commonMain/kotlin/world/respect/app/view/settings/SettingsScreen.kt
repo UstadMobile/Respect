@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.jetbrains.compose.resources.stringResource
-import world.respect.shared.domain.applanguage.RespectMobileSystemCommon
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.loading
@@ -53,7 +53,7 @@ fun SettingsScreen(
     onNavigateToMapping: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
     onDismissLangDialog: () -> Unit = {},
-    onClickLang: (RespectMobileSystemCommon.UiLanguage) -> Unit = {}
+    onClickLang: (SupportedLanguagesConfig.UiLanguage) -> Unit = {}
 ) {
 
     if (uiState.langDialogVisible) {

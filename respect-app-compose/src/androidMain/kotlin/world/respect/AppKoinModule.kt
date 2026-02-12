@@ -2,6 +2,7 @@
 package world.respect
 
 import android.content.Context
+import androidx.core.os.LocaleListCompat
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
@@ -281,15 +282,11 @@ val appKoinModule = module {
         LaunchSendEmailAndroid(androidContext())
     }
 
-    single<List<String>> {
-        androidx.core.os.ConfigurationCompat.getLocales(
-            androidContext().resources.configuration
-        ).toLanguageTags().split(",")
-    }
-
     single {
         SupportedLanguagesConfig(
-            systemLocales = get(),
+            systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
+                (0 .. localeList.size()).mapNotNull { localeList[it]?.language }
+            },
             localeSettingDelegate = LocaleSettingDelegateAndroid()
         )
     }

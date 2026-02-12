@@ -10,5 +10,9 @@
     <string name="settings">सेटिंग्स</string>
     <string name="mappings">मानचित्रण</string>
     <string name="apps">ऐप्स</string>
+    <string name="default_language">सिस्टम डिफॉल्ट का उपयोग करें (%1$s)</string>
+    <string name="lets_get_started">आएँ शुरू करें</string>
+    <string name="other_options">अन्य विकल्प</string>
+    <string name="next_button">अगला</string>
 
 </resources>

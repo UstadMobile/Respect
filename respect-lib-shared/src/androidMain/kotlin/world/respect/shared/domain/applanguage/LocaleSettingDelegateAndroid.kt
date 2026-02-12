@@ -7,11 +7,15 @@ import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companio
 class LocaleSettingDelegateAndroid: SupportedLanguagesConfig.LocaleSettingDelegate {
 
     override var localeSetting: String?
-        get() = AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "en"
+        get() = if (AppCompatDelegate.getApplicationLocales().isEmpty) {
+            null
+        } else {
+            AppCompatDelegate.getApplicationLocales().get(0)?.language
+        }
         set(value) {
-            val localeList = if(value == LOCALE_USE_SYSTEM) {
-                LocaleListCompat.getAdjustedDefault()
-            }else {
+            val localeList = if (value == LOCALE_USE_SYSTEM || value == null) {
+                LocaleListCompat.getEmptyLocaleList()
+            } else {
                 LocaleListCompat.forLanguageTags(value)
             }
             AppCompatDelegate.setApplicationLocales(localeList)

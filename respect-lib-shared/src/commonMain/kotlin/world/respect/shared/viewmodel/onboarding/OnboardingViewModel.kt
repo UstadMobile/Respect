@@ -16,15 +16,12 @@ import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCa
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.default_language
 
 data class OnboardingUiState(
     val isLoading: Boolean = false,
     val usageStatsOptInChecked: Boolean = true,
     val availableLanguages: List<SupportedLanguagesConfig.UiLanguage> = emptyList(),
-    val selectedLanguage: SupportedLanguagesConfig.UiLanguage? = null,
-)
+    val selectedLanguage: SupportedLanguagesConfig.UiLanguage? = null)
 
 class OnboardingViewModel(
     savedStateHandle: SavedStateHandle,
@@ -48,29 +45,7 @@ class OnboardingViewModel(
             )
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
-        viewModelScope.launch {
-            val resolvedSystemLang = supportedLangConfig.selectFirstSupportedLocale()
-
-            val systemDefaultLabel = getString(
-                Res.string.default_language,
-                resolvedSystemLang.langDisplay
-            )
-
-            val availableLangs = supportedLangConfig
-                .supportedUiLanguagesAndSysDefault(systemDefaultLabel)
-            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
-
-            val currentLang = availableLangs.first {
-                it.langCode == langSetting
-            }
-
-            _uiState.update {
-                it.copy(
-                    availableLanguages = availableLangs,
-                    selectedLanguage = currentLang
-                )
-            }
-        }
+        refreshSystemDefaultLabel()
     }
 
     fun onToggleUsageStatsOptIn() {
@@ -93,16 +68,37 @@ class OnboardingViewModel(
     }
 
     fun onLanguageSelected(lang: SupportedLanguagesConfig.UiLanguage) {
+        viewModelScope.launch {
+            setLanguageUseCase(uiLang = lang)
 
-        val result = setLanguageUseCase(uiLang = lang)
+            refreshSystemDefaultLabel()
 
-        if (result.waitForRestart) {
             _uiState.update {
                 it.copy(selectedLanguage = lang)
             }
-        } else {
+        }
+    }
+
+    fun refreshSystemDefaultLabel() {
+        viewModelScope.launch {
+
+            val resolvedSystemLang = supportedLangConfig.selectFirstSupportedLocale()
+
+            val systemDefaultLabel = resolvedSystemLang.langDisplay
+
+            val availableLangs = supportedLangConfig
+                .supportedUiLanguagesAndSysDefault(systemDefaultLabel)
+
+            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
+
+            val currentLang = availableLangs.firstOrNull { it.langCode == langSetting }
+                ?: availableLangs.first()
+
             _uiState.update {
-                it.copy(selectedLanguage = lang)
+                it.copy(
+                    availableLanguages = availableLangs,
+                    selectedLanguage = currentLang
+                )
             }
         }
     }

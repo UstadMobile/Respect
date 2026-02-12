@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.default_language
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +36,7 @@ fun LanguageDropdown(
         onExpandedChange = { if (enabled) expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = selected?.langDisplay ?: "",
+            value = getLanguageDisplayText(selected),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(Res.string.language)) },
@@ -54,7 +55,7 @@ fun LanguageDropdown(
         ) {
             languages.forEach { lang ->
                 DropdownMenuItem(
-                    text = { Text(lang.langDisplay) },
+                    text = { Text(getLanguageDisplayText(lang) ) },
                     onClick = {
                         onSelected(lang)
                         expanded = false
@@ -63,6 +64,14 @@ fun LanguageDropdown(
             }
         }
     }
+}
+
+@Composable
+fun getLanguageDisplayText(lang: SupportedLanguagesConfig.UiLanguage?): String {
+    return if(lang?.langCode?.isEmpty() == true)
+        stringResource(Res.string.default_language, lang.langDisplay)
+    else
+        lang?.langDisplay ?: ""
 }
 
 

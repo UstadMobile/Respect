@@ -139,8 +139,11 @@ class InvitePersonViewModel(
                 ?.person?.roles?.first()?.roleEnum ?: return@launch
 
             val writableRoles = getWritableRolesListUseCase(currentPersonRole)
-            val selectedRole = writableRoles.firstOrNull() ?: PersonRoleEnum.STUDENT
-
+            val selectedRole = if (!isSharedDeviceMode){
+                writableRoles.firstOrNull() ?: PersonRoleEnum.STUDENT
+            }else{
+                PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            }
             _uiState.update {
                 it.copy(
                     roleOptions =  writableRoles,

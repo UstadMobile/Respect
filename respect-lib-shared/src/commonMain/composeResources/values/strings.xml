@@ -601,4 +601,7 @@
 
     <string name="select_host">Select Host</string>
 
+    <string name="pin_error">Error: please enter 4 digit number </string>
+
+
 </resources>

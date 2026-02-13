@@ -251,8 +251,11 @@ import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
-import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewmodel
-
+import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
+import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -391,12 +394,13 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
-
     viewModelOf(::SchoolSettingsViewModel)
     viewModelOf(::SharedDevicesSettingsViewmodel)
     viewModelOf(::SharedSchoolDeviceEnableViewmodel)
     viewModelOf(::TeacherAndAdminLoginViewmodel)
-    viewModelOf(::SelectClassViewmodel)
+    viewModelOf(::SelectClassViewModel)
+    viewModelOf(::StudentListViewModel)
+
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -709,6 +713,13 @@ val appKoinModule = module {
             settings = get(),
         )
     }
+    single<EnableSharedDeviceModeUseCase> {
+        EnableSharedDeviceModeUseCase(
+            accountManager = get(),
+            settings = get(),
+            getDeviceInfoUseCase = get()
+        )
+    }
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
@@ -738,7 +749,6 @@ val appKoinModule = module {
                 )
             )
         }
-
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
@@ -762,7 +772,12 @@ val appKoinModule = module {
             )
         }
 
-
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,

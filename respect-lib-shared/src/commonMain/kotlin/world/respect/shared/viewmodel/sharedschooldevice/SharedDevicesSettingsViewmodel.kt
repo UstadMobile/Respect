@@ -10,6 +10,7 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
@@ -21,6 +22,7 @@ import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
+import world.respect.shared.generated.resources.pin_error
 import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
@@ -29,6 +31,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import kotlin.random.Random
 
 data class SharedDevicesSettingsUiState(
     val devices: IPagingSourceFactory<Int, Person> = IPagingSourceFactory {
@@ -44,24 +47,21 @@ data class SharedDevicesSettingsUiState(
     val showPinDialog: Boolean = false,
     val pin: String = "",
     val showBottomSheetOptions: Boolean = false,
-    val teacherPin: String = "5464", // Should come from actual data source
 ) {
     // Computed properties
     val isPinValid: Boolean
-        get() = pin.length == PIN_LENGTH && pin.all { it.isDigit() }
+        get() = pin.length >= PIN_LENGTH && pin.all { it.isDigit() }
 
     companion object {
         const val PIN_LENGTH = 4
-        const val MAX_PIN_LENGTH = 4
-        const val BACKGROUND_COLOR = 0xFFEEEEEE
-        const val DEFAULT_ANDROID_VERSION = "14"
     }
 }
 
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+    private val respectAppDataSource: RespectAppDataSource,
+    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -92,6 +92,7 @@ class SharedDevicesSettingsViewmodel(
     }
 
     init {
+        loadSchoolPin()
         _appUiState.update {
             it.copy(
                 title = Res.string.shared_school_devices.asUiText(),
@@ -143,11 +144,18 @@ class SharedDevicesSettingsViewmodel(
             )
         )
     }
+    fun loadSchoolPin() {
+        viewModelScope.launch {
+            val pin =  Random.nextInt(1000, 10000).toString().padStart(4, '0')
+            _uiState.update { it.copy(pin = pin) }
+        }
+        onSavePin()
+    }
 
     fun onClickEnableOnThisDevice() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                SharedDevicesEnable
+                SharedDevicesEnable.create(null)
             )
         )
     }
@@ -157,25 +165,23 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onDismissPinDialog() {
-        _uiState.update { it.copy(showPinDialog = false, pin = "") }
+        _uiState.update { it.copy(showPinDialog = false) }
     }
 
     fun onPinChange(newPin: String) {
-        if (newPin.length <= SharedDevicesSettingsUiState.MAX_PIN_LENGTH && newPin.all { it.isDigit() }) {
-            _uiState.update { it.copy(pin = newPin) }
-        }
+        _uiState.update { it.copy(pin = newPin) }
+
     }
 
     fun onSavePin() {
         val currentPin = _uiState.value.pin
-        if (currentPin.length == SharedDevicesSettingsUiState.PIN_LENGTH) {
+        if (currentPin.length >= SharedDevicesSettingsUiState.PIN_LENGTH && currentPin.all { it.isDigit() }) {
             viewModelScope.launch {
                 // TODO: Implement actual pin saving
-                // schoolDataSource.savePin(currentPin)
                 onDismissPinDialog()
             }
         } else {
-            // Show error - pin length invalid
+            _uiState.update { it.copy(error = Res.string.pin_error.asUiText()) }
         }
     }
 
@@ -204,8 +210,7 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onRemoveDevice(deviceGuid: String) {
-        viewModelScope.launch {
-            // TODO: Implement remove logic
-        }
+
+
     }
 }

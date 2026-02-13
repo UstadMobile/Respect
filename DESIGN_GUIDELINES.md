@@ -3,8 +3,8 @@
 ### General
 
 * Designs follow [Material3](https://m3.material.io/) guidelines (unless there is an absolute need / justification to not do so in a specific case)
-* Designs _always_ follow patterns seen in other widely used apps
 * Designs _always_ follow patterns in the RESPECT app as currently published unless there is a noted reason to do otherwise.
+* Designs _always_ follow patterns seen in other widely used apps (especially apps that use Material Design) as far as reasonably possible.
 * Where the on screen keyboard would likely cover textfields (e.g. an edit screen with more than 2 textfields), then the action button (e.g. next/done/save) should be in the top right
 * Where a user's actions are saved to the database/server, the the action text should be __Save__. Where the changes are not directly saved (e.g. when the user is taken
   another screen to edit a component (such as the filter in a report) then the text should be __Done__.

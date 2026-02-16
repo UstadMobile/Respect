@@ -14,6 +14,7 @@ import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -48,6 +49,8 @@ interface SchoolDataSource {
     val inviteDataSource: InviteDataSource
 
     val opdsDataSource: OpdsDataSource
+
+    val opdsFeedDataSource: OpdsFeedDataSource
 
     val schoolConfigSettingDataSource: SchoolConfigSettingDataSource
 

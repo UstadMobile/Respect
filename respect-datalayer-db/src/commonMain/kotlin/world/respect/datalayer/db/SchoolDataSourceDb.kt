@@ -5,6 +5,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.opds.OpdsDataSourceDb
+import world.respect.datalayer.db.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
@@ -34,6 +35,7 @@ import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.opds.OpdsDataSourceLocal
+import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 /**
@@ -120,6 +122,14 @@ class SchoolDataSourceDb(
             json = json,
             uidNumberMapper = uidNumberMapper,
             primaryKeyGenerator = primaryKeyGenerator,
+        )
+    }
+
+    override val opdsFeedDataSource: OpdsFeedDataSourceLocal by lazy {
+        OpdsFeedDataSourceDb(
+            schoolDb = schoolDb,
+            uidNumberMapper = uidNumberMapper,
+            authenticatedUser = authenticatedUser,
         )
     }
 

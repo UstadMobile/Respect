@@ -65,6 +65,7 @@ import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
 import world.respect.app.view.sharedschooldevice.SharedSchoolDeviceEnableScreen
 import world.respect.app.view.sharedschooldevice.TeacherAndAdminLoginScreen
 import world.respect.app.view.sharedschooldevice.login.SelectClassScreen
+import world.respect.app.view.sharedschooldevice.login.StudentListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.AccountList
@@ -123,6 +124,7 @@ import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.StudentList
 import world.respect.shared.navigation.TeacherAndAdminLogin
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -692,6 +694,15 @@ fun AppNavHost(
 
         composable<QrCode> {
             InviteQrScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<StudentList> {
+            StudentListScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

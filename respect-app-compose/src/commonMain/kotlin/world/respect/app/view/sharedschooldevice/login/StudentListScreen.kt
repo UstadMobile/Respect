@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,32 +15,28 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.model.Clazz
-import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassUiState
-import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
+import world.respect.datalayer.school.model.composites.PersonListDetails
+import world.respect.shared.util.ext.fullName
+import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListUiState
+import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
 
 @Composable
-fun SelectClassScreen(
-    viewModel: SelectClassViewModel,
+fun StudentListScreen(
+    viewModel: StudentListViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    SelectClassScreen(
+    StudentListScreen(
         uiState = uiState,
-        onClickClazz = viewModel::onClickClazz,
-        onClickScanQrCode = viewModel::onClickScanQrCode,
-        onClickTeacherAdminLogin = viewModel::onClickTeacherAdminLogin
+        onClickStudent = viewModel::onClickStudent,
     )
 }
 
 @Composable
-fun SelectClassScreen(
-    uiState: SelectClassUiState,
-    onClickClazz: (Clazz) -> Unit,
-    onClickScanQrCode: () -> Unit,
-    onClickTeacherAdminLogin: () -> Unit,
+fun StudentListScreen(
+    uiState: StudentListUiState,
+    onClickStudent: (PersonListDetails) -> Unit,
 ) {
-
-    val pager = respectRememberPager(uiState.classes)
+    val pager = respectRememberPager(uiState.persons)
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
@@ -51,37 +46,23 @@ fun SelectClassScreen(
             items = lazyPagingItems,
             key = { item, index -> item?.guid ?: index.toString() },
             contentType = { ClassDataSource.ENDPOINT_NAME },
-        ) { clazz ->
+        ) { student ->
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        clazz?.also(onClickClazz)
+                        student?.also(onClickStudent)
                     },
 
                 leadingContent = {
-                    RespectPersonAvatar(name = clazz?.title ?: "")
+                    RespectPersonAvatar(name = student?.fullName() ?: "")
                 },
 
                 headlineContent = {
-                    Text(text = clazz?.title ?: "")
+                    Text(text = student?.fullName() ?: "")
                 }
             )
         }
-        item {
-            OutlinedButton(
-                onClick = onClickScanQrCode,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Scan QR code badge")
-            }
-            OutlinedButton(
-                onClick = onClickTeacherAdminLogin,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Teacher/admin login")
-            }
-        }
-
     }
+
 }

@@ -6,8 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.model.Invite2
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
+import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.navigation.NavCommand
@@ -22,7 +28,7 @@ data class SharedSchoolDeviceEnableUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val isEnabling: Boolean = false,
     val isSuccess: Boolean = false
-){
+) {
     val isDeviceNameValid: Boolean
         get() = deviceName.isNotBlank()
 }
@@ -30,7 +36,11 @@ data class SharedSchoolDeviceEnableUiState(
 class SharedSchoolDeviceEnableViewmodel(
     savedStateHandle: SavedStateHandle,
     private val respectAccountManager: RespectAccountManager,
-) : RespectViewModel(savedStateHandle) {
+    private val enableSharedDeviceModeUseCase: EnableSharedDeviceModeUseCase
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = respectAccountManager.requireActiveAccountScope()
+    private val schoolDataSource: SchoolDataSource by inject() // From account scope
 
     private val _uiState = MutableStateFlow(SharedSchoolDeviceEnableUiState())
     val uiState = _uiState.asStateFlow()
@@ -62,7 +72,6 @@ class SharedSchoolDeviceEnableViewmodel(
         val deviceName = _uiState.value.deviceName
 
         if (deviceName.isBlank()) {
-            // Show error if device name is empty
             _uiState.update { it.copy(error = "Please enter a device name".asUiText()) }
             return
         }
@@ -71,17 +80,17 @@ class SharedSchoolDeviceEnableViewmodel(
 
         viewModelScope.launch {
             try {
-                // 1. Get ALL accounts currently logged in
-                val allAccounts = respectAccountManager.accounts.value
+                val schoolUrl = respectAccountManager.activeAccount?.school?.self
+                    ?: throw IllegalStateException("No active school session found")
 
-                // 2. Log out ALL accounts one by one
-                allAccounts.forEach { account ->
-                    respectAccountManager.removeAccount(account)
-                }
+                val inviteCode = Invite2.newRandomCode()
 
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(SelectClass)
+                enableSharedDeviceModeUseCase(
+                    inviteCode = inviteCode,
+                    deviceName = deviceName,
+                    schoolUrl = schoolUrl
                 )
+                _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass))
 
             } catch (e: Exception) {
                 _uiState.update {

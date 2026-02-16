@@ -59,6 +59,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_device
@@ -78,6 +79,7 @@ import world.respect.shared.generated.resources.students_must_enter_their_roll_n
 import world.respect.shared.generated.resources.tablet_android_last_seen
 import world.respect.shared.generated.resources.teacher_admin_unlock_pin
 import world.respect.shared.generated.resources.this_device_enable
+import world.respect.shared.resources.UiText
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsUiState
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
 
@@ -86,6 +88,7 @@ fun SharedDevicesSettingsScreen(
     viewModel: SharedDevicesSettingsViewmodel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    println("hgfhjhg ${uiState.pin}")
 
     SharedDevicesSettingsContent(
         uiState = uiState,
@@ -177,8 +180,7 @@ private fun SharedDevicesSettingsContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(Res.string.teacher_admin_unlock_pin) + "\n" +
-                                uiState.teacherPin,
+                        text = "${stringResource(Res.string.teacher_admin_unlock_pin)} ${uiState.pin}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
@@ -334,7 +336,8 @@ private fun SharedDevicesSettingsContent(
                 isPinValid = uiState.isPinValid,
                 onPinChange = onPinChange,
                 onDismiss = onDismissPinDialog,
-                onSave = onSavePin
+                onSave = onSavePin,
+                errorMessage = uiState.error
             )
         }
 
@@ -449,7 +452,8 @@ fun PinEntryDialog(
     isPinValid: Boolean,
     onPinChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    errorMessage: UiText? = null,
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -484,23 +488,27 @@ fun PinEntryDialog(
                 BasicTextField(
                     value = pin,
                     onValueChange = { newPin ->
-                        if (newPin.length <= SharedDevicesSettingsUiState.MAX_PIN_LENGTH &&
-                            newPin.all { it.isDigit() }
-                        ) {
                             onPinChange(newPin)
-                        }
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.NumberPassword
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color(SharedDevicesSettingsUiState.BACKGROUND_COLOR))
+                        .background(color = Color(0xFFEEEEEE))
                         .focusRequester(focusRequester)
                         .focusable()
-                        .padding(12.dp)
+                        .padding(12.dp),
                 )
-
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = uiTextStringResource(errorMessage),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Buttons Row
@@ -530,7 +538,6 @@ fun PinEntryDialog(
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .clickable(
-                                enabled = isPinValid,
                                 onClick = onSave
                             )
                             .padding(horizontal = 16.dp, vertical = 12.dp)

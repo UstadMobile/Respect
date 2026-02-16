@@ -29,7 +29,7 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
 
         const val PARENT_INT = 5
 
-        const val SHARED_SCHOOL_DEVICE = 6
+        const val SHARED_SCHOOL_DEVICE_INT = 6
 
 
         fun fromValue(value: String): PersonRoleEnum {

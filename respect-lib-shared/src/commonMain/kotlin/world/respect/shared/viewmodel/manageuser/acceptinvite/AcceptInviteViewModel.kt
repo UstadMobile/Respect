@@ -16,9 +16,12 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
+import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.isChildUser
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.lib.opds.model.LangMap
+import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest.PersonInfo
@@ -27,9 +30,11 @@ import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
+import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.generated.resources.something_wrong_with_invite
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.resources.UiText
@@ -43,16 +48,21 @@ data class AcceptInviteUiState(
     val isTeacherInvite: Boolean = false,
     val schoolName: LangMap? = null,
     val schoolUrl: Url? = null,
+    val isSharedDeviceMode: Boolean = false,
+    val deviceName: String = "",
 ) {
     val nextButtonEnabled: Boolean
         get() = inviteInfo?.invite != null
 
+    val isDeviceNameValid: Boolean
+        get() = deviceName.isNotBlank()
 }
 
 class AcceptInviteViewModel(
     savedStateHandle: SavedStateHandle,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val respectAppDataSource: RespectAppDataSource,
+    private val enableSharedDeviceModeUseCase: EnableSharedDeviceModeUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: AcceptInvite = savedStateHandle.toRoute()
@@ -73,14 +83,6 @@ class AcceptInviteViewModel(
     val uiState = _uiState.asStateFlow()
 
     init {
-        _appUiState.update {
-            it.copy(
-                title = Res.string.invitation.asUiText(),
-                hideBottomNavigation = true,
-                userAccountIconVisible = false,
-                showBackButton = route.canGoBack,
-            )
-        }
 
         launchWithLoadingIndicator(
             onShowError = {
@@ -95,12 +97,30 @@ class AcceptInviteViewModel(
                     isTeacherInvite = false
                 )
             }
+            val isSharedDeviceMode =
+                _uiState.value.inviteInfo?.invite?.accepterPersonRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            _uiState.update { it.copy(isSharedDeviceMode = isSharedDeviceMode) }
+
+            val title = if (isSharedDeviceMode) {
+                Res.string.shared_school_devices.asUiText()
+            } else {
+                Res.string.invitation.asUiText()
+            }
+            _appUiState.update {
+                it.copy(
+                    title = title,
+                    hideBottomNavigation = true,
+                    userAccountIconVisible = false,
+                    showBackButton = route.canGoBack,
+                )
+            }
         }
 
         viewModelScope.launch {
-            val schoolDirEntry = respectAppDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
-                route.schoolUrl
-            ).dataOrNull() ?: return@launch
+            val schoolDirEntry =
+                respectAppDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+                    route.schoolUrl
+                ).dataOrNull() ?: return@launch
 
             _uiState.update {
                 it.copy(schoolName = schoolDirEntry.name)
@@ -139,6 +159,60 @@ class AcceptInviteViewModel(
                 }
             )
         )
+    }
+
+    fun updateDeviceName(deviceName: String) {
+        _uiState.update { currentState ->
+            currentState.copy(deviceName = deviceName)
+        }
+    }
+
+    fun enableSharedDeviceMode() {
+        val deviceName = _uiState.value.deviceName
+
+        if (deviceName.isBlank()) {
+            _uiState.update { it.copy(errorText = "Please enter a device name".asUiText()) }
+            return
+        }
+
+        _uiState.update { it.copy(errorText = null) }
+
+        val invite = uiState.value.inviteInfo?.invite ?: return
+
+        val inviteRedeemRequest = RespectRedeemInviteRequest(
+            code = invite.code,
+            accountPersonInfo = PersonInfo(),
+            account = RespectRedeemInviteRequest.Account(
+                guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID)
+                    .toString(),
+                username = "",
+            ),
+            deviceName = _uiState.value.deviceName,
+            deviceInfo = getDeviceInfoUseCase(),
+            invite = invite
+        )
+
+        viewModelScope.launch {
+            try {
+                enableSharedDeviceModeUseCase(
+                    redeemInviteRequest = inviteRedeemRequest,
+                    schoolUrl = route.schoolUrl
+                )
+                _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass))
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        errorText = "Failed to enable shared device mode: ${e.message}".asUiText()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun saveSharedDeviceSettings(deviceName: String) {
+        // TODO: Implement saving shared device mode to database
+        println("Shared device mode enabled with name: $deviceName")
     }
 
 }

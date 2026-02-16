@@ -15,7 +15,7 @@ import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
+import world.respect.datalayer.db.MIGRATION_8_9
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -225,7 +225,7 @@ fun serverKoinModule(
             Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(false))
+                .addMigrations(MIGRATION_8_9)
                 .build()
         }
 

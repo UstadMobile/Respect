@@ -769,21 +769,6 @@ data object SchoolSettings : RespectAppRoute
 data object SharedDevicesSettings : RespectAppRoute
 
 @Serializable
-data class SharedDevicesEnable(
-    val schoolUrlStr: String? = null,
-) : RespectAppRoute {
-
-    @Transient
-    val schoolUrl:Url? = schoolUrlStr?.let { Url(it) }
-
-    companion object {
-        fun create(schoolUrl: Url?) = SharedDevicesEnable(schoolUrl.toString())
-    }
-
-}
-
-
-@Serializable
 data object SelectClass : RespectAppRoute
 
 @Serializable

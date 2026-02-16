@@ -24,9 +24,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
 import world.respect.shared.generated.resources.pin_error
 import world.respect.shared.generated.resources.shared_school_devices
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -59,9 +59,9 @@ data class SharedDevicesSettingsUiState(
 
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
-    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -153,11 +153,11 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onClickEnableOnThisDevice() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                SharedDevicesEnable.create(null)
-            )
-        )
+//        _navCommandFlow.tryEmit(
+//            NavCommand.Navigate(
+//                AcceptInvite.create(null)
+//            )
+//        )
     }
 
     fun onShowPinDialog() {

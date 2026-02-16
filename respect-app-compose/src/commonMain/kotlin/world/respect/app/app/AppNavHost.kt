@@ -62,7 +62,6 @@ import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.sharedschooldevice.SchoolSettingsScreen
 import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
-import world.respect.app.view.sharedschooldevice.SharedSchoolDeviceEnableScreen
 import world.respect.app.view.sharedschooldevice.TeacherAndAdminLoginScreen
 import world.respect.app.view.sharedschooldevice.login.SelectClassScreen
 import world.respect.app.view.sharedschooldevice.login.StudentListScreen
@@ -121,7 +120,6 @@ import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.SchoolSettings
 import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.Settings
-import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.StudentList
@@ -595,14 +593,6 @@ fun AppNavHost(
             )
         }
 
-        composable<SharedDevicesEnable> {
-            SharedSchoolDeviceEnableScreen(
-                viewModel = respectViewModel(
-                    onSetAppUiState = onSetAppUiState,
-                    navController = respectNavController,
-                )
-            )
-        }
         composable<SelectClass> {
             SelectClassScreen(
                 viewModel = respectViewModel(

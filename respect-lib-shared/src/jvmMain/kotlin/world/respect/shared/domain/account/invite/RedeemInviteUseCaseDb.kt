@@ -61,7 +61,8 @@ class RedeemInviteUseCaseDb(
 ) : RedeemInviteUseCase, KoinComponent {
 
     override suspend fun invoke(
-        redeemRequest: RespectRedeemInviteRequest
+        redeemRequest: RespectRedeemInviteRequest,
+        isActiveUserIsTeacherOrAdmin: Boolean
     ): AuthResponse {
         val inviteFromDb = schoolDb.getInviteEntityDao().getInviteByInviteCode(
             redeemRequest.code
@@ -72,7 +73,7 @@ class RedeemInviteUseCaseDb(
         val accountGuid = redeemRequest.account.guid
 
         val isSharedDeviceInvite = redeemRequest.invite.accepterPersonRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
-        val approvalRequired = if (isSharedDeviceInvite) {
+        val approvalRequired = if (isSharedDeviceInvite && isActiveUserIsTeacherOrAdmin) {
             false
         } else {
             inviteFromDb.isApprovalRequiredNow()

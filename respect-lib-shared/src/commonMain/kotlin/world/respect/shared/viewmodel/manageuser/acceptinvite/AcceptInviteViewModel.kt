@@ -196,7 +196,8 @@ class AcceptInviteViewModel(
             try {
                 enableSharedDeviceModeUseCase(
                     redeemInviteRequest = inviteRedeemRequest,
-                    schoolUrl = route.schoolUrl
+                    schoolUrl = route.schoolUrl,
+                    isActiveUserIsTeacherOrAdmin = route.isTeacherOrAdmin
                 )
                 _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass))
 

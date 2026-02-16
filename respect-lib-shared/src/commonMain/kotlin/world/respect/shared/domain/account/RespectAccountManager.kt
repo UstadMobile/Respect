@@ -160,6 +160,7 @@ class RespectAccountManager(
     suspend fun register(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
+        isActiveUserIsTeacherOrAdmin: Boolean = false
     ): Person {
         val schoolScopeId = SchoolDirectoryEntryScopeId(
             schoolUrl, null,
@@ -169,7 +170,7 @@ class RespectAccountManager(
         )
 
         val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
-        val authResponse = redeemInviteUseCase(redeemInviteRequest)
+        val authResponse = redeemInviteUseCase(redeemInviteRequest,isActiveUserIsTeacherOrAdmin)
 
         val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl

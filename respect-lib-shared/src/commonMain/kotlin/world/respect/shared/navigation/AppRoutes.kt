@@ -400,6 +400,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
+    val isTeacherOrAdmin: Boolean = false,
 ) : RespectAppRoute {
 
     @Transient
@@ -410,10 +411,12 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
+            isTeacherOrAdmin: Boolean = false
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
+            isTeacherOrAdmin = isTeacherOrAdmin
         )
     }
 }

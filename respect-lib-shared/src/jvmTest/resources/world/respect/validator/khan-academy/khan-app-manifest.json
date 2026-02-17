@@ -1,0 +1,23 @@
+{
+  "name": {
+    "en-US": "Khan Academy"
+  },
+  "description": {
+    "en-US": "Free world-class education in maths, science, and more."
+  },
+  "license": "",
+  "website": "https://www.khanacademy.org/",
+  "icon": "https://www.khanacademy.org/favicon.ico",
+  "learningUnits": "http://192.168.1.10/respect-ds/index.json",
+  "defaultLaunchUri": "https://www.khanacademy.or/",
+  "android": {
+    "packageId": "org.khanacademy.android",
+    "stores": [
+      "https://play.google.com/store/apps/details?id=org.khanacademy.android&hl=en_IN"
+    ],
+    "sourceCode": ""
+  },
+  "web": {
+    "url": "https://www.khanacademy.org/"
+  }
+}

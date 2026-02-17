@@ -54,7 +54,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "सेटिंग्स"
-- assertVisible: "भाषा"
+- tapOn: "भाषा"
 - tapOn: "English"
 - assertVisible:
     id: "app_title"

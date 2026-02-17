@@ -6,7 +6,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import world.respect.shared.generated.resources.language
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -15,9 +14,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.choose_language
 import world.respect.shared.generated.resources.default_language
 
 
@@ -33,13 +34,14 @@ fun LanguageDropdown(
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { if (enabled) expanded = !expanded }
+        onExpandedChange = { if (enabled) expanded = !expanded },
+        modifier = Modifier.testTag("choose_language")
     ) {
         OutlinedTextField(
             value = getLanguageDisplayText(selected),
             onValueChange = {},
             readOnly = true,
-            label = { Text(stringResource(Res.string.language)) },
+            label = { Text(stringResource(Res.string.choose_language)) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded)
             },

@@ -3,10 +3,14 @@
 ### General
 
 * Designs follow [Material3](https://m3.material.io/) guidelines (unless there is an absolute need / justification to not do so in a specific case)
-* Designs _always_ follow patterns seen in other widely used apps 
+* Designs _always_ follow patterns in the RESPECT app as currently published unless there is a noted reason to do otherwise.
+* Designs _always_ follow patterns seen in other widely used apps (especially apps that use Material Design) as far as reasonably possible.
 * Where the on screen keyboard would likely cover textfields (e.g. an edit screen with more than 2 textfields), then the action button (e.g. next/done/save) should be in the top right
 * Where a user's actions are saved to the database/server, the the action text should be __Save__. Where the changes are not directly saved (e.g. when the user is taken
-  another screen to edit a component (such as the filter in a report) then the text should be __Done__.  
+  another screen to edit a component (such as the filter in a report) then the text should be __Done__.
+* When a user creates/adds a new entity (e.g. class, assignment, person) and clicks __Save__ the user is taken to the detail screen for the entity they
+  just created (prototypes might not get the navigation to skip the edit screen if user then clicks back, but must still follow the pattern of taking
+  a user to the detail screen after clicking Save on adding a new entity).
 * Screens should be as intuitive as possible. Explicit text explanations of what to do next are a _last resort_ (e.g. as used with passkeys, as per
   Google's UX guidance because users are not familiar with them).
 
@@ -34,6 +38,14 @@ Behaviors below do not need to be included in prototypes. They must be implement
   the supporting text (underneath field) that shows "Required field".
 * When a new entity is being added, the app title should say Add new entity (e.g. Add new class). When an existing entity is being
   modified, the app title should show "Edit entity" (e.g. Edit class). The add new and edit screen are the same screen.
+* When the user clicks __Save__ after adding a new entity:
+   * If in picker mode the user will be returned from where the pick started (e.g. if the user was in a class detail screen,
+     then selected to add a student, and then selected add a new person, filled in the details and clicked save for the new
+     person, they are returned to the class detail screen).
+   * Otherwise: the user is taken to the detail screen for the entity they just created. If the user clicks back, then they go
+     back to where they were before the edit screen (e.g. if a user is in the person list screen, and clicks to add a new person,
+     then fills in the details and clicks save, they are brought to the person detail screen for the person they just added. If
+     the user then clicks back, they go back to the person list screen, not the edit screen).  
 * Links and invites: there are _many_ different ways and paths that could be used from getting a link on the first device to
   opening a link on the second device (e.g. scan QR code using camera app, scan QR code using RESPECT app itself, send link
   via a messenger app and then open it on the second device, copy paste link on second device into other options, enter link

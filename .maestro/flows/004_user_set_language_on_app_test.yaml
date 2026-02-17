@@ -20,9 +20,11 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Choose your language"
+- tapOn:
+    id: "choose_language"
 - assertVisible: "Use system default (English)"
 - assertVisible: "हिन्दी"
+- assertVisible: "Choose your language"
 - tapOn: "English"
 - tapOn: "Get Started"
 - runFlow:

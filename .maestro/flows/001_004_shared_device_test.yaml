@@ -53,7 +53,7 @@ onFlowComplete:
     id: "app_title"
     text: "Apps"
 - tapOn:
-    id: "settings_icon"
+    id: "Settings"
 - assertVisible:
     id: "app_title"
     text: "Settings"

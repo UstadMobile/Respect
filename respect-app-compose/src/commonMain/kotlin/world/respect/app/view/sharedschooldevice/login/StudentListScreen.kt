@@ -14,9 +14,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.model.composites.PersonListDetails
-import world.respect.shared.util.ext.fullName
+import world.respect.datalayer.school.model.Person
 import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListUiState
 import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
 
@@ -34,9 +34,9 @@ fun StudentListScreen(
 @Composable
 fun StudentListScreen(
     uiState: StudentListUiState,
-    onClickStudent: (PersonListDetails) -> Unit,
+    onClickStudent: (Person) -> Unit,
 ) {
-    val pager = respectRememberPager(uiState.persons)
+    val pager = respectRememberPager(uiState.students)
 
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
@@ -64,5 +64,4 @@ fun StudentListScreen(
             )
         }
     }
-
 }

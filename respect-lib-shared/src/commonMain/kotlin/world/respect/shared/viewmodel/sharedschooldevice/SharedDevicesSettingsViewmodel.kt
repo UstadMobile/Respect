@@ -10,11 +10,13 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.ext.newUserInviteUid
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
@@ -22,7 +24,11 @@ import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.libutil.ext.CHAR_POOL_NUMBERS
+import world.respect.libutil.ext.randomString
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
 import world.respect.shared.generated.resources.pin_error
@@ -34,7 +40,9 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.random.Random
+import kotlin.time.Clock
 
 data class SharedDevicesSettingsUiState(
     val devices: IPagingSourceFactory<Int, Person> = IPagingSourceFactory {
@@ -51,7 +59,6 @@ data class SharedDevicesSettingsUiState(
     val pin: String = "",
     val showBottomSheetOptions: Boolean = false,
 ) {
-    // Computed properties
     val isPinValid: Boolean
         get() = pin.length >= PIN_LENGTH && pin.all { it.isDigit() }
 
@@ -63,11 +70,12 @@ data class SharedDevicesSettingsUiState(
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
-    private val respectAppDataSource: RespectAppDataSource,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
+    private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
 
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -146,9 +154,10 @@ class SharedDevicesSettingsViewmodel(
             )
         )
     }
+
     fun loadSchoolPin() {
         viewModelScope.launch {
-            val pin =  Random.nextInt(1000, 10000).toString().padStart(4, '0')
+            val pin = Random.nextInt(1000, 10000).toString().padStart(4, '0')
             _uiState.update { it.copy(pin = pin) }
         }
         onSavePin()
@@ -169,21 +178,45 @@ class SharedDevicesSettingsViewmodel(
             val activePerson = persons?.firstOrNull { person ->
                 person.guid == (activeAccount?.userGuid)
             }
-
-            // Check if the person is a teacher or admin using the extension function
             val isTeacherOrAdmin = activePerson?.isAdminOrTeacher() ?: false
+
             activeAccount?.school?.self?.let { url ->
+                val invite = createSharedDeviceInvite()
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         AcceptInvite.create(
                             schoolUrl = url,
-                            code = "",
+                            code = invite.code,
                             isTeacherOrAdmin = isTeacherOrAdmin
                         )
                     )
                 )
             }
         }
+    }
+
+    private suspend fun createSharedDeviceInvite(): Invite2 {
+        // Create a new invite for SHARED_SCHOOL_DEVICE role
+        val inviteUid = PersonRoleEnum.SHARED_SCHOOL_DEVICE.newUserInviteUid
+
+        // Check if invite already exists
+        val existingInvite = schoolDataSource.inviteDataSource.findByGuid(
+            guid = inviteUid,
+        ).dataOrNull()
+
+        if (existingInvite != null) {
+            return existingInvite
+        }
+
+        // Create new invite
+        val newInvite = NewUserInvite(
+            uid = inviteUid,
+            code = randomString(10, CHAR_POOL_NUMBERS),
+            role = PersonRoleEnum.SHARED_SCHOOL_DEVICE,
+            approvalRequiredAfter = Clock.System.now(),
+        )
+        schoolDataSource.inviteDataSource.store(listOf(newInvite))
+        return newInvite
     }
 
     fun onShowPinDialog() {
@@ -223,20 +256,30 @@ class SharedDevicesSettingsViewmodel(
         }
     }
 
-    fun onApproveDevice(deviceGuid: String) {
+    fun onClickAcceptOrDismissInvite(
+        person: Person,
+        approved: Boolean,
+    ) {
         viewModelScope.launch {
-            // TODO: Implement approve logic
+            snackBarDispatcher.tryOrShowSnackbarOnError {
+                approveOrDeclineInviteRequestUseCase(
+                    personUid = person.guid,
+                    approved = approved,
+                )
+            }
         }
     }
 
-    fun onRejectDevice(deviceGuid: String) {
+    fun onRemoveDevice(person: Person) {
         viewModelScope.launch {
-            // TODO: Implement reject logic
+            schoolDataSource.personDataSource.store(
+                listOf(
+                    person.copy(
+                        status = PersonStatusEnum.TO_BE_DELETED,
+                        lastModified = Clock.System.now(),
+                    )
+                )
+            )
         }
-    }
-
-    fun onRemoveDevice(deviceGuid: String) {
-
-
     }
 }

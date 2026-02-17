@@ -21,10 +21,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,21 +62,23 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.ext.getDeviceDisplayName
+import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.add_device
 import world.respect.shared.generated.resources.another_device_add
 import world.respect.shared.generated.resources.arrow_down_icon
 import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.check_circle_icon
 import world.respect.shared.generated.resources.close_icon
 import world.respect.shared.generated.resources.devices
+import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.pending_device_requests
 import world.respect.shared.generated.resources.phone_android_icon
 import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.set_pin
 import world.respect.shared.generated.resources.share_icon
 import world.respect.shared.generated.resources.student_can_self_select_their_class_name
-import world.respect.shared.generated.resources.students_must_enter_their_roll_number
 import world.respect.shared.generated.resources.tablet_android_last_seen
 import world.respect.shared.generated.resources.teacher_admin_unlock_pin
 import world.respect.shared.generated.resources.this_device_enable
@@ -88,16 +91,13 @@ fun SharedDevicesSettingsScreen(
     viewModel: SharedDevicesSettingsViewmodel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    println("hgfhjhg ${uiState.pin}")
-
     SharedDevicesSettingsContent(
         uiState = uiState,
         onToggleSelfSelect = viewModel::toggleSelfSelect,
         onToggleRollNumberLogin = viewModel::toggleRollNumberLogin,
         onShowPinDialog = viewModel::onShowPinDialog,
         onTogglePendingInvites = viewModel::onTogglePendingInvites,
-        onApproveDevice = viewModel::onApproveDevice,
-        onRejectDevice = viewModel::onRejectDevice,
+        onClickAcceptOrDismissInvite = viewModel::onClickAcceptOrDismissInvite,
         onRemoveDevice = viewModel::onRemoveDevice,
         onPinChange = viewModel::onPinChange,
         onSavePin = viewModel::onSavePin,
@@ -122,9 +122,8 @@ private fun SharedDevicesSettingsContent(
     onToggleRollNumberLogin: (Boolean) -> Unit,
     onShowPinDialog: () -> Unit,
     onTogglePendingInvites: () -> Unit,
-    onApproveDevice: (String) -> Unit,
-    onRejectDevice: (String) -> Unit,
-    onRemoveDevice: (String) -> Unit,
+    onClickAcceptOrDismissInvite: (Person, Boolean) -> Unit,
+    onRemoveDevice: (Person) -> Unit,
     onPinChange: (String) -> Unit,
     onSavePin: () -> Unit,
     onDismissPinDialog: () -> Unit,
@@ -236,7 +235,7 @@ private fun SharedDevicesSettingsContent(
                                     )
 
                                     Text(
-                                        text = "${device.metadata} ${
+                                        text = "${device.getDeviceDisplayName()} ${
                                             stringResource(
                                                 Res.string.tablet_android_last_seen
                                             )
@@ -248,22 +247,29 @@ private fun SharedDevicesSettingsContent(
                             },
                             trailingContent = {
                                 Row {
-                                    IconButton(
-                                        onClick = { onApproveDevice(device.guid) }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.CheckCircle,
-                                            contentDescription = stringResource(Res.string.check_circle_icon),
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = { onRejectDevice(device.guid) }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = stringResource(Res.string.close_icon),
-                                        )
-                                    }
+                                    Icon(
+                                        modifier = Modifier.size(24.dp)
+                                            .clickable {
+                                                device.also {
+                                                    onClickAcceptOrDismissInvite(
+                                                        it,
+                                                        true
+                                                    )
+                                                }
+                                            },
+                                        imageVector = Icons.Outlined.CheckCircle,
+                                        contentDescription = stringResource(resource = Res.string.accept_invite)
+                                    )
+
+                                    Spacer(Modifier.width(16.dp))
+
+                                    Icon(
+                                        modifier = Modifier.size(24.dp).clickable {
+                                            device.also { onClickAcceptOrDismissInvite(it, false) }
+                                        },
+                                        imageVector = Icons.Outlined.Cancel,
+                                        contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                                    )
                                 }
                             }
                         )
@@ -304,7 +310,7 @@ private fun SharedDevicesSettingsContent(
                                 )
 
                                 Text(
-                                    text = "${details.metadata} ${
+                                    text = "${details.getDeviceDisplayName()} ${
                                         stringResource(
                                             Res.string.tablet_android_last_seen
                                         )
@@ -316,7 +322,7 @@ private fun SharedDevicesSettingsContent(
                         },
                         trailingContent = {
                             IconButton(
-                                onClick = { onRemoveDevice(details.guid) }
+                                onClick = { onRemoveDevice(details) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
@@ -488,7 +494,7 @@ fun PinEntryDialog(
                 BasicTextField(
                     value = pin,
                     onValueChange = { newPin ->
-                            onPinChange(newPin)
+                        onPinChange(newPin)
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.NumberPassword

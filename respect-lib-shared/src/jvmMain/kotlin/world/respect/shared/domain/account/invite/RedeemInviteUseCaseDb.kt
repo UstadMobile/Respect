@@ -23,11 +23,11 @@ import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
-import world.respect.datalayer.school.model.Invite2
-import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
@@ -40,7 +40,6 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
-import java.lang.IllegalArgumentException
 import kotlin.time.Clock
 
 /**
@@ -89,9 +88,12 @@ class RedeemInviteUseCaseDb(
                 PersonStatusEnum.ACTIVE
             },
         ).let {
-            if(approvalRequired) {
-                it.copyWithInviteInfo(invite = redeemRequest.invite)
-            }else {
+            if (approvalRequired) {
+                it.copyWithInviteInfo(
+                    invite = redeemRequest.invite,
+                    deviceInfo = redeemRequest.deviceInfo
+                )
+            } else {
                 it
             }
         }

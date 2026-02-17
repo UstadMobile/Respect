@@ -18,8 +18,12 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.isChildUser
+import world.respect.datalayer.school.ext.newUserInviteUid
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.LangMap
 import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -41,6 +45,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import kotlin.time.Clock
 
 data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
@@ -58,7 +63,7 @@ data class AcceptInviteUiState(
         get() = deviceName.isNotBlank()
 }
 
-class AcceptInviteViewModel(
+class  AcceptInviteViewModel(
     savedStateHandle: SavedStateHandle,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val respectAppDataSource: RespectAppDataSource,
@@ -181,16 +186,19 @@ class AcceptInviteViewModel(
 
         val inviteRedeemRequest = RespectRedeemInviteRequest(
             code = invite.code,
-            accountPersonInfo = PersonInfo(),
+            accountPersonInfo = PersonInfo(name = _uiState.value.deviceName),
             account = RespectRedeemInviteRequest.Account(
                 guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID)
                     .toString(),
-                username = "",
+                username = _uiState.value.deviceName,
             ),
             deviceName = _uiState.value.deviceName,
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
+        println("DEBUGGG >> route.isTeacherOrAdmin ${route.isTeacherOrAdmin.toString()}")
+        println("DEBUGGG >> route.isTeacherOrAdmin ${inviteRedeemRequest}")
+
 
         viewModelScope.launch {
             try {

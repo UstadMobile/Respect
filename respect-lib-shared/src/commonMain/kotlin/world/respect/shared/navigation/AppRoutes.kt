@@ -778,7 +778,10 @@ data object SelectClass : RespectAppRoute
 data object TeacherAndAdminLogin : RespectAppRoute
 
 @Serializable
-data object StudentList : RespectAppRoute
+data class StudentList(
+    val className: String,
+    val guid: String,
+): RespectAppRoute
 
 @Serializable
 data class CurriculumMappingEdit(

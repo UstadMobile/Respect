@@ -303,7 +303,9 @@ class ManageAccountViewModel(
                     listParams = PersonQrBadgeDataSource.GetListParams(
                         qrCodeUrl = url
                     )
-                ).dataOrNull()?.firstOrNull() != null
+                ).dataOrNull()?.firstOrNull { existingBadge ->
+                    existingBadge.personGuid != personGuid
+                } != null
 
             if (qrCodeAlreadyAssignedToAnotherPerson) {
                 _uiState.update { prev ->

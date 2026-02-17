@@ -12,6 +12,8 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -19,14 +21,15 @@ import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
 import world.respect.shared.generated.resources.pin_error
 import world.respect.shared.generated.resources.shared_school_devices
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.SharedDevicesEnable
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -59,12 +62,11 @@ data class SharedDevicesSettingsUiState(
 
 class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
-    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
-
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState())
@@ -153,11 +155,35 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onClickEnableOnThisDevice() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                SharedDevicesEnable.create(null)
-            )
-        )
+        viewModelScope.launch {
+            val activeAccount = accountManager.activeAccount
+            val persons = schoolDataSource.personDataSource.list(
+                loadParams = DataLoadParams(),
+                params = PersonDataSource.GetListParams(
+                    common = GetListCommonParams(
+                        guid = activeAccount?.userGuid
+                    ),
+                    includeRelated = true,
+                )
+            ).dataOrNull()
+            val activePerson = persons?.firstOrNull { person ->
+                person.guid == (activeAccount?.userGuid)
+            }
+
+            // Check if the person is a teacher or admin using the extension function
+            val isTeacherOrAdmin = activePerson?.isAdminOrTeacher() ?: false
+            activeAccount?.school?.self?.let { url ->
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        AcceptInvite.create(
+                            schoolUrl = url,
+                            code = "",
+                            isTeacherOrAdmin = isTeacherOrAdmin
+                        )
+                    )
+                )
+            }
+        }
     }
 
     fun onShowPinDialog() {

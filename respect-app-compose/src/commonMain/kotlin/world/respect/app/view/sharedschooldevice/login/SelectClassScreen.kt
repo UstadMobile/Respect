@@ -46,12 +46,14 @@ fun SelectClassScreen(
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
+        println("DEBUG >> ${lazyPagingItems.itemCount}")
 
         respectPagingItems(
             items = lazyPagingItems,
             key = { item, index -> item?.guid ?: index.toString() },
             contentType = { ClassDataSource.ENDPOINT_NAME },
         ) { clazz ->
+            println("DEBUG >> ${clazz.toString()}")
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()

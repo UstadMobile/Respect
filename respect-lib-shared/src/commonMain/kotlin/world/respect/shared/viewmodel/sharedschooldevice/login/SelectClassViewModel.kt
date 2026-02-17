@@ -39,7 +39,7 @@ data class SelectClassUiState(
 class SelectClassViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: SelectClass = savedStateHandle.toRoute()
 

@@ -60,7 +60,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
+import world.respect.datalayer.db.MIGRATION_8_9
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -250,7 +250,6 @@ import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCa
 import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
-import world.respect.shared.viewmodel.sharedschooldevice.SharedSchoolDeviceEnableViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
 import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
@@ -396,7 +395,6 @@ val appKoinModule = module {
     viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::SchoolSettingsViewModel)
     viewModelOf(::SharedDevicesSettingsViewmodel)
-    viewModelOf(::SharedSchoolDeviceEnableViewmodel)
     viewModelOf(::TeacherAndAdminLoginViewmodel)
     viewModelOf(::SelectClassViewModel)
     viewModelOf(::StudentListViewModel)
@@ -717,7 +715,6 @@ val appKoinModule = module {
         EnableSharedDeviceModeUseCase(
             accountManager = get(),
             settings = get(),
-            getDeviceInfoUseCase = get()
         )
     }
 
@@ -755,7 +752,7 @@ val appKoinModule = module {
                 "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(true))
+                .addMigrations(MIGRATION_8_9)
                 .build()
         }
 

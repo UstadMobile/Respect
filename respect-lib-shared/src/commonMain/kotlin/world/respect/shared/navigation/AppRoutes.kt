@@ -400,6 +400,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
+    val isTeacherOrAdmin: Boolean = false,
 ) : RespectAppRoute {
 
     @Transient
@@ -410,10 +411,12 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
+            isTeacherOrAdmin: Boolean = false
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
+            isTeacherOrAdmin = isTeacherOrAdmin
         )
     }
 }
@@ -767,21 +770,6 @@ data object SchoolSettings : RespectAppRoute
 
 @Serializable
 data object SharedDevicesSettings : RespectAppRoute
-
-@Serializable
-data class SharedDevicesEnable(
-    val schoolUrlStr: String? = null,
-) : RespectAppRoute {
-
-    @Transient
-    val schoolUrl:Url? = schoolUrlStr?.let { Url(it) }
-
-    companion object {
-        fun create(schoolUrl: Url?) = SharedDevicesEnable(schoolUrl.toString())
-    }
-
-}
-
 
 @Serializable
 data object SelectClass : RespectAppRoute

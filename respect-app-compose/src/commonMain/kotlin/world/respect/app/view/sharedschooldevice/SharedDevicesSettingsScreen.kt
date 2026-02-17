@@ -94,7 +94,6 @@ fun SharedDevicesSettingsScreen(
     SharedDevicesSettingsContent(
         uiState = uiState,
         onToggleSelfSelect = viewModel::toggleSelfSelect,
-        onToggleRollNumberLogin = viewModel::toggleRollNumberLogin,
         onShowPinDialog = viewModel::onShowPinDialog,
         onTogglePendingInvites = viewModel::onTogglePendingInvites,
         onClickAcceptOrDismissInvite = viewModel::onClickAcceptOrDismissInvite,
@@ -119,7 +118,6 @@ fun SharedDevicesSettingsScreen(
 private fun SharedDevicesSettingsContent(
     uiState: SharedDevicesSettingsUiState,
     onToggleSelfSelect: (Boolean) -> Unit,
-    onToggleRollNumberLogin: (Boolean) -> Unit,
     onShowPinDialog: () -> Unit,
     onTogglePendingInvites: () -> Unit,
     onClickAcceptOrDismissInvite: (Person, Boolean) -> Unit,
@@ -163,7 +161,7 @@ private fun SharedDevicesSettingsContent(
                 ) {
                     SettingsOptionRow(
                         title = stringResource(Res.string.student_can_self_select_their_class_name),
-                        checked = uiState.selfSelectEnabled,
+                        checked = uiState.isSelfSelectClassAndName,
                         onCheckedChange = onToggleSelfSelect
                     )
                 }

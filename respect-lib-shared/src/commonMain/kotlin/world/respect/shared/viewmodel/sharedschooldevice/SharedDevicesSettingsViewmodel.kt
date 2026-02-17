@@ -52,12 +52,12 @@ data class SharedDevicesSettingsUiState(
         IPagingSourceFactory { EmptyPagingSource() },
     val error: UiText? = null,
     val isPendingExpanded: Boolean = true,
-    val selfSelectEnabled: Boolean = true,
-    val rollNumberLoginEnabled: Boolean = true,
+    val isSelfSelectClassAndName: Boolean = true,
     val showEnableDialog: Boolean = false,
     val showPinDialog: Boolean = false,
     val pin: String = "",
     val showBottomSheetOptions: Boolean = false,
+    val isLoadingPin: Boolean = true,
 ) {
     val isPinValid: Boolean
         get() = pin.length >= PIN_LENGTH && pin.all { it.isDigit() }
@@ -71,13 +71,14 @@ class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
+//    private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal, //TODO
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
     private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
 
-    private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState())
+    private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState(isLoadingPin = true))
     val uiState = _uiState.asStateFlow()
 
     private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
@@ -102,7 +103,7 @@ class SharedDevicesSettingsViewmodel(
     }
 
     init {
-        loadSchoolPin()
+        loadSchoolPin() // Load existing PIN first
         _appUiState.update {
             it.copy(
                 title = Res.string.shared_school_devices.asUiText(),
@@ -113,7 +114,7 @@ class SharedDevicesSettingsViewmodel(
                     onClick = ::onClickAdd,
                     visible = true,
                 ),
-                showBackButton = false,
+                showBackButton = true,
             )
         }
 
@@ -127,14 +128,9 @@ class SharedDevicesSettingsViewmodel(
 
     fun toggleSelfSelect(enabled: Boolean) {
         _uiState.update { currentState ->
-            currentState.copy(selfSelectEnabled = enabled)
+            currentState.copy(isSelfSelectClassAndName = enabled)
         }
-    }
-
-    fun toggleRollNumberLogin(enabled: Boolean) {
-        _uiState.update { currentState ->
-            currentState.copy(rollNumberLoginEnabled = enabled)
-        }
+        // TODO
     }
 
     fun onClickAdd() {
@@ -155,12 +151,78 @@ class SharedDevicesSettingsViewmodel(
         )
     }
 
-    fun loadSchoolPin() {
+    private fun loadSchoolPin() {
+        //TODO
         viewModelScope.launch {
-            val pin = Random.nextInt(1000, 10000).toString().padStart(4, '0')
-            _uiState.update { it.copy(pin = pin) }
+            try {
+                val activeAccount = accountManager.activeAccount
+//                if (activeAccount != null) {
+//                    val schoolEntry = schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+//                        activeAccount.school.self
+//                    ).dataOrNull()
+//
+//                    val existingPin = schoolEntry?.teacherPin
+//
+//                    if (!existingPin.isNullOrBlank()) {
+//                        // Use existing PIN from database
+//                        _uiState.update {
+//                            it.copy(
+//                                pin = existingPin,
+//                                isLoadingPin = false
+//                            )
+//                        }
+//                    } else {
+                        val newPin = generateRandomPin()
+                        _uiState.update {
+                            it.copy(
+                                pin = newPin,
+                                isLoadingPin = false
+                            )
+                        }
+                        // Save the generated PIN
+                        savePinToDatabase(newPin)
+//                    }
+//                } else {
+//                    _uiState.update { it.copy(isLoadingPin = false) }
+//                }
+            } catch (e: Exception) {
+                val fallbackPin = generateRandomPin()
+                _uiState.update {
+                    it.copy(
+                        pin = fallbackPin,
+                        isLoadingPin = false,
+                        error = "Failed to load PIN, using generated one".asUiText()
+                    )
+                }
+            }
         }
-        onSavePin()
+    }
+
+    private fun generateRandomPin(): String {
+        return Random.nextInt(1000, 10000).toString().padStart(4, '0')
+    }
+
+    private suspend fun savePinToDatabase(pin: String) {
+        //TODO
+        try {
+            val activeAccount = accountManager.activeAccount
+                ?: throw IllegalStateException("No active account")
+
+//            val schoolEntry = schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+//                activeAccount.school.self
+//            ).dataOrNull() ?: throw IllegalStateException("School not found")
+//
+//            val updatedSchoolEntry = schoolEntry.copy(
+//                teacherPin = pin,
+//                lastModified = Clock.System.now()
+//            )
+//
+//            schoolDirectoryEntryDataSource.updateLocal(listOf(updatedSchoolEntry))
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(error = "Failed to save PIN: ${e.message}".asUiText())
+            }
+        }
     }
 
     fun onClickEnableOnThisDevice() {
@@ -187,7 +249,8 @@ class SharedDevicesSettingsViewmodel(
                         AcceptInvite.create(
                             schoolUrl = url,
                             code = invite.code,
-                            isTeacherOrAdmin = isTeacherOrAdmin
+                            isActiveAccountIsTeacherOrAdmin = isTeacherOrAdmin,
+                            isSelfSelectClassAndName = _uiState.value.isSelfSelectClassAndName
                         )
                     )
                 )
@@ -196,10 +259,8 @@ class SharedDevicesSettingsViewmodel(
     }
 
     private suspend fun createSharedDeviceInvite(): Invite2 {
-        // Create a new invite for SHARED_SCHOOL_DEVICE role
         val inviteUid = PersonRoleEnum.SHARED_SCHOOL_DEVICE.newUserInviteUid
 
-        // Check if invite already exists
         val existingInvite = schoolDataSource.inviteDataSource.findByGuid(
             guid = inviteUid,
         ).dataOrNull()
@@ -208,7 +269,6 @@ class SharedDevicesSettingsViewmodel(
             return existingInvite
         }
 
-        // Create new invite
         val newInvite = NewUserInvite(
             uid = inviteUid,
             code = randomString(10, CHAR_POOL_NUMBERS),
@@ -224,23 +284,32 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onDismissPinDialog() {
-        _uiState.update { it.copy(showPinDialog = false) }
+        _uiState.update {
+            it.copy(
+                showPinDialog = false,
+                error = null // Clear error on dismiss
+            )
+        }
     }
 
     fun onPinChange(newPin: String) {
-        _uiState.update { it.copy(pin = newPin) }
-
+        // Only allow digits and limit length
+        if (newPin.all { it.isDigit() } && newPin.length <= 4) {
+            _uiState.update { it.copy(pin = newPin, error = null) }
+        }
     }
 
     fun onSavePin() {
         val currentPin = _uiState.value.pin
-        if (currentPin.length >= SharedDevicesSettingsUiState.PIN_LENGTH && currentPin.all { it.isDigit() }) {
+        if (currentPin.length == SharedDevicesSettingsUiState.PIN_LENGTH && currentPin.all { it.isDigit() }) {
             viewModelScope.launch {
-                // TODO: Implement actual pin saving
+                savePinToDatabase(currentPin)
                 onDismissPinDialog()
             }
         } else {
-            _uiState.update { it.copy(error = Res.string.pin_error.asUiText()) }
+            _uiState.update {
+                it.copy(error = Res.string.pin_error.asUiText())
+            }
         }
     }
 

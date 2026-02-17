@@ -1,6 +1,7 @@
 package world.respect.shared.viewmodel.sharedschooldevice.login
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -16,9 +17,11 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.select_class
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
+import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.StudentList
 import world.respect.shared.navigation.TeacherAndAdminLogin
 import world.respect.shared.resources.UiText
@@ -28,6 +31,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class SelectClassUiState(
     val error: UiText? = null,
     val classes: IPagingSourceFactory<Int, Clazz> = EmptyPagingSourceFactory(),
+    val isSelfSelectClassAndName: Boolean = true
 )
 
 class SelectClassViewModel(
@@ -36,6 +40,8 @@ class SelectClassViewModel(
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val route: SelectClass = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -53,14 +59,16 @@ class SelectClassViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.select_class.asUiText(),
+                title = if (route.isSelfSelectClassAndName) Res.string.select_class.asUiText() else Res.string.login.asUiText(),
                 hideBottomNavigation = true,
-                userAccountIconVisible = false
+                userAccountIconVisible = false,
+                showBackButton = false
             )
         }
         _uiState.update { prev ->
             prev.copy(
                 classes = pagingSourceHolder,
+                isSelfSelectClassAndName = route.isSelfSelectClassAndName
             )
         }
     }

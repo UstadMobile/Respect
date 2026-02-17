@@ -18,12 +18,8 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.isChildUser
-import world.respect.datalayer.school.ext.newUserInviteUid
-import world.respect.datalayer.school.model.Invite2
-import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.LangMap
 import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -45,7 +41,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import kotlin.time.Clock
 
 data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
@@ -196,18 +191,15 @@ class  AcceptInviteViewModel(
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
-        println("DEBUGGG >> route.isTeacherOrAdmin ${route.isTeacherOrAdmin.toString()}")
-        println("DEBUGGG >> route.isTeacherOrAdmin ${inviteRedeemRequest}")
-
 
         viewModelScope.launch {
             try {
                 enableSharedDeviceModeUseCase(
                     redeemInviteRequest = inviteRedeemRequest,
                     schoolUrl = route.schoolUrl,
-                    isActiveUserIsTeacherOrAdmin = route.isTeacherOrAdmin
+                    isActiveUserIsTeacherOrAdmin = route.isActiveAccountIsTeacherOrAdmin
                 )
-                _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass))
+                _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass(isSelfSelectClassAndName = route.isSelfSelectClassAndName)))
 
             } catch (e: Exception) {
                 _uiState.update {

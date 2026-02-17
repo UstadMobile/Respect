@@ -400,7 +400,8 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
-    val isTeacherOrAdmin: Boolean = false,
+    val isActiveAccountIsTeacherOrAdmin: Boolean = false,
+    val isSelfSelectClassAndName: Boolean = true,
 ) : RespectAppRoute {
 
     @Transient
@@ -411,12 +412,14 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
-            isTeacherOrAdmin: Boolean = false
+            isActiveAccountIsTeacherOrAdmin: Boolean = false,
+            isSelfSelectClassAndName: Boolean = true,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
-            isTeacherOrAdmin = isTeacherOrAdmin
+            isActiveAccountIsTeacherOrAdmin = isActiveAccountIsTeacherOrAdmin,
+            isSelfSelectClassAndName = isSelfSelectClassAndName
         )
     }
 }
@@ -772,7 +775,9 @@ data object SchoolSettings : RespectAppRoute
 data object SharedDevicesSettings : RespectAppRoute
 
 @Serializable
-data object SelectClass : RespectAppRoute
+data class SelectClass(
+    val isSelfSelectClassAndName: Boolean = true
+) : RespectAppRoute
 
 @Serializable
 data object TeacherAndAdminLogin : RespectAppRoute

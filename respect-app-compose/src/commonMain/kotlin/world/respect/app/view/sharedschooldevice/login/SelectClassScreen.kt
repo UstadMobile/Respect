@@ -56,31 +56,33 @@ fun SelectClassScreen(
     val listState = rememberLazyListState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState
-        ) {
-            respectPagingItems(
-                items = lazyPagingItems,
-                key = { item, index -> item?.guid ?: index.toString() },
-                contentType = { ClassDataSource.ENDPOINT_NAME },
-            ) { clazz ->
-                ListItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            clazz?.also(onClickClazz)
+        if(uiState.isSelfSelectClassAndName) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState
+            ) {
+                respectPagingItems(
+                    items = lazyPagingItems,
+                    key = { item, index -> item?.guid ?: index.toString() },
+                    contentType = { ClassDataSource.ENDPOINT_NAME },
+                ) { clazz ->
+                    ListItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                clazz?.also(onClickClazz)
+                            },
+                        leadingContent = {
+                            RespectPersonAvatar(name = clazz?.title ?: "")
                         },
-                    leadingContent = {
-                        RespectPersonAvatar(name = clazz?.title ?: "")
-                    },
-                    headlineContent = {
-                        Text(text = clazz?.title ?: "")
-                    }
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.padding(bottom = 100.dp))
+                        headlineContent = {
+                            Text(text = clazz?.title ?: "")
+                        }
+                    )
+                }
+                item {
+                    Spacer(modifier = Modifier.padding(bottom = 100.dp))
+                }
             }
         }
         Column(

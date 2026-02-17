@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -48,7 +49,7 @@ data class AppLauncherUiState(
     val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
     val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
     val canRemove: Boolean = false,
-    val emptyListDescription: UiText?=null,
+    val emptyListDescription: UiText? = null,
 )
 
 class AppLauncherViewModel(
@@ -82,6 +83,8 @@ class AppLauncherViewModel(
             it.copy(
                 title = Res.string.apps.asUiText(),
                 onClickSettings = ::onClickSettings,
+                downloadIconVisible = true,
+                onClickDownload = ::onClickDownloads,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
@@ -103,7 +106,6 @@ class AppLauncherViewModel(
                 respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
                 apps = pagingSourceHolder
             )
-
         }
 
         viewModelScope.launch {
@@ -152,12 +154,47 @@ class AppLauncherViewModel(
             )
         )
     }
+
     fun onClickSettings() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(Settings)
         )
     }
+    fun onClickDownloads() {
+        viewModelScope.launch {
+            try {
+                val firstApp = schoolDataSource.schoolAppDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = SchoolAppDataSource.GetListParams()
+                ).dataOrNull()?.firstOrNull()
 
+                if (firstApp != null) {
+                    val appManifest = appDataSource.compatibleAppsDataSource.getAppAsFlow(
+                        manifestUrl = firstApp.appManifestUrl,
+                        loadParams = DataLoadParams()
+                    ).first().dataOrNull()
+
+                    if (appManifest != null) {
+                        val learningUnitsUrl = firstApp.appManifestUrl.resolve(
+                            appManifest.learningUnits.toString()
+                        )
+
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                LearningUnitList.create(
+                                    opdsFeedUrl = learningUnitsUrl,
+                                    appManifestUrl = firstApp.appManifestUrl,
+                                    showOnlyDownloaded = true
+                                )
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
     fun onClickRemove(app: DataLoadState<RespectAppManifest>) {
         val manifestUrl = app.metaInfo.url ?: return
         viewModelScope.launch {
@@ -180,4 +217,3 @@ class AppLauncherViewModel(
         )
     }
 }
-

@@ -29,6 +29,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.ImportContacts
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
@@ -177,17 +187,30 @@ fun App(
     val koin = getKoin()
 
     LaunchedEffect(Unit) {
-        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
-            val uiText = it.message
-            val message = if(uiText is StringUiText) {
-                uiText.text
-            }else if(uiText is StringResourceUiText) {
-                getString(uiText.resource)
-            }else {
-                ""
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack ->
+            val uiText = snack.message
+            val message = when (uiText) {
+                is StringUiText -> uiText.text
+                is StringResourceUiText -> getString(uiText.resource)
+                else -> ""
+            }
+            val actionLabel = snack.action?.let { actionUiText ->
+                when (actionUiText) {
+                    is StringUiText -> actionUiText.text
+                    is StringResourceUiText -> getString(actionUiText.resource)
+                    else -> null
+                }
             }
 
-            snackbarHostState.showSnackbar(message, it.action)
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = actionLabel,
+                duration = SnackbarDuration.Short
+            )
+
+            if (result == SnackbarResult.ActionPerformed) {
+                snack.onAction?.invoke()
+            }
         }
     }
 

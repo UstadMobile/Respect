@@ -4,6 +4,6 @@ import world.respect.shared.resources.UiText
 
 data class Snack(
     val message: UiText,
-    val action: String? = null,
+    val action: UiText?= null,
     val onAction: (() -> Unit)? = null,
 )

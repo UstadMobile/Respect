@@ -21,6 +21,8 @@ data class AppUiState(
     val hideBottomNavigation: Boolean = false,
     val hideSettingsIcon: Boolean = false,
     val userAccountIconVisible: Boolean? = null,
+    val downloadIconVisible: Boolean? = null,
+    val onClickDownload: (() -> Unit)? = null,
     val hideAppBar: Boolean = false,
     val appBarColors: AppBarColors = AppBarColors.STANDARD,
     val actions: List<AppActionButton> = emptyList(),

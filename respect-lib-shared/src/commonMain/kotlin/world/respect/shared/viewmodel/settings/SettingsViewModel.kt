@@ -36,11 +36,10 @@ class SettingsViewModel(
     private val setLanguageUseCase: SetLanguageUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    private var availableLangs: List<SupportedLanguagesConfig.UiLanguage> = emptyList()
-
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(SettingsUiState())
+
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -79,12 +78,6 @@ class SettingsViewModel(
         setLanguageUseCase(uiLang = lang)
 
         loadLanguages()
-    }
-
-    fun onNavigateToMapping() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(CurriculumMappingList)
-        )
     }
 
     fun loadLanguages() {

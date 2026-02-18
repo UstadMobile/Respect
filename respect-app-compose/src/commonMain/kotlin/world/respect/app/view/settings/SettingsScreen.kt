@@ -30,7 +30,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.default_language
 import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.loading
-import world.respect.shared.generated.resources.mappings
 import world.respect.shared.viewmodel.settings.SettingsUiState
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
@@ -41,7 +40,6 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     SettingsScreen(
         uiState = uiState,
-        onNavigateToMapping = viewModel::onNavigateToMapping,
         onClickLang = viewModel::onClickLang,
         onClickLanguage = viewModel::onClickLanguage,
         onDismissLangDialog = viewModel::onDismissLangDialog
@@ -51,7 +49,6 @@ fun SettingsScreen(
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
-    onNavigateToMapping: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
     onDismissLangDialog: () -> Unit = {},
     onClickLang: (SupportedLanguagesConfig.UiLanguage) -> Unit = {}
@@ -81,14 +78,6 @@ fun SettingsScreen(
             .fillMaxSize()
             .padding(vertical = 8.dp),
     ) {
-        item {
-            SettingsListItem(
-                icon = Icons.Filled.Map,
-                title = stringResource(Res.string.mappings),
-                onClick = onNavigateToMapping,
-                testTag = "mapping_setting_item"
-            )
-        }
 
         item {
             ListItem(

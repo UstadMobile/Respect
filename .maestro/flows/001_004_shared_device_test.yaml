@@ -17,8 +17,10 @@ onFlowComplete:
       file: "scripts/teardown.js"
 
 ---
-# Admin enable shared school device mode on the same device
+# Admin setup
 - runFlow: "subflows/school_admin_login_flow.yaml"
+
+# Add class, then add Student and Teacher to class
 - runFlow:
      file: "subflows/admin_add_class.yaml"
      env:
@@ -52,6 +54,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Apps"
+
+# Enable Shared Mode - Test Device 1
 - tapOn:
     id: "Settings"
 - assertVisible:
@@ -103,6 +107,8 @@ onFlowComplete:
     id: "app_title"
     text: "Shared school device"
 - assertVisible: "1234"
+
+# Enable This Device
 - tapOn:
     id: "add_device"
 - assertVisible: "Add device"
@@ -125,7 +131,7 @@ onFlowComplete:
 - assertVisible: "New Class"
 - assertVisible: "Scan QR code badge"
 
-# Teacher login to shared school device
+# Teacher approves Test Device 1
 - tapOn: "Teacher/admin login"
 - assertVisible:
     id: "app_title"
@@ -166,7 +172,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Settings"
-- assertVisible: "School name, policies, shared device"
 - tapOn: "School"
 - assertVisible:
     id: "app_title"
@@ -179,7 +184,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Shared school device"
-- tapOn: "Student can self-select their class and name"  #switch is off
+- assertVisible: "Student can self-select their class and name"  #switch is ON
 - assertVisible: "Teacher/admin unlock PIN"
 - assertVisible: "Pending device request to join (1)"
 - assertVisible: "Test Device 1"
@@ -188,6 +193,8 @@ onFlowComplete:
 - assertNotVisible: "Pending device request to join (1)"
 - assertVisible: "Devices (1)"
 - assertVisible: "Test Device 1 (this device)"
+
+# Generate Invite Link (Approval OFF)
 - tapOn:
     id: "add_device"
 - assertVisible: "Add device"
@@ -207,7 +214,7 @@ onFlowComplete:
 - copyTextFrom:
       id: "invite_url"
 
-# Student adding shared device using QR code
+# Enable Test Device 2
 - runFlow:
     file: "subflows/openlink_flow.yaml"
     env:
@@ -219,6 +226,86 @@ onFlowComplete:
 - tapOn: "Device name"
 - inputText: "Test Device 2"
 - tapOn: "Enable"
+- assertVisible:
+    id: "app_title"
+    text: "Select class"
+- assertVisible: "Scan QR code badge"
+- assertVisible: "Teacher/admin login"
+- tapOn: "New Class"
+- assertVisible:
+    id: "app_title"
+    text: "New Class"
+- tapOn: "StudentA User"
+- assertVisible: "Assignment"
+- assertVisible: "Apps"
+- assertNotVisible: "Class"
+- assertNotVisible: "People"
+- tapOn:
+    id: "user_account_icon"
+- assertNotVisible: "Share Feedback"
+- assertVisible: "StudentA User"
+- tapOn: "Logout"
+- assertVisible:
+    id: "app_title"
+    text: "Select class"
+
+# Teacher login to shared school device to see devices update
+- tapOn: "Teacher/admin login"
+- assertVisible:
+    id: "app_title"
+    text: "Teacher/admin login"
+- tapOn: "Enter school device PIN"
+- inputText: "1234"
+- tapOn: "Next"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: teacherauser
+- tapOn:
+    id : "password"
+- inputText: test123
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn:
+    id: "settings_icon"
+- assertVisible:
+    id: "app_title"
+    text: "Settings"
+- tapOn: "School"
+- assertVisible:
+    id: "app_title"
+    text: "School"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Shared school device"
+- assertVisible: "2 devices"
+- tapOn: "Shared school device"
+- assertVisible:
+    id: "app_title"
+    text: "Shared school device"
+- tapOn: "Student can self-select their class and name"  #switch is OFF
+- assertVisible: "Teacher/admin unlock PIN"
+- assertVisible: "Devices (2)"
+- assertVisible: "Test Device 1 (this device)"
+- assertVisible: "Test Device 2"
+
+# Validating flow when the Student can self-select their class and name switch is OFF
+- clearState: world.respect.app
+- tapOn: "Get Started"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- assertVisible: "Teacher/admin login"
 - tapOn: "Scan QR code badge"
 - assertVisible:
     id: "app_title"
@@ -246,5 +333,13 @@ onFlowComplete:
 
 - assertVisible:
     id: "app_title"
-    text: "Apps"
-
+    text: "Assignments"
+- assertVisible: "Assignment"
+- assertVisible: "Apps"
+- assertNotVisible: "Class"
+- assertNotVisible: "People"
+- tapOn:
+    id: "user_account_icon"
+- assertNotVisible: "Share Feedback"
+- assertVisible: "StudentA User"
+- tapOn: "Logout"

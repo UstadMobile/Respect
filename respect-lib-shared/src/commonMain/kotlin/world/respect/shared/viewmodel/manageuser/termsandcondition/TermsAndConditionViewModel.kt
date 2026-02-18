@@ -50,9 +50,8 @@ class TermsAndConditionViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 SignupScreen.create(
-                    route.schoolUrl,
-                    route.type,
-                    route.respectRedeemInviteRequest
+                    schoolUrl = route.schoolUrl,
+                    inviteRequest = route.respectRedeemInviteRequest
                 )
             )
         )

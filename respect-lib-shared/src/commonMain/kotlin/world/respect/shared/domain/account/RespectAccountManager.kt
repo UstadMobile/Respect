@@ -29,6 +29,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
+import world.respect.datalayer.school.model.Person
 import world.respect.libutil.util.putDebugCrashCustomData
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
@@ -132,7 +133,7 @@ class RespectAccountManager(
     suspend fun login(
         credential: RespectCredential,
         schoolUrl: Url,
-    ) {
+    ) : AuthResponse {
         val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
             schoolScopeId.scopeId
@@ -151,13 +152,15 @@ class RespectAccountManager(
         )
 
         initSession(authResponse, RespectSession(respectAccount, null))
+
+        return authResponse
     }
 
     @Suppress("unused")
     suspend fun register(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
-    ) {
+    ): Person {
         val schoolScopeId = SchoolDirectoryEntryScopeId(
             schoolUrl, null,
         )
@@ -181,6 +184,8 @@ class RespectAccountManager(
                 profilePersonUid = null,
             )
         )
+
+        return authResponse.person
     }
 
     private suspend fun initSession(

@@ -39,7 +39,14 @@ appId: world.respect.app
 
 # Admin copy invite code to the teacher
 - tapOn: "Add Teacher"
-- tapOn: ".*Copy invite code.*"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Approval required"    #switch is On
+- copyTextFrom:
+    id: "invite_code"
+
 
 # Teacher sign-up via invite code to the class
 - clearState: world.respect.app
@@ -55,13 +62,19 @@ appId: world.respect.app
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- longPressOn: "Invite code"
-- tapOn: "Paste"
+- pasteText
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Teacher"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Class name"
 - assertVisible: "New Class"
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -90,6 +103,10 @@ appId: world.respect.app
 - tapOn: "Password*"
 - inputText: "testt1"
 - tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Waiting for approval"

@@ -24,6 +24,7 @@ import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntit
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
+import world.respect.datalayer.db.school.daos.InviteEntityDao
 import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
@@ -34,6 +35,7 @@ import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefE
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
 import world.respect.datalayer.db.school.entities.PersonQrBadgeEntity
+import world.respect.datalayer.db.school.entities.InviteEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
@@ -68,8 +70,9 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
         SchoolPermissionGrantEntity::class,
         PullSyncStatusEntity::class,
         PersonQrBadgeEntity::class,
+        InviteEntity::class,
     ],
-    version = 10,
+    version = 11,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -106,6 +109,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getAssignmentLearningResourceRefEntityDao(): AssignmentLearningResourceRefEntityDao
 
     abstract fun getWriteQueueItemEntityDao(): WriteQueueItemEntityDao
+
+    abstract fun getInviteEntityDao(): InviteEntityDao
 
     abstract fun getSchoolPermissionGrantDao(): SchoolPermissionGrantDao
 

@@ -2,6 +2,7 @@ package world.respect.shared.util.ext
 
 import org.jetbrains.compose.resources.StringResource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.pending_student
 import world.respect.shared.generated.resources.pending_teacher

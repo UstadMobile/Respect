@@ -1,6 +1,8 @@
 package world.respect.shared.domain.account.invite
 
 import io.ktor.http.Url
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import world.respect.credentials.passkey.CreatePasskeyUseCase
@@ -10,27 +12,40 @@ import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
+import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.adapters.toPersonPasskey
+import world.respect.datalayer.school.ext.accepterEnrollmentRole
+import world.respect.datalayer.school.ext.accepterPersonRole
+import world.respect.datalayer.school.ext.copyWithInviteInfo
+import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
+import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
-import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl.Companion.TOKEN_DEFAULT_TTL
+import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
 import java.lang.IllegalArgumentException
+import kotlin.time.Clock
 
 /**
- * Server-side use case that handles redeeming an invite
+ * Server-side use case that handles redeeming an invite: that is when a (new) user client signing up
+ * provies both a) invite info and code and b) information about the account they want to create (
+ * name, gender, username, password/passkey, etc).
  */
 class RedeemInviteUseCaseDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -42,41 +57,68 @@ class RedeemInviteUseCaseDb(
     private val json: Json,
     private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
-): RedeemInviteUseCase, KoinComponent {
+) : RedeemInviteUseCase, KoinComponent {
 
     override suspend fun invoke(
         redeemRequest: RespectRedeemInviteRequest
     ): AuthResponse {
-        val classUid = redeemRequest.classUid
-            ?: throw IllegalArgumentException("No class guid").withHttpStatus(400)
-        val clazz = schoolDb.getClassEntityDao().findByGuid(uidNumberMapper(classUid))
-            ?: throw IllegalArgumentException("Class not found").withHttpStatus(400)
-        val expectedInviteCode = when(redeemRequest.role) {
-            PersonRoleEnum.TEACHER -> clazz.clazz.cTeacherInviteCode
-            else -> clazz.clazz.cStudentInviteCode
-        } ?: throw IllegalArgumentException("No invite code for requested role")
-            .withHttpStatus(400)
-
-        if(!redeemRequest.code.endsWith(expectedInviteCode)) {
-            throw IllegalArgumentException("Bad code").withHttpStatus(400)
-        }
+        val inviteFromDb = schoolDb.getInviteEntityDao().getInviteByInviteCode(
+            redeemRequest.code
+        )?.toModel()
+            ?: throw IllegalArgumentException("invite not found for code: ${redeemRequest.code}")
+                .withHttpStatus(404)
 
         val accountGuid = redeemRequest.account.guid
 
+        val approvalRequired = inviteFromDb.isApprovalRequiredNow()
+
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
-            role = redeemRequest.role,
+            role = redeemRequest.invite.accepterPersonRole,
             username = redeemRequest.account.username,
             guid = accountGuid,
-        )
+        ).copy(
+            status = if(approvalRequired){
+                PersonStatusEnum.PENDING_APPROVAL
+            }else {
+                PersonStatusEnum.ACTIVE
+            },
+        ).let {
+            if(approvalRequired) {
+                it.copyWithInviteInfo(invite = redeemRequest.invite)
+            }else {
+                it
+            }
+        }
 
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
         )
         schoolDataSourceVal.personDataSource.updateLocal(listOf(accountPerson))
 
+        val enrollmentRole = inviteFromDb.accepterEnrollmentRole(approvalRequired)
+        if(enrollmentRole != null && inviteFromDb is ClassInvite
+                && inviteFromDb.inviteMode != ClassInviteModeEnum.VIA_PARENT
+        ) {
+            schoolDataSourceVal.enrollmentDataSource.updateLocal(
+                listOf(
+                    Enrollment(
+                        uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+                            Enrollment.TABLE_ID
+                        ).toString(),
+                        classUid = inviteFromDb.classUid,
+                        personUid = accountPerson.guid,
+                        role = enrollmentRole,
+                        beginDate = Clock.System.now().toLocalDateTime(
+                            TimeZone.currentSystemDefault()
+                        ).date
+                    )
+                )
+            )
+        }
+
         val credential = redeemRequest.account.credential
 
-        val authResponse = when(credential) {
+        val authResponse = when (credential) {
             is RespectPasswordCredential -> {
                 schoolDataSourceVal.personPasswordDataSource.store(
                     listOf(
@@ -117,7 +159,7 @@ class RedeemInviteUseCaseDb(
                 val token = AuthToken(
                     accessToken = randomString(32),
                     timeCreated = System.currentTimeMillis(),
-                    ttl = TOKEN_DEFAULT_TTL,
+                    ttl = GetTokenAndUserProfileWithCredentialDbImpl.TOKEN_DEFAULT_TTL,
                 )
 
                 val personGuidHash = uidNumberMapper(accountPerson.guid)
@@ -139,27 +181,27 @@ class RedeemInviteUseCaseDb(
                 throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
             }
         }
+        markFirstUserInviteAsDeleted(inviteFromDb, schoolDataSourceVal)
 
-        //If a teacher/student, make the pending enrollment now
-        if (redeemRequest.role == PersonRoleEnum.TEACHER || redeemRequest.role == PersonRoleEnum.STUDENT) {
-            schoolDataSourceVal.enrollmentDataSource.updateLocal(
-                listOf(
-                    Enrollment(
-                        uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                            Enrollment.TABLE_ID
-                        ).toString(),
-                        classUid = classUid,
-                        personUid = accountPerson.guid,
-                        role = if (redeemRequest.role == PersonRoleEnum.TEACHER) {
-                            EnrollmentRoleEnum.PENDING_TEACHER
-                        } else {
-                            EnrollmentRoleEnum.PENDING_STUDENT
-                        },
-                        inviteCode = redeemRequest.code,
-                    )
-                )
-            )
-        }
         return authResponse
+    }
+    /**
+     * Deletes the invite if it's a first user invite (firstUser = true)
+     * This ensures the first user invite can never be used again after the first user signs up
+     */
+    private suspend fun markFirstUserInviteAsDeleted(
+        redeemedInvite: Invite2,
+        schoolDataSourceVal: SchoolDataSourceLocal
+    ) {
+        // Check if this is a NewUserInvite with firstUser = true
+        if (redeemedInvite is NewUserInvite && redeemedInvite.firstUser) {
+
+            val deletedInvite = redeemedInvite.copy(
+                status = StatusEnum.TO_BE_DELETED,
+                lastModified = Clock.System.now()
+            )
+
+            schoolDataSourceVal.inviteDataSource.store(listOf(deletedInvite))
+        }
     }
 }

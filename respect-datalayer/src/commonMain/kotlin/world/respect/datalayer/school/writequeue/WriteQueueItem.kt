@@ -23,7 +23,11 @@ class WriteQueueItem(
     ) {
         PERSON(1), CLASS(2), ENROLLMENT(3), PERSON_PASSWORD(4),
         ASSIGNMENT(5), SCHOOL_APP(6), SCHOOL_PERMISSION_GRANT(7),
-        PERSON_QRBADGE(8);
+        PERSON_QRBADGE(8),
+        INVITE(9),
+
+        ;
+
 
         companion object {
 

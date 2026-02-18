@@ -16,6 +16,7 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsDataSource
 import world.respect.datalayer.school.AssignmentDataSource
@@ -40,7 +41,8 @@ class SchoolDataSourceHttp(
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    private val validationHelper: ExtendedDataSourceValidationHelper
+    private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
 ) : SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSource by lazy {
@@ -156,9 +158,9 @@ class SchoolDataSourceHttp(
     }
 
     override val opdsFeedDataSource: OpdsFeedDataSource by lazy {
-        //TODO: we need to provide the feed validation helper
         OpdsFeedDataSourceHttp(
             httpClient = httpClient,
+            opdsFeedValidationHelper = opdsFeedValidationHelper,
         )
     }
 

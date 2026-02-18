@@ -16,7 +16,7 @@ import world.respect.lib.opds.model.OpdsFeed
 
 class OpdsFeedDataSourceHttp(
     private val httpClient: HttpClient,
-    private val feedValidationHelper: BaseDataSourceValidationHelper? = null,
+    private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
 ): OpdsFeedDataSource {
 
     override fun getByUrlAsFlow(
@@ -26,7 +26,7 @@ class OpdsFeedDataSourceHttp(
         return httpClient.getDataLoadResultAsFlow<OpdsFeed>(
             url = url,
             dataLoadParams = params,
-            validationHelper = feedValidationHelper,
+            validationHelper = opdsFeedValidationHelper,
         ).map { loadResult ->
             /*
              * When the OpdsFeed is persisted to the database, the self url is used to determine the
@@ -42,7 +42,7 @@ class OpdsFeedDataSourceHttp(
     ): DataLoadState<OpdsFeed> {
         return httpClient.getAsDataLoadState<OpdsFeed>(
             url = url,
-            validationHelper = feedValidationHelper,
+            validationHelper = opdsFeedValidationHelper,
         ).map { it.withAbsoluteSelfUrl(url) }
     }
 

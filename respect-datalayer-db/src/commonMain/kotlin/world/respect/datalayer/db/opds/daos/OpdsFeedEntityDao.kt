@@ -24,6 +24,15 @@ abstract class OpdsFeedEntityDao {
     """)
     abstract suspend fun findByUrlHash(urlHash: Long): OpdsFeedEntity?
 
+    @Query("""
+        SELECT OpdsFeedEntity.ofeLastModifiedHeader AS lastModified,
+               OpdsFeedEntity.ofeEtag AS etag
+          FROM OpdsFeedEntity
+         WHERE OpdsFeedEntity.ofeUrlHash = :urlHash
+     
+    """)
+    abstract suspend fun getNetworkValidationInfo(urlHash: Long): LastModifiedAndETagDb?
+
 
     @Query("""
         DELETE FROM OpdsFeedEntity 

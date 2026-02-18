@@ -2,6 +2,7 @@ package world.respect.datalayer.db.opds
 
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,6 +19,8 @@ import world.respect.datalayer.db.opds.adapters.OpdsFeedEntities
 import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
 import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
+import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
+import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.ext.dataLoadMetaInfoForPlaylist
@@ -76,6 +79,15 @@ class OpdsFeedDataSourceDb(
                 )
             }
         } ?: NoDataLoadedState.notFound()
+    }
+
+    override suspend fun getValidationInfo(
+        url: Url,
+        requestHeaders: IHttpHeaders
+    ): NetworkValidationInfo? {
+        return schoolDb.getOpdsFeedEntityDao().getNetworkValidationInfo(
+            urlHash = uidNumberMapper(url.toString()),
+        )?.asNetworkValidationInfo()
     }
 
     private suspend fun doUpsertOpdsFeed(

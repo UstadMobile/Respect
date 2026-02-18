@@ -22,10 +22,11 @@ onFlowComplete:
       respect_directory: ${output.SCHOOL_URL}
 - tapOn:
     id: "choose_language"
+- assertVisible: "Choose your language"
 - assertVisible: "Use system default (English)"
 - assertVisible: "हिन्दी"
-- assertVisible: "Choose your language"
 - tapOn: "English"
+- assertVisible: "English"
 - tapOn: "Get Started"
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
@@ -36,7 +37,7 @@ onFlowComplete:
 - inputText: "admin"
 - tapOn:
     id : "password"
-- inputText: "test123"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
 - tapOn: "Login"
 - assertVisible:
     id: "app_title"

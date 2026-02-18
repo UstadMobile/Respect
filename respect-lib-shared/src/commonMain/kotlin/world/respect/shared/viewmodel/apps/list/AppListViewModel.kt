@@ -67,7 +67,7 @@ class AppListViewModel(
                     Url(it)
                 } ?: return@collectLatest
 
-                schoolDataSource.opdsDataSource.loadOpdsFeed(
+                schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                     url = feedUrl,
                     params = DataLoadParams()
                 ).collect { dataLoad ->

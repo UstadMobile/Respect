@@ -1,28 +1,39 @@
 package world.respect.datalayer.school.opds
 
+import io.ktor.http.Url
 import io.ktor.util.StringValues
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.lib.opds.model.OpdsFeed
 
 /**
- * OpdsFeedDataSource: essentially handles Playlists, using the Opds standard. Our general approach
- * to data models (as per ModelWithTimes) requires a last modified time, stored time, and uid for
- * each entity. For OpdsFeed this is handled as follows:
+ * OpdsFeedDataSource: essentially handles Playlists, using the Opds standard.
+ *
+ * There is a key difference between an Opds DataSource and others: this DataSource can fetch data
+ * from external, third party servers that are serving Opds feeds over HTTP, whereas other DataSources
+ * only fetch data from a single upstream school server.
+ *
+ * Our general approach to data models (as per ModelWithTimes) requires a last modified time,
+ * stored time, and uid for each entity. For OpdsFeed this is handled as follows:
  *  last-modified: OpdsFeedMetadata.modified
  *  stored: only kept on the database side
- *  uid: the OpdsFeed url. Playlists created on school are in the form of school-url/playlists/uuid
+ *  uid: the OpdsFeed url (as per the self link in the model). Playlists created on school are in
+ *  the form of school-url/playlists/uuid
  *
- * Client side: app uses 'normal' approach - local database and remote repository. All upstream
- * requests go to the school server, regardless of url
+ * Client side:
+ *  The remote datasource will fetch from a server as specified by the URL, which may, or may not,
+ *  be the school URL.
  *
- * Server side: server uses a repository. For any specified url that is not on the school server
- * itself, it will attempt to fetch from the upstream url.
+ * Server side:
+ * The server is expected to 'crawl' the school's available OpdsFeeds such that it can handle
+ * search queries.
  *
- * This approach allows the server to modify / process OpdsFeeds: e.g. to include additional
- * metadata that was not otherwise present, to mitigate the effect of a compatible app's server
- * being down, add download length to manifests, etc.
+ * OpdsFeeds Playlists are NOT modified or transformed by any server: they are copied. E.g. if a
+ * feed from an app developer has poor metadata, the server will NOT transform the original feed. The
+ * school admin or school teachers can copy the app's feed, and then modify it.
  */
 interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
 
@@ -43,11 +54,11 @@ interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
     }
 
     /**
-     *
+     * Load an OPDS Feed from a given URL : essentially the same as getByUid for other data types.
      */
-    suspend fun list(
-        loadParams: DataLoadParams = DataLoadParams(),
-        listParams: GetListParams
-    ): List<OpdsFeed>
+    fun getByUrlAsFlow(
+        url: Url,
+        params: DataLoadParams
+    ):  Flow<DataLoadState<OpdsFeed>>
 
 }

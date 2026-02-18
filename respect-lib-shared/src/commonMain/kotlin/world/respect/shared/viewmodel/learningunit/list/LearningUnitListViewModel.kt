@@ -73,7 +73,7 @@ class LearningUnitListViewModel(
                 )
             }
 
-            schoolDataSource.opdsDataSource.loadOpdsFeed(
+            schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                 url = route.opdsFeedUrl,
                 params = DataLoadParams()
             ).collect { result ->

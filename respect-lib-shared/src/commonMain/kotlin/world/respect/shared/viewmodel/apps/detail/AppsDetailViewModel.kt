@@ -81,7 +81,7 @@ class AppsDetailViewModel(
                 val defaultLessonLink = result.dataOrNull()?.respectAppDefaultLessonList()
                     ?: return@collectLatest
 
-                schoolDataSource.opdsDataSource.loadOpdsFeed(
+                schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                     url = route.manifestUrl.resolve(defaultLessonLink.href),
                     params = DataLoadParams()
                 ).collect { result ->

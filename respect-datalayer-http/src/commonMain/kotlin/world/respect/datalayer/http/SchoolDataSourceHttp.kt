@@ -5,6 +5,7 @@ import io.ktor.http.Url
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
+import world.respect.datalayer.http.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.AssignmentDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
@@ -31,6 +32,7 @@ import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class SchoolDataSourceHttp(
@@ -150,6 +152,13 @@ class SchoolDataSourceHttp(
     override val opdsDataSource: OpdsDataSource by lazy {
         OpdsDataSourceHttp(
             httpClient = httpClient
+        )
+    }
+
+    override val opdsFeedDataSource: OpdsFeedDataSource by lazy {
+        //TODO: we need to provide the feed validation helper
+        OpdsFeedDataSourceHttp(
+            httpClient = httpClient,
         )
     }
 

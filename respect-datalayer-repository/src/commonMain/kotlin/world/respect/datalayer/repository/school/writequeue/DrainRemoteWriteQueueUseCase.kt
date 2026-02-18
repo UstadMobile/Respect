@@ -64,6 +64,10 @@ class DrainRemoteWriteQueueUseCase(
                     WriteQueueItem.Model.INVITE -> {
                         repository.inviteDataSource.sendToRemote(listOf(item))
                     }
+
+                    WriteQueueItem.Model.OPDS_FEED -> {
+                        repository.opdsFeedDataSource.sendToRemote(listOf(item))
+                    }
                 }
 
             }

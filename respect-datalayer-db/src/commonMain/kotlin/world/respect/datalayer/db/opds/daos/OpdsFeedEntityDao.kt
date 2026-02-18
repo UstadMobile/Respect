@@ -26,13 +26,27 @@ abstract class OpdsFeedEntityDao {
     @Insert
     abstract suspend fun insertList(entities: List<OpdsFeedEntity>)
 
-    @Query("""
-        SELECT OpdsFeedEntity.ofeLastModifiedHeader AS lastModified,
+    @Query(
+        """
+        SELECT OpdsFeedEntity.ofeLastModified AS lastModified,
                OpdsFeedEntity.ofeEtag AS etag
           FROM OpdsFeedEntity
          WHERE ofeUrlHash = :urlHash
-    """)
+    """
+    )
     abstract suspend fun getLastModifiedAndETag(urlHash: Long): LastModifiedAndETagDb?
+
+    @Query(
+        """
+        SELECT OpdsFeedEntity.*
+          FROM OpdsFeedEntity
+         WHERE ofeUrlHash IN (:urlHashes)
+    """
+    )
+    abstract suspend fun findByUrlHashList(
+        urlHashes: List<Long>
+    ): List<OpdsFeedEntity>
+
 
 
 }

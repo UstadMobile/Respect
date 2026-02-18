@@ -130,6 +130,8 @@ class SchoolDataSourceDb(
             schoolDb = schoolDb,
             uidNumberMapper = uidNumberMapper,
             authenticatedUser = authenticatedUser,
+            json = json,
+            primaryKeyGenerator = primaryKeyGenerator,
         )
     }
 

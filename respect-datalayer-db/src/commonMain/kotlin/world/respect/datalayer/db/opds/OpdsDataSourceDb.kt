@@ -18,6 +18,7 @@ import world.respect.datalayer.db.opds.adapters.OpdsFeedEntities
 import world.respect.datalayer.db.opds.adapters.OpdsPublicationEntities
 import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
+import world.respect.datalayer.db.opds.adapters.asDataStateModel
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
@@ -143,7 +144,7 @@ class OpdsDataSourceDb(
                         publications = respectSchoolDatabase.getOpdsPublicationEntityDao().findByFeedUid(
                             feedEntity.ofeUid),
                         groups = respectSchoolDatabase.getOpdsGroupEntityDao().findByFeedUid(feedEntity.ofeUid),
-                    ).asModel(json)
+                    ).asDataStateModel(json)
                 }
             } ?: NoDataLoadedState.notFound()
         }

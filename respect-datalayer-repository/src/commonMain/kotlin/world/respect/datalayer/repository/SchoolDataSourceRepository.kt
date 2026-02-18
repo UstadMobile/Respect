@@ -4,6 +4,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.opds.OpdsDataSourceRepository
+import world.respect.datalayer.repository.opds.OpdsFeedDataSourceRepository
 import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
@@ -128,6 +129,14 @@ class SchoolDataSourceRepository(
         OpdsDataSourceRepository(
             local = local.opdsDataSource,
             remote = remote.opdsDataSource,
+        )
+    }
+
+    override val opdsFeedDataSource: OpdsFeedDataSourceRepository by lazy {
+        OpdsFeedDataSourceRepository(
+            local = local.opdsFeedDataSource,
+            remote = remote.opdsFeedDataSource,
+            remoteWriteQueue = remoteWriteQueue,
         )
     }
 

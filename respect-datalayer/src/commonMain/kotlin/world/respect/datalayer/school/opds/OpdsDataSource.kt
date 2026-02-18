@@ -9,6 +9,7 @@ import world.respect.lib.opds.model.OpdsPublication
 
 interface OpdsDataSource {
 
+    @Deprecated("Should be removed in favor of OpdsFeedDataSource.getByUrl")
     /**
      * Load an OPDS Feed from a given URL
      */

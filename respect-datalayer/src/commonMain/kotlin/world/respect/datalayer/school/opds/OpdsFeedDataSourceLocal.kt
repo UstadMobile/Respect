@@ -1,6 +1,14 @@
 package world.respect.datalayer.school.opds
 
-import world.respect.datalayer.shared.LocalModelDataSource
+import io.ktor.http.Url
+import world.respect.datalayer.DataReadyState
 import world.respect.lib.opds.model.OpdsFeed
 
-interface OpdsFeedDataSourceLocal: OpdsFeedDataSource, LocalModelDataSource<OpdsFeed>
+interface OpdsFeedDataSourceLocal: OpdsFeedDataSource {
+
+    suspend fun updateLocal(
+        url: Url,
+        dataLoadResult: DataReadyState<OpdsFeed>,
+    )
+
+}

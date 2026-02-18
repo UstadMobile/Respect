@@ -18,6 +18,14 @@ abstract class OpdsFeedEntityDao {
     abstract fun findByUrlHashAsFlow(urlHash: Long): Flow<OpdsFeedEntity?>
 
     @Query("""
+        SELECT * 
+          FROM OpdsFeedEntity 
+         WHERE ofeUrlHash = :urlHash
+    """)
+    abstract suspend fun findByUrlHash(urlHash: Long): OpdsFeedEntity?
+
+
+    @Query("""
         DELETE FROM OpdsFeedEntity 
          WHERE ofeUid = :feedUid
     """)

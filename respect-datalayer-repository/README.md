@@ -55,7 +55,8 @@ supported by an API (e.g. xAPI statements resource).
 > with a value of the timestamp for which all Statements that have or will have a "stored" property before that time are known with reasonable certainty to be available for retrieval
 
 Generally a Last-Modified HTTP header SHOULD actually be the most recent stored time of any data 
-included in the response: because this is the most recent time the response actually changed.
+included in the response: because this is the most recent time the response of this server actually 
+changed.
 
 When permissions change this can lead to a situation where a client using stored since parameter would
 not receive new entities because they were stored before the stored-since, but the client

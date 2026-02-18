@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.map
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
@@ -33,6 +34,16 @@ class OpdsFeedDataSourceHttp(
              */
             loadResult.map { it.withAbsoluteSelfUrl(url) }
         }
+    }
+
+    override suspend fun getByUrl(
+        url: Url,
+        params: DataLoadParams
+    ): DataLoadState<OpdsFeed> {
+        return httpClient.getAsDataLoadState<OpdsFeed>(
+            url = url,
+            validationHelper = feedValidationHelper,
+        ).map { it.withAbsoluteSelfUrl(url) }
     }
 
     override suspend fun store(list: List<OpdsFeed>) {

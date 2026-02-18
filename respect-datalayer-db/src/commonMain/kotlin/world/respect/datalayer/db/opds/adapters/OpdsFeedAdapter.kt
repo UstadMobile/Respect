@@ -30,6 +30,7 @@ class OpdsFeedEntities(
 )
 
 fun OpdsFeed.asEntities(
+    dataLoadMetaInfo: DataLoadMetaInfo,
     json: Json,
     primaryKeyGenerator: PrimaryKeyGenerator,
     uidNumberMapper: UidNumberMapper,
@@ -88,7 +89,8 @@ fun OpdsFeed.asEntities(
             ofeUrl = url,
             ofeUrlHash = ofeUid,
             ofeLastModified = this.metadata.modified ?: Clock.System.now(),
-            ofeEtag = null,//TODO:
+            ofeLastModifiedHeader = Instant.fromEpochMilliseconds(dataLoadMetaInfo.lastModified),
+            ofeEtag = dataLoadMetaInfo.etag,
         ),
         feedMetaData = buildList {
             add(feedMetadata)
@@ -178,6 +180,7 @@ fun DataReadyState<OpdsFeed>.asEntities(
             ofeUrlHash = ofeUid,
             ofeLastModified = Instant.fromEpochMilliseconds(metaInfo.lastModified),
             ofeEtag = metaInfo.etag,
+            ofeLastModifiedHeader = Instant.fromEpochMilliseconds(metaInfo.lastModified),
         ),
         feedMetaData = buildList {
             add(feedMetadata)

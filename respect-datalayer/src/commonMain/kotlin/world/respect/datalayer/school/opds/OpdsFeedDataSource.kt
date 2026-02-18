@@ -61,4 +61,10 @@ interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
         params: DataLoadParams
     ):  Flow<DataLoadState<OpdsFeed>>
 
+
+    suspend fun getByUrl(
+        url: Url,
+        params: DataLoadParams
+    ): DataLoadState<OpdsFeed>
+
 }

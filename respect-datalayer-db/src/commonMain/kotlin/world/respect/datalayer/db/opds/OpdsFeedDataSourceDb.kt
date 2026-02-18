@@ -1,6 +1,5 @@
 package world.respect.datalayer.db.opds
 
-import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
@@ -8,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
@@ -20,6 +20,7 @@ import world.respect.datalayer.db.opds.adapters.asModel
 import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.opds.ext.dataLoadMetaInfoForPlaylist
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
@@ -62,10 +63,27 @@ class OpdsFeedDataSourceDb(
         }
     }
 
+    override suspend fun getByUrl(
+        url: Url,
+        params: DataLoadParams
+    ): DataLoadState<OpdsFeed> {
+        return schoolDb.getOpdsFeedEntityDao().findByUrlHash(
+            urlHash = uidNumberMapper(url.toString())
+        )?.let { feedEntity ->
+            schoolDb.useReaderConnection {
+                DataReadyState(
+                    data = feedEntity.loadModel()
+                )
+            }
+        } ?: NoDataLoadedState.notFound()
+    }
+
     private suspend fun doUpsertOpdsFeed(
-        opdsFeed: OpdsFeed
+        opdsFeed: OpdsFeed,
+        dataLoadMetaInfo: DataLoadMetaInfo,
     ) {
         val feedEntities = opdsFeed.asEntities(
+            dataLoadMetaInfo =  dataLoadMetaInfo,
             json = json,
             primaryKeyGenerator = primaryKeyGenerator,
             uidNumberMapper = uidNumberMapper,
@@ -100,31 +118,22 @@ class OpdsFeedDataSourceDb(
             doUpsertOpdsFeed(
                 opdsFeed = feed.copy(
                     metadata = feed.metadata.copy(modified = timeNow)
-                )
+                ),
+                dataLoadMetaInfo = feed.dataLoadMetaInfoForPlaylist()
             )
         }
     }
 
     override suspend fun updateLocal(
-        list: List<OpdsFeed>,
-        forceOverwrite: Boolean
+        url: Url,
+        dataLoadResult: DataReadyState<OpdsFeed>,
     ) {
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                list.forEach { feed ->
-                    //TODO: check last modified before doing insert.
-
-                    doUpsertOpdsFeed(feed)
-                }
-            }
+        schoolDb.useWriterConnection {
+            doUpsertOpdsFeed(
+                opdsFeed = dataLoadResult.data,
+                dataLoadMetaInfo = dataLoadResult.metaInfo,
+            )
         }
     }
 
-    override suspend fun findByUidList(uids: List<String>): List<OpdsFeed> {
-        return schoolDb.useReaderConnection {
-            schoolDb.getOpdsFeedEntityDao().findByUrlHashList(
-                urlHashes = uids.map { uidNumberMapper(it) }
-            ).map { it.loadModel() }
-        }
-    }
 }

@@ -33,6 +33,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -42,6 +43,7 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
@@ -57,7 +59,9 @@ import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -121,9 +125,11 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(
+    activityNavCommandFlow: Flow<NavCommand>,
     widthClass: SizeClass = SizeClass.MEDIUM,
     useBottomBar: Boolean = true,
-    onAppStateChanged: (AppUiState) -> Unit = { }) {
+    onAppStateChanged: (AppUiState) -> Unit = { }
+) {
     val appUiState = remember {
         mutableStateOf(
             AppUiState(
@@ -134,6 +140,10 @@ fun App(
     }
 
     val navController = rememberNavController()
+    val respectNavController = remember(Unit) {
+        RespectComposeNavController(navController)
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     val accountManager: RespectAccountManager = koinInject()
@@ -147,6 +157,11 @@ fun App(
 
 
     NavControllerLogEffect(navController)
+
+    NavCommandEffect(
+        navHostController = respectNavController,
+        navCommandFlow = activityNavCommandFlow,
+    )
 
     var appUiStateVal by appUiState
     LaunchedEffect(appUiStateVal) {
@@ -231,7 +246,27 @@ fun App(
                 }
             },
             floatingActionButton = {
-                if (appUiStateVal.fabState.visible) {
+                if (appUiStateVal.expandableFabState.visible) {
+                    ExpandableFab(
+                        state = appUiStateVal.expandableFabState,
+                        onToggle = {
+                            appUiStateVal = appUiStateVal.copy(
+                                expandableFabState = appUiStateVal.expandableFabState.copy(
+                                    expanded = !appUiStateVal.expandableFabState.expanded
+                                )
+                            )
+                        },
+                        onItemClick = { item ->
+                            item.onClick()
+                            appUiStateVal = appUiStateVal.copy(
+                                expandableFabState = appUiStateVal.expandableFabState.copy(
+                                    expanded = false
+                                )
+                            )
+                        }
+                    )
+                }
+                else if (appUiStateVal.fabState.visible) {
                     ExtendedFloatingActionButton(
                         modifier = Modifier.testTag("floating_action_button"),
                         onClick = appUiStateVal.fabState.onClick,
@@ -265,6 +300,7 @@ fun App(
         ) { innerPadding ->
             AppNavHost(
                 navController = navController,
+                respectNavController = respectNavController,
                 onSetAppUiState = {
                     appUiStateVal = it
                 },

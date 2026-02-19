@@ -22,12 +22,12 @@ import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
-import world.respect.app.view.manageuser.confirmation.ConfirmationScreen
+import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
 import world.respect.app.view.manageuser.enterpasswordsignup.EnterPasswordSignupScreen
 import world.respect.app.view.manageuser.getstarted.GetStartedScreen
 import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
-import world.respect.app.view.manageuser.joinclazzwithcode.JoinClazzWithCodeScreen
+import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
@@ -36,13 +36,18 @@ import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScre
 import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
 import world.respect.app.view.onboarding.OnboardingScreen
 import world.respect.app.view.person.changepassword.ChangePasswordScreen
+import world.respect.app.view.person.copycode.CopyInviteCodeScreen
 import world.respect.app.view.person.detail.PersonDetailScreen
 import world.respect.app.view.person.edit.PersonEditScreen
+import world.respect.app.view.person.inviteperson.InvitePersonScreen
 import world.respect.app.view.person.list.PersonListScreen
 import world.respect.app.view.person.manageaccount.ManageAccountScreen
 import world.respect.app.view.person.passkeyList.PasskeyListScreen
+import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
+import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.share.PlaylistShareScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -51,13 +56,14 @@ import world.respect.app.view.report.indicator.edit.IndictorEditScreen
 import world.respect.app.view.report.indicator.list.IndicatorListScreen
 import world.respect.app.view.report.list.ReportListScreen
 import world.respect.app.view.report.list.ReportTemplateListScreen
+import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
-import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
@@ -66,17 +72,21 @@ import world.respect.shared.navigation.ChangePassword
 import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzList
-import world.respect.shared.navigation.ConfirmationScreen
+import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.CreateAccount
+import world.respect.shared.navigation.CreateAccountSetPassword
+import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.EnterLink
+import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.IndicatorDetail
 import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
+import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.JoinClazzWithCode
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
@@ -89,6 +99,9 @@ import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.PlaylistShare
+import world.respect.shared.navigation.QrCode
 import world.respect.shared.navigation.Report
 import world.respect.shared.navigation.ReportDetail
 import world.respect.shared.navigation.ReportEdit
@@ -100,8 +113,7 @@ import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
-import world.respect.shared.navigation.CreateAccountSetPassword
-import world.respect.shared.navigation.CreateAccountSetUsername
+import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
@@ -118,11 +130,11 @@ import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
-import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
+import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
@@ -131,6 +143,8 @@ import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionViewModel
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
 import world.respect.shared.viewmodel.report.filteredit.ReportFilterEditViewModel
@@ -139,36 +153,24 @@ import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewMode
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
-import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
-import world.respect.app.view.playlists.mapping.share.PlaylistShareScreen
-import world.respect.shared.viewmodel.settings.SettingsViewModel
-
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
-import world.respect.shared.navigation.Settings
-
-import world.respect.shared.navigation.PlaylistEdit
-import world.respect.shared.navigation.PlaylistShare
-import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-
+import world.respect.shared.viewmodel.settings.SettingsViewModel
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
+    respectNavController: RespectComposeNavController = remember(Unit) {
+        RespectComposeNavController(navController)
+    },
     onSetAppUiState: (AppUiState) -> Unit,
     modifier: Modifier,
 ) {
-    val respectNavController = remember {
-        RespectComposeNavController(navController)
-    }
-
     NavHost(
         navController = navController,
-        startDestination = Acknowledgement,
+        startDestination = Acknowledgement(),
         modifier = modifier,
     ) {
-
         composable<Acknowledgement> {
             val viewModel: AcknowledgementViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -177,14 +179,14 @@ fun AppNavHost(
             AcknowledgementScreen(viewModel)
         }
 
-        composable<Onboarding>{
+        composable<Onboarding> {
             val viewModel: OnboardingViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-
             OnboardingScreen(viewModel)
         }
+
         composable<LoginScreen> {
             val viewModel: LoginViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -193,12 +195,12 @@ fun AppNavHost(
             LoginScreen(viewModel)
         }
 
-        composable<JoinClazzWithCode> {
-            val viewModel: JoinClazzWithCodeViewModel = respectViewModel(
+        composable<EnterInviteCode> {
+            val viewModel: EnterInviteCodeViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            JoinClazzWithCodeScreen(viewModel)
+            EnterInviteCodeScreen(viewModel)
         }
 
         composable<RespectAppLauncher> {
@@ -305,6 +307,7 @@ fun AppNavHost(
             )
             ReportDetailScreen(navController = navController, viewModel = viewModel)
         }
+
         composable<ReportEdit> {
             val viewModel: ReportEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -312,6 +315,7 @@ fun AppNavHost(
             )
             ReportEditScreen(viewModel = viewModel)
         }
+
         composable<Report> {
             val viewModel: ReportListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -319,6 +323,7 @@ fun AppNavHost(
             )
             ReportListScreen(viewModel = viewModel)
         }
+
         composable<ReportTemplateList> {
             val viewModel: ReportTemplateListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -326,6 +331,7 @@ fun AppNavHost(
             )
             ReportTemplateListScreen(viewModel = viewModel)
         }
+
         composable<IndictorEdit> {
             val viewModel: IndicatorEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -333,6 +339,7 @@ fun AppNavHost(
             )
             IndictorEditScreen(viewModel = viewModel)
         }
+
         composable<ReportEditFilter> {
             val viewModel: ReportFilterEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -340,6 +347,7 @@ fun AppNavHost(
             )
             ReportFilterEditScreen(navController = navController, viewModel = viewModel)
         }
+
         composable<IndicatorList> {
             val viewModel: IndicatorListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -347,6 +355,7 @@ fun AppNavHost(
             )
             IndicatorListScreen(viewModel = viewModel)
         }
+
         composable<IndicatorDetail> {
             val viewModel: IndicatorDetailViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -362,6 +371,7 @@ fun AppNavHost(
             )
             HowPasskeyWorksScreen(viewModel = viewModel)
         }
+
         composable<RespectAppList> {
             val viewModel: AppListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -371,6 +381,7 @@ fun AppNavHost(
                 viewModel = viewModel
             )
         }
+
         composable<EnterLink> {
             val viewModel: EnterLinkViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -443,12 +454,12 @@ fun AppNavHost(
             )
         }
 
-        composable<ConfirmationScreen> {
-            val viewModel: ConfirmationViewModel = respectViewModel(
+        composable<AcceptInvite> {
+            val viewModel: AcceptInviteViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ConfirmationScreen(
+            AcceptInviteScreen(
                 viewModel = viewModel
             )
         }
@@ -518,6 +529,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<PasskeyList> {
             PasskeyListScreen(
                 viewModel = respectViewModel(
@@ -535,6 +547,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<Settings> {
             val viewModel: SettingsViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -544,6 +557,7 @@ fun AppNavHost(
                 viewModel = viewModel
             )
         }
+
         composable<ScanQRCode> {
             ScanQRCodeScreen(
                 viewModel = respectViewModel(
@@ -562,6 +576,7 @@ fun AppNavHost(
                 viewModel = viewModel
             )
         }
+
         composable<PlaylistShare> {
             val viewModel: PlaylistShareViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -571,21 +586,20 @@ fun AppNavHost(
                 viewModel = viewModel
             )
         }
-        composable<SchoolDirectoryList>{
+
+        composable<SchoolDirectoryList> {
             val viewModel: SchoolDirectoryListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-
             SchoolDirectoryListScreen(viewModel)
         }
 
-        composable<SchoolDirectoryEdit>{
+        composable<SchoolDirectoryEdit> {
             val viewModel: SchoolDirectoryEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-
             SchoolDirectoryEditScreen(viewModel)
         }
 
@@ -616,8 +630,31 @@ fun AppNavHost(
             )
         }
 
+        composable<InvitePerson> {
+            InvitePersonScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<CopyCode> {
+            CopyInviteCodeScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<QrCode> {
+            InviteQrScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
     }
 }
-
-
-

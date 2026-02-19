@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-sdk
-        android:minSdkVersion="24"
+        android:minSdkVersion="23"
         android:targetSdkVersion="34"
         tools:overrideLibrary="org.qrcodeScanner, network.chaintech.cmpimagepickncrop, org.ncgroup.kscan" />
 
@@ -25,6 +24,7 @@
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup,android:name">
+
 
         <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
 

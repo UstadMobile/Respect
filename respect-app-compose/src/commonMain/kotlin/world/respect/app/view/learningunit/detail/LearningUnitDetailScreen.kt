@@ -372,7 +372,7 @@ private fun PlaylistDetailScreen(
                                 )
                                 ActionButton(
                                     icon = Icons.Default.ContentCopy,
-                                    label = stringResource(Res.string.copy),
+                                    label = stringResource(Res.string.copy_list),
                                     onClick = onClickCopy,
                                     modifier = Modifier.testTag("copy_btn")
                                 )

@@ -1,4 +1,3 @@
-
 package world.respect
 
 import android.content.Context
@@ -58,6 +57,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
@@ -82,6 +82,8 @@ import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueu
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCaseImpl
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -101,7 +103,7 @@ import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
-import world.respect.shared.domain.account.child.AddChildAccountUseCaseDataSource
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseClient
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -128,8 +130,12 @@ import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseC
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
+import world.respect.shared.domain.biometric.BiometricAuthUseCase
+import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
+import world.respect.shared.domain.createclass.CreateClassUseCase
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
@@ -139,7 +145,13 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
+import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
+import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
+import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
@@ -149,8 +161,16 @@ import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.school.LaunchCustomTabUseCase
+import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.sendinvite.LaunchSendEmailAndroid
+import world.respect.shared.domain.sendinvite.LaunchSendSmsAndroid
+import world.respect.shared.domain.sendinvite.LaunchShareLinkAndroid
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
+import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
@@ -159,6 +179,7 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
@@ -176,19 +197,19 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
-import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
-import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
+import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
+import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
-import world.respect.shared.viewmodel.manageuser.confirmation.ConfirmationViewModel
+import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
-import world.respect.shared.viewmodel.manageuser.joinclazzwithcode.JoinClazzWithCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
@@ -198,13 +219,19 @@ import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndCondi
 import world.respect.shared.viewmodel.manageuser.waitingforapproval.WaitingForApprovalViewModel
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import world.respect.shared.viewmodel.person.changepassword.ChangePasswordViewModel
+import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
-import world.respect.shared.domain.biometric.BiometricAuthUseCase
-import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.viewmodel.person.edit.PersonEditViewModel
+import world.respect.shared.viewmodel.person.inviteperson.InvitePersonViewModel
 import world.respect.shared.viewmodel.person.list.PersonListViewModel
 import world.respect.shared.viewmodel.person.manageaccount.ManageAccountViewModel
 import world.respect.shared.viewmodel.person.passkeylist.PasskeyListViewModel
+import world.respect.shared.viewmodel.person.qrcode.InviteQrViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
+import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.report.ReportViewModel
 import world.respect.shared.viewmodel.report.detail.ReportDetailViewModel
 import world.respect.shared.viewmodel.report.edit.ReportEditViewModel
@@ -214,19 +241,12 @@ import world.respect.shared.viewmodel.report.indictor.edit.IndicatorEditViewMode
 import world.respect.shared.viewmodel.report.indictor.list.IndicatorListViewModel
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
-import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
-import java.io.File
-import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
-import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
-import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
-import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
-import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
-
-
+import world.respect.shared.viewmodel.settings.SettingsViewModel
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
+import java.io.File
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -249,6 +269,25 @@ val appKoinModule = module {
 
     single<XXStringHasher> {
         XXStringHasherCommonJvm()
+    }
+
+    single<LaunchSendSmsUseCase> {
+        LaunchSendSmsAndroid(androidContext())
+    }
+
+    single<LaunchSendEmailUseCase> {
+        LaunchSendEmailAndroid(androidContext())
+    }
+
+    single<LaunchShareLinkUseCase> {
+        LaunchShareLinkAndroid(androidContext())
+    }
+
+    single<GetDeferredDeepLinkUseCase>(createdAtStart = true) {
+        GetDeferredDeepLinkUseCaseAndroid(
+            context = androidContext(),
+            settings = get()
+        )
     }
 
     single<UidNumberMapper> {
@@ -293,6 +332,7 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
+
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -305,9 +345,9 @@ val appKoinModule = module {
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
     viewModelOf(::AcknowledgementViewModel)
-    viewModelOf(::JoinClazzWithCodeViewModel)
+    viewModelOf(::EnterInviteCodeViewModel)
     viewModelOf(::LoginViewModel)
-    viewModelOf(::ConfirmationViewModel)
+    viewModelOf(::AcceptInviteViewModel)
     viewModelOf(::SignupViewModel)
     viewModelOf(::TermsAndConditionViewModel)
     viewModelOf(::WaitingForApprovalViewModel)
@@ -321,6 +361,9 @@ val appKoinModule = module {
     viewModelOf(::AccountListViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
+    viewModelOf(::InvitePersonViewModel)
+    viewModelOf(::CopyInviteCodeViewModel)
+    viewModelOf(::InviteQrViewModel)
     viewModelOf(::PersonEditViewModel)
     viewModelOf(::PersonDetailViewModel)
     viewModelOf(::ReportDetailViewModel)
@@ -332,22 +375,20 @@ val appKoinModule = module {
     viewModelOf(::IndicatorListViewModel)
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
-    viewModelOf(::PlaylistEditViewModel)
     viewModelOf(::ScanQRCodeViewModel)
+    viewModelOf(::PlaylistEditViewModel)
+    viewModelOf(::PlaylistListViewModel)
+    viewModelOf(::PlaylistShareViewModel)
     viewModelOf(::CreateAccountSetUserNameViewModel)
+    viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
     viewModelOf(::SchoolDirectoryEditViewModel)
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
-    viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
-    viewModelOf(::PlaylistListViewModel)
-    viewModelOf(::PlaylistShareViewModel)
-    viewModelOf(::CreateAccountSetPasswordViewModel)
-
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -410,6 +451,7 @@ val appKoinModule = module {
             okHttpClient = get()
         )
     }
+
     single(named(TAG_TMP_DIR)) {
         File(androidContext().applicationContext.cacheDir, "tmp").apply { mkdirs() }
     }
@@ -429,6 +471,7 @@ val appKoinModule = module {
             json = get(),
         )
     }
+
     single<ValidateUsernameUseCase> {
         ValidateUsernameUseCase()
     }
@@ -440,6 +483,7 @@ val appKoinModule = module {
     single<EncodeUserHandleUseCase> {
         EncodeUserHandleUseCaseImpl()
     }
+
     single {
         CreatePublicKeyCredentialRequestOptionsJsonUseCase()
     }
@@ -450,11 +494,13 @@ val appKoinModule = module {
             createPublicKeyCredentialRequestOptionsJsonUseCase = get()
         )
     }
+
     single<VerifyDomainUseCase> {
         VerifyDomainUseCaseImpl(
             context = androidApplication()
         )
     }
+
     single<SavePasswordUseCase> {
         SavePasswordUseCaseAndroidImpl()
     }
@@ -507,6 +553,7 @@ val appKoinModule = module {
             json = get()
         )
     }
+
     single<XXHasher64Factory> {
         XXHasher64FactoryCommonJvm()
     }
@@ -522,6 +569,11 @@ val appKoinModule = module {
     single<SetClipboardStringUseCase> {
         SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
     }
+
+    single<LaunchCustomTabUseCase> {
+        LaunchCustomTabUseCaseAndroid(androidContext().applicationContext)
+    }
+
     single<ShouldShowOnboardingUseCase> {
         ShouldShowOnboardingUseCase(settings = get())
     }
@@ -582,6 +634,18 @@ val appKoinModule = module {
         get<SnackBarFlowDispatcher>()
     }
 
+    single<ResolveUrlToNavCommandUseCase> {
+        ResolveUrlToNavCommandUseCase()
+    }
+
+    single<InitDeepLinkUriProviderUseCaseAndroid> {
+        InitDeepLinkUriProviderUseCaseAndroid()
+    }
+
+    single<InitDeepLinkUriProviderUseCase> {
+        get<InitDeepLinkUriProviderUseCaseAndroid>()
+    }
+
     single<PhoneNumValidatorUseCase> {
         PhoneNumValidatorAndroid(iPhoneNumberUtil = get())
     }
@@ -634,6 +698,18 @@ val appKoinModule = module {
     single<BiometricAuthUseCase> {
         get<BiometricAuthUseCaseAndroidImpl>()
     }
+
+    single<NavigateOnAppStartUseCase> {
+        NavigateOnAppStartUseCase(
+            accountManager = get(),
+            initDeepLinkUriProvider = get(),
+            getDeferredDeepLinkUseCase = get(),
+            customDeepLinkToUrlUseCase = get(),
+            resolveUrlToNavCommandUseCase = get(),
+            settings = get(),
+        )
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -686,12 +762,17 @@ val appKoinModule = module {
             )
         }
 
-
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                 httpClient = get(),
+            )
+        }
+
+        scoped<CreateInviteLinkUseCase> {
+            CreateInviteLinkUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
             )
         }
 
@@ -737,8 +818,15 @@ val appKoinModule = module {
                 uidNumberMapper = get(),
             )
         }
+
         scoped<ValidateQrCodeUseCase> {
             ValidateQrCodeUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
+            )
+        }
+
+        scoped<NavigateOnAccountCreatedUseCase> {
+            NavigateOnAccountCreatedUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
@@ -751,7 +839,7 @@ val appKoinModule = module {
      */
     scope<RespectAccount> {
         /* Koin doesn't have an onScopeCreated kind of function or event listener. The
-         * RespectAccount scope is linked ot the SchoolDirectoryEntry scope when
+         * RespectAccount scope is linked to the SchoolDirectoryEntry scope when
          * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
          * dependency that all dependencies on RespectAccountScope require.
          */
@@ -770,7 +858,6 @@ val appKoinModule = module {
 
             RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
         }
-
 
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
@@ -793,12 +880,14 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
+
         scoped<RevokePasskeyUseCase> {
             RevokePasskeyUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 httpClient = get(),
             )
         }
+
         scoped<EnqueueDrainRemoteWriteQueueUseCase> {
             EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
                 context = androidContext().applicationContext,
@@ -814,19 +903,24 @@ val appKoinModule = module {
             )
         }
 
-        scoped<SchoolDataSource> {
+        scoped<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
+
+            SchoolDataSourceDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                authenticatedUser = AuthenticatedUserPrincipalId(
+                    accountScopeId.accountPrincipalId.guid
+                ),
+                checkPersonPermissionUseCase = get(),
+            )
+        }
+
+        scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
 
             SchoolDataSourceRepository(
-                local = SchoolDataSourceDb(
-                    schoolDb = get(),
-                    uidNumberMapper = get(),
-                    authenticatedUser = AuthenticatedUserPrincipalId(
-                        accountScopeId.accountPrincipalId.guid
-                    ),
-                    checkPersonPermissionUseCase = get(),
-                ),
+                local = get<SchoolDataSourceLocal>(),
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
@@ -844,11 +938,14 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
+
         scoped<AddChildAccountUseCase> {
-            AddChildAccountUseCaseDataSource(
-                schoolDataSource = get(),
-                schoolPrimaryKeyGenerator = get(),
-                authenticatedUser = RespectAccountScopeId.parse(id).accountPrincipalId,
+            AddChildAccountUseCaseClient(
+                schoolUrl = RespectAccountScopeId.parse(id).schoolUrl,
+                authTokenProvider = get(),
+                httpClient = get(),
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                schoolDataSourceLocal = get(),
             )
         }
 
@@ -909,13 +1006,23 @@ val appKoinModule = module {
             )
         }
 
+        scoped<GetWritableRolesListUseCase> {
+            GetWritableRolesListUseCaseImpl()
+        }
+
+        scoped<CreateClassUseCase> {
+            CreateClassUseCase(dataSource = get())
+        }
     }
+
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
     }
-    single<ValidateEmailUseCase>{
+
+    single<ValidateEmailUseCase> {
         ValidateEmailUseCase()
     }
+
     single<CreateGraphFormatterUseCase> {
         CreateGraphFormatterUseCase()
     }

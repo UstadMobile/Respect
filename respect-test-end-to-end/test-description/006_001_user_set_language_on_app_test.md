@@ -1,4 +1,4 @@
-# User able to set language from Onboarding screen and from Settings
+# Admin – Set and Change App Language
 
 ## Description:
 

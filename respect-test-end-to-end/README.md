@@ -32,7 +32,7 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ### 6 : Common
 
-6.1 
+6.1 [Admin – Set and Change App Language](test-description/006_001_user_set_language_on_app_test.md)
 
 6.2
 ...

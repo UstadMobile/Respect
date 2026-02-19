@@ -99,7 +99,7 @@ class OtherOptionsViewModel(
     }
 
     fun onClickManageSchoolDirectories() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(SchoolDirectoryList))
+        _navCommandFlow.tryEmit(NavCommand.Navigate(SchoolDirectoryList.create()))
     }
 
 }

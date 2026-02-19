@@ -21,6 +21,7 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.domain.GetPermissionLastModifiedUseCaseDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
@@ -38,6 +39,7 @@ import world.respect.server.account.invite.username.UsernameSuggestionUseCaseSer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
+import world.respect.server.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
@@ -64,6 +66,7 @@ import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -95,6 +98,10 @@ fun serverKoinModule(
             ignoreUnknownKeys = true
             encodeDefaults = true
         }
+    }
+
+    single<SchoolConfig> {
+        SchoolConfig.fromConfig(config)
     }
 
     single<XXStringHasher> {
@@ -139,7 +146,9 @@ fun serverKoinModule(
             encryptPasswordUseCase = get(),
         )
     }
-
+    single<RegisterSchoolUseCase> {
+        RegisterSchoolUseCase()
+    }
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
     }
@@ -299,6 +308,18 @@ fun serverKoinModule(
 
         scoped<CreateInviteUseCase> {
             CreateInviteUseCaseDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+        scoped<CreateInviteLinkUseCase> {
+            CreateInviteLinkUseCase(
+                schoolUrl = schoolUrl(),
+            )
+        }
+
+        scoped<AddDefaultSchoolPermissionGrantsUseCase>() {
+            AddDefaultSchoolPermissionGrantsUseCase(
                 schoolDb = get(),
                 uidNumberMapper = get(),
             )

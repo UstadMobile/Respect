@@ -88,6 +88,7 @@ kotlin {
             implementation(libs.androidx.biometric.ktx)
             implementation(libs.installreferrer)
 
+            implementation(libs.androidx.browser)
         }
 
         jvmMain.dependencies {

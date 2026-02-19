@@ -136,6 +136,7 @@ import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
+import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
@@ -157,6 +158,7 @@ import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
@@ -575,6 +577,9 @@ val appKoinModule = module {
 
     single<SetClipboardStringUseCase> {
         SetClipboardStringUseCaseAndroid(androidContext().applicationContext)
+    }
+    single<LaunchCustomTabUseCase> {
+        LaunchCustomTabUseCaseAndroid(androidContext().applicationContext)
     }
     single<ShouldShowOnboardingUseCase> {
         ShouldShowOnboardingUseCase(settings = get())

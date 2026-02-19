@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.graphics.Color
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.shared.generated.resources.Res
@@ -56,7 +56,7 @@ fun FeedbackSubmittedScreen(
             Text(
                 text = uiState.ticketId.toString(),
                 modifier = Modifier.testTag("zammad_case_id"),
-                color = Color.Transparent
+                color = MaterialTheme.colorScheme.surface
             )
         }
 

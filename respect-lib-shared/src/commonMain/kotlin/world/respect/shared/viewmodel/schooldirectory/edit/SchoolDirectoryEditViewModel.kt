@@ -75,8 +75,8 @@ class SchoolDirectoryEditViewModel(
 
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        destination = SchoolDirectoryList,
-                        popUpTo = SchoolDirectoryList,
+                        destination = SchoolDirectoryList.create(),
+                        popUpTo = SchoolDirectoryList.create(),
                         popUpToInclusive = true
                     )
                 )

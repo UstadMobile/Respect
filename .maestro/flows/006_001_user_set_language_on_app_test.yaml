@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "004_user_set_language_on_app_test"
+        NAME: "006_001_user_set_language_on_app_test"
 
 onFlowComplete:
   - runScript:

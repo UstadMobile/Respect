@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -15,8 +16,6 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.newUserInviteUid
-import world.respect.datalayer.school.model.Invite2
-import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
@@ -24,8 +23,6 @@ import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.datalayer.shared.params.GetListCommonParams
-import world.respect.libutil.ext.CHAR_POOL_NUMBERS
-import world.respect.libutil.ext.randomString
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
@@ -71,7 +68,6 @@ class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
-//    private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal, //TODO
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -155,36 +151,14 @@ class SharedDevicesSettingsViewmodel(
         //TODO
         viewModelScope.launch {
             try {
-                val activeAccount = accountManager.activeAccount
-//                if (activeAccount != null) {
-//                    val schoolEntry = schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
-//                        activeAccount.school.self
-//                    ).dataOrNull()
-//
-//                    val existingPin = schoolEntry?.teacherPin
-//
-//                    if (!existingPin.isNullOrBlank()) {
-//                        // Use existing PIN from database
-//                        _uiState.update {
-//                            it.copy(
-//                                pin = existingPin,
-//                                isLoadingPin = false
-//                            )
-//                        }
-//                    } else {
-                        val newPin = generateRandomPin()
-                        _uiState.update {
-                            it.copy(
-                                pin = newPin,
-                                isLoadingPin = false
-                            )
-                        }
-                        // Save the generated PIN
-                        savePinToDatabase(newPin)
-//                    }
-//                } else {
-//                    _uiState.update { it.copy(isLoadingPin = false) }
-//                }
+                val newPin = generateRandomPin()
+                _uiState.update {
+                    it.copy(
+                        pin = newPin,
+                        isLoadingPin = false
+                    )
+                }
+                savePinToDatabase(newPin)
             } catch (e: Exception) {
                 val fallbackPin = generateRandomPin()
                 _uiState.update {
@@ -202,27 +176,8 @@ class SharedDevicesSettingsViewmodel(
         return Random.nextInt(1000, 10000).toString().padStart(4, '0')
     }
 
-    private suspend fun savePinToDatabase(pin: String) {
+    private fun savePinToDatabase(pin: String) {
         //TODO
-        try {
-            val activeAccount = accountManager.activeAccount
-                ?: throw IllegalStateException("No active account")
-
-//            val schoolEntry = schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
-//                activeAccount.school.self
-//            ).dataOrNull() ?: throw IllegalStateException("School not found")
-//
-//            val updatedSchoolEntry = schoolEntry.copy(
-//                teacherPin = pin,
-//                lastModified = Clock.System.now()
-//            )
-//
-//            schoolDirectoryEntryDataSource.updateLocal(listOf(updatedSchoolEntry))
-        } catch (e: Exception) {
-            _uiState.update {
-                it.copy(error = "Failed to save PIN: ${e.message}".asUiText())
-            }
-        }
     }
 
     fun onClickEnableOnThisDevice() {
@@ -242,41 +197,32 @@ class SharedDevicesSettingsViewmodel(
             }
             val isTeacherOrAdmin = activePerson?.isAdminOrTeacher() ?: false
 
+            val inviteUid = InvitePerson.NewUserInviteOptions(
+                presetRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            ).presetRole?.newUserInviteUid
+
             activeAccount?.school?.self?.let { url ->
-                val invite = createSharedDeviceInvite()
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        AcceptInvite.create(
-                            schoolUrl = url,
-                            code = invite.code,
-                            isActiveAccountIsTeacherOrAdmin = isTeacherOrAdmin,
-                            isSelfSelectClassAndName = _uiState.value.isSelfSelectClassAndName
-                        )
-                    )
-                )
+                if (inviteUid != null) {
+                    schoolDataSource.inviteDataSource.findByUidAsFlow(
+                        uid = inviteUid,
+                        loadParams = DataLoadParams()
+                    ).collectLatest { invite ->
+                        invite.dataOrNull()?.let { it ->
+                            _navCommandFlow.tryEmit(
+                                NavCommand.Navigate(
+                                    AcceptInvite.create(
+                                        schoolUrl = url,
+                                        code = it.code,
+                                        useActiveUserAuth = isTeacherOrAdmin,
+                                        isSelfSelectClassAndName = _uiState.value.isSelfSelectClassAndName
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
-    }
-
-    private suspend fun createSharedDeviceInvite(): Invite2 {
-        val inviteUid = PersonRoleEnum.SHARED_SCHOOL_DEVICE.newUserInviteUid
-
-        val existingInvite = schoolDataSource.inviteDataSource.findByGuid(
-            guid = inviteUid,
-        ).dataOrNull()
-
-        if (existingInvite != null) {
-            return existingInvite
-        }
-
-        val newInvite = NewUserInvite(
-            uid = inviteUid,
-            code = randomString(10, CHAR_POOL_NUMBERS),
-            role = PersonRoleEnum.SHARED_SCHOOL_DEVICE,
-            approvalRequiredAfter = Clock.System.now(),
-        )
-        schoolDataSource.inviteDataSource.store(listOf(newInvite))
-        return newInvite
     }
 
     fun onShowPinDialog() {
@@ -287,7 +233,7 @@ class SharedDevicesSettingsViewmodel(
         _uiState.update {
             it.copy(
                 showPinDialog = false,
-                error = null // Clear error on dismiss
+                error = null
             )
         }
     }

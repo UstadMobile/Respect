@@ -90,9 +90,9 @@ class SelectClassViewModel(
     fun onClickClazz(clazz: Clazz) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                StudentList(
+                StudentList.create(
                     className = clazz.title,
-                    guid = clazz.guid
+                    guid = clazz.guid,
                 )
             )
         )

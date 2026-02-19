@@ -12,13 +12,13 @@ class EnableSharedDeviceModeUseCase(
     suspend operator fun invoke(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
-        isActiveUserIsTeacherOrAdmin: Boolean = false
+        useActiveUserAuth: Boolean = false
     ) {
         try {
             accountManager.register(
                 redeemInviteRequest = redeemInviteRequest,
                 schoolUrl = schoolUrl,
-                isActiveUserIsTeacherOrAdmin = isActiveUserIsTeacherOrAdmin
+                useActiveUserAuth = useActiveUserAuth
             )
 
             val deviceAccount = accountManager.activeAccount

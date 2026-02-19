@@ -15,14 +15,16 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
-import world.respect.shared.domain.account.RespectAccount
+import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.StudentList
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -40,7 +42,6 @@ class StudentListViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-
     private val route: StudentList = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(StudentListUiState())
@@ -52,6 +53,7 @@ class StudentListViewModel(
             params = PersonDataSource.GetListParams(
                 filterByClazzUid = route.guid,
                 filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
+                inClassOnDay = localDateInCurrentTimeZone()
             )
         )
     }
@@ -74,27 +76,18 @@ class StudentListViewModel(
 
     fun onClickStudent(person: Person) {
         viewModelScope.launch {
-            accountManager.activeAccount?.let { activeAccount ->
-                // Check if this student already has an account
-                val existingAccount = accountManager.accounts.value.firstOrNull {
-                    it.userGuid == person.guid && it.school.self == activeAccount.school.self
-                }
+            accountManager.switchProfile(person.guid)
 
-                val targetAccount = existingAccount ?: RespectAccount(
-                    userGuid = person.guid,
-                    school = activeAccount.school
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = if (person.status != PersonStatusEnum.PENDING_APPROVAL) {
+                        RespectAppLauncher()
+                    } else {
+                        WaitingForApproval()
+                    },
+                    clearBackStack = true
                 )
-
-                // Switch to the student account
-                accountManager.switchAccount(targetAccount)
-
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        destination = RespectAppLauncher(),
-                        clearBackStack = true
-                    )
-                )
-            }
+            )
         }
     }
 }

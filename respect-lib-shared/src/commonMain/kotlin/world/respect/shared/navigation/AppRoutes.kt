@@ -400,7 +400,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
-    val isActiveAccountIsTeacherOrAdmin: Boolean = false,
+    val useActiveUserAuth: Boolean = false,
     val isSelfSelectClassAndName: Boolean = true,
 ) : RespectAppRoute {
 
@@ -412,13 +412,13 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
-            isActiveAccountIsTeacherOrAdmin: Boolean = false,
+            useActiveUserAuth: Boolean = false,
             isSelfSelectClassAndName: Boolean = true,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
-            isActiveAccountIsTeacherOrAdmin = isActiveAccountIsTeacherOrAdmin,
+            useActiveUserAuth = useActiveUserAuth,
             isSelfSelectClassAndName = isSelfSelectClassAndName
         )
     }
@@ -774,11 +774,30 @@ data object SchoolSettings : RespectAppRoute
 @Serializable
 data object SharedDevicesSettings : RespectAppRoute
 
+// In navigation/RespectAppRoute.kt
 @Serializable
 data class SelectClass(
-    val isSelfSelectClassAndName: Boolean = true
-) : RespectAppRoute
+    val isSelfSelectClassAndName: Boolean = true,
+    private val inviteRedeemRequestStr: String? = null, // Add this
+) : RespectAppRoute {
 
+    @Transient
+    val redeemRequest: RespectRedeemInviteRequest? = inviteRedeemRequestStr?.let {
+        Json.decodeFromString(it)
+    }
+
+    companion object {
+        fun create(
+            isSelfSelectClassAndName: Boolean = true,
+            redeemRequest: RespectRedeemInviteRequest? = null // Add this parameter
+        ) = SelectClass(
+            isSelfSelectClassAndName = isSelfSelectClassAndName,
+            inviteRedeemRequestStr = redeemRequest?.let {
+                Json.encodeToString(it)
+            }
+        )
+    }
+}
 @Serializable
 data object TeacherAndAdminLogin : RespectAppRoute
 
@@ -786,7 +805,19 @@ data object TeacherAndAdminLogin : RespectAppRoute
 data class StudentList(
     val className: String,
     val guid: String,
-): RespectAppRoute
+): RespectAppRoute {
+
+    companion object {
+        fun create(
+            className: String,
+            guid: String,
+            redeemRequest: RespectRedeemInviteRequest? = null
+        ) = StudentList(
+            className = className,
+            guid = guid,
+        )
+    }
+}
 
 @Serializable
 data class CurriculumMappingEdit(

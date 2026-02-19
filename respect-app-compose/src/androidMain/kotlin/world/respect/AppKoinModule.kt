@@ -766,6 +766,7 @@ val appKoinModule = module {
             RedeemInviteUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 httpClient = get(),
+                accountManager = get()
             )
         }
 

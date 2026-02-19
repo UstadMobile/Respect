@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.RespectAppDataSource
@@ -27,6 +28,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest.PersonInfo
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
+import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
@@ -41,6 +43,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import kotlin.getValue
 
 data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
@@ -75,6 +78,7 @@ class  AcceptInviteViewModel(
     private val getInviteInfoUseCase: GetInviteInfoUseCase = scope.get()
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator = scope.get()
+    private val navigateOnAccountCreatedUseCase: NavigateOnAccountCreatedUseCase by inject()
 
     private val _uiState = MutableStateFlow(
         AcceptInviteUiState(schoolUrl = route.schoolUrl)
@@ -191,13 +195,12 @@ class  AcceptInviteViewModel(
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
-
         viewModelScope.launch {
             try {
-                enableSharedDeviceModeUseCase(
+              enableSharedDeviceModeUseCase(
                     redeemInviteRequest = inviteRedeemRequest,
                     schoolUrl = route.schoolUrl,
-                    isActiveUserIsTeacherOrAdmin = route.isActiveAccountIsTeacherOrAdmin
+                    useActiveUserAuth = route.useActiveUserAuth
                 )
                 _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass(isSelfSelectClassAndName = route.isSelfSelectClassAndName)))
 
@@ -209,11 +212,6 @@ class  AcceptInviteViewModel(
                 }
             }
         }
-    }
-
-    private fun saveSharedDeviceSettings(deviceName: String) {
-        // TODO: Implement saving shared device mode to database
-        println("Shared device mode enabled with name: $deviceName")
     }
 
 }

@@ -103,7 +103,7 @@ onFlowComplete:
 - assertVisible: "Assignments"
 - assertVisible: "People"
 - runFlow:
-    file: "subflows/admin_add_class.yaml"
+    file: "subflows/add_class.yaml"
     env:
       CLASSNAME: "New Class"
 - assertVisible:

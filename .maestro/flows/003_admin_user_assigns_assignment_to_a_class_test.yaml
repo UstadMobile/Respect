@@ -16,31 +16,52 @@ onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/admin_add_app_and_teacher.yaml"
+# Admin setup
+- runFlow: "subflows/school_admin_login_flow.yaml"
 
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-
-- tapOn: "Get Started"
-
+# Add app, class, then add Student and Teacher to class
 - runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
+    file: "subflows/add_app.yaml"
+- runFlow:
+    file: "subflows/add_class.yaml"
+    env:
+      CLASS_NAME: New Class
+- runFlow:
+    file: "subflows/add_person_to_a_class.yaml"
+    env:
+
+      ADD_USER: "Add Student"
+      FIRSTNAME: "StudentA"
+      LASTNAME:  "User"
+      GENDER: "Male"
+      ROLE:  "Student"
+      CLASS_NAME: "New Class"
+      USERNAME: "studentauser"
+      PASSWORD: "test123"
+      QR_BADGE_LINK: ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
+- back
+- runFlow:
+    file: "subflows/add_person_to_a_class.yaml"
+    env:
+      ADD_USER: "Add Teacher"
+      FIRSTNAME: "TeacherA"
+      LASTNAME:  "User"
+      GENDER: "Male"
+      ROLE:  "Teacher"
+      CLASS_NAME: "New Class"
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
 
-- tapOn:
-    id: "username"
-- inputText: "teacheruser"
-- tapOn:
-    id : "password"
-- inputText: "testt1"
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:

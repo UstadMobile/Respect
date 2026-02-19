@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "004_user_send_feedback_test.yaml"
+        NAME: "006_002_user_send_feedback_test.yaml"
 
 onFlowComplete:
   - runScript:
@@ -26,7 +26,6 @@ onFlowComplete:
        ROLE: Student
        USERNAME: testuser
        PASSWORD: test123
-
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
@@ -113,7 +112,6 @@ onFlowComplete:
       zammadToken: ${zammadToken}
       zammadUrl: ${zammadUrl}
       CASE_ID: ${maestro.copiedText}
-
 - back
 - assertVisible:
     id: "app_title"

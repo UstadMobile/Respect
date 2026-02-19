@@ -89,8 +89,8 @@
     <string name="invitation_for">Invitation for:</string>
     <string name="congratulation">Congratulations</string>
     <string name="successfully_registered_school">You have successfully registered the school</string>
-    <string name="i_am_student">I’m a Student</string>
-    <string name="i_am_parent">I’m a Parent</string>
+    <string name="i_am_student">I'm a Student</string>
+    <string name="i_am_parent">I'm a Parent</string>
     <string name="accept">Accept</string>
     <string name="terms_and_conditions">Terms and conditions</string>
     <string name="your_profile_title">Your profile</string>
@@ -177,6 +177,7 @@
     <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
+    <string name="enter_school_name">School name</string>
     <string name="school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
@@ -224,7 +225,6 @@
     <string name="sign_up_with_passkey">Sign up with a passkey</string>
     <string name="create_passkey">Create passkey</string>
     <string name="passkey">Passkey</string>
-
 
     <string name="add_account">Add account</string>
     <string name="logout">Logout</string>
@@ -317,7 +317,6 @@
     <string name="indicator">Indicator</string>
     <string name="indicator_detail">Indicator detail</string>
 
-
     <!-- Conditions -->
     <string name="equals">= Equals</string>
     <string name="not_equals">!= Not Equals</string>
@@ -356,7 +355,6 @@
     <string name="school">School</string>
     <string name="grade_level">Grade Level</string>
     <string name="assessment_type">Assessment Type (Self/Assignment)</string>
-
 
     <!-- Demographic Dimensions -->
     <string name="age_group">Age Group</string>
@@ -421,7 +419,6 @@
     <string name="expand_students">Expand students list</string>
     <string name="collapse_students">Collapse students list</string>
 
-
     <string name="add_person">Add person</string>
     <string name="select_person">Select person</string>
     <string name="edit_person">Edit person</string>
@@ -434,7 +431,7 @@
     <string name="edit_mapping">Edit mapping</string>
     <string name="textbooks">Textbooks</string>
     <string name="chapter">Chapter</string>
-    <string name="lesson">Lesson</string>
+    <string name="lesson">Item</string>
     <string name="add_book_cover">Add book cover</string>
     <string name="no_sections_yet">No sections have been added yet. Click + Section to add one.</string>
     <string name="map">Map</string>
@@ -501,7 +498,7 @@
 
     <string name="date">Date</string>
     <string name="time">Time</string>
-    <string name="assignment_tasks">Assignment tasks</string>
+    <string name="assignment_tasks">Tasks</string>
     <string name="assignment_name">Assignment name</string>
     <string name="lesson_assessment">Lesson/assessment</string>
 
@@ -521,9 +518,7 @@
     <string name="pending_teacher">Pending teacher</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
-
     <string name="regenerate_invite_code">Regenerate invite code</string>
-    <string name="copy_link">Copy link</string>
     <string name="invite_settings">Invite settings</string>
     <string name="invite_multiple_allowed">Invite multiple people</string>
     <string name="approval_required">Approval required</string>
@@ -533,17 +528,12 @@
     <string name="invite_via_share">Share link</string>
     <string name="qr_code">QR code</string>
     <string name="code">Code</string>
-    <string name="copy">Copy</string>
     <string name="code_private_info">
         This code is private. If it is shared with someone, they can enter this code here to join.
     </string>
     <string name="class_name_or_school_name">Class name or school name</string>
 
-
-    <string name="section_name">Section name</string>
     <string name="qr_code_private_screen">This QR code is private. If it is shared with someone, they can scan to join.</string>
-
-    <string name="not_set">Not set</string>
 
     <string name="school_server_url">School server URL</string>
 
@@ -553,7 +543,6 @@
 
     <string name="invite_students_directly">Invite students directly</string>
     <string name="students_register_themselves">Students register themselves</string>
-
 
     <string name="invite_via_parents">Invite via parents</string>
     <string name="parents_register_and">Parents register and student uses parents' device</string>
@@ -569,5 +558,44 @@
     <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
 
     <string name="select_host">Select Host</string>
+
+    <string name="section_name">Section name</string>
+    <string name="playlists">Playlists</string>
+    <string name="school_playlists">School Playlists</string>
+    <string name="my_playlists">My Playlists</string>
+    <string name="no_playlists_yet">No playlists yet</string>
+    <string name="create_first_playlist">Create your first playlist to get started</string>
+    <string name="create_playlist">Add playlist</string>
+    <string name="error_loading_playlists">Error loading playlists</string>
+    <string name="add_new">Add new</string>
+    <string name="add_from_a_link">Add from a link</string>
+    <string name="add_playlist">Playlist</string>
+    <string name="copy_playlist">Copy</string>
+    <string name="all_sections_items">All sections,  items</string>
+    <string name="created_by">Created by: </string>
+    <string name="edit_playlist">Edit playlist</string>
+    <string name="home">Home</string>
+    <string name="copy">Copy</string>
+    <string name="copy_list">copy playlist</string>
+    <string name="make_a_copy">Make a copy</string>
+    <string name="sections_and_items_count">%1$d sections • %2$d items</string>
+    <string name="add_from_playlist">Task</string>
+    <string name="select_curriculum_unit">Select Playlist Unit</string>
+    <string name="add_task_to_assignment"> Add task to assignment</string>
+    <string name="add_tasks_to_assignment">Add %1$d tasks to assignment</string>
+    <string name="select_all">Select all</string>
+    <string name="select_none">Select none</string>
+
+    <string name="who_can_view">Who can view</string>
+    <string name="who_can_edit">Who can edit</string>
+    <string name="anyone_with_the_link">Anyone with the link</string>
+    <string name="teacher_admin_in_my_school">Teacher/admin in my school</string>
+    <string name="share_link">Share link</string>
+    <string name="copy_link">Copy link</string>
+    <string name="send_link_via_sms">Send link via SMS</string>
+    <string name="send_link_via_email">Send link via email</string>
+    <string name="grade">Grade</string>
+
+    <string name="not_set">Not set</string>
 
 </resources>

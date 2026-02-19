@@ -14,3 +14,4 @@ data class LearningUnitSelection(
     val selectedPublication: OpdsPublication,
     val appManifestUrl: Url,
 )
+

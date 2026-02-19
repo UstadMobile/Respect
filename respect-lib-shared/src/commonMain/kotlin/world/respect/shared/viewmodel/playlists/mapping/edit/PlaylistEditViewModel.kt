@@ -1,0 +1,470 @@
+package world.respect.shared.viewmodel.playlists.mapping.edit
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.map
+import world.respect.lib.opds.model.findIcons
+import world.respect.lib.opds.model.ReadiumSubjectObject
+import world.respect.libutil.ext.moveItem
+import world.respect.libutil.ext.updateAtIndex
+import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.create_playlist
+import world.respect.shared.generated.resources.edit_playlist
+import world.respect.shared.generated.resources.required_field
+import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResult
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RouteResultDest
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.KEY_LEARNING_UNIT
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSection
+import world.respect.shared.viewmodel.playlists.mapping.model.PlaylistsSectionLink
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+
+data class PlaylistEditUiState(
+    val mapping: Playlists? = null,
+    val loading: Boolean = false,
+    val isNew: Boolean = true,
+    val titleError: UiText? = null,
+    val error: UiText? = null,
+    val pendingLessonSectionIndex: Int? = null,
+    val availableSubjects: List<ReadiumSubjectObject> = emptyList(),
+    val availableGrades: List<String> = emptyList(),
+    val availableLanguages: List<String> = emptyList(),
+    val sectionUiState: (PlaylistsSection) -> Flow<PlaylistSectionUiState> = { emptyFlow() },
+) {
+    val fieldsEnabled: Boolean
+        get() = !loading
+
+    val title: String
+        get() = mapping?.title ?: ""
+
+    val description: String
+        get() = mapping?.description ?: ""
+
+    val sections: List<PlaylistsSection>
+        get() = mapping?.sections ?: emptyList()
+
+    val selectedSubject: ReadiumSubjectObject?
+        get() = mapping?.subject
+
+    val selectedGrade: String?
+        get() = mapping?.grade
+}
+
+data class PlaylistSectionUiState(
+    val icon: Url? = null,
+    val title: String = "",
+    val subtitle: String = "",
+    val description: String = "",
+)
+
+class PlaylistEditViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val resultReturner: NavResultReturner,
+    private val json: Json,
+    private val respectAppDataSource: RespectAppDataSource,
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
+    private val route: PlaylistEdit = savedStateHandle.toRoute()
+
+    private val mappingUid = route.textbookUid
+    private val mappingData = route.mappingData
+
+    private val _uiState = MutableStateFlow(
+        PlaylistEditUiState(
+            mapping = mappingData ?: Playlists(uid = mappingUid),
+            isNew = mappingUid == 0L
+        )
+    )
+
+    val uiState = _uiState.asStateFlow()
+
+    init {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = if (mappingData == null) {
+                    Res.string.create_playlist.asUiText()
+                } else {
+                    Res.string.edit_playlist.asUiText()
+                },
+                userAccountIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = Res.string.save.asUiText(),
+                    onClick = ::onClickSave
+                ),
+                hideBottomNavigation = true
+            )
+        }
+        viewModelScope.launch {
+            loadSubjectsAndGrades()
+        }
+
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(
+                KEY_LEARNING_UNIT
+            ).collect { result ->
+                val selectedLearningUnit = result.result as? LearningUnitSelection ?: return@collect
+                val pendingSectionIndex = _uiState.value.pendingLessonSectionIndex ?: return@collect
+
+                updateUiStateAndCommit { prev ->
+                    prev.copy(
+                        mapping = prev.mapping?.copy(
+                            sections = prev.mapping.sections.updateAtIndex(pendingSectionIndex) {
+                                it.copy(
+                                    items = it.items + PlaylistsSectionLink(
+                                        href = selectedLearningUnit.learningUnitManifestUrl.toString(),
+                                        title = selectedLearningUnit.selectedPublication.metadata.title.getTitle(),
+                                        appManifestUrl = selectedLearningUnit.appManifestUrl
+                                    )
+                                )
+                            }
+                        ),
+                        pendingLessonSectionIndex = null,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun loadSubjectsAndGrades() {
+        viewModelScope.launch {
+            try {
+                val session = accountManager.selectedAccountAndPersonFlow.first()
+                val catalogUrl = session?.session?.account?.school?.respectExt ?: return@launch
+
+                respectAppDataSource.opdsDataSource.loadOpdsFeed(
+                    url = catalogUrl,
+                    params = DataLoadParams()
+                ).collect { feedState ->
+                    if (feedState is DataReadyState) {
+                        val allSubjects = mutableListOf<ReadiumSubjectObject>()
+                        val allGrades = mutableSetOf<String>()
+                        val allLanguages = mutableSetOf<String>()
+
+                        feedState.data.publications?.forEach { publication ->
+                            publication.metadata.subject?.forEach { subject ->
+                                if (subject is ReadiumSubjectObject && subject.code != null) {
+                                    allSubjects.add(subject)
+                                }
+                            }
+                            publication.metadata.language?.forEach { language ->
+                                allLanguages.add(language)
+                            }
+                        }
+
+                        feedState.data.groups?.forEach { group ->
+                            group.publications?.forEach { publication ->
+                                publication.metadata.subject?.forEach { subject ->
+                                    if (subject is ReadiumSubjectObject && subject.code != null) {
+                                        allSubjects.add(subject)
+                                    }
+                                }
+                                publication.metadata.language?.forEach { language ->
+                                    allLanguages.add(language)
+                                }
+                            }
+                        }
+
+                        val uniqueSubjects = allSubjects
+                            .distinctBy { subject -> subject.code }
+                            .sortedBy { subject -> subject.name.getTitle() }
+
+                        _uiState.update { prev ->
+                            prev.copy(
+                                availableSubjects = uniqueSubjects,
+                                availableGrades = allGrades.toList().sorted(),
+                                availableLanguages = allLanguages.toList().sorted()
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun updateUiStateAndCommit(block: (PlaylistEditUiState) -> PlaylistEditUiState) {
+        val mappingToCommit = _uiState.updateAndGet(block).mapping ?: return
+
+        savedStateHandle[KEY_MAPPING] = json.encodeToString(
+            Playlists.serializer(), mappingToCommit
+        )
+    }
+
+    fun onTitleChanged(title: String) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(title = title),
+                titleError = null,
+            )
+        }
+    }
+
+    fun onDescriptionChanged(description: String) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(description = description)
+            )
+        }
+    }
+
+    fun onSubjectSelected(subject: ReadiumSubjectObject?) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(subject = subject)
+            )
+        }
+    }
+
+    fun onGradeSelected(grade: String?) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(grade = grade)
+            )
+        }
+    }
+
+    fun onClickAddSection() {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(
+                    sections = prev.mapping.sections + PlaylistsSection(title = "")
+                )
+            )
+        }
+    }
+
+    fun onSectionTitleChanged(sectionIndex: Int, title: String) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(
+                    sections = prev.mapping.sections.updateAtIndex(sectionIndex) {
+                        it.copy(title = title)
+                    }
+                )
+            )
+        }
+    }
+
+    fun onClickRemoveSection(sectionIndex: Int) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(
+                    sections = prev.mapping.sections.filterIndexed { index, _ ->
+                        index != sectionIndex
+                    }
+                )
+            )
+        }
+    }
+
+    fun onSectionMoved(fromIndex: Int, toIndex: Int) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(
+                    sections = prev.sections.moveItem(from = fromIndex, to = toIndex)
+                )
+            )
+        }
+    }
+
+    fun onLessonMovedBetweenSections(
+        fromSectionIndex: Int,
+        fromLinkIndex: Int,
+        toSectionIndex: Int,
+        toLinkIndex: Int
+    ) {
+        updateUiStateAndCommit { prev ->
+            val mapping = prev.mapping
+            if (mapping == null) {
+                prev
+            } else if (fromSectionIndex == toSectionIndex) {
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.updateAtIndex(fromSectionIndex) { section ->
+                            section.copy(
+                                items = section.items.moveItem(from = fromLinkIndex, to = toLinkIndex)
+                            )
+                        }
+                    )
+                )
+            } else {
+                val fromSection = mapping.sections[fromSectionIndex]
+                val lessonToMove = fromSection.items[fromLinkIndex]
+
+                val updatedFromSection = fromSection.copy(
+                    items = fromSection.items.filterIndexed { index, _ -> index != fromLinkIndex }
+                )
+
+                val toSection = mapping.sections[toSectionIndex]
+                val updatedToSection = toSection.copy(
+                    items = buildList {
+                        addAll(toSection.items.take(toLinkIndex))
+                        add(lessonToMove)
+                        addAll(toSection.items.drop(toLinkIndex))
+                    }
+                )
+
+                prev.copy(
+                    mapping = mapping.copy(
+                        sections = mapping.sections.mapIndexed { index, section ->
+                            when (index) {
+                                fromSectionIndex -> updatedFromSection
+                                toSectionIndex -> updatedToSection
+                                else -> section
+                            }
+                        }
+                    )
+                )
+            }
+        }
+    }
+
+    fun onClickAddLesson(sectionIndex: Int) {
+        _uiState.update { it.copy(pendingLessonSectionIndex = sectionIndex) }
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                RespectAppLauncher.create(
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_LEARNING_UNIT
+                    )
+                )
+            )
+        )
+    }
+
+    fun onClickRemoveLesson(sectionIndex: Int, linkIndex: Int) {
+        updateUiStateAndCommit { prev ->
+            prev.copy(
+                mapping = prev.mapping?.copy(
+                    sections = prev.mapping.sections.updateAtIndex(sectionIndex) { section ->
+                        section.copy(
+                            items = section.items.filterIndexed { index, _ -> index != linkIndex }
+                        )
+                    }
+                )
+            )
+        }
+    }
+
+    fun onClickLesson(link: PlaylistsSectionLink) {
+        val publicationUrl = Url(link.href)
+        val appManifestUrl = link.appManifestUrl ?: return
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = publicationUrl,
+                    appManifestUrl = appManifestUrl,
+                    refererUrl = publicationUrl,
+                    expectedIdentifier = null
+                )
+            )
+        )
+    }
+
+    fun sectionLinkUiStateFor(
+        link: PlaylistsSectionLink
+    ): Flow<DataLoadState<PlaylistSectionUiState>> {
+        val publicationUrl = Url(link.href)
+        return respectAppDataSource.opdsDataSource.loadOpdsPublication(
+            url = Url(link.href),
+            params = DataLoadParams(),
+            referrerUrl = null,
+            expectedPublicationId = null,
+        ).map { opdsLoadState ->
+            opdsLoadState.map { publication ->
+                PlaylistSectionUiState(
+                    icon = publication.findIcons().firstOrNull()?.let {
+                        publicationUrl.resolve(it.href)
+                    }
+                )
+            }
+        }
+    }
+
+    fun onClickSave() {
+        val mapping = _uiState.value.mapping ?: return
+        if (mapping.title.isBlank()) {
+            _uiState.update { it.copy(titleError = Res.string.required_field.asUiText()) }
+            return
+        }
+
+        viewModelScope.launch {
+            val currentSession = accountManager.selectedAccountAndPersonFlow.first()
+
+            val finalMapping = if (mapping.uid == 0L) {
+                mapping.copy(
+                    uid = System.currentTimeMillis(),
+                    createdBy = currentSession?.person?.guid,
+                    schoolUrl = currentSession?.session?.account?.school?.self
+                )
+            } else {
+                mapping
+            }
+
+            resultReturner.sendResult(
+                NavResult(
+                    key = KEY_SAVED_MAPPING,
+                    result = finalMapping
+                )
+            )
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = LearningUnitDetail.createFromMapping(finalMapping),
+                    popUpTo = RespectAppLauncher(),
+                    popUpToInclusive = false
+                )
+            )
+        }
+    }
+
+    fun onClearError() {
+        _uiState.update { it.copy(titleError = null) }
+    }
+
+    companion object {
+        private const val KEY_MAPPING = "curriculum_mapping"
+        const val KEY_SAVED_MAPPING = "saved_curriculum_mapping"
+    }
+}

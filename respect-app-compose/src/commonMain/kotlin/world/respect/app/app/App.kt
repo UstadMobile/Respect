@@ -1,22 +1,15 @@
 package world.respect.app.app
 
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.ImportContacts
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,10 +18,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ImportContacts
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
@@ -51,14 +52,15 @@ import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.continue_using_fingerprint_or
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
@@ -83,8 +85,8 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = RespectAppLauncher(),
-        icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        icon = Icons.Filled.Home,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
     TopNavigationItem(
@@ -120,12 +122,6 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         routeName = "$routeNamePrefix.RespectAppLauncher",
     ),
 )
-
-/**
- * @param activityNavCommandFlow a flow that is received from the activity. When a link is opened
- *        and the app is already running, the Activity's onNewIntent will be invoked. If the app is
- *        started cold then InitDeepLinkUriProviderUseCase should be used.
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(

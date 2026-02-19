@@ -314,6 +314,22 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Home"
+- tapOn: "People"
+- tapOn: "Test User"
+- tapOn: "Manage account"
+- assertVisible: "testuser"
+- tapOn: "Change"
+- tapOn: "Old password*"
+- inputText: "test234"
+- tapOn: "New password*"
+- inputText: "t2"
+- tapOn: "Save"
+- assertVisible: "Password must be at least 6 characters"
+- tapOn: "New password*"
+- eraseText
+- inputText: "test123"
+- tapOn: "Save"
 - assertVisible: "Apps"
 - tapOn: "People"
 - tapOn: "ParentA User"
@@ -356,6 +372,23 @@ onFlowComplete:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
 - tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "childuser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- hideKeyboard
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Home"
 - tapOn: "Scan QR code/badge"
 - assertVisible:
     id: "app_title"

@@ -242,10 +242,9 @@ class SignupViewModel(
                                 )
                             )
                         )
-                     }
+                    }
                 }
             }
         }
     }
 }
-

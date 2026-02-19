@@ -146,6 +146,7 @@ kotlin {
             implementation(libs.reorderable)
             implementation(libs.kscan)
             implementation(libs.qrose)
+            implementation(compose.components.resources)
         }
 
         desktopMain.dependencies {
@@ -177,12 +178,18 @@ android {
     namespace = "world.respect.app"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    androidResources{
+        generateLocaleConfig = true
+        localeFilters.addAll(listOf("en", "hi", "ne"))
+    }
+
     defaultConfig {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 121
         versionName = "1.0.21"
+
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

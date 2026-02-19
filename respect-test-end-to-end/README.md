@@ -30,6 +30,13 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 ...
 
-## Semi automated scenarios
+### 6 : Common
 
-6.1 [User can signup using passkey with an invite code](test-description/006_user_signup_using_passkey_test_description.md)
+6.1 [Admin – Set and Change App Language](test-description/006_001_user_set_language_on_app_test.md)
+
+6.2
+...
+
+## 7 : Semi automated scenarios
+
+7.1 [User can signup using passkey with an invite code](test-description/007_001_user_signup_using_passkey_test_description.md)

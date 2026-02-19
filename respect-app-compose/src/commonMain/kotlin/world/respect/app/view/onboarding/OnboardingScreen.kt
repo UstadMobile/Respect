@@ -33,7 +33,9 @@ import world.respect.images.respectImagePainter
 import world.respect.shared.viewmodel.onboarding.OnboardingUiState
 import world.respect.shared.viewmodel.onboarding.OnboardingViewModel
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.LanguageDropdown
 import world.respect.app.components.defaultItemPadding
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.get_started
 import world.respect.shared.generated.resources.onboardingDescription1
@@ -45,6 +47,7 @@ import world.respect.shared.generated.resources.onboardingTitle2
 import world.respect.shared.generated.resources.onboardingTitle3
 import world.respect.shared.generated.resources.onboardingTitle4
 import world.respect.shared.generated.resources.send_usage_stats_and_crash_reports
+
 
 
 data class OnboardingItem(
@@ -62,6 +65,7 @@ fun OnboardingScreen(
         uiState = uiState,
         onClickGetStartedButton = viewModel::onClickGetStartedButton,
         onToggleUsageStatsOptIn = viewModel::onToggleUsageStatsOptIn,
+        onLanguageSelected = viewModel::onLanguageSelected
     )
 }
 
@@ -70,6 +74,7 @@ fun OnboardingScreen(
     uiState: OnboardingUiState,
     onClickGetStartedButton: () -> Unit,
     onToggleUsageStatsOptIn: () -> Unit,
+    onLanguageSelected: (SupportedLanguagesConfig.UiLanguage) -> Unit
 ) {
 
     val onboardingItem = listOf(
@@ -104,6 +109,14 @@ fun OnboardingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+
+        LanguageDropdown(
+            selected = uiState.selectedLanguage,
+            languages = uiState.availableLanguages,
+            onSelected = onLanguageSelected,
+            enabled = !uiState.isLoading
+        )
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -202,7 +215,5 @@ fun OnboardingScreen(
         }
     }
 }
-
-
 
 

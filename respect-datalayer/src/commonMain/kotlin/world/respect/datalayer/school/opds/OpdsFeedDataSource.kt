@@ -1,27 +1,37 @@
 package world.respect.datalayer.school.opds
 
 import io.ktor.http.Url
-import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.shared.WritableDataSource
-import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.lib.opds.model.OpdsFeed
 
 /**
- * OpdsFeedDataSource: essentially handles Playlists, using the Opds standard.
+ * OpdsFeedDataSource: OpdsFeeds can be either:
+ *  a) External OPDS feeds that come from app developers or any other third party source, which are
+ *     hosted on external URLs. This is read-only information from the point of view of the RESPECT
+ *     app and server.
+ *  b) Playlists that are created by RESPECT app users within the RESPECT app.
  *
- * There is a key difference between an Opds DataSource and others: this DataSource can fetch data
- * from external, third party servers that are serving Opds feeds over HTTP, whereas other DataSources
- * only fetch data from a single upstream school server.
+ * The need to handle third party external data from other servers is the key difference between
+ * this DataSource and others. Other DataSources (e.g. Person, Assignment, etc) handle data where
+ * there is only one upstream remote endpoint (the RESPECT school endpoint).
  *
- * Our general approach to data models (as per ModelWithTimes) requires a last modified time,
- * stored time, and uid for each entity. For OpdsFeed this is handled as follows:
- *  last-modified: OpdsFeedMetadata.modified
- *  stored: only kept on the database side
- *  uid: the OpdsFeed url (as per the self link in the model). Playlists created on school are in
- *  the form of school-url/playlists/uuid
+ * There is a 1:1 relationship between the OpdsFeed URL and the OpdsFeedEntity when stored locally.
+ * There is no general "list" function.
+ *
+ * Playlists that are created by users on the RESPECT app:
+ *  a) Have a URL in the form of http://school.example.org/playlist/uid
+ *  b) Have the OpdsFeedMetadata.modified set to the time the user actually modified or changed the
+ *     playlist (e.g. when the user clicked Save). It is not the same time as when the data is stored
+ *     on any given node (including the server). See respect-datalayer-repository offline-first
+ *     README.md notes.
+ *  c) The HTTP ETag will be set using the OpdsFeedMetadata.modified value.
+ *  d) The HTTP Last-Modified header will be the time the playlist was actually stored into the
+ *     database on the node (eg server) serving the response. This is essential to ensure that HTTP
+ *     responses remain compliant with the HTTP spec, as per the respect-datalayer-repository
+ *     offline-first README.md notes.
  *
  * Client side:
  *  The remote datasource will fetch from a server as specified by the URL, which may, or may not,
@@ -36,22 +46,6 @@ import world.respect.lib.opds.model.OpdsFeed
  * school admin or school teachers can copy the app's feed, and then modify it.
  */
 interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
-
-    /**
-     * common.guid is the Url of the OpdsFeed.
-     */
-    data class GetListParams(
-        val common: GetListCommonParams
-    ) {
-        companion object {
-
-            fun fromParams(params: StringValues): GetListParams {
-                return GetListParams(
-                    common = GetListCommonParams.fromParams(params)
-                )
-            }
-        }
-    }
 
     /**
      * Load an OPDS Feed from a given URL : essentially the same as getByUid for other data types.

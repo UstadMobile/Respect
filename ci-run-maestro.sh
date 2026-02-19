@@ -4,12 +4,35 @@
 # .maestro for test flows
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
-
 # Root directory for TestServerController to use (each server will get its own sub directory)
+
+# Fail if FEEDBACK file is not found
+if [ -z "$FEEDBACK" ] || [ ! -f "$FEEDBACK" ]; then
+    echo "ERROR: Feedback properties file not found at $FEEDBACK"
+    exit 1
+fi
+
+# Function to read property
+get_prop() {
+    grep -E "^$1=" "$FEEDBACK" | cut -d'=' -f2- | tr -d '\r'
+}
+
+# Extract required variables
+zammadUrl=$(get_prop "zammadUrl")
+zammadToken=$(get_prop "zammadToken")
+
+if [ -z "$zammadUrl" ] || [ -z "$zammadToken" ]; then
+    echo "ERROR: zammadUrl or zammadToken missing in feedback.properties"
+    exit 1
+fi
+
+export zammadUrl="$zammadUrl"
+export zammadToken="$zammadToken"
+
+echo "ci-run-maestro: zammadUrl=$zammadUrl"
+
 # TestServerController will create the directory automatically.
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
-
-
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"
 
@@ -152,6 +175,8 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
+        --env zammadUrl="${zammadUrl}" \
+        --env zammadToken="${zammadToken}" \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -197,6 +222,8 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
+      --env zammadUrl="${zammadUrl}" \
+      --env zammadToken="${zammadToken}" \
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \

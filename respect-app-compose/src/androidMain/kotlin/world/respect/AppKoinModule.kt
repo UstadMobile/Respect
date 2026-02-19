@@ -143,6 +143,10 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
+import world.respect.shared.domain.launchers.WhatsAppLauncherUseCaseAndroid
+import world.respect.shared.domain.launchers.WebLauncherUseCase
+import world.respect.shared.domain.launchers.WebLauncherUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -190,6 +194,8 @@ import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
+import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
+import world.respect.shared.viewmodel.manageuser.sharefeedback.FeedbackSubmittedViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -208,6 +214,10 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.feedback.CreateTicketUseCase
+import world.respect.shared.domain.feedback.CreateTicketUseCaseImpl
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
+import world.respect.shared.domain.feedback.GetFeedbackInfoUseCaseImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
@@ -355,6 +365,8 @@ val appKoinModule = module {
     viewModelOf(::OtherOptionsSignupViewModel)
     viewModelOf(::EnterPasswordSignupViewModel)
     viewModelOf(::AccountListViewModel)
+    viewModelOf(::ShareFeedbackViewModel)
+    viewModelOf(::FeedbackSubmittedViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
     viewModelOf(::InvitePersonViewModel)
@@ -386,6 +398,12 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
 
+    single<WhatsAppLauncherUseCase> {
+        WhatsAppLauncherUseCaseAndroid(androidContext())
+    }
+    single<WebLauncherUseCase> {
+        WebLauncherUseCaseAndroid(androidContext())
+    }
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -583,6 +601,15 @@ val appKoinModule = module {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
 
+    single<GetFeedbackInfoUseCase> {
+        GetFeedbackInfoUseCaseImpl()
+    }
+
+    single<CreateTicketUseCase>{
+        CreateTicketUseCaseImpl(
+            httpClient = get(),
+        )
+    }
     factory<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseAndroid(
             appContext = androidContext().applicationContext,

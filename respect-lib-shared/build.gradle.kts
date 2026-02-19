@@ -1,5 +1,24 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
+
+// Initialize Zammad properties
+val feedbackProperties = Properties()
+val feedbackPropertiesFile = System.getenv("FEEDBACK")?.let {
+    File(it)
+} ?: rootProject.file("feedback.properties")
+
+feedbackProperties.takeIf { feedbackPropertiesFile.exists() }
+    ?.load(FileInputStream(feedbackPropertiesFile))
+
+val FEEDBACK_PROP_NAMES = listOf("zammadUrl","zammadToken","respectPhoneNumber","respectEmailId")
+
+FEEDBACK_PROP_NAMES.forEach { propName ->
+    System.getenv("FEEDBACK_${propName.uppercase()}")?.also {
+        feedbackProperties.setProperty(propName, it)
+    }
+}
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -109,9 +128,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        for(propName in FEEDBACK_PROP_NAMES) {
+            buildConfigField(
+                type = "String",
+                name = "FEEDBACK_${propName.uppercase()}",
+                value = "\"${feedbackProperties.getProperty(propName) ?: ""}\""
+            )
+        }
     }
+
 }
 dependencies {
     implementation(project(":respect-datalayer-repository"))

@@ -1,6 +1,7 @@
 appId: world.respect.app
 
 ---
+- clearState: world.respect.app
 - launchApp:
       arguments:
           respect_directory: ${output.SCHOOL_URL}
@@ -11,10 +12,10 @@ appId: world.respect.app
           SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
       id: "username"
-- inputText: "admin"
+- inputText: ${USERNAME}
 - tapOn:
       id : "password"
-- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- inputText: ${PASSWORD}
 - tapOn: "Login"
 - runFlow:
     when:

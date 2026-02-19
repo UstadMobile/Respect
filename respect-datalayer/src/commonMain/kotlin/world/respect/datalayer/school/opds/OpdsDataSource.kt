@@ -4,19 +4,9 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 
 interface OpdsDataSource {
-
-    @Deprecated("Should be removed in favor of OpdsFeedDataSource.getByUrl")
-    /**
-     * Load an OPDS Feed from a given URL
-     */
-    fun loadOpdsFeed(
-        url: Url,
-        params: DataLoadParams
-    ):  Flow<DataLoadState<OpdsFeed>>
 
     /**
      *

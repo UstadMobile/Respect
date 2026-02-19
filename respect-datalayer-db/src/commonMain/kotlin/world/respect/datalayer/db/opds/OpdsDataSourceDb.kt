@@ -1,7 +1,6 @@
 package world.respect.datalayer.db.opds
 
 import androidx.room.Transactor
-import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
@@ -14,17 +13,14 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.opds.adapters.OpdsFeedEntities
 import world.respect.datalayer.db.opds.adapters.OpdsPublicationEntities
 import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
-import world.respect.datalayer.db.opds.adapters.asDataStateModel
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.OpdsDataSourceLocal
-import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
@@ -54,39 +50,6 @@ class OpdsDataSourceDb(
             return respectSchoolDatabase.getOpdsPublicationEntityDao().getLastModifiedAndETag(
                 uidNumberMapper(url.toString())
             )?.asNetworkValidationInfo()
-        }
-    }
-
-    /**
-     * Update the database with the given opdsfeed by converting it to entities. Delete any previous
-     * entities associated with the given publication.
-     */
-    override suspend fun updateOpdsFeed(feed: DataReadyState<OpdsFeed>) {
-        val feedUrl = feed.metaInfo.requireUrl()
-
-        val feedEntities = feed.asEntities(
-            json = json,
-            primaryKeyGenerator = primaryKeyGenerator,
-            uidNumberMapper = uidNumberMapper,
-        ) ?: return
-
-        respectSchoolDatabase.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val feedUid = uidNumberMapper(feedUrl.toString())
-                respectSchoolDatabase.getOpdsFeedEntityDao().deleteByFeedUid(feedUid)
-                respectSchoolDatabase.getOpdsFeedMetadataEntityDao().deleteByFeedUid(feedUid)
-                respectSchoolDatabase.getLangMapEntityDao().deleteAllByFeedUid(feedUid)
-                respectSchoolDatabase.getReadiumLinkEntityDao().deleteAllByFeedUid(feedUid)
-                respectSchoolDatabase.getOpdsPublicationEntityDao().deleteAllByFeedUid(feedUid)
-                respectSchoolDatabase.getOpdsGroupEntityDao().deleteByFeedUid(feedUid)
-
-                respectSchoolDatabase.getOpdsFeedEntityDao().insertList(listOf(feedEntities.opdsFeed))
-                respectSchoolDatabase.getOpdsFeedMetadataEntityDao().insertList(feedEntities.feedMetaData)
-                respectSchoolDatabase.getLangMapEntityDao().insertAsync(feedEntities.langMapEntities)
-                respectSchoolDatabase.getReadiumLinkEntityDao().insertList(feedEntities.linkEntities)
-                respectSchoolDatabase.getOpdsPublicationEntityDao().insertList(feedEntities.publications)
-                respectSchoolDatabase.getOpdsGroupEntityDao().insertList(feedEntities.groups)
-            }
         }
     }
 
@@ -123,30 +86,6 @@ class OpdsDataSourceDb(
                 respectSchoolDatabase.getLangMapEntityDao().insertAsync(publicationEntities.langMapEntities)
                 respectSchoolDatabase.getReadiumLinkEntityDao().insertList(publicationEntities.linkEntities)
             }
-        }
-    }
-
-    override fun loadOpdsFeed(
-        url: Url,
-        params: DataLoadParams
-    ): Flow<DataLoadState<OpdsFeed>> {
-        return respectSchoolDatabase.getOpdsFeedEntityDao().findByUrlHashAsFlow(
-            uidNumberMapper(url.toString())
-        ).map { feedEntity ->
-            respectSchoolDatabase.takeIf { feedEntity != null }?.useReaderConnection {
-                feedEntity?.let {
-                    OpdsFeedEntities(
-                        opdsFeed = feedEntity,
-                        feedMetaData = respectSchoolDatabase.getOpdsFeedMetadataEntityDao().findByFeedUid(
-                            feedEntity.ofeUid),
-                        langMapEntities = respectSchoolDatabase.getLangMapEntityDao().findAllByFeedUid(feedEntity.ofeUid),
-                        linkEntities =respectSchoolDatabase.getReadiumLinkEntityDao().findAllByFeedUid(feedEntity.ofeUid),
-                        publications = respectSchoolDatabase.getOpdsPublicationEntityDao().findByFeedUid(
-                            feedEntity.ofeUid),
-                        groups = respectSchoolDatabase.getOpdsGroupEntityDao().findByFeedUid(feedEntity.ofeUid),
-                    ).asDataStateModel(json)
-                }
-            } ?: NoDataLoadedState.notFound()
         }
     }
 

@@ -36,7 +36,7 @@ import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
-    val app: DataLoadState<RespectAppManifest> = DataLoadingState(),
+    val app: DataLoadState<OpdsPublication> = DataLoadingState(),
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
@@ -95,9 +95,11 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.getAppAsFlow(
-                manifestUrl = route.appManifestUrl,
-                loadParams = DataLoadParams()
+            schoolDataSource.opdsDataSource.loadOpdsPublication(
+                url = route.appManifestUrl,
+                params = DataLoadParams(),
+                referrerUrl = null,
+                expectedPublicationId = null,
             ).collect { app ->
                 _uiState.update { it.copy(app = app) }
             }

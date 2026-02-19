@@ -1,7 +1,7 @@
 package world.respect.shared.domain.launchapp
 
 import io.ktor.http.Url
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.navigation.NavCommand
 
 /**
@@ -10,7 +10,7 @@ import world.respect.shared.navigation.NavCommand
 interface LaunchAppUseCase {
 
     operator fun invoke(
-        app: RespectAppManifest,
+        app: OpdsPublication,
         learningUnitId: Url?,
         navigateFn: (NavCommand) -> Unit,
     )

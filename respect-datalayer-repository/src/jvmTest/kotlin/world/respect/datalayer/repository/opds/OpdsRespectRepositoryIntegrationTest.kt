@@ -23,14 +23,18 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.mock
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.opds.OpdsDataSourceDb
+import world.respect.datalayer.db.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.http.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.findFreePort
@@ -54,9 +58,9 @@ class OpdsRespectRepositoryIntegrationTest {
         val okHttpClient: OkHttpClient,
         val httpClient: HttpClient,
         val xxStringHasher: XXStringHasherCommonJvm,
-        val local: OpdsDataSourceDb,
-        val remote: OpdsDataSourceHttp,
-        val repository: OpdsDataSourceRepository
+        val local: OpdsFeedDataSourceDb,
+        val remote: OpdsFeedDataSourceHttp,
+        val repository: OpdsFeedDataSourceRepository
     )
 
     private fun opdsIntegrationTest(
@@ -94,18 +98,25 @@ class OpdsRespectRepositoryIntegrationTest {
 
             val xxStringHasher = XXStringHasherCommonJvm()
 
-            val localDataSource = OpdsDataSourceDb(
-                respectSchoolDatabase = db,
+            val localDataSource = OpdsFeedDataSourceDb(
                 json = json,
                 uidNumberMapper = XXHashUidNumberMapper(xxStringHasher),
-                primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS)
+                primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
+                schoolDb = db,
+                authenticatedUser = AuthenticatedUserPrincipalId("0")
             )
 
-            val httpDataSource = OpdsDataSourceHttp(
-                httpClient, localDataSource.feedNetworkValidationHelper
+            val httpDataSource = OpdsFeedDataSourceHttp(
+                httpClient,
+                opdsFeedValidationHelper = localDataSource
             )
 
-            val repository = OpdsDataSourceRepository(localDataSource, httpDataSource)
+            val repository = OpdsFeedDataSourceRepository(
+                local = localDataSource,
+                remote = httpDataSource,
+                remoteWriteQueue = mock {  }
+            )
+
             block(
                 OpdsRepositoryIntegrationTestContext(
                     port = port,
@@ -131,7 +142,7 @@ class OpdsRespectRepositoryIntegrationTest {
             val url = Url("http://localhost:$port/resources/index.json")
             runBlocking {
                 val loadStart = Clock.System.now().toEpochMilliseconds()
-                repository.loadOpdsFeed(url, DataLoadParams()).filter {
+                repository.getByUrlAsFlow(url, DataLoadParams()).filter {
                     it is DataReadyState
                 }.test(timeout = 10.seconds) {
                     val data = awaitItem()
@@ -141,7 +152,7 @@ class OpdsRespectRepositoryIntegrationTest {
                     cancelAndIgnoreRemainingEvents()
                 }
 
-                repository.loadOpdsFeed(url, DataLoadParams()).filter {
+                repository.getByUrlAsFlow(url, DataLoadParams()).filter {
                     it is DataReadyState && it.remoteState is NoDataLoadedState
                 }.test(timeout = 10.seconds) {
                     val data = awaitItem()
@@ -161,11 +172,11 @@ class OpdsRespectRepositoryIntegrationTest {
             val url = Url("http://localhost:$port/resources/index.json")
             runBlocking {
                 withTimeout(15_000) {
-                    repository.loadOpdsFeed(url, DataLoadParams()).filter {
+                    repository.getByUrlAsFlow(url, DataLoadParams()).filter {
                         it is DataReadyState
                     }.first()
 
-                    repository.loadOpdsFeed(url, DataLoadParams()).filter {
+                    repository.getByUrlAsFlow(url, DataLoadParams()).filter {
                         it is DataReadyState && it.remoteState is NoDataLoadedState
                     }.test(timeout = 10.seconds) {
                         val data = awaitItem()

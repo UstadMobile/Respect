@@ -293,27 +293,12 @@ onFlowComplete:
 - assertVisible: "QR code badge"
 
 # Validate Parent User login
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
 - runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-- tapOn:
-    id: "username"
-- inputText: "parentauser"
-- tapOn:
-    id : "password"
-- inputText: "test123"
-- hideKeyboard
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
+     file: "subflows/school_user_login_flow.yaml"
+     env:
+       SCHOOL_NAME: ${SCHOOL_NAME}
+       USERNAME: "parentauser"
+       PASSWORD: "test123"
 - assertVisible: "Apps"
 - tapOn: "People"
 - tapOn: "ParentA User"

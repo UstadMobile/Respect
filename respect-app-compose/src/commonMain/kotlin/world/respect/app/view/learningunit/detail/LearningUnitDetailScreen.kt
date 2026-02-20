@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,18 +34,18 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import androidx.compose.ui.graphics.vector.ImageVector
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import world.respect.shared.generated.resources.open
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
@@ -62,6 +61,7 @@ fun LearningUnitDetailScreen(
         onClickOpen = viewModel::onClickOpen,
         onClickDownload = viewModel::onClickDownload,
         onClickAssign = viewModel::onClickAssign,
+        onClickBookmark =viewModel::onClickBookmark
     )
 }
 
@@ -71,6 +71,7 @@ fun LearningUnitDetailScreen(
     onClickOpen: () -> Unit,
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
+    onClickBookmark: () -> Unit
 ) {
 
     LazyColumn(
@@ -175,6 +176,13 @@ fun LearningUnitDetailScreen(
                 )
 
                 RespectQuickActionButton(
+                    imageVector = Icons.Outlined.BookmarkBorder,
+                    labelText = stringResource(Res.string.bookmark),
+                    onClick = onClickBookmark,
+                    enabled = uiState.buttonsEnabled,
+                )
+
+                RespectQuickActionButton(
                     imageVector = Icons.Filled.NearMe,
                     labelText = stringResource(Res.string.assign),
                     onClick = onClickAssign,
@@ -185,26 +193,3 @@ fun LearningUnitDetailScreen(
     }
 }
 
-@Composable
-private fun IconLabel(icon: ImageVector, labelRes: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(
-            modifier = Modifier
-                .height(4.dp)
-        )
-
-        Text(
-            text = labelRes
-        )
-
-    }
-}

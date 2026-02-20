@@ -156,4 +156,8 @@ class LearningUnitDetailViewModel(
             )
         )
     }
+
+    fun onClickBookmark(){
+
+    }
 }

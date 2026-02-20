@@ -15,7 +15,6 @@ enum class FeedbackCategory(val resource: StringResource) {
     LAUNCHER(Res.string.category_launcher),
     INTEGRATED_APPS(Res.string.category_integrated_apps),
     QUESTION(Res.string.category_question),
-    RATE_US(Res.string.category_rate_us),
     OTHER(Res.string.category_other);
 
 

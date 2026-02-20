@@ -17,6 +17,7 @@ import world.respect.datalayer.db.opds.adapters.OpdsFeedEntities
 import world.respect.datalayer.db.opds.adapters.OpdsPublicationEntities
 import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
+import world.respect.datalayer.db.opds.entities.BookmarkEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
@@ -172,5 +173,19 @@ class OpdsDataSourceDb(
                 ).asModel(json)
             } ?: NoDataLoadedState.notFound()
         }
+    }
+
+    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
+        val urlHash = xxStringHasher.hash(url.toString())
+        return respectDatabase.getBookmarkDao()
+            .observeBookmarkStatus(urlHash)
+            .map { it ?: false }
+    }
+
+    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean) {
+        val urlHash = xxStringHasher.hash(url.toString())
+        respectDatabase.getBookmarkDao().insertOrUpdateBookmark(
+            BookmarkEntity(urlHash = urlHash, isBookmarked = isBookmarked)
+        )
     }
 }

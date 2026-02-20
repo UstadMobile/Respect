@@ -35,4 +35,8 @@ interface OpdsDataSource {
         expectedPublicationId: String?,
     ): Flow<DataLoadState<OpdsPublication>>
 
+    fun observeBookmarkStatus(url: Url): Flow<Boolean>
+
+    suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean)
+
 }

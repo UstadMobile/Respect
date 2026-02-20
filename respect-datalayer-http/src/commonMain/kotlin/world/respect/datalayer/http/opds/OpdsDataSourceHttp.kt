@@ -40,4 +40,12 @@ class OpdsDataSourceHttp(
             validationHelper = publicationValidationHelper,
         )
     }
+
+    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean) {
+        TODO("Not yet implemented")
+    }
 }

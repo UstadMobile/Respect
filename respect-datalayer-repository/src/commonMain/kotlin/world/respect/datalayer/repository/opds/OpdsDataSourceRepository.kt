@@ -41,4 +41,12 @@ class OpdsDataSourceRepository(
     ): Flow<DataLoadState<OpdsPublication>> {
         return remote.loadOpdsPublication(url, params, referrerUrl, expectedPublicationId)
     }
+
+    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
+        return local.observeBookmarkStatus(url)
+    }
+
+    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean) {
+        return local.setBookmarkStatus(url, isBookmarked)
+    }
 }

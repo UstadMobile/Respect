@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -160,6 +161,11 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val bookmarkIcon = if (uiState.isBookmarked) {
+                    Icons.Filled.Bookmark
+                } else {
+                    Icons.Outlined.BookmarkBorder
+                }
                 RespectQuickActionButton(
                     labelText = when(uiState.pinState.status) {
                         PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
@@ -176,7 +182,7 @@ fun LearningUnitDetailScreen(
                 )
 
                 RespectQuickActionButton(
-                    imageVector = Icons.Outlined.BookmarkBorder,
+                    imageVector = bookmarkIcon,
                     labelText = stringResource(Res.string.bookmark),
                     onClick = onClickBookmark,
                     enabled = uiState.buttonsEnabled,

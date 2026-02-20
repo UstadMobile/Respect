@@ -12,11 +12,13 @@ import world.respect.datalayer.db.compatibleapps.entities.CompatibleAppEntity
 import world.respect.datalayer.db.networkvalidation.daos.NetworkValidationInfoEntityDao
 import world.respect.datalayer.db.networkvalidation.entities.NetworkValidationInfoEntity
 import world.respect.datalayer.db.opds.OpdsTypeConverters
+import world.respect.datalayer.db.opds.daos.BookmarkDao
 import world.respect.datalayer.db.opds.daos.OpdsFeedEntityDao
 import world.respect.datalayer.db.opds.daos.OpdsFeedMetadataEntityDao
 import world.respect.datalayer.db.opds.daos.OpdsGroupEntityDao
 import world.respect.datalayer.db.opds.daos.OpdsPublicationEntityDao
 import world.respect.datalayer.db.opds.daos.ReadiumLinkEntityDao
+import world.respect.datalayer.db.opds.entities.BookmarkEntity
 import world.respect.datalayer.db.opds.entities.OpdsFacetEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
@@ -49,6 +51,9 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
         OpdsGroupEntity::class,
         OpdsFeedEntity::class,
         OpdsFeedMetadataEntity::class,
+
+        //Bookmark
+        BookmarkEntity::class,
 
         //Compatible apps
         CompatibleAppEntity::class,
@@ -84,6 +89,8 @@ abstract class RespectAppDatabase : RoomDatabase() {
     abstract fun getReadiumLinkEntityDao(): ReadiumLinkEntityDao
 
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
+
+    abstract fun getBookmarkDao(): BookmarkDao
 
     abstract fun getSchoolDirectoryEntryEntityDao(): SchoolDirectoryEntryEntityDao
 

@@ -35,6 +35,7 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
+    val isBookmarked: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -81,6 +82,13 @@ class LearningUnitDetailViewModel(
                     }
                 }
             }
+        }
+
+        viewModelScope.launch {
+            appDataSource.opdsDataSource.observeBookmarkStatus(route.learningUnitManifestUrl)
+                .collect { bookmarked ->
+                    _uiState.update { it.copy(isBookmarked = bookmarked) }
+                }
         }
 
         viewModelScope.launch {
@@ -157,7 +165,13 @@ class LearningUnitDetailViewModel(
         )
     }
 
-    fun onClickBookmark(){
-
+    fun onClickBookmark() {
+        viewModelScope.launch {
+            val nextStatus = !uiState.value.isBookmarked
+            appDataSource.opdsDataSource.setBookmarkStatus(
+                route.learningUnitManifestUrl,
+                nextStatus
+            )
+        }
     }
 }

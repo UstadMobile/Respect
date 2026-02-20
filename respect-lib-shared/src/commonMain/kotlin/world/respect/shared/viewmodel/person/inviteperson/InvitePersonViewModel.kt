@@ -40,9 +40,11 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_shared_school_device
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.navigation.InvitePerson
+import world.respect.shared.navigation.InvitePerson.InvitePersonOptions
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
@@ -62,7 +64,8 @@ data class InvitePersonUiState(
     val selectedRole: PersonRoleEnum? = null,
     val className: String? = null,
     val schoolName: String? = null,
-    val roleOptions: List<PersonRoleEnum> = emptyList()
+    val roleOptions: List<PersonRoleEnum> = emptyList(),
+    val isSharedDeviceMode: Boolean = false
 ) {
     val inviteCode: String?
         get() = invite.dataOrNull()?.code
@@ -107,9 +110,23 @@ class InvitePersonViewModel(
     private val getWritableRolesListUseCase: GetWritableRolesListUseCase by inject()
 
     init {
+        val isSharedDeviceMode = when (val options = route.invitePersonOptions) {
+            is InvitePerson.NewUserInviteOptions -> {
+                options.presetRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            }
+
+            else -> false
+        }
+        _uiState.update { it.copy(isSharedDeviceMode = isSharedDeviceMode) }
+
+        val title = if (isSharedDeviceMode) {
+            Res.string.add_shared_school_device.asUiText()
+        } else {
+            Res.string.invite_person.asUiText()
+        }
         _appUiState.update {
             it.copy(
-                title = Res.string.invite_person.asUiText(),
+                title = title,
                 searchState = AppBarSearchUiState(visible = false),
                 showBackButton = true,
                 hideBottomNavigation = true,
@@ -122,8 +139,11 @@ class InvitePersonViewModel(
                 ?.person?.roles?.first()?.roleEnum ?: return@launch
 
             val writableRoles = getWritableRolesListUseCase(currentPersonRole)
-            val selectedRole = writableRoles.firstOrNull() ?: PersonRoleEnum.STUDENT
-
+            val selectedRole = if (!isSharedDeviceMode){
+                writableRoles.firstOrNull() ?: PersonRoleEnum.STUDENT
+            }else{
+                PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            }
             _uiState.update {
                 it.copy(
                     roleOptions =  writableRoles,

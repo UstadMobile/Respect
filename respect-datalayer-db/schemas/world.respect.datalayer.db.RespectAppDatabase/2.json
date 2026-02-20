@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "9483cee680b9388b763f97e77c2b62b1",
+    "identityHash": "2119aa07383a2e7d1f12e06a7301dc8b",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -648,7 +648,7 @@
       },
       {
         "tableName": "SchoolDirectoryEntryEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, `reLastModified` INTEGER NOT NULL, `reStored` INTEGER NOT NULL, PRIMARY KEY(`reUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reUid` INTEGER NOT NULL, `reSelf` TEXT NOT NULL, `reXapi` TEXT NOT NULL, `reOneRoster` TEXT NOT NULL, `reRespectExt` TEXT, `reRpId` TEXT, `reLastModified` INTEGER NOT NULL, `reStored` INTEGER NOT NULL, `reTeacherPin` TEXT, PRIMARY KEY(`reUid`))",
         "fields": [
           {
             "fieldPath": "reUid",
@@ -695,6 +695,11 @@
             "columnName": "reStored",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "reTeacherPin",
+            "columnName": "reTeacherPin",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -830,7 +835,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9483cee680b9388b763f97e77c2b62b1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2119aa07383a2e7d1f12e06a7301dc8b')"
     ]
   }
 }

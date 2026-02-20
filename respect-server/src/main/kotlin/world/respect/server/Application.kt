@@ -215,9 +215,11 @@ fun Application.module() {
                         AuthRoute()
                     }
                     route("invite") {
-                        RedeemInviteRoute(
-                            redeemInviteUseCase = { it.getSchoolKoinScope().get() }
-                        )
+                        authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                            RedeemInviteRoute(
+                                redeemInviteUseCase = { it.getSchoolKoinScope().get() }
+                            )
+                        }
                         InviteInfoRoute(
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )

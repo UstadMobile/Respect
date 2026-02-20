@@ -14,7 +14,8 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
     STUDENT("student", 2),
     SYSTEM_ADMINISTRATOR("systemAdministrator", 3),
     TEACHER("teacher", 4),
-    PARENT("parent", 5);
+    PARENT("parent", 5),
+    SHARED_SCHOOL_DEVICE("sharedschooldevice",6);
 
     companion object {
 
@@ -27,6 +28,8 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
         const val TEACHER_INT = 4
 
         const val PARENT_INT = 5
+
+        const val SHARED_SCHOOL_DEVICE_INT = 6
 
 
         fun fromValue(value: String): PersonRoleEnum {

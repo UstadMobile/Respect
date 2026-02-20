@@ -99,7 +99,7 @@ class RespectAccountManager(
                     loadParams = DataLoadParams(),
                     params = PersonDataSource.GetListParams(
                         common = GetListCommonParams(
-                            guid = session.account.userGuid
+                            guid = activePersonUid
                         ),
                         includeRelated = true,
                     )
@@ -160,6 +160,7 @@ class RespectAccountManager(
     suspend fun register(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
+        useActiveUserAuth: Boolean = true
     ): Person {
         val schoolScopeId = SchoolDirectoryEntryScopeId(
             schoolUrl, null,
@@ -169,7 +170,7 @@ class RespectAccountManager(
         )
 
         val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
-        val authResponse = redeemInviteUseCase(redeemInviteRequest)
+        val authResponse = redeemInviteUseCase(redeemInviteRequest,useActiveUserAuth)
 
         val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl

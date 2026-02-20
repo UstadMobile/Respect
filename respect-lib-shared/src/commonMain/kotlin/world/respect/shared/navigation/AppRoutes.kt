@@ -400,6 +400,8 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
+    val useActiveUserAuth: Boolean = false,
+    val isSelfSelectClassAndName: Boolean = true,
 ) : RespectAppRoute {
 
     @Transient
@@ -410,10 +412,14 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
+            useActiveUserAuth: Boolean = false,
+            isSelfSelectClassAndName: Boolean = true,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
+            useActiveUserAuth = useActiveUserAuth,
+            isSelfSelectClassAndName = isSelfSelectClassAndName
         )
     }
 }
@@ -761,6 +767,56 @@ data class ScanQRCode(
 
 @Serializable
 data object CurriculumMappingList : RespectAppRoute
+
+@Serializable
+data object SchoolSettings : RespectAppRoute
+
+@Serializable
+data object SharedDevicesSettings : RespectAppRoute
+
+@Serializable
+data class SelectClass(
+    val isSelfSelectClassAndName: Boolean = true,
+    private val inviteRedeemRequestStr: String? = null,
+) : RespectAppRoute {
+
+    @Transient
+    val redeemRequest: RespectRedeemInviteRequest? = inviteRedeemRequestStr?.let {
+        Json.decodeFromString(it)
+    }
+
+    companion object {
+        fun create(
+            isSelfSelectClassAndName: Boolean = true,
+            redeemRequest: RespectRedeemInviteRequest? = null
+        ) = SelectClass(
+            isSelfSelectClassAndName = isSelfSelectClassAndName,
+            inviteRedeemRequestStr = redeemRequest?.let {
+                Json.encodeToString(it)
+            }
+        )
+    }
+}
+@Serializable
+data object TeacherAndAdminLogin : RespectAppRoute
+
+@Serializable
+data class StudentList(
+    val className: String,
+    val guid: String,
+): RespectAppRoute {
+
+    companion object {
+        fun create(
+            className: String,
+            guid: String,
+            redeemRequest: RespectRedeemInviteRequest? = null
+        ) = StudentList(
+            className = className,
+            guid = guid,
+        )
+    }
+}
 
 @Serializable
 data class CurriculumMappingEdit(

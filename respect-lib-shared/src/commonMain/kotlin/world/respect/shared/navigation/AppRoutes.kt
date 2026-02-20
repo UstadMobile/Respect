@@ -774,11 +774,10 @@ data object SchoolSettings : RespectAppRoute
 @Serializable
 data object SharedDevicesSettings : RespectAppRoute
 
-// In navigation/RespectAppRoute.kt
 @Serializable
 data class SelectClass(
     val isSelfSelectClassAndName: Boolean = true,
-    private val inviteRedeemRequestStr: String? = null, // Add this
+    private val inviteRedeemRequestStr: String? = null,
 ) : RespectAppRoute {
 
     @Transient
@@ -789,7 +788,7 @@ data class SelectClass(
     companion object {
         fun create(
             isSelfSelectClassAndName: Boolean = true,
-            redeemRequest: RespectRedeemInviteRequest? = null // Add this parameter
+            redeemRequest: RespectRedeemInviteRequest? = null
         ) = SelectClass(
             isSelfSelectClassAndName = isSelfSelectClassAndName,
             inviteRedeemRequestStr = redeemRequest?.let {

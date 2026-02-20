@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.ext.primaryRole
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -27,6 +28,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
@@ -40,9 +42,11 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
+    val accountOwnerRole: PersonRoleEnum? = null,
 ) {
     val showSelectedAccountProfileButton: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
+                && accountOwnerRole != PersonRoleEnum.SHARED_SCHOOL_DEVICE // Hide for shared device
 
     val familyMembersClickEnabled: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
@@ -71,8 +75,20 @@ class AccountListViewModel(
 
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
+                val accountOwnerRole = respectAccountManager.activeAccount?.let { account ->
+                    val accountScope = respectAccountManager.getOrCreateAccountScope(account)
+                    val dataSource: SchoolDataSource = accountScope.get()
+                    dataSource.personDataSource.findByGuid(
+                        DataLoadParams(onlyIfCached = true),
+                        account.userGuid
+                    ).dataOrNull()?.primaryRole()
+                }
+
                 _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson)
+                    prev.copy(
+                        selectedAccount = accountAndPerson,
+                        accountOwnerRole = accountOwnerRole
+                    )
                 }
             }
         }
@@ -215,11 +231,19 @@ class AccountListViewModel(
 
 
     fun onClickLogout() {
-        uiState.value.selectedAccount?.also {
-            viewModelScope.launch {
-                respectAccountManager.removeAccount(it.session.account)
+        if (uiState.value.showSelectedAccountProfileButton) {
+            uiState.value.selectedAccount?.also {
+                viewModelScope.launch {
+                    respectAccountManager.removeAccount(it.session.account)
+                }
             }
+        } else {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = SelectClass.create(),
+                    clearBackStack = true
+                )
+            )
         }
     }
-
 }

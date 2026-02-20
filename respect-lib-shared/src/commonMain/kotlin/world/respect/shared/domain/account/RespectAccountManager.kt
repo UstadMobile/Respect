@@ -99,7 +99,7 @@ class RespectAccountManager(
                     loadParams = DataLoadParams(),
                     params = PersonDataSource.GetListParams(
                         common = GetListCommonParams(
-                            guid = session.account.userGuid
+                            guid = activePersonUid
                         ),
                         includeRelated = true,
                     )

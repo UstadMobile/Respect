@@ -2,6 +2,7 @@ package world.respect.shared.domain.account.invite
 
 import com.russhwolf.settings.Settings
 import io.ktor.http.Url
+import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.util.ext.isSameAccount
 
@@ -13,9 +14,9 @@ class EnableSharedDeviceModeUseCase(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
         useActiveUserAuth: Boolean = false
-    ) {
+    ): Person {
         try {
-            accountManager.register(
+            val personRegistered = accountManager.register(
                 redeemInviteRequest = redeemInviteRequest,
                 schoolUrl = schoolUrl,
                 useActiveUserAuth = useActiveUserAuth
@@ -32,6 +33,8 @@ class EnableSharedDeviceModeUseCase(
             }
 
             settings.putBoolean(SETTINGS_KEY_IS_SHARED_MODE, true)
+
+            return personRegistered
 
         } catch (e: Exception) {
             println("EnableSharedDeviceModeUseCase ERROR: ${e.message}")

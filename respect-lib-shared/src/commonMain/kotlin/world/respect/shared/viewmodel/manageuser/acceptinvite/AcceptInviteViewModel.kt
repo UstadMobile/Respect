@@ -21,6 +21,7 @@ import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.isChildUser
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.lib.opds.model.LangMap
 import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
@@ -36,9 +37,11 @@ import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.generated.resources.something_wrong_with_invite
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
@@ -197,13 +200,21 @@ class  AcceptInviteViewModel(
         )
         viewModelScope.launch {
             try {
-              enableSharedDeviceModeUseCase(
+                val personRegistered = enableSharedDeviceModeUseCase(
                     redeemInviteRequest = inviteRedeemRequest,
                     schoolUrl = route.schoolUrl,
                     useActiveUserAuth = route.useActiveUserAuth
                 )
-                _navCommandFlow.tryEmit(NavCommand.Navigate(SelectClass(isSelfSelectClassAndName = route.isSelfSelectClassAndName)))
-
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = if (personRegistered.status != PersonStatusEnum.PENDING_APPROVAL) {
+                            SelectClass(isSelfSelectClassAndName = route.isSelfSelectClassAndName)
+                        } else {
+                            WaitingForApproval()
+                        },
+                        clearBackStack = true
+                    )
+                )
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(

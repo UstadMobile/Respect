@@ -16,6 +16,7 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
@@ -57,6 +58,8 @@ class StudentListViewModel(
             )
         )
     }
+    private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
+
 
     init {
         _appUiState.update {
@@ -72,12 +75,14 @@ class StudentListViewModel(
                 students = pagingSourceHolder,
             )
         }
+        viewModelScope.launch {
+            enqueuePullSyncUseCase()
+        }
     }
 
     fun onClickStudent(person: Person) {
         viewModelScope.launch {
             accountManager.switchProfile(person.guid)
-
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = if (person.status != PersonStatusEnum.PENDING_APPROVAL) {

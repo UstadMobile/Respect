@@ -246,7 +246,6 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
-
 import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel

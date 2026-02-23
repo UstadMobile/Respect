@@ -110,7 +110,6 @@ fun SharedDevicesSettingsScreen(
             viewModel.onDismissBottomSheet()
         },
         onDismissBottomSheet = viewModel::onDismissBottomSheet,
-        onClickAdd = viewModel::onClickAdd,
     )
 }
 
@@ -128,7 +127,6 @@ private fun SharedDevicesSettingsContent(
     onAddAnotherDevice: () -> Unit,
     onEnableOnThisDevice: () -> Unit,
     onDismissBottomSheet: () -> Unit,
-    onClickAdd: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 

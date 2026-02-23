@@ -41,7 +41,6 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import kotlin.random.Random
 import kotlin.time.Clock
 
 data class SharedDevicesSettingsUiState(
@@ -211,11 +210,6 @@ class SharedDevicesSettingsViewmodel(
                 }
         }
     }
-
-    private fun generateRandomPin(): String {
-        return Random.nextInt(1000, 10000).toString().padStart(4, '0')
-    }
-
 
     fun onClickEnableOnThisDevice() {
         viewModelScope.launch {

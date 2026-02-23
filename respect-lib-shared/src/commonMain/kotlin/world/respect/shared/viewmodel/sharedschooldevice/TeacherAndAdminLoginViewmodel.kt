@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.teacher_admin_login
@@ -51,12 +50,8 @@ class TeacherAndAdminLoginViewmodel(
         )
     }
 
-    suspend fun verifyTeacherPin(enteredPin: String): Boolean {
-        val activeAccount = accountManager.activeAccount ?: return false
-        val schoolEntry =respectAppDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
-            activeAccount.school.self
-        ).dataOrNull() ?: return false
-
-        return schoolEntry.teacherPin == enteredPin
+    fun verifyTeacherPin(enteredPin: String): Boolean {
+        // TODO
+        return true
     }
 }

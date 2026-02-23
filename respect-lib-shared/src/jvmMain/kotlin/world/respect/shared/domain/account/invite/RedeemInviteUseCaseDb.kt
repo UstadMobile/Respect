@@ -71,7 +71,8 @@ class RedeemInviteUseCaseDb(
 
         val accountGuid = redeemRequest.account.guid
 
-        val isSharedDeviceInvite = redeemRequest.invite.accepterPersonRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+        val isSharedDeviceInvite =
+            redeemRequest.invite.accepterPersonRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
         val approvalRequired = if (isSharedDeviceInvite && useActiveUserAuth) {
             false
         } else {

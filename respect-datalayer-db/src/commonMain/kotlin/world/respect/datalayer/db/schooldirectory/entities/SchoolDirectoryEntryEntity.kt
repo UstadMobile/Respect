@@ -19,5 +19,4 @@ data class SchoolDirectoryEntryEntity(
     val reRpId: String?,
     val reLastModified: Instant,
     val reStored: Instant,
-    val reTeacherPin: String? = null,
 )

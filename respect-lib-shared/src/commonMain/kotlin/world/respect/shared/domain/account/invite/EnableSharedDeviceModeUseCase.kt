@@ -37,7 +37,6 @@ class EnableSharedDeviceModeUseCase(
             return personRegistered
 
         } catch (e: Exception) {
-            println("EnableSharedDeviceModeUseCase ERROR: ${e.message}")
             e.printStackTrace()
             throw e
         }

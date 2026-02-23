@@ -29,5 +29,4 @@ data class SchoolDirectoryEntry(
     val rpId : String?,
     override val lastModified: InstantAsISO8601,
     override val stored: InstantAsISO8601,
-    val teacherPin: String? = null, // temporary field - school-wide PIN for teacher/admin access TODO :MIGRATION
 ): ModelWithTimes

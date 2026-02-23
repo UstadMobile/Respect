@@ -38,7 +38,7 @@ class SchoolSettingsViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
-    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
@@ -62,7 +62,7 @@ class SchoolSettingsViewModel(
             }.collectLatest { (storedAccounts, activeAccount) ->
                 _uiState.update { prev ->
                     prev.copy(
-                        schoolName =  activeAccount?.school?.name?.getTitle()
+                        schoolName = activeAccount?.school?.name?.getTitle()
                     )
                 }
             }
@@ -78,7 +78,6 @@ class SchoolSettingsViewModel(
                 Pair(person, activeAccount)
             }.collect { (personsResult, activeAccount) ->
                 val sharedDevices = personsResult.dataOrNull()?.filter { person ->
-                    // Filter for shared school devices
                     person.roles.any { role ->
                         role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
                     }

@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.devices
 import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
@@ -32,7 +33,7 @@ fun SchoolSettingsScreen(
         )
         SchoolSettingsScreen(
             title = stringResource(Res.string.shared_school_devices),
-            description = "${uiState.sharedSchoolDeviceCount.toString()} devices",
+            description = "${uiState.sharedSchoolDeviceCount.toString()} ${stringResource(Res.string.devices)}",
             testTag = "devices_count",
             onClick = viewModel::onClickSharedSchoolDevices
         )

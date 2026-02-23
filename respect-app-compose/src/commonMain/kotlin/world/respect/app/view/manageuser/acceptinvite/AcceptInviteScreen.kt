@@ -45,6 +45,7 @@ import world.respect.shared.generated.resources.enable_button
 import world.respect.shared.generated.resources.image_shared_device
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.next
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.role
 import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.school_server_url
@@ -209,7 +210,7 @@ fun SharedSchoolDeviceEnableScreenContent(
                 isError = !uiState.isDeviceNameValid && uiState.deviceName.isNotEmpty(),
                 supportingText = {
                     if (!uiState.isDeviceNameValid && uiState.deviceName.isNotEmpty()) {
-                        Text("Device name is required")
+                        Text(text = stringResource(Res.string.required_field))
                     }
                 }
             )

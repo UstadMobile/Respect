@@ -170,7 +170,7 @@ class RespectAccountManager(
         )
 
         val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
-        val authResponse = redeemInviteUseCase(redeemInviteRequest,useActiveUserAuth)
+        val authResponse = redeemInviteUseCase(redeemInviteRequest, useActiveUserAuth)
 
         val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl

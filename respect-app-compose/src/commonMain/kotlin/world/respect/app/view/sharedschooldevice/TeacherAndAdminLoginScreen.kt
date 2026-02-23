@@ -1,21 +1,16 @@
 package world.respect.app.view.sharedschooldevice
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -36,7 +31,6 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_school_device_pin
 import world.respect.shared.generated.resources.next
-import world.respect.shared.generated.resources.other_options
 import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginUiState
 import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
 
@@ -52,12 +46,13 @@ fun TeacherAndAdminLoginScreen(
         onClickNext = viewModel::onClickNext
     )
 }
+
 @Composable
 fun TeacherAndAdminLoginScreen(
     uiState: TeacherAndAdminLoginUiState,
     onPinChanged: (String) -> Unit,
-    onClickNext:() -> Unit
-    ) {
+    onClickNext: () -> Unit
+) {
     val focusRequester = remember { FocusRequester() }
 
     Column(
@@ -77,7 +72,8 @@ fun TeacherAndAdminLoginScreen(
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier.testTag("Enter school device PIN")
+            modifier = Modifier
+                .testTag("Enter school device PIN")
                 .fillMaxWidth()
                 .background(color = Color(0xFFEEEEEE))
                 .focusRequester(focusRequester),

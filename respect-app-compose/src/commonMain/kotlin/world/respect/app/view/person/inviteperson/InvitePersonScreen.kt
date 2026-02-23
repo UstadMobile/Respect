@@ -119,7 +119,10 @@ fun InvitePersonScreen(
 
                 RespectExposedDropDownMenuField(
                     value = selectedRole,
-                    modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth()
+                        .testTag("role"),
                     label = {
                         Text(stringResource(Res.string.role))
                     },

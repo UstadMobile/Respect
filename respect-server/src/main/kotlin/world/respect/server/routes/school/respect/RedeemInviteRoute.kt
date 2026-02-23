@@ -15,15 +15,15 @@ fun Route.RedeemInviteRoute(
 ) {
 
     post("redeem") {
-            val redeemRequest: RespectRedeemInviteRequest = call.receive()
+        val redeemRequest: RespectRedeemInviteRequest = call.receive()
 
-            val isAuthenticated = call.principal<UserIdPrincipal>() != null
+        val isAuthenticated = call.principal<UserIdPrincipal>() != null
 
-            val response = redeemInviteUseCase(call).invoke(
-                redeemRequest,
-                useActiveUserAuth = isAuthenticated
-            )
-            call.respond(response)
+        val response = redeemInviteUseCase(call).invoke(
+            redeemRequest,
+            useActiveUserAuth = isAuthenticated
+        )
+        call.respond(response)
     }
 
 }

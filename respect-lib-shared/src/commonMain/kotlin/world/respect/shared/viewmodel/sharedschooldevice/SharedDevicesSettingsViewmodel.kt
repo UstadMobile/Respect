@@ -25,6 +25,8 @@ import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
+import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device
@@ -34,6 +36,7 @@ import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -82,7 +85,8 @@ class SharedDevicesSettingsViewmodel(
             DataLoadParams(),
             PersonDataSource.GetListParams(
                 filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
-                filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE,
+                excludeSharedSchoolDevice = false
             )
         )
     }
@@ -93,10 +97,28 @@ class SharedDevicesSettingsViewmodel(
             PersonDataSource.GetListParams(
                 filterByName = _appUiState.value.searchState.searchText.takeIf { it.isNotBlank() },
                 filterByPersonStatus = PersonStatusEnum.ACTIVE,
-                filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE,
+                excludeSharedSchoolDevice = false
             )
         )
     }
+    private val getSharedDevicePINUseCase: GetSharedDevicePINUseCase
+        get() = getKoin().getScope(
+            SchoolDirectoryEntryScopeId(
+                schoolUrl = accountManager.activeAccount?.school?.self
+                    ?: throw IllegalStateException("No active school"),
+                accountPrincipalId = null
+            ).scopeId
+        ).get()
+
+    private val setSharedDevicePINUseCase: SetSharedDevicePINUseCase
+        get() = getKoin().getScope(
+            SchoolDirectoryEntryScopeId(
+                schoolUrl = accountManager.activeAccount?.school?.self
+                    ?: throw IllegalStateException("No active school"),
+                accountPrincipalId = null
+            ).scopeId
+        ).get()
 
     init {
         loadSchoolPin() // Load existing PIN first
@@ -148,27 +170,45 @@ class SharedDevicesSettingsViewmodel(
     }
 
     private fun loadSchoolPin() {
-        //TODO
         viewModelScope.launch {
-            try {
-                val newPin = generateRandomPin()
-                _uiState.update {
-                    it.copy(
-                        pin = newPin,
-                        isLoadingPin = false
-                    )
+            getSharedDevicePINUseCase()
+                .onSuccess { pin ->
+                    _uiState.update {
+                        it.copy(
+                            pin = pin,
+                            isLoadingPin = false
+                        )
+                    }
                 }
-                savePinToDatabase(newPin)
-            } catch (e: Exception) {
-                val fallbackPin = generateRandomPin()
-                _uiState.update {
-                    it.copy(
-                        pin = fallbackPin,
-                        isLoadingPin = false,
-                        error = "Failed to load PIN, using generated one".asUiText()
-                    )
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(
+                            error = exception.message?.asUiText()
+                                ?: "Failed to load PIN, using generated one".asUiText()
+                        )
+                    }
                 }
-            }
+        }
+    }
+
+    private fun savePinToDatabase(pin: String) {
+        viewModelScope.launch {
+            setSharedDevicePINUseCase(pin)
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            pin = pin,
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(
+                            error = exception.message?.asUiText() ?: "Failed to save PIN".asUiText()
+                        )
+                    }
+                }
         }
     }
 
@@ -176,9 +216,6 @@ class SharedDevicesSettingsViewmodel(
         return Random.nextInt(1000, 10000).toString().padStart(4, '0')
     }
 
-    private fun savePinToDatabase(pin: String) {
-        //TODO
-    }
 
     fun onClickEnableOnThisDevice() {
         viewModelScope.launch {
@@ -239,7 +276,6 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onPinChange(newPin: String) {
-        // Only allow digits and limit length
         if (newPin.all { it.isDigit() } && newPin.length <= 4) {
             _uiState.update { it.copy(pin = newPin, error = null) }
         }

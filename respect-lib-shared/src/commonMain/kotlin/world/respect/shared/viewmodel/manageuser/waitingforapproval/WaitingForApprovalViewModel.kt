@@ -70,11 +70,11 @@ class WaitingForApprovalViewModel(
                 ).dataOrNull()
 
                 val personLoaded = personsLoaded?.firstOrNull { it.guid == activeUserUid }
-                if(personLoaded?.status == PersonStatusEnum.ACTIVE) {
+                if (personLoaded?.status == PersonStatusEnum.ACTIVE) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             destination = if (personLoaded.roles.firstOrNull()?.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE) {
-                                SelectClass.create()
+                                SelectClass.create(deviceGuid = personLoaded.guid)
                             } else {
                                 RespectAppLauncher()
                             },

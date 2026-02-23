@@ -121,6 +121,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
@@ -148,6 +149,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): List<PersonEntityWithRoles>
 
     @Transaction
@@ -191,6 +193,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
@@ -221,6 +224,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): PagingSource<Int, PersonListDetails>
 
     @Query("""
@@ -422,7 +426,13 @@ interface PersonEntityDao {
                               FROM PersonRoleEntity
                              WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
                       AND (:filterByPersonStatus = 0 OR PersonEntity.pStatus = :filterByPersonStatus)
-                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT})       
+                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT}) 
+                      AND (:excludeSharedSchoolDevice = 0 OR NOT EXISTS ( 
+                       SELECT 1
+                         FROM PersonRoleEntity
+                        WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                          AND PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SHARED_SCHOOL_DEVICE_INT}
+                  ))              
             ),
                 
             RelatedPersons(uidNum) AS (
@@ -437,6 +447,12 @@ interface PersonEntityDao {
                                  FROM Persons)
                        )
                    AND ($AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL)    
+                    AND (:excludeSharedSchoolDevice = 0 OR NOT EXISTS (  
+                    SELECT 1
+                      FROM PersonRoleEntity
+                     WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                       AND PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SHARED_SCHOOL_DEVICE_INT}
+               ))   
             ),
                 
             AllPersons(uidNum) AS (

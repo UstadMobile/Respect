@@ -62,6 +62,10 @@ import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
+import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -197,6 +201,12 @@ fun serverKoinModule(
                 json = get(),
                 decodeUserHandleUseCase = get(),
             )
+        }
+        scoped<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl()
+        }
+        scoped<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl()
         }
         scoped<RespectSchoolPath> {
             val schoolDirName = schoolUrl().sanitizedForFilename()

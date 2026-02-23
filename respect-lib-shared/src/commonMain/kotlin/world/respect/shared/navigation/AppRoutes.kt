@@ -777,23 +777,17 @@ data object SharedDevicesSettings : RespectAppRoute
 @Serializable
 data class SelectClass(
     val isSelfSelectClassAndName: Boolean = true,
-    private val inviteRedeemRequestStr: String? = null,
+    val deviceGuid: String
 ) : RespectAppRoute {
-
-    @Transient
-    val redeemRequest: RespectRedeemInviteRequest? = inviteRedeemRequestStr?.let {
-        Json.decodeFromString(it)
-    }
 
     companion object {
         fun create(
             isSelfSelectClassAndName: Boolean = true,
-            redeemRequest: RespectRedeemInviteRequest? = null
+            redeemRequest: RespectRedeemInviteRequest? = null,
+            deviceGuid: String
         ) = SelectClass(
             isSelfSelectClassAndName = isSelfSelectClassAndName,
-            inviteRedeemRequestStr = redeemRequest?.let {
-                Json.encodeToString(it)
-            }
+            deviceGuid = deviceGuid
         )
     }
 }

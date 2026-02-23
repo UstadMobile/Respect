@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +59,7 @@ fun SelectClassScreen(
     val listState = rememberLazyListState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if(uiState.isSelfSelectClassAndName) {
+        if (uiState.isSelfSelectClassAndName) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState
@@ -85,25 +88,72 @@ fun SelectClassScreen(
                 }
             }
         }
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedButton(
-                onClick = onClickScanQrCode,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = stringResource(Res.string.scan_qr_code))
-            }
 
-            OutlinedButton(
-                onClick = onClickTeacherAdminLogin,
-                modifier = Modifier.fillMaxWidth()
+        if (uiState.isSelfSelectClassAndName) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = stringResource(Res.string.teacher_admin_login))
+                OutlinedButton(
+                    onClick = onClickScanQrCode,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(Res.string.scan_qr_code))
+                }
+
+                OutlinedButton(
+                    onClick = onClickTeacherAdminLogin,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(Res.string.teacher_admin_login))
+                }
+                if (uiState.deviceName.isNotEmpty()) {
+                    Text(
+                        text = uiState.deviceName,
+                        modifier = Modifier.padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Button(
+                    onClick = onClickScanQrCode,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                ) {
+                    Text(text = stringResource(Res.string.scan_qr_code))
+                }
+
+                OutlinedButton(
+                    onClick = onClickTeacherAdminLogin,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
+                ) {
+                    Text(text = stringResource(Res.string.teacher_admin_login))
+                }
+                if (uiState.deviceName.isNotEmpty()) {
+                    Text(
+                        text = uiState.deviceName,
+                        modifier = Modifier.padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

@@ -238,12 +238,14 @@ class AccountListViewModel(
                 }
             }
         } else {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    destination = SelectClass.create(),
-                    clearBackStack = true
+            uiState.value.selectedAccount?.person?.let { person ->
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = SelectClass.create(deviceGuid = person.guid),
+                        clearBackStack = true
+                    )
                 )
-            )
+            }
         }
     }
 }

@@ -1,15 +1,18 @@
 package world.respect.shared.viewmodel.sharedschooldevice.login
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
@@ -31,7 +34,8 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class SelectClassUiState(
     val error: UiText? = null,
     val classes: IPagingSourceFactory<Int, Clazz> = EmptyPagingSourceFactory(),
-    val isSelfSelectClassAndName: Boolean = true
+    val isSelfSelectClassAndName: Boolean = true,
+    val deviceName: String = ""
 )
 
 class SelectClassViewModel(
@@ -65,11 +69,17 @@ class SelectClassViewModel(
                 showBackButton = false
             )
         }
-        _uiState.update { prev ->
-            prev.copy(
-                classes = pagingSourceHolder,
-                isSelfSelectClassAndName = route.isSelfSelectClassAndName
-            )
+        viewModelScope.launch {
+            val device =
+                schoolDataSource.personDataSource.findByGuid(DataLoadParams(), route.deviceGuid)
+
+            _uiState.update { prev ->
+                prev.copy(
+                    classes = pagingSourceHolder,
+                    isSelfSelectClassAndName = route.isSelfSelectClassAndName,
+                    deviceName = device.dataOrNull()?.givenName ?: ""
+                )
+            }
         }
     }
 

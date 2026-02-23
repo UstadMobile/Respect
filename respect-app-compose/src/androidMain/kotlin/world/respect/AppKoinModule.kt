@@ -255,6 +255,10 @@ import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewMo
 import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
+import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCaseImpl
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
@@ -760,6 +764,13 @@ val appKoinModule = module {
             SchoolPrimaryKeyGenerator(
                 primaryKeyGenerator = PrimaryKeyGenerator(SchoolPrimaryKeyGenerator.TABLE_IDS)
             )
+        }
+
+        scoped<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl()
+        }
+        scoped<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl()
         }
 
         scoped<RedeemInviteUseCase> {

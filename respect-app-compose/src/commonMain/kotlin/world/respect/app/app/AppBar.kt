@@ -209,8 +209,8 @@ fun RespectAppBar(
                         )
                     }
                 }
-
-                if (appUiState.settingsIconVisible == true) {
+                // TODO: For now, make the settingsIcon always visible for testing.
+//                if (appUiState.settingsIconVisible == true) {
                     IconButton(
                         onClick = appUiState.onClickSettings ?: {},
                         modifier = Modifier.testTag("Settings")
@@ -220,7 +220,7 @@ fun RespectAppBar(
                             contentDescription = stringResource(Res.string.settings)
                         )
                     }
-                }
+//                }
                 if(showUserAccountIcon) {
                     activeAccount?.also {
                         IconButton(

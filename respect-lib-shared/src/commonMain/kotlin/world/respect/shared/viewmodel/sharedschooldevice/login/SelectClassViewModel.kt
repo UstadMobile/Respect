@@ -19,6 +19,7 @@ import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.enableclassname.GetSharedDeviceSelfSelectUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.select_class
@@ -28,6 +29,7 @@ import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.StudentList
 import world.respect.shared.navigation.TeacherAndAdminLogin
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -52,6 +54,8 @@ class SelectClassViewModel(
     private val _uiState = MutableStateFlow(SelectClassUiState())
     val uiState = _uiState.asStateFlow()
 
+    val schoolUrl = accountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("No active school")
     private val pagingSourceHolder = PagingSourceFactoryHolder {
         schoolDataSource.classDataSource.listAsPagingSource(
             loadParams = DataLoadParams(),
@@ -59,6 +63,9 @@ class SelectClassViewModel(
         )
     }
 
+    private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase
+        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
+            .get()
 
     init {
         _appUiState.update {
@@ -69,9 +76,11 @@ class SelectClassViewModel(
                 showBackButton = false
             )
         }
+
+        loadSelfSelectSetting()
+
         viewModelScope.launch {
-            val device =
-                schoolDataSource.personDataSource.findByGuid(DataLoadParams(), route.deviceGuid)
+            val device = schoolDataSource.personDataSource.findByGuid(DataLoadParams(), route.deviceGuid)
 
             _uiState.update { prev ->
                 prev.copy(
@@ -80,6 +89,22 @@ class SelectClassViewModel(
                     deviceName = device.dataOrNull()?.givenName ?: ""
                 )
             }
+        }
+    }
+    private fun loadSelfSelectSetting() {
+        viewModelScope.launch {
+            getSharedDeviceSelfSelectUseCase()
+                .onSuccess { enabled ->
+                    _uiState.update {
+                        it.copy(isSelfSelectClassAndName = enabled)
+                    }
+                }
+                .onFailure { exception ->
+                    // Handle error, maybe use default
+                    _uiState.update {
+                        it.copy(isSelfSelectClassAndName = true)
+                    }
+                }
         }
     }
 

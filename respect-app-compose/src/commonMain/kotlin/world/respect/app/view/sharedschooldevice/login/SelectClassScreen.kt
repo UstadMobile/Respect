@@ -54,12 +54,12 @@ fun SelectClassScreen(
     onClickScanQrCode: () -> Unit,
     onClickTeacherAdminLogin: () -> Unit,
 ) {
-    val pager = respectRememberPager(uiState.classes)
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-    val listState = rememberLazyListState()
-
     Box(modifier = Modifier.fillMaxSize()) {
         if (uiState.isSelfSelectClassAndName) {
+            val pager = respectRememberPager(uiState.classes)
+            val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+            val listState = rememberLazyListState()
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState
@@ -84,75 +84,63 @@ fun SelectClassScreen(
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier.padding(bottom = 100.dp))
+                    Spacer(modifier = Modifier.padding(bottom = 160.dp))
                 }
             }
         }
 
-        if (uiState.isSelfSelectClassAndName) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Scan button appears here when self-select is enabled
+            if (uiState.isSelfSelectClassAndName) {
                 OutlinedButton(
                     onClick = onClickScanQrCode,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = stringResource(Res.string.scan_qr_code))
                 }
-
-                OutlinedButton(
-                    onClick = onClickTeacherAdminLogin,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = stringResource(Res.string.teacher_admin_login))
-                }
-                if (uiState.deviceName.isNotEmpty()) {
-                    Text(
-                        text = uiState.deviceName,
-                        modifier = Modifier.padding(top = 8.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
-        } else {
+            OutlinedButton(
+                onClick = onClickTeacherAdminLogin,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(text = stringResource(Res.string.teacher_admin_login))
+            }
+
+            if (uiState.deviceName.isNotEmpty()) {
+                Text(
+                    text = uiState.deviceName,
+                    modifier = Modifier.padding(top = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Centered scan button (only when self-select is disabled)
+        if (!uiState.isSelfSelectClassAndName) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(bottom = 120.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Button(
                     onClick = onClickScanQrCode,
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ),
                 ) {
                     Text(text = stringResource(Res.string.scan_qr_code))
-                }
-
-                OutlinedButton(
-                    onClick = onClickTeacherAdminLogin,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                ) {
-                    Text(text = stringResource(Res.string.teacher_admin_login))
-                }
-                if (uiState.deviceName.isNotEmpty()) {
-                    Text(
-                        text = uiState.deviceName,
-                        modifier = Modifier.padding(top = 8.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
         }

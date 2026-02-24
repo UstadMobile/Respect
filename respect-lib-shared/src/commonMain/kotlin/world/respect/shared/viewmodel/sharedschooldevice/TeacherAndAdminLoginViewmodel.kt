@@ -1,9 +1,11 @@
 package world.respect.shared.viewmodel.sharedschooldevice
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -45,9 +47,16 @@ class TeacherAndAdminLoginViewmodel(
     }
 
     fun onClickNext() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(GetStartedScreen())
-        )
+        viewModelScope.launch {
+            val currentAccounts = accountManager.accounts.value
+            currentAccounts.forEach { account ->
+                accountManager.removeAccount(account)
+
+            }
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(GetStartedScreen())
+            )
+        }
     }
 
     fun verifyTeacherPin(enteredPin: String): Boolean {

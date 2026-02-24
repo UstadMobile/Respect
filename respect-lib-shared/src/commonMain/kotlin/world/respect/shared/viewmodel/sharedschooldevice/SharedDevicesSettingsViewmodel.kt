@@ -24,6 +24,8 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.enableclassname.GetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.enableclassname.SetSharedDeviceSelfSelectUseCase
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
 import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
@@ -79,6 +81,8 @@ class SharedDevicesSettingsViewmodel(
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState(isLoadingPin = true))
     val uiState = _uiState.asStateFlow()
 
+    val schoolUrl = accountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("No active school")
     private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
         schoolDataSource.personDataSource.listAsPagingSource(
             DataLoadParams(),
@@ -102,25 +106,25 @@ class SharedDevicesSettingsViewmodel(
         )
     }
     private val getSharedDevicePINUseCase: GetSharedDevicePINUseCase
-        get() = getKoin().getScope(
-            SchoolDirectoryEntryScopeId(
-                schoolUrl = accountManager.activeAccount?.school?.self
-                    ?: throw IllegalStateException("No active school"),
-                accountPrincipalId = null
-            ).scopeId
-        ).get()
+        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
+            .get()
 
     private val setSharedDevicePINUseCase: SetSharedDevicePINUseCase
-        get() = getKoin().getScope(
-            SchoolDirectoryEntryScopeId(
-                schoolUrl = accountManager.activeAccount?.school?.self
-                    ?: throw IllegalStateException("No active school"),
-                accountPrincipalId = null
-            ).scopeId
-        ).get()
+        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
+            .get()
+
+    private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase
+        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
+            .get()
+
+    private val setSharedDeviceSelfSelectUseCase: SetSharedDeviceSelfSelectUseCase
+        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
+            .get()
 
     init {
+
         loadSchoolPin() // Load existing PIN first
+        loadSelfSelectSetting()
         _appUiState.update {
             it.copy(
                 title = Res.string.shared_school_devices.asUiText(),
@@ -147,7 +151,16 @@ class SharedDevicesSettingsViewmodel(
         _uiState.update { currentState ->
             currentState.copy(isSelfSelectClassAndName = enabled)
         }
-        // TODO
+        // Save to database
+        viewModelScope.launch {
+            setSharedDeviceSelfSelectUseCase(enabled)
+                .onFailure { exception ->
+                    // Revert on failure and show error
+                    _uiState.update {
+                        it.copy(isSelfSelectClassAndName = !enabled)
+                    }
+                }
+        }
     }
 
     fun onClickAdd() {
@@ -185,6 +198,23 @@ class SharedDevicesSettingsViewmodel(
                             error = exception.message?.asUiText()
                                 ?: "Failed to load PIN, using generated one".asUiText()
                         )
+                    }
+                }
+        }
+    }
+
+    private fun loadSelfSelectSetting() {
+        viewModelScope.launch {
+            getSharedDeviceSelfSelectUseCase()
+                .onSuccess { enabled ->
+                    _uiState.update {
+                        it.copy(isSelfSelectClassAndName = enabled)
+                    }
+                }
+                .onFailure { exception ->
+                    // Handle error, maybe use default
+                    _uiState.update {
+                        it.copy(isSelfSelectClassAndName = true)
                     }
                 }
         }

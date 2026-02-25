@@ -51,6 +51,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -67,12 +68,15 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.add_device
+import world.respect.shared.generated.resources.another_device
 import world.respect.shared.generated.resources.another_device_add
 import world.respect.shared.generated.resources.arrow_down_icon
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.close_icon
 import world.respect.shared.generated.resources.devices
 import world.respect.shared.generated.resources.dismiss_invite
+import world.respect.shared.generated.resources.no_shared_devices_available
+import world.respect.shared.generated.resources.no_shared_devices_available_info
 import world.respect.shared.generated.resources.pending_device_requests
 import world.respect.shared.generated.resources.phone_android_icon
 import world.respect.shared.generated.resources.save
@@ -81,6 +85,7 @@ import world.respect.shared.generated.resources.share_icon
 import world.respect.shared.generated.resources.student_can_self_select_their_class_name
 import world.respect.shared.generated.resources.tablet_android_last_seen
 import world.respect.shared.generated.resources.teacher_admin_unlock_pin
+import world.respect.shared.generated.resources.this_device
 import world.respect.shared.generated.resources.this_device_enable
 import world.respect.shared.resources.UiText
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsUiState
@@ -174,11 +179,19 @@ private fun SharedDevicesSettingsContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "${stringResource(Res.string.teacher_admin_unlock_pin)} ${uiState.pin}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f)
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.teacher_admin_unlock_pin),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = uiState.pin,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.testTag("set_pin")
+                        )
+                    }
                 }
             }
 
@@ -280,53 +293,71 @@ private fun SharedDevicesSettingsContent(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
-            respectPagingItems(
-                items = lazyPagingItems,
-                key = { item, index -> item?.guid ?: index.toString() },
-                contentType = { PersonDataSource.ENDPOINT_NAME },
-            ) { personDetails ->
-                personDetails?.let { details ->
-                    ListItem(
-                        modifier = Modifier.clickable { },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Default.PhoneAndroid,
-                                contentDescription = stringResource(Res.string.phone_android_icon),
-                            )
-                        },
-                        headlineContent = {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Text(
-                                    text = details.givenName,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium
-                                )
-
-                                Text(
-                                    text = "${details.getDeviceDisplayName()} ${
-                                        stringResource(
-                                            Res.string.tablet_android_last_seen
-                                        )
-                                    }: ${details.lastModified}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        },
-                        trailingContent = {
-                            IconButton(
-                                onClick = { onRemoveDevice(details) }
-                            ) {
+            if (lazyPagingItems.itemCount == 0){
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.no_shared_devices_available),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            text = stringResource(Res.string.no_shared_devices_available_info),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }else{
+                respectPagingItems(
+                    items = lazyPagingItems,
+                    key = { item, index -> item?.guid ?: index.toString() },
+                    contentType = { PersonDataSource.ENDPOINT_NAME },
+                ) { personDetails ->
+                    personDetails?.let { details ->
+                        ListItem(
+                            modifier = Modifier.clickable { },
+                            leadingContent = {
                                 Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(Res.string.close_icon),
+                                    imageVector = Icons.Default.PhoneAndroid,
+                                    contentDescription = stringResource(Res.string.phone_android_icon),
                                 )
+                            },
+                            headlineContent = {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Text(
+                                        text = details.givenName,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+
+                                    Text(
+                                        text = "${details.getDeviceDisplayName()} ${
+                                            stringResource(
+                                                Res.string.tablet_android_last_seen
+                                            )
+                                        }: ${details.lastModified}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            trailingContent = {
+                                IconButton(
+                                    onClick = { onRemoveDevice(details) }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = stringResource(Res.string.close_icon),
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -419,10 +450,20 @@ fun AddDeviceBottomSheet(
                     contentDescription = stringResource(Res.string.phone_android_icon),
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = stringResource(Res.string.this_device_enable),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.this_device),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(Res.string.this_device_enable),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
 
             Row(
@@ -438,10 +479,20 @@ fun AddDeviceBottomSheet(
                     contentDescription = stringResource(Res.string.share_icon),
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = stringResource(Res.string.another_device_add),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(
+                    modifier = Modifier
+                    .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.another_device),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(Res.string.another_device_add),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }
@@ -492,15 +543,16 @@ fun PinEntryDialog(
                     onValueChange = { newPin ->
                         onPinChange(newPin)
                     },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.NumberPassword
-                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(color = Color(0xFFEEEEEE))
                         .focusRequester(focusRequester)
                         .focusable()
-                        .padding(12.dp),
+                        .padding(12.dp)
+                        .testTag("pin_text"),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.NumberPassword
+                    ),
                 )
                 if (errorMessage != null) {
                     Spacer(modifier = Modifier.height(4.dp))

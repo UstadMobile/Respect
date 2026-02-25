@@ -10,7 +10,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.teacher_admin_login
-import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -48,14 +48,17 @@ class TeacherAndAdminLoginViewmodel(
 
     fun onClickNext() {
         viewModelScope.launch {
+            val schoolUrl = accountManager.activeAccount?.school?.self
             val currentAccounts = accountManager.accounts.value
             currentAccounts.forEach { account ->
                 accountManager.removeAccount(account)
 
             }
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(GetStartedScreen())
-            )
+            schoolUrl?.let { url ->
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(LoginScreen.create(url))
+                )
+            }
         }
     }
 

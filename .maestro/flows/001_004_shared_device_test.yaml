@@ -75,7 +75,7 @@ onFlowComplete:
     id: "app_title"
     text: "Shared school device"
 - assertVisible: "No Shared Devices Available"
-- assertVisible: "Shared school devices allow multiple users to securely access the app on the same device using their profile."
+- assertVisible: "Shared school devices allow multiple users to securely access the app on the same device using their profile"
 - assertVisible: "Student can self-select their class and name"
 - assertVisible: "Teacher/admin unlock PIN"
 - copyTextFrom:

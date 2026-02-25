@@ -41,7 +41,7 @@ import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.device_name
-import world.respect.shared.generated.resources.enable_button
+import world.respect.shared.generated.resources.enable
 import world.respect.shared.generated.resources.image_shared_device
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.next
@@ -291,7 +291,7 @@ private fun SharedSchoolDeviceInfoBox(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ),
             ) {
-                Text(stringResource(Res.string.enable_button))
+                Text(stringResource(Res.string.enable))
             }
         }
     }

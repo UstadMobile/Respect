@@ -31,7 +31,7 @@ class RedeemInviteUseCaseClient(
         ) {
             contentType(ContentType.Application.Json)
 
-            if (useActiveUserAuth) {
+            if (!useActiveUserAuth) {
                 val scope = accountManager.requireActiveAccountScope()
                 val tokenProvider = scope.getOrNull<AuthTokenProvider>()
                     ?: throw IllegalStateException(

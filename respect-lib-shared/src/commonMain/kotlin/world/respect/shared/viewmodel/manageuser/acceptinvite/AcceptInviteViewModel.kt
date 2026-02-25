@@ -30,8 +30,8 @@ import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.toUserFriendlyString
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.enable_shared_school_device_mode
 import world.respect.shared.generated.resources.invitation
-import world.respect.shared.generated.resources.shared_school_devices
 import world.respect.shared.generated.resources.something_wrong_with_invite
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
@@ -104,7 +104,7 @@ class  AcceptInviteViewModel(
             _uiState.update { it.copy(isSharedDeviceMode = isSharedDeviceMode) }
 
             val title = if (isSharedDeviceMode) {
-                Res.string.shared_school_devices.asUiText()
+                Res.string.enable_shared_school_device_mode.asUiText()
             } else {
                 Res.string.invitation.asUiText()
             }

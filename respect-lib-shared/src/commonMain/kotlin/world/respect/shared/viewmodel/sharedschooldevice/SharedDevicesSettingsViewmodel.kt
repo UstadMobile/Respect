@@ -274,7 +274,7 @@ class SharedDevicesSettingsViewmodel(
                                     AcceptInvite.create(
                                         schoolUrl = url,
                                         code = it.code,
-                                        useActiveUserAuth = isTeacherOrAdmin,
+                                        useActiveUserAuth = !isTeacherOrAdmin,
                                         isSelfSelectClassAndName = _uiState.value.isSelfSelectClassAndName
                                     )
                                 )

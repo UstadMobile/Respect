@@ -175,11 +175,9 @@ class AcceptInviteViewModel(
             _uiState.update { it.copy(errorText = Res.string.required_field.asUiText()) }
             return
         }
-        println("sgcj ${deviceName}")
         _uiState.update { it.copy(errorText = null) }
 
         val invite = uiState.value.inviteInfo?.invite ?: return
-        println("sgcj invite${invite}")
 
         val inviteRedeemRequest = RespectRedeemInviteRequest(
             code = invite.code,
@@ -193,13 +191,13 @@ class AcceptInviteViewModel(
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
-        println("sjjagscjag ${route.useActiveUserAuth}")
+        val _useActiveUserAuth = route.useActiveUserAuth ?: true
         viewModelScope.launch {
             try {
                 val personRegistered = enableSharedDeviceModeUseCase(
                     redeemInviteRequest = inviteRedeemRequest,
                     schoolUrl = route.schoolUrl,
-                    useActiveUserAuth = route.useActiveUserAuth
+                    useActiveUserAuth = _useActiveUserAuth
                 )
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
@@ -215,7 +213,6 @@ class AcceptInviteViewModel(
                     )
                 )
             } catch (e: Exception) {
-                println("sjjagscjag eeee ${e.message}")
                 _uiState.update {
                     it.copy(
                         errorText = "Failed to enable shared device mode: ${e.message}".asUiText()

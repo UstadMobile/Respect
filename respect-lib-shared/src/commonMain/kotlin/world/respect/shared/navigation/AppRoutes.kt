@@ -401,7 +401,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
-    val useActiveUserAuth: Boolean = false,
+    val useActiveUserAuth: Boolean? = null,
     val isSelfSelectClassAndName: Boolean = true,
 ) : RespectAppRoute {
 
@@ -413,7 +413,7 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
-            useActiveUserAuth: Boolean = false,
+            useActiveUserAuth: Boolean? = null,
             isSelfSelectClassAndName: Boolean = true,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),

@@ -365,7 +365,6 @@ private fun SharedDevicesSettingsContent(
         if (uiState.showPinDialog) {
             PinEntryDialog(
                 pin = uiState.pin,
-                isPinValid = uiState.isPinValid,
                 onPinChange = onPinChange,
                 onDismiss = onDismissPinDialog,
                 onSave = onSavePin,
@@ -501,7 +500,6 @@ fun AddDeviceBottomSheet(
 @Composable
 fun PinEntryDialog(
     pin: String,
-    isPinValid: Boolean,
     onPinChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onSave: () -> Unit,

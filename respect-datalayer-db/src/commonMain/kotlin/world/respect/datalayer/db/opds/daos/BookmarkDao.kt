@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.opds.entities.BookmarkEntity
-import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
 
 @Dao
 interface BookmarkDao {
@@ -16,10 +15,6 @@ interface BookmarkDao {
     @Query("SELECT COALESCE(isBookmarked, 0) FROM BookmarkEntity WHERE urlHash = :urlHash")
     fun observeBookmarkStatus(urlHash: Long): Flow<Boolean>
 
-    @Query("""
-        SELECT OpdsPublicationEntity.* FROM OpdsPublicationEntity 
-        INNER JOIN BookmarkEntity ON OpdsPublicationEntity.opeUrlHash = BookmarkEntity.urlHash
-        WHERE BookmarkEntity.isBookmarked = 1
-    """)
-    fun getBookmarkedPublications(): Flow<List<OpdsPublicationEntity>>
+    @Query("SELECT * FROM BookmarkEntity WHERE isBookmarked = 1 ORDER BY updatedAt DESC")
+    fun observeAllBookmarks(): Flow<List<BookmarkEntity>>
 }

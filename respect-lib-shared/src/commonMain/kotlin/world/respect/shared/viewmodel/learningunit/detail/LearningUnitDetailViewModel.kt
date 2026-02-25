@@ -170,7 +170,9 @@ class LearningUnitDetailViewModel(
             val nextStatus = !uiState.value.isBookmarked
             appDataSource.opdsDataSource.setBookmarkStatus(
                 route.learningUnitManifestUrl,
-                nextStatus
+                        nextStatus,
+                uiState.value.lessonDetail?.metadata?.title.toString()
+
             )
         }
     }

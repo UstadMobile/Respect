@@ -45,11 +45,7 @@ class OpdsDataSourceHttp(
         TODO("Not yet implemented")
     }
 
-    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getBookmarkedPublications(): Flow<List<OpdsPublication>> {
+    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean, title: String) {
         TODO("Not yet implemented")
     }
 }

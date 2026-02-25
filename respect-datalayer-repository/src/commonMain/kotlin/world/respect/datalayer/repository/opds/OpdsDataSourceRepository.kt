@@ -46,11 +46,7 @@ class OpdsDataSourceRepository(
         return local.observeBookmarkStatus(url)
     }
 
-    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean) {
-        return local.setBookmarkStatus(url, isBookmarked)
-    }
-
-    override fun getBookmarkedPublications(): Flow<List<OpdsPublication>> {
-        return  local.getBookmarkedPublications()
+    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean, title: String) {
+        return local.setBookmarkStatus(url, isBookmarked, title)
     }
 }

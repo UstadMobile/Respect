@@ -20,7 +20,6 @@ import world.respect.datalayer.db.opds.adapters.asModel
 import world.respect.datalayer.db.opds.entities.BookmarkEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.opds.OpdsDataSourceLocal
@@ -193,32 +192,16 @@ class OpdsDataSourceDb(
             .map { it ?: false }
     }
 
-    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean) {
+    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean, title: String) {
         val urlHash = xxStringHasher.hash(url.toString())
         respectDatabase.getBookmarkDao().insertOrUpdateBookmark(
-            BookmarkEntity(urlHash = urlHash, isBookmarked = isBookmarked)
+            BookmarkEntity(
+                urlHash = urlHash, isBookmarked = isBookmarked, title = title
+
+            )
         )
     }
-
-    override fun getBookmarkedPublications(): Flow<List<OpdsPublication>> {
-        return respectDatabase.getBookmarkDao()
-            .getBookmarkedPublications()
-            .map { entities ->
-                respectDatabase.useReaderConnection {
-                    entities.mapNotNull { entity ->
-                        OpdsPublicationEntities(
-                            opdsPublicationEntity = entity,
-                            langMapEntities = respectDatabase.getLangMapEntityDao()
-                                .selectAllByTableAndEntityId(
-                                    lmeTopParentType = LangMapEntity.ODPS_PUBLICATION_PARENT_ID,
-                                    lmeEntityUid1 = entity.opeUid,
-                                    lmeEntityUid2 = 0
-                                ),
-                            linkEntities = respectDatabase.getReadiumLinkEntityDao()
-                                .findAllByPubUid(entity.opeUid)
-                        ).asModel(json).dataOrNull()
-                    }
-                }
-            }
+    fun getAllBookmarks(): Flow<List<BookmarkEntity>> {
+        return respectDatabase.getBookmarkDao().observeAllBookmarks()
     }
 }

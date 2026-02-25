@@ -39,4 +39,6 @@ interface OpdsDataSource {
 
     suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean)
 
+    fun getBookmarkedPublications(): Flow<List<OpdsPublication>>
+
 }

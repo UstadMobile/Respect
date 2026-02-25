@@ -188,4 +188,24 @@ class OpdsDataSourceDb(
             BookmarkEntity(urlHash = urlHash, isBookmarked = isBookmarked)
         )
     }
+
+    override fun getBookmarkedPublications(): Flow<List<OpdsPublication>> {
+        return respectDatabase.getBookmarkDao()
+            .getBookmarkedPublications()
+            .map { entities ->
+                entities.mapNotNull { entity ->
+                    val state = OpdsPublicationEntities(
+                        opdsPublicationEntity = entity,
+                        langMapEntities = respectDatabase.getLangMapEntityDao().selectAllByTableAndEntityId(
+                            lmeTopParentType = LangMapEntity.ODPS_PUBLICATION_PARENT_ID,
+                            lmeEntityUid1 = entity.opeUid,
+                            lmeEntityUid2 = 0
+                        ),
+                        linkEntities = respectDatabase.getReadiumLinkEntityDao().findAllByPublicationUid(entity.opeUid)
+                    ).asModel(json)
+
+                    (state as? DataReadyState<OpdsPublication>)?.data
+                }
+            }
+    }
 }

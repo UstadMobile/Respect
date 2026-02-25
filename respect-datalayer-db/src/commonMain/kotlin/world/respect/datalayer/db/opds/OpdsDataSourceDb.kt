@@ -20,6 +20,7 @@ import world.respect.datalayer.db.opds.adapters.asModel
 import world.respect.datalayer.db.opds.entities.BookmarkEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.opds.OpdsDataSourceLocal
@@ -37,7 +38,7 @@ class OpdsDataSourceDb(
     ),
 ): OpdsDataSourceLocal {
 
-    override val feedNetworkValidationHelper = object: BaseDataSourceValidationHelper {
+    override val feedNetworkValidationHelper = object : BaseDataSourceValidationHelper {
         override suspend fun getValidationInfo(
             url: Url,
             requestHeaders: IHttpHeaders,
@@ -48,7 +49,7 @@ class OpdsDataSourceDb(
         }
     }
 
-    override val publicationNetworkValidationHelper = object: BaseDataSourceValidationHelper {
+    override val publicationNetworkValidationHelper = object : BaseDataSourceValidationHelper {
         override suspend fun getValidationInfo(
             url: Url,
             requestHeaders: IHttpHeaders,
@@ -122,8 +123,10 @@ class OpdsDataSourceDb(
                 respectDatabase.getOpdsPublicationEntityDao().insertList(
                     listOf(publicationEntities.opdsPublicationEntity)
                 )
-                respectDatabase.getLangMapEntityDao().insertAsync(publicationEntities.langMapEntities)
-                respectDatabase.getReadiumLinkEntityDao().insertList(publicationEntities.linkEntities)
+                respectDatabase.getLangMapEntityDao()
+                    .insertAsync(publicationEntities.langMapEntities)
+                respectDatabase.getReadiumLinkEntityDao()
+                    .insertList(publicationEntities.linkEntities)
             }
         }
     }
@@ -140,12 +143,17 @@ class OpdsDataSourceDb(
                     OpdsFeedEntities(
                         opdsFeed = feedEntity,
                         feedMetaData = respectDatabase.getOpdsFeedMetadataEntityDao().findByFeedUid(
-                            feedEntity.ofeUid),
-                        langMapEntities = respectDatabase.getLangMapEntityDao().findAllByFeedUid(feedEntity.ofeUid),
-                        linkEntities =respectDatabase.getReadiumLinkEntityDao().findAllByFeedUid(feedEntity.ofeUid),
+                            feedEntity.ofeUid
+                        ),
+                        langMapEntities = respectDatabase.getLangMapEntityDao()
+                            .findAllByFeedUid(feedEntity.ofeUid),
+                        linkEntities = respectDatabase.getReadiumLinkEntityDao()
+                            .findAllByFeedUid(feedEntity.ofeUid),
                         publications = respectDatabase.getOpdsPublicationEntityDao().findByFeedUid(
-                            feedEntity.ofeUid),
-                        groups = respectDatabase.getOpdsGroupEntityDao().findByFeedUid(feedEntity.ofeUid),
+                            feedEntity.ofeUid
+                        ),
+                        groups = respectDatabase.getOpdsGroupEntityDao()
+                            .findByFeedUid(feedEntity.ofeUid),
                     ).asModel(json)
                 }
             } ?: NoDataLoadedState.notFound()
@@ -160,19 +168,22 @@ class OpdsDataSourceDb(
     ): Flow<DataLoadState<OpdsPublication>> {
         val urlHash = xxStringHasher.hash(url.toString())
 
-        return respectDatabase.getOpdsPublicationEntityDao().findByUrlHashAsFlow(urlHash).map { entity ->
-            entity?.let {
-                OpdsPublicationEntities(
-                    opdsPublicationEntity = entity,
-                    langMapEntities = respectDatabase.getLangMapEntityDao().selectAllByTableAndEntityId(
-                        lmeTopParentType = LangMapEntity.ODPS_PUBLICATION_PARENT_ID,
-                        lmeEntityUid1 = entity.opeUid,
-                        lmeEntityUid2 = 0
-                    ),
-                    linkEntities = respectDatabase.getReadiumLinkEntityDao().findAllByFeedUid(entity.opeUid)
-                ).asModel(json)
-            } ?: NoDataLoadedState.notFound()
-        }
+        return respectDatabase.getOpdsPublicationEntityDao().findByUrlHashAsFlow(urlHash)
+            .map { entity ->
+                entity?.let {
+                    OpdsPublicationEntities(
+                        opdsPublicationEntity = entity,
+                        langMapEntities = respectDatabase.getLangMapEntityDao()
+                            .selectAllByTableAndEntityId(
+                                lmeTopParentType = LangMapEntity.ODPS_PUBLICATION_PARENT_ID,
+                                lmeEntityUid1 = entity.opeUid,
+                                lmeEntityUid2 = 0
+                            ),
+                        linkEntities = respectDatabase.getReadiumLinkEntityDao()
+                            .findAllByFeedUid(entity.opeUid)
+                    ).asModel(json)
+                } ?: NoDataLoadedState.notFound()
+            }
     }
 
     override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
@@ -193,18 +204,20 @@ class OpdsDataSourceDb(
         return respectDatabase.getBookmarkDao()
             .getBookmarkedPublications()
             .map { entities ->
-                entities.mapNotNull { entity ->
-                    val state = OpdsPublicationEntities(
-                        opdsPublicationEntity = entity,
-                        langMapEntities = respectDatabase.getLangMapEntityDao().selectAllByTableAndEntityId(
-                            lmeTopParentType = LangMapEntity.ODPS_PUBLICATION_PARENT_ID,
-                            lmeEntityUid1 = entity.opeUid,
-                            lmeEntityUid2 = 0
-                        ),
-                        linkEntities = respectDatabase.getReadiumLinkEntityDao().findAllByPublicationUid(entity.opeUid)
-                    ).asModel(json)
-
-                    (state as? DataReadyState<OpdsPublication>)?.data
+                respectDatabase.useReaderConnection {
+                    entities.mapNotNull { entity ->
+                        OpdsPublicationEntities(
+                            opdsPublicationEntity = entity,
+                            langMapEntities = respectDatabase.getLangMapEntityDao()
+                                .selectAllByTableAndEntityId(
+                                    lmeTopParentType = LangMapEntity.ODPS_PUBLICATION_PARENT_ID,
+                                    lmeEntityUid1 = entity.opeUid,
+                                    lmeEntityUid2 = 0
+                                ),
+                            linkEntities = respectDatabase.getReadiumLinkEntityDao()
+                                .findAllByPubUid(entity.opeUid)
+                        ).asModel(json).dataOrNull()
+                    }
                 }
             }
     }

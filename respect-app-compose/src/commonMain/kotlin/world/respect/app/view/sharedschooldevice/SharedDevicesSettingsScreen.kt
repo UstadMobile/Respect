@@ -2,7 +2,6 @@ package world.respect.app.view.sharedschooldevice
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -293,7 +292,7 @@ private fun SharedDevicesSettingsContent(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            if (lazyPagingItems.itemCount == 0){
+            if (lazyPagingItems.itemCount == 0) {
                 item {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -310,7 +309,7 @@ private fun SharedDevicesSettingsContent(
                         )
                     }
                 }
-            }else{
+            } else {
                 respectPagingItems(
                     items = lazyPagingItems,
                     key = { item, index -> item?.guid ?: index.toString() },
@@ -481,7 +480,7 @@ fun AddDeviceBottomSheet(
                 )
                 Column(
                     modifier = Modifier
-                    .fillMaxWidth(),
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
@@ -544,12 +543,10 @@ fun PinEntryDialog(
                         onPinChange(newPin)
                     },
                     modifier = Modifier
+                        .testTag("pin_text")
                         .fillMaxWidth()
                         .background(color = Color(0xFFEEEEEE))
-                        .focusRequester(focusRequester)
-                        .focusable()
-                        .padding(12.dp)
-                        .testTag("pin_text"),
+                        .focusRequester(focusRequester),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.NumberPassword
                     ),

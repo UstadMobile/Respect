@@ -32,6 +32,7 @@ import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enable_shared_school_device_mode
 import world.respect.shared.generated.resources.invitation
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_wrong_with_invite
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
@@ -55,12 +56,9 @@ data class AcceptInviteUiState(
 ) {
     val nextButtonEnabled: Boolean
         get() = inviteInfo?.invite != null
-
-    val isDeviceNameValid: Boolean
-        get() = deviceName.isNotBlank()
 }
 
-class  AcceptInviteViewModel(
+class AcceptInviteViewModel(
     savedStateHandle: SavedStateHandle,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val respectAppDataSource: RespectAppDataSource,
@@ -113,7 +111,7 @@ class  AcceptInviteViewModel(
                     title = title,
                     hideBottomNavigation = true,
                     userAccountIconVisible = false,
-                    showBackButton = route.canGoBack,
+                    showBackButton = true,
                 )
             }
         }
@@ -137,7 +135,8 @@ class  AcceptInviteViewModel(
             code = invite.code,
             accountPersonInfo = PersonInfo(),
             account = RespectRedeemInviteRequest.Account(
-                guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID).toString(),
+                guid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(Person.TABLE_ID)
+                    .toString(),
                 username = "",
                 credential = RespectPasswordCredential(username = "", password = ""),
             ),
@@ -148,12 +147,12 @@ class  AcceptInviteViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = if(!invite.isChildUser()) {
+                destination = if (!invite.isChildUser()) {
                     TermsAndCondition.create(
                         schoolUrl = route.schoolUrl,
                         inviteRequest = inviteRedeemRequest,
                     )
-                }else {
+                } else {
                     SignupScreen.create(
                         schoolUrl = route.schoolUrl,
                         inviteRequest = inviteRedeemRequest,
@@ -165,7 +164,7 @@ class  AcceptInviteViewModel(
 
     fun updateDeviceName(deviceName: String) {
         _uiState.update { currentState ->
-            currentState.copy(deviceName = deviceName)
+            currentState.copy(deviceName = deviceName, errorText = null)
         }
     }
 
@@ -173,13 +172,14 @@ class  AcceptInviteViewModel(
         val deviceName = _uiState.value.deviceName
 
         if (deviceName.isBlank()) {
-            _uiState.update { it.copy(errorText = "Please enter a device name".asUiText()) }
+            _uiState.update { it.copy(errorText = Res.string.required_field.asUiText()) }
             return
         }
-
+        println("sgcj ${deviceName}")
         _uiState.update { it.copy(errorText = null) }
 
         val invite = uiState.value.inviteInfo?.invite ?: return
+        println("sgcj invite${invite}")
 
         val inviteRedeemRequest = RespectRedeemInviteRequest(
             code = invite.code,
@@ -193,6 +193,7 @@ class  AcceptInviteViewModel(
             deviceInfo = getDeviceInfoUseCase(),
             invite = invite
         )
+        println("sjjagscjag ${route.useActiveUserAuth}")
         viewModelScope.launch {
             try {
                 val personRegistered = enableSharedDeviceModeUseCase(
@@ -214,6 +215,7 @@ class  AcceptInviteViewModel(
                     )
                 )
             } catch (e: Exception) {
+                println("sjjagscjag eeee ${e.message}")
                 _uiState.update {
                     it.copy(
                         errorText = "Failed to enable shared device mode: ${e.message}".asUiText()

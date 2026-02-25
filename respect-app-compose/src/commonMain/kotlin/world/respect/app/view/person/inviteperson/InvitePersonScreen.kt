@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.RadioButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
@@ -135,7 +135,15 @@ fun InvitePersonScreen(
                 )
             }
         }
-
+        if (uiState.isSharedDeviceMode) {
+            uiState.schoolName?.let {
+                Text(
+                    text = it,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+                )
+            }
+        }
 
         uiState.inviteUrl?.also { link ->
             val linkStr = link.toString()

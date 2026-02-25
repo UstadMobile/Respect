@@ -68,19 +68,19 @@ fun AcceptInviteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val appUiState by viewModel.appUiState.collectAsState()
-if (!uiState.isSharedDeviceMode) {
-    AcceptInviteScreen(
-        uiState = uiState,
-        appUiState = appUiState,
-        onClickNext = viewModel::onClickNext
-    )
-}else{
-    SharedSchoolDeviceEnableScreenContent(
-        uiState = uiState,
-        onDeviceNameChange = viewModel::updateDeviceName,
-        onEnableSharedDeviceMode = viewModel::enableSharedDeviceMode,
-    )
-}
+    if (!uiState.isSharedDeviceMode) {
+        AcceptInviteScreen(
+            uiState = uiState,
+            appUiState = appUiState,
+            onClickNext = viewModel::onClickNext
+        )
+    } else {
+        SharedSchoolDeviceEnableScreenContent(
+            uiState = uiState,
+            onDeviceNameChange = viewModel::updateDeviceName,
+            onEnableSharedDeviceMode = viewModel::enableSharedDeviceMode,
+        )
+    }
 }
 
 @Composable
@@ -104,7 +104,7 @@ fun AcceptInviteScreen(
                 Spacer(Modifier.size(16.dp))
 
                 Text(
-                    text =stringResource(Res.string.loading),
+                    text = stringResource(Res.string.loading),
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
             }
@@ -128,7 +128,7 @@ fun AcceptInviteScreen(
             }
 
             invite != null -> {
-                when(invite) {
+                when (invite) {
                     is NewUserInvite -> {
                         RespectDetailField(
                             modifier = Modifier.defaultItemPadding(),
@@ -207,10 +207,10 @@ fun SharedSchoolDeviceEnableScreenContent(
                 label = { Text("${stringResource(Res.string.device_name)} *") },
                 onValueChange = onDeviceNameChange,
                 singleLine = true,
-                isError = !uiState.isDeviceNameValid && uiState.deviceName.isNotEmpty(),
+                isError = uiState.errorText != null,
                 supportingText = {
-                    if (!uiState.isDeviceNameValid && uiState.deviceName.isNotEmpty()) {
-                        Text(text = stringResource(Res.string.required_field))
+                    if (uiState.errorText != null) {
+                        Text(text = "${stringResource(Res.string.required_field)}*")
                     }
                 }
             )

@@ -43,11 +43,11 @@
     <string name="this_device_enable">Enable shared school device on mode on this device</string>
     <string name="close_icon">Close Icon</string>
     <string name="another_device_add">Add using QR code, link, or invite code</string>
-    <string name="another_device">Another device </string>
+    <string name="another_device">Another device</string>
     <string name="set_pin">Set PIN</string>
     <string name="share_icon">Share Icon</string>
     <string name="arrow_down_icon">Arrow Down</string>
-    <string name="devices">devices</string>
+    <string name="devices">Devices</string>
 
     <string name="add_assignment">Add assignment</string>
     <string name="edit_assignment">Edit assignment</string>
@@ -209,6 +209,8 @@
     <string name="enter_school_device_pin">Enter school device PIN</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
+    <string name="select_another_school">Select another school</string>
+
     <string name="invalid_school_name">Invalid school name</string>
     <string name="school_not_found">School not found: please ask your admin to add your school.</string>
     <string name="add_directory">Add Directory</string>
@@ -388,7 +390,7 @@
     <string name="shared_school_devices">Shared school device</string>
     <string name="enable_shared_school_device_mode">Enable shared school device mode</string>
 
-    <string name="device_name">device name</string>
+    <string name="device_name">Device name</string>
     <string name="enable_shared_device_mode">Enable shared device mode</string>
     <string name="students_must_enter_their_roll_number">Students must enter their roll number to login</string>
     <string name="student_can_self_select_their_class_name">Student can self-select their class and name</string>

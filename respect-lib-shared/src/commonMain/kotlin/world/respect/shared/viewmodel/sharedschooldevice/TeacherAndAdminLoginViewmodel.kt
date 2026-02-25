@@ -56,7 +56,7 @@ class TeacherAndAdminLoginViewmodel(
             }
             schoolUrl?.let { url ->
                 _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(LoginScreen.create(url))
+                    NavCommand.Navigate(LoginScreen.create(url,true))
                 )
             }
         }

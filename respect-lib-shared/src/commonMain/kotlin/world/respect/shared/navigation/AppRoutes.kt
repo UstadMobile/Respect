@@ -85,15 +85,16 @@ object SchoolDirectoryEdit : RespectAppRoute
 @Serializable
 data class LoginScreen(
     val schoolUrlStr: String,
+    val isSharedDevice: Boolean? = null,
 ) : RespectAppRoute {
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = LoginScreen(schoolUrl.toString())
+        fun create(schoolUrl: Url, isSharedDevice: Boolean? = null) =
+            LoginScreen(schoolUrl.toString(), isSharedDevice)
     }
-
 }
 
 @Serializable

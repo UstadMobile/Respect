@@ -48,6 +48,7 @@ import world.respect.shared.navigation.InvitePerson.InvitePersonOptions
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -147,7 +148,8 @@ class InvitePersonViewModel(
             _uiState.update {
                 it.copy(
                     roleOptions =  writableRoles,
-                    selectedRole = selectedRole
+                    selectedRole = selectedRole,
+                    schoolName = accountManager.activeAccount?.school?.name?.getTitle()
                 )
             }
 

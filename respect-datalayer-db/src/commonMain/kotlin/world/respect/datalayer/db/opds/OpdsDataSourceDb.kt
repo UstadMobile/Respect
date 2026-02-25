@@ -23,6 +23,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.opds.OpdsDataSourceLocal
+import world.respect.lib.opds.model.Bookmark
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -201,7 +202,15 @@ class OpdsDataSourceDb(
             )
         )
     }
-    fun getAllBookmarks(): Flow<List<BookmarkEntity>> {
+    override fun getAllBookmarks(): Flow<List<Bookmark>> {
         return respectDatabase.getBookmarkDao().observeAllBookmarks()
+            .map { entities ->
+                entities.map { entity ->
+                    Bookmark(
+                        title = entity.title,
+                        isBookmarked = entity.isBookmarked
+                    )
+                }
+            }
     }
 }

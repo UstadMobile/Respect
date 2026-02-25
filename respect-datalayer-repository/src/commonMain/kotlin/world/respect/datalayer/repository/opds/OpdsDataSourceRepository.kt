@@ -12,6 +12,7 @@ import world.respect.datalayer.opds.OpdsDataSourceLocal
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.ext.combineWithRemote
+import world.respect.lib.opds.model.Bookmark
 
 class OpdsDataSourceRepository(
     private val local: OpdsDataSourceLocal,
@@ -48,5 +49,9 @@ class OpdsDataSourceRepository(
 
     override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean, title: String) {
         return local.setBookmarkStatus(url, isBookmarked, title)
+    }
+
+    override fun getAllBookmarks(): Flow<List<Bookmark>> {
+        return local.getAllBookmarks()
     }
 }

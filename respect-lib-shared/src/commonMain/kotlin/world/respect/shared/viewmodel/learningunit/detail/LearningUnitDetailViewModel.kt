@@ -90,6 +90,11 @@ class LearningUnitDetailViewModel(
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }
         }
+        viewModelScope.launch {
+            appDataSource.opdsDataSource.getAllBookmarks().collect { bookmarks ->
+              //use bookmark
+            }
+        }
 
         viewModelScope.launch {
             appDataSource.compatibleAppsDataSource.getAppAsFlow(

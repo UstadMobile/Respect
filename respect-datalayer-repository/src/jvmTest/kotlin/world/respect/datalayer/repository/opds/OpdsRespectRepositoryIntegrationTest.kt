@@ -29,15 +29,14 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.opds.OpdsDataSourceDb
 import world.respect.datalayer.db.opds.OpdsFeedDataSourceDb
-import world.respect.datalayer.http.opds.OpdsDataSourceHttp
-import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.http.opds.OpdsFeedDataSourceHttp
+import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.findFreePort
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -107,8 +106,11 @@ class OpdsRespectRepositoryIntegrationTest {
             )
 
             val httpDataSource = OpdsFeedDataSourceHttp(
-                httpClient,
-                opdsFeedValidationHelper = localDataSource
+                httpClient = httpClient,
+                opdsFeedValidationHelper = localDataSource,
+                tokenProvider = {
+                    AuthToken("secret", systemTimeInMillis(), 3600)
+                }
             )
 
             val repository = OpdsFeedDataSourceRepository(

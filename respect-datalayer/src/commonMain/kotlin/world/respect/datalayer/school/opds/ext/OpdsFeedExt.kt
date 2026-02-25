@@ -3,7 +3,10 @@ package world.respect.datalayer.school.opds.ext
 import io.ktor.http.Url
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.ReadiumLink
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.util.time.systemTimeInMillis
+import kotlin.time.Clock
 
 fun OpdsFeed.selfUrl(): Url? {
     return links.firstOrNull { "self" in (it.rel ?: emptyList()) }?.let {
@@ -20,12 +23,20 @@ fun OpdsFeed.requireSelfUrl(): Url {
  */
 fun OpdsFeed.withAbsoluteSelfUrl(urlLoaded: Url): OpdsFeed {
     return copy(
-        links = links.map { link ->
-            if("self" in (link.rel ?: emptyList())) {
-                link.copy(href = urlLoaded.toString())
-            }else {
-                link
+        links = if(links.any { it.hasRel("self") }) {
+            links.map { link ->
+                if(link.hasRel("self")) {
+                    link.copy(href = urlLoaded.toString())
+                }else {
+                    link
+                }
             }
+        }else {
+            links + ReadiumLink(
+                href = urlLoaded.toString(),
+                rel = listOf("self"),
+                type = "application/opds+json",
+            )
         }
     )
 }

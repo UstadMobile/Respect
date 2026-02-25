@@ -123,14 +123,9 @@ class OpdsFeedDataSourceDb(
     override suspend fun store(list: List<OpdsFeed>) {
         //TODO: throw illegal argument exception if anything on list is not for this school url
         //TODO: run permission check to see if user is allowed to save/write this feed
-
-        val timeNow = Clock.System.now()
-
         list.forEach { feed ->
             doUpsertOpdsFeed(
-                opdsFeed = feed.copy(
-                    metadata = feed.metadata.copy(modified = timeNow)
-                ),
+                opdsFeed = feed,
                 dataLoadMetaInfo = feed.dataLoadMetaInfoForPlaylist()
             )
         }

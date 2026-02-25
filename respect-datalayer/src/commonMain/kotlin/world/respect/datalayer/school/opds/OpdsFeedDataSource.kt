@@ -61,4 +61,11 @@ interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
         params: DataLoadParams
     ): DataLoadState<OpdsFeed>
 
+
+    companion object {
+
+        const val PLAYLIST_ENDPOINT_NAME = "playlist"
+
+    }
+
 }

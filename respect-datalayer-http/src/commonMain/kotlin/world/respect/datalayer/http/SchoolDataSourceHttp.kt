@@ -161,6 +161,7 @@ class SchoolDataSourceHttp(
         OpdsFeedDataSourceHttp(
             httpClient = httpClient,
             opdsFeedValidationHelper = opdsFeedValidationHelper,
+            tokenProvider = tokenProvider,
         )
     }
 

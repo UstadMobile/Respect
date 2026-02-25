@@ -1,22 +1,30 @@
 package world.respect.datalayer.http.opds
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.map
+import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
 import world.respect.lib.opds.model.OpdsFeed
 
 class OpdsFeedDataSourceHttp(
     private val httpClient: HttpClient,
     private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
+    private val tokenProvider: AuthTokenProvider,
 ): OpdsFeedDataSource {
 
     override fun getByUrlAsFlow(
@@ -47,7 +55,15 @@ class OpdsFeedDataSourceHttp(
     }
 
     override suspend fun store(list: List<OpdsFeed>) {
-        TODO("OpdsFeedDataSourceHttp.store using HTTP post")
+        list.forEach { feed ->
+            val url = feed.requireSelfUrl()
+
+            httpClient.post(url) {
+                useTokenProvider(tokenProvider)
+                contentType(ContentType.Application.Json)
+                setBody(feed)
+            }
+        }
     }
 
 }

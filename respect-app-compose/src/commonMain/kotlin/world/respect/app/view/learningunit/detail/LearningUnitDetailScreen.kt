@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,7 +31,6 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
@@ -46,6 +43,7 @@ import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.datalayer.DataReadyState
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
@@ -74,6 +72,8 @@ fun LearningUnitDetailScreen(
     onClickAssign: () -> Unit,
     onClickBookmark: () -> Unit
 ) {
+
+    val appDetail = (uiState.appDetail as? DataReadyState)?.data
 
     LazyColumn(
         modifier = Modifier
@@ -120,17 +120,22 @@ fun LearningUnitDetailScreen(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Android,
-                                    modifier = Modifier.padding(6.dp),
-                                    contentDescription = null
-                                )
+                                uiState.appIcon.also { icon ->
+                                    RespectAsyncImage(
+                                        uri = icon,
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .size(80.dp)
+
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = stringResource(Res.string.app_name),
+                                text = appDetail?.name?.getTitle().toString()
                             )
                         }
 

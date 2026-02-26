@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.shared.navigation.LearningUnitDetail
@@ -35,6 +36,9 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
+    val appDetail: DataLoadState<RespectAppManifest>? = null,
+
+    val appIcon: String? = null,
     val isBookmarked: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
@@ -55,6 +59,26 @@ class LearningUnitDetailViewModel(
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
     init {
+
+        viewModelScope.launch {
+            appDataSource.compatibleAppsDataSource.getAppAsFlow(
+                manifestUrl = route.appManifestUrl,
+                loadParams = DataLoadParams()
+            ).collectLatest { result ->
+                if (result is DataReadyState) {
+                    _uiState.update {
+                        it.copy(
+                            appDetail = result,
+                            appIcon = route.appManifestUrl.resolve(
+                                result.data.icon.toString()
+                            ).toString()
+                        )
+
+                    }
+                }
+            }
+        }
+
         viewModelScope.launch {
             appDataSource.opdsDataSource.loadOpdsPublication(
                 url = route.learningUnitManifestUrl,

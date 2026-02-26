@@ -114,11 +114,6 @@ class LearningUnitDetailViewModel(
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }
         }
-        viewModelScope.launch {
-            appDataSource.opdsDataSource.getAllBookmarks().collect { bookmarks ->
-              //use bookmark
-            }
-        }
 
         viewModelScope.launch {
             appDataSource.compatibleAppsDataSource.getAppAsFlow(
@@ -200,7 +195,9 @@ class LearningUnitDetailViewModel(
             appDataSource.opdsDataSource.setBookmarkStatus(
                 route.learningUnitManifestUrl,
                         nextStatus,
-                uiState.value.lessonDetail?.metadata?.title.toString()
+                uiState.value.lessonDetail?.metadata?.title.toString(),
+              uiState.value.lessonDetail?.metadata?.subtitle.toString(),
+                 uiState.value.appIcon.toString()
 
             )
         }

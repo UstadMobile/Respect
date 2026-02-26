@@ -46,7 +46,13 @@ class OpdsDataSourceHttp(
         TODO("Not yet implemented")
     }
 
-    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean, title: String) {
+    override suspend fun setBookmarkStatus(
+        url: Url,
+        isBookmarked: Boolean,
+        title: String,
+        subtitle: String,
+        appIcon: String
+    ) {
         TODO("Not yet implemented")
     }
 

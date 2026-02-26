@@ -193,11 +193,17 @@ class OpdsDataSourceDb(
             .map { it ?: false }
     }
 
-    override suspend fun setBookmarkStatus(url: Url, isBookmarked: Boolean, title: String) {
+    override suspend fun setBookmarkStatus(
+        url: Url,
+        isBookmarked: Boolean,
+        title: String,
+        subtitle: String,
+        appIcon: String
+    ) {
         val urlHash = xxStringHasher.hash(url.toString())
         respectDatabase.getBookmarkDao().insertOrUpdateBookmark(
             BookmarkEntity(
-                urlHash = urlHash, isBookmarked = isBookmarked, title = title
+                urlHash = urlHash, isBookmarked = isBookmarked, title = title,subtitle = subtitle,appIcon=appIcon
 
             )
         )

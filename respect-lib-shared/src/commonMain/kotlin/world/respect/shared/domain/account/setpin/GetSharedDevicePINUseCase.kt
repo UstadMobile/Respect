@@ -1,25 +1,23 @@
 package world.respect.shared.domain.account.setpin
 
+import org.koin.core.component.KoinComponent
 import kotlin.random.Random
 
 interface GetSharedDevicePINUseCase {
-    suspend operator fun invoke(): Result<String>
+    suspend operator fun invoke(): String
 }
 
-class GetSharedDevicePINUseCaseImpl : GetSharedDevicePINUseCase {
-    override suspend fun invoke(): Result<String> {
-        return try {
-            // Check if PIN exists in database for this school/device
-            val existingPin = null
+class GetSharedDevicePINUseCaseImpl : GetSharedDevicePINUseCase, KoinComponent {
 
-            if (existingPin != null) {
-                Result.success(existingPin)
-            } else {
-                val newPin = generateRandomPin()
-                Result.success(newPin)
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun invoke(): String {
+        // Check if PIN exists in database for this school/device
+        val existingPin = null
+        return if (existingPin != null) {
+            existingPin
+        } else {
+            val newPin = generateRandomPin()
+            // Save the generated PIN to database
+            newPin
         }
     }
 

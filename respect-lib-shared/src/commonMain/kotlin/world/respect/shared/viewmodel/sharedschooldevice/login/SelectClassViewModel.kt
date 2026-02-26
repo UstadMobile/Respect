@@ -93,18 +93,10 @@ class SelectClassViewModel(
     }
     private fun loadSelfSelectSetting() {
         viewModelScope.launch {
-            getSharedDeviceSelfSelectUseCase()
-                .onSuccess { enabled ->
-                    _uiState.update {
-                        it.copy(isSelfSelectClassAndName = enabled)
-                    }
-                }
-                .onFailure { exception ->
-                    // Handle error, maybe use default
-                    _uiState.update {
-                        it.copy(isSelfSelectClassAndName = true)
-                    }
-                }
+            val selfEnableValue = getSharedDeviceSelfSelectUseCase()
+            _uiState.update {
+                it.copy(isSelfSelectClassAndName = selfEnableValue)
+            }
         }
     }
 

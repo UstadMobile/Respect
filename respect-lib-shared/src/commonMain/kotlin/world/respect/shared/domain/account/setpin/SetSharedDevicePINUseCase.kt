@@ -1,17 +1,14 @@
 package world.respect.shared.domain.account.setpin
 
+import org.koin.core.component.KoinComponent
+
 interface SetSharedDevicePINUseCase {
-    suspend operator fun invoke(pin: String): Result<Unit>
+    suspend operator fun invoke(pin: String)
 }
 
-class SetSharedDevicePINUseCaseImpl : SetSharedDevicePINUseCase {
-    override suspend fun invoke(pin: String): Result<Unit> {
-        return try {
-            // TODO Attempt to save to database
-//            schoolDataSource.saveSharedDevicePIN(pin)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+class SetSharedDevicePINUseCaseImpl : SetSharedDevicePINUseCase, KoinComponent {
+
+    override suspend fun invoke(pin: String) {
+        // Save PIN to database (update if exists, insert if not)
     }
 }

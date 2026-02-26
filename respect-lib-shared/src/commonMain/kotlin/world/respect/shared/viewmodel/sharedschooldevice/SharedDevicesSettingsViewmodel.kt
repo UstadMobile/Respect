@@ -123,7 +123,7 @@ class SharedDevicesSettingsViewmodel(
 
     init {
 
-        loadSchoolPin() // Load existing PIN first
+        loadSchoolPin()
         loadSelfSelectSetting()
         _appUiState.update {
             it.copy(
@@ -153,13 +153,13 @@ class SharedDevicesSettingsViewmodel(
         }
         // Save to database
         viewModelScope.launch {
-            setSharedDeviceSelfSelectUseCase(enabled)
-                .onFailure { exception ->
-                    // Revert on failure and show error
-                    _uiState.update {
-                        it.copy(isSelfSelectClassAndName = !enabled)
-                    }
+            try {
+                setSharedDeviceSelfSelectUseCase(enabled)
+            } catch (e: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(error = e.message?.asUiText())
                 }
+            }
         }
     }
 
@@ -183,63 +183,34 @@ class SharedDevicesSettingsViewmodel(
 
     private fun loadSchoolPin() {
         viewModelScope.launch {
-            getSharedDevicePINUseCase()
-                .onSuccess { pin ->
-                    _uiState.update {
-                        it.copy(
-                            pin = pin,
-                            isLoadingPin = false
-                        )
-                    }
+            try {
+                val pin = getSharedDevicePINUseCase()
+                _uiState.update {
+                    it.copy(
+                        pin = pin,
+                        isLoadingPin = false
+                    )
                 }
-                .onFailure { exception ->
-                    _uiState.update {
-                        it.copy(
-                            error = exception.message?.asUiText()
-                                ?: "Failed to load PIN, using generated one".asUiText()
-                        )
-                    }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        error = e.message?.asUiText(),
+                        isLoadingPin = false
+                    )
                 }
+            }
         }
     }
 
     private fun loadSelfSelectSetting() {
         viewModelScope.launch {
-            getSharedDeviceSelfSelectUseCase()
-                .onSuccess { enabled ->
-                    _uiState.update {
-                        it.copy(isSelfSelectClassAndName = enabled)
-                    }
-                }
-                .onFailure { exception ->
-                    // Handle error, maybe use default
-                    _uiState.update {
-                        it.copy(isSelfSelectClassAndName = true)
-                    }
-                }
+            val selfEnableValue = getSharedDeviceSelfSelectUseCase()
+            _uiState.update {
+                it.copy(isSelfSelectClassAndName = selfEnableValue)
+            }
         }
     }
 
-    private fun savePinToDatabase(pin: String) {
-        viewModelScope.launch {
-            setSharedDevicePINUseCase(pin)
-                .onSuccess {
-                    _uiState.update {
-                        it.copy(
-                            pin = pin,
-                            error = null
-                        )
-                    }
-                }
-                .onFailure { exception ->
-                    _uiState.update {
-                        it.copy(
-                            error = exception.message?.asUiText() ?: "Failed to save PIN".asUiText()
-                        )
-                    }
-                }
-        }
-    }
 
     fun onClickEnableOnThisDevice() {
         viewModelScope.launch {
@@ -299,17 +270,22 @@ class SharedDevicesSettingsViewmodel(
         }
     }
 
-    fun onPinChange(newPin: String) {
-        if (newPin.all { it.isDigit() } && newPin.length <= 4) {
-            _uiState.update { it.copy(pin = newPin, error = null) }
+    fun onSavePin(pin: String) {
+        _uiState.update {
+            it.copy(pin = pin)
         }
-    }
-
-    fun onSavePin() {
         val currentPin = _uiState.value.pin
         if (currentPin.length == SharedDevicesSettingsUiState.PIN_LENGTH && currentPin.all { it.isDigit() }) {
             viewModelScope.launch {
-                savePinToDatabase(currentPin)
+                try {
+                    setSharedDevicePINUseCase(pin)
+                } catch (e: Exception) {
+                    _uiState.update {
+                        it.copy(
+                            error = e.message?.asUiText()
+                        )
+                    }
+                }
                 onDismissPinDialog()
             }
         } else {

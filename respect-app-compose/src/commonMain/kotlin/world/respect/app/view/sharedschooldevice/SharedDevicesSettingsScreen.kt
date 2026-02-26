@@ -42,7 +42,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -61,6 +63,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.getDeviceDisplayName
 import world.respect.datalayer.school.model.Person
@@ -102,7 +105,6 @@ fun SharedDevicesSettingsScreen(
         onTogglePendingInvites = viewModel::onTogglePendingInvites,
         onClickAcceptOrDismissInvite = viewModel::onClickAcceptOrDismissInvite,
         onRemoveDevice = viewModel::onRemoveDevice,
-        onPinChange = viewModel::onPinChange,
         onSavePin = viewModel::onSavePin,
         onDismissPinDialog = viewModel::onDismissPinDialog,
         onAddAnotherDevice = {
@@ -125,8 +127,7 @@ private fun SharedDevicesSettingsContent(
     onTogglePendingInvites: () -> Unit,
     onClickAcceptOrDismissInvite: (Person, Boolean) -> Unit,
     onRemoveDevice: (Person) -> Unit,
-    onPinChange: (String) -> Unit,
-    onSavePin: () -> Unit,
+    onSavePin: (String) -> Unit,
     onDismissPinDialog: () -> Unit,
     onAddAnotherDevice: () -> Unit,
     onEnableOnThisDevice: () -> Unit,
@@ -297,7 +298,9 @@ private fun SharedDevicesSettingsContent(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .padding(top = 34.dp)
+                            .fillMaxWidth()
                     ) {
                         Text(
                             text = stringResource(Res.string.no_shared_devices_available),
@@ -329,7 +332,7 @@ private fun SharedDevicesSettingsContent(
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
                                 ) {
                                     Text(
-                                        text = details.givenName,
+                                        text = details.fullName(),
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -364,8 +367,6 @@ private fun SharedDevicesSettingsContent(
         // PIN Dialog
         if (uiState.showPinDialog) {
             PinEntryDialog(
-                pin = uiState.pin,
-                onPinChange = onPinChange,
                 onDismiss = onDismissPinDialog,
                 onSave = onSavePin,
                 errorMessage = uiState.error
@@ -499,10 +500,8 @@ fun AddDeviceBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PinEntryDialog(
-    pin: String,
-    onPinChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSave: () -> Unit,
+    onSave: (String) -> Unit,
     errorMessage: UiText? = null,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -510,6 +509,7 @@ fun PinEntryDialog(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+    var currentPin by remember { mutableStateOf("") }
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -536,15 +536,16 @@ fun PinEntryDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 BasicTextField(
-                    value = pin,
+                    value = currentPin,
                     onValueChange = { newPin ->
-                        onPinChange(newPin)
+                        currentPin = newPin
                     },
                     modifier = Modifier
                         .testTag("pin_text")
                         .fillMaxWidth()
                         .background(color = Color(0xFFEEEEEE))
-                        .focusRequester(focusRequester),
+                        .focusRequester(focusRequester)
+                        .padding(8.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.NumberPassword
                     ),
@@ -587,7 +588,7 @@ fun PinEntryDialog(
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .clickable(
-                                onClick = onSave
+                                onClick = { onSave(currentPin) }
                             )
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     )

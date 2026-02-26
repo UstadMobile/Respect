@@ -4,7 +4,7 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.opds.OpdsDataSourceDb
+import world.respect.datalayer.db.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
@@ -34,7 +34,7 @@ import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
-import world.respect.datalayer.school.opds.OpdsDataSourceLocal
+import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
@@ -116,8 +116,8 @@ class SchoolDataSourceDb(
         AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 
-    override val opdsDataSource: OpdsDataSourceLocal by lazy {
-        OpdsDataSourceDb(
+    override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal by lazy {
+        OpdsPublicationDataSourceDb(
             respectSchoolDatabase = schoolDb,
             json = json,
             uidNumberMapper = uidNumberMapper,

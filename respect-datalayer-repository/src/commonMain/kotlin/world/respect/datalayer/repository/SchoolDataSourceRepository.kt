@@ -3,7 +3,7 @@ package world.respect.datalayer.repository
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.opds.OpdsDataSourceRepository
+import world.respect.datalayer.repository.opds.OpdsPublicationDataSourceRepository
 import world.respect.datalayer.repository.opds.OpdsFeedDataSourceRepository
 import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
@@ -20,7 +20,7 @@ import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
-import world.respect.datalayer.school.opds.OpdsDataSource
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 
 class SchoolDataSourceRepository(
@@ -125,10 +125,10 @@ class SchoolDataSourceRepository(
         )
     }
 
-    override val opdsDataSource: OpdsDataSource by lazy {
-        OpdsDataSourceRepository(
-            local = local.opdsDataSource,
-            remote = remote.opdsDataSource,
+    override val opdsPublicationDataSource: OpdsPublicationDataSource by lazy {
+        OpdsPublicationDataSourceRepository(
+            local = local.opdsPublicationDataSource,
+            remote = remote.opdsPublicationDataSource,
         )
     }
 

@@ -4,7 +4,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.lib.opds.model.OpdsPublication
 
-interface OpdsDataSourceLocal: OpdsDataSource {
+interface OpdsPublicationDataSourceLocal: OpdsPublicationDataSource {
 
     val feedNetworkValidationHelper: BaseDataSourceValidationHelper
 

@@ -1,6 +1,6 @@
 package world.respect.datalayer
 
-import world.respect.datalayer.school.opds.OpdsDataSourceLocal
+import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -43,7 +43,7 @@ interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val inviteDataSource: InviteDataSourceLocal
 
-    override val opdsDataSource: OpdsDataSourceLocal
+    override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal
 
     override val opdsFeedDataSource: OpdsFeedDataSourceLocal
 

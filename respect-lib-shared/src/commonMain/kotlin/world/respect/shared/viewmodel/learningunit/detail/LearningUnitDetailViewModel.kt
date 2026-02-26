@@ -20,7 +20,6 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
@@ -66,7 +65,7 @@ class LearningUnitDetailViewModel(
 
     init {
         viewModelScope.launch {
-            schoolDataSource.opdsDataSource.loadOpdsPublication(
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
                 url = route.learningUnitManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = route.learningUnitManifestUrl,
@@ -95,7 +94,7 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.opdsDataSource.loadOpdsPublication(
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
                 url = route.appManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = null,

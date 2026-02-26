@@ -6,7 +6,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.lib.opds.model.OpdsPublication
 
-interface OpdsDataSource {
+interface OpdsPublicationDataSource {
 
     /**
      *
@@ -19,7 +19,7 @@ interface OpdsDataSource {
      *        opds feed, providing the URL and publicationId of the feed can be used to load a first
      *        version from the cache
      */
-    fun loadOpdsPublication(
+    fun getByUrlAsFlow(
         url: Url,
         params: DataLoadParams,
         referrerUrl: Url?,

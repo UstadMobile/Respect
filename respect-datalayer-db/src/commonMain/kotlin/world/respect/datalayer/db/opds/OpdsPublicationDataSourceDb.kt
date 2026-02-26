@@ -20,16 +20,16 @@ import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
-import world.respect.datalayer.school.opds.OpdsDataSourceLocal
+import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
-class OpdsDataSourceDb(
+class OpdsPublicationDataSourceDb(
     private val respectSchoolDatabase: RespectSchoolDatabase,
     private val json: Json,
     private val uidNumberMapper: UidNumberMapper,
     private val primaryKeyGenerator: PrimaryKeyGenerator,
-): OpdsDataSourceLocal {
+): OpdsPublicationDataSourceLocal {
 
     override val feedNetworkValidationHelper = object: BaseDataSourceValidationHelper {
         override suspend fun getValidationInfo(
@@ -89,7 +89,7 @@ class OpdsDataSourceDb(
         }
     }
 
-    override fun loadOpdsPublication(
+    override fun getByUrlAsFlow(
         url: Url,
         params: DataLoadParams,
         referrerUrl: Url?,

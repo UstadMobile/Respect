@@ -242,7 +242,7 @@ class CurriculumMappingEditViewModel(
         link: CurriculumMappingSectionLink
     ): Flow<DataLoadState<CurriculumMappingSectionUiState>> {
         val publicationUrl = Url(link.href)
-        return schoolDataSource.opdsDataSource.loadOpdsPublication(
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = Url(link.href),
             params = DataLoadParams(),
             referrerUrl = null,

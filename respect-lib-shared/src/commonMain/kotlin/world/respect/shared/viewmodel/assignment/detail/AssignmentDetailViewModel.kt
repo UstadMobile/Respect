@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,13 +23,8 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.ext.whenSubscribed
@@ -138,7 +132,7 @@ class AssignmentDetailViewModel(
     }
 
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
-        return schoolDataSource.opdsDataSource.loadOpdsPublication(
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )
     }

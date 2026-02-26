@@ -7,16 +7,15 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
-import world.respect.datalayer.school.opds.OpdsDataSource
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.lib.opds.model.OpdsPublication
 
-class OpdsDataSourceHttp(
+class OpdsPublicationDataSourceHttp(
     private val httpClient: HttpClient,
-    private val feedValidationHelper: BaseDataSourceValidationHelper? = null,
     private val publicationValidationHelper: BaseDataSourceValidationHelper? = null,
-) : OpdsDataSource {
+) : OpdsPublicationDataSource {
 
-    override fun loadOpdsPublication(
+    override fun getByUrlAsFlow(
         url: Url,
         params: DataLoadParams,
         referrerUrl: Url?,

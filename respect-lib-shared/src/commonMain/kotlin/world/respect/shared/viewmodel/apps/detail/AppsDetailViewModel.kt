@@ -68,7 +68,7 @@ class AppsDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.opdsDataSource.loadOpdsPublication(
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
                 url = route.manifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = null,

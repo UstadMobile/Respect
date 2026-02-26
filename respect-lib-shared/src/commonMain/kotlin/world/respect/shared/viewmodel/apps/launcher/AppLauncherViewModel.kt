@@ -177,7 +177,7 @@ class AppLauncherViewModel(
     }
 
     fun respectPublicationForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<OpdsPublication>> {
-        return schoolDataSource.opdsDataSource.loadOpdsPublication(
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = schoolApp.appManifestUrl,
             params = DataLoadParams(),
             referrerUrl = null,

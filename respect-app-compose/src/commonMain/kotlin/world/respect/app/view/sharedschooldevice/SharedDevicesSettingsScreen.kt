@@ -64,7 +64,6 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.getDeviceDisplayName
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
@@ -140,7 +139,21 @@ private fun SharedDevicesSettingsContent(
 
     val pendingPager = respectRememberPager(uiState.pendingDevices)
     val pendingItems = pendingPager.flow.collectAsLazyPagingItems()
-
+    // Create sorted items list using remember with keys to trigger recomposition
+    val sortedItems = remember(
+        lazyPagingItems.itemCount,
+        lazyPagingItems.itemSnapshotList,
+        uiState.currentDeviceGuid
+    ) {
+        lazyPagingItems.itemSnapshotList.items
+            .filterNotNull()
+            .sortedWith(
+                compareBy<Person> { person ->
+                    // Current device first (false before true)
+                    person.guid != uiState.currentDeviceGuid
+                }.thenBy { it.fullName() }
+            )
+    }
     // Handle bottom sheet dismissal
     LaunchedEffect(uiState.showBottomSheetOptions) {
         if (uiState.showBottomSheetOptions) {
@@ -313,53 +326,54 @@ private fun SharedDevicesSettingsContent(
                     }
                 }
             } else {
-                respectPagingItems(
-                    items = lazyPagingItems,
-                    key = { item, index -> item?.guid ?: index.toString() },
-                    contentType = { PersonDataSource.ENDPOINT_NAME },
-                ) { personDetails ->
-                    personDetails?.let { details ->
-                        ListItem(
-                            modifier = Modifier.clickable { },
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.PhoneAndroid,
-                                    contentDescription = stringResource(Res.string.phone_android_icon),
-                                )
-                            },
-                            headlineContent = {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                ) {
-                                    Text(
-                                        text = details.fullName(),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                items(sortedItems.size) { index ->
+                    val personDetails = sortedItems[index]
+                    val isCurrentDevice = personDetails.guid == uiState.currentDeviceGuid
 
-                                    Text(
-                                        text = "${details.getDeviceDisplayName()} ${
-                                            stringResource(
-                                                Res.string.tablet_android_last_seen
-                                            )
-                                        }: ${details.lastModified}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            },
-                            trailingContent = {
-                                IconButton(
-                                    onClick = { onRemoveDevice(details) }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = stringResource(Res.string.close_icon),
-                                    )
-                                }
+                    ListItem(
+                        modifier = Modifier.clickable { },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Default.PhoneAndroid,
+                                contentDescription = stringResource(Res.string.phone_android_icon),
+                            )
+                        },
+                        headlineContent = {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    text = if (isCurrentDevice) {
+                                        "${personDetails.fullName()} (${stringResource(Res.string.this_device)})"
+                                    } else {
+                                        personDetails.fullName()
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                Text(
+                                    text = "${personDetails.getDeviceDisplayName()} ${
+                                        stringResource(
+                                            Res.string.tablet_android_last_seen
+                                        )
+                                    }: ${personDetails.lastModified}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
-                        )
-                    }
+                        },
+                        trailingContent = {
+                            IconButton(
+                                onClick = { onRemoveDevice(personDetails) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(Res.string.close_icon),
+                                )
+                            }
+                        }
+                    )
                 }
             }
         }

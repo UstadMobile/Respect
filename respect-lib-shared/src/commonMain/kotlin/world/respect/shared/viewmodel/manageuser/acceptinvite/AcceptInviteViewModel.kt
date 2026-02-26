@@ -4,6 +4,7 @@ package world.respect.shared.viewmodel.manageuser.acceptinvite
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.russhwolf.settings.Settings
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,7 +63,8 @@ class AcceptInviteViewModel(
     savedStateHandle: SavedStateHandle,
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
     private val respectAppDataSource: RespectAppDataSource,
-    private val enableSharedDeviceModeUseCase: EnableSharedDeviceModeUseCase
+    private val enableSharedDeviceModeUseCase: EnableSharedDeviceModeUseCase,
+    private val settings: Settings
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: AcceptInvite = savedStateHandle.toRoute()
@@ -199,6 +201,7 @@ class AcceptInviteViewModel(
                     schoolUrl = route.schoolUrl,
                     useActiveUserAuth = _useActiveUserAuth
                 )
+                settings.putString("current_device_guid", personRegistered.guid)
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = if (personRegistered.status != PersonStatusEnum.PENDING_APPROVAL) {

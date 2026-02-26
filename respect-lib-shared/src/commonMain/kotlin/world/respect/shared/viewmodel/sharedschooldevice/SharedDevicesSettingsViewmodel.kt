@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.sharedschooldevice
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -59,6 +60,7 @@ data class SharedDevicesSettingsUiState(
     val pin: String = "",
     val showBottomSheetOptions: Boolean = false,
     val isLoadingPin: Boolean = true,
+    val currentDeviceGuid: String? = null
 ) {
     val isPinValid: Boolean
         get() = pin.length >= PIN_LENGTH && pin.all { it.isDigit() }
@@ -72,6 +74,7 @@ class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
+    settings: Settings
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -80,6 +83,8 @@ class SharedDevicesSettingsViewmodel(
 
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState(isLoadingPin = true))
     val uiState = _uiState.asStateFlow()
+
+    private val currentDeviceGuid = settings.getStringOrNull("current_device_guid")
 
     val schoolUrl = accountManager.activeAccount?.school?.self
         ?: throw IllegalStateException("No active school")
@@ -122,7 +127,6 @@ class SharedDevicesSettingsViewmodel(
             .get()
 
     init {
-
         loadSchoolPin()
         loadSelfSelectSetting()
         _appUiState.update {
@@ -142,7 +146,8 @@ class SharedDevicesSettingsViewmodel(
         _uiState.update {
             it.copy(
                 devices = pagingSourceFactoryHolder,
-                pendingDevices = pendingPersonsPagingSource
+                pendingDevices = pendingPersonsPagingSource,
+                currentDeviceGuid = currentDeviceGuid
             )
         }
     }

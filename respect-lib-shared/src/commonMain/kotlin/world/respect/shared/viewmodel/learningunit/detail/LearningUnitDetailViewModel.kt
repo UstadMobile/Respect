@@ -103,7 +103,6 @@ class LearningUnitDetailViewModel(
                             )
                         }
                     }
-
                     else -> {
                     }
                 }
@@ -156,7 +155,7 @@ class LearningUnitDetailViewModel(
     fun onClickDownload() {
         viewModelScope.launch {
             try {
-                when (uiState.value.pinState.status) {
+                when(uiState.value.pinState.status) {
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
@@ -164,13 +163,12 @@ class LearningUnitDetailViewModel(
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }
-
                     else -> {
                         //Do nothing
                     }
                 }
 
-            } catch (t: Throwable) {
+            }catch(t: Throwable) {
                 t.printStackTrace()
             }
         }

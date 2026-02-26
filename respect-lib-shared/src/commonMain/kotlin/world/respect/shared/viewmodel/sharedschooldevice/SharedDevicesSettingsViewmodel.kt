@@ -271,11 +271,10 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onSavePin(pin: String) {
-        _uiState.update {
-            it.copy(pin = pin)
-        }
-        val currentPin = _uiState.value.pin
-        if (currentPin.length == SharedDevicesSettingsUiState.PIN_LENGTH && currentPin.all { it.isDigit() }) {
+        if (pin.length == SharedDevicesSettingsUiState.PIN_LENGTH && pin.all { it.isDigit() }) {
+            _uiState.update {
+                it.copy(pin = pin)
+            }
             viewModelScope.launch {
                 try {
                     setSharedDevicePINUseCase(pin)

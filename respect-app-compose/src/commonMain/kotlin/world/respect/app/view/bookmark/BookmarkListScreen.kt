@@ -205,7 +205,7 @@ private fun BookmarkListContent(
                 trailingContent = {
                     Icon(
                         imageVector = bookmarkIcon,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.bookmark),
                     )
                 }
 

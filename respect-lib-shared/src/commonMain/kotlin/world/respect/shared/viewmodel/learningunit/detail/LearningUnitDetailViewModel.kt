@@ -39,6 +39,7 @@ data class LearningUnitDetailUiState(
     val appDetail: DataLoadState<RespectAppManifest>? = null,
 
     val appIcon: String? = null,
+
     val isBookmarked: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
@@ -71,7 +72,7 @@ class LearningUnitDetailViewModel(
                             appDetail = result,
                             appIcon = route.appManifestUrl.resolve(
                                 result.data.icon.toString()
-                            ).toString()
+                            ).toString(),
                         )
 
                     }
@@ -102,6 +103,7 @@ class LearningUnitDetailViewModel(
                             )
                         }
                     }
+
                     else -> {
                     }
                 }
@@ -154,19 +156,21 @@ class LearningUnitDetailViewModel(
     fun onClickDownload() {
         viewModelScope.launch {
             try {
-                when(uiState.value.pinState.status) {
+                when (uiState.value.pinState.status) {
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
+
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }
+
                     else -> {
                         //Do nothing
                     }
                 }
 
-            }catch(t: Throwable) {
+            } catch (t: Throwable) {
                 t.printStackTrace()
             }
         }
@@ -194,10 +198,13 @@ class LearningUnitDetailViewModel(
             val nextStatus = !uiState.value.isBookmarked
             appDataSource.opdsDataSource.setBookmarkStatus(
                 route.learningUnitManifestUrl,
-                        nextStatus,
-                uiState.value.lessonDetail?.metadata?.title.toString(),
-              uiState.value.lessonDetail?.metadata?.subtitle.toString(),
-                 uiState.value.appIcon.toString()
+                nextStatus,
+                uiState.value.lessonDetail?.metadata?.title?.getTitle(),
+                uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
+                uiState.value.appIcon.toString(),
+                uiState.value.appDetail?.dataOrNull()?.name?.getTitle().toString(),
+                uiState.value.lessonDetail?.images?.firstOrNull()?.href
+
 
             )
         }

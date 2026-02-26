@@ -41,9 +41,11 @@ interface OpdsDataSource {
     suspend fun setBookmarkStatus(
         url: Url,
         isBookmarked: Boolean,
-        title: String,
-        subtitle: String,
-        appIcon : String
+        title: String?,
+        subtitle: String?,
+        appIcon: String,
+        appName: String,
+        iconUrl: String?,
     )
 
     fun getAllBookmarks(): Flow<List<Bookmark>>

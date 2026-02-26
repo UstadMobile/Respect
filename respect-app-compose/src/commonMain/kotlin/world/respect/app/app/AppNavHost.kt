@@ -14,6 +14,7 @@ import world.respect.app.view.apps.list.AppListScreen
 import world.respect.app.view.assignment.detail.AssignmentDetailScreen
 import world.respect.app.view.assignment.edit.AssignmentEditScreen
 import world.respect.app.view.assignment.list.AssignmentListScreen
+import world.respect.app.view.bookmark.BookmarkListScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
@@ -61,6 +62,7 @@ import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.viewmodel.respectViewModel
+import world.respect.lib.opds.model.Bookmark
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
 import world.respect.shared.navigation.AppsDetail
@@ -72,6 +74,7 @@ import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.BookmarkList
 import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.CreateAccountSetPassword
@@ -251,6 +254,14 @@ fun AppNavHost(
             )
         }
 
+        composable<BookmarkList> {
+            BookmarkListScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
         composable<ClazzList> {
             val viewModel: ClazzListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

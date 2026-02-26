@@ -67,6 +67,8 @@ fun AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
+        onClick ={viewModel.onClick()}
+
     )
 }
 
@@ -76,6 +78,7 @@ fun AppLauncherScreen(
     uiState: AppLauncherUiState,
     onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
     onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
+    onClick:() -> Unit
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
@@ -116,6 +119,7 @@ fun AppLauncherScreen(
                     } ?: "",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 16.dp)
+                        .clickable { onClick() },
                 )
             }
         } else {

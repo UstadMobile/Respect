@@ -47,15 +47,6 @@ abstract class ReadiumLinkEntityDao {
     @Insert
     abstract suspend fun insertList(entities: List<ReadiumLinkEntity>)
 
-    @Query("""
-    SELECT * FROM ReadiumLinkEntity 
-    WHERE rleOpdsParentUid = :pubUid 
-    AND rleOpdsParentType = ${OpdsParentType.ID_PUBLICATION}
-""")
-    abstract suspend fun findAllByPublicationUid(
-        pubUid: Long
-    ): List<ReadiumLinkEntity>
-
     companion object {
         const val LINK_ENTITIES_FOR_FEEDUID_WHERE_CLAUSE = """
               (     ReadiumLinkEntity.rleOpdsParentType = ${OpdsParentType.ID_FEED}

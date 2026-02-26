@@ -68,7 +68,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
         //Network validation
         NetworkValidationInfoEntity::class,
     ],
-    version = 4,
+    version = 2,
 )
 @TypeConverters(SharedConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)

@@ -66,6 +66,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.ext.getDeviceDisplayName
 import world.respect.datalayer.school.model.Person
+import world.respect.libutil.util.time.toFormattedDate
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.add_device
@@ -357,7 +358,7 @@ private fun SharedDevicesSettingsContent(
                                         stringResource(
                                             Res.string.tablet_android_last_seen
                                         )
-                                    }: ${personDetails.lastModified}",
+                                    }: ${personDetails.lastModified.toString().toFormattedDate()}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

@@ -314,7 +314,7 @@ onFlowComplete:
 - tapOn:
     text: "Device name *"
     index: 1
-- inputText: "Test Device 1"
+- inputText: "Test Device 3"
 - hideKeyboard
 - assertVisible: "Enable"
 - tapOn: "Enable"

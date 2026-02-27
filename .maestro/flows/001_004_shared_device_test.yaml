@@ -236,9 +236,9 @@ onFlowComplete:
     id: "app_title"
     text: "New Class"
 - tapOn: "StudentA User"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
 - assertVisible: "Assignments"
 - assertVisible: "Apps"
 - assertNotVisible: "Class"

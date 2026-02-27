@@ -83,9 +83,6 @@ onFlowComplete:
 - tapOn:
     id: "set_pin"
 - assertVisible: "Set PIN"
-- tapOn:
-    id: "pin_text"
-- eraseText
 - inputText: "123"
 - tapOn: "Save"
 - assertVisible: "Error: please enter 4 digit number"
@@ -98,9 +95,6 @@ onFlowComplete:
 - tapOn:
     id: "set_pin"
 - assertVisible: "Set PIN"
-- tapOn:
-    id: "pin_text"
-- eraseText
 - inputText: "1234"
 - tapOn: "Save"
 - assertVisible:
@@ -122,7 +116,9 @@ onFlowComplete:
     text: "Enable shared school device mode"
 - tapOn: "Enable"
 - assertVisible: "Required field*" #mandatory field error
-- tapOn: "Device name*"
+- tapOn:
+    text: "Device name *"
+    index: 1
 - inputText: "Test Device 1"
 - hideKeyboard
 - assertVisible: "Enable"
@@ -133,13 +129,13 @@ onFlowComplete:
 - assertVisible: "New Class"
 - assertVisible: "Scan QR code badge"
 
-# Teacher approves Test Device 1
+# Enable Test Device 1
 - tapOn: "Teacher/admin login"
 - assertVisible:
     id: "app_title"
     text: "Teacher/admin login"
 #- tapOn: "Enter school device PIN"
-#- inputText: "1233"
+#- inputText: ${maestro.copiedText}
 #- tapOn: "Next"
 #- assertVisible: "Incorrect device PIN"
 #- eraseText
@@ -149,11 +145,11 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Login"
-- tapOn: "Select another school"
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
+#- tapOn: "Select another school"
+#- runFlow:
+#    file: "subflows/get_started_select_school_by_name.yaml"
+#    env:
+#      SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
 - inputText: "teacherauser"
@@ -188,7 +184,7 @@ onFlowComplete:
     text: "Shared school device"
 - assertVisible: "Student can self-select their class and name"  #switch is ON
 - assertVisible: "Teacher/admin unlock PIN"
-- assertVisible: "Test Device"
+- assertVisible: "Test Device 1"
 - assertVisible: "Devices (1)"
 #- assertVisible: "Test Device 1 (this device)"
 
@@ -222,7 +218,9 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Enable shared school device mode"
-- tapOn: "Device name"
+- tapOn:
+    text: "Device name *"
+    index: 1
 - inputText: "Test Device 2"
 - tapOn: "Enable"
 - assertVisible:
@@ -295,11 +293,18 @@ onFlowComplete:
 - tapOn: "Student can self-select their class and name"  #switch is OFF
 - assertVisible: "Teacher/admin unlock PIN"
 - assertVisible: "Devices (2)"
-- assertVisible: "Test Device 1 (this device)"
+- assertVisible: "Pending device request to join (1)"
 - assertVisible: "Test Device 2"
+- tapOn:
+    id: "approve_request"
+- assertNotVisible: "Pending device request to join (1)"
+- assertVisible: "Devices (2)"
+- assertVisible: "Test Device 2 (this device)"
+- assertVisible: "Test Device 1"
 
 # Validating flow when the Student can self-select their class and name switch is OFF
-- clearState: world.respect.app
+- launchApp:
+    clearState: false
 - tapOn: "Get Started"
 - assertVisible:
     id: "app_title"

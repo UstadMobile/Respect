@@ -12,6 +12,10 @@ interface BookmarkDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateBookmark(bookmark: BookmarkEntity)
 
+    @Query("DELETE FROM BookmarkEntity WHERE urlHash = :urlHash")
+    suspend fun deleteBookmark(urlHash: Long)
+
+
     @Query("SELECT COALESCE(isBookmarked, 0) FROM BookmarkEntity WHERE urlHash = :urlHash")
     fun observeBookmarkStatus(urlHash: Long): Flow<Boolean>
 

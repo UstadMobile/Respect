@@ -193,17 +193,21 @@ class OpdsDataSourceDb(
         iconUrl: String?
     ) {
         val urlHash = xxStringHasher.hash(url.toString())
-        respectDatabase.getBookmarkDao().insertOrUpdateBookmark(
-            BookmarkEntity(
-                urlHash = urlHash,
-                isBookmarked = isBookmarked,
-                title = title,
-                subtitle = subtitle,
-                appIcon =appIcon,
-                appName = appName,
-                iconUrl=iconUrl
+        if (isBookmarked) {
+            respectDatabase.getBookmarkDao().insertOrUpdateBookmark(
+                BookmarkEntity(
+                    urlHash = urlHash,
+                    isBookmarked = true,
+                    title = title,
+                    subtitle = subtitle,
+                    appIcon = appIcon,
+                    appName = appName,
+                    iconUrl = iconUrl
+                )
             )
-        )
+        } else {
+            respectDatabase.getBookmarkDao().deleteBookmark(urlHash)
+        }
     }
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
         return respectDatabase.getBookmarkDao().observeAllBookmarks()

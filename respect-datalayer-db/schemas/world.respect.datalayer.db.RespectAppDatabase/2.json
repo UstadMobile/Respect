@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "9483cee680b9388b763f97e77c2b62b1",
+    "identityHash": "2f7cdcdb5431469987df8415e4203dde",
     "entities": [
       {
         "tableName": "LangMapEntity",
@@ -514,6 +514,69 @@
         }
       },
       {
+        "tableName": "BookmarkEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`urlHash` INTEGER NOT NULL, `isBookmarked` INTEGER NOT NULL, `title` TEXT, `subtitle` TEXT, `appIcon` TEXT NOT NULL, `appName` TEXT NOT NULL, `iconUrl` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`urlHash`))",
+        "fields": [
+          {
+            "fieldPath": "urlHash",
+            "columnName": "urlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isBookmarked",
+            "columnName": "isBookmarked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "subtitle",
+            "columnName": "subtitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appIcon",
+            "columnName": "appIcon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appName",
+            "columnName": "appName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconUrl",
+            "columnName": "iconUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "urlHash"
+          ]
+        }
+      },
+      {
         "tableName": "CompatibleAppEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`caeUid` INTEGER NOT NULL, `caeUrl` TEXT NOT NULL, `caeIcon` TEXT, `caeLastModified` INTEGER NOT NULL, `caeEtag` TEXT, `caeLicense` TEXT NOT NULL, `caeWebsite` TEXT NOT NULL, `caeLearningUnits` TEXT NOT NULL, `caeDefaultLaunchUri` TEXT NOT NULL, `caeAndroidPackageId` TEXT, `caeAndroidStoreList` TEXT, `caeAndroidSourceCode` TEXT, PRIMARY KEY(`caeUid`))",
         "fields": [
@@ -830,7 +893,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9483cee680b9388b763f97e77c2b62b1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2f7cdcdb5431469987df8415e4203dde')"
     ]
   }
 }

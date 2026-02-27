@@ -4,15 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
@@ -26,7 +23,6 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.getTitle
-import kotlin.getValue
 
 data class SchoolSettingsUiState(
     val schoolName: String? = null,
@@ -37,7 +33,6 @@ data class SchoolSettingsUiState(
 class SchoolSettingsViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -55,42 +50,30 @@ class SchoolSettingsViewModel(
             )
         }
         viewModelScope.launch {
-            accountManager.accounts.combine(
-                accountManager.selectedAccountFlow
-            ) { storedAccounts, activeAccount ->
-                Pair(storedAccounts, activeAccount)
-            }.collectLatest { (storedAccounts, activeAccount) ->
-                _uiState.update { prev ->
-                    prev.copy(
-                        schoolName = activeAccount?.school?.name?.getTitle()
-                    )
-                }
+            val schoolName = accountManager.activeAccount?.school?.name?.getTitle()
+            _uiState.update { prev ->
+                prev.copy(
+                    schoolName = schoolName
+                )
             }
         }
 
         viewModelScope.launch {
-            schoolDataSource.personDataSource.listAsFlow(
+            val deviceList = schoolDataSource.personDataSource.list(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
-                    includeRelated = true,
+                    filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
                 )
-            ).combine(accountManager.selectedAccountAndPersonFlow) { person, activeAccount ->
-                Pair(person, activeAccount)
-            }.collect { (personsResult, activeAccount) ->
-                val sharedDevices = personsResult.dataOrNull()?.filter { person ->
-                    person.roles.any { role ->
-                        role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
-                    }
-                }
+            )
 
-                _uiState.update { prev ->
-                    prev.copy(
-                        sharedSchoolDeviceCount = sharedDevices?.size
-                    )
-                }
+            _uiState.update { prev ->
+                prev.copy(
+                    sharedSchoolDeviceCount = deviceList.dataOrNull()?.size
+                )
             }
         }
     }
+
 
     fun onClickSharedSchoolDevices() {
         _navCommandFlow.tryEmit(

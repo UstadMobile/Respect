@@ -184,10 +184,8 @@ onFlowComplete:
     text: "Shared school device"
 - assertVisible: "Student can self-select their class and name"  #switch is ON
 - assertVisible: "Teacher/admin unlock PIN"
-- assertVisible: "Test Device 1"
 - assertVisible: "Devices (1)"
-#- assertVisible: "Test Device 1 (this device)"
-
+- assertVisible: "Test Device 1 (This device)"
 # Generate Invite Link (Approval OFF)
 - tapOn:
     id: "floating_action_button"
@@ -254,10 +252,6 @@ onFlowComplete:
 - tapOn: "Enter school device PIN"
 - inputText: "1234"
 - tapOn: "Next"
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn:
     id: "username"
 - inputText: teacherauser
@@ -293,19 +287,32 @@ onFlowComplete:
 - tapOn: "Student can self-select their class and name"  #switch is OFF
 - assertVisible: "Teacher/admin unlock PIN"
 - assertVisible: "Devices (2)"
-- assertVisible: "Pending device request to join (1)"
-- assertVisible: "Test Device 2"
-- tapOn:
-    id: "approve_request"
-- assertNotVisible: "Pending device request to join (1)"
-- assertVisible: "Devices (2)"
-- assertVisible: "Test Device 2 (this device)"
+- assertVisible: "Test Device 2 (This device)"
 - assertVisible: "Test Device 1"
+# Enable This Device
+- tapOn:
+    id: "floating_action_button"
+- assertVisible: "Add device"
+- assertVisible: "This device"
+- assertVisible: "Enable shared school device on mode on this device"
+- assertVisible: "Another device"
+- assertVisible: "Add using QR code, link, or invite code"
+- tapOn: "This device"
+- assertVisible:
+    id: "app_title"
+    text: "Enable shared school device mode"
+- tapOn: "Enable"
+- assertVisible: "Required field*" #mandatory field error
+- tapOn:
+    text: "Device name *"
+    index: 1
+- inputText: "Test Device 1"
+- hideKeyboard
+- assertVisible: "Enable"
+- tapOn: "Enable"
+
 
 # Validating flow when the Student can self-select their class and name switch is OFF
-- launchApp:
-    clearState: false
-- tapOn: "Get Started"
 - assertVisible:
     id: "app_title"
     text: "Login"
@@ -347,3 +354,4 @@ onFlowComplete:
 - assertNotVisible: "Share Feedback"
 - assertVisible: "StudentA User"
 - tapOn: "Logout"
+

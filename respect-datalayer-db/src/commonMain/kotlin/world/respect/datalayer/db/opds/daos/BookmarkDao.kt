@@ -9,16 +9,16 @@ import world.respect.datalayer.db.opds.entities.BookmarkEntity
 
 @Dao
 interface BookmarkDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrUpdateBookmark(bookmark: BookmarkEntity)
+    suspend fun insertBookmark(bookmark: BookmarkEntity)
 
     @Query("DELETE FROM BookmarkEntity WHERE urlHash = :urlHash")
     suspend fun deleteBookmark(urlHash: Long)
 
-
-    @Query("SELECT COALESCE(isBookmarked, 0) FROM BookmarkEntity WHERE urlHash = :urlHash")
+    @Query("SELECT EXISTS(SELECT 1 FROM BookmarkEntity WHERE urlHash = :urlHash)")
     fun observeBookmarkStatus(urlHash: Long): Flow<Boolean>
 
-    @Query("SELECT * FROM BookmarkEntity WHERE isBookmarked = 1 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM BookmarkEntity ORDER BY updatedAt DESC")
     fun observeAllBookmarks(): Flow<List<BookmarkEntity>>
 }

@@ -49,7 +49,6 @@ class OpdsDataSourceRepository(
 
     override suspend fun setBookmarkStatus(
         url: Url,
-        isBookmarked: Boolean,
         title: String?,
         subtitle: String?,
         appIcon: String,
@@ -58,7 +57,6 @@ class OpdsDataSourceRepository(
     ) {
         return local.setBookmarkStatus(
             url,
-            isBookmarked,
             title,
             subtitle,
             appIcon,

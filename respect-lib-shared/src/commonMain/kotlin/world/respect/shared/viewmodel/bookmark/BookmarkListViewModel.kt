@@ -29,6 +29,7 @@ class BookmarkListViewModel (
             appDataSource.opdsDataSource
                 .getAllBookmarks()
                 .collect { bookmarks ->
+                    println("Bookmark ${bookmarks}")
                     _uiState.update {
                         it.copy(
                             bookmarks = bookmarks,
@@ -38,4 +39,11 @@ class BookmarkListViewModel (
                 }
         }
     }
+
+    fun onClickRemoveBookmark(bookmark: Bookmark) {
+        viewModelScope.launch {
+            appDataSource.opdsDataSource
+        }
+    }
+
 }

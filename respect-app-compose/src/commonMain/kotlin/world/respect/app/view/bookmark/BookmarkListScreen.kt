@@ -2,6 +2,7 @@ package world.respect.app.view.bookmark
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +22,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.ListItem
@@ -38,16 +38,13 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
-import world.respect.app.components.RespectQuickActionButton
 import world.respect.lib.opds.model.Bookmark
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
 import world.respect.shared.generated.resources.no_bookmark
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.bookmark.BookmarkListUiState
 import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel.Companion.ICON
 
 @Composable
 fun BookmarkListScreen(
@@ -57,12 +54,14 @@ fun BookmarkListScreen(
 
     BookmarkListScreen(
         uiState = uiState,
+        onClickRemoveBookmark = viewModel::onClickRemoveBookmark
     )
 }
 
 @Composable
 fun BookmarkListScreen(
-    uiState: BookmarkListUiState
+    uiState: BookmarkListUiState,
+    onClickRemoveBookmark: (Bookmark) -> Unit
 ) {
 
     when {
@@ -75,7 +74,8 @@ fun BookmarkListScreen(
         }
 
         else -> {
-            BookmarkListContent(uiState.bookmarks)
+            BookmarkListContent(uiState.bookmarks,
+                onClickRemoveBookmark)
         }
     }
 }
@@ -113,9 +113,11 @@ private fun EmptyBookmarkState() {
         }
     }
 }
+
 @Composable
 private fun BookmarkListContent(
-    bookmarks: List<Bookmark>
+    bookmarks: List<Bookmark>,
+    onClickRemoveBookmark: (Bookmark) -> Unit
 ) {
 
     LazyColumn(
@@ -127,11 +129,11 @@ private fun BookmarkListContent(
 
         items(bookmarks) { bookmark ->
 
-            val bookmarkIcon = if (bookmark.isBookmarked) {
-                Icons.Filled.Bookmark
-            } else {
-                Icons.Outlined.BookmarkBorder
-            }
+//            val bookmarkIcon = if (bookmark.isBookmarked) {
+//                Icons.Filled.Bookmark
+//            } else {
+//                Icons.Outlined.BookmarkBorder
+//            }
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
 
@@ -157,7 +159,7 @@ private fun BookmarkListContent(
                 },
 
                 headlineContent = {
-                    Text(text = bookmark.title?:"")
+                    Text(text = bookmark.title ?: "")
                 },
 
                 supportingContent = {
@@ -196,7 +198,7 @@ private fun BookmarkListContent(
                         }
 
                         Text(
-                            text = bookmark.subtitle?:""
+                            text = bookmark.subtitle ?: ""
                         )
 
                     }
@@ -204,7 +206,10 @@ private fun BookmarkListContent(
 
                 trailingContent = {
                     Icon(
-                        imageVector = bookmarkIcon,
+                        modifier = Modifier.clickable {
+                            onClickRemoveBookmark(bookmark)
+                        },
+                        imageVector = Icons.Default.Bookmark,
                         contentDescription = stringResource(Res.string.bookmark),
                     )
                 }

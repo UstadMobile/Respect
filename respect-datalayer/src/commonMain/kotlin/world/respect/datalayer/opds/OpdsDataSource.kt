@@ -40,7 +40,6 @@ interface OpdsDataSource {
 
     suspend fun setBookmarkStatus(
         url: Url,
-        isBookmarked: Boolean,
         title: String?,
         subtitle: String?,
         appIcon: String,

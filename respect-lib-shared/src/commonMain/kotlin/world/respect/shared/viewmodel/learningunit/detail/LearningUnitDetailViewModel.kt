@@ -193,18 +193,15 @@ class LearningUnitDetailViewModel(
 
     fun onClickBookmark() {
         viewModelScope.launch {
-            val nextStatus = !uiState.value.isBookmarked
             appDataSource.opdsDataSource.setBookmarkStatus(
                 route.learningUnitManifestUrl,
-                nextStatus,
                 uiState.value.lessonDetail?.metadata?.title?.getTitle(),
                 uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
                 uiState.value.appIcon.toString(),
-                uiState.value.appDetail?.dataOrNull()?.name?.getTitle().toString(),
+                uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
                 uiState.value.lessonDetail?.images?.firstOrNull()?.href
-
-
             )
         }
     }
+
 }

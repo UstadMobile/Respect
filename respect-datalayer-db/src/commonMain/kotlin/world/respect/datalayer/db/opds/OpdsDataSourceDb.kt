@@ -6,6 +6,7 @@ import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadParams
@@ -180,12 +181,11 @@ class OpdsDataSourceDb(
         val urlHash = xxStringHasher.hash(url.toString())
         return respectDatabase.getBookmarkDao()
             .observeBookmarkStatus(urlHash)
-            .map { it ?: false }
     }
+
 
     override suspend fun setBookmarkStatus(
         url: Url,
-        isBookmarked: Boolean,
         title: String?,
         subtitle: String?,
         appIcon: String,
@@ -193,11 +193,17 @@ class OpdsDataSourceDb(
         iconUrl: String?
     ) {
         val urlHash = xxStringHasher.hash(url.toString())
-        if (isBookmarked) {
-            respectDatabase.getBookmarkDao().insertOrUpdateBookmark(
+
+        val exists = respectDatabase.getBookmarkDao()
+            .observeBookmarkStatus(urlHash)
+            .first()
+
+        if (exists) {
+            respectDatabase.getBookmarkDao().deleteBookmark(urlHash)
+        } else {
+            respectDatabase.getBookmarkDao().insertBookmark(
                 BookmarkEntity(
                     urlHash = urlHash,
-                    isBookmarked = true,
                     title = title,
                     subtitle = subtitle,
                     appIcon = appIcon,
@@ -205,22 +211,20 @@ class OpdsDataSourceDb(
                     iconUrl = iconUrl
                 )
             )
-        } else {
-            respectDatabase.getBookmarkDao().deleteBookmark(urlHash)
         }
     }
+
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
         return respectDatabase.getBookmarkDao().observeAllBookmarks()
             .map { entities ->
                 entities.map { entity ->
                     Bookmark(
+                        url = entity.urlHash,
                         title = entity.title,
                         subtitle = entity.subtitle,
                         appIcon = entity.appIcon,
                         appName = entity.appName,
-                        iconUrl = entity.iconUrl,
-                        isBookmarked = entity.isBookmarked
-                    )
+                        iconUrl = entity.iconUrl,)
                 }
             }
     }

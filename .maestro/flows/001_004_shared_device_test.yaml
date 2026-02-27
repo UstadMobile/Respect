@@ -186,6 +186,11 @@ onFlowComplete:
 - assertVisible: "Teacher/admin unlock PIN"
 - assertVisible: "Devices (1)"
 - assertVisible: "Test Device 1 (This device)"
+- runScript:
+    file: "scripts/deviceInfo.js"
+- evalScript: ${output.deviceModel + " (Android " + output.osVersion + ")"}
+- assertVisible:
+    text: ${output}
 # Generate Invite Link (Approval OFF)
 - tapOn:
     id: "floating_action_button"
@@ -231,7 +236,10 @@ onFlowComplete:
     id: "app_title"
     text: "New Class"
 - tapOn: "StudentA User"
-- assertVisible: "Assignment"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Assignments"
+- assertVisible: "Assignments"
 - assertVisible: "Apps"
 - assertNotVisible: "Class"
 - assertNotVisible: "People"
@@ -345,7 +353,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- assertVisible: "Assignment"
+- assertVisible: "Assignments"
 - assertVisible: "Apps"
 - assertNotVisible: "Class"
 - assertNotVisible: "People"

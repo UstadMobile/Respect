@@ -22,8 +22,8 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.StudentList
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.UiText
@@ -86,7 +86,7 @@ class StudentListViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = if (person.status != PersonStatusEnum.PENDING_APPROVAL) {
-                        RespectAppLauncher()
+                        AssignmentList
                     } else {
                         WaitingForApproval()
                     },

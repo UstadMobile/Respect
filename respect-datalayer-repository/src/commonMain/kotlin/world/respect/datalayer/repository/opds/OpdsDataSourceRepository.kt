@@ -68,4 +68,8 @@ class OpdsDataSourceRepository(
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
         return local.getAllBookmarks()
     }
+
+    override suspend fun removeBookmark(url: Long) {
+        return local.removeBookmark(url)
+    }
 }

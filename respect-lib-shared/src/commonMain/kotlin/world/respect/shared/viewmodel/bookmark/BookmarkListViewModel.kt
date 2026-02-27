@@ -42,8 +42,7 @@ class BookmarkListViewModel (
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-            appDataSource.opdsDataSource
+            appDataSource.opdsDataSource.removeBookmark(bookmark.url)
         }
     }
-
 }

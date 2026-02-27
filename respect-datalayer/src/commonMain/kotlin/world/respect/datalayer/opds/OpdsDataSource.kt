@@ -49,4 +49,7 @@ interface OpdsDataSource {
 
     fun getAllBookmarks(): Flow<List<Bookmark>>
 
+    suspend fun removeBookmark(url: Long)
+
+
 }

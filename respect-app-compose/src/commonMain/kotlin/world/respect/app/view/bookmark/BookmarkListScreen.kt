@@ -128,12 +128,6 @@ private fun BookmarkListContent(
     ) {
 
         items(bookmarks) { bookmark ->
-
-//            val bookmarkIcon = if (bookmark.isBookmarked) {
-//                Icons.Filled.Bookmark
-//            } else {
-//                Icons.Outlined.BookmarkBorder
-//            }
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
 

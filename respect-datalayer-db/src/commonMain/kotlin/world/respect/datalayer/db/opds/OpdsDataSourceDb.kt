@@ -228,4 +228,8 @@ class OpdsDataSourceDb(
                 }
             }
     }
+
+    override suspend fun removeBookmark(url: Long) {
+        respectDatabase.getBookmarkDao().deleteBookmark(url)
+    }
 }

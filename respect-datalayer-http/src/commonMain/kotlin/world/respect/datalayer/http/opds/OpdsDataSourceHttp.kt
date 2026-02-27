@@ -60,4 +60,8 @@ class OpdsDataSourceHttp(
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun removeBookmark(url: Long) {
+        TODO("Not yet implemented")
+    }
 }

@@ -69,7 +69,7 @@ fun Person.deviceOsVersionOrNull(): String? {
 }
 
 
-fun Person.getDeviceDisplayName(): String {
+fun Person.getDeviceInfo(): String {
     val model = deviceModelOrNull() ?: return givenName
     val platform = devicePlatformOrNull() ?: "Android"
     val osVersion = deviceOsVersionOrNull() ?: ""

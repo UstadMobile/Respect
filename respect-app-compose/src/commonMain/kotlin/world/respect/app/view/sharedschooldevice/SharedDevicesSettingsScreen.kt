@@ -64,7 +64,7 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.school.ext.getDeviceDisplayName
+import world.respect.datalayer.school.ext.getDeviceInfo
 import world.respect.datalayer.school.model.Person
 import world.respect.libutil.util.time.toFormattedDate
 import world.respect.shared.generated.resources.Res
@@ -256,13 +256,12 @@ private fun SharedDevicesSettingsContent(
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium
                                     )
-
                                     Text(
-                                        text = "${device.getDeviceDisplayName()} ${
+                                        text = "${device.getDeviceInfo()} ${
                                             stringResource(
                                                 Res.string.tablet_android_last_seen
                                             )
-                                        }: ${device.lastModified}",
+                                        }: ${device.lastModified.toString().toFormattedDate()}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -354,7 +353,7 @@ private fun SharedDevicesSettingsContent(
                                 )
 
                                 Text(
-                                    text = "${personDetails.getDeviceDisplayName()} ${
+                                    text = "${personDetails.getDeviceInfo()}, ${
                                         stringResource(
                                             Res.string.tablet_android_last_seen
                                         )

@@ -83,21 +83,15 @@ class RedeemInviteUseCaseDb(
             username = redeemRequest.account.username,
             guid = accountGuid,
         ).copy(
-            status = if(approvalRequired){
+            status = if (approvalRequired) {
                 PersonStatusEnum.PENDING_APPROVAL
-            }else {
+            } else {
                 PersonStatusEnum.ACTIVE
             },
-        ).let {
-            if (approvalRequired) {
-                it.copyWithInviteInfo(
-                    invite = redeemRequest.invite,
-                    deviceInfo = redeemRequest.deviceInfo
-                )
-            } else {
-                it
-            }
-        }
+        ).copyWithInviteInfo(
+            invite = redeemRequest.invite,
+            deviceInfo = redeemRequest.deviceInfo
+        )
 
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)

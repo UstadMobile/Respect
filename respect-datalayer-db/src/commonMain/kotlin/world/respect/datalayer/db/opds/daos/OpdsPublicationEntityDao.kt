@@ -47,6 +47,13 @@ abstract class OpdsPublicationEntityDao {
     abstract fun findByUrlHashAsFlow(urlHash: Long): Flow<OpdsPublicationEntity?>
 
     @Query("""
+        SELECT OpdsPublicationEntity.*
+          FROM OpdsPublicationEntity
+         WHERE OpdsPublicationEntity.opeUrlHash = :urlHash
+    """)
+    abstract suspend fun findByUrlHash(urlHash: Long): OpdsPublicationEntity?
+
+    @Query("""
         SELECT OpdsPublicationEntity.opeLastModified AS lastModified,
                OpdsPublicationEntity.opeEtag AS etag
           FROM OpdsPublicationEntity

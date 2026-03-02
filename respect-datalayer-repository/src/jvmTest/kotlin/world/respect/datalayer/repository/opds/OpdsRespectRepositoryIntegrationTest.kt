@@ -36,6 +36,7 @@ import world.respect.datalayer.http.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.opds.OpdsPublicationDataSourceHttp
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
+import world.respect.datalayer.school.opds.ext.hasRel
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -138,6 +139,7 @@ class OpdsRespectRepositoryIntegrationTest {
             val opdsPubRemote = OpdsPublicationDataSourceHttp(
                 httpClient = httpClient,
                 publicationValidationHelper = null,
+                json = json,
             )
 
             block(
@@ -241,6 +243,14 @@ class OpdsRespectRepositoryIntegrationTest {
                         expected = LangMapStringValue("Lesson 001"),
                         actual = data.dataOrNull()?.metadata?.title
                     )
+
+                    assertEquals(
+                        expected = "lesson001.html",
+                        actual = data.dataOrNull()?.links?.firstOrNull {
+                            it.hasRel("http://opds-spec.org/acquisition/open-access")
+                        }?.href
+                    )
+
                     cancelAndIgnoreRemainingEvents()
                 }
             }

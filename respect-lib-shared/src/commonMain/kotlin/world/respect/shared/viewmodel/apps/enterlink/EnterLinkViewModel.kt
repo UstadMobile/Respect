@@ -5,6 +5,9 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_link
 import world.respect.shared.generated.resources.invalid_url
@@ -15,9 +18,11 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import kotlin.getValue
 
 data class EnterLinkUiState(
     val linkUrl: String = "",
@@ -26,8 +31,12 @@ data class EnterLinkUiState(
 
 class EnterLinkViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
-) : RespectViewModel(savedStateHandle) {
+    accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(EnterLinkUiState())
 
@@ -36,7 +45,8 @@ class EnterLinkViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.enter_link.asUiText()
+                title = Res.string.enter_link.asUiText(),
+                hideBottomNavigation = true,
             )
         }
     }
@@ -54,8 +64,11 @@ class EnterLinkViewModel(
         launchWithLoadingIndicator {
             try {
                 val linkUrl = Url(uiState.value.linkUrl)
-                val appResult = appDataSource.compatibleAppsDataSource.getApp(
-                    manifestUrl = linkUrl, loadParams = DataLoadParams()
+                val appResult = schoolDataSource.opdsPublicationDataSource.getByUrl(
+                    url = linkUrl,
+                    params = DataLoadParams(),
+                    referrerUrl = null,
+                    expectedPublicationId = null,
                 )
 
                 if(appResult is DataReadyState) {

@@ -1,6 +1,7 @@
 package world.respect.datalayer.db.opds
 
 import androidx.room.Transactor
+import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
@@ -16,6 +17,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.opds.adapters.OpdsPublicationEntities
 import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
+import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
@@ -30,17 +32,6 @@ class OpdsPublicationDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val primaryKeyGenerator: PrimaryKeyGenerator,
 ): OpdsPublicationDataSourceLocal {
-
-    override val feedNetworkValidationHelper = object: BaseDataSourceValidationHelper {
-        override suspend fun getValidationInfo(
-            url: Url,
-            requestHeaders: IHttpHeaders,
-        ): NetworkValidationInfo? {
-            return respectSchoolDatabase.getOpdsFeedEntityDao().getLastModifiedAndETag(
-                uidNumberMapper(url.toString())
-            )?.asNetworkValidationInfo()
-        }
-    }
 
     override val publicationNetworkValidationHelper = object: BaseDataSourceValidationHelper {
         override suspend fun getValidationInfo(
@@ -89,6 +80,18 @@ class OpdsPublicationDataSourceDb(
         }
     }
 
+    suspend fun OpdsPublicationEntity.loadPublicationEntities(): OpdsPublicationEntities {
+        return OpdsPublicationEntities(
+            opdsPublicationEntity = this,
+            langMapEntities = respectSchoolDatabase.getLangMapEntityDao().selectAllByTableAndEntityId(
+                lmeTopParentType = LangMapEntity.TopParentType.OPDS_PUBLICATION.id,
+                lmeEntityUid1 = this.opeUid,
+                lmeEntityUid2 = 0
+            ),
+            linkEntities = respectSchoolDatabase.getReadiumLinkEntityDao().findAllByPubUid(this.opeUid)
+        )
+    }
+
     override fun getByUrlAsFlow(
         url: Url,
         params: DataLoadParams,
@@ -98,17 +101,23 @@ class OpdsPublicationDataSourceDb(
         val urlHash = uidNumberMapper(url.toString())
 
         return respectSchoolDatabase.getOpdsPublicationEntityDao().findByUrlHashAsFlow(urlHash).map { entity ->
-            entity?.let {
-                OpdsPublicationEntities(
-                    opdsPublicationEntity = entity,
-                    langMapEntities = respectSchoolDatabase.getLangMapEntityDao().selectAllByTableAndEntityId(
-                        lmeTopParentType = LangMapEntity.TopParentType.OPDS_PUBLICATION.id,
-                        lmeEntityUid1 = entity.opeUid,
-                        lmeEntityUid2 = 0
-                    ),
-                    linkEntities = respectSchoolDatabase.getReadiumLinkEntityDao().findAllByFeedUid(entity.opeUid)
-                ).asModel(json)
-            } ?: NoDataLoadedState.notFound()
+            respectSchoolDatabase.useReaderConnection {
+                entity?.loadPublicationEntities()?.asModel(json) ?: NoDataLoadedState.notFound()
+            }
         }
     }
+
+    override suspend fun getByUrl(
+        url: Url,
+        params: DataLoadParams,
+        referrerUrl: Url?,
+        expectedPublicationId: String?
+    ) : DataLoadState<OpdsPublication> {
+        return respectSchoolDatabase.useReaderConnection {
+            respectSchoolDatabase.getOpdsPublicationEntityDao().findByUrlHash(
+                uidNumberMapper(url.toString())
+            )?.loadPublicationEntities()?.asModel(json) ?: NoDataLoadedState.notFound()
+        }
+    }
+
 }

@@ -240,6 +240,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
             httpClient = httpClient,
             tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },
             validationHelper = clientValidationHelper,
+            json = json,
         )
 
         val drainQueueSignal = Channel<Boolean>(capacity = Channel.UNLIMITED)

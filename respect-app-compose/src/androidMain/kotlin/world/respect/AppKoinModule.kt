@@ -911,6 +911,7 @@ val appKoinModule = module {
                     httpClient = get(),
                     tokenProvider = get(),
                     validationHelper = get(),
+                    json = get(),
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),

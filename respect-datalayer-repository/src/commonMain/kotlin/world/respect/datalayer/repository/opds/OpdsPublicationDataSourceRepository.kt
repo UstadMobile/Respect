@@ -41,4 +41,17 @@ class OpdsPublicationDataSourceRepository(
         )
     }
 
+    override suspend fun getByUrl(
+        url: Url,
+        params: DataLoadParams,
+        referrerUrl: Url?,
+        expectedPublicationId: String?
+    ): DataLoadState<OpdsPublication> {
+        val remoteData = remote.getByUrl(url, params, referrerUrl, expectedPublicationId)
+        if(remoteData is DataReadyState)
+            local.updateOpdsPublication(remoteData)
+
+        return local.getByUrl(url, params, referrerUrl, expectedPublicationId)
+    }
+
 }

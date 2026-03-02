@@ -2,6 +2,7 @@ package world.respect.datalayer.http
 
 import io.ktor.client.HttpClient
 import io.ktor.http.Url
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.http.opds.OpdsPublicationDataSourceHttp
@@ -42,6 +43,7 @@ class SchoolDataSourceHttp(
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val json: Json,
     private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
 ) : SchoolDataSource {
 
@@ -153,7 +155,8 @@ class SchoolDataSourceHttp(
 
     override val opdsPublicationDataSource: OpdsPublicationDataSource by lazy {
         OpdsPublicationDataSourceHttp(
-            httpClient = httpClient
+            httpClient = httpClient,
+            json = json,
         )
     }
 

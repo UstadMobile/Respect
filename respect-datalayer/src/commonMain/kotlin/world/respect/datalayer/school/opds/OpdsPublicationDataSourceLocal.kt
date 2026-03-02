@@ -6,8 +6,6 @@ import world.respect.lib.opds.model.OpdsPublication
 
 interface OpdsPublicationDataSourceLocal: OpdsPublicationDataSource {
 
-    val feedNetworkValidationHelper: BaseDataSourceValidationHelper
-
     val publicationNetworkValidationHelper: BaseDataSourceValidationHelper
 
     suspend fun updateOpdsPublication(publication: DataReadyState<OpdsPublication>)

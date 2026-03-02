@@ -8,7 +8,9 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 
-class DummySchoolConfigSettingsDataSource: SchoolConfigSettingDataSource {
+class DummySchoolConfigSettingsDataSource(
+    private val defaultAppCatalogUrl: String?,
+): SchoolConfigSettingDataSource {
 
     override suspend fun findByGuid(
         params: DataLoadParams,
@@ -30,12 +32,14 @@ class DummySchoolConfigSettingsDataSource: SchoolConfigSettingDataSource {
     ): Flow<DataLoadState<List<SchoolConfigSetting>>> {
         return flowOf(
             DataReadyState(
-                data = listOf(
-                    SchoolConfigSetting(
-                        key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS,
-                        value = "http://10.40.49.70/opds/apps.json"
+                data = defaultAppCatalogUrl?.let {
+                    listOf(
+                        SchoolConfigSetting(
+                            key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS,
+                            value = it,
+                        )
                     )
-                )
+                } ?: emptyList()
             )
         )
     }
@@ -45,12 +49,14 @@ class DummySchoolConfigSettingsDataSource: SchoolConfigSettingDataSource {
         params: SchoolConfigSettingDataSource.GetListParams
     ): DataLoadState<List<SchoolConfigSetting>> {
         return DataReadyState(
-            data = listOf(
-                SchoolConfigSetting(
-                    key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS,
-                    value = "http://10.40.49.70/opds/apps.json"
+            data = defaultAppCatalogUrl?.let {
+                listOf(
+                    SchoolConfigSetting(
+                        key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS,
+                        value = it,
+                    )
                 )
-            )
+            } ?: emptyList()
         )
     }
 

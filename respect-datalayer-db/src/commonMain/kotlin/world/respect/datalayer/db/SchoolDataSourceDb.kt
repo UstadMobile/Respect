@@ -53,6 +53,7 @@ class SchoolDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
     private val json: Json,
+    private val defaultAppCatalogUrl: String?,
     private val primaryKeyGenerator: PrimaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
 ) : SchoolDataSourceLocal {
 
@@ -136,6 +137,8 @@ class SchoolDataSourceDb(
     }
 
     override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
-        DummySchoolConfigSettingsDataSource()
+        DummySchoolConfigSettingsDataSource(
+            defaultAppCatalogUrl = defaultAppCatalogUrl,
+        )
     }
 }

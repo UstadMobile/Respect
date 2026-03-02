@@ -111,7 +111,6 @@ fun serverKoinModule(
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
@@ -354,7 +353,8 @@ fun serverKoinModule(
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 checkPersonPermissionUseCase = get(),
                 json = get(),
-                primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator
+                primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator,
+                defaultAppCatalogUrl = RespectServerBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         }
 

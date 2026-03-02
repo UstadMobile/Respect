@@ -140,6 +140,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
                 schoolDb = schoolDb,
                 uidNumberMapper = uidMapper,
             ),
+            defaultAppCatalogUrl = null,
             json = Json { ignoreUnknownKeys = true },
         )
 
@@ -240,6 +241,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
             httpClient = httpClient,
             tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },
             validationHelper = clientValidationHelper,
+            defaultAppCatalogUrl = null,
             json = json,
         )
 

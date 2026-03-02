@@ -897,14 +897,16 @@ val appKoinModule = module {
                 ),
                 checkPersonPermissionUseCase = get(),
                 json = get(),
+                defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         }
 
         scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
+            val localDs = get<SchoolDataSourceLocal>()
 
             SchoolDataSourceRepository(
-                local = get<SchoolDataSourceLocal>(),
+                local = localDs,
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
@@ -912,6 +914,10 @@ val appKoinModule = module {
                     tokenProvider = get(),
                     validationHelper = get(),
                     json = get(),
+                    defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                    opdsFeedValidationHelper = localDs.opdsFeedDataSource,
+                    opdsPublicationValidationHelper = localDs.opdsPublicationDataSource
+                        .publicationNetworkValidationHelper
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),

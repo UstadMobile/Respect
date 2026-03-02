@@ -1,5 +1,7 @@
 package world.respect.datalayer.ext
 
+import kotlin.time.Instant
+
 
 /**
  * Unix timestamp for maximum date we will recognize as being a set date: 1/Jan/2200
@@ -16,3 +18,5 @@ const val MS_PER_MIN = (60 * 1000)
  * value, leading to unpredictable behavior.
  */
 const val UNSET_DISTANT_FUTURE = MAX_VALID_DATE + (24 * MS_PER_HOUR)
+
+val EPOCH = Instant.fromEpochMilliseconds(0)

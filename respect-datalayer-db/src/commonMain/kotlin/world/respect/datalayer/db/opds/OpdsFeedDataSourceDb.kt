@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.opds
 
+import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
@@ -20,6 +21,7 @@ import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
 import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
+import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
@@ -102,6 +104,14 @@ class OpdsFeedDataSourceDb(
         )
         val feedUrl = opdsFeed.requireSelfUrl()
 
+        val hasMetaData = feedEntities.feedMetaData.any {
+            it.ofmeOfeUid == feedEntities.opdsFeed.ofeUid
+        }
+
+        if(!hasMetaData) {
+            throw IllegalStateException("WTF: feedEntities has no metadata for opdsfeed")
+        }
+
         val feedUid = uidNumberMapper(feedUrl.toString())
         schoolDb.getOpdsFeedEntityDao().deleteByFeedUid(feedUid)
         schoolDb.getOpdsFeedMetadataEntityDao().deleteByFeedUid(feedUid)
@@ -123,11 +133,15 @@ class OpdsFeedDataSourceDb(
     override suspend fun store(list: List<OpdsFeed>) {
         //TODO: throw illegal argument exception if anything on list is not for this school url
         //TODO: run permission check to see if user is allowed to save/write this feed
-        list.forEach { feed ->
-            doUpsertOpdsFeed(
-                opdsFeed = feed,
-                dataLoadMetaInfo = feed.dataLoadMetaInfoForPlaylist()
-            )
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { feed ->
+                    doUpsertOpdsFeed(
+                        opdsFeed = feed,
+                        dataLoadMetaInfo = feed.dataLoadMetaInfoForPlaylist()
+                    )
+                }
+            }
         }
     }
 
@@ -135,11 +149,23 @@ class OpdsFeedDataSourceDb(
         url: Url,
         dataLoadResult: DataReadyState<OpdsFeed>,
     ) {
-        schoolDb.useWriterConnection {
-            doUpsertOpdsFeed(
-                opdsFeed = dataLoadResult.data,
-                dataLoadMetaInfo = dataLoadResult.metaInfo,
-            )
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val opdsFeedEntity = schoolDb.getOpdsFeedEntityDao().findByUrlHash(
+                    uidNumberMapper(url.toString())
+                )
+                val dbLastModified = opdsFeedEntity?.ofeLastModified ?: EPOCH
+                val isMoreRecent = dataLoadResult.data.metadata.modified?.let {
+                    it > dbLastModified
+                } ?: true
+
+                if(isMoreRecent) {
+                    doUpsertOpdsFeed(
+                        opdsFeed = dataLoadResult.data,
+                        dataLoadMetaInfo = dataLoadResult.metaInfo,
+                    )
+                }
+            }
         }
     }
 

@@ -44,7 +44,9 @@ class SchoolDataSourceHttp(
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val json: Json,
+    private val defaultAppCatalogUrl: String?,
     private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
+    private val opdsPublicationValidationHelper: BaseDataSourceValidationHelper? = null,
 ) : SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSource by lazy {
@@ -157,6 +159,7 @@ class SchoolDataSourceHttp(
         OpdsPublicationDataSourceHttp(
             httpClient = httpClient,
             json = json,
+            publicationValidationHelper =  opdsPublicationValidationHelper,
         )
     }
 
@@ -169,6 +172,8 @@ class SchoolDataSourceHttp(
     }
 
     override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
-        DummySchoolConfigSettingsDataSource()
+        DummySchoolConfigSettingsDataSource(
+            defaultAppCatalogUrl = defaultAppCatalogUrl,
+        )
     }
 }

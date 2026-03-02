@@ -234,8 +234,11 @@ class AccountListViewModel(
                 role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
             }
         }
+        val isSelectedAccountSharedDevice = uiState.value.selectedAccount?.person?.roles?.any { role ->
+            role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+        }
 
-        if (isSharedDevice?.person?.status == PersonStatusEnum.ACTIVE) {
+        if (isSharedDevice?.person?.status == PersonStatusEnum.ACTIVE || isSelectedAccountSharedDevice == true) {
             // For shared devices, navigate to Select Class
             uiState.value.selectedAccount?.person?.let { person ->
                 _navCommandFlow.tryEmit(

@@ -775,10 +775,10 @@ val appKoinModule = module {
             GetSharedDevicePINUseCaseImpl()
         }
         scoped<GetSharedDeviceSelfSelectUseCase> {
-            GetSharedDeviceSelfSelectUseCase()
+            GetSharedDeviceSelfSelectUseCase(settings = get())
         }
         scoped<SetSharedDeviceSelfSelectUseCase> {
-            SetSharedDeviceSelfSelectUseCase()
+            SetSharedDeviceSelfSelectUseCase(settings = get())
         }
 
         scoped<RedeemInviteUseCase> {

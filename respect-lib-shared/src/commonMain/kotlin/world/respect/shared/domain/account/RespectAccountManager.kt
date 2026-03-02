@@ -282,6 +282,23 @@ class RespectAccountManager(
 
     }
 
+    suspend fun loginAsProfileOnSharedDevice(
+        credential: RespectCredential,
+        schoolUrl: Url,
+    ): AuthResponse {
+        val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
+        )
+
+        val authUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
+        val authResponse = authUseCase(credential)
+
+        switchProfile(authResponse.person.guid)
+
+        return authResponse
+    }
+
     fun switchAccount(account: RespectAccount) {
         if(!_storedAccounts.value.any { it.isSameAccount(account) }) {
             throw IllegalArgumentException("switchAccount: account not stored/available")

@@ -147,7 +147,6 @@ private fun SharedDevicesSettingsContent(
         uiState.currentDeviceGuid
     ) {
         lazyPagingItems.itemSnapshotList.items
-            .filterNotNull()
             .sortedWith(
                 compareBy<Person> { person ->
                     // Current device first (false before true)
@@ -418,7 +417,8 @@ private fun SettingsOptionRow(
 
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.testTag("self_select_their_class")
         )
     }
 }

@@ -80,7 +80,7 @@ class AccountListViewModel(
                     val accountScope = respectAccountManager.getOrCreateAccountScope(account)
                     val dataSource: SchoolDataSource = accountScope.get()
                     dataSource.personDataSource.findByGuid(
-                        DataLoadParams(onlyIfCached = true),
+                        DataLoadParams(),
                         account.userGuid
                     ).dataOrNull()?.primaryRole()
                 }
@@ -199,7 +199,7 @@ class AccountListViewModel(
             respectAccountManager.switchProfile(person.guid)
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = if(person.roles.firstOrNull()?.roleEnum == PersonRoleEnum.PARENT) {
+                    destination = if (person.roles.firstOrNull()?.roleEnum == PersonRoleEnum.PARENT) {
                         RespectAppLauncher()
                     } else {
                         AssignmentList
@@ -229,25 +229,42 @@ class AccountListViewModel(
     }
 
     fun onClickLogout() {
-       val isSharedDevice =  uiState.value.accounts.find{ andPerson ->
+        val isSelectedAccountSharedDevice =
+            uiState.value.accountOwnerRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+
+        // Find the shared device account in the accounts list
+        val sharedDeviceAccount = uiState.value.accounts.find { andPerson ->
             andPerson.person.roles.any { role ->
                 role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
             }
         }
-        val isSelectedAccountSharedDevice = uiState.value.accountOwnerRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
 
-        if (isSharedDevice?.person?.status == PersonStatusEnum.ACTIVE || isSelectedAccountSharedDevice) {
-            // For shared devices, navigate to Select Class
-            uiState.value.selectedAccount?.person?.let { person ->
+        if (isSelectedAccountSharedDevice) {
+            // Currently on shared device account - just go to Select Class
+            uiState.value.selectedAccount?.also { selectedAccount ->
+                viewModelScope.launch {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = SelectClass.create(deviceGuid = selectedAccount.person.guid),
+                            clearBackStack = true
+                        )
+                    )
+                }
+            }
+        } else if (sharedDeviceAccount?.person?.status == PersonStatusEnum.ACTIVE) {
+            // This is a teacher/admin on a shared device - switch to shared device account first
+            viewModelScope.launch {
+                // First switch to the shared device account
+                respectAccountManager.switchAccount(sharedDeviceAccount.session.account)
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        destination = SelectClass.create(deviceGuid = person.guid),
+                        destination = SelectClass.create(deviceGuid = sharedDeviceAccount.person.guid),
                         clearBackStack = true
                     )
                 )
             }
         } else {
-            // Regular logout for non-shared devices
+            // Regular logout - no shared device present
             uiState.value.selectedAccount?.also {
                 viewModelScope.launch {
                     respectAccountManager.removeAccount(it.session.account)

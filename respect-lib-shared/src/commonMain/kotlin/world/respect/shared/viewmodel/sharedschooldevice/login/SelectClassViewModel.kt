@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.sharedschooldevice.login
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -43,6 +44,7 @@ data class SelectClassUiState(
 class SelectClassViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val settings: Settings
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -68,24 +70,21 @@ class SelectClassViewModel(
             .get()
 
     init {
+        loadSelfSelectSetting()
         _appUiState.update {
             it.copy(
-                title = if (route.isSelfSelectClassAndName) Res.string.select_class.asUiText() else Res.string.login.asUiText(),
+                title = if (_uiState.value.isSelfSelectClassAndName) Res.string.select_class.asUiText() else Res.string.login.asUiText(),
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
                 showBackButton = false
             )
         }
-
-        loadSelfSelectSetting()
-
         viewModelScope.launch {
             val device = schoolDataSource.personDataSource.findByGuid(DataLoadParams(), route.deviceGuid)
 
             _uiState.update { prev ->
                 prev.copy(
                     classes = pagingSourceHolder,
-                    isSelfSelectClassAndName = route.isSelfSelectClassAndName,
                     deviceName = device.dataOrNull()?.givenName ?: ""
                 )
             }
@@ -103,7 +102,7 @@ class SelectClassViewModel(
     fun onClickScanQrCode() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                ScanQRCode.create()
+                ScanQRCode.create(isSharedDevice = true)
             )
         )
     }

@@ -735,7 +735,8 @@ data class ScanQRCode(
     val resultDestStr: String? = null,
     private val schoolUrlStr: String? = null,
     val username: String? = null,
-    private val nextAfterScanStr: String? = null
+    private val nextAfterScanStr: String? = null,
+    val isSharedDevice: Boolean = false
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -755,13 +756,15 @@ data class ScanQRCode(
             resultDest: ResultDest? = null,
             schoolUrl: Url? = null,
             username: String? = null,
-            nextAfterScan: NextAfterScan? = null
+            nextAfterScan: NextAfterScan? = null,
+            isSharedDevice: Boolean = false
         ) = ScanQRCode(
             guid = guid,
             resultDestStr = resultDest?.encodeToJsonStringOrNull(),
             username = username,
             schoolUrlStr = schoolUrl?.toString(),
-            nextAfterScanStr = nextAfterScan?.name
+            nextAfterScanStr = nextAfterScan?.name,
+            isSharedDevice = isSharedDevice
         )
     }
 }

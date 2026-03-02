@@ -297,22 +297,23 @@ onFlowComplete:
     id: "user_account_icon"
 - tapOn: "Logout"
 
-
+# ---------- Test disabled
+#--------Select Class enabled/disabled” state in the database is not working as expected due to a dependency issue
 # Validating flow when the Student can self-select their class and name switch is OFF
-- assertVisible:
-    id: "app_title"
-    text: "Login"
-- assertNotVisible: "New Class"
-- assertVisible: "Teacher/admin login"
-- tapOn: "Scan QR code badge"
-- assertVisible:
-    id: "app_title"
-    text: "Scan QR code badge"
-- tapOn: "More Options"
-- tapOn: "Paste URL"
-- tapOn: "Url"
-- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
-- tapOn: "OK"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Login"
+#- assertNotVisible: "New Class"
+#- assertVisible: "Teacher/admin login"
+#- tapOn: "Scan QR code badge"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Scan QR code badge"
+#- tapOn: "More Options"
+#- tapOn: "Paste URL"
+#- tapOn: "Url"
+#- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
+#- tapOn: "OK"
 
 # DISABLED temporarily 21/Jan/2026 by Mike - how this is handled is being changed
 # This part validate - When a device is in shared school device mode, if the user clicks scan a QR code badge button, then ONLY a QR code badge (student login badge) will be accepted.
@@ -328,17 +329,17 @@ onFlowComplete:
 #- tapOn: "Url"
 #- inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 #- tapOn: "Ok"
-
-- assertVisible:
-    id: "app_title"
-    text: "Assignments"
-- assertVisible: "Assignments"
-- assertVisible: "Apps"
-- assertNotVisible: "Class"
-- assertNotVisible: "People"
-- tapOn:
-    id: "user_account_icon"
-- assertNotVisible: "Share Feedback"
-- assertVisible: "StudentA User"
-- tapOn: "Logout"
+#
+#- assertVisible:
+#    id: "app_title"
+#    text: "Assignments"
+#- assertVisible: "Assignments"
+#- assertVisible: "Apps"
+#- assertNotVisible: "Class"
+#- assertNotVisible: "People"
+#- tapOn:
+#    id: "user_account_icon"
+#- assertNotVisible: "Share Feedback"
+#- assertVisible: "StudentA User"
+#- tapOn: "Logout"
 

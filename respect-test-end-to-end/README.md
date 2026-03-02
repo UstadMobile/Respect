@@ -14,6 +14,8 @@ End-to-end tests that start a blank new server/app and test functionality end-to
 
 1.3 [User can login to school using school link instead of school name](test-description/001_003_login_using_school_link_test_description.md)
 
+1.4 [Admin enables shared school device mode, manages devices, and student login via link and QR badge](test-description/001_004_shared_device_test.md)
+
 ### 2 : Apps
 
 2.1 [User Can Browse Apps and lessons ](test-description/002_browse_lessons_test_description.md)

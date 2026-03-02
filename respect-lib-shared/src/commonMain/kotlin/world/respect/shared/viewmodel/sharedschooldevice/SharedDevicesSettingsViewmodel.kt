@@ -74,7 +74,7 @@ class SharedDevicesSettingsViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
-    settings: Settings
+    private val settings: Settings
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -326,6 +326,7 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onRemoveDevice(person: Person) {
+        settings.remove("current_device_guid")
         viewModelScope.launch {
             schoolDataSource.personDataSource.store(
                 listOf(

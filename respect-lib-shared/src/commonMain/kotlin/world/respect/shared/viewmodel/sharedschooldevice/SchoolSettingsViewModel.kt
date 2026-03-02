@@ -14,6 +14,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.school
@@ -62,7 +63,8 @@ class SchoolSettingsViewModel(
             val deviceList = schoolDataSource.personDataSource.list(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
-                    filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                    filterByPersonRole = PersonRoleEnum.SHARED_SCHOOL_DEVICE,
+                    filterByPersonStatus = PersonStatusEnum.ACTIVE
                 )
             )
 

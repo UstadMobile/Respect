@@ -45,11 +45,14 @@ interface OpdsDataSource {
         appIcon: String,
         appName: String,
         iconUrl: String?,
+        appManifestUrl: Url,
+        expectedIdentifier: String?,
+        refererUrl: Url?,
     )
 
     fun getAllBookmarks(): Flow<List<Bookmark>>
 
-    suspend fun removeBookmark(url: Long)
+    suspend fun removeBookmark(url: String)
 
 
 }

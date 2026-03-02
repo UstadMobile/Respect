@@ -54,14 +54,16 @@ fun BookmarkListScreen(
 
     BookmarkListScreen(
         uiState = uiState,
-        onClickRemoveBookmark = viewModel::onClickRemoveBookmark
+        onClickRemoveBookmark = viewModel::onClickRemoveBookmark,
+        onClickBookmark = viewModel::onClickBookmark
     )
 }
 
 @Composable
 fun BookmarkListScreen(
     uiState: BookmarkListUiState,
-    onClickRemoveBookmark: (Bookmark) -> Unit
+    onClickRemoveBookmark: (Bookmark) -> Unit,
+    onClickBookmark:(Bookmark) -> Unit
 ) {
 
     when {
@@ -74,8 +76,7 @@ fun BookmarkListScreen(
         }
 
         else -> {
-            BookmarkListContent(uiState.bookmarks,
-                onClickRemoveBookmark)
+            BookmarkListContent(uiState.bookmarks,onClickRemoveBookmark,onClickBookmark)
         }
     }
 }
@@ -117,7 +118,8 @@ private fun EmptyBookmarkState() {
 @Composable
 private fun BookmarkListContent(
     bookmarks: List<Bookmark>,
-    onClickRemoveBookmark: (Bookmark) -> Unit
+    onClickRemoveBookmark: (Bookmark) -> Unit,
+    onClickBookmark: (Bookmark) -> Unit
 ) {
 
     LazyColumn(
@@ -129,10 +131,12 @@ private fun BookmarkListContent(
 
         items(bookmarks) { bookmark ->
             ListItem(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        onClickBookmark(bookmark)
+                    },
 
                 leadingContent = {
-
 
                     Box(
                         modifier = Modifier

@@ -178,7 +178,7 @@ class OpdsDataSourceDb(
     }
 
     override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
-        val urlHash = xxStringHasher.hash(url.toString())
+        val urlHash: String = xxStringHasher.hash(url.toString()).toString()
         return respectDatabase.getBookmarkDao()
             .observeBookmarkStatus(urlHash)
     }
@@ -190,25 +190,30 @@ class OpdsDataSourceDb(
         subtitle: String?,
         appIcon: String,
         appName: String,
-        iconUrl: String?
+        iconUrl: String?,
+        appManifestUrl: Url,
+        expectedIdentifier: String?,
+        refererUrl: Url?
     ) {
-        val urlHash = xxStringHasher.hash(url.toString())
 
         val exists = respectDatabase.getBookmarkDao()
-            .observeBookmarkStatus(urlHash)
+            .observeBookmarkStatus(url.toString())
             .first()
 
         if (exists) {
-            respectDatabase.getBookmarkDao().deleteBookmark(urlHash)
+            respectDatabase.getBookmarkDao().deleteBookmark(url.toString())
         } else {
             respectDatabase.getBookmarkDao().insertBookmark(
                 BookmarkEntity(
-                    urlHash = urlHash,
+                    urlHash = url.toString(),
                     title = title,
                     subtitle = subtitle,
                     appIcon = appIcon,
                     appName = appName,
-                    iconUrl = iconUrl
+                    iconUrl = iconUrl,
+                    appManifestUrl = appManifestUrl.toString(),
+                    expectedIdentifier = expectedIdentifier,
+                    refererUrl = refererUrl?.toString()
                 )
             )
         }
@@ -224,12 +229,15 @@ class OpdsDataSourceDb(
                         subtitle = entity.subtitle,
                         appIcon = entity.appIcon,
                         appName = entity.appName,
-                        iconUrl = entity.iconUrl,)
+                        iconUrl = entity.iconUrl,
+                        appManifestUrl = entity.appManifestUrl,
+                        expectedIdentifier = entity.expectedIdentifier,
+                        refererUrl = entity.refererUrl )
                 }
             }
     }
 
-    override suspend fun removeBookmark(url: Long) {
+    override suspend fun removeBookmark(url: String) {
         respectDatabase.getBookmarkDao().deleteBookmark(url)
     }
 }

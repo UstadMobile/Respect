@@ -52,7 +52,10 @@ class OpdsDataSourceHttp(
         subtitle: String?,
         appIcon: String,
         appName: String,
-        iconUrl: String?
+        iconUrl: String?,
+        appManifestUrl: Url,
+        expectedIdentifier: String?,
+        refererUrl: Url?
     ) {
         TODO("Not yet implemented")
     }
@@ -61,7 +64,7 @@ class OpdsDataSourceHttp(
         TODO("Not yet implemented")
     }
 
-    override suspend fun removeBookmark(url: Long) {
+    override suspend fun removeBookmark(url: String) {
         TODO("Not yet implemented")
     }
 }

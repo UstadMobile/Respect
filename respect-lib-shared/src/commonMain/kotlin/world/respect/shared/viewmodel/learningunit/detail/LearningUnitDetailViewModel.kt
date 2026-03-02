@@ -199,7 +199,10 @@ class LearningUnitDetailViewModel(
                 uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
                 uiState.value.appIcon.toString(),
                 uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
-                uiState.value.lessonDetail?.images?.firstOrNull()?.href
+                uiState.value.lessonDetail?.images?.firstOrNull()?.href,
+                route.appManifestUrl,
+                route.expectedIdentifier,
+                route.refererUrl
             )
         }
     }

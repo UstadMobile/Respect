@@ -53,7 +53,10 @@ class OpdsDataSourceRepository(
         subtitle: String?,
         appIcon: String,
         appName: String,
-        iconUrl: String?
+        iconUrl: String?,
+        appManifestUrl: Url,
+        expectedIdentifier: String?,
+        refererUrl: Url?
     ) {
         return local.setBookmarkStatus(
             url,
@@ -61,7 +64,10 @@ class OpdsDataSourceRepository(
             subtitle,
             appIcon,
             appName,
-            iconUrl
+            iconUrl,
+            appManifestUrl,
+            expectedIdentifier,
+            refererUrl
         )
     }
 
@@ -69,7 +75,8 @@ class OpdsDataSourceRepository(
         return local.getAllBookmarks()
     }
 
-    override suspend fun removeBookmark(url: Long) {
-        return local.removeBookmark(url)
+    override suspend fun removeBookmark(url: String) {
+       return local.removeBookmark(url)
     }
+
 }

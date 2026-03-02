@@ -14,10 +14,10 @@ interface BookmarkDao {
     suspend fun insertBookmark(bookmark: BookmarkEntity)
 
     @Query("DELETE FROM BookmarkEntity WHERE urlHash = :urlHash")
-    suspend fun deleteBookmark(urlHash: Long)
+    suspend fun deleteBookmark(urlHash: String)
 
     @Query("SELECT EXISTS(SELECT 1 FROM BookmarkEntity WHERE urlHash = :urlHash)")
-    fun observeBookmarkStatus(urlHash: Long): Flow<Boolean>
+    fun observeBookmarkStatus(urlHash: String): Flow<Boolean>
 
     @Query("SELECT * FROM BookmarkEntity ORDER BY updatedAt DESC")
     fun observeAllBookmarks(): Flow<List<BookmarkEntity>>

@@ -2,14 +2,17 @@ package world.respect.shared.viewmodel.bookmark
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.lib.opds.model.Bookmark
-
+import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.RespectViewModel
+import io.ktor.http.Url
 
 data class BookmarkListUiState(
     val bookmarks: List<Bookmark> = emptyList(),
@@ -44,5 +47,22 @@ class BookmarkListViewModel (
         viewModelScope.launch {
             appDataSource.opdsDataSource.removeBookmark(bookmark.url)
         }
+    }
+
+    fun onClickBookmark(bookmark: Bookmark){
+        print("LearningUnit Detail bookmark list - ${bookmark.url} ${bookmark.appManifestUrl} ${bookmark.refererUrl} ${bookmark.expectedIdentifier}")
+
+        _navCommandFlow.tryEmit(
+            value = NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = Url(bookmark.url),
+                    appManifestUrl = Url(bookmark.appManifestUrl),
+                    refererUrl = Url(
+                        bookmark.refererUrl.toString()
+                    ),
+                    expectedIdentifier = bookmark.expectedIdentifier
+                )
+            )
+        )
     }
 }

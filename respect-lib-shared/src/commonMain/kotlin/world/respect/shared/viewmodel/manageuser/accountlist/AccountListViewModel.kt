@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.manageuser.accountlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -50,13 +51,13 @@ data class AccountListUiState(
 
     val familyMembersClickEnabled: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
-
 }
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
-    savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle){
+    savedStateHandle: SavedStateHandle,
+    private val settings: Settings
+) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 
@@ -182,17 +183,15 @@ class AccountListViewModel(
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = if(person.dataOrNull()?.status != PersonStatusEnum.PENDING_APPROVAL) {
+                    destination = if (person.dataOrNull()?.status != PersonStatusEnum.PENDING_APPROVAL) {
                         RespectAppLauncher()
-                    }else {
+                    } else {
                         WaitingForApproval()
                     },
                     clearBackStack = true
                 )
             )
         }
-
-
     }
 
     fun onClickFamilyPerson(person: Person) {
@@ -229,15 +228,15 @@ class AccountListViewModel(
         }
     }
 
-
     fun onClickLogout() {
-        if (uiState.value.showSelectedAccountProfileButton) {
-            uiState.value.selectedAccount?.also {
-                viewModelScope.launch {
-                    respectAccountManager.removeAccount(it.session.account)
-                }
+       val isSharedDevice =  uiState.value.accounts.find{ andPerson ->
+            andPerson.person.roles.any { role ->
+                role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
             }
-        } else {
+        }
+
+        if (isSharedDevice?.person?.status == PersonStatusEnum.ACTIVE) {
+            // For shared devices, navigate to Select Class
             uiState.value.selectedAccount?.person?.let { person ->
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
@@ -245,6 +244,19 @@ class AccountListViewModel(
                         clearBackStack = true
                     )
                 )
+            }
+        } else {
+            // Regular logout for non-shared devices
+            uiState.value.selectedAccount?.also {
+                viewModelScope.launch {
+                    respectAccountManager.removeAccount(it.session.account)
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = GetStartedScreen(),
+                            clearBackStack = true
+                        )
+                    )
+                }
             }
         }
     }

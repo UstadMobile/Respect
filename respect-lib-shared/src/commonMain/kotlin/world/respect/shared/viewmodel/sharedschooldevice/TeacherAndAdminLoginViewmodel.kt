@@ -49,11 +49,6 @@ class TeacherAndAdminLoginViewmodel(
     fun onClickNext() {
         viewModelScope.launch {
             val schoolUrl = accountManager.activeAccount?.school?.self
-            val currentAccounts = accountManager.accounts.value
-            currentAccounts.forEach { account ->
-                accountManager.removeAccount(account)
-
-            }
             schoolUrl?.let { url ->
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(LoginScreen.create(url,true))

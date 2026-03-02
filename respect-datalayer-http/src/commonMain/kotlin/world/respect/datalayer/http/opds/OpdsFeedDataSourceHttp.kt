@@ -51,7 +51,9 @@ class OpdsFeedDataSourceHttp(
         return httpClient.getAsDataLoadState<OpdsFeed>(
             url = url,
             validationHelper = opdsFeedValidationHelper,
-        ).map { it.withAbsoluteSelfUrl(url) }
+        ).map {
+            it.withAbsoluteSelfUrl(url)
+        }
     }
 
     override suspend fun store(list: List<OpdsFeed>) {

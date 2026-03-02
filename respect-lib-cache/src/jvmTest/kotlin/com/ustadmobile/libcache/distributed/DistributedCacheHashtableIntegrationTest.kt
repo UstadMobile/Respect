@@ -11,6 +11,7 @@ import com.ustadmobile.libcache.CachePaths
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.NeighborCache
@@ -125,6 +126,7 @@ class DistributedCacheHashtableIntegrationTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb1, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val cache2 = UstadCacheImpl(
@@ -135,6 +137,7 @@ class DistributedCacheHashtableIntegrationTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb2, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val httpServer1 = TestHttpServer(DistributedCacheHttpEndpoint(cache1)).also {

@@ -12,6 +12,7 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.response.StringResponse
@@ -146,6 +147,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val createdLocks = if(createLock) {
@@ -285,6 +287,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val url = "http://server.com/file.css"
@@ -327,6 +330,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val url = "http://server.com/file.css"
@@ -345,6 +349,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val url = "http://server.com/file.css"

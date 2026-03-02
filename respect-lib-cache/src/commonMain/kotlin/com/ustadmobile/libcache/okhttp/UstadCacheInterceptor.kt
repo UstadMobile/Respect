@@ -293,16 +293,15 @@ class UstadCacheInterceptor(
         }
 
         val isConnected = connectivityMonitor.statusFlow.value.isConnected
+        val useOnlyCacheResponse = !isConnected || requestCacheControlHeader?.onlyIfCached == true
+        val isFreshOrUseOnlyCache = cachedResponseStatus?.isFresh == true || useOnlyCacheResponse
 
         return when {
             /*
              * When response isFresh - can immediately return the cached response.
              * If the cache-control only-if-cached is set, then
              */
-            cacheResponse != null &&
-                    (cachedResponseStatus?.isFresh == true ||
-                            !isConnected ||
-                            requestCacheControlHeader?.onlyIfCached == true) -> {
+            cacheResponse != null && isFreshOrUseOnlyCache -> {
                 cacheResponse.asOkHttpResponse().also {
                     logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url ${it.logSummary()}")
                 }

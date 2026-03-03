@@ -7,7 +7,6 @@ import world.respect.lib.opds.model.Bookmark
 
 fun BookmarkEntity.toBookmark(): Bookmark {
     return Bookmark(
-
         learningUnitManifestUrl = learningUnitUrl,
         title = title,
         subtitle = subtitle,

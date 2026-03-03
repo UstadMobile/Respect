@@ -40,8 +40,7 @@ class BookmarkDataSourceDb(
         val urlHash: Long = uidNumberMapper(url.toString())
 
         val exists = schoolDb.getBookmarkDao()
-            .getBookmarkStatus(urlHash)
-            .first()
+            .getBookmarkStatus(urlHash).first()
 
         if (exists) {
             schoolDb.getBookmarkDao().updateBookmark(
@@ -59,8 +58,8 @@ class BookmarkDataSourceDb(
                     appName = appName,
                     iconUrl = iconUrl,
                     appManifestUrl = appManifestUrl.toString(),
-                    expectedIdentifier = expectedIdentifier,
-                    refererUrl = refererUrl?.toString(),
+                    expectedIdentifier = expectedIdentifier.toString(),
+                    refererUrl = refererUrl.toString(),
                     status = StatusEnum.ACTIVE.flag,
                     updatedAt = System.currentTimeMillis()
                 )

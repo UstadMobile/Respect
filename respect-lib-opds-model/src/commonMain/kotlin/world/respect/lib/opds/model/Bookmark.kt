@@ -9,6 +9,6 @@ data class Bookmark(
     val appName: String,
     val iconUrl: String?,
     val appManifestUrl: String,
-    val expectedIdentifier: String?,
-    val refererUrl: String?
+    val expectedIdentifier: String,
+    val refererUrl: String
 )

@@ -14,8 +14,8 @@ data class BookmarkEntity(
     val appName: String,
     val iconUrl: String?,
     val appManifestUrl: String,
-    val expectedIdentifier: String?,
-    val refererUrl: String?,
+    val expectedIdentifier: String,
+    val refererUrl: String,
     val status: Int = StatusEnum.ACTIVE.flag,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

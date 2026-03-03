@@ -22,7 +22,6 @@ fun BookmarkEntity.toBookmark(): Bookmark {
 
 fun Bookmark.toBookmarkEntity(
     urlHash: Long,
-    now: Long = System.currentTimeMillis()
 ): BookmarkEntity {
     return BookmarkEntity(
         urlHash = urlHash,
@@ -36,7 +35,7 @@ fun Bookmark.toBookmarkEntity(
         expectedIdentifier = expectedIdentifier,
         refererUrl = refererUrl,
         status = StatusEnum.ACTIVE.flag,
-        createdAt = now,
-        updatedAt = now
+        createdAt = System.currentTimeMillis(),
+        updatedAt = System.currentTimeMillis()
     )
 }

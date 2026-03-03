@@ -7,12 +7,10 @@ import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.bookmarks.BookmarkDataSource
-import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.Bookmark
-import world.respect.libxxhash.XXStringHasher
 
 class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -21,10 +19,10 @@ class BookmarkDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ): BookmarkDataSource {
 
-    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
+    override fun getBookmarkStatus(url: Url): Flow<Boolean> {
         val urlHash: Long = uidNumberMapper(url.toString())
         return schoolDb.getBookmarkDao()
-            .observeBookmarkStatus(urlHash)
+            .getBookmarkStatus(urlHash)
     }
 
     override suspend fun store(
@@ -42,7 +40,7 @@ class BookmarkDataSourceDb(
         val urlHash: Long = uidNumberMapper(url.toString())
 
         val exists = schoolDb.getBookmarkDao()
-            .observeBookmarkStatus(urlHash)
+            .getBookmarkStatus(urlHash)
             .first()
 
         if (exists) {
@@ -71,7 +69,7 @@ class BookmarkDataSourceDb(
     }
 
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        return schoolDb.getBookmarkDao().observeAllBookmarks()
+        return schoolDb.getBookmarkDao().getAllBookmarks()
             .map { entities ->
                 entities.map { entity ->
                     Bookmark(
@@ -89,9 +87,6 @@ class BookmarkDataSourceDb(
             }
     }
 
-  /*  override suspend fun removeBookmark(url: Long) {
-        schoolDb.getBookmarkDao().deleteBookmark(url)
-    }*/
   override suspend fun removeBookmark(url: Long) {
       schoolDb.getBookmarkDao()
           .updateBookmark(

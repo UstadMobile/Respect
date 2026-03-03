@@ -6,7 +6,7 @@ import world.respect.lib.opds.model.Bookmark
 
 interface BookmarkDataSource {
 
-    fun observeBookmarkStatus(url: Url): Flow<Boolean>
+    fun getBookmarkStatus(url: Url): Flow<Boolean>
 
     suspend fun store(
         url: Url,

@@ -32,7 +32,7 @@ interface BookmarkDao {
         AND status = :activeStatus
     )
 """)
-    fun observeBookmarkStatus(
+    fun getBookmarkStatus(
         urlHash: Long,
         activeStatus: Int = StatusEnum.ACTIVE.flag
     ): Flow<Boolean>
@@ -43,7 +43,7 @@ interface BookmarkDao {
     WHERE status = :activeStatus
     ORDER BY updatedAt DESC
 """)
-    fun observeAllBookmarks(
+    fun getAllBookmarks(
         activeStatus: Int = StatusEnum.ACTIVE.flag
     ): Flow<List<BookmarkEntity>>
 

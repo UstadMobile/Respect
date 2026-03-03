@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import org.koin.java.KoinJavaComponent.inject
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
@@ -122,7 +121,7 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.bookmarkDataSource.observeBookmarkStatus(route.learningUnitManifestUrl)
+            schoolDataSource.bookmarkDataSource.getBookmarkStatus(route.learningUnitManifestUrl)
                 .collect { bookmarked ->
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }

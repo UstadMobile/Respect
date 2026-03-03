@@ -8,7 +8,7 @@ import world.respect.lib.opds.model.Bookmark
 fun BookmarkEntity.toBookmark(): Bookmark {
     return Bookmark(
 
-        learningUnitUrl = learningUnitUrl,
+        learningUnitManifestUrl = learningUnitUrl,
         title = title,
         subtitle = subtitle,
         appIcon = appIcon,
@@ -25,7 +25,7 @@ fun Bookmark.toBookmarkEntity(
 ): BookmarkEntity {
     return BookmarkEntity(
         urlHash = urlHash,
-        learningUnitUrl = learningUnitUrl,
+        learningUnitUrl = learningUnitManifestUrl,
         title = title,
         subtitle = subtitle,
         appIcon = appIcon,

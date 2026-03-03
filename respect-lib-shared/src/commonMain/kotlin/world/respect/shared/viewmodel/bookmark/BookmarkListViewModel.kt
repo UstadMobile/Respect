@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.lib.opds.model.Bookmark
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
@@ -54,7 +53,7 @@ class BookmarkListViewModel(
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-            schoolDataSource.bookmarkDataSource.removeBookmark(bookmark.learningUnitUrl)
+            schoolDataSource.bookmarkDataSource.removeBookmark(bookmark.learningUnitManifestUrl)
         }
     }
 
@@ -63,7 +62,7 @@ class BookmarkListViewModel(
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(
-                    learningUnitManifestUrl = Url(bookmark.learningUnitUrl),
+                    learningUnitManifestUrl = Url(bookmark.learningUnitManifestUrl),
                     appManifestUrl = Url(bookmark.appManifestUrl),
                     refererUrl = Url(
                         bookmark.refererUrl.toString()

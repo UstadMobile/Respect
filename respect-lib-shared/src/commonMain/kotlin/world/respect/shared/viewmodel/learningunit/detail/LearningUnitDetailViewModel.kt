@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
-import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -208,7 +207,7 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
 
             val bookmark = Bookmark(
-                learningUnitUrl = route.learningUnitManifestUrl.toString(),
+                learningUnitManifestUrl = route.learningUnitManifestUrl.toString(),
                 title = uiState.value.lessonDetail?.metadata?.title?.getTitle(),
                 subtitle = uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
                 appIcon = uiState.value.appIcon.toString(),

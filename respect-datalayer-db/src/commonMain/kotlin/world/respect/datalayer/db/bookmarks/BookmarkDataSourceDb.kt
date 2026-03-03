@@ -31,7 +31,7 @@ class BookmarkDataSourceDb(
 
         val dao = schoolDb.getBookmarkDao()
 
-        val urlHash = uidNumberMapper(bookmark.learningUnitUrl)
+        val urlHash = uidNumberMapper(bookmark.learningUnitManifestUrl)
 
         val exists = dao.getBookmarkStatus(urlHash).first()
 

@@ -12,7 +12,6 @@ import world.respect.datalayer.opds.OpdsDataSourceLocal
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.ext.combineWithRemote
-import world.respect.lib.opds.model.Bookmark
 
 class OpdsDataSourceRepository(
     private val local: OpdsDataSourceLocal,
@@ -42,41 +41,4 @@ class OpdsDataSourceRepository(
     ): Flow<DataLoadState<OpdsPublication>> {
         return remote.loadOpdsPublication(url, params, referrerUrl, expectedPublicationId)
     }
-
-    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
-        return local.observeBookmarkStatus(url)
-    }
-
-    override suspend fun setBookmarkStatus(
-        url: Url,
-        title: String?,
-        subtitle: String?,
-        appIcon: String,
-        appName: String,
-        iconUrl: String?,
-        appManifestUrl: Url,
-        expectedIdentifier: String?,
-        refererUrl: Url?
-    ) {
-        return local.setBookmarkStatus(
-            url,
-            title,
-            subtitle,
-            appIcon,
-            appName,
-            iconUrl,
-            appManifestUrl,
-            expectedIdentifier,
-            refererUrl
-        )
-    }
-
-    override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        return local.getAllBookmarks()
-    }
-
-    override suspend fun removeBookmark(url: String) {
-       return local.removeBookmark(url)
-    }
-
 }

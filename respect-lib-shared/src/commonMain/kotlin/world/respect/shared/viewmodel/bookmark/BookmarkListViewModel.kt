@@ -29,10 +29,9 @@ class BookmarkListViewModel (
 
     init {
         viewModelScope.launch {
-            appDataSource.opdsDataSource
+            appDataSource.bookmarkDataSource
                 .getAllBookmarks()
                 .collect { bookmarks ->
-                    println("Bookmark ${bookmarks}")
                     _uiState.update {
                         it.copy(
                             bookmarks = bookmarks,
@@ -45,17 +44,15 @@ class BookmarkListViewModel (
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-            appDataSource.opdsDataSource.removeBookmark(bookmark.url)
+            appDataSource.bookmarkDataSource.removeBookmark(bookmark.url.toString())
         }
     }
-
     fun onClickBookmark(bookmark: Bookmark){
-        print("LearningUnit Detail bookmark list - ${bookmark.url} ${bookmark.appManifestUrl} ${bookmark.refererUrl} ${bookmark.expectedIdentifier}")
 
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(
-                    learningUnitManifestUrl = Url(bookmark.url),
+                    learningUnitManifestUrl = Url(bookmark.url.toString()),
                     appManifestUrl = Url(bookmark.appManifestUrl),
                     refererUrl = Url(
                         bookmark.refererUrl.toString()

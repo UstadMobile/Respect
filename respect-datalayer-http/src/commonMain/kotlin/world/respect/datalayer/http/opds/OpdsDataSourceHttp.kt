@@ -8,7 +8,6 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.opds.OpdsDataSource
-import world.respect.lib.opds.model.Bookmark
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 
@@ -40,31 +39,5 @@ class OpdsDataSourceHttp(
             dataLoadParams = params,
             validationHelper = publicationValidationHelper,
         )
-    }
-
-    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun setBookmarkStatus(
-        url: Url,
-        title: String?,
-        subtitle: String?,
-        appIcon: String,
-        appName: String,
-        iconUrl: String?,
-        appManifestUrl: Url,
-        expectedIdentifier: String?,
-        refererUrl: Url?
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun removeBookmark(url: String) {
-        TODO("Not yet implemented")
     }
 }

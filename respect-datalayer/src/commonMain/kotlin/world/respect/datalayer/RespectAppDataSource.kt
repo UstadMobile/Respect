@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
@@ -26,5 +27,7 @@ interface RespectAppDataSource {
     val schoolDirectoryDataSource: SchoolDirectoryDataSource
 
     val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource
+
+    val bookmarkDataSource: BookmarkDataSource
 
 }

@@ -6,7 +6,6 @@ import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadParams
@@ -18,13 +17,11 @@ import world.respect.datalayer.db.opds.adapters.OpdsFeedEntities
 import world.respect.datalayer.db.opds.adapters.OpdsPublicationEntities
 import world.respect.datalayer.db.opds.adapters.asEntities
 import world.respect.datalayer.db.opds.adapters.asModel
-import world.respect.datalayer.db.opds.entities.BookmarkEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.opds.OpdsDataSourceLocal
-import world.respect.lib.opds.model.Bookmark
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -175,69 +172,5 @@ class OpdsDataSourceDb(
                 ).asModel(json)
             } ?: NoDataLoadedState.notFound()
         }
-    }
-
-    override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
-        val urlHash: String = xxStringHasher.hash(url.toString()).toString()
-        return respectDatabase.getBookmarkDao()
-            .observeBookmarkStatus(urlHash)
-    }
-
-
-    override suspend fun setBookmarkStatus(
-        url: Url,
-        title: String?,
-        subtitle: String?,
-        appIcon: String,
-        appName: String,
-        iconUrl: String?,
-        appManifestUrl: Url,
-        expectedIdentifier: String?,
-        refererUrl: Url?
-    ) {
-
-        val exists = respectDatabase.getBookmarkDao()
-            .observeBookmarkStatus(url.toString())
-            .first()
-
-        if (exists) {
-            respectDatabase.getBookmarkDao().deleteBookmark(url.toString())
-        } else {
-            respectDatabase.getBookmarkDao().insertBookmark(
-                BookmarkEntity(
-                    urlHash = url.toString(),
-                    title = title,
-                    subtitle = subtitle,
-                    appIcon = appIcon,
-                    appName = appName,
-                    iconUrl = iconUrl,
-                    appManifestUrl = appManifestUrl.toString(),
-                    expectedIdentifier = expectedIdentifier,
-                    refererUrl = refererUrl?.toString()
-                )
-            )
-        }
-    }
-
-    override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        return respectDatabase.getBookmarkDao().observeAllBookmarks()
-            .map { entities ->
-                entities.map { entity ->
-                    Bookmark(
-                        url = entity.urlHash,
-                        title = entity.title,
-                        subtitle = entity.subtitle,
-                        appIcon = entity.appIcon,
-                        appName = entity.appName,
-                        iconUrl = entity.iconUrl,
-                        appManifestUrl = entity.appManifestUrl,
-                        expectedIdentifier = entity.expectedIdentifier,
-                        refererUrl = entity.refererUrl )
-                }
-            }
-    }
-
-    override suspend fun removeBookmark(url: String) {
-        respectDatabase.getBookmarkDao().deleteBookmark(url)
     }
 }

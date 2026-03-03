@@ -4,7 +4,6 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.lib.opds.model.Bookmark
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 
@@ -35,24 +34,5 @@ interface OpdsDataSource {
         referrerUrl: Url?,
         expectedPublicationId: String?,
     ): Flow<DataLoadState<OpdsPublication>>
-
-    fun observeBookmarkStatus(url: Url): Flow<Boolean>
-
-    suspend fun setBookmarkStatus(
-        url: Url,
-        title: String?,
-        subtitle: String?,
-        appIcon: String,
-        appName: String,
-        iconUrl: String?,
-        appManifestUrl: Url,
-        expectedIdentifier: String?,
-        refererUrl: Url?,
-    )
-
-    fun getAllBookmarks(): Flow<List<Bookmark>>
-
-    suspend fun removeBookmark(url: String)
-
 
 }

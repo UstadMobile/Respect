@@ -2,6 +2,8 @@ package world.respect.datalayer.db
 
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.RespectAppDataSourceLocal
+import world.respect.datalayer.bookmarks.BookmarkDataSource
+import world.respect.datalayer.db.bookmarks.BookmarkDataSourceDb
 import world.respect.datalayer.db.compatibleapps.CompatibleAppDataSourceDb
 import world.respect.datalayer.db.opds.OpdsDataSourceDb
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
@@ -36,5 +38,9 @@ class RespectAppDataSourceDb(
         SchoolDirectoryEntryDataSourceDb(
             respectAppDatabase, json, xxStringHasher
         )
+    }
+
+    override val bookmarkDataSource: BookmarkDataSource by lazy {
+        BookmarkDataSourceDb(respectAppDatabase, xxStringHasher)
     }
 }

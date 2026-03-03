@@ -110,7 +110,7 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.opdsDataSource.observeBookmarkStatus(route.learningUnitManifestUrl)
+            appDataSource.bookmarkDataSource.observeBookmarkStatus(route.learningUnitManifestUrl)
                 .collect { bookmarked ->
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }
@@ -193,7 +193,7 @@ class LearningUnitDetailViewModel(
 
     fun onClickBookmark() {
         viewModelScope.launch {
-            appDataSource.opdsDataSource.setBookmarkStatus(
+            appDataSource.bookmarkDataSource.store(
                 route.learningUnitManifestUrl,
                 uiState.value.lessonDetail?.metadata?.title?.getTitle(),
                 uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),

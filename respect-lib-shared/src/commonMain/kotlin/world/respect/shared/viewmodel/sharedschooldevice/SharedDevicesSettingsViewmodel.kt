@@ -44,6 +44,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsUiState.Companion.CURRENT_DEVICE_GUID
 import kotlin.time.Clock
 
 data class SharedDevicesSettingsUiState(
@@ -62,11 +63,9 @@ data class SharedDevicesSettingsUiState(
     val isLoadingPin: Boolean = true,
     val currentDeviceGuid: String? = null
 ) {
-    val isPinValid: Boolean
-        get() = pin.length >= PIN_LENGTH && pin.all { it.isDigit() }
-
     companion object {
         const val PIN_LENGTH = 4
+        const val CURRENT_DEVICE_GUID = "current_device_guid"
     }
 }
 
@@ -84,7 +83,7 @@ class SharedDevicesSettingsViewmodel(
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState(isLoadingPin = true))
     val uiState = _uiState.asStateFlow()
 
-    private val currentDeviceGuid = settings.getStringOrNull("current_device_guid")
+    private val currentDeviceGuid = settings.getStringOrNull(CURRENT_DEVICE_GUID)
 
     val schoolUrl = accountManager.activeAccount?.school?.self
         ?: throw IllegalStateException("No active school")
@@ -326,7 +325,7 @@ class SharedDevicesSettingsViewmodel(
     }
 
     fun onRemoveDevice(person: Person) {
-        settings.remove("current_device_guid")
+        settings.remove(CURRENT_DEVICE_GUID)
         viewModelScope.launch {
             schoolDataSource.personDataSource.store(
                 listOf(

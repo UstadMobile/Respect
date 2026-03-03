@@ -45,6 +45,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteUiState.Companion.CURRENT_DEVICE_GUID
 
 data class AcceptInviteUiState(
     val inviteInfo: RespectInviteInfo? = null,
@@ -57,6 +58,10 @@ data class AcceptInviteUiState(
 ) {
     val nextButtonEnabled: Boolean
         get() = inviteInfo?.invite != null
+
+    companion object {
+        const val CURRENT_DEVICE_GUID = "current_device_guid"
+    }
 }
 
 class AcceptInviteViewModel(
@@ -201,7 +206,7 @@ class AcceptInviteViewModel(
                     schoolUrl = route.schoolUrl,
                     useActiveUserAuth = _useActiveUserAuth
                 )
-                settings.putString("current_device_guid", personRegistered.guid)
+                settings.putString(CURRENT_DEVICE_GUID, personRegistered.guid)
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = if (personRegistered.status != PersonStatusEnum.PENDING_APPROVAL) {
@@ -218,7 +223,7 @@ class AcceptInviteViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        errorText = "Failed to enable shared device mode: ${e.message}".asUiText()
+                        errorText = e.message?.asUiText()
                     )
                 }
             }

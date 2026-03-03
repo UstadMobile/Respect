@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPersonAvatar
+import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.school.ClassDataSource
@@ -93,7 +94,7 @@ fun SelectClassScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(16.dp),
+                .defaultItemPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Scan button appears here when self-select is enabled

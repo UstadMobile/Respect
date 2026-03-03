@@ -24,7 +24,6 @@ data class TeacherAndAdminLoginUiState(
 class TeacherAndAdminLoginViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
-    private val respectAppDataSource: RespectAppDataSource
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(TeacherAndAdminLoginUiState())
@@ -51,14 +50,14 @@ class TeacherAndAdminLoginViewmodel(
             val schoolUrl = accountManager.activeAccount?.school?.self
             schoolUrl?.let { url ->
                 _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(LoginScreen.create(url,true))
+                    NavCommand.Navigate(LoginScreen.create(url, true))
                 )
             }
         }
     }
 
     fun verifyTeacherPin(enteredPin: String): Boolean {
-        // TODO
+        // TODO: Implement actual PIN verification logic
         return true
     }
 }

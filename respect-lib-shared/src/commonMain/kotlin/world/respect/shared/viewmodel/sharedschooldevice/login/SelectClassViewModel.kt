@@ -3,7 +3,6 @@ package world.respect.shared.viewmodel.sharedschooldevice.login
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -44,7 +43,6 @@ data class SelectClassUiState(
 class SelectClassViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    private val settings: Settings
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()

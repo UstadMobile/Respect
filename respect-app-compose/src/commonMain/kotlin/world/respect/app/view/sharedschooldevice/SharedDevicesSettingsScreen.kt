@@ -1,5 +1,6 @@
 package world.respect.app.view.sharedschooldevice
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,7 +60,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.paging.compose.collectAsLazyPagingItems
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
@@ -81,6 +84,7 @@ import world.respect.shared.generated.resources.no_shared_devices_available
 import world.respect.shared.generated.resources.no_shared_devices_available_info
 import world.respect.shared.generated.resources.pending_device_requests
 import world.respect.shared.generated.resources.phone_android_icon
+import world.respect.shared.generated.resources.qr_code_badge
 import world.respect.shared.generated.resources.save
 import world.respect.shared.generated.resources.set_pin
 import world.respect.shared.generated.resources.share_icon
@@ -89,6 +93,8 @@ import world.respect.shared.generated.resources.tablet_android_last_seen
 import world.respect.shared.generated.resources.teacher_admin_unlock_pin
 import world.respect.shared.generated.resources.this_device
 import world.respect.shared.generated.resources.this_device_enable
+import world.respect.shared.generated.resources.undraw_bookmarks_i66k__1__1
+import world.respect.shared.generated.resources.undraw_qr_code_scan_bewe
 import world.respect.shared.resources.UiText
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsUiState
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
@@ -167,7 +173,7 @@ private fun SharedDevicesSettingsContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .defaultItemPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
@@ -314,6 +320,11 @@ private fun SharedDevicesSettingsContent(
                             .padding(top = 34.dp)
                             .fillMaxWidth()
                     ) {
+                        Image(
+                            painter = painterResource(Res.drawable.undraw_bookmarks_i66k__1__1),
+                            contentDescription = stringResource(Res.string.qr_code_badge),
+                            modifier = Modifier
+                        )
                         Text(
                             text = stringResource(Res.string.no_shared_devices_available),
                             style = MaterialTheme.typography.bodyLarge,
@@ -560,7 +571,7 @@ fun PinEntryDialog(
                     modifier = Modifier
                         .testTag("pin_text")
                         .fillMaxWidth()
-                        .background(color = Color(0xFFEEEEEE))
+                        .background(color = MaterialTheme.colorScheme.surfaceVariant)
                         .focusRequester(focusRequester)
                         .padding(8.dp),
                     keyboardOptions = KeyboardOptions(

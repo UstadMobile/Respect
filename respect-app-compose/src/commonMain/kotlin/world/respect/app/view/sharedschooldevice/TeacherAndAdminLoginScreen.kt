@@ -1,6 +1,5 @@
 package world.respect.app.view.sharedschooldevice
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -76,24 +75,20 @@ fun TeacherAndAdminLoginScreen(
             modifier = Modifier
                 .testTag("Enter school device PIN")
                 .fillMaxWidth()
-                .background(color = Color(0xFFEEEEEE))
                 .focusRequester(focusRequester),
             isError = uiState.errorMessage != null,
-            // Remove the underline by setting indicator colors to transparent
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent,
-
-                // Keep other colors as needed
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 focusedTextColor = MaterialTheme.colorScheme.onSurface,
                 unfocusedTextColor = MaterialTheme.colorScheme.onSurface
             ),
-            supportingText = uiState.errorMessage?.let {
-                { Text(uiTextStringResource(it)) }
+            supportingText = uiState.errorMessage?.let { errorMessage ->
+                { Text(uiTextStringResource(errorMessage)) }
             }
         )
         Spacer(modifier = Modifier.height(4.dp))

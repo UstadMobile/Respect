@@ -82,17 +82,25 @@ class StudentListViewModel(
 
     fun onClickStudent(person: Person) {
         viewModelScope.launch {
-            accountManager.switchProfile(person.guid)
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    destination = if (person.status != PersonStatusEnum.PENDING_APPROVAL) {
-                        AssignmentList
-                    } else {
-                        WaitingForApproval()
-                    },
-                    clearBackStack = true
+            try {
+                accountManager.switchProfile(person.guid)
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = if (person.status != PersonStatusEnum.PENDING_APPROVAL) {
+                            AssignmentList
+                        } else {
+                            WaitingForApproval()
+                        },
+                        clearBackStack = true
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        error = e.message?.asUiText(),
+                    )
+                }
+            }
         }
     }
 }

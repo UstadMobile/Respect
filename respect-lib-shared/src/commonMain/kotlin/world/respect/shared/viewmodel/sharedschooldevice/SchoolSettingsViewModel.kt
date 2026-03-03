@@ -57,9 +57,6 @@ class SchoolSettingsViewModel(
                     schoolName = schoolName
                 )
             }
-        }
-
-        viewModelScope.launch {
             val deviceList = schoolDataSource.personDataSource.list(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(

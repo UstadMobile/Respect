@@ -447,4 +447,56 @@ class UstadCacheJvmTest {
     }
 
 
+    @Test
+    fun givenFileCachedAndStored_whenRequestHasCacheValidationHeaders_thenShouldRespond304NotModified() {
+        val testUrl = "http://www.server.com/file.png"
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = testUrl,
+            mimeType = "image/png",
+            expectContentEncoding = "identity"
+        ) {
+            val fullResponse = runBlocking {
+                cache.retrieve(iRequestBuilder(testUrl))
+            }
+
+            listOf(
+                Pair("If-None-Match", "etag"), Pair("If-Modified-Since", "Last-Modified")
+            ).forEach { (requestHeaderName, responseHeaderName) ->
+                assertEquals(
+                    expected = 304,
+                    actual = runBlocking {
+                        cache.retrieve(
+                            request = iRequestBuilder(testUrl) {
+                                header(
+                                    headerName = requestHeaderName,
+                                    headerVal = fullResponse!!.headers[responseHeaderName]!!
+                                )
+                            }
+                        )!!.responseCode
+                    }
+                )
+            }
+
+            assertEquals(
+                expected = 304,
+                actual = runBlocking {
+                    cache.retrieve(
+                        request = iRequestBuilder(testUrl) {
+                            header(
+                                headerName = "If-None-Match",
+                                headerVal = fullResponse!!.headers["etag"]!!
+                            )
+                            header(
+                                headerName = "If-Modified-Since",
+                                headerVal = fullResponse.headers["last-modified"]!!
+                            )
+                        }
+                    )!!.responseCode
+                }
+            )
+        }
+    }
+
+
 }

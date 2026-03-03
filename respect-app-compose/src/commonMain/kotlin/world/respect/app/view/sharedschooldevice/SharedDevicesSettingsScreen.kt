@@ -352,10 +352,13 @@ private fun SharedDevicesSettingsContent(
                                 )
 
                                 Text(
-                                    text = "${personDetails.getDeviceInfo()}, ${
-                                        stringResource(
-                                            Res.string.tablet_android_last_seen
-                                        )
+                                    text = personDetails.getDeviceInfo(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "${
+                                        stringResource(Res.string.tablet_android_last_seen)
                                     }: ${personDetails.lastModified.toString().toFormattedDate()}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant

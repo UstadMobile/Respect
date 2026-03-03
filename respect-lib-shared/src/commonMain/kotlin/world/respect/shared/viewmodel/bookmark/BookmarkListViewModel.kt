@@ -52,7 +52,7 @@ class BookmarkListViewModel (
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(
-                    learningUnitManifestUrl = Url(bookmark.url.toString()),
+                    learningUnitManifestUrl = Url(bookmark.learningUnitUrl),
                     appManifestUrl = Url(bookmark.appManifestUrl),
                     refererUrl = Url(
                         bookmark.refererUrl.toString()

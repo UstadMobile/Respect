@@ -2,6 +2,7 @@ package world.respect.lib.opds.model
 
 data class Bookmark(
     val url: Long,
+    val learningUnitUrl:String,
     val title: String?,
     val subtitle: String?,
     val appIcon: String,

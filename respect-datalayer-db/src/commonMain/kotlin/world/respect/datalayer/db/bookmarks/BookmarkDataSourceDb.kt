@@ -45,6 +45,7 @@ class BookmarkDataSourceDb(
             respectDatabase.getBookmarkDao().insertBookmark(
                 BookmarkEntity(
                     urlHash = urlHash,
+                    learningUnitUrl = url.toString(),
                     title = title,
                     subtitle = subtitle,
                     appIcon = appIcon,
@@ -64,6 +65,7 @@ class BookmarkDataSourceDb(
                 entities.map { entity ->
                     Bookmark(
                         url = entity.urlHash,
+                        learningUnitUrl = entity.learningUnitUrl,
                         title = entity.title,
                         subtitle = entity.subtitle,
                         appIcon = entity.appIcon,

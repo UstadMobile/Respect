@@ -7,6 +7,7 @@ import world.respect.datalayer.school.model.StatusEnum
 @Entity
 data class BookmarkEntity(
     @PrimaryKey val urlHash: Long,
+    val learningUnitUrl:String,
     val title: String?,
     val subtitle: String?,
     val appIcon: String,

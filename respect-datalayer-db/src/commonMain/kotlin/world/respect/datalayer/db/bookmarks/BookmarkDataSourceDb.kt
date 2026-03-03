@@ -10,6 +10,7 @@ import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.Bookmark
 import world.respect.libxxhash.XXStringHasher
 
@@ -27,24 +28,28 @@ class BookmarkDataSourceDb(
     }
 
     override suspend fun store(
-    url: Url,
-    title: String?,
-    subtitle: String?,
-    appIcon: String,
-    appName: String,
-    iconUrl: String?,
-    appManifestUrl: Url,
-    expectedIdentifier: String?,
-    refererUrl: Url?
+        url: Url,
+        title: String?,
+        subtitle: String?,
+        appIcon: String,
+        appName: String,
+        iconUrl: String?,
+        appManifestUrl: Url,
+        expectedIdentifier: String?,
+        refererUrl: Url?
     ) {
 
         val urlHash: Long = uidNumberMapper(url.toString())
+
         val exists = schoolDb.getBookmarkDao()
             .observeBookmarkStatus(urlHash)
             .first()
 
         if (exists) {
-            schoolDb.getBookmarkDao().deleteBookmark(urlHash)
+            schoolDb.getBookmarkDao().updateBookmark(
+                urlHash = urlHash,
+                status = StatusEnum.TO_BE_DELETED.flag
+            )
         } else {
             schoolDb.getBookmarkDao().insertBookmark(
                 BookmarkEntity(
@@ -57,7 +62,9 @@ class BookmarkDataSourceDb(
                     iconUrl = iconUrl,
                     appManifestUrl = appManifestUrl.toString(),
                     expectedIdentifier = expectedIdentifier,
-                    refererUrl = refererUrl?.toString()
+                    refererUrl = refererUrl?.toString(),
+                    status = StatusEnum.ACTIVE.flag,
+                    updatedAt = System.currentTimeMillis()
                 )
             )
         }
@@ -82,7 +89,15 @@ class BookmarkDataSourceDb(
             }
     }
 
-    override suspend fun removeBookmark(url: Long) {
+  /*  override suspend fun removeBookmark(url: Long) {
         schoolDb.getBookmarkDao().deleteBookmark(url)
-    }
+    }*/
+  override suspend fun removeBookmark(url: Long) {
+      schoolDb.getBookmarkDao()
+          .updateBookmark(
+              urlHash = url,
+              status = StatusEnum.TO_BE_DELETED.flag
+          )
+  }
+
 }

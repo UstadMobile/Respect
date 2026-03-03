@@ -6,18 +6,45 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
+import world.respect.datalayer.school.model.StatusEnum
 
 @Dao
 interface BookmarkDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookmark(bookmark: BookmarkEntity)
 
-    @Query("DELETE FROM BookmarkEntity WHERE urlHash = :urlHash")
-    suspend fun deleteBookmark(urlHash: Long)
+    @Query("""
+    UPDATE BookmarkEntity 
+    SET status = :status, updatedAt = :updatedAt 
+    WHERE urlHash = :urlHash
+""")
+    suspend fun updateBookmark(
+        urlHash: Long,
+        status: Int,
+        updatedAt: Long = System.currentTimeMillis()
+    )
 
-    @Query("SELECT EXISTS(SELECT 1 FROM BookmarkEntity WHERE urlHash = :urlHash)")
-    fun observeBookmarkStatus(urlHash: Long): Flow<Boolean>
 
-    @Query("SELECT * FROM BookmarkEntity ORDER BY updatedAt DESC")
-    fun observeAllBookmarks(): Flow<List<BookmarkEntity>>
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM BookmarkEntity 
+        WHERE urlHash = :urlHash 
+        AND status = :activeStatus
+    )
+""")
+    fun observeBookmarkStatus(
+        urlHash: Long,
+        activeStatus: Int = StatusEnum.ACTIVE.flag
+    ): Flow<Boolean>
+
+
+    @Query("""
+    SELECT * FROM BookmarkEntity 
+    WHERE status = :activeStatus
+    ORDER BY updatedAt DESC
+""")
+    fun observeAllBookmarks(
+        activeStatus: Int = StatusEnum.ACTIVE.flag
+    ): Flow<List<BookmarkEntity>>
+
 }

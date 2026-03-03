@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import org.koin.java.KoinJavaComponent.inject
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
@@ -17,11 +21,13 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
@@ -29,6 +35,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import kotlin.getValue
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
@@ -50,14 +57,19 @@ class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
+    private val accountManager: RespectAccountManager,
     private val ustadCache: UstadCache,
-) : RespectViewModel(savedStateHandle) {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
 
     val uiState = _uiState.asStateFlow()
 
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     init {
 
@@ -110,7 +122,7 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.bookmarkDataSource.observeBookmarkStatus(route.learningUnitManifestUrl)
+            schoolDataSource.bookmarkDataSource.observeBookmarkStatus(route.learningUnitManifestUrl)
                 .collect { bookmarked ->
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }
@@ -193,7 +205,7 @@ class LearningUnitDetailViewModel(
 
     fun onClickBookmark() {
         viewModelScope.launch {
-            appDataSource.bookmarkDataSource.store(
+            schoolDataSource.bookmarkDataSource.store(
                 route.learningUnitManifestUrl,
                 uiState.value.lessonDetail?.metadata?.title?.getTitle(),
                 uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),

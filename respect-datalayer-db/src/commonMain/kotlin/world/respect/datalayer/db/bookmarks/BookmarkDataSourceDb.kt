@@ -4,21 +4,25 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.db.RespectAppDatabase
+import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
 import world.respect.lib.opds.model.Bookmark
 import world.respect.libxxhash.XXStringHasher
 
 class BookmarkDataSourceDb(
-
-    private val respectDatabase: RespectAppDatabase,
-    private val xxStringHasher: XXStringHasher,
+    private val schoolDb: RespectSchoolDatabase,
+    private val uidNumberMapper: UidNumberMapper,
+    @Suppress("unused")
+    private val authenticatedUser: AuthenticatedUserPrincipalId,
 ): BookmarkDataSource {
 
     override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
-        val urlHash: Long = xxStringHasher.hash(url.toString())
-        return respectDatabase.getBookmarkDao()
+        val urlHash: Long = uidNumberMapper(url.toString())
+        return schoolDb.getBookmarkDao()
             .observeBookmarkStatus(urlHash)
     }
 
@@ -34,15 +38,15 @@ class BookmarkDataSourceDb(
     refererUrl: Url?
     ) {
 
-        val urlHash: Long = xxStringHasher.hash(url.toString())
-        val exists = respectDatabase.getBookmarkDao()
+        val urlHash: Long = uidNumberMapper(url.toString())
+        val exists = schoolDb.getBookmarkDao()
             .observeBookmarkStatus(urlHash)
             .first()
 
         if (exists) {
-            respectDatabase.getBookmarkDao().deleteBookmark(urlHash)
+            schoolDb.getBookmarkDao().deleteBookmark(urlHash)
         } else {
-            respectDatabase.getBookmarkDao().insertBookmark(
+            schoolDb.getBookmarkDao().insertBookmark(
                 BookmarkEntity(
                     urlHash = urlHash,
                     learningUnitUrl = url.toString(),
@@ -60,7 +64,7 @@ class BookmarkDataSourceDb(
     }
 
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        return respectDatabase.getBookmarkDao().observeAllBookmarks()
+        return schoolDb.getBookmarkDao().observeAllBookmarks()
             .map { entities ->
                 entities.map { entity ->
                     Bookmark(
@@ -79,6 +83,6 @@ class BookmarkDataSourceDb(
     }
 
     override suspend fun removeBookmark(url: Long) {
-        respectDatabase.getBookmarkDao().deleteBookmark(url)
+        schoolDb.getBookmarkDao().deleteBookmark(url)
     }
 }

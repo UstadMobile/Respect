@@ -2,7 +2,6 @@ package world.respect.datalayer.repository
 
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.RespectAppDataSourceLocal
-import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.opds.OpdsDataSource
 import world.respect.datalayer.repository.compatibleapps.CompatibleAppDataSourceRepository
@@ -38,9 +37,4 @@ class RespectAppDataSourceRepository(
             local.schoolDirectoryEntryDataSource, remote.schoolDirectoryEntryDataSource
         )
     }
-    override val bookmarkDataSource: BookmarkDataSource by lazy {
-        local.bookmarkDataSource
-    }
-
-
 }

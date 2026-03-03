@@ -13,23 +13,33 @@ import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.RespectViewModel
 import io.ktor.http.Url
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.SchoolDataSource
+import world.respect.shared.domain.account.RespectAccountManager
+import kotlin.getValue
 
 data class BookmarkListUiState(
     val bookmarks: List<Bookmark> = emptyList(),
     val isLoading: Boolean = true,
 
-)
-class BookmarkListViewModel (
+    )
+
+class BookmarkListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource
-) : RespectViewModel(savedStateHandle) {
+    private val accountManager: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val _uiState = MutableStateFlow(BookmarkListUiState())
 
     val uiState = _uiState.asStateFlow()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     init {
         viewModelScope.launch {
-            appDataSource.bookmarkDataSource
+            schoolDataSource.bookmarkDataSource
                 .getAllBookmarks()
                 .collect { bookmarks ->
                     _uiState.update {
@@ -44,10 +54,11 @@ class BookmarkListViewModel (
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-            appDataSource.bookmarkDataSource.removeBookmark(bookmark.url)
+            schoolDataSource.bookmarkDataSource.removeBookmark(bookmark.url)
         }
     }
-    fun onClickBookmark(bookmark: Bookmark){
+
+    fun onClickBookmark(bookmark: Bookmark) {
 
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(

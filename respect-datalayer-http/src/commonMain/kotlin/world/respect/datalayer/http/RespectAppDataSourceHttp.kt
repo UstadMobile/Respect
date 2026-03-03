@@ -3,7 +3,6 @@ package world.respect.datalayer.http
 import io.ktor.client.HttpClient
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.RespectAppDataSourceLocal
-import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSource
 import world.respect.datalayer.http.compatibleapps.CompatibleAppDataSourceHttp
 import world.respect.datalayer.http.opds.OpdsDataSourceHttp
@@ -43,8 +42,4 @@ class RespectAppDataSourceHttp(
             local = local,
         )
     }
-
-    override val bookmarkDataSource: BookmarkDataSource
-        get() = TODO("Not yet implemented")
-
 }

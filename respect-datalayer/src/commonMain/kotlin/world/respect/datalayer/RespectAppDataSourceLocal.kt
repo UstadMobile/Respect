@@ -1,6 +1,5 @@
 package world.respect.datalayer
 
-import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.compatibleapps.CompatibleAppsDataSourceLocal
 import world.respect.datalayer.opds.OpdsDataSourceLocal
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
@@ -19,5 +18,4 @@ interface RespectAppDataSourceLocal: RespectAppDataSource {
 
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSourceLocal
 
-    override val bookmarkDataSource: BookmarkDataSource
 }

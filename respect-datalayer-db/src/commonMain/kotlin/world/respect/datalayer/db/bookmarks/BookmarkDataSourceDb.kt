@@ -17,7 +17,7 @@ class BookmarkDataSourceDb(
 ): BookmarkDataSource {
 
     override fun observeBookmarkStatus(url: Url): Flow<Boolean> {
-        val urlHash: String = xxStringHasher.hash(url.toString()).toString()
+        val urlHash: Long = xxStringHasher.hash(url.toString())
         return respectDatabase.getBookmarkDao()
             .observeBookmarkStatus(urlHash)
     }
@@ -36,11 +36,11 @@ class BookmarkDataSourceDb(
 
         val urlHash: Long = xxStringHasher.hash(url.toString())
         val exists = respectDatabase.getBookmarkDao()
-            .observeBookmarkStatus(url.toString())
+            .observeBookmarkStatus(urlHash)
             .first()
 
         if (exists) {
-            respectDatabase.getBookmarkDao().deleteBookmark(url.toString())
+            respectDatabase.getBookmarkDao().deleteBookmark(urlHash)
         } else {
             respectDatabase.getBookmarkDao().insertBookmark(
                 BookmarkEntity(
@@ -78,7 +78,7 @@ class BookmarkDataSourceDb(
             }
     }
 
-    override suspend fun removeBookmark(url: String) {
+    override suspend fun removeBookmark(url: Long) {
         respectDatabase.getBookmarkDao().deleteBookmark(url)
     }
 }

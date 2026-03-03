@@ -22,5 +22,5 @@ interface BookmarkDataSource {
 
     fun getAllBookmarks(): Flow<List<Bookmark>>
 
-    suspend fun removeBookmark(url: String)
+    suspend fun removeBookmark(url: Long)
 }

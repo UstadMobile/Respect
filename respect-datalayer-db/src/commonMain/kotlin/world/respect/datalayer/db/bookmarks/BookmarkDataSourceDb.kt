@@ -26,40 +26,7 @@ class BookmarkDataSourceDb(
             .getBookmarkStatus(urlHash)
     }
 
-  /*  override suspend fun store(
-       bookmark: Bookmark
-    ) {
-
-        val urlHash: Long = uidNumberMapper(url.toString())
-
-        val exists = schoolDb.getBookmarkDao()
-            .getBookmarkStatus(urlHash).first()
-
-        if (exists) {
-            schoolDb.getBookmarkDao().updateBookmark(
-                urlHash = urlHash,
-                status = StatusEnum.TO_BE_DELETED.flag
-            )
-        } else {
-            schoolDb.getBookmarkDao().insertBookmark(
-                BookmarkEntity(
-                    urlHash = urlHash,
-                    learningUnitUrl = url.toString(),
-                    title = title,
-                    subtitle = subtitle,
-                    appIcon = appIcon,
-                    appName = appName,
-                    iconUrl = iconUrl,
-                    appManifestUrl = appManifestUrl.toString(),
-                    expectedIdentifier = expectedIdentifier.toString(),
-                    refererUrl = refererUrl.toString(),
-                    status = StatusEnum.ACTIVE.flag,
-                    updatedAt = System.currentTimeMillis()
-                )
-            )
-        }
-    }
-*/
+  
 
     override suspend fun store(bookmark: Bookmark) {
 

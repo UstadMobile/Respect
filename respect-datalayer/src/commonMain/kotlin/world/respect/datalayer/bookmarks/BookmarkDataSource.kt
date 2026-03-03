@@ -9,18 +9,10 @@ interface BookmarkDataSource {
     fun getBookmarkStatus(url: Url): Flow<Boolean>
 
     suspend fun store(
-        url: Url,
-        title: String?,
-        subtitle: String?,
-        appIcon: String,
-        appName: String,
-        iconUrl: String?,
-        appManifestUrl: Url,
-        expectedIdentifier: String?,
-        refererUrl: Url?,
+       bookmark: Bookmark
     )
 
     fun getAllBookmarks(): Flow<List<Bookmark>>
 
-    suspend fun removeBookmark(url: Long)
+    suspend fun removeBookmark(url: String)
 }

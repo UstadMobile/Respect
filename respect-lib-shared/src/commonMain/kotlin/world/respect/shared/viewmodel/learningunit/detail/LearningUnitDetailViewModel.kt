@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -25,6 +26,7 @@ import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
+import world.respect.lib.opds.model.Bookmark
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
@@ -204,16 +206,20 @@ class LearningUnitDetailViewModel(
 
     fun onClickBookmark() {
         viewModelScope.launch {
+
+            val bookmark = Bookmark(
+                learningUnitUrl = route.learningUnitManifestUrl.toString(),
+                title = uiState.value.lessonDetail?.metadata?.title?.getTitle(),
+                subtitle = uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
+                appIcon = uiState.value.appIcon.toString(),
+                appName = uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
+                iconUrl = uiState.value.lessonDetail?.images?.firstOrNull()?.href,
+                appManifestUrl = route.appManifestUrl.toString(),
+                expectedIdentifier = route.expectedIdentifier.orEmpty(),
+                refererUrl = route.refererUrl?.toString().orEmpty()
+            )
             schoolDataSource.bookmarkDataSource.store(
-                route.learningUnitManifestUrl,
-                uiState.value.lessonDetail?.metadata?.title?.getTitle(),
-                uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
-                uiState.value.appIcon.toString(),
-                uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
-                uiState.value.lessonDetail?.images?.firstOrNull()?.href,
-                route.appManifestUrl,
-                route.expectedIdentifier,
-                route.refererUrl
+               bookmark
             )
         }
     }

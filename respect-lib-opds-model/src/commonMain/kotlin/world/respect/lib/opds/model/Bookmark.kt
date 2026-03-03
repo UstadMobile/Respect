@@ -1,7 +1,8 @@
 package world.respect.lib.opds.model
 
+import com.eygraber.uri.Url
+
 data class Bookmark(
-    val url: Long,
     val learningUnitUrl:String,
     val title: String?,
     val subtitle: String?,

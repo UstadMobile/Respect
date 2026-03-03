@@ -8,7 +8,8 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
+import world.respect.datalayer.db.bookmarks.adapters.toBookmark
+import world.respect.datalayer.db.bookmarks.adapters.toBookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.Bookmark
 
@@ -25,16 +26,8 @@ class BookmarkDataSourceDb(
             .getBookmarkStatus(urlHash)
     }
 
-    override suspend fun store(
-        url: Url,
-        title: String?,
-        subtitle: String?,
-        appIcon: String,
-        appName: String,
-        iconUrl: String?,
-        appManifestUrl: Url,
-        expectedIdentifier: String?,
-        refererUrl: Url?
+  /*  override suspend fun store(
+       bookmark: Bookmark
     ) {
 
         val urlHash: Long = uidNumberMapper(url.toString())
@@ -66,30 +59,42 @@ class BookmarkDataSourceDb(
             )
         }
     }
+*/
+
+    override suspend fun store(bookmark: Bookmark) {
+
+        val dao = schoolDb.getBookmarkDao()
+
+        val urlHash = uidNumberMapper(bookmark.learningUnitUrl)
+
+        val exists = dao.getBookmarkStatus(urlHash).first()
+
+        if (exists) {
+            dao.updateBookmark(
+                urlHash = urlHash,
+                status = StatusEnum.TO_BE_DELETED.flag
+            )
+        } else {
+            dao.insertBookmark(
+                bookmark.toBookmarkEntity(urlHash)
+            )
+        }
+    }
 
     override fun getAllBookmarks(): Flow<List<Bookmark>> {
         return schoolDb.getBookmarkDao().getAllBookmarks()
             .map { entities ->
                 entities.map { entity ->
-                    Bookmark(
-                        url = entity.urlHash,
-                        learningUnitUrl = entity.learningUnitUrl,
-                        title = entity.title,
-                        subtitle = entity.subtitle,
-                        appIcon = entity.appIcon,
-                        appName = entity.appName,
-                        iconUrl = entity.iconUrl,
-                        appManifestUrl = entity.appManifestUrl,
-                        expectedIdentifier = entity.expectedIdentifier,
-                        refererUrl = entity.refererUrl )
+                    entity.toBookmark()
                 }
             }
     }
 
-  override suspend fun removeBookmark(url: Long) {
+  override suspend fun removeBookmark(url: String) {
+      val urlHash = uidNumberMapper(url)
       schoolDb.getBookmarkDao()
           .updateBookmark(
-              urlHash = url,
+              urlHash = urlHash,
               status = StatusEnum.TO_BE_DELETED.flag
           )
   }

@@ -26,7 +26,6 @@ class BookmarkDataSourceDb(
             .getBookmarkStatus(urlHash)
     }
 
-  
 
     override suspend fun store(bookmark: Bookmark) {
 

@@ -3,19 +3,19 @@ package world.respect.libutil.util.time
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
-fun LocalDate.atStartOfDayInMillisUtc(): Long {
-    return atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-}
+fun LocalDate.atStartOfDayInMillisUtc(): Long =
+    atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
 
 fun String.toFormattedDate(): String = try {
-    SimpleDateFormat("M/d/yyyy, HH:mm", Locale.getDefault()).apply {
-        timeZone = java.util.TimeZone.getDefault()
-    }.format(
-        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-            timeZone = java.util.TimeZone.getTimeZone("UTC")
-        }.parse(this)!!
-    )
-} catch (e: Exception) { this }
+    val dt = Instant.parse(this).toLocalDateTime(TimeZone.currentSystemDefault())
+    "${dt.month.number}/${dt.day}/${dt.year}, ${
+        dt.hour.toString().padStart(2, '0')
+    }:${dt.minute.toString().padStart(2, '0')}"
+} catch (e: Exception) {
+    println("Date parsing failed: ${e.message}")
+    this
+}

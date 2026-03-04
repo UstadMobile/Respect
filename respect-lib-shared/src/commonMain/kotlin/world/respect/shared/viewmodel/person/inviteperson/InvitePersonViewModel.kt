@@ -4,9 +4,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.delay
-import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
-import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
-import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -39,12 +36,14 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
+import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_shared_school_device
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
 import world.respect.shared.navigation.InvitePerson
-import world.respect.shared.navigation.InvitePerson.InvitePersonOptions
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState

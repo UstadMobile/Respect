@@ -209,6 +209,7 @@ fun RespectAppBar(
                         )
                     }
                 }
+
                 if (appUiState.settingsIconVisible == true) {
                     IconButton(
                         onClick = appUiState.onClickSettings ?: {},

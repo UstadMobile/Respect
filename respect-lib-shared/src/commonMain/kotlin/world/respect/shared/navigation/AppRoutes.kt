@@ -780,21 +780,18 @@ data object SharedDevicesSettings : RespectAppRoute
 
 @Serializable
 data class SelectClass(
-    val isSelfSelectClassAndName: Boolean = true,
     val deviceGuid: String
 ) : RespectAppRoute {
 
     companion object {
         fun create(
-            isSelfSelectClassAndName: Boolean = true,
-            redeemRequest: RespectRedeemInviteRequest? = null,
             deviceGuid: String
         ) = SelectClass(
-            isSelfSelectClassAndName = isSelfSelectClassAndName,
             deviceGuid = deviceGuid
         )
     }
 }
+
 @Serializable
 data object TeacherAndAdminLogin : RespectAppRoute
 
@@ -802,13 +799,12 @@ data object TeacherAndAdminLogin : RespectAppRoute
 data class StudentList(
     val className: String,
     val guid: String,
-): RespectAppRoute {
+) : RespectAppRoute {
 
     companion object {
         fun create(
             className: String,
             guid: String,
-            redeemRequest: RespectRedeemInviteRequest? = null
         ) = StudentList(
             className = className,
             guid = guid,

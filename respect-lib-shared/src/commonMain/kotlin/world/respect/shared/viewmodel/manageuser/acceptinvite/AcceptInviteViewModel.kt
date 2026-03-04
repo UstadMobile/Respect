@@ -211,7 +211,6 @@ class AcceptInviteViewModel(
                     NavCommand.Navigate(
                         destination = if (personRegistered.status != PersonStatusEnum.PENDING_APPROVAL) {
                             SelectClass(
-                                isSelfSelectClassAndName = route.isSelfSelectClassAndName,
                                 deviceGuid = personRegistered.guid
                             )
                         } else {

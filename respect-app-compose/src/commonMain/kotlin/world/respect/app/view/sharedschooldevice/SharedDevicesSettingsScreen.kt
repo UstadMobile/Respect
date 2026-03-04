@@ -51,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -94,7 +93,6 @@ import world.respect.shared.generated.resources.teacher_admin_unlock_pin
 import world.respect.shared.generated.resources.this_device
 import world.respect.shared.generated.resources.this_device_enable
 import world.respect.shared.generated.resources.undraw_bookmarks_i66k__1__1
-import world.respect.shared.generated.resources.undraw_qr_code_scan_bewe
 import world.respect.shared.resources.UiText
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsUiState
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel

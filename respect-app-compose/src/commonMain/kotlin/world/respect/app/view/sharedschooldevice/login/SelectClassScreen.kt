@@ -97,7 +97,7 @@ fun SelectClassScreen(
                 .defaultItemPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Scan button appears here when self-select is enabled
+            // Scan button appears bottom when self-select is enabled
             if (uiState.isSelfSelectClassAndName) {
                 OutlinedButton(
                     onClick = onClickScanQrCode,

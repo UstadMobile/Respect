@@ -282,6 +282,14 @@ class RespectAccountManager(
 
     }
 
+    /**
+     * Logs in a user on a shared device by switching to an existing profile without creating a new account.
+     *
+     * This function is specifically designed for shared device scenarios where:
+     * - Users scan a QR code to access the device
+     * - We want to switch to their existing profile rather than creating a new account
+     * - The device remains shared but the active user context changes
+     **/
     suspend fun loginAsProfileOnSharedDevice(
         credential: RespectCredential,
         schoolUrl: Url,

@@ -752,6 +752,7 @@ val appKoinModule = module {
                 )
             )
         }
+
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
@@ -789,12 +790,7 @@ val appKoinModule = module {
             )
         }
 
-        scoped<CreateInviteUseCase> {
-            CreateInviteUseCaseDb(
-                schoolDb = get(),
-                uidNumberMapper = get(),
-            )
-        }
+
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,

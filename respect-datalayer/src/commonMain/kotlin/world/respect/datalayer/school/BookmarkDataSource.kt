@@ -1,4 +1,4 @@
-package world.respect.datalayer.bookmarks
+package world.respect.datalayer.school
 
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow

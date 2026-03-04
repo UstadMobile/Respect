@@ -63,7 +63,7 @@ fun BookmarkListScreen(
 fun BookmarkListScreen(
     uiState: BookmarkListUiState,
     onClickRemoveBookmark: (Bookmark) -> Unit,
-    onClickBookmark:(Bookmark) -> Unit
+    onClickBookmark: (Bookmark) -> Unit
 ) {
 
     when {
@@ -76,7 +76,11 @@ fun BookmarkListScreen(
         }
 
         else -> {
-            BookmarkListContent(uiState.bookmarks,onClickRemoveBookmark,onClickBookmark)
+            BookmarkListContent(
+                uiState.bookmarks,
+                onClickRemoveBookmark,
+                onClickBookmark
+            )
         }
     }
 }

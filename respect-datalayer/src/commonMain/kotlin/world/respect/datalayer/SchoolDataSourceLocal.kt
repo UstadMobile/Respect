@@ -1,6 +1,6 @@
 package world.respect.datalayer
 
-import world.respect.datalayer.bookmarks.BookmarkDataSource
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal

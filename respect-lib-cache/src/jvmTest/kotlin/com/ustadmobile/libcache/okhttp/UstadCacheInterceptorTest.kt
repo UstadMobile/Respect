@@ -208,6 +208,7 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
                 override fun dispatch(request: RecordedRequest): MockResponse {
                     val response = super.dispatch(request)
                         .setHeader("etag", etagVal)
+                        .setHeader("cache-control", "must-revalidate")
                     return if(request.headers["if-none-match"] == etagVal) {
                         //Validation response will not normally contain content-length and content-type headers
                         response.setBody("").setResponseCode(304)
@@ -222,7 +223,9 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
         }
 
         val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder().url(requestUrl).build()
+        val request = Request.Builder().url(requestUrl)
+            .addHeader("cache-control", "must-revalidate")
+            .build()
         val initResponseBytes = okHttpClient.newCall(request).execute().use {
             it.body!!.bytes()
         }

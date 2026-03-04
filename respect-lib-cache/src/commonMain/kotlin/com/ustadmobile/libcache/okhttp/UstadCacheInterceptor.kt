@@ -20,8 +20,10 @@ import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
+import com.ustadmobile.libcache.headers.hasCacheValidators
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
+import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.response.HttpPathResponse
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.FileSystem
@@ -347,8 +349,24 @@ class UstadCacheInterceptor(
                         )
                     }
 
-                    cacheResponse.asOkHttpResponse().also {
-                        logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")
+                    if(cacheRequest.headers.hasCacheValidators()) {
+                        //the underlying request had cache validation info, so we can return a
+                        //304 not modified response directly
+                        ByteArrayResponse(
+                            request = cacheRequest,
+                            mimeType = cacheResponse.headers["content-type"] ?: "application/octet-stream",
+                            responseCode = 304,
+                            body = ByteArray(0),
+                        ).asOkHttpResponse().also {
+                            logger?.d(
+                                tag = LOG_TAG,
+                                message = "$logPrefix validated : returning 304 as per validation params ${it.logSummary()}"
+                            )
+                        }
+                    }else {
+                        cacheResponse.asOkHttpResponse().also {
+                            logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")
+                        }
                     }
                 }else {
                     logger?.d(LOG_TAG, "$logPrefix MISS(invalid) $url")

@@ -18,34 +18,39 @@ interface BookmarkDao {
         UPDATE BookmarkEntity
            SET bStatus = :status,
                bLastModified = :lastModified
-         WHERE bUidNum = :uidNum
+         WHERE bPersonUid = :personUid
+           AND bLearningUnitManifestUrl = :manifestUrl
     """)
     suspend fun updateStatus(
-        uidNum: Long,
+        personUid: String,
+        manifestUrl: String,
         status: StatusEnum,
         lastModified: Instant
     )
 
+
     @Query("""
         SELECT EXISTS(
-            SELECT 1 FROM BookmarkEntity
-             WHERE bUidNum = :uidNum
-               AND bStatus = :activeStatus
-        )
-    """)
-    fun observeBookmarkStatusByUid(
-        uidNum: Long,
+        SELECT 1 FROM BookmarkEntity
+         WHERE bPersonUid = :personUid
+           AND bLearningUnitManifestUrl = :manifestUrl
+           AND bStatus = :activeStatus
+    )
+""")
+    fun observeBookmarkStatus(
+        personUid: String,
+        manifestUrl: String,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): Flow<Boolean>
 
     @Query("""
         SELECT * FROM BookmarkEntity
-         WHERE bPersonUidNum = :personUidNum
+         WHERE bPersonUid = :personUid
            AND bStatus = :activeStatus
-         ORDER BY bLastModified DESC
-    """)
+      ORDER BY bLastModified DESC
+   """)
     fun observeBookmarks(
-        personUidNum: Long,
+        personUid: String,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): Flow<List<BookmarkEntity>>
 }

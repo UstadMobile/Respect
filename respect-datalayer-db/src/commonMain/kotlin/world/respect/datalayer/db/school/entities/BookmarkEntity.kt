@@ -1,29 +1,24 @@
 package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import world.respect.datalayer.school.model.StatusEnum
-import kotlin.time.Clock
 import kotlin.time.Instant
 
-@Entity
+@Entity(
+    primaryKeys = ["bPersonUid", "bLearningUnitManifestUrl"]
+)
 data class BookmarkEntity(
-
-    val bUid: String,
-
-    @PrimaryKey
-    val bUidNum: Long,
 
     val bStatus: StatusEnum = StatusEnum.ACTIVE,
 
-    val bLastModified: Instant = Clock.System.now(),
+    val bLastModified: Instant,
 
-    val bStored: Instant = Clock.System.now(),
+    val bStored: Instant,
 
-    val bPersonUid: String,
-    val bPersonUidNum: Long,
+    val bPersonUid: String?=null,
 
     val bLearningUnitManifestUrl: String,
+
     val bTitle: String? = null,
     val bSubtitle: String? = null,
 

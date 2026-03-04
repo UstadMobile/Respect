@@ -208,23 +208,21 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
 
             val now = Clock.System.now()
-            val personUid = accountManager.activeAccount?.userGuid ?: return@launch
+            val personUid = accountManager.activeAccount?.userGuid
             val manifestUrl = route.learningUnitManifestUrl.toString()
-            val uid = "$personUid|$manifestUrl"
 
             val isBookmarked = uiState.value.isBookmarked
 
             if (isBookmarked) {
 
                 schoolDataSource.bookmarkDataSource.removeBookmark(
-                    uid = uid,
+                    manifestUrl = manifestUrl,
                     lastModified = now
                 )
 
             } else {
 
                 val bookmark = Bookmark(
-                    uid = uid,
                     status = StatusEnum.ACTIVE,
                     lastModified = now,
                     stored = now,

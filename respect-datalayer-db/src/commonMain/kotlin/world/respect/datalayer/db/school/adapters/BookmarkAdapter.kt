@@ -1,14 +1,10 @@
 package world.respect.datalayer.db.school.adapters
 
-import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.BookmarkEntity
-import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.Bookmark
-
 
 fun BookmarkEntity.toModel(): Bookmark {
     return Bookmark(
-        uid = bUid,
         status = bStatus,
         lastModified = bLastModified,
         stored = bStored,
@@ -25,19 +21,12 @@ fun BookmarkEntity.toModel(): Bookmark {
     )
 }
 
-
-fun Bookmark.toEntities(
-    uidNumberMapper: UidNumberMapper
-): BookmarkEntity {
-
+fun Bookmark.toEntities(): BookmarkEntity {
     return BookmarkEntity(
-        bUid = uid,
-        bUidNum = uidNumberMapper(uid),
         bStatus = status,
         bLastModified = lastModified,
         bStored = stored,
         bPersonUid = personUid,
-        bPersonUidNum = uidNumberMapper(personUid),
         bLearningUnitManifestUrl = learningUnitManifestUrl,
         bTitle = title,
         bSubtitle = subtitle,

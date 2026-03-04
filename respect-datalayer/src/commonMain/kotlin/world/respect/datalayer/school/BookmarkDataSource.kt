@@ -12,7 +12,7 @@ interface BookmarkDataSource {
     suspend fun store(bookmark: Bookmark)
 
     suspend fun removeBookmark(
-        uid: String,
+        manifestUrl: String,
         lastModified: Instant
     )
 

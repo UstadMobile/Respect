@@ -6,11 +6,10 @@ import kotlin.time.Instant
 
 @Serializable
 data class Bookmark(
-    val uid: String,
     val status: StatusEnum = StatusEnum.ACTIVE,
     override val lastModified: Instant,
     override val stored: Instant,
-    val personUid: String,
+    val personUid: String? = null,
     val learningUnitManifestUrl: String,
     val title: String? = null,
     val subtitle: String? = null,

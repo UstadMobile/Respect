@@ -2,7 +2,6 @@ package world.respect.datalayer.repository
 
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
-import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
@@ -14,6 +13,7 @@ import world.respect.datalayer.repository.school.PersonPasswordDataSourceReposit
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource

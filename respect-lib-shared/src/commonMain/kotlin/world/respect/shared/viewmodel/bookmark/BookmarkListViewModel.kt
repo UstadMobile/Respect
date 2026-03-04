@@ -56,7 +56,7 @@ class BookmarkListViewModel(
         viewModelScope.launch {
 
             schoolDataSource.bookmarkDataSource.removeBookmark(
-                uid = bookmark.uid,
+                manifestUrl = bookmark.learningUnitManifestUrl,
                 lastModified = Clock.System.now()
             )
         }

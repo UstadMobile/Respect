@@ -11,7 +11,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toBookmark
 import world.respect.datalayer.db.school.adapters.toBookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
-import world.respect.lib.opds.model.Bookmark
+import world.respect.datalayer.school.model.Bookmark
 
 class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,

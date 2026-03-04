@@ -25,7 +25,7 @@ import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
-import world.respect.lib.opds.model.Bookmark
+import world.respect.datalayer.school.model.Bookmark
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase

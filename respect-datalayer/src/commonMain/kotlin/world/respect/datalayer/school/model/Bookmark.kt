@@ -1,4 +1,4 @@
-package world.respect.lib.opds.model
+package world.respect.datalayer.school.model
 
 data class Bookmark(
     val learningUnitManifestUrl:String,

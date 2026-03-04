@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.lib.opds.model.Bookmark
+import world.respect.datalayer.school.model.Bookmark
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.RespectViewModel

@@ -38,7 +38,7 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
-import world.respect.lib.opds.model.Bookmark
+import world.respect.datalayer.school.model.Bookmark
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark

@@ -2,7 +2,7 @@ package world.respect.datalayer.bookmarks
 
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
-import world.respect.lib.opds.model.Bookmark
+import world.respect.datalayer.school.model.Bookmark
 
 interface BookmarkDataSource {
 

@@ -1,6 +1,6 @@
-package world.respect.datalayer.db.bookmarks.adapters
+package world.respect.datalayer.db.school.adapters
 
-import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
+import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.Bookmark
 

@@ -5,8 +5,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
-import world.respect.datalayer.db.bookmarks.daos.BookmarkDao
-import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
+import world.respect.datalayer.db.school.daos.BookmarkDao
+import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.db.opds.daos.PersonPasskeyEntityDao
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao

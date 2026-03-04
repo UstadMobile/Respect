@@ -1,16 +1,16 @@
-package world.respect.datalayer.db.bookmarks.daos
+package world.respect.datalayer.db.school.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.bookmarks.entities.BookmarkEntity
+import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 
 @Dao
 interface BookmarkDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insertBookmark(bookmark: BookmarkEntity)
 
     @Query("""

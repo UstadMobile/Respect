@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.bookmarks
+package world.respect.datalayer.db.school
 
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
@@ -8,8 +8,8 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.bookmarks.BookmarkDataSource
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.bookmarks.adapters.toBookmark
-import world.respect.datalayer.db.bookmarks.adapters.toBookmarkEntity
+import world.respect.datalayer.db.school.adapters.toBookmark
+import world.respect.datalayer.db.school.adapters.toBookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.Bookmark
 

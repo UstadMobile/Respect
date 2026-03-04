@@ -19,7 +19,7 @@ import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.enableclassname.GetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.GetSharedDeviceSelfSelectUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.select_class

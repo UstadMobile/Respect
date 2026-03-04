@@ -62,10 +62,10 @@ import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
-import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
-import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCaseImpl
-import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
-import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase

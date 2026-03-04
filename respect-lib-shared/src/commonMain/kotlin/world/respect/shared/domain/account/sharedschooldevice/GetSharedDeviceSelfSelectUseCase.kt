@@ -1,4 +1,4 @@
-package world.respect.shared.domain.account.enableclassname
+package world.respect.shared.domain.account.sharedschooldevice
 
 import com.russhwolf.settings.Settings
 

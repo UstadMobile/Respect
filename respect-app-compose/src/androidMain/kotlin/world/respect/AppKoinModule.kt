@@ -252,14 +252,12 @@ import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsVi
 import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
 import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
-import world.respect.shared.domain.account.invite.CreateInviteUseCase
-import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
-import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
-import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCaseImpl
-import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
-import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCaseImpl
-import world.respect.shared.domain.account.enableclassname.GetSharedDeviceSelfSelectUseCase
-import world.respect.shared.domain.account.enableclassname.SetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.GetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.SetSharedDeviceSelfSelectUseCase
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"

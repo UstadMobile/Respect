@@ -1,4 +1,4 @@
-package world.respect.shared.domain.account.setpin
+package world.respect.shared.domain.account.sharedschooldevice.setpin
 
 import org.koin.core.component.KoinComponent
 import kotlin.random.Random

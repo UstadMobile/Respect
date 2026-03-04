@@ -25,11 +25,11 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.enableclassname.GetSharedDeviceSelfSelectUseCase
-import world.respect.shared.domain.account.enableclassname.SetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.GetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.SetSharedDeviceSelfSelectUseCase
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
-import world.respect.shared.domain.account.setpin.GetSharedDevicePINUseCase
-import world.respect.shared.domain.account.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.device

@@ -12,100 +12,40 @@ import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.Bookmark
-/*
-
-class BookmarkDataSourceDb(
-    private val schoolDb: RespectSchoolDatabase,
-    private val uidNumberMapper: UidNumberMapper,
-    @Suppress("unused")
-    private val authenticatedUser: AuthenticatedUserPrincipalId,
-): BookmarkDataSource {
-
-    val personUidNum = uidNumberMapper(authenticatedUser.guid)
-
-    override fun getBookmarkStatus(url: Url): Flow<Boolean> {
-
-        val urlHash: Long = uidNumberMapper(url.toString())
-
-        return schoolDb.getBookmarkDao()
-            .getBookmarkStatus(personUidNum,urlHash)
-    }
-
-
-    override suspend fun store(bookmark: Bookmark) {
-
-        val dao = schoolDb.getBookmarkDao()
-        val urlHash = uidNumberMapper(bookmark.learningUnitManifestUrl)
-
-        val isActive = dao.getBookmarkStatus(
-            personUidNum = personUidNum,
-            urlHash = urlHash
-        ).first()
-
-        if (isActive) {
-            // Soft delete
-            dao.updateBookmark(
-                personUidNum = personUidNum,
-                urlHash = urlHash,
-                status = StatusEnum.TO_BE_DELETED.flag
-            )
-        } else {
-            // Insert OR Reactivate
-            dao.insertBookmark(
-                bookmark.toEntities(uidNumberMapper)
-            )
-        }
-    }
-
-    override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        return schoolDb.getBookmarkDao().getAllBookmarks(personUidNum)
-            .map { entities ->
-                entities.map { entity ->
-                    entity.toModel()
-                }
-            }
-    }
-
-  override suspend fun removeBookmark(url: String) {
-      val urlHash = uidNumberMapper(url)
-      schoolDb.getBookmarkDao()
-          .updateBookmark(
-              personUidNum=personUidNum,
-              urlHash = urlHash,
-              status = StatusEnum.TO_BE_DELETED.flag
-          )
-  }
-}
-*/
+import kotlin.time.Instant
 class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : BookmarkDataSource {
 
-    private val personUidNum = uidNumberMapper(authenticatedUser.guid)
+    private val personUid: String = authenticatedUser.guid
+    private val personUidNum: Long = uidNumberMapper(personUid)
 
     override fun getBookmarkStatus(url: Url): Flow<Boolean> {
-        val urlHash = uidNumberMapper(url.toString())
+        val manifestUrl = url.toString()
+        val uid = "$personUid|$manifestUrl"
+        val uidNum = uidNumberMapper(uid)
+
         return schoolDb.getBookmarkDao()
-            .observeBookmarkStatus(personUidNum, urlHash)
+            .observeBookmarkStatusByUid(uidNum)
     }
 
     override suspend fun store(bookmark: Bookmark) {
-
         val entity = bookmark.toEntities(uidNumberMapper)
-
         schoolDb.getBookmarkDao().upsert(entity)
     }
 
-    override suspend fun removeBookmark(url: String) {
-
-        val urlHash = uidNumberMapper(url)
+    override suspend fun removeBookmark(
+        uid: String,
+        lastModified: Instant
+    ) {
+        val uidNum = uidNumberMapper(uid)
 
         schoolDb.getBookmarkDao().updateStatus(
-            personUidNum = personUidNum,
-            urlHash = urlHash,
-            status = StatusEnum.TO_BE_DELETED.flag
+            uidNum = uidNum,
+            status = StatusEnum.TO_BE_DELETED,
+            lastModified = lastModified
         )
     }
 
@@ -114,5 +54,4 @@ class BookmarkDataSourceDb(
             .observeBookmarks(personUidNum)
             .map { list -> list.map { it.toModel() } }
     }
-
 }

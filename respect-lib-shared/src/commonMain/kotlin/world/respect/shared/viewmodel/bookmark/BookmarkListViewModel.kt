@@ -18,6 +18,7 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import kotlin.getValue
+import kotlin.time.Clock
 
 data class BookmarkListUiState(
     val bookmarks: List<Bookmark> = emptyList(),
@@ -53,10 +54,13 @@ class BookmarkListViewModel(
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-            schoolDataSource.bookmarkDataSource.removeBookmark(bookmark.learningUnitManifestUrl)
+
+            schoolDataSource.bookmarkDataSource.removeBookmark(
+                uid = bookmark.uid,
+                lastModified = Clock.System.now()
+            )
         }
     }
-
     fun onClickBookmark(bookmark: Bookmark) {
 
         _navCommandFlow.tryEmit(
@@ -65,7 +69,7 @@ class BookmarkListViewModel(
                     learningUnitManifestUrl = Url(bookmark.learningUnitManifestUrl),
                     appManifestUrl = Url(bookmark.appManifestUrl),
                     refererUrl = Url(
-                        bookmark.refererUrl.toString()
+                        bookmark.refererUrl
                     ),
                     expectedIdentifier = bookmark.expectedIdentifier
                 )

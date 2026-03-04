@@ -8,6 +8,11 @@ import world.respect.datalayer.school.model.Bookmark
 
 fun BookmarkEntity.toModel(): Bookmark {
     return Bookmark(
+        uid = bUid,
+        status = bStatus,
+        lastModified = bLastModified,
+        stored = bStored,
+        personUid = bPersonUid,
         learningUnitManifestUrl = bLearningUnitManifestUrl,
         title = bTitle,
         subtitle = bSubtitle,
@@ -17,17 +22,22 @@ fun BookmarkEntity.toModel(): Bookmark {
         appManifestUrl = bAppManifestUrl,
         expectedIdentifier = bExpectedIdentifier,
         refererUrl = bRefererUrl,
-        personUid = bPersonUid
     )
 }
+
 
 fun Bookmark.toEntities(
     uidNumberMapper: UidNumberMapper
 ): BookmarkEntity {
+
     return BookmarkEntity(
-        bUrlHash = uidNumberMapper(learningUnitManifestUrl),
+        bUid = uid,
+        bUidNum = uidNumberMapper(uid),
+        bStatus = status,
+        bLastModified = lastModified,
+        bStored = stored,
         bPersonUid = personUid,
-        bPersonUidNum = uidNumberMapper(personUid) ,
+        bPersonUidNum = uidNumberMapper(personUid),
         bLearningUnitManifestUrl = learningUnitManifestUrl,
         bTitle = title,
         bSubtitle = subtitle,
@@ -37,10 +47,5 @@ fun Bookmark.toEntities(
         bAppManifestUrl = appManifestUrl,
         bExpectedIdentifier = expectedIdentifier,
         bRefererUrl = refererUrl,
-        bStatus = StatusEnum.ACTIVE.flag,
-
-
-        bCreatedAt = System.currentTimeMillis(),
-        bUpdatedAt = System.currentTimeMillis()
     )
 }

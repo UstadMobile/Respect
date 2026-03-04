@@ -12,6 +12,7 @@ import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.Bookmark
+/*
 
 class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -74,5 +75,44 @@ class BookmarkDataSourceDb(
               status = StatusEnum.TO_BE_DELETED.flag
           )
   }
+}
+*/
+class BookmarkDataSourceDb(
+    private val schoolDb: RespectSchoolDatabase,
+    private val uidNumberMapper: UidNumberMapper,
+    private val authenticatedUser: AuthenticatedUserPrincipalId,
+) : BookmarkDataSource {
+
+    private val personUidNum = uidNumberMapper(authenticatedUser.guid)
+
+    override fun getBookmarkStatus(url: Url): Flow<Boolean> {
+        val urlHash = uidNumberMapper(url.toString())
+        return schoolDb.getBookmarkDao()
+            .observeBookmarkStatus(personUidNum, urlHash)
+    }
+
+    override suspend fun store(bookmark: Bookmark) {
+
+        val entity = bookmark.toEntities(uidNumberMapper)
+
+        schoolDb.getBookmarkDao().upsert(entity)
+    }
+
+    override suspend fun removeBookmark(url: String) {
+
+        val urlHash = uidNumberMapper(url)
+
+        schoolDb.getBookmarkDao().updateStatus(
+            personUidNum = personUidNum,
+            urlHash = urlHash,
+            status = StatusEnum.TO_BE_DELETED.flag
+        )
+    }
+
+    override fun getAllBookmarks(): Flow<List<Bookmark>> {
+        return schoolDb.getBookmarkDao()
+            .observeBookmarks(personUidNum)
+            .map { list -> list.map { it.toModel() } }
+    }
 
 }

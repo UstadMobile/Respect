@@ -12,6 +12,7 @@ data class BookmarkEntity(
     val bPersonUid: String,
     val bPersonUidNum: Long,
     val bLearningUnitManifestUrl:String,
+
     val bTitle: String?,
     val bSubtitle: String?,
     val bAppIcon: String,

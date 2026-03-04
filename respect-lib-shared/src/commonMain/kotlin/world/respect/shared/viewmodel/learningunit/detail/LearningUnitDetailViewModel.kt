@@ -202,26 +202,32 @@ class LearningUnitDetailViewModel(
             )
         )
     }
-
     fun onClickBookmark() {
         viewModelScope.launch {
 
-            val bookmark = Bookmark(
-                learningUnitManifestUrl = route.learningUnitManifestUrl.toString(),
-                title = uiState.value.lessonDetail?.metadata?.title?.getTitle(),
-                subtitle = uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
-                appIcon = uiState.value.appIcon.toString(),
-                appName = uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
-                iconUrl = uiState.value.lessonDetail?.images?.firstOrNull()?.href,
-                appManifestUrl = route.appManifestUrl.toString(),
-                expectedIdentifier = route.expectedIdentifier.orEmpty(),
-                refererUrl = route.refererUrl?.toString().orEmpty(),
-                personUid = accountManager.activeAccount?.userGuid ?: ""
-            )
-            schoolDataSource.bookmarkDataSource.store(
-               bookmark
-            )
+            val isBookmarked = uiState.value.isBookmarked
+
+            if (isBookmarked) {
+                schoolDataSource.bookmarkDataSource
+                    .removeBookmark(route.learningUnitManifestUrl.toString())
+            } else {
+
+                val bookmark = Bookmark(
+                    learningUnitManifestUrl = route.learningUnitManifestUrl.toString(),
+                    title = uiState.value.lessonDetail?.metadata?.title?.getTitle(),
+                    subtitle = uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
+                    appIcon = uiState.value.appIcon.toString(),
+                    appName = uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
+                    iconUrl = uiState.value.lessonDetail?.images?.firstOrNull()?.href,
+                    appManifestUrl = route.appManifestUrl.toString(),
+                    expectedIdentifier = route.expectedIdentifier.orEmpty(),
+                    refererUrl = route.refererUrl?.toString().orEmpty(),
+                    personUid = accountManager.activeAccount?.userGuid ?: ""
+                )
+
+                schoolDataSource.bookmarkDataSource
+                    .store(bookmark)
+            }
         }
     }
-
 }

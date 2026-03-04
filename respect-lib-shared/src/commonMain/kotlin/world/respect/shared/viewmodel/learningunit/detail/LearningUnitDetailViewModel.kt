@@ -215,7 +215,8 @@ class LearningUnitDetailViewModel(
                 iconUrl = uiState.value.lessonDetail?.images?.firstOrNull()?.href,
                 appManifestUrl = route.appManifestUrl.toString(),
                 expectedIdentifier = route.expectedIdentifier.orEmpty(),
-                refererUrl = route.refererUrl?.toString().orEmpty()
+                refererUrl = route.refererUrl?.toString().orEmpty(),
+                personUid = accountManager.activeAccount?.userGuid ?: ""
             )
             schoolDataSource.bookmarkDataSource.store(
                bookmark

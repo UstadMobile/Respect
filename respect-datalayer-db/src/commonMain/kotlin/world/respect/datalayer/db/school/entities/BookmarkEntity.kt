@@ -4,19 +4,23 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import world.respect.datalayer.school.model.StatusEnum
 
-@Entity
+@Entity(
+    primaryKeys = ["bPersonUidNum", "bUrlHash"]
+)
 data class BookmarkEntity(
-    @PrimaryKey val urlHash: Long,
-    val learningUnitUrl:String,
-    val title: String?,
-    val subtitle: String?,
-    val appIcon: String,
-    val appName: String,
-    val iconUrl: String?,
-    val appManifestUrl: String,
-    val expectedIdentifier: String,
-    val refererUrl: String,
-    val status: Int = StatusEnum.ACTIVE.flag,
-    val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val bUrlHash:Long,
+    val bPersonUid: String,
+    val bPersonUidNum: Long,
+    val bLearningUnitManifestUrl:String,
+    val bTitle: String?,
+    val bSubtitle: String?,
+    val bAppIcon: String,
+    val bAppName: String,
+    val bIconUrl: String?,
+    val bAppManifestUrl: String,
+    val bExpectedIdentifier: String,
+    val bRefererUrl: String,
+    val bStatus: Int = StatusEnum.ACTIVE.flag,
+    val bCreatedAt: Long = System.currentTimeMillis(),
+    val bUpdatedAt: Long = System.currentTimeMillis()
 )

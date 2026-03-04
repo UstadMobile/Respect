@@ -10,41 +10,48 @@ import world.respect.datalayer.school.model.StatusEnum
 
 @Dao
 interface BookmarkDao {
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookmark(bookmark: BookmarkEntity)
 
-    @Query("""
-    UPDATE BookmarkEntity 
-    SET status = :status, updatedAt = :updatedAt 
-    WHERE urlHash = :urlHash
-""")
+    @Query(
+        """
+        UPDATE BookmarkEntity 
+           SET bStatus = :status, bUpdatedAt = :updatedAt 
+         WHERE bPersonUidNum = :personUidNum
+           AND bUrlHash = :urlHash
+    """)
     suspend fun updateBookmark(
+        personUidNum: Long,
         urlHash: Long,
         status: Int,
         updatedAt: Long = System.currentTimeMillis()
     )
 
 
-    @Query("""
-    SELECT EXISTS(
+    @Query(
+        """
+        SELECT EXISTS(
         SELECT 1 FROM BookmarkEntity 
-        WHERE urlHash = :urlHash 
-        AND status = :activeStatus
-    )
-""")
+                WHERE bPersonUidNum = :personUidNum
+                  AND bUrlHash = :urlHash
+                  AND bStatus = :activeStatus
+       )
+    """)
     fun getBookmarkStatus(
+        personUidNum: Long,
         urlHash: Long,
         activeStatus: Int = StatusEnum.ACTIVE.flag
     ): Flow<Boolean>
 
 
     @Query("""
-    SELECT * FROM BookmarkEntity 
-    WHERE status = :activeStatus
-    ORDER BY updatedAt DESC
-""")
+            SELECT * FROM BookmarkEntity 
+                    WHERE bPersonUidNum = :personUidNum
+                      AND bStatus = :activeStatus
+                 ORDER BY bUpdatedAt DESC
+    """)
     fun getAllBookmarks(
+        personUidNum: Long,
         activeStatus: Int = StatusEnum.ACTIVE.flag
     ): Flow<List<BookmarkEntity>>
-
 }

@@ -1,6 +1,7 @@
 package world.respect.datalayer.school.model
 
 data class Bookmark(
+    val personUid: String,
     val learningUnitManifestUrl:String,
     val title: String?,
     val subtitle: String?,
@@ -9,5 +10,5 @@ data class Bookmark(
     val iconUrl: String?,
     val appManifestUrl: String,
     val expectedIdentifier: String,
-    val refererUrl: String
+    val refererUrl: String,
 )

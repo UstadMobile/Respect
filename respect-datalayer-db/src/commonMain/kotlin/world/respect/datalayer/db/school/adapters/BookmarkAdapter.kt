@@ -38,6 +38,7 @@ fun Bookmark.toEntities(
         bExpectedIdentifier = expectedIdentifier,
         bRefererUrl = refererUrl,
         bStatus = StatusEnum.ACTIVE.flag,
+
         bCreatedAt = System.currentTimeMillis(),
         bUpdatedAt = System.currentTimeMillis()
     )

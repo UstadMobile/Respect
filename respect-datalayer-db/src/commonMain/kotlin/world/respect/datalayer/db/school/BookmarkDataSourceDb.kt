@@ -27,25 +27,29 @@ class BookmarkDataSourceDb(
         val urlHash: Long = uidNumberMapper(url.toString())
 
         return schoolDb.getBookmarkDao()
-            .getBookmarkStatus(urlHash,personUidNum)
+            .getBookmarkStatus(personUidNum,urlHash)
     }
 
 
     override suspend fun store(bookmark: Bookmark) {
 
         val dao = schoolDb.getBookmarkDao()
-
         val urlHash = uidNumberMapper(bookmark.learningUnitManifestUrl)
 
-        val exists = dao.getBookmarkStatus(urlHash,personUidNum).first()
+        val isActive = dao.getBookmarkStatus(
+            personUidNum = personUidNum,
+            urlHash = urlHash
+        ).first()
 
-        if (exists) {
+        if (isActive) {
+            // Soft delete
             dao.updateBookmark(
-                personUidNum=personUidNum,
+                personUidNum = personUidNum,
                 urlHash = urlHash,
-                status = StatusEnum.TO_BE_DELETED.flag,
+                status = StatusEnum.TO_BE_DELETED.flag
             )
         } else {
+            // Insert OR Reactivate
             dao.insertBookmark(
                 bookmark.toEntities(uidNumberMapper)
             )

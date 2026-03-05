@@ -54,7 +54,6 @@ class BookmarkListViewModel(
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-
             schoolDataSource.bookmarkDataSource.removeBookmark(
                 manifestUrl = bookmark.learningUnitManifestUrl,
                 lastModified = Clock.System.now()

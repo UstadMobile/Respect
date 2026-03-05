@@ -170,11 +170,6 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val bookmarkIcon = if (uiState.isBookmarked) {
-                    Icons.Filled.Bookmark
-                } else {
-                    Icons.Outlined.BookmarkBorder
-                }
                 RespectQuickActionButton(
                     labelText = when(uiState.pinState.status) {
                         PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
@@ -191,7 +186,11 @@ fun LearningUnitDetailScreen(
                 )
 
                 RespectQuickActionButton(
-                    imageVector = bookmarkIcon,
+                    imageVector = if (uiState.isBookmarked) {
+                        Icons.Filled.Bookmark
+                    } else {
+                        Icons.Outlined.BookmarkBorder
+                    },
                     labelText = stringResource(Res.string.bookmark),
                     onClick = onClickBookmark,
                     enabled = uiState.buttonsEnabled,

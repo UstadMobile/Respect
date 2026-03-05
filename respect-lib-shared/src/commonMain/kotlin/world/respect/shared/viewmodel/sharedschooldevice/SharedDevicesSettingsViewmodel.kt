@@ -250,7 +250,6 @@ class SharedDevicesSettingsViewmodel(
                                         schoolUrl = url,
                                         code = it.code,
                                         useActiveUserAuth = !isTeacherOrAdmin,
-                                        isSelfSelectClassAndName = _uiState.value.isSelfSelectClassAndName
                                     )
                                 )
                             )

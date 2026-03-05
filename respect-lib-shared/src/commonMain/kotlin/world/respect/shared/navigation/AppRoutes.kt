@@ -402,7 +402,6 @@ class AcceptInvite(
     val code: String,
     val canGoBack: Boolean = true,
     val useActiveUserAuth: Boolean? = null,
-    val isSelfSelectClassAndName: Boolean = true,
 ) : RespectAppRoute {
 
     @Transient
@@ -414,13 +413,11 @@ class AcceptInvite(
             code: String,
             canGoBack: Boolean = true,
             useActiveUserAuth: Boolean? = null,
-            isSelfSelectClassAndName: Boolean = true,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
             useActiveUserAuth = useActiveUserAuth,
-            isSelfSelectClassAndName = isSelfSelectClassAndName
         )
     }
 }

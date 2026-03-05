@@ -5,10 +5,6 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
-import world.respect.datalayer.db.compatibleapps.daos.CompatibleAppAddJoinDao
-import world.respect.datalayer.db.compatibleapps.daos.CompatibleAppEntityDao
-import world.respect.datalayer.db.compatibleapps.entities.CompatibleAppAddJoin
-import world.respect.datalayer.db.compatibleapps.entities.CompatibleAppEntity
 import world.respect.datalayer.db.networkvalidation.daos.NetworkValidationInfoEntityDao
 import world.respect.datalayer.db.networkvalidation.entities.NetworkValidationInfoEntity
 import world.respect.datalayer.db.schooldirectory.daos.SchoolConfigEntityDao
@@ -23,10 +19,6 @@ import world.respect.datalayer.db.shared.SharedConverters
 
 @Database(
     entities = [
-        //Compatible apps
-        CompatibleAppEntity::class,
-        CompatibleAppAddJoin::class,
-
         //SchoolDirectory
         SchoolDirectoryEntity::class,
         SchoolDirectoryEntryEntity::class,
@@ -36,15 +28,11 @@ import world.respect.datalayer.db.shared.SharedConverters
         //Network validation
         NetworkValidationInfoEntity::class,
     ],
-    version = 3,
+    version = 4,
 )
 @TypeConverters(SharedConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)
 abstract class RespectAppDatabase : RoomDatabase() {
-
-    abstract fun getCompatibleAppEntityDao(): CompatibleAppEntityDao
-
-    abstract fun getCompatibleAppAddJoinDao(): CompatibleAppAddJoinDao
 
     abstract fun getSchoolDirectoryEntryEntityDao(): SchoolDirectoryEntryEntityDao
 

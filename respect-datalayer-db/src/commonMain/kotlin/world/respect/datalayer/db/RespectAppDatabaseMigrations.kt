@@ -24,12 +24,20 @@ val APP_MIGRATION_2_3 = object: Migration(2,3) {
     }
 }
 
+val APP_MIGRATION_3_4 = object: Migration(3,4) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("DROP TABLE IF EXISTS CompatibleAppEntity")
+        connection.execSQL("DROP TABLE IF EXISTS CompatibleAppAddJoin")
+    }
+}
+
 
 fun RoomDatabase.Builder<RespectAppDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectAppDatabase> {
     return this.addMigrations(
         APP_MIGRATION_2_3,
+        APP_MIGRATION_3_4,
     )
 }
 

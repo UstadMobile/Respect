@@ -71,7 +71,8 @@ fun RespectSchoolDatabase.toDataSource(
             encodeDefaults = false
             ignoreUnknownKeys = true
         },
-        primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS)
+        primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
+        defaultAppCatalogUrl = "https://respect.world/respect-ds/apps.json"
     )
 }
 

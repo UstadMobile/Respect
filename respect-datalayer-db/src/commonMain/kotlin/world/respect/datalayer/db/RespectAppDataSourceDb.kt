@@ -2,7 +2,6 @@ package world.respect.datalayer.db
 
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.RespectAppDataSourceLocal
-import world.respect.datalayer.db.compatibleapps.CompatibleAppDataSourceDb
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryEntryDataSourceDb
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
@@ -14,10 +13,6 @@ class RespectAppDataSourceDb(
     private val json: Json,
     private val xxStringHasher: XXStringHasher,
 ): RespectAppDataSourceLocal {
-
-    override val compatibleAppsDataSource by lazy {
-        CompatibleAppDataSourceDb(respectAppDatabase, json, xxStringHasher)
-    }
 
     override val schoolDirectoryDataSource: SchoolDirectoryDataSourceLocal by lazy {
         SchoolDirectoryDataSourceDb(

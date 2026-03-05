@@ -527,7 +527,6 @@ val appKoinModule = module {
                     xxStringHasher = get(),
                 ),
                 httpClient = get(),
-                defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         )
     }

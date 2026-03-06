@@ -12,6 +12,7 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.response.StringResponse
@@ -146,6 +147,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val createdLocks = if(createLock) {
@@ -285,6 +287,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val url = "http://server.com/file.css"
@@ -327,6 +330,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val url = "http://server.com/file.css"
@@ -345,6 +349,7 @@ class UstadCacheJvmTest {
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb, XXStringHasherCommonJvm()
             ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
         val url = "http://server.com/file.css"
@@ -438,6 +443,58 @@ class UstadCacheJvmTest {
             val responseBytes = fullResponse.bodyAsSource()!!.asInputStream().readAllBytes()
             assertTrue(resourceBytes.contentEquals(responseBytes),
                 "When if-range did not match actual etag, returned full response")
+        }
+    }
+
+
+    @Test
+    fun givenFileCachedAndStored_whenRequestHasCacheValidationHeaders_thenShouldRespond304NotModified() {
+        val testUrl = "http://www.server.com/file.png"
+        assertFileCanBeCachedAndRetrieved(
+            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testUrl = testUrl,
+            mimeType = "image/png",
+            expectContentEncoding = "identity"
+        ) {
+            val fullResponse = runBlocking {
+                cache.retrieve(iRequestBuilder(testUrl))
+            }
+
+            listOf(
+                Pair("If-None-Match", "etag"), Pair("If-Modified-Since", "Last-Modified")
+            ).forEach { (requestHeaderName, responseHeaderName) ->
+                assertEquals(
+                    expected = 304,
+                    actual = runBlocking {
+                        cache.retrieve(
+                            request = iRequestBuilder(testUrl) {
+                                header(
+                                    headerName = requestHeaderName,
+                                    headerVal = fullResponse!!.headers[responseHeaderName]!!
+                                )
+                            }
+                        )!!.responseCode
+                    }
+                )
+            }
+
+            assertEquals(
+                expected = 304,
+                actual = runBlocking {
+                    cache.retrieve(
+                        request = iRequestBuilder(testUrl) {
+                            header(
+                                headerName = "If-None-Match",
+                                headerVal = fullResponse!!.headers["etag"]!!
+                            )
+                            header(
+                                headerName = "If-Modified-Since",
+                                headerVal = fullResponse.headers["last-modified"]!!
+                            )
+                        }
+                    )!!.responseCode
+                }
+            )
         }
     }
 

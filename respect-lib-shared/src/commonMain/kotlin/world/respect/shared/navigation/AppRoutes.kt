@@ -59,7 +59,6 @@ data class EnterInviteCode(
     }
 
 }
-
 @Serializable
 object Onboarding : RespectAppRoute
 
@@ -311,6 +310,7 @@ class LearningUnitList(
     private val opdsFeedUrlStr: String,
     private val appManifestUrlStr: String,
     private val resultDestStr: String?,
+    val showOnlyDownloaded: Boolean = false,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -328,11 +328,13 @@ class LearningUnitList(
             opdsFeedUrl: Url,
             appManifestUrl: Url,
             resultDest: ResultDest? = null,
+            showOnlyDownloaded: Boolean = false,
         ): LearningUnitList {
             return LearningUnitList(
                 opdsFeedUrlStr = opdsFeedUrl.toString(),
                 appManifestUrlStr = appManifestUrl.toString(),
-                resultDestStr = resultDest.encodeToJsonStringOrNull()
+                resultDestStr = resultDest.encodeToJsonStringOrNull(),
+                showOnlyDownloaded = showOnlyDownloaded
             )
         }
 

@@ -13,6 +13,7 @@ import world.respect.datalayer.repository.school.PersonPasswordDataSourceReposit
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -119,4 +120,9 @@ class SchoolDataSourceRepository(
             validationHelper = validationHelper
         )
     }
+
+    override val bookmarkDataSource: BookmarkDataSource by lazy {
+        local.bookmarkDataSource
+    }
+
 }

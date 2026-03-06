@@ -17,8 +17,13 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "Apps"
 - tapOn:
-    id: "floating_action_button"
+    id: "floating_action_button"  # +Add App
 - tapOn: "Add from Link"
 - tapOn: "Link*"
 - inputText: "https://respect.world/respect-ds/case_valid/appmanifest.json"
@@ -30,14 +35,15 @@ onFlowComplete:
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
-- tapOn: "Apps"
+- tapOn: "Home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
-- assertVisible: "My app"
+    text: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "No bookmarks yet"
+- assertVisible: "Bookmark a lesson or a playlist to see it here."
+- tapOn: "Apps"
 - tapOn: "My app"
-- assertVisible: "Lessons"
-- tapOn: "Lessons"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
@@ -48,5 +54,93 @@ onFlowComplete:
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
+- assertVisible: "Download"
+- assertVisible: "Assign"
+- tapOn: "Bookmark"
+- assertVisible: "Lesson added to bookmark list"
+- tapOn: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
 
-
+- tapOn: "Playlists"
+- assertVisible: "All"
+- assertVisible: "School Playlists"
+- assertVisible: "My Playlists"
+- assertVisible: "No playlists yet"
+- tapOn: "Playlist"
+- assertVisible: "Add new"
+- assertVisible: "Add from a link"
+- tapOn:
+    text: "Add new"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- tapOn: "Save" # To test mandatory fields
+- assertVisible: "Required field"  #Title field is mandatory
+- tapOn: "Title*"
+- inputText: "Playlist - Grade 1"
+- tapOn: "Description"
+- inputText: "Test list"
+- tapOn: "Section"
+- tapOn: "Section title"
+- inputText: "Day 1"
+- hideKeyboard
+- tapOn:
+    id: "add_item"
+- tapOn: "My app"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- assertVisible: "Lesson 001"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- assertVisible: "Day 1"
+- tapOn:
+    id: "expand_collapse_icon_"
+- assertVisible: "Lesson 001"
+- tapOn:
+    text: "Edit"
+    index: 1 # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit playlist"
+- tapOn: "Section"
+- tapOn:
+    text: "Section title"
+    index: 1
+- inputText: "Day 2"
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- tapOn: "Day 1"
+- assertVisible: "Lesson 001"
+- assertVisible: "Day 2"
+- assertVisible:
+    id: "share_btn"
+- assertVisible:
+    id: "copy_btn"
+- assertVisible:
+    id: "assign_btn"
+- assertVisible:
+    id: "delete_btn"
+- assertVisible:
+    id: "bookmark_btn"
+- tapOn:
+    id: "bookmark_btn"
+- assertVisible: "Playlist added to bookmark list"
+- tapOn: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
+- assertVisible: "Playlist - Grade 1"
+- tapOn:
+    id: "bookmark_icon"
+- assertNotVisible: "Lesson 001"
+- assertVisible: "1 Remove Bookmark"
+- tapOn: "Undo"
+- assertVisible: "Lesson 001"

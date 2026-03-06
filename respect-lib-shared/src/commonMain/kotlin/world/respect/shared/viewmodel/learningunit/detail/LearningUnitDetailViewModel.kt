@@ -7,8 +7,12 @@ import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
@@ -16,11 +20,15 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
+import world.respect.datalayer.school.model.Bookmark
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
@@ -28,6 +36,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import kotlin.getValue
+import kotlin.time.Clock
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
@@ -35,6 +45,11 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
+    val appDetail: DataLoadState<RespectAppManifest>? = null,
+
+    val appIcon: String? = null,
+
+    val isBookmarked: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -44,8 +59,11 @@ class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
+    private val accountManager: RespectAccountManager,
     private val ustadCache: UstadCache,
-) : RespectViewModel(savedStateHandle) {
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
 
@@ -53,7 +71,29 @@ class LearningUnitDetailViewModel(
 
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
+    private val schoolDataSource: SchoolDataSource by inject()
+
     init {
+
+        viewModelScope.launch {
+            appDataSource.compatibleAppsDataSource.getAppAsFlow(
+                manifestUrl = route.appManifestUrl,
+                loadParams = DataLoadParams()
+            ).collectLatest { result ->
+                if (result is DataReadyState) {
+                    _uiState.update {
+                        it.copy(
+                            appDetail = result,
+                            appIcon = route.appManifestUrl.resolve(
+                                result.data.icon.toString()
+                            ).toString(),
+                        )
+
+                    }
+                }
+            }
+        }
+
         viewModelScope.launch {
             appDataSource.opdsDataSource.loadOpdsPublication(
                 url = route.learningUnitManifestUrl,
@@ -81,6 +121,13 @@ class LearningUnitDetailViewModel(
                     }
                 }
             }
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.bookmarkDataSource.getBookmarkStatus(route.learningUnitManifestUrl)
+                .collect { bookmarked ->
+                    _uiState.update { it.copy(isBookmarked = bookmarked) }
+                }
         }
 
         viewModelScope.launch {
@@ -126,6 +173,7 @@ class LearningUnitDetailViewModel(
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
+
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }
@@ -155,5 +203,43 @@ class LearningUnitDetailViewModel(
                 )
             )
         )
+    }
+    fun onClickBookmark() {
+        viewModelScope.launch {
+
+            val now = Clock.System.now()
+            val personUid = accountManager.activeAccount?.userGuid
+            val manifestUrl = route.learningUnitManifestUrl.toString()
+
+            val isBookmarked = uiState.value.isBookmarked
+
+            if (isBookmarked) {
+
+                schoolDataSource.bookmarkDataSource.removeBookmark(
+                    manifestUrl = manifestUrl,
+                    lastModified = now
+                )
+
+            } else {
+
+                val bookmark = Bookmark(
+                    status = StatusEnum.ACTIVE,
+                    lastModified = now,
+                    stored = now,
+                    personUid = personUid,
+                    learningUnitManifestUrl = manifestUrl,
+                    title = uiState.value.lessonDetail?.metadata?.title?.getTitle(),
+                    subtitle = uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
+                    appIcon = uiState.value.appIcon.orEmpty(),
+                    appName = uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
+                    iconUrl = uiState.value.lessonDetail?.images?.firstOrNull()?.href,
+                    appManifestUrl = route.appManifestUrl.toString(),
+                    expectedIdentifier = route.expectedIdentifier.orEmpty(),
+                    refererUrl = route.refererUrl?.toString().orEmpty(),
+                )
+
+                schoolDataSource.bookmarkDataSource.store(bookmark)
+            }
+        }
     }
 }

@@ -16,6 +16,7 @@ import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.AssignmentDataSource
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
@@ -142,4 +143,7 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
+    override val bookmarkDataSource: BookmarkDataSource
+        get() = TODO("Not yet implemented")
+
 }

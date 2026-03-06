@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import world.respect.datalayer.db.school.daos.BookmarkDao
+import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.db.opds.daos.PersonPasskeyEntityDao
 import world.respect.datalayer.db.school.SchoolTypeConverters
 import world.respect.datalayer.db.school.daos.AuthTokenEntityDao
@@ -71,6 +73,7 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
         PullSyncStatusEntity::class,
         PersonQrBadgeEntity::class,
         InviteEntity::class,
+        BookmarkEntity::class,
     ],
     version = 11,
 )
@@ -115,6 +118,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getSchoolPermissionGrantDao(): SchoolPermissionGrantDao
 
     abstract fun getPullSyncStatusEntityDao(): PullSyncStatusEntityDao
+
+    abstract fun getBookmarkDao(): BookmarkDao
 
 }
 

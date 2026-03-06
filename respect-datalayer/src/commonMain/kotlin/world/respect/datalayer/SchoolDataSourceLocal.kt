@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -40,4 +41,5 @@ interface SchoolDataSourceLocal: SchoolDataSource {
     override val assignmentDataSource: AssignmentDataSourceLocal
 
     override val inviteDataSource: InviteDataSourceLocal
+    override val bookmarkDataSource: BookmarkDataSource
 }

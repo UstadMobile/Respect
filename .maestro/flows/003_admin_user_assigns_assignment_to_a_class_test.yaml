@@ -80,4 +80,3 @@ onFlowComplete:
 - assertVisible: "Lesson 001"
 - back
 - assertVisible: "Homework 1"
-

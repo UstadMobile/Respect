@@ -28,6 +28,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.i_have_an_invite_code
+import world.respect.shared.generated.resources.select_another_school
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.password_label
 import world.respect.shared.generated.resources.username_label
@@ -50,6 +51,7 @@ fun LoginScreen(
         onPasswordChanged = viewModel::onPasswordChanged,
         onClickLogin = viewModel::onClickLogin,
         onClickInviteCode = viewModel::onClickInviteCode,
+        onClickSelectAnotherSchool = viewModel::onClickSelectAnotherSchool
     )
 }
 
@@ -60,7 +62,8 @@ fun LoginScreen(
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onClickLogin: () -> Unit,
-    onClickInviteCode: () -> Unit = {}
+    onClickInviteCode: () -> Unit = {},
+    onClickSelectAnotherSchool:() -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -109,6 +112,14 @@ fun LoginScreen(
             enabled = !appUiState.isLoading,
         ) {
             Text(text = stringResource(Res.string.login))
+        }
+        if (uiState.isSharedDevice) {
+            OutlinedButton(
+                onClick = onClickSelectAnotherSchool,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            ) {
+                Text(text = stringResource(Res.string.select_another_school))
+            }
         }
 
         OutlinedButton(

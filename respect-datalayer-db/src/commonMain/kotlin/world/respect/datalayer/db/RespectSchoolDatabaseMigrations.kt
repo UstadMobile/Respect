@@ -4,6 +4,8 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
+import world.respect.datalayer.school.model.PermissionFlags
+import kotlin.time.Clock
 
 val MIGRATION_1_2 = object: Migration(1, 2) {
     override fun migrate(connection: SQLiteConnection) {
@@ -112,12 +114,30 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        connection.execSQL("""
+            INSERT OR IGNORE INTO SchoolPermissionGrantEntity 
+            (spgUid, spgUidNum, spgStatusEnum, spgToRole, spgPermissions, spgLastModified, spgStored)
+            VALUES 
+            ('shared_device_default', 
+             ${System.currentTimeMillis()}, 
+             'ACTIVE', 
+             'sharedschooldevice', 
+             ${PermissionFlags.SHARED_DEVICE_DEFAULT_SCHOOL_PERMISSIONS}, 
+             $now, 
+             $now)
+        """.trimIndent())
+    }
+}
+
 
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
     return this.addMigrations(
-        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7,MIGRATION_7_8
+        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7,MIGRATION_7_8,MIGRATION_8_9
     )
 }
 

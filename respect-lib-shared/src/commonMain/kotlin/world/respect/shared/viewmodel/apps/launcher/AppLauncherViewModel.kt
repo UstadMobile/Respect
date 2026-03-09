@@ -41,6 +41,8 @@ import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.school.model.Bookmark
+import world.respect.shared.navigation.BookmarkList
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -171,6 +173,12 @@ class AppLauncherViewModel(
                 )
             )
         }
+    }
+
+    fun onClickDes(){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(BookmarkList)
+        )
     }
 
     fun respectAppForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<RespectAppManifest>> {

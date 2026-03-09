@@ -24,7 +24,6 @@ class BookmarkDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : BookmarkDataSourceLocal {
 
-    private val personUid: String = authenticatedUser.guid
 
     override fun getBookmarkStatus(personUid: String, url: Url): Flow<Boolean> {
         return schoolDb.getBookmarkDao().getBookmarkStatus(
@@ -32,8 +31,6 @@ class BookmarkDataSourceDb(
             manifestUrl = url.toString()
         )
     }
-
-
 
     override suspend fun store(list: List<Bookmark>) {
 
@@ -61,13 +58,14 @@ class BookmarkDataSourceDb(
         listParams: BookmarkDataSource.GetListParams,
 
         ): DataLoadState<List<Bookmark>> {
+        val entities = schoolDb.getBookmarkDao()
+            .list(
+                personUid = listParams.personUid ?: "0",
+                includeDeleted = listParams.common.includeDeleted ?: false
+            )
+
         return DataReadyState(
-            data = schoolDb.getBookmarkDao()
-                .list(
-                    personUid = listParams.personUid ?: "0",
-                    includeDeleted = listParams.common.includeDeleted ?: false
-                )
-                .map { it.toModel() }
+            data = entities.map { it.toModel() }
         )
     }
 

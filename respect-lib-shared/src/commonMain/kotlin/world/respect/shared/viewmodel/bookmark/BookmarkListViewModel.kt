@@ -47,6 +47,8 @@ class BookmarkListViewModel(
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
 
             val bookmarks = schoolDataSource.bookmarkDataSource
+
+
                 .list(
                     loadParams = DataLoadParams(),
                     listParams = BookmarkDataSource.GetListParams(
@@ -54,9 +56,12 @@ class BookmarkListViewModel(
                     )
                 ).dataOrNull() ?: emptyList()
 
+            println("Bookmarks list: $bookmarks")
+
             _uiState.update {
                 it.copy(
-                    bookmarks = bookmarks
+                    bookmarks = bookmarks,
+                    isLoading = false
                 )
             }
         }

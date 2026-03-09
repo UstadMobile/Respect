@@ -7,6 +7,7 @@ import kotlin.time.Instant
 @Entity(
     primaryKeys = ["bPersonUidHash", "bLearningUnitUrlHash"]
 )
+
 data class BookmarkEntity(
     val bPersonUid: String,
     val bPersonUidHash : Long,

@@ -86,6 +86,7 @@ fun DataReadyState<OpdsFeed>.asEntities(
             ofeUrlHash = ofeUid,
             ofeLastModifiedHeader = metaInfo.lastModified,
             ofeEtag = metaInfo.etag,
+
         ),
         feedMetaData = buildList {
             add(feedMetadata)

@@ -4,13 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.adapters.BookmarkEntities
 import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 
 @Dao
 interface BookmarkDao {
-
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(bookmarks: List<BookmarkEntity>)
@@ -30,6 +31,7 @@ interface BookmarkDao {
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): Flow<Boolean>
 
+    @Transaction
     @Query("""
         SELECT *
           FROM BookmarkEntity
@@ -41,5 +43,6 @@ interface BookmarkDao {
         personUid: String,
         includeDeleted: Boolean = false,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
-    ): List<BookmarkEntity>
+    ): List<BookmarkEntities>
+
 }

@@ -149,21 +149,19 @@ private fun BookmarkListContent(
                         contentAlignment = Alignment.Center
                     ) {
 
-/*
                             RespectAsyncImage(
-                                uri = ,
+                                uri = bookmark.imageUrl ,
                                 contentDescription = "",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(36.dp)
                             )
-*/
                         }
 
                 },
 
                 headlineContent = {
-                    Text(text =" bookmark.title ?: ")
+                    Text(text =bookmark.title ?: "")
                 },
 
                 supportingContent = {
@@ -204,7 +202,7 @@ private fun BookmarkListContent(
                         }
 
                         Text(
-                            text = "bookmark.subtitle ?: "
+                            text = bookmark.subtitle ?: ""
                         )
 
                     }

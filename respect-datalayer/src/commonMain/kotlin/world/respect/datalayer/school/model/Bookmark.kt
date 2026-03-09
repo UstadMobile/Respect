@@ -11,5 +11,8 @@ data class Bookmark(
     val learningUnitManifestUrl: String,
     val status: StatusEnum = StatusEnum.ACTIVE,
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
-    override val stored: InstantAsISO8601 = Clock.System.now()
+    override val stored: InstantAsISO8601 = Clock.System.now(),
+    var title : String?,
+    var subtitle : String?,
+    var imageUrl : String?
 ) : ModelWithTimes

@@ -15,7 +15,11 @@ import io.ktor.http.Url
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.BookmarkDataSource
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import kotlin.getValue
 import kotlin.time.Clock
@@ -39,40 +43,50 @@ class BookmarkListViewModel(
 
     init {
         viewModelScope.launch {
-            schoolDataSource.bookmarkDataSource
-                .getAllBookmarks()
-                .collect { bookmarks ->
-                    _uiState.update {
-                        it.copy(
-                            bookmarks = bookmarks,
-                            isLoading = false
-                        )
-                    }
-                }
+
+            val personUid = accountManager.activeAccount?.userGuid ?: return@launch
+
+            val bookmarks = schoolDataSource.bookmarkDataSource
+                .list(
+                    loadParams = DataLoadParams(),
+                    listParams = BookmarkDataSource.GetListParams(
+                        personUid = personUid
+                    )
+                ).dataOrNull() ?: emptyList()
+
+            _uiState.update {
+                it.copy(
+                    bookmarks = bookmarks
+                )
+            }
         }
     }
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
-            schoolDataSource.bookmarkDataSource.removeBookmark(
-                manifestUrl = bookmark.learningUnitManifestUrl,
-                lastModified = Clock.System.now()
+            val updatedBookmark = bookmark.copy(
+                status = StatusEnum.TO_BE_DELETED
+            )
+
+            schoolDataSource.bookmarkDataSource.store(
+                listOf(updatedBookmark)
             )
         }
     }
+
     fun onClickBookmark(bookmark: Bookmark) {
 
-        _navCommandFlow.tryEmit(
-            value = NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = Url(bookmark.learningUnitManifestUrl),
-                    appManifestUrl = Url(bookmark.appManifestUrl),
-                    refererUrl = Url(
-                        bookmark.refererUrl
-                    ),
-                    expectedIdentifier = bookmark.expectedIdentifier
-                )
-            )
-        )
+        /*  _navCommandFlow.tryEmit(
+              value = NavCommand.Navigate(
+                  LearningUnitDetail.create(
+                      learningUnitManifestUrl = Url(bookmark.learningUnitManifestUrl),
+                      appManifestUrl = Url(bookmark.appManifestUrl),
+                      refererUrl = Url(
+                          bookmark.refererUrl
+                      ),
+                      expectedIdentifier = bookmark.expectedIdentifier
+                  )
+              )
+          )*/
     }
 }

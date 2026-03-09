@@ -1,51 +1,85 @@
 package world.respect.datalayer.db.school
 
+import androidx.room.Transactor
+import androidx.room.useWriterConnection
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.DataErrorResult
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.BookmarkDataSource
-import world.respect.datalayer.school.model.StatusEnum
+import world.respect.datalayer.school.BookmarkDataSourceLocal
 import world.respect.datalayer.school.model.Bookmark
-import kotlin.time.Instant
+import kotlin.time.Clock
 
 class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
+    private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-) : BookmarkDataSource {
+) : BookmarkDataSourceLocal {
 
     private val personUid: String = authenticatedUser.guid
 
-    override fun getBookmarkStatus(url: Url): Flow<Boolean> {
-        val manifestUrl = url.toString()
-
-        return schoolDb.getBookmarkDao()
-            .observeBookmarkStatus(personUid, manifestUrl)
-    }
-
-    override suspend fun store(bookmark: Bookmark) {
-        schoolDb.getBookmarkDao()
-            .upsert(bookmark.toEntities())
-    }
-
-    override suspend fun removeBookmark(
-        manifestUrl: String,
-        lastModified: Instant
-    ) {
-        schoolDb.getBookmarkDao().updateStatus(
+    override fun getBookmarkStatus(personUid: String, url: Url): Flow<Boolean> {
+        return schoolDb.getBookmarkDao().getBookmarkStatus(
             personUid = personUid,
-            manifestUrl = manifestUrl,
-            status = StatusEnum.TO_BE_DELETED,
-            lastModified = lastModified
+            manifestUrl = url.toString()
         )
     }
 
-    override fun getAllBookmarks(): Flow<List<Bookmark>> {
-        return schoolDb.getBookmarkDao()
-            .observeBookmarks(personUid)
-            .map { list -> list.map { it.toModel() } }
+
+
+    override suspend fun store(list: List<Bookmark>) {
+
+        if (list.isEmpty())
+            return
+
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+
+                val now = Clock.System.now()
+
+                schoolDb.getBookmarkDao().upsert(
+                    list.map {
+                        it.copy(
+                            stored = now
+                        ).toEntities(uidNumberMapper)
+                    }
+                )
+            }
+        }
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: BookmarkDataSource.GetListParams,
+
+        ): DataLoadState<List<Bookmark>> {
+        return DataReadyState(
+            data = schoolDb.getBookmarkDao()
+                .list(
+                    personUid = listParams.personUid ?: "0",
+                    includeDeleted = listParams.common.includeDeleted ?: false
+                )
+                .map { it.toModel() }
+        )
+    }
+
+
+    override suspend fun updateLocal(
+        list: List<Bookmark>,
+        forceOverwrite: Boolean
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun findByUidList(uids: List<String>): List<Bookmark> {
+        TODO("Not yet implemented")
     }
 }

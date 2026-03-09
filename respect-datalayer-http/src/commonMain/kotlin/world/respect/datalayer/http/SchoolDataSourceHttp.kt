@@ -5,6 +5,7 @@ import io.ktor.http.Url
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.http.school.AssignmentDataSourceHttp
+import world.respect.datalayer.http.school.BookmarkDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
 import world.respect.datalayer.http.school.InviteDataSourceHttp
@@ -143,7 +144,13 @@ class SchoolDataSourceHttp(
             validationHelper = validationHelper,
         )
     }
-    override val bookmarkDataSource: BookmarkDataSource
-        get() = TODO("Not yet implemented")
-
+    override val bookmarkDataSource: BookmarkDataSource by lazy {
+        BookmarkDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
 }

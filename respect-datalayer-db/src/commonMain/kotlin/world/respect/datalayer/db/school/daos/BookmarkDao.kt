@@ -7,26 +7,13 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
-import kotlin.time.Instant
+
 @Dao
 interface BookmarkDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(bookmark: BookmarkEntity)
 
-    @Query("""
-        UPDATE BookmarkEntity
-           SET bStatus = :status,
-               bLastModified = :lastModified
-         WHERE bPersonUid = :personUid
-           AND bLearningUnitManifestUrl = :manifestUrl
-    """)
-    suspend fun updateStatus(
-        personUid: String,
-        manifestUrl: String,
-        status: StatusEnum,
-        lastModified: Instant
-    )
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(bookmarks: List<BookmarkEntity>)
 
 
     @Query("""
@@ -35,22 +22,24 @@ interface BookmarkDao {
          WHERE bPersonUid = :personUid
            AND bLearningUnitManifestUrl = :manifestUrl
            AND bStatus = :activeStatus
-    )
-""")
-    fun observeBookmarkStatus(
+         )
+    """)
+    fun getBookmarkStatus(
         personUid: String,
         manifestUrl: String,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): Flow<Boolean>
 
     @Query("""
-        SELECT * FROM BookmarkEntity
+        SELECT *
+          FROM BookmarkEntity
          WHERE bPersonUid = :personUid
-           AND bStatus = :activeStatus
+           AND (:includeDeleted OR bStatus = :activeStatus)
       ORDER BY bLastModified DESC
-   """)
-    fun observeBookmarks(
+    """)
+    suspend fun list(
         personUid: String,
+        includeDeleted: Boolean = false,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
-    ): Flow<List<BookmarkEntity>>
+    ): List<BookmarkEntity>
 }

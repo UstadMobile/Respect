@@ -148,20 +148,22 @@ private fun BookmarkListContent(
                             .width(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        bookmark.iconUrl.also { icon ->
+
+/*
                             RespectAsyncImage(
-                                uri = icon,
+                                uri = ,
                                 contentDescription = "",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(36.dp)
                             )
+*/
                         }
-                    }
+
                 },
 
                 headlineContent = {
-                    Text(text = bookmark.title ?: "")
+                    Text(text =" bookmark.title ?: ")
                 },
 
                 supportingContent = {
@@ -180,6 +182,7 @@ private fun BookmarkListContent(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
+/*
                                 bookmark.appIcon.also { icon ->
                                     RespectAsyncImage(
                                         uri = icon,
@@ -190,17 +193,18 @@ private fun BookmarkListContent(
 
                                     )
                                 }
+*/
                             }
 
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = bookmark.appName
+                                text = "bookmark.appName"
                             )
                         }
 
                         Text(
-                            text = bookmark.subtitle ?: ""
+                            text = "bookmark.subtitle ?: "
                         )
 
                     }

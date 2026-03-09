@@ -5,20 +5,14 @@ import world.respect.datalayer.school.model.StatusEnum
 import kotlin.time.Instant
 
 @Entity(
-    primaryKeys = ["bPersonUid", "bLearningUnitManifestUrl"]
+    primaryKeys = ["bPersonUidHash", "bLearningUnitUrlHash"]
 )
 data class BookmarkEntity(
+    val bPersonUid: String,
+    val bPersonUidHash : Long,
+    val bLearningUnitManifestUrl: String,
+    val bLearningUnitUrlHash:Long,
     val bStatus: StatusEnum = StatusEnum.ACTIVE,
     val bLastModified: Instant,
-    val bStored: Instant,
-    val bPersonUid: String?=null,
-    val bLearningUnitManifestUrl: String,
-    val bTitle: String? = null,
-    val bSubtitle: String? = null,
-    val bAppIcon: String,
-    val bAppName: String,
-    val bIconUrl: String? = null,
-    val bAppManifestUrl: String,
-    val bExpectedIdentifier: String,
-    val bRefererUrl: String,
+    val bStored: Instant
 )

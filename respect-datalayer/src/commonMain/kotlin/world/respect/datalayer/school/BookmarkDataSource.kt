@@ -1,20 +1,49 @@
 package world.respect.datalayer.school
 
 import io.ktor.http.Url
+import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.Bookmark
-import kotlin.time.Instant
+import world.respect.datalayer.shared.WritableDataSource
+import world.respect.datalayer.shared.params.GetListCommonParams
 
-interface BookmarkDataSource {
+interface BookmarkDataSource : WritableDataSource<Bookmark> {
 
-    fun getBookmarkStatus(url: Url): Flow<Boolean>
+    data class GetListParams(
+        val common: GetListCommonParams = GetListCommonParams(),
+        val personUid: String? = null
+    ) {
+        companion object {
+            fun fromParams(params: StringValues): GetListParams {
+                return GetListParams(
+                    common = GetListCommonParams.fromParams(params),
+                    personUid = params[PERSON_UID],
+                )
+            }
+        }
+    }
 
-    suspend fun store(bookmark: Bookmark)
+    fun getBookmarkStatus(
+        personUid: String,
+        url: Url
+    ): Flow<Boolean>
 
-    suspend fun removeBookmark(
-        manifestUrl: String,
-        lastModified: Instant
+    override suspend fun store(
+        list: List<Bookmark>
     )
 
-    fun getAllBookmarks(): Flow<List<Bookmark>>
+    suspend fun list(
+        loadParams: DataLoadParams,
+        listParams: GetListParams,
+    ): DataLoadState<List<Bookmark>>
+
+
+    companion object {
+
+        const val ENDPOINT_NAME = "bookmark"
+        const val PERSON_UID = "personUid"
+
+    }
 }

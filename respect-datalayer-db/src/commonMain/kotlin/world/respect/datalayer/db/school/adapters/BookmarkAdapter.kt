@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.adapters
 
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.school.model.Bookmark
 
@@ -9,32 +10,18 @@ fun BookmarkEntity.toModel(): Bookmark {
         lastModified = bLastModified,
         stored = bStored,
         personUid = bPersonUid,
-        learningUnitManifestUrl = bLearningUnitManifestUrl,
-        title = bTitle,
-        subtitle = bSubtitle,
-        appIcon = bAppIcon,
-        appName = bAppName,
-        iconUrl = bIconUrl,
-        appManifestUrl = bAppManifestUrl,
-        expectedIdentifier = bExpectedIdentifier,
-        refererUrl = bRefererUrl,
+        learningUnitManifestUrl = bLearningUnitManifestUrl
     )
 }
 
-fun Bookmark.toEntities(): BookmarkEntity {
+fun Bookmark.toEntities(uidNumberMapper: UidNumberMapper,): BookmarkEntity {
     return BookmarkEntity(
         bStatus = status,
         bLastModified = lastModified,
         bStored = stored,
         bPersonUid = personUid,
+        bPersonUidHash = uidNumberMapper(personUid),
         bLearningUnitManifestUrl = learningUnitManifestUrl,
-        bTitle = title,
-        bSubtitle = subtitle,
-        bAppIcon = appIcon,
-        bAppName = appName,
-        bIconUrl = iconUrl,
-        bAppManifestUrl = appManifestUrl,
-        bExpectedIdentifier = expectedIdentifier,
-        bRefererUrl = refererUrl,
+        bLearningUnitUrlHash = uidNumberMapper(learningUnitManifestUrl)
     )
 }

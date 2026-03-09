@@ -37,7 +37,6 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import kotlin.getValue
-import kotlin.time.Clock
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
@@ -124,7 +123,9 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.bookmarkDataSource.getBookmarkStatus(route.learningUnitManifestUrl)
+            val personUid = accountManager.activeAccount?.userGuid ?: return@launch
+
+            schoolDataSource.bookmarkDataSource.getBookmarkStatus(personUid,route.learningUnitManifestUrl)
                 .collect { bookmarked ->
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }
@@ -206,40 +207,22 @@ class LearningUnitDetailViewModel(
     }
     fun onClickBookmark() {
         viewModelScope.launch {
-
-            val now = Clock.System.now()
-            val personUid = accountManager.activeAccount?.userGuid
+            val personUid = accountManager.activeAccount?.userGuid ?: return@launch
             val manifestUrl = route.learningUnitManifestUrl.toString()
 
-            val isBookmarked = uiState.value.isBookmarked
+            val status =
+                if (uiState.value.isBookmarked)
+                    StatusEnum.TO_BE_DELETED
+                else
+                    StatusEnum.ACTIVE
 
-            if (isBookmarked) {
+            val bookmark = Bookmark(
+                personUid = personUid,
+                learningUnitManifestUrl = manifestUrl,
+                status = status
+            )
 
-                schoolDataSource.bookmarkDataSource.removeBookmark(
-                    manifestUrl = manifestUrl,
-                    lastModified = now
-                )
-
-            } else {
-
-                val bookmark = Bookmark(
-                    status = StatusEnum.ACTIVE,
-                    lastModified = now,
-                    stored = now,
-                    personUid = personUid,
-                    learningUnitManifestUrl = manifestUrl,
-                    title = uiState.value.lessonDetail?.metadata?.title?.getTitle(),
-                    subtitle = uiState.value.lessonDetail?.metadata?.subtitle?.getTitle(),
-                    appIcon = uiState.value.appIcon.orEmpty(),
-                    appName = uiState.value.appDetail?.dataOrNull()?.name?.getTitle().orEmpty(),
-                    iconUrl = uiState.value.lessonDetail?.images?.firstOrNull()?.href,
-                    appManifestUrl = route.appManifestUrl.toString(),
-                    expectedIdentifier = route.expectedIdentifier.orEmpty(),
-                    refererUrl = route.refererUrl?.toString().orEmpty(),
-                )
-
-                schoolDataSource.bookmarkDataSource.store(bookmark)
-            }
+            schoolDataSource.bookmarkDataSource.store(listOf(bookmark))
         }
     }
 }

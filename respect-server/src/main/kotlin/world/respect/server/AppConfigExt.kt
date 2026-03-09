@@ -10,7 +10,7 @@ const val SERVER_PROPERTIES_KEY_PORT = "port"
 /**
  * KTOR server configuration that can be used to run a static directory on the same port.
  */
-const val SERVER_CONFIG_KEY_STATICFILES = "ktor.staticfiles.dir"
+const val SERVER_CONFIG_KEY_STATICFILES = "ktor.extrastaticfiles.dir"
 
 /**
  * File that contains the password for directory management.

@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "title": "RESPECT Base App Catalog"
+  },
+
+  "links": [
+    {"rel": "self", "href": "https://respect.world/respect-ds/base.json", "type": "application/opds+json"}
+  ],
+
+  "publications": [
+    {
+      "metadata": {
+        "@type": "https://respect-schema.ustadmobile.com/App",
+        "title": "Curious Reader",
+        "author": "Curious Reader",
+        "identifier": "http://curiousreader.app/",
+        "language": "en",
+        "modified": "2025-03-02T00:00:00Z",
+        "subject": []
+      },
+      "links": [
+        {"rel": "self", "href": "https://curious-reader.web.app/manifest.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "https://respect.ustadmobile.com/respect-app-manifest",
+          "href": "https://curiousreader.app/respect-manifest.opds",
+          "type": "application/opds+json"
+        }
+      ],
+      "images": [
+        {"href": "https://raw.githubusercontent.com/chimple/CRcontainer/main/app/src/debug/ic_launcher-playstore.png", "type": "image/png", "height": 700, "width": 400 }
+      ]
+    }
+  ]
+}
+

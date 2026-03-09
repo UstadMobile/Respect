@@ -7,8 +7,9 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
-fun LocalDate.atStartOfDayInMillisUtc(): Long =
-    atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+fun LocalDate.atStartOfDayInMillisUtc(): Long {
+    return atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+}
 
 fun String.toFormattedDate(): String = try {
     val dt = Instant.parse(this).toLocalDateTime(TimeZone.currentSystemDefault())

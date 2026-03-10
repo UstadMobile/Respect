@@ -43,6 +43,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
 import world.respect.shared.generated.resources.no_bookmark
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.bookmark.BookmarkListUiState
 import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
@@ -149,19 +150,21 @@ private fun BookmarkListContent(
                         contentAlignment = Alignment.Center
                     ) {
 
-                            RespectAsyncImage(
+                       /*     RespectAsyncImage(
                                 uri = bookmark.imageUrl ,
                                 contentDescription = "",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(36.dp)
-                            )
+                            )*/
                         }
 
                 },
 
                 headlineContent = {
-                    Text(text =bookmark.title ?: "")
+                    Text(
+                        text = bookmark.title?.getTitle() ?: ""
+                    )
                 },
 
                 supportingContent = {
@@ -202,7 +205,7 @@ private fun BookmarkListContent(
                         }
 
                         Text(
-                            text = bookmark.subtitle ?: ""
+                            text = bookmark.title?.getTitle() ?: ""
                         )
 
                     }

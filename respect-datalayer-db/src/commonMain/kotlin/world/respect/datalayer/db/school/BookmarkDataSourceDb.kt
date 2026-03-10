@@ -21,6 +21,8 @@ class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+
+
 ) : BookmarkDataSourceLocal {
 
 
@@ -45,7 +47,7 @@ class BookmarkDataSourceDb(
                     list.map {
                         it.copy(
                             stored = now
-                        ).toEntities(uidNumberMapper)
+                        ).toEntities(uidNumberMapper).bookmark
                     }
                 )
             }
@@ -57,14 +59,13 @@ class BookmarkDataSourceDb(
         listParams: BookmarkDataSource.GetListParams,
 
         ): DataLoadState<List<Bookmark>> {
-        val entities = schoolDb.getBookmarkDao()
-            .list(
-                personUid = listParams.personUid ?: "0",
-                includeDeleted = listParams.common.includeDeleted ?: false
-            )
-
         return DataReadyState(
-            data = entities.map { it.toModel() }
+            data = schoolDb.getBookmarkDao()
+                .list(
+                    personUid = requireNotNull(listParams.personUid),
+                    includeDeleted = listParams.common.includeDeleted ?: false
+                )
+                .map { it.toModel() }
         )
     }
 

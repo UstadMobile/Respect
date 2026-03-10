@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.adapters.BookmarkEntities
 import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.school.model.StatusEnum
 
@@ -19,6 +20,8 @@ interface BookmarkDao {
     @Query("""
         SELECT EXISTS(
         SELECT 1 FROM BookmarkEntity
+        
+        
          WHERE bPersonUid = :personUid
            AND bLearningUnitManifestUrl = :manifestUrl
            AND bStatus = :activeStatus
@@ -42,6 +45,6 @@ interface BookmarkDao {
         personUid: String,
         includeDeleted: Boolean = false,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
-    ): List<BookmarkEntity>
+    ): List<BookmarkEntities>
 
 }

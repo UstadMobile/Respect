@@ -5,3 +5,6 @@ import world.respect.datalayer.shared.LocalModelDataSource
 
 
 interface BookmarkDataSourceLocal: BookmarkDataSource, LocalModelDataSource<Bookmark>
+
+
+

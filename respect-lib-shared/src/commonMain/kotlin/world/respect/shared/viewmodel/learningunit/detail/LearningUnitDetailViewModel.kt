@@ -43,9 +43,8 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
-    val appDetail: DataLoadState<RespectAppManifest>? = null,
 
-    val appIcon: String? = null,
+
 
     val isBookmarked: Boolean = false,
 ) {

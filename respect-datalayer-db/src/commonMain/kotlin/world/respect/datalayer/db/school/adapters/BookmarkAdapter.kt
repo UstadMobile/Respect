@@ -46,32 +46,48 @@ data class BookmarkEntities(
         parentColumn = "bLearningUnitUrlHash",
         entityColumn = "opeUrlHash",
         entity = OpdsPublicationEntity::class
+
     )
     val publication: OpdsPublicationEntities? = null
 )
 
 fun BookmarkEntities.toModel(): Bookmark {
 
-    fun List<LangMapEntity>.extract(propType: LangMapEntity.PropType): LangMap? {
+    fun List<LangMapEntity>.extract(
+        propType: LangMapEntity.PropType,
+        publicationUid: Long
+    ): LangMap? {
         return this
-            .filter { it.lmePropType == propType && it.lmeTopParentUid1 == 0L }
+            .filter {
+                it.lmePropType == propType &&
+                        it.lmeTopParentUid1 == publicationUid
+            }
             .takeIf { it.isNotEmpty() }
             ?.toModel()
     }
 
-    val title = publication?.langMaps
-        ?.extract(LangMapEntity.PropType.OPDS_PUB_TITLE)
+    val title =
+        publication?.langMaps?.extract(
+        LangMapEntity.PropType.OPDS_PUB_TITLE,
+        publication.publication.opeUid
+    )
+
+    val subTitle =
+        publication?.langMaps?.extract(
+            LangMapEntity.PropType.OPDS_PUB_SUBTITLE,
+            publication.publication.opeUid
+        )
+
+
 
     return Bookmark(
-
-
-
         status = bookmark.bStatus,
         lastModified = bookmark.bLastModified,
         stored = bookmark.bStored,
         personUid = bookmark.bPersonUid,
         learningUnitManifestUrl = bookmark.bLearningUnitManifestUrl,
-        title = title
+        title = title,
+        subTitle=subTitle
     )
 }
 

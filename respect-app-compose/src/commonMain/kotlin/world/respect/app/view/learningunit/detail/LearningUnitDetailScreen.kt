@@ -48,6 +48,8 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
@@ -69,6 +71,7 @@ fun LearningUnitDetailScreen(
 }
 
 @Composable
+
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
@@ -77,7 +80,8 @@ fun LearningUnitDetailScreen(
     onClickBookmark: () -> Unit
 ) {
 
-    val appDetail = (uiState.appDetail as? DataReadyState)?.data
+    val appData = uiState.app.dataOrNull()
+    val appIcon = appData?.findIcons()?.firstOrNull()?.toString()
 
     LazyColumn(
         modifier = Modifier
@@ -124,14 +128,12 @@ fun LearningUnitDetailScreen(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                uiState.appIcon.also { icon ->
+                                appIcon?.let { icon ->
                                     RespectAsyncImage(
                                         uri = icon,
                                         contentDescription = "",
                                         contentScale = ContentScale.Fit,
-                                        modifier = Modifier
-                                            .size(80.dp)
-
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
@@ -139,7 +141,7 @@ fun LearningUnitDetailScreen(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = appDetail?.name?.getTitle().toString()
+                                text = appData?.metadata?.title?.getTitle().orEmpty()
                             )
                         }
 

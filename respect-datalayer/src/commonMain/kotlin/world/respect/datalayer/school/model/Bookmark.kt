@@ -14,5 +14,6 @@ data class Bookmark(
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
     val title: LangMap? = null,
+    val subTitle: LangMap? = null,
 ) : ModelWithTimes
 

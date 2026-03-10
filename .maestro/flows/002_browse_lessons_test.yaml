@@ -26,7 +26,7 @@ onFlowComplete:
     id: "floating_action_button"  # +Add App
 - tapOn: "Add from Link"
 - tapOn: "Link*"
-- inputText: "https://respect.world/respect-ds/case_valid/appmanifest.json"
+- inputText: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/appmanifest.json
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"

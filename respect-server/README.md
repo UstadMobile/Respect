@@ -7,6 +7,10 @@ Run from source:
 ./gradlew respect-server:run
 ```
 
+KTOR configuration parameters:
+- ktor.extrastaticfiles.dir : path to a directory that will be served on /static-extra. Can be used to host 
+  test assets.
+
 OpenAPI (swagger) docs detailing the API endpoints are in [openapi.yaml](src/main/resources/openapi/openapi.yaml).
 
 They can be viewed:

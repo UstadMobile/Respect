@@ -127,12 +127,7 @@ class AddSchoolUseCase(
                         uid = personRole.newUserInviteUid,
                         code = Invite2.newRandomCode(),
                         role = personRole,
-                        firstUser = personRole == PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-                        approvalRequiredAfter = if (personRole == PersonRoleEnum.SYSTEM_ADMINISTRATOR) {
-                            Clock.System.now() + (10 * 365).days
-                        } else {
-                            Clock.System.now()
-                        }
+                        approvalRequiredAfter = Clock.System.now(),
                     )
                 )
             }

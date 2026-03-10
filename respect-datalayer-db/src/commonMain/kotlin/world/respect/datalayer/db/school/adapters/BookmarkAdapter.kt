@@ -63,6 +63,9 @@ fun BookmarkEntities.toModel(): Bookmark {
         ?.extract(LangMapEntity.PropType.OPDS_PUB_TITLE)
 
     return Bookmark(
+
+
+
         status = bookmark.bStatus,
         lastModified = bookmark.bLastModified,
         stored = bookmark.bStored,

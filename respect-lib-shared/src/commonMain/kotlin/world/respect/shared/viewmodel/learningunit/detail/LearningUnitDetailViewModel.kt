@@ -7,7 +7,6 @@ import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -22,7 +21,6 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
@@ -59,8 +57,9 @@ class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
+    private val accountManager: RespectAccountManager,
     private val ustadCache: UstadCache,
-    accountMananger: RespectAccountManager,
+    private val accountMananger: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
 

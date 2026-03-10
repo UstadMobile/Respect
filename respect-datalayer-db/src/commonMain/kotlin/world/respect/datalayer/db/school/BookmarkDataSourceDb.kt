@@ -26,6 +26,8 @@ class BookmarkDataSourceDb(
 ) : BookmarkDataSourceLocal {
 
 
+
+
     override fun getBookmarkStatus(personUid: String, url: Url): Flow<Boolean> {
         return schoolDb.getBookmarkDao().getBookmarkStatus(
             personUid = personUid,

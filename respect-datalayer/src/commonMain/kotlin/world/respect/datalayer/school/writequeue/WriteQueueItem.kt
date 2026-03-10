@@ -26,7 +26,9 @@ class WriteQueueItem(
         PERSON_QRBADGE(8),
         INVITE(9),
 
-        BOOKMARK(10)
+        OPDS_FEED(10),
+
+        BOOKMARK(11)
 
         ;
 

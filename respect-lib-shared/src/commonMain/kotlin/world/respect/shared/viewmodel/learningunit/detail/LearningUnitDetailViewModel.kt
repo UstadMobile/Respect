@@ -22,6 +22,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
@@ -40,7 +41,7 @@ import kotlin.getValue
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
-    val app: DataLoadState<RespectAppManifest> = DataLoadingState(),
+    val app: DataLoadState<OpdsPublication> = DataLoadingState(),
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
@@ -58,11 +59,12 @@ class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
-    private val accountManager: RespectAccountManager,
     private val ustadCache: UstadCache,
+    accountMananger: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    override val scope: Scope = accountMananger.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
 
@@ -73,28 +75,8 @@ class LearningUnitDetailViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {
-
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.getAppAsFlow(
-                manifestUrl = route.appManifestUrl,
-                loadParams = DataLoadParams()
-            ).collectLatest { result ->
-                if (result is DataReadyState) {
-                    _uiState.update {
-                        it.copy(
-                            appDetail = result,
-                            appIcon = route.appManifestUrl.resolve(
-                                result.data.icon.toString()
-                            ).toString(),
-                        )
-
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            appDataSource.opdsDataSource.loadOpdsPublication(
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
                 url = route.learningUnitManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = route.learningUnitManifestUrl,
@@ -132,9 +114,11 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.getAppAsFlow(
-                manifestUrl = route.appManifestUrl,
-                loadParams = DataLoadParams()
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+                url = route.appManifestUrl,
+                params = DataLoadParams(),
+                referrerUrl = null,
+                expectedPublicationId = null,
             ).collect { app ->
                 _uiState.update { it.copy(app = app) }
             }
@@ -174,7 +158,6 @@ class LearningUnitDetailViewModel(
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
-
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }

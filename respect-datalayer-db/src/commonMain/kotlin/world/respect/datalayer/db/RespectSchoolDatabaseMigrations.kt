@@ -5,119 +5,23 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
-val MIGRATION_1_2 = object: Migration(1, 2) {
+val MIGRATION_11_12 = object: Migration(11, 12) {
     override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("""
-            ALTER TABLE PersonPasskeyEntity
-            ADD COLUMN ppLastModified INTEGER NOT NULL DEFAULT 0
-        """)
-
-        connection.execSQL("""
-            ALTER TABLE PersonPasskeyEntity
-            ADD COLUMN ppStored INTEGER NOT NULL DEFAULT 0
-        """)
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `LangMapEntity` (`lmeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lmeTopParentType` INTEGER NOT NULL, `lmeTopParentUid1` INTEGER NOT NULL, `lmeTopParentUid2` INTEGER NOT NULL, `lmePropType` INTEGER NOT NULL, `lmePropFk` INTEGER NOT NULL, `lmeLang` TEXT NOT NULL, `lmeRegion` TEXT, `lmeValue` TEXT NOT NULL)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `index_LangMapEntity_lmeTopParentType_lmeTopParentUid1_lmeTopParentUid2_lmePropType` ON `LangMapEntity` (`lmeTopParentType`, `lmeTopParentUid1`, `lmeTopParentUid2`, `lmePropType`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `ReadiumLinkEntity` (`rleId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rleOpdsParentType` INTEGER NOT NULL, `rleOpdsParentUid` INTEGER NOT NULL, `rlePropType` TEXT NOT NULL, `rlePropFk` INTEGER NOT NULL, `rleIndex` INTEGER NOT NULL, `rleHref` TEXT NOT NULL, `rleRel` TEXT, `rleType` TEXT, `rleTitle` TEXT, `rleTemplated` INTEGER, `rleProperties` TEXT, `rleHeight` INTEGER, `rleWidth` INTEGER, `rleSize` INTEGER, `rleBitrate` REAL, `rleDuration` REAL, `rleLanguage` TEXT)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `OpdsPublicationEntity` (`opeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `opeOfeUid` INTEGER NOT NULL, `opeOgeUid` INTEGER NOT NULL, `opeIndex` INTEGER NOT NULL, `opeUrl` TEXT, `opeUrlHash` INTEGER NOT NULL, `opeLastModified` INTEGER NOT NULL, `opeEtag` TEXT, `opeMdIdentifier` TEXT, `opeMdLanguage` TEXT, `opeMdType` TEXT, `opeMdDescription` TEXT, `opeMdNumberOfPages` INTEGER, `opeMdDuration` REAL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `ReadiumSubjectEntity` (`rseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rseStringValue` TEXT, `rseTopParentType` INTEGER NOT NULL, `rseTopParentUid` INTEGER NOT NULL, `rseSubjectSortAs` TEXT, `rseSubjectCode` TEXT, `rseSubjectScheme` TEXT, `rseIndex` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `OpdsFacetEntity` (`ofaeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ofaeOfeUid` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `OpdsGroupEntity` (`ogeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ogeOfeUid` INTEGER NOT NULL, `ogeIndex` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `OpdsFeedEntity` (`ofeUid` INTEGER NOT NULL, `ofeUrl` TEXT NOT NULL, `ofeUrlHash` INTEGER NOT NULL, `ofeLastModifiedHeader` INTEGER NOT NULL, `ofeEtag` TEXT, PRIMARY KEY(`ofeUid`))")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `OpdsFeedMetadataEntity` (`ofmeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ofmeOfeUid` INTEGER NOT NULL, `ofmePropType` INTEGER NOT NULL, `ofmePropFk` INTEGER NOT NULL, `ofmeIdentifier` TEXT, `ofmeType` TEXT, `ofmeTitle` TEXT NOT NULL, `ofmeSubtitle` TEXT, `ofmeModified` TEXT, `ofmeDescription` TEXT, `ofmeItemsPerPage` INTEGER, `ofmeCurrentPage` INTEGER, `ofmeNumberOfItems` INTEGER)")
     }
 }
-
-fun MIGRATION_2_3(
-    deleteExisting: Boolean = false,
-) = object: Migration(2, 3) {
-    override fun migrate(connection: SQLiteConnection) {
-        if(deleteExisting) {
-            connection.execSQL("DELETE FROM PersonPasskeyEntity")
-        }
-        connection.execSQL("ALTER TABLE PersonPasskeyEntity RENAME TO PersonPasskeyEntity_old")
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `PersonPasskeyEntity` (`ppPersonUid` INTEGER NOT NULL, `ppId` TEXT NOT NULL, `ppLastModified` INTEGER NOT NULL, `ppStored` INTEGER NOT NULL, `ppAttestationObj` TEXT, `ppClientDataJson` TEXT, `ppOriginString` TEXT, `ppChallengeString` TEXT, `ppPublicKey` TEXT, `isRevoked` INTEGER NOT NULL, PRIMARY KEY(`ppPersonUid`, `ppId`))")
-        connection.execSQL("""
-            INSERT INTO PersonPasskeyEntity (ppPersonUid, ppId, ppLastModified, ppStored, ppAttestationObj, ppClientDataJson, ppOriginString, ppChallengeString, ppPublicKey, isRevoked)
-            SELECT ppPersonUid, ppId, ppLastModified, ppStored, ppAttestationObj, ppClientDataJson, ppOriginString, ppChallengeString, ppPublicKey, isRevoked
-              FROM PersonPasskeyEntity_old
-        """.trimIndent())
-    }
-}
-
-val MIGRATE_3_4 = object: Migration(3, 4) {
-    override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("""
-            ALTER TABLE PersonPasskeyEntity 
-             ADD COLUMN ppDeviceName TEXT NOT NULL DEFAULT ''
-        """.trimIndent())
-    }
-}
-
-val MIGRATE_4_5 = object: Migration(4, 5) {
-    override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("""
-            ALTER TABLE PersonPasskeyEntity 
-             ADD COLUMN ppTimeCreated INTEGER NOT NULL DEFAULT 0
-        """.trimIndent())
-        connection.execSQL("""
-            UPDATE PersonPasskeyEntity
-               SET ppTimeCreated = ppLastModified
-        """.trimIndent())
-    }
-}
-
-val MIGRATE_5_6 = object: Migration(5, 6){
-    override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL(
-            """
-            ALTER TABLE PersonPasskeyEntity 
-             ADD COLUMN ppAaguid TEXT NOT NULL DEFAULT ''
-        """.trimIndent()
-        )
-
-        connection.execSQL(
-            """
-            ALTER TABLE PersonPasskeyEntity
-            ADD COLUMN ppProviderName TEXT NOT NULL DEFAULT ''
-        """.trimIndent()
-        )
-    }
-}
-
-val MIGRATE_6_7 = object: Migration(6, 7) {
-    override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("""
-            ALTER TABLE PersonPasskeyEntity
-             ADD COLUMN ppIconLight TEXT NOT NULL DEFAULT ''
-        """.trimIndent())
-
-        connection.execSQL("""
-            ALTER TABLE PersonPasskeyEntity
-             ADD COLUMN ppIconDark TEXT NOT NULL DEFAULT ''
-        """.trimIndent())
-    }
-}
-
-
-val MIGRATION_7_8 = object : Migration(7, 8) {
-    override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("""
-            CREATE TABLE `PersonRelatedPersonEntity_new` (
-                `prpUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                `prpPersonUidNum` INTEGER NOT NULL,
-                `prpOtherPersonUid` TEXT NOT NULL,
-                `prpOtherPersonUidNum` INTEGER NOT NULL
-            )
-        """.trimIndent())
-
-        connection.execSQL("""
-            INSERT INTO `PersonRelatedPersonEntity_new` (prpPersonUidNum, prpOtherPersonUid, prpOtherPersonUidNum)
-            SELECT prpPersonUidNum, prpOtherPersonUid, prpOtherPersonUidNum FROM `PersonRelatedPersonEntity`
-        """.trimIndent())
-
-        connection.execSQL("DROP TABLE `PersonRelatedPersonEntity`")
-        connection.execSQL("ALTER TABLE `PersonRelatedPersonEntity_new` RENAME TO `PersonRelatedPersonEntity`")
-    }
-}
-
 
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(
-        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7,MIGRATION_7_8
-    )
+    return this.addMigrations(MIGRATION_11_12)
 }
 

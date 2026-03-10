@@ -46,8 +46,9 @@ import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
@@ -67,7 +68,6 @@ fun AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
-        onClickDes={viewModel.onClickDes()}
     )
 }
 
@@ -75,9 +75,8 @@ fun AppLauncherScreen(
 @Composable
 fun AppLauncherScreen(
     uiState: AppLauncherUiState,
-    onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
-    onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
-    onClickDes:()-> Unit
+    onClickApp: (DataLoadState<OpdsPublication>) -> Unit,
+    onClickRemove: (DataLoadState<OpdsPublication>) -> Unit,
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
@@ -118,7 +117,6 @@ fun AppLauncherScreen(
                     } ?: "",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 16.dp)
-                        .clickable { onClickDes() },
                 )
             }
         } else {
@@ -138,8 +136,8 @@ fun AppLauncherScreen(
                     }
                 ) { index ->
                     val schoolApp = lazyPagingItems[index]
-                    val respectAppFlow = remember(schoolApp, uiState.respectAppForSchoolApp) {
-                        schoolApp?.let { uiState.respectAppForSchoolApp(schoolApp) } ?: emptyFlow()
+                    val respectAppFlow = remember(schoolApp, uiState.respectPublicationForSchoolApp) {
+                        schoolApp?.let { uiState.respectPublicationForSchoolApp(schoolApp) } ?: emptyFlow()
                     }
                     val respectApp by respectAppFlow.collectAsState(NoDataLoadedState.notFound())
 
@@ -161,7 +159,7 @@ fun AppLauncherScreen(
 
 @Composable
 fun AppGridItem(
-    app: DataLoadState<RespectAppManifest>,
+    app: DataLoadState<OpdsPublication>,
     onClickApp: () -> Unit,
     onClickRemove: () -> Unit,
     showRemove: Boolean = false,
@@ -182,7 +180,7 @@ fun AppGridItem(
                 .fillMaxWidth()
                 .aspectRatio(1f)
         ) {
-            appData?.icon.also { icon ->
+            appData?.findIcons()?.firstOrNull()?.also { icon ->
                 RespectAsyncImage(
                     uri = icon.toString(),
                     contentDescription = "",
@@ -236,7 +234,7 @@ fun AppGridItem(
         )
 
         Text(
-            text = appData?.name?.getTitle() ?: "",
+            text = appData?.metadata?.title?.getTitle() ?: "",
             modifier = Modifier.align(Alignment.Start)
         )
 

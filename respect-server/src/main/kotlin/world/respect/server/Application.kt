@@ -11,6 +11,8 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
+import io.ktor.server.http.content.staticFiles
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -185,6 +187,14 @@ fun Application.module() {
             path = "swagger",
             swaggerFile = "openapi/openapi.yaml",
         )
+
+        environment.config.filePropertyOrNull(
+            propertyName = SERVER_CONFIG_KEY_STATICFILES
+        )?.also { staticFilesDir ->
+            staticFiles("/static-extra", staticFilesDir)
+        }
+
+        staticResources("/static-resources", "http")
 
         route(RESPECT_SCHOOL_LINK_SEGMENT) {
             SchoolLinkRoute()

@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -34,6 +36,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
+import world.respect.shared.viewmodel.playlists.mapping.model.Playlists
 
 data class AssignmentListUiState(
     val assignments: IPagingSourceFactory<Int, Assignment> = EmptyPagingSourceFactory(),
@@ -44,6 +48,7 @@ class AssignmentListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
+    private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -104,14 +109,34 @@ class AssignmentListViewModel(
         )
     }
 
+
     fun onClickAdd() {
+        val availablePlaylists = getAvailablePlaylists()
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AssignmentEdit.create(uid = null)
+                AssignmentEdit.create(
+                    uid = null,
+                    availablePlaylists = availablePlaylists
+                )
             )
         )
     }
 
+    private fun getAvailablePlaylists(): List<Playlists> {
+        val mappingsJson = savedStateHandle.get<String>(AppLauncherViewModel.KEY_MAPPINGS_LIST)
+        return if (mappingsJson != null) {
+            try {
+                json.decodeFromString(
+                    ListSerializer(Playlists.serializer()),
+                    mappingsJson
+                )
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+    }
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
         return respectAppDataSource.opdsDataSource.loadOpdsPublication(
             url = url, params = DataLoadParams(), null, null

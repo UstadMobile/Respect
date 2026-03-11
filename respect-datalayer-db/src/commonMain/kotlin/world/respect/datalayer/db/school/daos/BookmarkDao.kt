@@ -16,12 +16,9 @@ interface BookmarkDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(bookmarks: List<BookmarkEntity>)
 
-
     @Query("""
         SELECT EXISTS(
         SELECT 1 FROM BookmarkEntity
-        
-        
          WHERE bPersonUid = :personUid
            AND bLearningUnitManifestUrl = :manifestUrl
            AND bStatus = :activeStatus
@@ -46,5 +43,4 @@ interface BookmarkDao {
         includeDeleted: Boolean = false,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): List<BookmarkEntities>
-
 }

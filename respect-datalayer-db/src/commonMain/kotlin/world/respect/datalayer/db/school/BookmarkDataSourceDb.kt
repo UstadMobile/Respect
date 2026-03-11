@@ -39,9 +39,7 @@ class BookmarkDataSourceDb(
 
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-
                 val now = Clock.System.now()
-
                 schoolDb.getBookmarkDao().upsert(
                     list.map {
                         it.copy(

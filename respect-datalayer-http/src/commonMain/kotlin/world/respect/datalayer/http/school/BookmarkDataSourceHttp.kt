@@ -20,10 +20,7 @@ import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSource.Companion.PERSON_UID
-import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.ClassDataSource.Companion.PARAM_NAME_INVITE_CODE
 import world.respect.datalayer.school.model.Bookmark
-import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 
@@ -66,8 +63,6 @@ class BookmarkDataSourceHttp(
         loadParams: DataLoadParams,
         listParams: BookmarkDataSource.GetListParams
     ): DataLoadState<List<Bookmark>> {
-
-
         return httpClient.getAsDataLoadState<List<Bookmark>>(
             url = listParams.urlWithParams(),
             validationHelper = validationHelper
@@ -76,6 +71,4 @@ class BookmarkDataSourceHttp(
             useValidationCacheControl(validationHelper)
         }
     }
-
-
 }

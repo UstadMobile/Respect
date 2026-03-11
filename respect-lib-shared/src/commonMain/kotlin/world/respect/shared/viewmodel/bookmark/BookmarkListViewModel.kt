@@ -2,7 +2,6 @@ package world.respect.shared.viewmodel.bookmark
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

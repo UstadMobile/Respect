@@ -21,7 +21,6 @@ import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
-import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource

@@ -25,14 +25,13 @@ class BookmarkDataSourceRepository(
     override val remote: BookmarkDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-    ) : BookmarkDataSource, RepositoryModelDataSource<Bookmark> {
+) : BookmarkDataSource, RepositoryModelDataSource<Bookmark> {
     override fun getBookmarkStatus(
         personUid: String,
         url: Url
     ): Flow<Boolean> {
         return local.getBookmarkStatus(personUid, url)
     }
-
 
     override suspend fun store(list: List<Bookmark>) {
         local.store(list)
@@ -45,7 +44,8 @@ class BookmarkDataSourceRepository(
                     timeQueued = timeNow,
                 )
             }
-        )    }
+        )
+    }
 
     override suspend fun list(
         loadParams: DataLoadParams,
@@ -55,7 +55,7 @@ class BookmarkDataSourceRepository(
             remote.list(loadParams, listParams).also {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
             }
-        }catch(e: Throwable) {
+        } catch (e: Throwable) {
             Napier.w(
                 message = "BookmarkDataSourceRepository.list() failed:",
                 throwable = e,
@@ -66,5 +66,4 @@ class BookmarkDataSourceRepository(
 
         return local.list(loadParams, listParams).combineWithRemoteIfNotNull(remote)
     }
-
 }

@@ -41,7 +41,6 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.shared.navigation.BookmarkList
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -161,6 +160,7 @@ class AppLauncherViewModel(
             NavCommand.Navigate(Settings)
         )
     }
+
     fun onClickRemove(app: DataLoadState<OpdsPublication>) {
         val manifestUrl = app.metaInfo.url ?: return
         viewModelScope.launch {

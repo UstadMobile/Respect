@@ -2,31 +2,30 @@
   "metadata": {
     "@type": "http://schema.org/Game",
     "title": "Lesson 002",
-    "author": "Mullah Nasruddin",
+    "author": "Video Lesson",
     "identifier": "https://example.app/id/lesson002",
     "language": "en",
-    "modified": "2015-09-29T17:00:00Z"
+    "modified": "2026-03-11T10:00:00Z"
   },
   "links": [
-    {"rel": "self", "href": "https://respect.world/respect-ds/case_valid/grade1/lesson002/lesson002.json", "type": "application/opds-publication+json"},
-    {"rel": "http://opds-spec.org/acquisition/open-access", "href": "lesson021.html", "type": "text/html"}
+    {
+      "rel": "self",
+      "href": "$TESTBASEURL/grade1/lesson002/lesson002.json",
+      "type": "application/opds-publication+json"
+    },
+    {
+      "rel": "http://opds-spec.org/acquisition/open-access",
+      "href": "lesson002.html",
+      "type": "text/html"
+    }
   ],
   "images": [
-    {"href": "cover.png", "type": "image/png" }
+    { "href": "cover.png", "type": "image/png" }
   ],
   "resources": [
     {
-      "href": "audio.ogg",
-      "type": "audio/ogg"
-    },
-    {
       "href": "video.mp4",
       "type": "video/mp4"
-    },
-    {
-      "href": "script.js",
-      "type": "text/javascript",
-      "rel": ["respect-not-android"]
     }
   ]
 }

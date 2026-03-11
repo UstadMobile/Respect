@@ -4,7 +4,7 @@
   },
 
   "links": [
-    {"rel": "self", "href": "grade1.json", "type": "application/opds+json"}
+    { "rel": "self", "href": "grade1.json", "type": "application/opds+json" }
   ],
 
   "publications": [
@@ -15,57 +15,49 @@
         "author": "Mullah Nasruddin",
         "identifier": "http://example.app/id/lesson001",
         "language": "en",
-        "modified": "2015-09-29T17:00:00Z",
-        "subject": [
-          {
-            "name": "Mathematics",
-            "scheme": "https://www.bisg.org/#bisac",
-            "code": "MAT000000"
-          }
-        ]
+        "modified": "2015-09-29T17:00:00Z"
       },
       "links": [
-        {"rel": "self", "href": "lesson001/lesson001.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "self",
+          "href": "lesson001/lesson001.json",
+          "type": "application/opds-publication+json"
+        },
         {
           "rel": "http://opds-spec.org/acquisition/open-access",
-          "href": "http://localhost/opds/case_valid/grade1/lesson001/lesson001.html",
+          "href": "$TESTBASEURL/grade1/lesson001/lesson001.html",
           "type": "text/html"
         }
       ],
       "images": [
-        {"href": "lesson001/cover.png", "type": "image/png"  }
+        { "href": "lesson001/cover.png", "type": "image/png" }
       ]
     },
+
     {
       "metadata": {
         "@type": "http://schema.org/Game",
         "title": "Lesson 002",
-        "author": "Mullah Nasruddin",
+        "author": "Video Lesson",
         "identifier": "http://example.app/id/lesson002",
         "language": "en",
-        "modified": "2015-09-29T17:00:00Z",
-        "subject": [
-          {
-            "name": "Mathematics",
-            "scheme": "https://www.bisg.org/#bisac",
-            "code": "MAT000000"
-          }
-        ]
+        "modified": "2026-03-11T10:00:00Z"
       },
       "links": [
-        {"rel": "self", "href": "lesson002/lesson002.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "self",
+          "href": "lesson002/lesson002.json",
+          "type": "application/opds-publication+json"
+        },
         {
           "rel": "http://opds-spec.org/acquisition/open-access",
-          "href": "http://localhost/opds/case_valid/grade1/lesson002/lesson002.html",
+          "href": "$TESTBASEURL/grade1/lesson002/lesson002.html",
           "type": "text/html"
         }
       ],
       "images": [
-        {"href": "lesson002/cover.png", "type": "image/png"  }
+        { "href": "lesson002/cover.png", "type": "image/png" }
       ]
     }
-
   ]
 }
-
-

@@ -114,6 +114,15 @@ onFlowComplete:
     index: 1
 - inputText: "Day 2"
 - hideKeyboard
+- tapOn:
+    id: "add_item"
+- tapOn: "My app"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 002"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- assertVisible: "Lesson 002"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -121,6 +130,7 @@ onFlowComplete:
 - tapOn: "Day 1"
 - assertVisible: "Lesson 001"
 - assertVisible: "Day 2"
+- assertVisible: "Lesson 002"
 - assertVisible:
     id: "share_btn"
 - assertVisible:
@@ -138,9 +148,10 @@ onFlowComplete:
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 - assertVisible: "Playlist - Grade 1"
-- tapOn:
+- tapOn:                                #RemoveBookmark
     id: "bookmark_icon"
-- assertNotVisible: "Lesson 001"
 - assertVisible: "1 Remove Bookmark"
+- assertVisible: "Undo"
+- assertNotVisible: "Lesson 001"
 - tapOn: "Undo"
 - assertVisible: "Lesson 001"

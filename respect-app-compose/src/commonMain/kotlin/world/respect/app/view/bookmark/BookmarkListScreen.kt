@@ -199,7 +199,7 @@ private fun BookmarkListContent(
                         }
 
                         Text(
-                            text = bookmark.title?.getTitle() ?: ""
+                            text = bookmark.subTitle?.getTitle() ?: ""
                         )
 
                     }

@@ -18,7 +18,6 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
@@ -190,7 +189,8 @@ class LearningUnitDetailViewModel(
     fun onClickBookmark() {
         viewModelScope.launch {
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
-            val manifestUrl = route.learningUnitManifestUrl.toString()
+            val learningUnitManifestUrl = route.learningUnitManifestUrl
+            val appManifestUrl =route.appManifestUrl
 
             val status =
                 if (uiState.value.isBookmarked)
@@ -200,7 +200,7 @@ class LearningUnitDetailViewModel(
 
             val bookmark = Bookmark(
                 personUid = personUid,
-                learningUnitManifestUrl = manifestUrl,
+                learningUnitManifestUrl = learningUnitManifestUrl,
                 status = status
             )
 

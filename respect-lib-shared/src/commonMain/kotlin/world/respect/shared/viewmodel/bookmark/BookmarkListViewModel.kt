@@ -17,6 +17,8 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 import kotlin.getValue
 
@@ -38,11 +40,25 @@ class BookmarkListViewModel(
 
     init {
         viewModelScope.launch {
+
             loadingState = LoadingUiState.INDETERMINATE
 
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
 
-            val bookmarks = schoolDataSource.bookmarkDataSource.list(
+            val missingBookmarks = schoolDataSource.bookmarkDataSource
+                .findBookmarks(personUid)
+
+            missingBookmarks.forEach { bookmark ->
+                schoolDataSource.opdsPublicationDataSource.getByUrl(
+                    url = bookmark.learningUnitManifestUrl,
+                    params = DataLoadParams(),
+                    referrerUrl = null,
+                    expectedPublicationId = null
+                )
+            }
+
+            val bookmarks = schoolDataSource.bookmarkDataSource
+                .list(
                     loadParams = DataLoadParams(),
                     listParams = BookmarkDataSource.GetListParams(
                         personUid = personUid
@@ -51,7 +67,7 @@ class BookmarkListViewModel(
 
             _uiState.update {
                 it.copy(
-                    bookmarks = bookmarks,
+                    bookmarks = bookmarks
                 )
             }
 
@@ -73,8 +89,15 @@ class BookmarkListViewModel(
             loadingState = LoadingUiState.NOT_LOADING
         }
     }
+    fun onClickBookmark(bookmark: Bookmark) {
 
-    fun onClickBookmark(bookmark: Bookmark){
-        //Have to implement navigation
+        _navCommandFlow.tryEmit(
+            value = NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = bookmark.learningUnitManifestUrl,
+                    appManifestUrl = bookmark.learningUnitManifestUrl,
+                )
+            )
+        )
     }
 }

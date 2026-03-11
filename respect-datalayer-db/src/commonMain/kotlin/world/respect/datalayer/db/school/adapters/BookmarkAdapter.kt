@@ -45,7 +45,7 @@ data class BookmarkEntities(
     val bookmark: BookmarkEntity,
 
     @Relation(
-        parentColumn = "bLearningUnitUrlHash",
+        parentColumn = "bUrl",
         entityColumn = "opeUrlHash",
         entity = OpdsPublicationEntity::class
 
@@ -102,7 +102,7 @@ fun BookmarkEntities.toModel(
         lastModified = bookmark.bLastModified,
         stored = bookmark.bStored,
         personUid = bookmark.bPersonUid,
-        learningUnitManifestUrl = bookmark.bLearningUnitManifestUrl,
+        learningUnitManifestUrl = bookmark.bUrl,
         title = title,
         subTitle = subTitle,
         imageUrl = imageUrl
@@ -119,8 +119,8 @@ fun Bookmark.toEntities(
         bStored = stored,
         bPersonUid = personUid,
         bPersonUidHash = uidNumberMapper(personUid),
-        bLearningUnitManifestUrl = learningUnitManifestUrl,
-        bLearningUnitUrlHash = uidNumberMapper(learningUnitManifestUrl)
+        bUrl = learningUnitManifestUrl,
+        bUrlHash = uidNumberMapper(learningUnitManifestUrl.toString())
     )
 
     return BookmarkEntities(

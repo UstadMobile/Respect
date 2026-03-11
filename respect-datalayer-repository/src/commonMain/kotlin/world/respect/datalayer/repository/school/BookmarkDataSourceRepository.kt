@@ -66,4 +66,9 @@ class BookmarkDataSourceRepository(
 
         return local.list(loadParams, listParams).combineWithRemoteIfNotNull(remote)
     }
+
+    override suspend fun findBookmarks(personUid: String): List<Bookmark> {
+        return local.findBookmarks(personUid)
+    }
+
 }

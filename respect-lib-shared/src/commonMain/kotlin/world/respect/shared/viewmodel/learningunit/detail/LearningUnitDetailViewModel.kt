@@ -42,9 +42,6 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
-
-
-
     val isBookmarked: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
@@ -53,11 +50,10 @@ data class LearningUnitDetailUiState(
 
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
     private val accountManager: RespectAccountManager,
     private val ustadCache: UstadCache,
-    private val accountMananger: RespectAccountManager,
+    accountMananger: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
 
@@ -104,7 +100,10 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
 
-            schoolDataSource.bookmarkDataSource.getBookmarkStatus(personUid,route.learningUnitManifestUrl)
+            schoolDataSource.bookmarkDataSource.getBookmarkStatus(
+                personUid,
+                route.learningUnitManifestUrl
+            )
                 .collect { bookmarked ->
                     _uiState.update { it.copy(isBookmarked = bookmarked) }
                 }
@@ -151,19 +150,21 @@ class LearningUnitDetailViewModel(
     fun onClickDownload() {
         viewModelScope.launch {
             try {
-                when(uiState.value.pinState.status) {
+                when (uiState.value.pinState.status) {
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
+
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }
+
                     else -> {
                         //Do nothing
                     }
                 }
 
-            }catch(t: Throwable) {
+            } catch (t: Throwable) {
                 t.printStackTrace()
             }
         }
@@ -185,6 +186,7 @@ class LearningUnitDetailViewModel(
             )
         )
     }
+
     fun onClickBookmark() {
         viewModelScope.launch {
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch

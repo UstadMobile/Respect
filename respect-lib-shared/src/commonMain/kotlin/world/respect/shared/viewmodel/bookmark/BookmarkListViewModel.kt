@@ -25,6 +25,7 @@ data class BookmarkListUiState(
 )
 
 class BookmarkListViewModel(
+
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {

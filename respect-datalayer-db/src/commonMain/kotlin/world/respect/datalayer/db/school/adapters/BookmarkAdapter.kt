@@ -2,7 +2,9 @@ package world.respect.datalayer.db.school.adapters
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.opds.adapters.asModels
 import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.school.entities.BookmarkEntity
@@ -10,7 +12,7 @@ import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.school.model.Bookmark
 import world.respect.lib.opds.model.LangMap
-
+import world.respect.lib.opds.model.ReadiumLink
 
 /**
  * Publication + its relations
@@ -51,7 +53,9 @@ data class BookmarkEntities(
     val publication: OpdsPublicationEntities? = null
 )
 
-fun BookmarkEntities.toModel(): Bookmark {
+fun BookmarkEntities.toModel(
+    json: Json
+): Bookmark {
 
     fun List<LangMapEntity>.extract(
         propType: LangMapEntity.PropType,
@@ -66,6 +70,17 @@ fun BookmarkEntities.toModel(): Bookmark {
             ?.toModel()
     }
 
+    fun List<ReadiumLinkEntity>.asModelsSub(
+        propType: ReadiumLinkEntity.PropertyType
+    ): List<ReadiumLink> {
+        val pubUid = publication?.publication?.opeUid ?: return emptyList()
+        return asModels(
+            json = json,
+            propType = propType,
+            propFk = pubUid
+        )
+    }
+
     val title = publication?.langMaps?.extract(
         LangMapEntity.PropType.OPDS_PUB_TITLE,
         publication.publication.opeUid
@@ -76,6 +91,12 @@ fun BookmarkEntities.toModel(): Bookmark {
         publication.publication.opeUid
     )
 
+    val images = publication?.links?.asModelsSub(
+        ReadiumLinkEntity.PropertyType.OPDS_PUB_IMAGES
+    )
+
+    val imageUrl = images?.firstOrNull()?.href
+
     return Bookmark(
         status = bookmark.bStatus,
         lastModified = bookmark.bLastModified,
@@ -83,7 +104,8 @@ fun BookmarkEntities.toModel(): Bookmark {
         personUid = bookmark.bPersonUid,
         learningUnitManifestUrl = bookmark.bLearningUnitManifestUrl,
         title = title,
-        subTitle = subTitle
+        subTitle = subTitle,
+        imageUrl = imageUrl
     )
 }
 

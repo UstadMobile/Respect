@@ -15,5 +15,6 @@ data class Bookmark(
     override val stored: InstantAsISO8601 = Clock.System.now(),
     val title: LangMap? = null,
     val subTitle: LangMap? = null,
+    val imageUrl: String? = null
 ) : ModelWithTimes
 

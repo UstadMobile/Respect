@@ -4,6 +4,7 @@ import androidx.room.Transactor
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
@@ -21,9 +22,8 @@ class BookmarkDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-
-
-    ) : BookmarkDataSourceLocal {
+    private val json: Json,
+) : BookmarkDataSourceLocal {
 
     override fun getBookmarkStatus(personUid: String, url: Url): Flow<Boolean> {
         return schoolDb.getBookmarkDao().getBookmarkStatus(
@@ -61,7 +61,7 @@ class BookmarkDataSourceDb(
                     personUid = requireNotNull(listParams.personUid),
                     includeDeleted = listParams.common.includeDeleted ?: false
                 )
-                .map { it.toModel() }
+                .map { it.toModel(json) }
         )
     }
 

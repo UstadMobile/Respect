@@ -120,7 +120,7 @@ class SchoolDataSourceDb(
     }
 
     override val bookmarkDataSource: BookmarkDataSourceLocal by lazy {
-        BookmarkDataSourceDb(schoolDb,uidNumberMapper,authenticatedUser)
+        BookmarkDataSourceDb(schoolDb,uidNumberMapper,authenticatedUser,json)
     }
 
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal by lazy {

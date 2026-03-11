@@ -30,11 +30,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.app.RespectAsyncImage
 import world.respect.datalayer.school.model.Bookmark
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
@@ -142,15 +144,14 @@ private fun BookmarkListContent(
                             .width(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-
-                       /*     RespectAsyncImage(
-                                uri = bookmark.imageUrl ,
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(36.dp)
-                            )*/
-                        }
+                        RespectAsyncImage(
+                            uri = bookmark.imageUrl,
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(36.dp)
+                        )
+                    }
 
                 },
 

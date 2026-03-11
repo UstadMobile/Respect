@@ -161,12 +161,6 @@ class AppLauncherViewModel(
             NavCommand.Navigate(Settings)
         )
     }
-
-    fun onClick() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(BookmarkList)
-        )
-    }
     fun onClickRemove(app: DataLoadState<OpdsPublication>) {
         val manifestUrl = app.metaInfo.url ?: return
         viewModelScope.launch {

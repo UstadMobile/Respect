@@ -66,19 +66,15 @@ fun BookmarkEntities.toModel(): Bookmark {
             ?.toModel()
     }
 
-    val title =
-        publication?.langMaps?.extract(
+    val title = publication?.langMaps?.extract(
         LangMapEntity.PropType.OPDS_PUB_TITLE,
         publication.publication.opeUid
     )
 
-    val subTitle =
-        publication?.langMaps?.extract(
-            LangMapEntity.PropType.OPDS_PUB_SUBTITLE,
-            publication.publication.opeUid
-        )
-
-
+    val subTitle = publication?.langMaps?.extract(
+        LangMapEntity.PropType.OPDS_PUB_SUBTITLE,
+        publication.publication.opeUid
+    )
 
     return Bookmark(
         status = bookmark.bStatus,
@@ -87,7 +83,7 @@ fun BookmarkEntities.toModel(): Bookmark {
         personUid = bookmark.bPersonUid,
         learningUnitManifestUrl = bookmark.bLearningUnitManifestUrl,
         title = title,
-        subTitle=subTitle
+        subTitle = subTitle
     )
 }
 

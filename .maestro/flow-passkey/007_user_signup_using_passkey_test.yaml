@@ -11,7 +11,7 @@ onFlowStart:
         SCHOOL_NAME: ${SCHOOL_NAME}
         USERNAME: ${USERNAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "006_user_signup_using_passkey_test.yaml"
+        NAME: "007_user_signup_using_passkey_test.yaml"
 
 onFlowComplete:
   - runScript:

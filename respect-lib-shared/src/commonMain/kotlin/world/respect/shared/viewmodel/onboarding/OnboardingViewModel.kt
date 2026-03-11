@@ -8,6 +8,9 @@ import world.respect.shared.viewmodel.RespectViewModel
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.shared.domain.applanguage.SetLanguageUseCase
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
@@ -16,6 +19,8 @@ import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCas
 data class OnboardingUiState(
     val isLoading: Boolean = false,
     val usageStatsOptInChecked: Boolean = true,
+    val availableLanguages: List<SupportedLanguagesConfig.UiLanguage> = emptyList(),
+    val selectedLanguage: SupportedLanguagesConfig.UiLanguage? = null
 )
 
 class OnboardingViewModel(
@@ -24,6 +29,8 @@ class OnboardingViewModel(
     private val setUsageReportingEnabledUseCase: SetUsageReportingEnabledUseCase,
     private val getUsageReportingEnabledUseCase: GetUsageReportingEnabledUseCase,
     private val navigateOnAppStartUseCase: NavigateOnAppStartUseCase,
+    private val supportedLangConfig: SupportedLanguagesConfig,
+    private val setLanguageUseCase: SetLanguageUseCase
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -38,6 +45,7 @@ class OnboardingViewModel(
             )
         }
         _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
+        loadLanguages()
     }
 
     fun onToggleUsageStatsOptIn() {
@@ -59,4 +67,36 @@ class OnboardingViewModel(
 
     }
 
+    fun onLanguageSelected(lang: SupportedLanguagesConfig.UiLanguage) {
+        viewModelScope.launch {
+            setLanguageUseCase(uiLang = lang)
+
+            loadLanguages()
+
+            _uiState.update {
+                it.copy(selectedLanguage = lang)
+            }
+        }
+    }
+
+    fun loadLanguages() {
+        viewModelScope.launch {
+
+            val availableLangs = supportedLangConfig.getAvailableLanguages()
+
+            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
+
+            val currentLang = availableLangs.firstOrNull {
+                it.langCode == langSetting
+            } ?: availableLangs.first()
+
+            _uiState.update {
+                it.copy(
+                    availableLanguages = availableLangs,
+                    selectedLanguage = currentLang
+                )
+            }
+
+        }
+    }
 }

@@ -8,10 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.school.model.Bookmark
-import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.navigation.NavCommand
 import world.respect.shared.viewmodel.RespectViewModel
-import io.ktor.http.Url
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -21,14 +18,12 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 import kotlin.getValue
-import kotlin.time.Clock
 
 data class BookmarkListUiState(
-    val bookmarks: List<Bookmark> = emptyList(),
-    val isLoading: Boolean = true,
-
-    )
+    val bookmarks: List<Bookmark> = emptyList()
+)
 
 class BookmarkListViewModel(
     savedStateHandle: SavedStateHandle,
@@ -37,38 +32,37 @@ class BookmarkListViewModel(
     private val _uiState = MutableStateFlow(BookmarkListUiState())
 
     val uiState = _uiState.asStateFlow()
-    override val scope: Scope = accountManager.requireActiveAccountScope()
 
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {
         viewModelScope.launch {
+            loadingState = LoadingUiState.INDETERMINATE
 
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
 
-            val bookmarks = schoolDataSource.bookmarkDataSource
-
-
-                .list(
+            val bookmarks = schoolDataSource.bookmarkDataSource.list(
                     loadParams = DataLoadParams(),
                     listParams = BookmarkDataSource.GetListParams(
                         personUid = personUid
                     )
                 ).dataOrNull() ?: emptyList()
 
-            println("Bookmarks list: $bookmarks")
-
             _uiState.update {
                 it.copy(
                     bookmarks = bookmarks,
-                    isLoading = false
                 )
             }
+
+            loadingState = LoadingUiState.NOT_LOADING
         }
     }
 
     fun onClickRemoveBookmark(bookmark: Bookmark) {
         viewModelScope.launch {
+            loadingState = LoadingUiState.INDETERMINATE
+
             val updatedBookmark = bookmark.copy(
                 status = StatusEnum.TO_BE_DELETED
             )
@@ -76,22 +70,11 @@ class BookmarkListViewModel(
             schoolDataSource.bookmarkDataSource.store(
                 listOf(updatedBookmark)
             )
+            loadingState = LoadingUiState.NOT_LOADING
         }
     }
 
-    fun onClickBookmark(bookmark: Bookmark) {
-
-        /*  _navCommandFlow.tryEmit(
-              value = NavCommand.Navigate(
-                  LearningUnitDetail.create(
-                      learningUnitManifestUrl = Url(bookmark.learningUnitManifestUrl),
-                      appManifestUrl = Url(bookmark.appManifestUrl),
-                      refererUrl = Url(
-                          bookmark.refererUrl
-                      ),
-                      expectedIdentifier = bookmark.expectedIdentifier
-                  )
-              )
-          )*/
+    fun onClickBookmark(bookmark: Bookmark){
+        //Have to implement navigation
     }
 }

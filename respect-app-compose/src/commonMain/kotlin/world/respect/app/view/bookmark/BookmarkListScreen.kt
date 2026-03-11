@@ -68,10 +68,6 @@ fun BookmarkListScreen(
 ) {
 
     when {
-        uiState.isLoading -> {
-            CircularProgressIndicator()
-        }
-
         uiState.bookmarks.isEmpty() -> {
             EmptyBookmarkState()
         }

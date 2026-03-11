@@ -23,7 +23,7 @@ class BookmarkDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 
 
-) : BookmarkDataSourceLocal {
+    ) : BookmarkDataSourceLocal {
 
     override fun getBookmarkStatus(personUid: String, url: Url): Flow<Boolean> {
         return schoolDb.getBookmarkDao().getBookmarkStatus(
@@ -55,38 +55,16 @@ class BookmarkDataSourceDb(
 
     override suspend fun list(
         loadParams: DataLoadParams,
-        listParams: BookmarkDataSource.GetListParams,
-
-        ): DataLoadState<List<Bookmark>> {
-        val entities = schoolDb.getBookmarkDao()
-            .list(
-                personUid = requireNotNull(listParams.personUid),
-                includeDeleted = listParams.common.includeDeleted ?: false
-            )
-
-        entities.forEach {
-            println(
-                """
-        BOOKMARK DEBUG
-        bookmarkUrl=${it.bookmark.bLearningUnitManifestUrl}
-        bookmarkHash=${it.bookmark.bLearningUnitUrlHash}
-        publicationHash=${it.publication?.publication?.opeUrlHash}
-        publicationUid=${it.publication?.publication?.opeUid}
-        langMaps=${it.publication?.langMaps?.size}
-        """.trimIndent()
-            )
-        }
+        listParams: BookmarkDataSource.GetListParams
+    ): DataLoadState<List<Bookmark>> {
         return DataReadyState(
-            data = entities.map { it.toModel() }
-        )
-     /*   return DataReadyState(
             data = schoolDb.getBookmarkDao()
                 .list(
                     personUid = requireNotNull(listParams.personUid),
                     includeDeleted = listParams.common.includeDeleted ?: false
                 )
                 .map { it.toModel() }
-        )*/
+        )
     }
 
 

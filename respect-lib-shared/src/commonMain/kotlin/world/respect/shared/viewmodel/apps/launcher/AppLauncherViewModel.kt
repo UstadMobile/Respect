@@ -27,10 +27,12 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
+import world.respect.shared.generated.resources.playlist
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
+import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Settings
@@ -45,13 +47,17 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
+enum class HomeTab { APPS, PLAYLISTS }
+
 data class AppLauncherUiState(
-    val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
+    val apps: IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
     val respectPublicationForSchoolApp: (SchoolApp) -> Flow<DataLoadState<OpdsPublication>> = {
         emptyFlow()
     },
     val canRemove: Boolean = false,
     val emptyListDescription: UiText? = null,
+    val selectedTab: HomeTab = HomeTab.APPS,
+    val isTeacherOrAdmin: Boolean = false,
 )
 
 class AppLauncherViewModel(
@@ -82,19 +88,8 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
-                fabState = FabUiState(
-                    icon = FabUiState.FabIcon.ADD,
-                    text = Res.string.app.asUiText(),
-                    onClick = {
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                RespectAppList
-                            )
-                        )
-                    }
-                ),
                 hideBottomNavigation = route.resultDest != null,
                 showBackButton = route.resultDest != null,
             )
@@ -105,31 +100,57 @@ class AppLauncherViewModel(
                 respectPublicationForSchoolApp = this@AppLauncherViewModel::respectPublicationForSchoolApp,
                 apps = pagingSourceHolder
             )
-
         }
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
                 val devModeEnabled = getDevModeEnabledUseCase()
-                _appUiState.update {
-                    it.copy(
-                        fabState = it.fabState.copy(
-                            visible = isAdmin
-                        ),
-                        settingsIconVisible = isAdmin && devModeEnabled,
-                    )
-                }
                 _uiState.update {
                     it.copy(
                         canRemove = isAdmin,
-                        emptyListDescription = if(isAdmin)
+                        isTeacherOrAdmin = isAdmin,
+                        emptyListDescription = if (isAdmin)
                             Res.string.empty_list_description_admin.asUiText()
                         else
                             Res.string.empty_list_description_non_admin.asUiText()
                     )
                 }
+                _appUiState.update {
+                    it.copy(settingsIconVisible = isAdmin && devModeEnabled)
+                }
+                updateFabForTab(_uiState.value.selectedTab, isAdmin)
             }
+        }
+    }
+
+    fun onSelectTab(tab: HomeTab) {
+        _uiState.update { it.copy(selectedTab = tab) }
+        updateFabForTab(tab, _uiState.value.isTeacherOrAdmin)
+    }
+
+    private fun updateFabForTab(tab: HomeTab, isTeacherOrAdmin: Boolean) {
+        _appUiState.update {
+            it.copy(
+                fabState = when (tab) {
+                    HomeTab.APPS -> FabUiState(
+                        visible = isTeacherOrAdmin,
+                        icon = FabUiState.FabIcon.ADD,
+                        text = Res.string.app.asUiText(),
+                        onClick = {
+                            _navCommandFlow.tryEmit(NavCommand.Navigate(RespectAppList))
+                        }
+                    )
+                    HomeTab.PLAYLISTS -> FabUiState(
+                        visible = isTeacherOrAdmin,
+                        icon = FabUiState.FabIcon.ADD,
+                        text = Res.string.playlist.asUiText(),
+                        onClick = {
+                            _navCommandFlow.tryEmit(NavCommand.Navigate(CurriculumMappingEdit()))
+                        }
+                    )
+                }
+            )
         }
     }
 
@@ -138,7 +159,7 @@ class AppLauncherViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                if(route.resultDest != null) {
+                if (route.resultDest != null) {
                     LearningUnitList.create(
                         opdsFeedUrl = Url("https://example.org/wrong/todo"),
                         appManifestUrl = url,
@@ -146,7 +167,7 @@ class AppLauncherViewModel(
                     ).also {
                         TODO("Needs changed to look for default learning units list")
                     }
-                }else {
+                } else {
                     AppsDetail.create(
                         manifestUrl = url,
                         resultDest = route.resultDest,
@@ -156,9 +177,7 @@ class AppLauncherViewModel(
         )
     }
     fun onClickSettings() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(Settings)
-        )
+        _navCommandFlow.tryEmit(NavCommand.Navigate(Settings))
     }
 
     fun onClickRemove(app: DataLoadState<OpdsPublication>) {
@@ -189,4 +208,3 @@ class AppLauncherViewModel(
         }
     }
 }
-

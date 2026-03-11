@@ -60,7 +60,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
+import world.respect.datalayer.db.MIGRATION_8_9
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -246,6 +246,18 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
+import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.GetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.SetSharedDeviceSelfSelectUseCase
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -385,6 +397,11 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
+    viewModelOf(::SchoolSettingsViewModel)
+    viewModelOf(::SharedDevicesSettingsViewmodel)
+    viewModelOf(::TeacherAndAdminLoginViewmodel)
+    viewModelOf(::SelectClassViewModel)
+    viewModelOf(::StudentListViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -698,6 +715,12 @@ val appKoinModule = module {
             settings = get(),
         )
     }
+    single<EnableSharedDeviceModeUseCase> {
+        EnableSharedDeviceModeUseCase(
+            accountManager = get(),
+            settings = get(),
+        )
+    }
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
@@ -734,7 +757,7 @@ val appKoinModule = module {
                 "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(true))
+                .addMigrations(MIGRATION_8_9)
                 .build()
         }
 
@@ -744,10 +767,24 @@ val appKoinModule = module {
             )
         }
 
+        scoped<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl()
+        }
+        scoped<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl()
+        }
+        scoped<GetSharedDeviceSelfSelectUseCase> {
+            GetSharedDeviceSelfSelectUseCase(settings = get())
+        }
+        scoped<SetSharedDeviceSelfSelectUseCase> {
+            SetSharedDeviceSelfSelectUseCase(settings = get())
+        }
+
         scoped<RedeemInviteUseCase> {
             RedeemInviteUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 httpClient = get(),
+                accountManager = get()
             )
         }
 

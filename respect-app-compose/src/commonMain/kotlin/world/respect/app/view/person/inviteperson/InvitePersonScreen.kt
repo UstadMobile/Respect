@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.RadioButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
@@ -112,26 +112,38 @@ fun InvitePersonScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-
-        if(uiState.showRoleSelection) {
-            val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull()
+        if (!uiState.isSharedDeviceMode) {
+            if (uiState.showRoleSelection) {
+                val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull()
                 ?: PersonRoleEnum.STUDENT
 
-            RespectExposedDropDownMenuField(
-                value = selectedRole,
-                modifier = Modifier.defaultItemPadding().fillMaxWidth().testTag("role"),
-                label = {
-                    Text(stringResource(Res.string.role))
-                },
-                onOptionSelected = { newRole ->
-                    onRoleChange(newRole)
-                },
-                options = uiState.roleOptions,
-                itemText = { stringResource(it.label) },
-                enabled = fieldsEnabled,
-            )
+                RespectExposedDropDownMenuField(
+                    value = selectedRole,
+                    modifier = Modifier
+                        .defaultItemPadding()
+                        .fillMaxWidth()
+                        .testTag("role"),
+                    label = {
+                        Text(stringResource(Res.string.role))
+                    },
+                    onOptionSelected = { newRole ->
+                        onRoleChange(newRole)
+                    },
+                    options = uiState.roleOptions,
+                    itemText = { stringResource(it.label) },
+                    enabled = fieldsEnabled,
+                )
+            }
         }
-
+        if (uiState.isSharedDeviceMode) {
+            uiState.schoolName?.let {
+                Text(
+                    text = it,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+                )
+            }
+        }
 
         uiState.inviteUrl?.also { link ->
             val linkStr = link.toString()

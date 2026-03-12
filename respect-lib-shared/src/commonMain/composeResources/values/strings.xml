@@ -110,6 +110,7 @@
     <string name="email">Email</string>
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
+    <string name="change_history">Change history</string>
     <string name="username_label">Username</string>
     <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>

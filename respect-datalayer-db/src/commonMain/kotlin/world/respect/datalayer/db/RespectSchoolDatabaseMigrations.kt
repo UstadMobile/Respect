@@ -112,12 +112,42 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+val MIGRATE_11_12 = object : Migration(11, 12) {
+
+    override fun migrate(connection: SQLiteConnection) {
+
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS `ChangeHistoryEntity` (
+                `hGuid` TEXT NOT NULL,
+                `hGuidHash` INTEGER NOT NULL,
+                `hTable` TEXT NOT NULL,
+                `hTimestamp` INTEGER NOT NULL,
+                `hWhoGuid` TEXT NOT NULL,
+                `hWhoGuidHash` INTEGER NOT NULL,
+                `hChanges` TEXT NOT NULL,
+                PRIMARY KEY(`hGuidHash`)
+            )
+        """.trimIndent())
+
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS `ChangeHistoryChangeEntity` (
+                `hcId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `hcHistoryGuidHash` INTEGER NOT NULL,
+                `hcField` TEXT NOT NULL,
+                `hcOldVal` TEXT,
+                `hcNewVal` TEXT NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
 
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
     return this.addMigrations(
-        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7,MIGRATION_7_8
+        MIGRATION_1_2, MIGRATE_3_4, MIGRATE_4_5,MIGRATE_5_6, MIGRATE_6_7,MIGRATION_7_8,
+        MIGRATE_11_12
     )
 }
 

@@ -863,3 +863,8 @@ data class QrCode(
 data class CopyCode(
     val inviteCode:String?=null
 ): RespectAppRoute
+
+@Serializable
+data class ChangeHistory(
+    val guid: String,
+): RespectAppRoute

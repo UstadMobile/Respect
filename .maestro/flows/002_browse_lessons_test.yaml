@@ -57,101 +57,26 @@ onFlowComplete:
 - assertVisible: "Download"
 - assertVisible: "Assign"
 - tapOn: "Bookmark"
-- assertVisible: "Lesson added to bookmark list"
 - tapOn: "Home"
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 
-- tapOn: "Playlists"
-- assertVisible: "All"
-- assertVisible: "School Playlists"
-- assertVisible: "My Playlists"
-- assertVisible: "No playlists yet"
-- tapOn: "Playlist"
-- assertVisible: "Add new"
-- assertVisible: "Add from a link"
-- tapOn:
-    text: "Add new"
-- assertVisible:
-    id: "app_title"
-    text: "Add playlist"
-- tapOn: "Save" # To test mandatory fields
-- assertVisible: "Required field"  #Title field is mandatory
-- tapOn: "Title*"
-- inputText: "Playlist - Grade 1"
-- tapOn: "Description"
-- inputText: "Test list"
-- tapOn: "Section"
-- tapOn: "Section title"
-- inputText: "Day 1"
-- hideKeyboard
-- tapOn:
-    id: "add_item"
-- tapOn: "My app"
-- tapOn: "Grade 1"
-- tapOn: "Lesson 001"
-- assertVisible:
-    id: "app_title"
-    text: "Add playlist"
-- assertVisible: "Lesson 001"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Playlist - Grade 1"
-- assertVisible: "Day 1"
-- tapOn:
-    id: "expand_collapse_icon_"
-- assertVisible: "Lesson 001"
-- tapOn:
-    text: "Edit"
-    index: 1 # Edit button
-- assertVisible:
-    id: "app_title"
-    text: "Edit playlist"
-- tapOn: "Section"
-- tapOn:
-    text: "Section title"
-    index: 1
-- inputText: "Day 2"
-- hideKeyboard
-- tapOn:
-    id: "add_item"
-- tapOn: "My app"
-- tapOn: "Grade 1"
-- tapOn: "Lesson 002"
-- assertVisible:
-    id: "app_title"
-    text: "Add playlist"
-- assertVisible: "Lesson 002"
-- tapOn: "Save"
-- assertVisible:
-    id: "app_title"
-    text: "Playlist - Grade 1"
-- tapOn: "Day 1"
-- assertVisible: "Lesson 001"
-- assertVisible: "Day 2"
-- assertVisible: "Lesson 002"
-- assertVisible:
-    id: "share_btn"
-- assertVisible:
-    id: "copy_btn"
-- assertVisible:
-    id: "assign_btn"
-- assertVisible:
-    id: "delete_btn"
-- assertVisible:
-    id: "bookmark_btn"
-- tapOn:
-    id: "bookmark_btn"
-- assertVisible: "Playlist added to bookmark list"
-- tapOn: "Home"
-- tapOn: "Bookmarks"
-- assertVisible: "Lesson 001"
-- assertVisible: "Playlist - Grade 1"
-- tapOn:                                #RemoveBookmark
-    id: "bookmark_icon"
-- assertVisible: "1 Remove Bookmark"
-- assertVisible: "Undo"
-- assertNotVisible: "Lesson 001"
-- tapOn: "Undo"
-- assertVisible: "Lesson 001"
+# -------------------------------------------------------------------------------------------------------------
+#--------Commented out below code will be enabled once the Playlist branch is merged to this Bookmarks
+#---------------------------------------------------------------------------------------------------------------
+#- assertVisible:
+#    id: "bookmark_btn"
+#- tapOn:
+#    id: "bookmark_btn"
+#- assertVisible: "Playlist added to bookmark list"
+#- tapOn: "Home"
+#- tapOn: "Bookmarks"
+#- assertVisible: "Lesson 001"
+#- assertVisible: "Playlist - Grade 1"
+#- tapOn:                                #RemoveBookmark
+#    id: "bookmark_icon"
+#- assertVisible: "1 Remove Bookmark"
+#- assertVisible: "Undo"
+#- assertNotVisible: "Lesson 001"
+#- tapOn: "Undo"
+#- assertVisible: "Lesson 001"

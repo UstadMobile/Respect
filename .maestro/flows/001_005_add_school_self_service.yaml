@@ -29,10 +29,13 @@ onFlowComplete:
 - tapOn:
     text: "Add my school"
     index: 1
-- tapOn: ${output.SCHOOL_URL}
 - assertVisible:
-    text: "Register New School"
-    index: 1
+    id: "app_title"
+    text: "Select Host"
+- tapOn: ${output.SCHOOL_URL}
+- extendedWaitUntil:
+    visible: "Register New School"
+    timeout: 1000
 - tapOn:
     id: "schoolName"
 - inputText: "NewSchool"

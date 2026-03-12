@@ -16,18 +16,20 @@ interface BookmarkDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(bookmarks: List<BookmarkEntity>)
 
-    @Query("""
+    @Query(
+        """
         SELECT EXISTS(
         SELECT 1 FROM BookmarkEntity
          WHERE bPersonUid = :personUid
-           AND bLearningUnitManifestUrl = :manifestUrl
-           AND bStatus = :activeStatus
+           AND bUrl = :url
+           AND bStatus = :status
          )
-    """)
+    """
+    )
     fun getBookmarkStatus(
         personUid: String,
-        manifestUrl: String,
-        activeStatus: StatusEnum = StatusEnum.ACTIVE
+        url: String,
+        status: StatusEnum = StatusEnum.ACTIVE
     ): Flow<Boolean>
 
     @Transaction
@@ -36,11 +38,27 @@ interface BookmarkDao {
           FROM BookmarkEntity
          WHERE bPersonUid = :personUid
            AND (:includeDeleted OR bStatus = :activeStatus)
-      ORDER BY bLastModified DESC
+      ORDER BY bLastModified ASC
     """)
     suspend fun list(
         personUid: String,
         includeDeleted: Boolean = false,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
+    ): List<BookmarkEntities>
+
+    @Query(
+        """
+            SELECT * 
+              FROM BookmarkEntity 
+             WHERE bPersonUid = :personUid
+             AND NOT EXISTS ( 
+                 SELECT 1
+                   FROM OpdsPublicationEntity 
+                   WHERE opeUrlHash = bUrlHash
+             )
+    """
+    )
+    suspend fun findBookmarks(
+        personUid: String
     ): List<BookmarkEntities>
 }

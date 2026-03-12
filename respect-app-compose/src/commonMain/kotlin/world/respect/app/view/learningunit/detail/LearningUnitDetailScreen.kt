@@ -66,7 +66,7 @@ fun LearningUnitDetailScreen(
         onClickOpen = viewModel::onClickOpen,
         onClickDownload = viewModel::onClickDownload,
         onClickAssign = viewModel::onClickAssign,
-        onClickBookmark =viewModel::onClickBookmark
+        onClickBookmark = viewModel::onClickBookmark
     )
 }
 
@@ -128,20 +128,22 @@ fun LearningUnitDetailScreen(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                appIcon?.let { icon ->
-                                    RespectAsyncImage(
-                                        uri = icon,
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
+                                uiState.app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
+                                    ?.let { icon ->
+                                        RespectAsyncImage(
+                                            uri = icon,
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                             }
 
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = appData?.metadata?.title?.getTitle().orEmpty()
+                                text = uiState.app.dataOrNull()?.metadata?.title?.getTitle()
+                                    .orEmpty()
                             )
                         }
 

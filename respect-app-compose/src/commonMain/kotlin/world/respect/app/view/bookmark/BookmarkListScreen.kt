@@ -37,7 +37,11 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Bookmark
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
@@ -73,6 +77,7 @@ fun BookmarkListScreen(
 
         else -> {
             BookmarkListContent(
+                uiState.app,
                 uiState.bookmarks,
                 onClickRemoveBookmark,
                 onClickBookmark
@@ -115,8 +120,10 @@ private fun EmptyBookmarkState() {
     }
 }
 
+
 @Composable
 private fun BookmarkListContent(
+    app: DataLoadState<OpdsPublication>,
     bookmarks: List<Bookmark>,
     onClickRemoveBookmark: (Bookmark) -> Unit,
     onClickBookmark: (Bookmark) -> Unit
@@ -128,7 +135,6 @@ private fun BookmarkListContent(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-
         items(bookmarks) { bookmark ->
             ListItem(
                 modifier = Modifier.fillMaxWidth()
@@ -145,7 +151,7 @@ private fun BookmarkListContent(
                         contentAlignment = Alignment.Center
                     ) {
                         RespectAsyncImage(
-                            uri = bookmark.imageUrl,
+                            uri = bookmark.imageUrl.toString(),
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -177,24 +183,24 @@ private fun BookmarkListContent(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-/*
-                                bookmark.appIcon.also { icon ->
-                                    RespectAsyncImage(
-                                        uri = icon,
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier
-                                            .size(80.dp)
+                                app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
+                                    .also { icon ->
+                                        RespectAsyncImage(
+                                            uri = icon,
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier
+                                                .size(80.dp)
 
-                                    )
-                                }
-*/
+                                        )
+                                    }
                             }
 
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = "bookmark.appName"
+                                text = app.dataOrNull()?.metadata?.title?.getTitle()
+                                    .orEmpty()
                             )
                         }
 

@@ -71,4 +71,8 @@ class BookmarkDataSourceHttp(
             useValidationCacheControl(validationHelper)
         }
     }
+
+    override suspend fun findBookmarks(personUid: String): List<Bookmark> {
+        TODO("Not yet implemented")
+    }
 }

@@ -28,7 +28,7 @@ class BookmarkDataSourceDb(
     override fun getBookmarkStatus(personUid: String, url: Url): Flow<Boolean> {
         return schoolDb.getBookmarkDao().getBookmarkStatus(
             personUid = personUid,
-            manifestUrl = url.toString()
+            url = url.toString()
         )
     }
 
@@ -61,10 +61,19 @@ class BookmarkDataSourceDb(
                     personUid = requireNotNull(listParams.personUid),
                     includeDeleted = listParams.common.includeDeleted ?: false
                 )
-                .map { it.toModel(json) }
+                .map {
+                    it.toModel(json)
+                }
         )
     }
 
+    override suspend fun findBookmarks(personUid: String): List<Bookmark> {
+        return schoolDb.getBookmarkDao()
+            .findBookmarks(personUid)
+            .map { entity ->
+                entity.toModel(json)
+            }
+    }
 
     override suspend fun updateLocal(
         list: List<Bookmark>,

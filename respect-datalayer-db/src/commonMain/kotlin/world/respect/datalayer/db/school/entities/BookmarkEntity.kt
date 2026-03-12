@@ -16,5 +16,6 @@ data class BookmarkEntity(
     val bUrlHash:Long,
     val bStatus: StatusEnum = StatusEnum.ACTIVE,
     val bLastModified: Instant,
-    val bStored: Instant
+    val bStored: Instant,
+    val bAppManifestUrl: Url
 )

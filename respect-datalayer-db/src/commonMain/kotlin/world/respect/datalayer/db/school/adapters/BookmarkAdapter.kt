@@ -13,6 +13,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.school.model.Bookmark
 import world.respect.lib.opds.model.LangMap
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.libutil.ext.resolve
 
 /**
  * Publication + its relations
@@ -45,12 +46,12 @@ data class BookmarkEntities(
     val bookmark: BookmarkEntity,
 
     @Relation(
-        parentColumn = "bUrl",
+        parentColumn = "bUrlHash",
         entityColumn = "opeUrlHash",
         entity = OpdsPublicationEntity::class
 
     )
-    val publication: OpdsPublicationEntities? = null
+    val opdsPublicationEntities: OpdsPublicationEntities? = null
 )
 
 fun BookmarkEntities.toModel(
@@ -70,32 +71,26 @@ fun BookmarkEntities.toModel(
             ?.toModel()
     }
 
-    fun List<ReadiumLinkEntity>.asModelsSub(
-        propType: ReadiumLinkEntity.PropertyType
-    ): List<ReadiumLink> {
-        val pubUid = publication?.publication?.opeUid ?: return emptyList()
-        return asModels(
-            json = json,
-            propType = propType,
-            propFk = pubUid
-        )
+    fun List<ReadiumLinkEntity>.asModelsSub(propType: ReadiumLinkEntity.PropertyType): List<ReadiumLink> {
+        val pubUid = opdsPublicationEntities?.publication?.opeUid ?: return emptyList()
+        return asModels(json = json, propType = propType, propFk = pubUid)
     }
 
-    val title = publication?.langMaps?.extract(
+    val title = opdsPublicationEntities?.langMaps?.extract(
         LangMapEntity.PropType.OPDS_PUB_TITLE,
-        publication.publication.opeUid
+        opdsPublicationEntities.publication.opeUid
     )
 
-    val subTitle = publication?.langMaps?.extract(
+    val subTitle = opdsPublicationEntities?.langMaps?.extract(
         LangMapEntity.PropType.OPDS_PUB_SUBTITLE,
-        publication.publication.opeUid
+        opdsPublicationEntities.publication.opeUid
     )
 
-    val images = publication?.links?.asModelsSub(
-        ReadiumLinkEntity.PropertyType.OPDS_PUB_IMAGES
-    )
-
-    val imageUrl = images?.firstOrNull()?.href
+    val images =
+        opdsPublicationEntities?.links?.asModelsSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_IMAGES)
+    val imageUrl = images?.firstOrNull()?.href?.let {
+        bookmark.bUrl.resolve(it)
+    }
 
     return Bookmark(
         status = bookmark.bStatus,
@@ -103,6 +98,7 @@ fun BookmarkEntities.toModel(
         stored = bookmark.bStored,
         personUid = bookmark.bPersonUid,
         learningUnitManifestUrl = bookmark.bUrl,
+        appManifestUrl = bookmark.bAppManifestUrl,
         title = title,
         subTitle = subTitle,
         imageUrl = imageUrl
@@ -120,11 +116,12 @@ fun Bookmark.toEntities(
         bPersonUid = personUid,
         bPersonUidHash = uidNumberMapper(personUid),
         bUrl = learningUnitManifestUrl,
-        bUrlHash = uidNumberMapper(learningUnitManifestUrl.toString())
+        bUrlHash = uidNumberMapper(learningUnitManifestUrl.toString()),
+        bAppManifestUrl = appManifestUrl
     )
 
     return BookmarkEntities(
         bookmark = bookmarkEntity,
-        publication = null
+        opdsPublicationEntities = null
     )
 }

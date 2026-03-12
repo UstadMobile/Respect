@@ -38,7 +38,7 @@ interface BookmarkDao {
           FROM BookmarkEntity
          WHERE bPersonUid = :personUid
            AND (:includeDeleted OR bStatus = :activeStatus)
-      ORDER BY bLastModified DESC
+      ORDER BY bLastModified ASC
     """)
     suspend fun list(
         personUid: String,

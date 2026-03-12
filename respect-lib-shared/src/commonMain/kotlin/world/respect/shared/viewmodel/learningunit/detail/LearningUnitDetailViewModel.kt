@@ -190,7 +190,6 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
             val learningUnitManifestUrl = route.learningUnitManifestUrl
-            val appManifestUrl =route.appManifestUrl
 
             val status =
                 if (uiState.value.isBookmarked)
@@ -201,10 +200,12 @@ class LearningUnitDetailViewModel(
             val bookmark = Bookmark(
                 personUid = personUid,
                 learningUnitManifestUrl = learningUnitManifestUrl,
-                status = status
+                status = status,
+                appManifestUrl= route.appManifestUrl
             )
 
             schoolDataSource.bookmarkDataSource.store(listOf(bookmark))
         }
     }
 }
+

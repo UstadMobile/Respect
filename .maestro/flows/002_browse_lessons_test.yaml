@@ -62,7 +62,7 @@ onFlowComplete:
 - assertVisible: "Lesson 001"
 
 # -------------------------------------------------------------------------------------------------------------
-#--------Commented out below code will be enabled once the Playlist branch is merged to this Bookmarks
+# Commented out until the Playlist branch is merged into Bookmarks.
 #---------------------------------------------------------------------------------------------------------------
 #- assertVisible:
 #    id: "bookmark_btn"

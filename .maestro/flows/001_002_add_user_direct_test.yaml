@@ -8,15 +8,101 @@ onFlowStart:
         SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
         DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
         SCHOOL_URL: ${SCHOOL_URL}
-        SCHOOL_NAME: ${SCHOOL_NAME}
+        NO_SCHOOL_CREATION: "true"
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002_add_user_direct_test"
+        NAME: "001_002_add_user_direct_test.yaml"
 
 onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/school_admin_login_flow.yaml"
+
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- tapOn:
+    id: "school_name"
+- inputText: "test"
+- tapOn:
+    text: "Add my school"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Select Host"
+- tapOn: ${output.SCHOOL_URL}
+- extendedWaitUntil:
+    visible: "Register New School"
+    timeout: 8000
+- tapOn:
+    id: "schoolName"
+- inputText: "TestSchool"
+- tapOn:
+    id: "schoolUrl"
+- inputText: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "System administrator"
+- assertVisible: "School name"
+- assertVisible: "TestSchool"
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "Admin"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- extendedWaitUntil:
+    visible: "admin" #username
+    timeout: 10000
+- tapOn: "Next"
+- tapOn: "Password*"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Sign-up"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn:
+    id: "user_account_icon"
+- assertVisible: "Profile"
+- assertVisible: "admin"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Logout"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: "TestSchool"
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 
 - tapOn: "People"
 - assertVisible:

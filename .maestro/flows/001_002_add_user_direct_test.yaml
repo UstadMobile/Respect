@@ -32,7 +32,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Select Host"
-- tapOn: ${output.SCHOOL_URL}
+- tapOn:
+    id: "host_url"
 - extendedWaitUntil:
     visible: "Register New School"
     timeout: 8000

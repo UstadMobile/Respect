@@ -1,11 +1,14 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 
+val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/base.json"
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     application
     alias(libs.plugins.swagger.generator)
+    alias(libs.plugins.buildconfigPlugin)
 }
 
 group = "world.respect.app"
@@ -22,6 +25,12 @@ kotlin {
     }
 }
 
+buildConfig {
+    packageName("world.respect.server")
+    className("RespectServerBuildConfig")
+
+    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
+}
 
 // As per https://swagger.io/docs/open-source-tools/swagger-codegen/codegen-v3/workflow-integration/
 swaggerSources {

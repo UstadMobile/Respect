@@ -570,4 +570,9 @@
 
     <string name="select_host">Select Host</string>
 
+    <!-- Playlists -->
+    <string name="home">Home</string>
+    <string name="playlists">Playlists</string>
+    <string name="playlist">Playlist</string>
+
 </resources>

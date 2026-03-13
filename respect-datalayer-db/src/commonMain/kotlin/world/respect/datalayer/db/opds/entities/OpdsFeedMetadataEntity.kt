@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.eygraber.uri.Uri
 import kotlinx.datetime.LocalDateTime
+import kotlin.time.Instant
 
 /**
  * @property ofmeUid auto generated primary key
@@ -23,7 +24,7 @@ data class OpdsFeedMetadataEntity(
     val ofmeType: String?,
     val ofmeTitle: String,
     val ofmeSubtitle: String?,
-    val ofmeModified: LocalDateTime?,
+    val ofmeModified: Instant?,
     val ofmeDescription: String?,
     val ofmeItemsPerPage: Int?,
     val ofmeCurrentPage: Int?,

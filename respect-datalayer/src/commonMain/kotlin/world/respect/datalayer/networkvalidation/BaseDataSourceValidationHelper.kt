@@ -27,6 +27,10 @@ import io.ktor.http.Url
  */
 interface BaseDataSourceValidationHelper {
 
+    /**
+     * Get validation info to be used for an outgoing request to set the if-modified-since header
+     * and if-none-match header.
+     */
     suspend fun getValidationInfo(
         url: Url,
         requestHeaders: IHttpHeaders,

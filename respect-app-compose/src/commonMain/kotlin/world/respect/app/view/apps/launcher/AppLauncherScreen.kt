@@ -23,9 +23,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,61 +35,98 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.emptyFlow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
+import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
 import world.respect.shared.generated.resources.more_info
+import world.respect.shared.generated.resources.playlists
 import world.respect.shared.generated.resources.remove
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
+import world.respect.shared.viewmodel.apps.launcher.HomeTab
+import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 
 @Composable
 fun AppLauncherScreen(
     viewModel: AppLauncherViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
+        onSelectTab = viewModel::onSelectTab,
     )
 }
-
 
 @Composable
 fun AppLauncherScreen(
     uiState: AppLauncherUiState,
-    onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
-    onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
+    onClickApp: (DataLoadState<OpdsPublication>) -> Unit,
+    onClickRemove: (DataLoadState<OpdsPublication>) -> Unit,
+    onSelectTab: (HomeTab) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        TabRow(
+            selectedTabIndex = uiState.selectedTab.ordinal,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.primary,
+        ) {
+            Tab(
+                selected = uiState.selectedTab == HomeTab.APPS,
+                onClick = { onSelectTab(HomeTab.APPS) },
+                text = { Text(stringResource(Res.string.apps)) },
+                modifier = Modifier.testTag("tab_apps"),
+            )
+            Tab(
+                selected = uiState.selectedTab == HomeTab.PLAYLISTS,
+                onClick = { onSelectTab(HomeTab.PLAYLISTS) },
+                text = { Text(stringResource(Res.string.playlists)) },
+                modifier = Modifier.testTag("tab_playlists"),
+            )
+        }
+
+        when (uiState.selectedTab) {
+            HomeTab.APPS -> AppsTabContent(
+                uiState = uiState,
+                onClickApp = onClickApp,
+                onClickRemove = onClickRemove,
+            )
+            HomeTab.PLAYLISTS -> {
+                val curriculumMappingListViewModel: CurriculumMappingListViewModel = koinViewModel()
+                CurriculumMappingListScreenForViewModel(viewModel = curriculumMappingListViewModel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppsTabContent(
+    uiState: AppLauncherUiState,
+    onClickApp: (DataLoadState<OpdsPublication>) -> Unit,
+    onClickRemove: (DataLoadState<OpdsPublication>) -> Unit,
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
-    /**
-     * Maestro end to end tests can be flakey: When running the login sometimes the keyboard stays
-     * visible even after going from the login screen to the app launcher screen, which then
-     * hides the bottom navigation buttons.
-     */
-    val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(Unit) {
-        keyboardController?.hide()
-    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -127,7 +165,6 @@ fun AppLauncherScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
                 items(
                     count = lazyPagingItems.itemCount,
                     key = { index ->
@@ -135,8 +172,8 @@ fun AppLauncherScreen(
                     }
                 ) { index ->
                     val schoolApp = lazyPagingItems[index]
-                    val respectAppFlow = remember(schoolApp, uiState.respectAppForSchoolApp) {
-                        schoolApp?.let { uiState.respectAppForSchoolApp(schoolApp) } ?: emptyFlow()
+                    val respectAppFlow = remember(schoolApp, uiState.respectPublicationForSchoolApp) {
+                        schoolApp?.let { uiState.respectPublicationForSchoolApp(schoolApp) } ?: emptyFlow()
                     }
                     val respectApp by respectAppFlow.collectAsState(NoDataLoadedState.notFound())
 
@@ -158,7 +195,7 @@ fun AppLauncherScreen(
 
 @Composable
 fun AppGridItem(
-    app: DataLoadState<RespectAppManifest>,
+    app: DataLoadState<OpdsPublication>,
     onClickApp: () -> Unit,
     onClickRemove: () -> Unit,
     showRemove: Boolean = false,
@@ -179,7 +216,7 @@ fun AppGridItem(
                 .fillMaxWidth()
                 .aspectRatio(1f)
         ) {
-            appData?.icon.also { icon ->
+            appData?.findIcons()?.firstOrNull()?.also { icon ->
                 RespectAsyncImage(
                     uri = icon.toString(),
                     contentDescription = "",
@@ -213,7 +250,7 @@ fun AppGridItem(
                             onClickApp()
                         }
                     )
-                    if(showRemove) {
+                    if (showRemove) {
                         DropdownMenuItem(
                             text = {
                                 Text(stringResource(resource = Res.string.remove))
@@ -233,7 +270,7 @@ fun AppGridItem(
         )
 
         Text(
-            text = appData?.name?.getTitle() ?: "",
+            text = appData?.metadata?.title?.getTitle() ?: "",
             modifier = Modifier.align(Alignment.Start)
         )
 

@@ -3,10 +3,12 @@ package world.respect.shared.viewmodel.apps.launcher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -14,25 +16,23 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.model.SchoolApp
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
-import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
+import world.respect.shared.generated.resources.playlist
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
+import world.respect.shared.navigation.CurriculumMappingEdit
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Settings
@@ -41,19 +41,27 @@ import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.ext.map
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
+enum class HomeTab { APPS, PLAYLISTS }
+
 data class AppLauncherUiState(
-    val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
-    val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
+    val apps: IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
+    val respectPublicationForSchoolApp: (SchoolApp) -> Flow<DataLoadState<OpdsPublication>> = {
+        emptyFlow()
+    },
     val canRemove: Boolean = false,
-    val emptyListDescription: UiText?=null,
+    val emptyListDescription: UiText? = null,
+    val selectedTab: HomeTab = HomeTab.APPS,
+    val isTeacherOrAdmin: Boolean = false,
 )
 
 class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
@@ -80,19 +88,8 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
-                fabState = FabUiState(
-                    icon = FabUiState.FabIcon.ADD,
-                    text = Res.string.app.asUiText(),
-                    onClick = {
-                        _navCommandFlow.tryEmit(
-                            NavCommand.Navigate(
-                                RespectAppList
-                            )
-                        )
-                    }
-                ),
                 hideBottomNavigation = route.resultDest != null,
                 showBackButton = route.resultDest != null,
             )
@@ -100,50 +97,77 @@ class AppLauncherViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
+                respectPublicationForSchoolApp = this@AppLauncherViewModel::respectPublicationForSchoolApp,
                 apps = pagingSourceHolder
             )
-
         }
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
                 val devModeEnabled = getDevModeEnabledUseCase()
-                _appUiState.update {
-                    it.copy(
-                        fabState = it.fabState.copy(
-                            visible = isAdmin
-                        ),
-                        settingsIconVisible = isAdmin && devModeEnabled,
-                    )
-                }
                 _uiState.update {
                     it.copy(
                         canRemove = isAdmin,
-                        emptyListDescription = if(isAdmin)
+                        isTeacherOrAdmin = isAdmin,
+                        emptyListDescription = if (isAdmin)
                             Res.string.empty_list_description_admin.asUiText()
                         else
                             Res.string.empty_list_description_non_admin.asUiText()
                     )
                 }
+                _appUiState.update {
+                    it.copy(settingsIconVisible = isAdmin && devModeEnabled)
+                }
+                updateFabForTab(_uiState.value.selectedTab, isAdmin)
             }
         }
     }
 
-    fun onClickApp(app: DataLoadState<RespectAppManifest>) {
+    fun onSelectTab(tab: HomeTab) {
+        _uiState.update { it.copy(selectedTab = tab) }
+        updateFabForTab(tab, _uiState.value.isTeacherOrAdmin)
+    }
+
+    private fun updateFabForTab(tab: HomeTab, isTeacherOrAdmin: Boolean) {
+        _appUiState.update {
+            it.copy(
+                fabState = when (tab) {
+                    HomeTab.APPS -> FabUiState(
+                        visible = isTeacherOrAdmin,
+                        icon = FabUiState.FabIcon.ADD,
+                        text = Res.string.app.asUiText(),
+                        onClick = {
+                            _navCommandFlow.tryEmit(NavCommand.Navigate(RespectAppList))
+                        }
+                    )
+                    HomeTab.PLAYLISTS -> FabUiState(
+                        visible = isTeacherOrAdmin,
+                        icon = FabUiState.FabIcon.ADD,
+                        text = Res.string.playlist.asUiText(),
+                        onClick = {
+                            _navCommandFlow.tryEmit(NavCommand.Navigate(CurriculumMappingEdit()))
+                        }
+                    )
+                }
+            )
+        }
+    }
+
+    fun onClickApp(app: DataLoadState<OpdsPublication>) {
         val url = app.metaInfo.url ?: return
-        val appData = app.dataOrNull() ?: return
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                if(route.resultDest != null) {
+                if (route.resultDest != null) {
                     LearningUnitList.create(
-                        opdsFeedUrl = url.resolve(appData.learningUnits.toString()),
+                        opdsFeedUrl = Url("https://example.org/wrong/todo"),
                         appManifestUrl = url,
                         resultDest = route.resultDest,
-                    )
-                }else {
+                    ).also {
+                        TODO("Needs changed to look for default learning units list")
+                    }
+                } else {
                     AppsDetail.create(
                         manifestUrl = url,
                         resultDest = route.resultDest,
@@ -153,12 +177,10 @@ class AppLauncherViewModel(
         )
     }
     fun onClickSettings() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(Settings)
-        )
+        _navCommandFlow.tryEmit(NavCommand.Navigate(Settings))
     }
 
-    fun onClickRemove(app: DataLoadState<RespectAppManifest>) {
+    fun onClickRemove(app: DataLoadState<OpdsPublication>) {
         val manifestUrl = app.metaInfo.url ?: return
         viewModelScope.launch {
             schoolDataSource.schoolAppDataSource.store(
@@ -173,11 +195,16 @@ class AppLauncherViewModel(
         }
     }
 
-    fun respectAppForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<RespectAppManifest>> {
-        return appDataSource.compatibleAppsDataSource.getAppAsFlow(
-            schoolApp.appManifestUrl,
-            DataLoadParams()
-        )
+    fun respectPublicationForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<OpdsPublication>> {
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+            url = schoolApp.appManifestUrl,
+            params = DataLoadParams(),
+            referrerUrl = null,
+            expectedPublicationId = null,
+        ).map { dataLoad ->
+            dataLoad.map { publication ->
+                publication.resolve(schoolApp.appManifestUrl)
+            }
+        }
     }
 }
-

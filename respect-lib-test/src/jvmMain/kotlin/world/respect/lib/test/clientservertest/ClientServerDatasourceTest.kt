@@ -47,7 +47,6 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.findFreePort
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -140,7 +139,9 @@ class ClientServerDataSourceTestBuilder internal constructor(
                 authenticatedUser = localAuthenticatedUser,
                 schoolDb = schoolDb,
                 uidNumberMapper = uidMapper,
-            )
+            ),
+            defaultAppCatalogUrl = null,
+            json = Json { ignoreUnknownKeys = true },
         )
 
         return Pair(schoolDb, schoolDataSource)
@@ -210,8 +211,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         val clientAppDataSource: RespectAppDataSourceLocal = RespectAppDataSourceDb(
             respectAppDatabase = clientAppDb,
             json = json,
-            xxStringHasher = stringHasher,
-            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
+            xxStringHasher = stringHasher
         )
 
         val (schoolDb, schoolDataSourceLocal) = newLocalSchoolDatabase(
@@ -241,6 +241,8 @@ class ClientServerDataSourceTestBuilder internal constructor(
             httpClient = httpClient,
             tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },
             validationHelper = clientValidationHelper,
+            defaultAppCatalogUrl = null,
+            json = json,
         )
 
         val drainQueueSignal = Channel<Boolean>(capacity = Channel.UNLIMITED)

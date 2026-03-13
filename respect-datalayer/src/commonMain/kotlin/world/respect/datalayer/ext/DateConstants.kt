@@ -2,7 +2,6 @@ package world.respect.datalayer.ext
 
 import kotlin.time.Instant
 
-
 /**
  * Unix timestamp for maximum date we will recognize as being a set date: 1/Jan/2200
  */

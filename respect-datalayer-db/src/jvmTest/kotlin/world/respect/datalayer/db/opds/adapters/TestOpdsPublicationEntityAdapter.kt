@@ -1,8 +1,9 @@
 package world.respect.datalayer.db.opds.adapters
 
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.opds.adapters.asEntities
+import world.respect.datalayer.db.school.opds.adapters.asModel
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator

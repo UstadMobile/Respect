@@ -4,8 +4,8 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.opds.OpdsPublicationDataSourceDb
-import world.respect.datalayer.db.opds.OpdsFeedDataSourceDb
+import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
+import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb

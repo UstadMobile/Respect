@@ -1,4 +1,4 @@
-package world.respect.datalayer.http.opds
+package world.respect.datalayer.http.school.opds
 
 import io.ktor.client.HttpClient
 import io.ktor.http.Url

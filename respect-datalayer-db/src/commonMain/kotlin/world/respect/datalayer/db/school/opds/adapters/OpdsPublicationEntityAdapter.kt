@@ -1,12 +1,12 @@
-package world.respect.datalayer.db.opds.adapters
+package world.respect.datalayer.db.school.opds.adapters
 
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.opds.OpdsParentType
-import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
-import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
+import world.respect.datalayer.db.school.opds.OpdsParentType
+import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
+import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.shared.adapters.asEntities
 import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity

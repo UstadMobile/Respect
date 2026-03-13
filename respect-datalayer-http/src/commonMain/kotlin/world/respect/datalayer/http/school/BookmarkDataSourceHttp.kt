@@ -45,7 +45,7 @@ class BookmarkDataSourceHttp(
         personUid: String,
         url: Url
     ): Flow<Boolean> {
-        throw UnsupportedOperationException(
+        throw IllegalArgumentException(
             "Bookmark status is not supported in HTTP datasource."
         )
     }
@@ -74,8 +74,10 @@ class BookmarkDataSourceHttp(
         }
     }
 
-    override suspend fun findBookmarks(personUid: String): List<Bookmark> {
-        throw UnsupportedOperationException(
+    override suspend fun findBookmarksWithMissingPublication(personUid: String): List<Bookmark> {
+
+
+        throw IllegalArgumentException(
             "Find Bookmarks is not supported in HTTP datasource."
         )
     }

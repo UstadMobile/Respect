@@ -49,20 +49,6 @@ class BookmarkListViewModel(
 
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
 
-            val missingBookmarks = schoolDataSource.bookmarkDataSource
-                .findBookmarks(personUid)
-
-            missingBookmarks.forEach { bookmark ->
-                schoolDataSource.opdsPublicationDataSource.getByUrl(
-                    url = bookmark.learningUnitManifestUrl,
-                    params = DataLoadParams(),
-                    referrerUrl = null,
-                    expectedPublicationId = null
-                )
-            }
-
-            loadingState = LoadingUiState.NOT_LOADING
-
             val bookmarks = schoolDataSource.bookmarkDataSource.list(
                 loadParams = DataLoadParams(),
                 listParams = BookmarkDataSource.GetListParams(
@@ -74,6 +60,20 @@ class BookmarkListViewModel(
                     bookmarks = bookmarks
                 )
             }
+
+            val missingBookmarks = schoolDataSource.bookmarkDataSource
+                .findBookmarksWithMissingPublication(personUid)
+
+            missingBookmarks.forEach { bookmark ->
+                schoolDataSource.opdsPublicationDataSource.getByUrl(
+                    url = bookmark.learningUnitManifestUrl,
+                    params = DataLoadParams(),
+                    referrerUrl = null,
+                    expectedPublicationId = null
+                )
+            }
+
+            loadingState = LoadingUiState.NOT_LOADING
 
             bookmarks.forEach { it ->
                 schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
@@ -120,3 +120,4 @@ class BookmarkListViewModel(
         )
     }
 }
+

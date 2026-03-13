@@ -10,17 +10,17 @@ import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSourceLocal
-
 import world.respect.datalayer.school.model.Bookmark
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.DataLayerTags
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.libutil.util.time.systemTimeInMillis
-import kotlin.time.Instant
 
 
 class BookmarkDataSourceRepository(
+
+
     override val local: BookmarkDataSourceLocal,
     override val remote: BookmarkDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
@@ -67,8 +67,8 @@ class BookmarkDataSourceRepository(
         return local.list(loadParams, listParams).combineWithRemoteIfNotNull(remote)
     }
 
-    override suspend fun findBookmarks(personUid: String): List<Bookmark> {
-        return local.findBookmarks(personUid)
+    override suspend fun findBookmarksWithMissingPublication(personUid: String): List<Bookmark> {
+        return local.findBookmarksWithMissingPublication(personUid)
     }
 
 }

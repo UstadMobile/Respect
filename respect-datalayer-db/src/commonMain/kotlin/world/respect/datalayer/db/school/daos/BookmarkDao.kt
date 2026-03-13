@@ -56,7 +56,7 @@ interface BookmarkDao {
                   WHERE opeUrlHash = bUrlHash
              )
     """)
-    suspend fun findBookmarks(
+    suspend fun findBookmarksWithMissingPublication(
         personUid: String
     ): List<BookmarkEntities>
 }

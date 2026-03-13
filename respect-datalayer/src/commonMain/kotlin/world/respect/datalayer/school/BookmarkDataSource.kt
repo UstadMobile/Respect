@@ -39,7 +39,7 @@ interface BookmarkDataSource : WritableDataSource<Bookmark> {
         listParams: GetListParams,
     ): DataLoadState<List<Bookmark>>
 
-    suspend fun findBookmarks(
+    suspend fun findBookmarksWithMissingPublication(
         personUid: String
     ): List<Bookmark>
 

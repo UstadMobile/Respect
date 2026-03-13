@@ -67,9 +67,9 @@ class BookmarkDataSourceDb(
         )
     }
 
-    override suspend fun findBookmarks(personUid: String): List<Bookmark> {
+    override suspend fun findBookmarksWithMissingPublication(personUid: String): List<Bookmark> {
         return schoolDb.getBookmarkDao()
-            .findBookmarks(personUid)
+            .findBookmarksWithMissingPublication(personUid)
             .map { entity ->
                 entity.toModel(json)
             }

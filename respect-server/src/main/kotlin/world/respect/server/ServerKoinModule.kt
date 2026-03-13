@@ -1,7 +1,11 @@
 package world.respect.server
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.Url
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -40,6 +44,8 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCase
+import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
+import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
@@ -148,6 +154,22 @@ fun serverKoinModule(
     }
     single<RegisterSchoolUseCase> {
         RegisterSchoolUseCase()
+    }
+    single<SchoolUrlVerificationManager> {
+        SchoolUrlVerificationManager()
+    }
+    single<HttpClient> {
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(json = get())
+            }
+        }
+    }
+    single<VerifySchoolUrlPointsToThisServerUseCase> {
+        VerifySchoolUrlPointsToThisServerUseCase(
+            verificationManager = get(),
+            httpClient = get()
+        )
     }
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()

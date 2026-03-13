@@ -46,18 +46,16 @@ interface BookmarkDao {
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): List<BookmarkEntities>
 
-    @Query(
-        """
-            SELECT * 
-              FROM BookmarkEntity 
-             WHERE bPersonUid = :personUid
-             AND NOT EXISTS ( 
+    @Query("""
+        SELECT * 
+          FROM BookmarkEntity 
+         WHERE bPersonUid = :personUid
+         AND NOT EXISTS ( 
                  SELECT 1
                    FROM OpdsPublicationEntity 
-                   WHERE opeUrlHash = bUrlHash
+                  WHERE opeUrlHash = bUrlHash
              )
-    """
-    )
+    """)
     suspend fun findBookmarks(
         personUid: String
     ): List<BookmarkEntities>

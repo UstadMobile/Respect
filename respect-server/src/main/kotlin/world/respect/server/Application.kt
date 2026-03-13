@@ -44,6 +44,7 @@ import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
 import world.respect.server.routes.qrcode.PersonQrBadgeRoute
 import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
+import world.respect.server.routes.school.respect.BookmarkRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
@@ -51,6 +52,7 @@ import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
@@ -250,9 +252,14 @@ fun Application.module() {
                         EnrollmentRoute()
                         AssignmentRoute()
                         PersonQrBadgeRoute()
+                        BookmarkRoute()
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )
+                    }
+
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                        PlaylistRoute()
                     }
                 }
             }

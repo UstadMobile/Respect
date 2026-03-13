@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "@type": "http://schema.org/Game",
+    "title": "Lesson 002",
+    "author": "Video Lesson",
+    "identifier": "https://example.app/id/lesson002",
+    "language": "en",
+    "modified": "2026-03-11T10:00:00Z"
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "$TESTBASEURL/grade1/lesson002/lesson002.json",
+      "type": "application/opds-publication+json"
+    },
+    {
+      "rel": "http://opds-spec.org/acquisition/open-access",
+      "href": "lesson002.html",
+      "type": "text/html"
+    }
+  ],
+  "images": [
+    { "href": "cover.png", "type": "image/png" }
+  ],
+  "resources": [
+    {
+      "href": "video.mp4",
+      "type": "video/mp4"
+    }
+  ]
+}

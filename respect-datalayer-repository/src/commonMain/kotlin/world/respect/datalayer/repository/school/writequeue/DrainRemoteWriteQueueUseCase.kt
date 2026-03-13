@@ -1,5 +1,9 @@
 package world.respect.datalayer.repository.school.writequeue
 
+import io.github.aakira.napier.Napier
+import io.ktor.http.Url
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -63,6 +67,25 @@ class DrainRemoteWriteQueueUseCase(
 
                     WriteQueueItem.Model.INVITE -> {
                         repository.inviteDataSource.sendToRemote(listOf(item))
+                    }
+
+                    WriteQueueItem.Model.OPDS_FEED -> {
+                        val dataLoad = repository.opdsFeedDataSource.local.getByUrl(
+                            url = Url(item.uid),
+                            params = DataLoadParams()
+                        )
+
+                        if(dataLoad is DataReadyState) {
+                            repository.opdsFeedDataSource.remote.store(listOf(dataLoad.data))
+                        }else {
+                            Napier.w("WARN: No local data for ${item.uid}")
+                        }
+
+                        remoteWriteQueue.markSent(ids = listOf(item.queueItemId))
+                    }
+
+                    WriteQueueItem.Model.BOOKMARK -> {
+                        repository.bookmarkDataSource.sendToRemote(listOf(item))
                     }
                 }
 

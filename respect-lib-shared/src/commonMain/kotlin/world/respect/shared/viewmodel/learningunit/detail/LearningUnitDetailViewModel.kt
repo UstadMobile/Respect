@@ -9,18 +9,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
+import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
+import world.respect.datalayer.school.model.Bookmark
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
@@ -28,13 +33,15 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import kotlin.getValue
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
-    val app: DataLoadState<RespectAppManifest> = DataLoadingState(),
+    val app: DataLoadState<OpdsPublication> = DataLoadingState(),
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
+    val isBookmarked: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -42,10 +49,14 @@ data class LearningUnitDetailUiState(
 
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     private val launchAppUseCase: LaunchAppUseCase,
+    private val accountManager: RespectAccountManager,
     private val ustadCache: UstadCache,
-) : RespectViewModel(savedStateHandle) {
+    accountMananger: RespectAccountManager,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+
+    override val scope: Scope = accountMananger.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
 
@@ -53,9 +64,11 @@ class LearningUnitDetailViewModel(
 
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
+    private val schoolDataSource: SchoolDataSource by inject()
+
     init {
         viewModelScope.launch {
-            appDataSource.opdsDataSource.loadOpdsPublication(
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
                 url = route.learningUnitManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = route.learningUnitManifestUrl,
@@ -84,9 +97,23 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            appDataSource.compatibleAppsDataSource.getAppAsFlow(
-                manifestUrl = route.appManifestUrl,
-                loadParams = DataLoadParams()
+            val personUid = accountManager.activeAccount?.userGuid ?: return@launch
+
+            schoolDataSource.bookmarkDataSource.getBookmarkStatus(
+                personUid,
+                route.learningUnitManifestUrl
+            )
+                .collect { bookmarked ->
+                    _uiState.update { it.copy(isBookmarked = bookmarked) }
+                }
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+                url = route.appManifestUrl,
+                params = DataLoadParams(),
+                referrerUrl = null,
+                expectedPublicationId = null,
             ).collect { app ->
                 _uiState.update { it.copy(app = app) }
             }
@@ -122,19 +149,21 @@ class LearningUnitDetailViewModel(
     fun onClickDownload() {
         viewModelScope.launch {
             try {
-                when(uiState.value.pinState.status) {
+                when (uiState.value.pinState.status) {
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
+
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }
+
                     else -> {
                         //Do nothing
                     }
                 }
 
-            }catch(t: Throwable) {
+            } catch (t: Throwable) {
                 t.printStackTrace()
             }
         }
@@ -156,4 +185,27 @@ class LearningUnitDetailViewModel(
             )
         )
     }
+
+    fun onClickBookmark() {
+        viewModelScope.launch {
+            val personUid = accountManager.activeAccount?.userGuid ?: return@launch
+            val learningUnitManifestUrl = route.learningUnitManifestUrl
+
+            val status =
+                if (uiState.value.isBookmarked)
+                    StatusEnum.TO_BE_DELETED
+                else
+                    StatusEnum.ACTIVE
+
+            val bookmark = Bookmark(
+                personUid = personUid,
+                learningUnitManifestUrl = learningUnitManifestUrl,
+                status = status,
+                appManifestUrl= route.appManifestUrl
+            )
+
+            schoolDataSource.bookmarkDataSource.store(listOf(bookmark))
+        }
+    }
 }
+

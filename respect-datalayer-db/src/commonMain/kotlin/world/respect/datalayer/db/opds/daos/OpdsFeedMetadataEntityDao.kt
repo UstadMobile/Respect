@@ -11,7 +11,7 @@ abstract class OpdsFeedMetadataEntityDao {
     @Query("""
         SELECT OpdsFeedMetadataEntity.*
           FROM OpdsFeedMetadataEntity
-         WHERE ofmeOfeUid = :feedUid 
+         WHERE OpdsFeedMetadataEntity.ofmeOfeUid = :feedUid 
     """)
     abstract suspend fun findByFeedUid(feedUid: Long): List<OpdsFeedMetadataEntity>
 

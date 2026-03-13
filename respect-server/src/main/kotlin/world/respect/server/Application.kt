@@ -51,6 +51,7 @@ import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
@@ -253,6 +254,10 @@ fun Application.module() {
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )
+                    }
+
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                        PlaylistRoute()
                     }
                 }
             }

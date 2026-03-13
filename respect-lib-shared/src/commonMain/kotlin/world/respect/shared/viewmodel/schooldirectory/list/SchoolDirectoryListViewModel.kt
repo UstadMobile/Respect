@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.school_directories
@@ -31,6 +32,7 @@ class SchoolDirectoryListViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
     private val launchCustomTabUseCase: LaunchCustomTabUseCase,
+    private val getAppVersionInfoUseCase: GetAppVersionInfoUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: SchoolDirectoryList = savedStateHandle.toRoute()
@@ -86,10 +88,13 @@ class SchoolDirectoryListViewModel(
     fun onSelectDirectory(directory: RespectSchoolDirectory) {
         when (route.mode) {
             SchoolDirectoryMode.SELECT -> {
-                val encodedPackageName = URLEncoder.encode("world.respect.app", "UTF-8") //TODO Need to use package name from build config
-                val registrationUrl = "${directory.baseUrl}register-school?packageName=$encodedPackageName"
+                viewModelScope.launch {
+                    val appInfo = getAppVersionInfoUseCase()
+                    val encodedPackageName = URLEncoder.encode(appInfo.packageName, "UTF-8")
+                    val registrationUrl = "${directory.baseUrl}register-school?packageName=$encodedPackageName"
 
-                launchCustomTabUseCase(url = registrationUrl)
+                    launchCustomTabUseCase(url = registrationUrl)
+                }
             }
 
             else -> {}

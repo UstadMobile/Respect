@@ -1,6 +1,5 @@
 package world.respect.server.domain.school.add
 
-import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
@@ -14,6 +13,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.server.SchoolConfig
+import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.ext.HttpStatusException
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
@@ -39,6 +39,7 @@ class RegisterSchoolUseCase : KoinComponent {
     private val addSchoolUseCase: AddSchoolUseCase by inject()
     private val schoolConfig: SchoolConfig by inject()
     private val urlToCustomDeepLinkUseCase: UrlToCustomDeepLinkUseCase  by inject()
+    private val verifySchoolUrlUseCase: VerifySchoolUrlPointsToThisServerUseCase by inject()
 
     suspend operator fun invoke(request: RegisterSchoolRequest): RegisterSchoolResponse {
         // Check if registration is enabled
@@ -60,6 +61,9 @@ class RegisterSchoolUseCase : KoinComponent {
                 HttpStatusCode.BadRequest
             )
         }
+
+        // Verify school URL - will throw SchoolUrlVerificationException if verification fails
+        verifySchoolUrlUseCase(parsedUrl)
 
         // Extract subdomain from URL for use as dbUrl and rpId
         val schoolSubdomain = when (schoolConfig.registration.mode) {

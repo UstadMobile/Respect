@@ -79,10 +79,31 @@ class BookmarkDataSourceDb(
         list: List<Bookmark>,
         forceOverwrite: Boolean
     ) {
-        TODO("Not yet implemented")
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val now = Clock.System.now()
+                schoolDb.getBookmarkDao().upsert(
+                    bookmarks = list.filter { bookmark ->
+
+                        forceOverwrite || schoolDb.getBookmarkDao().getBookmarkLastModified(
+                                    personUid = bookmark.personUid,
+                                    urlHash = uidNumberMapper(
+                                        bookmark.learningUnitManifestUrl.toString()
+                                    )
+                                ).let { it ?: 0L } < bookmark.lastModified.toEpochMilliseconds()
+                    }.map {
+                        it.copy(stored = now).toEntities(uidNumberMapper).bookmark
+                    }
+                )
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<Bookmark> {
-        TODO("Not yet implemented")
+        return schoolDb.getBookmarkDao()
+            .findByUidList(
+                uids.map { uidNumberMapper(it) }
+            )
+            .map { it.toModel(json) }
     }
 }

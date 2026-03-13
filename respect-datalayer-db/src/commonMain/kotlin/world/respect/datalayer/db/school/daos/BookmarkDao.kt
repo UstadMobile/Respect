@@ -59,4 +59,24 @@ interface BookmarkDao {
     suspend fun findBookmarksWithMissingPublication(
         personUid: String
     ): List<BookmarkEntities>
+
+    @Query("""
+        SELECT bLastModified
+          FROM BookmarkEntity
+         WHERE bPersonUid = :personUid
+           AND bUrlHash = :urlHash
+    """)
+    suspend fun getBookmarkLastModified(
+        personUid: String,
+        urlHash: Long
+    ): Long?
+
+    @Query("""
+        SELECT *
+          FROM BookmarkEntity
+         WHERE bUrlHash IN (:uids)
+    """)
+    suspend fun findByUidList(
+        uids: List<Long>
+    ): List<BookmarkEntities>
 }

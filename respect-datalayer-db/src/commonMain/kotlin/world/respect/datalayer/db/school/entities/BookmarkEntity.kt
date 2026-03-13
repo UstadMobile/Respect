@@ -11,11 +11,18 @@ import kotlin.time.Instant
 
 data class BookmarkEntity(
     val bPersonUid: String,
-    val bPersonUidHash : Long,
+    val bPersonUidHash: Long,
     val bUrl: Url,
-    val bUrlHash:Long,
+    val bUrlHash: Long,
     val bStatus: StatusEnum = StatusEnum.ACTIVE,
     val bLastModified: Instant,
     val bStored: Instant,
     val bAppManifestUrl: Url
-)
+) {
+
+    companion object {
+        const val TABLE_ID = 11
+    }
+
+}
+

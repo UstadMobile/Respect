@@ -45,7 +45,9 @@ class BookmarkDataSourceHttp(
         personUid: String,
         url: Url
     ): Flow<Boolean> {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException(
+            "Bookmark status is not supported in HTTP datasource."
+        )
     }
 
 
@@ -73,6 +75,8 @@ class BookmarkDataSourceHttp(
     }
 
     override suspend fun findBookmarks(personUid: String): List<Bookmark> {
-        TODO("Not yet implemented")
+        throw UnsupportedOperationException(
+            "Find Bookmarks is not supported in HTTP datasource."
+        )
     }
 }

@@ -75,9 +75,9 @@ class BookmarkListViewModel(
                 )
             }
 
-            bookmarks.forEach { bookmark ->
+            bookmarks.forEach { it ->
                 schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                    url = bookmark.appManifestUrl,
+                    url = it.appManifestUrl,
                     params = DataLoadParams(),
                     referrerUrl = null,
                     expectedPublicationId = null,

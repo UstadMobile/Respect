@@ -184,6 +184,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
+            BookmarkEntity.TABLE_ID
         )
 
     }

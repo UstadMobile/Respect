@@ -24,8 +24,6 @@ import world.respect.server.util.ext.respondOffsetLimitPaging
 fun Route.BookmarkRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->
         call.requireAccountScope().get()
-
-
     },
 ) {
 

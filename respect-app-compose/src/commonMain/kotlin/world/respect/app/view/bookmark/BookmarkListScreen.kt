@@ -208,6 +208,24 @@ private fun BookmarkListContent(
                             text = bookmark.subTitle?.getTitle() ?: ""
                         )
 
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+
+
+                            bookmark.language?.let {
+                                Text(text = it)
+                            }
+
+                            bookmark.grade?.let {
+                                Text(text = it)
+                            }
+
+                            bookmark.type?.let {
+                                Text(text = it)
+                            }
+                        }
+
                     }
                 },
 

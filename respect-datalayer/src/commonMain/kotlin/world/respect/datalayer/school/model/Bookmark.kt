@@ -17,6 +17,9 @@ data class Bookmark(
     val appManifestUrl: Url,
     val title: LangMap? = null,
     val subTitle: LangMap? = null,
-    val imageUrl: Url? = null
+    val imageUrl: Url? = null,
+    val type: String? = null,
+    val language: String? = null,
+    val grade: String? = null
 ) : ModelWithTimes
 

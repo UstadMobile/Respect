@@ -92,6 +92,21 @@ fun BookmarkEntities.toModel(
         bookmark.bUrl.resolve(it)
     }
 
+    val type = opdsPublicationEntities
+        ?.publication
+        ?.opeMdType
+        ?.toString()
+        ?.substringAfterLast("/")
+
+    val language = opdsPublicationEntities
+        ?.publication
+        ?.opeMdLanguage
+        ?.firstOrNull()
+
+    val languageName = language?.let {
+        java.util.Locale(it).displayLanguage
+    }
+
     return Bookmark(
         status = bookmark.bStatus,
         lastModified = bookmark.bLastModified,
@@ -101,7 +116,9 @@ fun BookmarkEntities.toModel(
         appManifestUrl = bookmark.bAppManifestUrl,
         title = title,
         subTitle = subTitle,
-        imageUrl = imageUrl
+        imageUrl = imageUrl,
+        type = type,
+        language = languageName
     )
 }
 

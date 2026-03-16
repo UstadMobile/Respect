@@ -56,9 +56,9 @@ import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
@@ -82,10 +82,10 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
-        destRoute = RespectAppLauncher(),
+        destRoute = Home,
         icon = Icons.Filled.GridView,
         label = Res.string.apps,
-        routeName = "$routeNamePrefix.RespectAppLauncher",
+        routeName = "$routeNamePrefix.Home",
     ),
     TopNavigationItem(
         destRoute = AssignmentList,
@@ -114,10 +114,10 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         routeName = "$routeNamePrefix.Assignment"
     ),
     TopNavigationItem(
-        destRoute = RespectAppLauncher(),
+        destRoute = Home,
         icon = Icons.Filled.GridView,
         label = Res.string.apps,
-        routeName = "$routeNamePrefix.RespectAppLauncher",
+        routeName = "$routeNamePrefix.Home",
     ),
 )
 

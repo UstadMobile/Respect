@@ -1,16 +1,16 @@
-package world.respect.datalayer.db.opds.adapters
+package world.respect.datalayer.db.school.opds.adapters
 
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.opds.OpdsParentType
-import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
-import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
-import world.respect.datalayer.db.opds.entities.OpdsGroupEntity
-import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
-import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
-import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_LINKS
-import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_NAVIGATION
+import world.respect.datalayer.db.school.opds.OpdsParentType
+import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
+import world.respect.datalayer.db.school.opds.entities.OpdsFeedMetadataEntity
+import world.respect.datalayer.db.school.opds.entities.OpdsGroupEntity
+import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
+import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
+import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_LINKS
+import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_NAVIGATION
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.lib.opds.model.OpdsFeed

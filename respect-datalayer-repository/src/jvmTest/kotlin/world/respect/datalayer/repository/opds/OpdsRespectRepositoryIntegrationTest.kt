@@ -29,11 +29,11 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.opds.OpdsFeedDataSourceDb
-import world.respect.datalayer.db.opds.OpdsPublicationDataSourceDb
+import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
+import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.http.opds.OpdsFeedDataSourceHttp
-import world.respect.datalayer.http.opds.OpdsPublicationDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.opds.ext.hasRel

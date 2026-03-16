@@ -1,10 +1,10 @@
-package world.respect.datalayer.db.opds.daos
+package world.respect.datalayer.db.school.opds.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
+import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.shared.LastModifiedAndETagDb
 
 @Dao

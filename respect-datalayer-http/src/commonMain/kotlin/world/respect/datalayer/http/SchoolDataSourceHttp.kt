@@ -5,8 +5,8 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.http.opds.OpdsPublicationDataSourceHttp
-import world.respect.datalayer.http.opds.OpdsFeedDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.AssignmentDataSourceHttp
 import world.respect.datalayer.http.school.BookmarkDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp

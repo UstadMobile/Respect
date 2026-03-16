@@ -60,7 +60,6 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -520,17 +519,14 @@ val appKoinModule = module {
                 respectAppDatabase = get(),
                 json = get(),
                 xxStringHasher = get(),
-                primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
             ),
             remote = RespectAppDataSourceHttp(
                 local = RespectAppDataSourceDb(
                     respectAppDatabase = get(),
                     json = get(),
                     xxStringHasher = get(),
-                    primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
                 ),
                 httpClient = get(),
-                defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         )
     }
@@ -734,7 +730,6 @@ val appKoinModule = module {
                 "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(true))
                 .build()
         }
 
@@ -900,20 +895,28 @@ val appKoinModule = module {
                     accountScopeId.accountPrincipalId.guid
                 ),
                 checkPersonPermissionUseCase = get(),
+                json = get(),
+                defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         }
 
         scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
+            val localDs = get<SchoolDataSourceLocal>()
 
             SchoolDataSourceRepository(
-                local = get<SchoolDataSourceLocal>(),
+                local = localDs,
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                     httpClient = get(),
                     tokenProvider = get(),
                     validationHelper = get(),
+                    json = get(),
+                    defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                    opdsFeedValidationHelper = localDs.opdsFeedDataSource,
+                    opdsPublicationValidationHelper = localDs.opdsPublicationDataSource
+                        .publicationNetworkValidationHelper
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),

@@ -26,11 +26,9 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
-import world.respect.shared.viewmodel.apps.list.AppListViewModel.Companion.EMPTY_LIST
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.libutil.ext.resolve
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findIcons
 
 @Composable
 fun AppListScreen(
@@ -49,12 +47,14 @@ fun AppListScreen(
 fun AppListScreen(
     uiState: AppListUiState,
     onClickAddLink: () -> Unit,
-    onClickApp: (DataLoadState<RespectAppManifest>) -> Unit
+    onClickApp: (OpdsPublication) -> Unit
 ) {
+    val appPublications = uiState.appList.dataOrNull() ?: emptyList()
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
-        item(key = EMPTY_LIST) {
+        item(key = "empty") {
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -74,12 +74,12 @@ fun AppListScreen(
         }
 
         itemsIndexed(
-            items = uiState.appList,
+            items = appPublications,
             key = { index, app ->
-                app.metaInfo.url?.toString() ?: index
+                app.metadata.identifier?.toString() ?: index
             }
         ) { index, app ->
-            val appData = app.dataOrNull()
+
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,13 +87,9 @@ fun AppListScreen(
                         onClickApp(app)
                     },
                 leadingContent = {
-                    appData?.icon.also { icon ->
-                        val appIcon = app.metaInfo.url?.resolve(
-                            icon.toString()
-                        ).toString()
-
+                    app.findIcons().firstOrNull()?.also { iconLink ->
                         RespectAsyncImage(
-                            uri = appIcon,
+                            uri = iconLink.href,
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -103,7 +99,7 @@ fun AppListScreen(
                 },
                 headlineContent = {
                     Text(
-                        text = appData?.name?.getTitle() ?: "",
+                        text = app.metadata.title.getTitle(),
                     )
                 },
                 supportingContent = {
@@ -116,7 +112,7 @@ fun AppListScreen(
                     }
                 },
 
-                )
+            )
         }
     }
 }

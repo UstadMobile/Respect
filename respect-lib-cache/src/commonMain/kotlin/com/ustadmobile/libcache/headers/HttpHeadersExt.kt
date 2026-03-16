@@ -26,3 +26,12 @@ fun IHttpHeaders.requireIntegrity(): String {
  * names are case insensitive
  */
 fun IHttpHeaders.containsHeader(headerName: String) = get(headerName) != null
+
+/**
+ * Shorthand to check if the given request headers contain cache validation info:
+ * if-modified-since or if-none-match.
+ */
+fun IHttpHeaders.hasCacheValidators() : Boolean {
+    return this.containsHeader("if-modified-since") ||
+            this.containsHeader("if-none-match")
+}

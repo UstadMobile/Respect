@@ -217,7 +217,7 @@ onFlowComplete:
     id: "app_title"
     text: "Change History"
 - assertVisible: "Join request approved for “Student User”"
-
+- assertVisible: "Teacher added: “TeacherA User”"
 
 # E) Teacher share invite link for parent device based signup
 - tapOn: "Add student"

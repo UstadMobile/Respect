@@ -24,9 +24,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount
@@ -167,7 +167,7 @@ class AccountListViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = if(person.dataOrNull()?.status != PersonStatusEnum.PENDING_APPROVAL) {
-                        RespectAppLauncher()
+                        Home
                     }else {
                         WaitingForApproval()
                     },
@@ -185,7 +185,7 @@ class AccountListViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = if(person.roles.firstOrNull()?.roleEnum == PersonRoleEnum.PARENT) {
-                        RespectAppLauncher()
+                        Home
                     } else {
                         AssignmentList
                     },

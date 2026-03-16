@@ -1,8 +1,12 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -98,6 +102,12 @@ class ChangeHistoryDataSourceHttp(
     }
 
     override suspend fun store(list: List<ChangeHistoryEntry>) {
-
+        httpClient.post(
+            respectEndpointUrl(ChangeHistoryDataSource.ENDPOINT_NAME)
+        ) {
+            useTokenProvider(tokenProvider)
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }
     }
 }

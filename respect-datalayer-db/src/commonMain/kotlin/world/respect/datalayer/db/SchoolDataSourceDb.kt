@@ -109,6 +109,6 @@ class SchoolDataSourceDb(
     }
 
     override val changeHistoryDataSource: ChangeHistoryLocal by lazy {
-        ChangeHistoryDataSourceDb(schoolDb)
+        ChangeHistoryDataSourceDb(schoolDb,uidNumberMapper)
     }
 }

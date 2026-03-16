@@ -6,6 +6,10 @@ import world.respect.datalayer.db.school.entities.ChangeHistoryEntity
 import world.respect.datalayer.db.school.entities.ChangeHistoryWithChanges
 import world.respect.datalayer.school.model.ChangeHistoryChange
 import world.respect.datalayer.school.model.ChangeHistoryEntry
+import world.respect.datalayer.school.model.ChangeHistoryFieldEnum
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.findDifference
 
 
 data class ChangeHistoryEntities(
@@ -61,5 +65,34 @@ fun ChangeHistoryEntry.toEntities(
     return ChangeHistoryEntities(
         changeHistoryEntity = historyEntity,
         changeEntities = changeEntities
+    )
+}
+fun generatePersonChanges(
+    hGuid: String,
+    old: Person?,
+    new: Person,
+    whoGuid: String,
+    timestamp: Long
+): ChangeHistoryEntry? {
+
+    val changes = mutableListOf<ChangeHistoryChange>()
+
+    findDifference(ChangeHistoryFieldEnum.PERSON_GIVEN_NAME, old?.givenName, new.givenName, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_FAMILY_NAME, old?.familyName, new.familyName, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_MIDDLE_NAME, old?.middleName, new.middleName, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_USERNAME, old?.username, new.username, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_GENDER, old?.gender, new.gender, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_EMAIL, old?.email, new.email, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_PHONE_NUMBER, old?.phoneNumber, new.phoneNumber, changes)
+    findDifference(ChangeHistoryFieldEnum.PERSON_DATE_OF_BIRTH, old?.dateOfBirth, new.dateOfBirth, changes)
+
+    if (changes.isEmpty()) return null
+
+    return ChangeHistoryEntry(
+        guid = hGuid,
+        table = ChangeHistoryTableEnum.PERSON,
+        timestamp = timestamp,
+        whoGuid = whoGuid,
+        changes = changes
     )
 }

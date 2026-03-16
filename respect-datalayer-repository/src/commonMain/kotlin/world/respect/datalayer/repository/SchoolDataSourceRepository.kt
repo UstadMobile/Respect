@@ -14,7 +14,6 @@ import world.respect.datalayer.repository.school.PersonPasswordDataSourceReposit
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
-import world.respect.datalayer.school.ChangeHistoryDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -121,11 +120,12 @@ class SchoolDataSourceRepository(
             validationHelper = validationHelper
         )
     }
-    override val changeHistoryDataSource: ChangeHistoryDataSource by lazy {
+    override val changeHistoryDataSource: ChangeHistoryDataSourceRepository by lazy {
         ChangeHistoryDataSourceRepository(
             local = local.changeHistoryDataSource,
             remote = remote.changeHistoryDataSource,
-            validationHelper = validationHelper
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
         )
     }
 }

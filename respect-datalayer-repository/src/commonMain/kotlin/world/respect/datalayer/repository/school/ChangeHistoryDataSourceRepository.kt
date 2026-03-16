@@ -13,13 +13,17 @@ import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
 import world.respect.datalayer.school.ChangeHistoryDataSource
 import world.respect.datalayer.school.ChangeHistoryLocal
 import world.respect.datalayer.school.model.ChangeHistoryEntry
+import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.libutil.util.time.systemTimeInMillis
 
 class ChangeHistoryDataSourceRepository(
     override val local: ChangeHistoryLocal,
     override val remote: ChangeHistoryDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val remoteWriteQueue: RemoteWriteQueue,
 ) : ChangeHistoryDataSource, RepositoryModelDataSource<ChangeHistoryEntry> {
 
     override suspend fun findByGuid(
@@ -68,5 +72,16 @@ class ChangeHistoryDataSourceRepository(
 
 
     override suspend fun store(list: List<ChangeHistoryEntry>) {
+        local.store(list)
+        val timeNow = systemTimeInMillis()
+        remoteWriteQueue.add(
+            list.map {
+                WriteQueueItem(
+                    model = WriteQueueItem.Model.CHANGE_HISTORY,
+                    uid = it.guid,
+                    timeQueued = timeNow,
+                )
+            }
+        )
     }
 }

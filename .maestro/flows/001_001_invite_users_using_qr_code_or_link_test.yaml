@@ -101,7 +101,19 @@ onFlowComplete:
     text: "Apps"
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
-- assertVisible: "People"
+- tapOn: "People"
+- tapOn: "TeacherA User"
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- tapOn: "Gender*"
+- tapOn: "Male"
+- tapOn: "Save"
+- tapOn: "Change History"
+- assertVisible:
+    id: "app_title"
+    text: "Change History"
+- assertVisible: "Person gender changed from “Female” to “Male”"
+
 - runFlow:
     file: "subflows/admin_add_class.yaml"
     env:
@@ -199,6 +211,13 @@ onFlowComplete:
 - assertVisible: "Pending requests.*"
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
+- assertNotVisible: "Pending requests.*"
+- tapOn: "Change History"
+- assertVisible:
+    id: "app_title"
+    text: "Change History"
+- assertVisible: "Join request approved for “Student User”"
+
 
 # E) Teacher share invite link for parent device based signup
 - tapOn: "Add student"

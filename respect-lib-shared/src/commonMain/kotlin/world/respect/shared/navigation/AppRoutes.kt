@@ -585,6 +585,13 @@ class LearningUnitViewer(
 @Serializable
 object AccountList : RespectAppRoute
 
+@Serializable
+object ShareFeedback : RespectAppRoute
+
+@Serializable
+data class FeedbackSubmitted(
+    val ticketId: Int,
+) : RespectAppRoute
 
 /**
  * @property addToClassUid if the PersonList screen has been navigated when the user clicks

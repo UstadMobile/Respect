@@ -4,10 +4,10 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.opds.adapters.asModels
-import world.respect.datalayer.db.opds.entities.OpdsPublicationEntity
-import world.respect.datalayer.db.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.school.entities.BookmarkEntity
+import world.respect.datalayer.db.school.opds.adapters.asModels
+import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
+import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.school.model.Bookmark

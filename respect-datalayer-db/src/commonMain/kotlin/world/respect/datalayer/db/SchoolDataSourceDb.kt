@@ -7,6 +7,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.AssignmentDatasourceDb
+import world.respect.datalayer.db.school.BookmarkDataSourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
@@ -119,7 +120,7 @@ class SchoolDataSourceDb(
     }
 
     override val bookmarkDataSource: BookmarkDataSourceLocal by lazy {
-        BookmarkDataSourceDb(schoolDb,uidNumberMapper,authenticatedUser,json)
+        BookmarkDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, json)
     }
 
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal by lazy {

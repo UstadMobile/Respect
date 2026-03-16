@@ -33,9 +33,9 @@ fi
 
 if [ "$TESTCONTROLLER_URL" == "" ]; then
     if [ "$URL_SUBSTITUTION" != "" ]; then
-        echo "ci-run-maestro: no TESTCONTROLLER_URL set: using hostname - this might not be correct"
         TESTCONTROLLER_URL=$(echo $URL_SUBSTITUTION | sed s/_PORT_/$TESTCONTROLLER_PORT/g)
     else
+        echo "ci-run-maestro: no TESTCONTROLLER_URL set: using hostname - this might not be correct"
         TESTCONTROLLER_URL="http://$(hostname -I | xargs):$TESTCONTROLLER_PORT/"
     fi
 fi

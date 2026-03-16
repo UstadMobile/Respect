@@ -3,6 +3,8 @@ package world.respect.datalayer.repository
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.repository.opds.OpdsPublicationDataSourceRepository
+import world.respect.datalayer.repository.opds.OpdsFeedDataSourceRepository
 import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
@@ -16,6 +18,8 @@ import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 
 class SchoolDataSourceRepository(
@@ -118,5 +122,24 @@ class SchoolDataSourceRepository(
             remoteWriteQueue = remoteWriteQueue,
             validationHelper = validationHelper
         )
+    }
+
+    override val opdsPublicationDataSource: OpdsPublicationDataSource by lazy {
+        OpdsPublicationDataSourceRepository(
+            local = local.opdsPublicationDataSource,
+            remote = remote.opdsPublicationDataSource,
+        )
+    }
+
+    override val opdsFeedDataSource: OpdsFeedDataSourceRepository by lazy {
+        OpdsFeedDataSourceRepository(
+            local = local.opdsFeedDataSource,
+            remote = remote.opdsFeedDataSource,
+            remoteWriteQueue = remoteWriteQueue,
+        )
+    }
+
+    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
+        local.schoolConfigSettingDataSource
     }
 }

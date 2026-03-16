@@ -6,6 +6,7 @@ import com.ustadmobile.libcache.CachePaths
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheImpl
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorJvm
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
@@ -88,6 +89,7 @@ abstract class AbstractCacheInterceptorTest {
                 enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                     cacheDb, XXStringHasherCommonJvm()
                 ),
+                freshnessChecker = CacheControlFreshnessCheckerImpl(),
             )
         )
         okHttpClient = OkHttpClient.Builder()

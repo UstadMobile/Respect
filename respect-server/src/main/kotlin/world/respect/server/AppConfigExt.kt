@@ -8,6 +8,11 @@ const val DEFAULT_DATA_DIR_NAME = "data"
 const val SERVER_PROPERTIES_KEY_PORT = "port"
 
 /**
+ * KTOR server configuration that can be used to run a static directory on the same port.
+ */
+const val SERVER_CONFIG_KEY_STATICFILES = "ktor.extrastaticfiles.dir"
+
+/**
  * File that contains the password for directory management.
  */
 const val DIRECTORY_ADMIN_FILENAME = "dir-admin.txt"
@@ -85,6 +90,18 @@ fun ktorServerPropertiesFile(
 }
 
 /**
+ * Used when handling file properties. If the File is already absolute, leave it is as is. Otherwise,
+ * return a File relative to the server home directory.
+ */
+fun File.relativeToHomeDirIfNotAbsolute() : File {
+    return if(isAbsolute) {
+        this
+    }else {
+        File(ktorAppHomeDir(), this.path)
+    }
+}
+
+/**
  * Get a File for a property e.g. for the data directory or well known directory
  *
  * @param propertyName the config property name
@@ -99,10 +116,14 @@ fun ApplicationConfig.fileProperty(
     val path = propertyOrNull(propertyName)?.getString() ?: defaultPath
     val file = File(path)
 
-    return if(file.isAbsolute) {
-        file
-    }else {
-        File(ktorAppHomeDir(), path)
+    return file.relativeToHomeDirIfNotAbsolute()
+}
+
+fun ApplicationConfig.filePropertyOrNull(
+    propertyName: String
+): File? {
+    return propertyOrNull(propertyName)?.getString()?.let {
+        File(it).relativeToHomeDirIfNotAbsolute()
     }
 }
 

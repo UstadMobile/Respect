@@ -19,7 +19,6 @@ import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -118,9 +117,6 @@ fun serverKoinModule(
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-    single<PrimaryKeyGenerator> {
-        PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
-    }
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
@@ -133,7 +129,6 @@ fun serverKoinModule(
             respectAppDatabase = get(),
             json = get(),
             xxStringHasher = get(),
-            primaryKeyGenerator = get(),
         )
     }
 
@@ -247,7 +242,6 @@ fun serverKoinModule(
             Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(false))
                 .build()
         }
 
@@ -380,6 +374,9 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 checkPersonPermissionUseCase = get(),
+                json = get(),
+                primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator,
+                defaultAppCatalogUrl = RespectServerBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         }
 

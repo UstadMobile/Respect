@@ -11,6 +11,8 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
+import io.ktor.server.http.content.staticFiles
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -49,6 +51,7 @@ import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
@@ -188,6 +191,14 @@ fun Application.module() {
             swaggerFile = "openapi/openapi.yaml",
         )
 
+        environment.config.filePropertyOrNull(
+            propertyName = SERVER_CONFIG_KEY_STATICFILES
+        )?.also { staticFilesDir ->
+            staticFiles("/static-extra", staticFilesDir)
+        }
+
+        staticResources("/static-resources", "http")
+
         route(RESPECT_SCHOOL_LINK_SEGMENT) {
             SchoolLinkRoute()
         }
@@ -245,6 +256,10 @@ fun Application.module() {
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )
+                    }
+
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                        PlaylistRoute()
                     }
                 }
             }

@@ -3,10 +3,8 @@ package world.respect.app.view.apps.detail
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
@@ -36,11 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.app.RespectAsyncImage
+import world.respect.datalayer.DataReadyState
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_app
 import world.respect.shared.generated.resources.lessons
-import world.respect.shared.generated.resources.try_it
-import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.detail.AppsDetailUiState
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
@@ -48,12 +48,6 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.BUTTONS_ROW
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.LEARNING_UNIT_LIST
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.LESSON_HEADER
-import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.SCREENSHOT
-import world.respect.datalayer.DataReadyState
-
-import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.ReadiumLink
-import world.respect.lib.opds.model.findIcons
 
 @Composable
 fun AppsDetailScreen(
@@ -67,7 +61,6 @@ fun AppsDetailScreen(
         onClickLessonList = { viewModel.onClickLessonList() },
         onClickPublication = { viewModel.onClickPublication(it) },
         onClickNavigation = { viewModel.onClickNavigation(it) },
-        onClickTry = { viewModel.onClickTry() },
         onClickAdd = { viewModel.onClickAdd() }
     )
 }
@@ -78,7 +71,6 @@ fun AppsDetailScreen(
     onClickLessonList: () -> Unit,
     onClickPublication: (OpdsPublication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit,
-    onClickTry: () -> Unit,
     onClickAdd: () -> Unit
 ) {
 
@@ -126,16 +118,6 @@ fun AppsDetailScreen(
                 horizontalArrangement =
                     Arrangement.spacedBy(12.dp)
             ) {
-                /* Mike: Temporarily disabled until we detect what is installed/launchable directly.
-                Button(
-                    onClick = {
-                        onClickTry()
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = stringResource(Res.string.try_it))
-                }*/
-
                 if(!uiState.isAdded && uiState.showAddRemoveButton) {
                     OutlinedButton(
                         onClick = onClickAdd,
@@ -150,40 +132,6 @@ fun AppsDetailScreen(
                     }
                 }
             }
-        }
-
-        item(
-            key = SCREENSHOT
-        ) {
-//            val screenshots = appDetail?.screenshots.orEmpty()
-//
-//            if (screenshots.isNotEmpty()) {
-//                LazyRow(
-//                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-//                    contentPadding = PaddingValues(horizontal = 4.dp)
-//                ) {
-//                    items(
-//                        count = screenshots.size,
-//                        key = { index -> screenshots[index].url.toString() }
-//                    ) { index ->
-//                        val screenshot = screenshots[index]
-//
-//                        screenshot.url.also { screenshotUrl ->
-//                            RespectAsyncImage(
-//                                uri = screenshotUrl.toString(),
-//                                contentDescription = "",
-//                                contentScale = ContentScale.Crop,
-//                                modifier = Modifier
-//                                    .width(200.dp)
-//                                    .aspectRatio(16f / 9f)
-//                                    .clip(
-//                                        RoundedCornerShape(12.dp)
-//                                    )
-//                            )
-//                        }
-//                    }
-//                }
-//            }
         }
 
         item(
@@ -213,10 +161,10 @@ fun AppsDetailScreen(
             ) {
                 itemsIndexed(
                     items = uiState.navigation,
-                    key = { index, navigation ->
+                    key = { _, navigation ->
                         navigation.href
                     }
-                ) { index, navigation ->
+                ) { _, navigation ->
                     NavigationList(
                         navigation,
                         onClickNavigation = {
@@ -227,10 +175,10 @@ fun AppsDetailScreen(
 
                 itemsIndexed(
                     items = uiState.publications,
-                    key = { index, publication ->
+                    key = { _, publication ->
                         publication.metadata.identifier.toString()
                     }
-                ) { index, publication ->
+                ) { _, publication ->
                     PublicationList(
                         publication,
                         onClickPublication = {
@@ -239,13 +187,13 @@ fun AppsDetailScreen(
                     )
                 }
 
-                uiState.group.forEach { group ->
+                uiState.group.forEach { _ ->
                     itemsIndexed(
                         items = uiState.navigation,
-                        key = { index, navigation ->
+                        key = { _, navigation ->
                             navigation.href
                         }
-                    ) { index, navigation ->
+                    ) { _, navigation ->
                         NavigationList(
                             navigation,
                             onClickNavigation = {
@@ -256,10 +204,10 @@ fun AppsDetailScreen(
 
                     itemsIndexed(
                         items = uiState.publications,
-                        key = { index, publication ->
+                        key = { _, publication ->
                             publication.metadata.identifier.toString()
                         }
-                    ) { index, publication ->
+                    ) { _, publication ->
                         PublicationList(
                             publication,
                             onClickPublication = {

@@ -4,9 +4,7 @@ import io.ktor.http.Url
 import world.respect.datalayer.DataLoadMetaInfo
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
-import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.util.time.systemTimeInMillis
-import kotlin.time.Clock
 
 fun OpdsFeed.selfUrl(): Url? {
     return links.firstOrNull { "self" in (it.rel ?: emptyList()) }?.let {
@@ -19,7 +17,12 @@ fun OpdsFeed.requireSelfUrl(): Url {
 }
 
 /**
+ * Make sure that the OpdsFeed has a self link with the absolute URL.
  *
+ * We need the absolute URL in the model after it has been loaded for Playlist editing (when the
+ * DataLoadState metadata is no longer available) so that we can store it and use the URL as a key.
+ *
+ * See also: dataLoadMetaInfoForPlaylist
  */
 fun OpdsFeed.withAbsoluteSelfUrl(urlLoaded: Url): OpdsFeed {
     return copy(

@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.opds.entities
+package world.respect.datalayer.db.school.opds.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.opds
+package world.respect.datalayer.db.school.opds
 
 import androidx.room.Transactor
 import androidx.room.useReaderConnection
@@ -16,10 +16,10 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.opds.adapters.OpdsFeedEntities
-import world.respect.datalayer.db.opds.adapters.asEntities
-import world.respect.datalayer.db.opds.adapters.asModel
-import world.respect.datalayer.db.opds.entities.OpdsFeedEntity
+import world.respect.datalayer.db.school.opds.adapters.OpdsFeedEntities
+import world.respect.datalayer.db.school.opds.adapters.asEntities
+import world.respect.datalayer.db.school.opds.adapters.asModel
+import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo

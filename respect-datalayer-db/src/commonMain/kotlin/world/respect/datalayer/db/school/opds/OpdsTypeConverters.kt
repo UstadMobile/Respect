@@ -1,7 +1,7 @@
-package world.respect.datalayer.db.opds
+package world.respect.datalayer.db.school.opds
 
 import androidx.room.TypeConverter
-import world.respect.datalayer.db.opds.entities.OpdsFeedMetadataEntity
+import world.respect.datalayer.db.school.opds.entities.OpdsFeedMetadataEntity
 
 class OpdsTypeConverters {
 

@@ -25,7 +25,6 @@ class WriteQueueItem(
         ASSIGNMENT(5), SCHOOL_APP(6), SCHOOL_PERMISSION_GRANT(7),
         PERSON_QRBADGE(8),
         INVITE(9),
-
         OPDS_FEED(10),
 
         ;

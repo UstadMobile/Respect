@@ -179,6 +179,7 @@ private fun AppsTabContent(
 
                     AppGridItem(
                         app = respectApp,
+                        clickEnabled = uiState.isAppClickable(respectApp),
                         onClickApp = {
                             onClickApp(respectApp)
                         },
@@ -196,6 +197,7 @@ private fun AppsTabContent(
 @Composable
 fun AppGridItem(
     app: DataLoadState<OpdsPublication>,
+    clickEnabled: Boolean,
     onClickApp: () -> Unit,
     onClickRemove: () -> Unit,
     showRemove: Boolean = false,
@@ -208,7 +210,9 @@ fun AppGridItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)
-            .clickable { onClickApp() },
+            .clickable(enabled = clickEnabled) {
+                onClickApp()
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(

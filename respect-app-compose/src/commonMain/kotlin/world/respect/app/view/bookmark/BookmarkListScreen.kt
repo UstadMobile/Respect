@@ -87,7 +87,7 @@ fun BookmarkListScreen(
 }
 
 
-/*@Composable
+@Composable
 private fun EmptyBookmarkState() {
     Box(
         modifier = Modifier
@@ -101,7 +101,7 @@ private fun EmptyBookmarkState() {
             Image(
                 painter = respectImagePainter(RespectImage.NO_BOOKMARK),
                 contentDescription = null,
-                modifier = Modifier.size(300.dp)
+                modifier = Modifier.size(220.dp)
             )
 
             Text(
@@ -109,48 +109,15 @@ private fun EmptyBookmarkState() {
                 fontWeight = FontWeight.Bold
             )
 
-            Text(
-                text = stringResource(Res.string.msg_see_bookmark),
-            )
-        }
-    }
-}*/
-@Composable
-private fun EmptyBookmarkState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Image(
-                painter = respectImagePainter(RespectImage.NO_BOOKMARK),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(220.dp),
-                contentScale = ContentScale.Fit
-            )
-
-            Text(
-                text = stringResource(Res.string.no_bookmark),
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp)) //
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = stringResource(Res.string.msg_see_bookmark),
-                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
+
 
 @Composable
 private fun BookmarkListContent(

@@ -1,5 +1,6 @@
 package world.respect.app.view.bookmark
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,13 +22,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,8 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Bookmark
+import world.respect.images.RespectImage
+import world.respect.images.respectImagePainter
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
@@ -83,7 +87,7 @@ fun BookmarkListScreen(
 }
 
 
-@Composable
+/*@Composable
 private fun EmptyBookmarkState() {
     Box(
         modifier = Modifier
@@ -94,28 +98,59 @@ private fun EmptyBookmarkState() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Outlined.BookmarkBorder,
+            Image(
+                painter = respectImagePainter(RespectImage.NO_BOOKMARK),
                 contentDescription = null,
-                modifier = Modifier.size(72.dp)
+                modifier = Modifier.size(300.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(Res.string.no_bookmark),
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = stringResource(Res.string.msg_see_bookmark),
             )
         }
     }
-}
+}*/
+@Composable
+private fun EmptyBookmarkState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
+            Image(
+                painter = respectImagePainter(RespectImage.NO_BOOKMARK),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(220.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Text(
+                text = stringResource(Res.string.no_bookmark),
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp)) //
+
+            Text(
+                text = stringResource(Res.string.msg_see_bookmark),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
 
 @Composable
 private fun BookmarkListContent(
@@ -142,7 +177,7 @@ private fun BookmarkListContent(
 
                     Box(
                         modifier = Modifier
-                            .fillMaxHeight()
+                            .fillMaxHeight().background(Color.Red)
                             .width(48.dp),
                         contentAlignment = Alignment.Center
                     ) {

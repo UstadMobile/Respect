@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -29,12 +28,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ustadmobile.libuicompose.theme.black
-import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.datalayer.DataLoadState
@@ -168,33 +164,22 @@ private fun BookmarkListContent(
                 },
 
                 supportingContent = {
-                    Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp)
-                    ) {
+                    Column {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(white)
-                                    .border(1.dp, black, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
+                            app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
                                     .also { icon ->
                                         RespectAsyncImage(
                                             uri = icon,
                                             contentDescription = "",
                                             contentScale = ContentScale.Fit,
                                             modifier = Modifier
-                                                .size(80.dp)
+                                                .size(20.dp)
 
                                         )
                                     }
-                            }
+
 
                             Spacer(modifier = Modifier.width(12.dp))
 
@@ -211,8 +196,6 @@ private fun BookmarkListContent(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-
-
                             bookmark.language?.let {
                                 Text(text = it)
                             }

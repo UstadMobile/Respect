@@ -47,7 +47,7 @@ onFlowComplete:
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "App name"
+- assertVisible: "My App"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"

@@ -20,8 +20,11 @@ import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 import kotlin.getValue
 
@@ -43,6 +46,12 @@ class BookmarkListViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {
+
+        _appUiState.update {
+            it.copy(
+                title = Res.string.home.asUiText()
+            )
+        }
         viewModelScope.launch {
 
             loadingState = LoadingUiState.INDETERMINATE

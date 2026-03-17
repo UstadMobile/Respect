@@ -33,7 +33,7 @@ onFlowComplete:
     id: "app_title"
     text: "Select Host"
 - tapOn:
-    id: "host_url"
+    text: ${output.SCHOOL_URL}
 - runFlow:
     when:
       notVisible: "Register New School"

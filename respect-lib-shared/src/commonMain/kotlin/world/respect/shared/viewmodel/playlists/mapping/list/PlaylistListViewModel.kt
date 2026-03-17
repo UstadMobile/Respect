@@ -14,6 +14,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
@@ -41,8 +42,9 @@ data class PlaylistListUiState(
     val isFabMenuExpanded: Boolean = false,
 ) {
     /**
+     * Playlists visible under the active filter chip.
      * user's owner href. Owner is identified via:
-     * rel = "https://respect.ustadmobile.com/ns/owner"
+     * rel = MakePlaylistOpdsFeedUseCase.REL_OWNER
      * href = "{schoolBaseUrl}user/{userGuid}"
      */
     val showPlaylists: List<OpdsPublication>
@@ -57,7 +59,7 @@ data class PlaylistListUiState(
         }
 
     companion object {
-        const val REL_OWNER = "https://respect.ustadmobile.com/ns/owner"
+        val REL_OWNER = MakePlaylistOpdsFeedUseCase.REL_OWNER
         const val REL_SELF = "self"
     }
 }
@@ -79,8 +81,10 @@ class PlaylistListViewModel(
         _appUiState.update {
             it.copy(title = Res.string.home.asUiText())
         }
+
         val activeAccount = accountManager.activeAccount
             ?: throw IllegalStateException(
+                "No active account"
             )
 
         val playlistFeedUrl = Url(
@@ -126,9 +130,7 @@ class PlaylistListViewModel(
                             it.copy(playlists = result.data.publications ?: emptyList())
                         }
                     }
-                    else -> {
-
-                    }
+                    else -> { /* loading/error states handled by app bar loading indicator */ }
                 }
             }
         }

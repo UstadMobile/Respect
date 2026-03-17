@@ -68,8 +68,10 @@ class ChangeHistoryDataSourceDb(
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach {
-                    schoolDb.getChangeHistoryDao().insertHistory(it.toEntities(uidNumberMapper).changeHistoryEntity)
-
+                    schoolDb.getChangeHistoryDao().insertHistoryWithChanges(
+                        history = it.toEntities(uidNumberMapper).changeHistoryEntity,
+                        changes = it.toEntities(uidNumberMapper).changeEntities
+                    )
                 }
             }
         }

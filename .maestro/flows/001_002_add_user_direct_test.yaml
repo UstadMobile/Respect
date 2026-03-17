@@ -34,9 +34,11 @@ onFlowComplete:
     text: "Select Host"
 - tapOn:
     id: "host_url"
-- extendedWaitUntil:
-    visible: "Register New School"
-    timeout: 60000
+- runFlow:
+    when:
+      notVisible: "Register New School"
+    file: "subflows/chrome-first-run-check.yaml"
+- assertVisible: "Register New School"
 - tapOn:
     id: "schoolName"
 - inputText: "TestSchool"

@@ -89,15 +89,31 @@ class SchoolDirectoryListViewModel(
         when (route.mode) {
             SchoolDirectoryMode.SELECT -> {
                 viewModelScope.launch {
+                    // ADD THIS LOG
+                    println("MAESTRO_DEBUG: onSelectDirectory called with directory: ${directory.baseUrl}")
+
                     val appInfo = getAppVersionInfoUseCase()
+                    println("MAESTRO_DEBUG: App package name: ${appInfo.packageName}")
+
                     val encodedPackageName = URLEncoder.encode(appInfo.packageName, "UTF-8")
                     val registrationUrl = "${directory.baseUrl}register-school?packageName=$encodedPackageName"
 
-                    launchCustomTabUseCase(url = registrationUrl)
+                    println("MAESTRO_DEBUG: Generated registration URL: $registrationUrl")
+                    println("MAESTRO_DEBUG: Attempting to launch custom tab...")
+
+                    try {
+                        launchCustomTabUseCase(url = registrationUrl)
+                        println("MAESTRO_DEBUG: launchCustomTabUseCase completed successfully")
+                    } catch (e: Exception) {
+                        println("MAESTRO_DEBUG: ERROR in launchCustomTabUseCase: ${e.message}")
+                        e.printStackTrace()
+                    }
                 }
             }
-
-            else -> {}
+            else -> {
+                // ADD THIS LOG TO SEE IF OTHER MODE IS BEING TRIGGERED
+                println("MAESTRO_DEBUG: onSelectDirectory called but mode is ${route.mode}, not SELECT")
+            }
         }
     }
 }

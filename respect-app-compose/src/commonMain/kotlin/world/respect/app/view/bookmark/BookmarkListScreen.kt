@@ -169,16 +169,16 @@ private fun BookmarkListContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
-                                    .also { icon ->
-                                        RespectAsyncImage(
-                                            uri = icon,
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier
-                                                .size(20.dp)
+                                .also { icon ->
+                                    RespectAsyncImage(
+                                        uri = icon,
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .size(20.dp)
 
-                                        )
-                                    }
+                                    )
+                                }
 
 
                             Spacer(modifier = Modifier.width(12.dp))

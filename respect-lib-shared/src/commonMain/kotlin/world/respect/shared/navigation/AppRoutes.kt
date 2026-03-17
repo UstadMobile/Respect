@@ -14,7 +14,6 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.ext.NextAfterScan
-import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
@@ -761,38 +760,34 @@ data class ScanQRCode(
         )
     }
 }
+@Serializable
+data object PlaylistList : RespectAppRoute
 
 @Serializable
-data object CurriculumMappingList : RespectAppRoute
-
-@Serializable
-data class CurriculumMappingEdit(
-    val textbookUid: Long = 0L,
-    private val mappingDataJson: String? = null
+class PlaylistDetail private constructor(
+    private val playlistUrlStr: String,
 ) : RespectAppRoute {
 
     @Transient
-    val mappingData: CurriculumMapping? = mappingDataJson?.let { jsonString ->
-        try {
-            Json.decodeFromString(CurriculumMapping.serializer(), jsonString)
-        } catch (e: Exception) {
-            null
-        }
-    }
+    val playlistUrl = Url(playlistUrlStr)
 
     companion object {
-        fun create(
-            uid: Long,
-            mappingData: CurriculumMapping? = null
-        ) = CurriculumMappingEdit(
-            textbookUid = uid,
-            mappingDataJson = mappingData?.let { mapping ->
-                try {
-                    Json.encodeToString(CurriculumMapping.serializer(), mapping)
-                } catch (e: Exception) {
-                    null
-                }
-            }
+        fun create(playlistUrl: Url) = PlaylistDetail(
+            playlistUrlStr = playlistUrl.toString()
+        )
+    }
+}
+@Serializable
+class PlaylistEdit private constructor(
+    private val playlistUrlStr: String? = null,
+) : RespectAppRoute {
+
+    @Transient
+    val playlistUrl: Url? = playlistUrlStr?.let { Url(it) }
+
+    companion object {
+        fun create(playlistUrl: Url? = null) = PlaylistEdit(
+            playlistUrlStr = playlistUrl?.toString()
         )
     }
 }

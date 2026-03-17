@@ -429,8 +429,6 @@
     <string name="first_names">First names</string>
     <string name="mappings">Mappings</string>
     <string name="mapping">Mapping</string>
-    <string name="sections">Sections</string>
-    <string name="section">Section</string>
     <string name="edit_mapping">Edit mapping</string>
     <string name="textbooks">Textbooks</string>
     <string name="chapter">Chapter</string>
@@ -574,5 +572,25 @@
     <string name="home">Home</string>
     <string name="playlists">Playlists</string>
     <string name="playlist">Playlist</string>
+    <string name="my_playlists">My Playlists</string>
+    <string name="sections_and_items">%1$d sections, %2$d items</string>
+    <string name="copy_playlist">Copy playlist</string>
+    <string name="playlist_section">Playlist section</string>
+    <string name="add_new">Add new</string>
+    <string name="add_from_a_link">Add from a link</string>
+    <string name="no_playlist_yet">No playlist yet</string>
+    <string name="no_playlist_yet_description">Add a playlist by clicking on the + playlist</string>
+    <string name="edit_playlist">Edit playlist</string>
+    <string name="add_playlist">Add playlist</string>
+    <string name="add_section">+ Section</string>
+    <string name="sections">Sections</string>
+    <string name="choose_section_type">Choose Section Type:</string>
+    <string name="playlist_section_description">Links to other playlists.</string>
+    <string name="learning_item_section">Learning item section</string>
+    <string name="learning_item_section_description">Links direct to items e.g. lessons, assessments, videos, etc</string>
+
+
+
+
 
 </resources>

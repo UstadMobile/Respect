@@ -229,8 +229,6 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
@@ -245,6 +243,9 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.learningunit.list.PlaylistDetailViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -370,8 +371,6 @@ val appKoinModule = module {
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::ScanQRCodeViewModel)
-    viewModelOf(::CurriculumMappingListViewModel)
-    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
@@ -384,6 +383,9 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
+    viewModelOf(::PlaylistListViewModel)
+    viewModelOf(::PlaylistDetailViewModel)
+    viewModelOf(::PlaylistEditViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {

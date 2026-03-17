@@ -39,8 +39,12 @@ import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.libutil.ext.resolve
+import world.respect.shared.generated.resources.home
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -52,7 +56,14 @@ data class AppLauncherUiState(
     },
     val canRemove: Boolean = false,
     val emptyListDescription: UiText? = null,
-)
+    val appMustLoadToBeClickable: Boolean = false,
+) {
+
+    fun isAppClickable(appState: DataLoadState<OpdsPublication>): Boolean {
+        return !appMustLoadToBeClickable || appState.dataOrNull() != null
+    }
+
+}
 
 class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
@@ -82,7 +93,7 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
@@ -103,7 +114,8 @@ class AppLauncherViewModel(
         _uiState.update { prev ->
             prev.copy(
                 respectPublicationForSchoolApp = this@AppLauncherViewModel::respectPublicationForSchoolApp,
-                apps = pagingSourceHolder
+                apps = pagingSourceHolder,
+                appMustLoadToBeClickable = route.resultDest != null,
             )
 
         }
@@ -133,19 +145,22 @@ class AppLauncherViewModel(
         }
     }
 
+
     fun onClickApp(app: DataLoadState<OpdsPublication>) {
         val url = app.metaInfo.url ?: return
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 if(route.resultDest != null) {
+                    val defaultLessonListHref = app.dataOrNull()?.respectAppDefaultLessonList()?.href
+                        ?: return
+                    val defaultLessonUrl = url.resolve(defaultLessonListHref)
+
                     LearningUnitList.create(
-                        opdsFeedUrl = Url("https://example.org/wrong/todo"),
+                        opdsFeedUrl = defaultLessonUrl,
                         appManifestUrl = url,
                         resultDest = route.resultDest,
-                    ).also {
-                        TODO("Needs changed to look for default learning units list")
-                    }
+                    )
                 }else {
                     AppsDetail.create(
                         manifestUrl = url,
@@ -189,4 +204,3 @@ class AppLauncherViewModel(
         }
     }
 }
-

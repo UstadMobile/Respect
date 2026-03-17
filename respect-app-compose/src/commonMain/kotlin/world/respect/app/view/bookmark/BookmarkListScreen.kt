@@ -108,9 +108,6 @@ private fun EmptyBookmarkState() {
                 text = stringResource(Res.string.no_bookmark),
                 fontWeight = FontWeight.Bold
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = stringResource(Res.string.msg_see_bookmark),
             )

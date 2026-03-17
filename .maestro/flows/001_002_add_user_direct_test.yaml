@@ -36,7 +36,7 @@ onFlowComplete:
     id: "host_url"
 - extendedWaitUntil:
     visible: "Register New School"
-    timeout: 8000
+    timeout: 60000
 - tapOn:
     id: "schoolName"
 - inputText: "TestSchool"

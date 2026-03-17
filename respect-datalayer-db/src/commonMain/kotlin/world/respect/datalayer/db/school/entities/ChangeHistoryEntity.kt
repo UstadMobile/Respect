@@ -10,10 +10,10 @@ data class ChangeHistoryEntity(
     @PrimaryKey
     val hGuidHash: Long,
     val hTable: ChangeHistoryTableEnum,
+    val hTableGuid: String,
     val hTimestamp: Long,
     val hWhoGuid: String,
     val hWhoGuidHash: Long,
-    val hChanges: String
 ){
     companion object{
        const val PARENT_COLUMN = "hGuidHash"

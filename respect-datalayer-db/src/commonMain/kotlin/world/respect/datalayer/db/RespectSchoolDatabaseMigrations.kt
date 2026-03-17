@@ -124,7 +124,7 @@ val MIGRATE_11_12 = object : Migration(11, 12) {
                 `hTimestamp` INTEGER NOT NULL,
                 `hWhoGuid` TEXT NOT NULL,
                 `hWhoGuidHash` INTEGER NOT NULL,
-                `hChanges` TEXT NOT NULL,
+                `hTableGuid` TEXT NOT NULL,
                 PRIMARY KEY(`hGuidHash`)
             )
         """.trimIndent())

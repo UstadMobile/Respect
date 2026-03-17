@@ -51,7 +51,7 @@ class ChangeHistoryDataSourceHttp(
     override suspend fun findByGuid(
         loadParams: DataLoadParams,
         guid: String
-    ): DataLoadState<ChangeHistoryEntry> {
+    ): DataLoadState<List<ChangeHistoryEntry>> {
         return httpClient.getAsDataLoadState<List<ChangeHistoryEntry>>(
             ChangeHistoryDataSource.GetListParams(
                 common = GetListCommonParams(guid = guid)
@@ -59,7 +59,7 @@ class ChangeHistoryDataSourceHttp(
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
-        }.firstOrNotLoaded()
+        }
     }
 
     override fun findByGuidAsFlow(

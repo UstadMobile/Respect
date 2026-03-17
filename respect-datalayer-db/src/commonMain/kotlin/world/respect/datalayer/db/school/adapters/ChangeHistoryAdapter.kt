@@ -24,6 +24,7 @@ fun ChangeHistoryWithChanges.toModel(): ChangeHistoryEntry {
         table = history.hTable,
         timestamp = history.hTimestamp,
         whoGuid = history.hWhoGuid,
+        tableGuid = history.hTableGuid,
         changes = changes.map { it.toModel() }
     )
 }
@@ -50,7 +51,7 @@ fun ChangeHistoryEntry.toEntities(
         hTimestamp = timestamp,
         hWhoGuid = whoGuid,
         hWhoGuidHash = uidNumberMapper(whoGuid),
-        hChanges = ""
+        hTableGuid = tableGuid
     )
 
     val changeEntities = changes.map { change ->
@@ -72,7 +73,8 @@ fun generatePersonChanges(
     old: Person?,
     new: Person,
     whoGuid: String,
-    timestamp: Long
+    timestamp: Long,
+    hTableGuid: String
 ): ChangeHistoryEntry? {
 
     val changes = mutableListOf<ChangeHistoryChange>()
@@ -93,6 +95,7 @@ fun generatePersonChanges(
         table = ChangeHistoryTableEnum.PERSON,
         timestamp = timestamp,
         whoGuid = whoGuid,
-        changes = changes
+        changes = changes,
+        tableGuid = hTableGuid
     )
 }

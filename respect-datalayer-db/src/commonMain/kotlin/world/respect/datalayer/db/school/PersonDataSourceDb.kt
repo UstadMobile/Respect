@@ -93,23 +93,23 @@ class PersonDataSourceDb(
                     }
                     val timeNow = systemTimeInMillis()
 
-                    val changeEntries = list.mapNotNull { person ->
-
-                        val oldPerson = schoolDb.getPersonEntityDao().findByGuidNum(
-                            guidHash = uidNumberMapper(person.guid)
+                    val oldPerson = schoolDb.getPersonEntityDao().findByGuidNum(
+                        guidHash = uidNumberMapper(personToStore.guid)
+                    )
+                    if (oldPerson != null) {
+                        val changeEntries = generatePersonChanges(
+                            hGuid = personToStore.guid,
+                            old = oldPerson.toPersonEntities().toModel(),
+                            new = personToStore,
+                            whoGuid = authenticatedUser.guid,
+                            timestamp = timeNow,
+                            hTableGuid = personToStore.guid
                         )
 
-                        generatePersonChanges(
-                            hGuid = person.guid,
-                            old = oldPerson?.toPersonEntities()?.toModel(),
-                            new = person,
-                            whoGuid = "",
-                            timestamp = timeNow
-                        )
-                    }
 
-                    if (changeEntries.isNotEmpty()) {
-                        changeHistoryDataSource.store(changeEntries)
+                        if (changeEntries != null) {
+                            changeHistoryDataSource.store(listOf(changeEntries))
+                        }
                     }
                     //Check that roles have not been change
                     doUpsertPerson(personToStore)

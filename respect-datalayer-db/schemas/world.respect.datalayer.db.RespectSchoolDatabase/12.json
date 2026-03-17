@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 12,
-    "identityHash": "a1d2a8d27768ea0e89527afe85c4f600",
+    "identityHash": "1999b1fad06789f3d63753bbad6a8283",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1215,7 +1215,7 @@
       },
       {
         "tableName": "ChangeHistoryEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hGuid` TEXT NOT NULL, `hGuidHash` INTEGER NOT NULL, `hTable` TEXT NOT NULL, `hTimestamp` INTEGER NOT NULL, `hWhoGuid` TEXT NOT NULL, `hWhoGuidHash` INTEGER NOT NULL, `hChanges` TEXT NOT NULL, PRIMARY KEY(`hGuidHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hGuid` TEXT NOT NULL, `hGuidHash` INTEGER NOT NULL, `hTable` TEXT NOT NULL, `hTableGuid` TEXT NOT NULL, `hTimestamp` INTEGER NOT NULL, `hWhoGuid` TEXT NOT NULL, `hWhoGuidHash` INTEGER NOT NULL, PRIMARY KEY(`hGuidHash`))",
         "fields": [
           {
             "fieldPath": "hGuid",
@@ -1236,6 +1236,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "hTableGuid",
+            "columnName": "hTableGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "hTimestamp",
             "columnName": "hTimestamp",
             "affinity": "INTEGER",
@@ -1251,12 +1257,6 @@
             "fieldPath": "hWhoGuidHash",
             "columnName": "hWhoGuidHash",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "hChanges",
-            "columnName": "hChanges",
-            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -1311,7 +1311,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a1d2a8d27768ea0e89527afe85c4f600')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1999b1fad06789f3d63753bbad6a8283')"
     ]
   }
 }

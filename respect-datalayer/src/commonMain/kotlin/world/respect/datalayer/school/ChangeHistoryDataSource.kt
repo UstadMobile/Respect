@@ -38,7 +38,7 @@ interface ChangeHistoryDataSource : WritableDataSource<ChangeHistoryEntry> {
     suspend fun findByGuid(
         loadParams: DataLoadParams,
         guid: String
-    ): DataLoadState<ChangeHistoryEntry>
+    ): DataLoadState<List<ChangeHistoryEntry>>
 
     fun findByGuidAsFlow(
         loadParams: DataLoadParams,

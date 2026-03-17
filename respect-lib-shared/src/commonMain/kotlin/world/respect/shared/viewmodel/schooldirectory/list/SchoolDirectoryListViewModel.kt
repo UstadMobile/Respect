@@ -86,6 +86,7 @@ class SchoolDirectoryListViewModel(
     }
 
     fun onSelectDirectory(directory: RespectSchoolDirectory) {
+        println("MAESTRO_DEBUG: onSelectDirectory called with directory: ${route.mode}")
         when (route.mode) {
             SchoolDirectoryMode.SELECT -> {
                 viewModelScope.launch {

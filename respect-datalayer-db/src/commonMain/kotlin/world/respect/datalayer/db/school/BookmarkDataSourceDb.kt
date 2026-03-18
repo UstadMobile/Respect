@@ -17,6 +17,8 @@ import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSourceLocal
 import world.respect.datalayer.school.model.Bookmark
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
 
 class BookmarkDataSourceDb(
@@ -90,7 +92,21 @@ class BookmarkDataSourceDb(
         }
     }
 
-override suspend fun updateLocal(
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        listParams: BookmarkDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Bookmark> {
+        return IPagingSourceFactory{
+            schoolDb.getBookmarkDao().listAsPagingSource(
+                personUid = requireNotNull(listParams.personUid),
+                includeDeleted = listParams.common.includeDeleted ?: false
+            ).map {
+                it.toModel(json)
+            }
+        }
+    }
+
+    override suspend fun updateLocal(
     list: List<Bookmark>,
     forceOverwrite: Boolean
 ) {

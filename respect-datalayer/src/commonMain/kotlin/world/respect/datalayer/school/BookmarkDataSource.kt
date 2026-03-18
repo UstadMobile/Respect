@@ -5,10 +5,9 @@ import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.school.SchoolAppDataSource.GetListParams
 import world.respect.datalayer.school.model.Bookmark
-import world.respect.datalayer.school.model.SchoolApp
 import world.respect.datalayer.shared.WritableDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface BookmarkDataSource : WritableDataSource<Bookmark> {
@@ -49,6 +48,11 @@ interface BookmarkDataSource : WritableDataSource<Bookmark> {
         loadParams: DataLoadParams = DataLoadParams(),
         listParams: BookmarkDataSource.GetListParams = GetListParams(),
     ): Flow<DataLoadState<List<Bookmark>>>
+
+    fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        listParams: BookmarkDataSource.GetListParams,
+    ): IPagingSourceFactory<Int, Bookmark>
 
     companion object {
 

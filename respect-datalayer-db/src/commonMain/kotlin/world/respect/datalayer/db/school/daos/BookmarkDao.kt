@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.daos
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -59,6 +60,20 @@ interface BookmarkDao {
         includeDeleted: Boolean = false,
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): Flow<List<BookmarkEntities>>
+
+    @Transaction
+    @Query("""
+        SELECT *
+          FROM BookmarkEntity
+         WHERE bPersonUid = :personUid
+           AND (:includeDeleted OR bStatus = :activeStatus)
+      ORDER BY bLastModified ASC
+    """)
+    fun listAsPagingSource(
+        personUid: String,
+        includeDeleted: Boolean = false,
+        activeStatus: StatusEnum = StatusEnum.ACTIVE
+    ): PagingSource<Int,BookmarkEntities>
 
     @Query("""
         SELECT * 

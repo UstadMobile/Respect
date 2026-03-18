@@ -25,7 +25,6 @@ import world.respect.shared.generated.resources.home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 import kotlin.getValue
 
 data class BookmarkListUiState(

@@ -1,8 +1,6 @@
 package world.respect.app.view.bookmark
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,13 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,26 +85,27 @@ fun BookmarkListScreen(
 @Composable
 private fun EmptyBookmarkState() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
+            modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Image(
                 painter = respectImagePainter(RespectImage.NO_BOOKMARK),
                 contentDescription = null,
-                modifier = Modifier.size(220.dp)
+                modifier = Modifier
+                    .size(220.dp),
+                contentScale = ContentScale.Crop
             )
-
             Text(
                 text = stringResource(Res.string.no_bookmark),
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = stringResource(Res.string.msg_see_bookmark),
+                modifier = Modifier.padding(bottom = 64.dp)
             )
         }
     }
@@ -141,7 +137,7 @@ private fun BookmarkListContent(
 
                     Box(
                         modifier = Modifier
-                            .fillMaxHeight().background(Color.Red)
+                            .fillMaxHeight()
                             .width(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -172,7 +168,7 @@ private fun BookmarkListContent(
                                     RespectAsyncImage(
                                         uri = icon,
                                         contentDescription = "",
-                                        contentScale = ContentScale.Fit,
+                                        contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .size(20.dp)
 
@@ -187,13 +183,12 @@ private fun BookmarkListContent(
                                     .orEmpty()
                             )
                         }
-
-                        Text(
-                            text = bookmark.subTitle?.getTitle() ?: ""
-                        )
+//                     Text(
+//                         text = bookmark.subTitle?.getTitle() ?: ""
+//                     )
 
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             bookmark.language?.let {
                                 Text(text = it)
@@ -210,6 +205,7 @@ private fun BookmarkListContent(
 
                     }
                 },
+
 
                 trailingContent = {
                     Icon(

@@ -4,6 +4,7 @@ import androidx.room.Transactor
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
@@ -75,35 +76,49 @@ class BookmarkDataSourceDb(
             }
     }
 
-    override suspend fun updateLocal(
-        list: List<Bookmark>,
-        forceOverwrite: Boolean
-    ) {
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val now = Clock.System.now()
-                schoolDb.getBookmarkDao().upsert(
-                    bookmarks = list.filter { bookmark ->
-
-                        forceOverwrite || schoolDb.getBookmarkDao().getBookmarkLastModified(
-                                    personUid = bookmark.personUid,
-                                    urlHash = uidNumberMapper(
-                                        bookmark.learningUnitManifestUrl.toString()
-                                    )
-                                ).let { it ?: 0L } < bookmark.lastModified.toEpochMilliseconds()
-                    }.map {
-                        it.copy(stored = now).toEntities(uidNumberMapper).bookmark
-                    }
-                )
-            }
+    override fun listAsFlow(
+        loadParams: DataLoadParams,
+        listParams: BookmarkDataSource.GetListParams
+    ): Flow<DataLoadState<List<Bookmark>>> {
+        return schoolDb.getBookmarkDao().listAsFlow(
+            personUid = requireNotNull(listParams.personUid),
+            includeDeleted = listParams.common.includeDeleted ?: false
+        ).map { entityList ->
+            DataReadyState(
+                data = entityList.map { it.toModel(json) }
+            )
         }
     }
 
-    override suspend fun findByUidList(uids: List<String>): List<Bookmark> {
-        return schoolDb.getBookmarkDao()
-            .findByUidList(
-                uids.map { uidNumberMapper(it) }
+override suspend fun updateLocal(
+    list: List<Bookmark>,
+    forceOverwrite: Boolean
+) {
+    schoolDb.useWriterConnection { con ->
+        con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+            val now = Clock.System.now()
+            schoolDb.getBookmarkDao().upsert(
+                bookmarks = list.filter { bookmark ->
+
+                    forceOverwrite || schoolDb.getBookmarkDao().getBookmarkLastModified(
+                        personUid = bookmark.personUid,
+                        urlHash = uidNumberMapper(
+                            bookmark.learningUnitManifestUrl.toString()
+                        )
+                    ).let { it ?: 0L } < bookmark.lastModified.toEpochMilliseconds()
+                }.map {
+                    it.copy(stored = now).toEntities(uidNumberMapper).bookmark
+                }
             )
-            .map { it.toModel(json) }
+        }
     }
+}
+
+override suspend fun findByUidList(uids: List<String>): List<Bookmark> {
+    return schoolDb.getBookmarkDao()
+        .findByUidList(
+            uids.map { uidNumberMapper(it) }
+        )
+        .map { it.toModel(json) }
+}
 }

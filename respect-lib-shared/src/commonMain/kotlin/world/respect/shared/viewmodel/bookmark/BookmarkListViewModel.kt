@@ -46,55 +46,35 @@ class BookmarkListViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {
-
         _appUiState.update {
-            it.copy(
-                title = Res.string.home.asUiText()
-            )
+            it.copy(title = Res.string.home.asUiText())
         }
-        viewModelScope.launch {
 
-            loadingState = LoadingUiState.INDETERMINATE
+        viewModelScope.launch {
 
             val personUid = accountManager.activeAccount?.userGuid ?: return@launch
 
-            val bookmarks = schoolDataSource.bookmarkDataSource.list(
-                loadParams = DataLoadParams(),
-                listParams = BookmarkDataSource.GetListParams(
-                    personUid = personUid
+            schoolDataSource.bookmarkDataSource
+                .listAsFlow(
+                    loadParams = DataLoadParams(),
+                    listParams = BookmarkDataSource.GetListParams(
+                        personUid = personUid
+                    )
                 )
-            ).dataOrNull() ?: emptyList()
-            _uiState.update {
-                it.copy(
-                    bookmarks = bookmarks
-                )
-            }
+                .collect { state ->
 
-            val missingBookmarks = schoolDataSource.bookmarkDataSource
-                .findBookmarksWithMissingPublication(personUid)
+                    val bookmarks = state.dataOrNull() ?: emptyList()
 
-            missingBookmarks.forEach { bookmark ->
-                schoolDataSource.opdsPublicationDataSource.getByUrl(
-                    url = bookmark.learningUnitManifestUrl,
-                    params = DataLoadParams(),
-                    referrerUrl = null,
-                    expectedPublicationId = null
-                )
-            }
+                    _uiState.update {
+                        it.copy(bookmarks = bookmarks)
+                    }
 
-            loadingState = LoadingUiState.NOT_LOADING
+                    // ✅ Load missing publications
+                    loadMissingBookmarks(personUid)
 
-            bookmarks.forEach { it ->
-                schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                    url = it.appManifestUrl,
-                    params = DataLoadParams(),
-                    referrerUrl = null,
-                    expectedPublicationId = null,
-                ).collect { app ->
-                    _uiState.update { it.copy(app = app) }
+                    // ✅ Load apps for bookmarks
+                    loadApps(bookmarks)
                 }
-            }
-            loadingState = LoadingUiState.NOT_LOADING
         }
     }
 
@@ -117,6 +97,41 @@ class BookmarkListViewModel(
         }
     }
 
+    private suspend fun loadMissingBookmarks(personUid: String) {
+        val missingBookmarks = schoolDataSource.bookmarkDataSource
+            .findBookmarksWithMissingPublication(personUid)
+
+        missingBookmarks.forEach { bookmark ->
+            schoolDataSource.opdsPublicationDataSource.getByUrl(
+                url = bookmark.learningUnitManifestUrl,
+                params = DataLoadParams(),
+                referrerUrl = null,
+                expectedPublicationId = null
+            )
+        }
+    }
+    private fun loadApps(bookmarks: List<Bookmark>) {
+
+        bookmarks.forEach { bookmark ->
+
+            viewModelScope.launch {
+
+                schoolDataSource.opdsPublicationDataSource
+                    .getByUrlAsFlow(
+                        url = bookmark.appManifestUrl,
+                        params = DataLoadParams(),
+                        referrerUrl = null,
+                        expectedPublicationId = null
+                    )
+                    .collect { app ->
+
+                        _uiState.update { state ->
+                            state.copy(app = app)
+                        }
+                    }
+            }
+        }
+    }
     fun onClickBookmark(bookmark: Bookmark) {
 
         _navCommandFlow.tryEmit(

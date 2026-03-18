@@ -46,6 +46,20 @@ interface BookmarkDao {
         activeStatus: StatusEnum = StatusEnum.ACTIVE
     ): List<BookmarkEntities>
 
+    @Transaction
+    @Query("""
+        SELECT *
+          FROM BookmarkEntity
+         WHERE bPersonUid = :personUid
+           AND (:includeDeleted OR bStatus = :activeStatus)
+      ORDER BY bLastModified ASC
+    """)
+     fun listAsFlow(
+        personUid: String,
+        includeDeleted: Boolean = false,
+        activeStatus: StatusEnum = StatusEnum.ACTIVE
+    ): Flow<List<BookmarkEntities>>
+
     @Query("""
         SELECT * 
           FROM BookmarkEntity 

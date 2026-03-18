@@ -12,6 +12,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getAsDataLoadState
+import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
@@ -75,10 +76,22 @@ class BookmarkDataSourceHttp(
     }
 
     override suspend fun findBookmarksWithMissingPublication(personUid: String): List<Bookmark> {
-
-
         throw IllegalArgumentException(
             "Find Bookmarks is not supported in HTTP datasource."
         )
+    }
+
+    override fun listAsFlow(
+        loadParams: DataLoadParams,
+        listParams: BookmarkDataSource.GetListParams
+    ): Flow<DataLoadState<List<Bookmark>>> {
+        return httpClient.getDataLoadResultAsFlow(
+            urlFn = { listParams.urlWithParams() },
+            dataLoadParams = loadParams,
+            validationHelper = validationHelper,
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }
     }
 }

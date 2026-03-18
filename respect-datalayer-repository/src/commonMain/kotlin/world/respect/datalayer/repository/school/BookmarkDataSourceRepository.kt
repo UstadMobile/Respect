@@ -3,8 +3,10 @@ package world.respect.datalayer.repository.school
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.combineWithRemoteIfNotNull
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -19,8 +21,6 @@ import world.respect.libutil.util.time.systemTimeInMillis
 
 
 class BookmarkDataSourceRepository(
-
-
     override val local: BookmarkDataSourceLocal,
     override val remote: BookmarkDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
@@ -71,4 +71,16 @@ class BookmarkDataSourceRepository(
         return local.findBookmarksWithMissingPublication(personUid)
     }
 
+    override fun listAsFlow(
+        loadParams: DataLoadParams,
+        listParams: BookmarkDataSource.GetListParams
+    ): Flow<DataLoadState<List<Bookmark>>> {
+        return local.listAsFlow(loadParams, listParams).combineWithRemote(
+            remoteFlow = remote.listAsFlow(
+                loadParams, listParams
+            ).onEach {
+                local.updateFromRemoteListIfNeeded(it, validationHelper)
+            }
+        )
+    }
 }

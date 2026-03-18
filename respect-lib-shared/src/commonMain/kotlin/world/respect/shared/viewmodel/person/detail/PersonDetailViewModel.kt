@@ -21,6 +21,7 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
@@ -171,7 +172,8 @@ class PersonDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 ChangeHistory(
-                    guid = ""
+                    guid = route.guid,
+                    table = ChangeHistoryTableEnum.PERSON.value
                 )
             )
         )

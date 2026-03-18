@@ -47,12 +47,14 @@ interface ChangeHistoryDao {
         whoGuidHash: Long,
     ): PagingSource<Int, ChangeHistoryWithChanges>
 
-    @Query("""
+    @Query(
+        """
         SELECT *
           FROM ChangeHistoryEntity
-         WHERE hGuid = :guid
-     """)
-    suspend fun findByGuid(guid: String): ChangeHistoryWithChanges?
+         WHERE hTableGuid = :tableGuid
+     """
+    )
+    suspend fun findByGuid(tableGuid: String): List<ChangeHistoryWithChanges>?
 
 
     @Query("""

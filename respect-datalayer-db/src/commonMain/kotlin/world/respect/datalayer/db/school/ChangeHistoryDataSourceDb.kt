@@ -28,11 +28,13 @@ class ChangeHistoryDataSourceDb(
     override suspend fun findByGuid(
         loadParams: DataLoadParams,
         guid: String
-    ): DataLoadState<ChangeHistoryEntry> {
-        return schoolDb.getChangeHistoryDao()
-            .findByGuid(guid)?.let {
-            DataReadyState(it.toModel())
-        }?: NoDataLoadedState.notFound()
+    ): DataLoadState<List<ChangeHistoryEntry>> {
+        val result = schoolDb.getChangeHistoryDao().findByGuid(guid)
+        return if (!result.isNullOrEmpty()) {
+            DataReadyState(result.map { it.toModel() })
+        } else {
+            NoDataLoadedState.notFound()
+        }
     }
 
     override fun findByGuidAsFlow(

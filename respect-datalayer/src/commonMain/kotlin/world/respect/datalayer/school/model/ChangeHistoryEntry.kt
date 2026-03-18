@@ -5,10 +5,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ChangeHistoryEntry(
     val guid: String,
+    val tableGuid: String,
     val table: ChangeHistoryTableEnum,
     val timestamp: Long,
     val whoGuid: String,
     val changes: List<ChangeHistoryChange>
+)
+
+@Serializable
+data class ChangeHistoryEntryWithWhoDid(
+    val person: Person,
+    val changeHistoryEntry: List<ChangeHistoryEntry>
 )
 
 @Serializable

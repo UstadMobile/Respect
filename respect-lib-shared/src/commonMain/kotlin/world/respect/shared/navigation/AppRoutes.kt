@@ -12,6 +12,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
@@ -867,4 +868,23 @@ data class CopyCode(
 @Serializable
 data class ChangeHistory(
     val guid: String,
-): RespectAppRoute
+    val table : String,
+) : RespectAppRoute {
+
+    @Transient
+    val tableValue = ChangeHistoryTableEnum.fromValue(table)
+
+
+    companion object  {
+        fun create(
+            guidStr: String,
+            tableEnum: ChangeHistoryTableEnum,
+        ) : ChangeHistory {
+            return ChangeHistory(
+                guid = guidStr,
+                table = tableEnum.value,
+            )
+        }
+    }
+
+}

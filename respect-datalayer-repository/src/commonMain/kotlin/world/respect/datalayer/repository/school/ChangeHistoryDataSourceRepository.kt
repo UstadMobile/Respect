@@ -7,6 +7,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
+import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
@@ -29,8 +30,8 @@ class ChangeHistoryDataSourceRepository(
     override suspend fun findByGuid(
         loadParams: DataLoadParams,
         guid: String
-    ): DataLoadState<ChangeHistoryEntry> {
-        local.updateFromRemoteIfNeeded(
+    ): DataLoadState<List<ChangeHistoryEntry>>{
+        local.updateFromRemoteListIfNeeded(
             remoteLoad = remote.findByGuid(loadParams, guid),
             validationHelper = validationHelper,
         )

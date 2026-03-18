@@ -16,7 +16,6 @@ class LaunchCustomTabUseCaseAndroid(
                 .setShareState(CustomTabsIntent.SHARE_STATE_ON)
                 .setUrlBarHidingEnabled(true)
                 .build()
-            customTabsIntent.intent.setPackage("com.android.chrome")
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             customTabsIntent.launchUrl(appContext, url.toUri())
             println("MAESTRO_DEBUG: onSelectDirectory called with LaunchCustomTabUseCaseAndroid try block")

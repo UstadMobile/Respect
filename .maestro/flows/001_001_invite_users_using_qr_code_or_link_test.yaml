@@ -109,7 +109,7 @@ onFlowComplete:
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
-      TEXT: "First name*"
+      TEXT: "First names*"
 - inputText: "TeacherB"
 - runScript:
     file: "scripts/setDate.js"

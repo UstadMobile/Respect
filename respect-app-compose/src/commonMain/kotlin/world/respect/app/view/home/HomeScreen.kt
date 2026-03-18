@@ -35,23 +35,12 @@ enum class HomeScreenTabs(val label: StringResource) {
     //PLAYLISTS(Res.string.textbooks)
     PLAYLISTS(Res.string.playlists)
 }
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     respectNavController: RespectComposeNavController,
     onSetAppUiState: (AppUiState) -> Unit,
 ) {
-    LaunchedEffect(Unit) {
-        onSetAppUiState(
-            AppUiState(
-                title = Res.string.home.asUiText(),
-                navigationVisible = true,
-                hideAppBar = false,
-            )
-        )
-    }
     val pagerState = rememberPagerState { HomeScreenTabs.entries.size }
     val scope = rememberCoroutineScope()
     val selectedTab = HomeScreenTabs.entries[pagerState.currentPage]

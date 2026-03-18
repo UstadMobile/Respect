@@ -183,9 +183,10 @@ private fun BookmarkListContent(
                                     .orEmpty()
                             )
                         }
-//                     Text(
-//                         text = bookmark.subTitle?.getTitle() ?: ""
-//                     )
+                        /**Currently there is no data in subtitle**/
+                       /* Text(
+                            text = bookmark.subTitle?.getTitle() ?: ""
+                        )*/
 
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -193,10 +194,10 @@ private fun BookmarkListContent(
                             bookmark.language?.let {
                                 Text(text = it)
                             }
-
-                            bookmark.grade?.let {
+                            /**Currently there is no data in grade**/
+                           /* bookmark.grade?.let {
                                 Text(text = it)
-                            }
+                            }*/
 
                             bookmark.type?.let {
                                 Text(text = it)
@@ -218,6 +219,7 @@ private fun BookmarkListContent(
                 }
 
             )
+
         }
     }
 }

@@ -9,7 +9,6 @@ class LaunchCustomTabUseCaseAndroid(
     private val appContext: Context
 ) : LaunchCustomTabUseCase {
     override fun invoke(url: String) {
-        println("MAESTRO_DEBUG: onSelectDirectory called with LaunchCustomTabUseCaseAndroid : $url")
         try {
             val customTabsIntent = CustomTabsIntent.Builder()
                 .setShowTitle(true)
@@ -18,13 +17,11 @@ class LaunchCustomTabUseCaseAndroid(
                 .build()
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             customTabsIntent.launchUrl(appContext, url.toUri())
-            println("MAESTRO_DEBUG: onSelectDirectory called with LaunchCustomTabUseCaseAndroid try block")
         } catch (e: Exception) {
             e.printStackTrace()
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             appContext.startActivity(intent)
-            println("MAESTRO_DEBUG: onSelectDirectory called with LaunchCustomTabUseCaseAndroid: $e")
         }
     }
 }

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.datalayer.DataLoadState
@@ -39,6 +40,8 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
+import world.respect.shared.generated.resources.empty
+import world.respect.shared.generated.resources.empty_list
 import world.respect.shared.generated.resources.msg_see_bookmark
 import world.respect.shared.generated.resources.no_bookmark
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -91,14 +94,13 @@ private fun EmptyBookmarkState() {
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Image(
-                painter = respectImagePainter(RespectImage.NO_BOOKMARK),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(220.dp),
-                contentScale = ContentScale.Crop
+                painter = painterResource(Res.drawable.no_bookmark),
+                contentDescription = stringResource(resource = Res.string.no_bookmark),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(200.dp)
             )
+//
             Text(
                 text = stringResource(Res.string.no_bookmark),
                 fontWeight = FontWeight.Bold

@@ -2,8 +2,11 @@ package world.respect.datalayer.http
 
 import io.ktor.client.HttpClient
 import io.ktor.http.Url
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.AssignmentDataSourceHttp
 import world.respect.datalayer.http.school.ChangeHistoryDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
@@ -15,10 +18,13 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ChangeHistoryDataSource
 import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.InviteDataSource
@@ -28,7 +34,9 @@ import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class SchoolDataSourceHttp(
@@ -36,7 +44,11 @@ class SchoolDataSourceHttp(
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    private val validationHelper: ExtendedDataSourceValidationHelper
+    private val validationHelper: ExtendedDataSourceValidationHelper,
+    private val json: Json,
+    private val defaultAppCatalogUrl: String?,
+    private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
+    private val opdsPublicationValidationHelper: BaseDataSourceValidationHelper? = null,
 ) : SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSource by lazy {
@@ -152,6 +164,28 @@ class SchoolDataSourceHttp(
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
+        )
+    }
+
+    override val opdsPublicationDataSource: OpdsPublicationDataSource by lazy {
+        OpdsPublicationDataSourceHttp(
+            httpClient = httpClient,
+            json = json,
+            publicationValidationHelper =  opdsPublicationValidationHelper,
+        )
+    }
+
+    override val opdsFeedDataSource: OpdsFeedDataSource by lazy {
+        OpdsFeedDataSourceHttp(
+            httpClient = httpClient,
+            opdsFeedValidationHelper = opdsFeedValidationHelper,
+            tokenProvider = tokenProvider,
+        )
+    }
+
+    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
+        DummySchoolConfigSettingsDataSource(
+            defaultAppCatalogUrl = defaultAppCatalogUrl,
         )
     }
 }

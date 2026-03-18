@@ -22,6 +22,7 @@ import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScree
 import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
+import world.respect.app.view.home.HomeScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
@@ -91,6 +92,7 @@ import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.EnterInviteCode
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
@@ -213,6 +215,13 @@ fun AppNavHost(
             )
             AppLauncherScreen(
                 viewModel = viewModel
+            )
+        }
+
+        composable<Home> {
+            HomeScreen(
+                respectNavController = respectNavController,
+                onSetAppUiState = onSetAppUiState,
             )
         }
 

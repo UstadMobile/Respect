@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_PARAM_NAME
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_VALUE
 import world.respect.shared.navigation.NavCommand
@@ -19,12 +19,12 @@ class LaunchAppUseCaseAndroid(
 ): LaunchAppUseCase {
 
     override fun invoke(
-        app: RespectAppManifest,
+        app: OpdsPublication,
         learningUnitId: Url?,
         navigateFn: (NavCommand) -> Unit
     ) {
-        val androidPackageId = app.android?.packageId
-        val launchUrlBase = learningUnitId ?: Url(app.defaultLaunchUri.toString())
+        val androidPackageId = null//app.android?.packageId
+        val launchUrlBase = learningUnitId ?: return //Url(app.defaultLaunchUri.toString())
         val launchUrl = URLBuilder(launchUrlBase).apply {
             parameters.append(
                 RESPECT_LAUNCH_VERSION_PARAM_NAME, RESPECT_LAUNCH_VERSION_VALUE
@@ -62,7 +62,6 @@ class LaunchAppUseCaseAndroid(
         intent.putExtra(EXTRA_URL, launchUrl.toString())
         appContext.startActivity(intent)
     }
-
 
     companion object {
 

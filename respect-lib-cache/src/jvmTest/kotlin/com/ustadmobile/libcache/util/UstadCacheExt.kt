@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.util
 
 import com.ustadmobile.ihttp.headers.IHttpHeader
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.requestBuilder
 import com.ustadmobile.ihttp.response.IHttpResponse
@@ -8,6 +9,8 @@ import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.StoreResult
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.response.HttpPathResponse
+import io.ktor.http.toHttpDate
+import io.ktor.util.date.GMTDate
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import java.io.File
@@ -37,6 +40,12 @@ suspend fun UstadCache.storeFileAsUrl(
         fileSystem = SystemFileSystem,
         mimeType = mimeType,
         request = request,
+        extraHeaders = iHeadersBuilder {
+            header(
+                name = "Last-Modified",
+                value = GMTDate( testFile.lastModified()).toHttpDate()
+            )
+        }
     )
 
     val storeResult = store(

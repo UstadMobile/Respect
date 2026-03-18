@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ChangeHistoryDataSource
 import world.respect.datalayer.school.ClassDataSource
@@ -12,7 +13,9 @@ import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.SchoolAppDataSource
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -45,6 +48,12 @@ interface SchoolDataSource {
     val assignmentDataSource: AssignmentDataSource
 
     val inviteDataSource: InviteDataSource
+
+    val opdsPublicationDataSource: OpdsPublicationDataSource
+
+    val opdsFeedDataSource: OpdsFeedDataSource
+
+    val schoolConfigSettingDataSource: SchoolConfigSettingDataSource
 
     val changeHistoryDataSource: ChangeHistoryDataSource
 

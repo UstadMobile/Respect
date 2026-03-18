@@ -58,7 +58,7 @@
         },
         {
           "rel": "http://opds-spec.org/acquisition/open-access",
-          "href": "$TESTBASEURL/grade1/lesson002/lesson002.html",
+          "href": "http://localhost/opds/case_valid/grade1/lesson002/lesson002.html",
           "type": "text/html"
         }
       ],

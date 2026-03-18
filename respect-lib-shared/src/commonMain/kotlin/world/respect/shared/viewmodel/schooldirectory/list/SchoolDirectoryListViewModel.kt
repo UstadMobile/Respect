@@ -97,7 +97,7 @@ class SchoolDirectoryListViewModel(
                     println("MAESTRO_DEBUG: App package name: ${appInfo.packageName}")
 
                     val encodedPackageName = URLEncoder.encode(appInfo.packageName, "UTF-8")
-                    val registrationUrl = "${directory.baseUrl}register-school?packageName=$encodedPackageName"
+                    val registrationUrl = "${directory.baseUrl}school-directory/register-school?packageName=$encodedPackageName"
 
                     println("MAESTRO_DEBUG: Generated registration URL: $registrationUrl")
                     println("MAESTRO_DEBUG: Attempting to launch custom tab...")

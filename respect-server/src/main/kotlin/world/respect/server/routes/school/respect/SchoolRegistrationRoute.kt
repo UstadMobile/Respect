@@ -45,7 +45,7 @@ fun Route.SchoolRegistrationRoute() {
     val httpClient = HttpClient()
 
     // Show registration form
-    get("/register-school") {
+    get("/school-directory/register-school") {
 
         if (!schoolConfig.registration.enabled) {
             call.respondText(
@@ -66,7 +66,7 @@ fun Route.SchoolRegistrationRoute() {
                 main(classes = "container") { // "container" centers the form and gives it padding
                     h1 { +"Register New School" }
 
-                    form(method = FormMethod.post, action = "/register-school") {
+                    form(method = FormMethod.post, action = "/school-directory/register-school") {
                         div("form-group") {
                             label {
                                 htmlFor = "schoolName"
@@ -139,7 +139,7 @@ fun Route.SchoolRegistrationRoute() {
         }
     }
 
-    post("/register-school") {
+    post("/school-directory/register-school") {
         val parameters = call.receiveParameters()
 
         val schoolName = parameters["schoolName"] ?: ""
@@ -197,7 +197,7 @@ fun Route.SchoolRegistrationRoute() {
                                     p { +"Please try again later or contact support if the problem persists." }
 
                                     a(
-                                        href = "/register-school?packageName=${
+                                        href = "/school-directory/register-school?packageName=${
                                             packageName?.let {
                                                 URLEncoder.encode(
                                                     it,
@@ -295,7 +295,7 @@ fun Route.SchoolRegistrationRoute() {
                             +errorMessage
                         }
                         a(
-                            href = "/register-school?packageName=${
+                            href = "/school-directory/register-school?packageName=${
                                 packageName?.let {
                                     URLEncoder.encode(
                                         it,

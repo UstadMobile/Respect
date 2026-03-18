@@ -68,10 +68,8 @@ class BookmarkListViewModel(
                         it.copy(bookmarks = bookmarks)
                     }
 
-                    // ✅ Load missing publications
                     loadMissingBookmarks(personUid)
 
-                    // ✅ Load apps for bookmarks
                     loadApps(bookmarks)
                 }
         }

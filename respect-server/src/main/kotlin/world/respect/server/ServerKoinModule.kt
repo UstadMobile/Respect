@@ -42,7 +42,7 @@ import world.respect.server.account.invite.username.UsernameSuggestionUseCaseSer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
-import world.respect.server.domain.school.add.RegisterSchoolUseCase
+import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
@@ -75,6 +75,7 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
@@ -148,7 +149,7 @@ fun serverKoinModule(
         )
     }
     single<RegisterSchoolUseCase> {
-        RegisterSchoolUseCase()
+        RegisterSchoolUseCaseImpl()
     }
     single<SchoolUrlVerificationManager> {
         SchoolUrlVerificationManager()

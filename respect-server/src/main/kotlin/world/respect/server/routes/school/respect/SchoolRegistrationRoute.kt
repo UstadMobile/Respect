@@ -34,8 +34,8 @@ import kotlinx.html.style
 import kotlinx.html.title
 import org.koin.ktor.ext.inject
 import world.respect.server.SchoolConfig
-import world.respect.server.domain.school.add.RegisterSchoolUseCase
 import world.respect.server.util.ext.getStatusCode
+import world.respect.shared.domain.school.add.RegisterSchoolUseCase
 import java.net.URLEncoder
 import kotlin.time.Duration.Companion.seconds
 

@@ -41,7 +41,7 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

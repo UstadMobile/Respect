@@ -64,7 +64,7 @@ fun Route.SchoolRegistrationRoute() {
             }
             body {
                 main(classes = "container") { // "container" centers the form and gives it padding
-                    h1 { +"Register New School" }
+                    h1 { + "Register New School" }
 
                     form(method = FormMethod.post, action = "/school-directory/register-school") {
                         div("form-group") {
@@ -72,6 +72,7 @@ fun Route.SchoolRegistrationRoute() {
                                 htmlFor = "schoolName"
                                 +"School Name"
                             }
+
                             input(type = InputType.text, name = "schoolName") {
                                 id = "schoolName"
                                 required = true
@@ -104,6 +105,7 @@ fun Route.SchoolRegistrationRoute() {
                                         htmlFor = "schoolUrl"
                                         +"School URL"
                                     }
+
                                     input(type = InputType.text, name = "schoolUrl") {
                                         id = "schoolUrl"
                                         required = true
@@ -118,7 +120,7 @@ fun Route.SchoolRegistrationRoute() {
                         }
 
                         // Hidden package name field
-                        packageName?.let { pkg ->
+                        packageName?.also { pkg ->
                             input(type = InputType.hidden, name = "packageName") {
                                 value = pkg
                             }

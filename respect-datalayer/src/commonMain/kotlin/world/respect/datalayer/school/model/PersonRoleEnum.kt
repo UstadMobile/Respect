@@ -12,9 +12,9 @@ import kotlinx.serialization.encoding.Encoder
 enum class PersonRoleEnum(val value: String, val flag: Int) {
     SITE_ADMINISTRATOR("siteAdministrator", 1),
     STUDENT("student", 2),
-    SYSTEM_ADMINISTRATOR("systemAdministrator", 3),
-    TEACHER("teacher", 4),
-    PARENT("parent", 5);
+    SYSTEM_ADMINISTRATOR("systemAdministrator", 4),
+    TEACHER("teacher", 8),
+    PARENT("parent", 16);
 
     companion object {
 
@@ -35,6 +35,12 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
 
         fun fromFlag(flag: Int): PersonRoleEnum {
             return entries.first { it.flag == flag }
+        }
+
+        fun unfoldFromFlag(flag: Int): List<PersonRoleEnum> {
+            return entries.filter { enum ->
+                flag.and(enum.flag) == flag
+            }
         }
 
     }

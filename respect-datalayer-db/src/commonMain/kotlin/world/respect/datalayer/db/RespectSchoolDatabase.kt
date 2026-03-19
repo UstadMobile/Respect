@@ -44,6 +44,7 @@ import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
 import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
+import world.respect.datalayer.db.school.daos.SchoolConfigSettingEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.AssignmentEntity
 import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
@@ -59,6 +60,7 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
 import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
+import world.respect.datalayer.db.school.entities.SchoolConfigSettingEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.Clazz
@@ -105,8 +107,10 @@ import world.respect.datalayer.school.model.Report
         OpdsGroupEntity::class,
         OpdsFeedEntity::class,
         OpdsFeedMetadataEntity::class,
+
+        SchoolConfigSettingEntity::class,
     ],
-    version = 12,
+    version = 13,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -162,6 +166,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
+    abstract fun getSchoolConfigSettingEntityDao(): SchoolConfigSettingEntityDao
 
     companion object {
 

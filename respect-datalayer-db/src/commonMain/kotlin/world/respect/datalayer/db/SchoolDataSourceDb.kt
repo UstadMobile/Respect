@@ -18,6 +18,7 @@ import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
+import world.respect.datalayer.db.school.SchoolConfigSettingDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
@@ -136,9 +137,10 @@ class SchoolDataSourceDb(
         )
     }
 
-    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
-        DummySchoolConfigSettingsDataSource(
-            defaultAppCatalogUrl = defaultAppCatalogUrl,
+    override val schoolConfigSettingDataSource by lazy {
+        SchoolConfigSettingDataSourceDb(
+            schoolDb = schoolDb,
+            authenticatedUser = authenticatedUser,
         )
     }
 }

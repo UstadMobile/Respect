@@ -6,36 +6,44 @@ data class SchoolConfig(
     val registration: RegistrationConfig
 ) {
     data class RegistrationConfig(
-        val enabled: Boolean,
         val mode: RegistrationMode,
-        val topLevelDomain: String = ""
+        val topLevelDomain: String?,
     ) {
-        enum class RegistrationMode {
-            DISABLED,
-            SUBDOMAIN,
-            ANY_URL
+        enum class RegistrationMode(val value : String) {
+            DISABLED("disabled"),
+            SUBDOMAIN("subdomain"),
+            ANY_URL("any-url");
+
+            companion object {
+
+                fun fromValue(value: String) : RegistrationMode {
+                    return entries.first { it.value == value }
+                }
+            }
+
         }
+
+        val enabled: Boolean
+            get() = mode != RegistrationMode.DISABLED
     }
 
     companion object {
         fun fromConfig(config: ApplicationConfig): SchoolConfig {
-            val registrationEnabled =
-                config.propertyOrNull("ktor.school.registration.enabled")?.getString()?.toBoolean()
-                    ?: false
-            val modeString =
-                config.propertyOrNull("ktor.school.registration.mode")?.getString() ?: "disabled"
-            val topLevelDomain =
-                config.propertyOrNull("ktor.school.top-level-domain")?.getString() ?: ""
+            val modeString = config.propertyOrNull("" +
+                    "ktor.school.registration.mode"
+            )?.getString() ?: RegistrationConfig.RegistrationMode.DISABLED.value
 
-            val mode = when (modeString.lowercase()) {
-                "subdomain" -> RegistrationConfig.RegistrationMode.SUBDOMAIN
-                "any-url" -> RegistrationConfig.RegistrationMode.ANY_URL
-                else -> RegistrationConfig.RegistrationMode.DISABLED
-            }
+            val topLevelDomain = config.propertyOrNull(
+                "ktor.school.registration.top-level-domain"
+            )?.getString()
+
+            val mode = RegistrationConfig.RegistrationMode.fromValue(modeString)
+
+            if(mode == RegistrationConfig.RegistrationMode.SUBDOMAIN && topLevelDomain == null)
+                throw IllegalStateException("Subdomain registration mode requires setting top level domain")
 
             return SchoolConfig(
                 registration = RegistrationConfig(
-                    enabled = registrationEnabled && mode != RegistrationConfig.RegistrationMode.DISABLED,
                     mode = mode,
                     topLevelDomain = topLevelDomain
                 )

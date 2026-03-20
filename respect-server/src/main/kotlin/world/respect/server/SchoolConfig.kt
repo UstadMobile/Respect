@@ -1,5 +1,6 @@
 package world.respect.server
 
+import io.ktor.http.DEFAULT_PORT
 import io.ktor.server.config.ApplicationConfig
 
 data class SchoolConfig(
@@ -7,7 +8,8 @@ data class SchoolConfig(
 ) {
     data class RegistrationConfig(
         val mode: RegistrationMode,
-        val topLevelDomain: String?,
+        val subdomainParent: String?,
+        val subdomainPort: Int = DEFAULT_PORT,
     ) {
         enum class RegistrationMode(val value : String) {
             DISABLED("disabled"),
@@ -29,23 +31,26 @@ data class SchoolConfig(
 
     companion object {
         fun fromConfig(config: ApplicationConfig): SchoolConfig {
-            val modeString = config.propertyOrNull("" +
+            val modeString = config.propertyOrNull(
                     "ktor.school.registration.mode"
             )?.getString() ?: RegistrationConfig.RegistrationMode.DISABLED.value
 
-            val topLevelDomain = config.propertyOrNull(
-                "ktor.school.registration.top-level-domain"
+            val subdomainParent = config.propertyOrNull(
+                "ktor.school.registration.subdomain-parent"
             )?.getString()
 
             val mode = RegistrationConfig.RegistrationMode.fromValue(modeString)
 
-            if(mode == RegistrationConfig.RegistrationMode.SUBDOMAIN && topLevelDomain == null)
+            if(mode == RegistrationConfig.RegistrationMode.SUBDOMAIN && subdomainParent == null)
                 throw IllegalStateException("Subdomain registration mode requires setting top level domain")
 
             return SchoolConfig(
                 registration = RegistrationConfig(
                     mode = mode,
-                    topLevelDomain = topLevelDomain
+                    subdomainParent = subdomainParent,
+                    subdomainPort = config.propertyOrNull(
+                        "ktor.school.registration.subdomain-port"
+                    )?.getString()?.toInt() ?: DEFAULT_PORT
                 )
             )
         }

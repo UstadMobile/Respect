@@ -11,6 +11,8 @@ import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.LangMapStringValue
+import world.respect.libutil.ext.normalizeForEndpoint
+import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.SchoolConfig
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.ext.HttpStatusException
@@ -32,7 +34,6 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
     override suspend operator fun invoke(
         request: RegisterSchoolUseCase.RegisterSchoolRequest
     ): RegisterSchoolUseCase.RegisterSchoolResponse {
-        // Check if registration is enabled
         if (!schoolConfig.registration.enabled) {
             throw HttpStatusException("School registration is disabled", HttpStatusCode.Forbidden)
         }
@@ -44,7 +45,7 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
 
         // Parse and validate URL
         val parsedUrl = try {
-            Url(request.schoolUrl)
+            Url(request.schoolUrl).normalizeForEndpoint()
         } catch (e: Exception) {
             throw HttpStatusException(
                 "Invalid URL format: ${request.schoolUrl}",
@@ -54,17 +55,6 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
 
         // Verify school URL - will throw SchoolUrlVerificationException if verification fails
         verifySchoolUrlUseCase(parsedUrl)
-
-        // Extract subdomain from URL for use as dbUrl and rpId
-        val schoolSubdomain = when (schoolConfig.registration.mode) {
-            SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
-                parsedUrl.host.removeSuffix(".${schoolConfig.registration.topLevelDomain}")
-            }
-            else -> {
-                // For any-url mode, use a sanitized version of the host as subdomain
-                parsedUrl.host
-            }
-        }
 
         // Create school using AddSchoolUseCase
         addSchoolUseCase(
@@ -76,11 +66,11 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
                         xapi = Url("${request.schoolUrl}/api/school/xapi"),
                         oneRoster = Url("${request.schoolUrl}/api/school/oneroster"),
                         respectExt = Url("${request.schoolUrl}/api/school/respect"),
-                        rpId = schoolSubdomain,
+                        rpId = parsedUrl.host,
                         lastModified = Clock.System.now(),
                         stored = Clock.System.now(),
                     ),
-                    dbUrl = schoolSubdomain,
+                    dbUrl = parsedUrl.sanitizedForFilename(),
                     adminUsername = null,
                     adminPassword = null
                 )
@@ -120,7 +110,7 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
 
         return RegisterSchoolUseCase.RegisterSchoolResponse(
             schoolUrl = Url(request.schoolUrl),
-            redirectUrl = customDeepLinkUrl
+            redirectUrl = customDeepLinkUrl,
         )
     }
 

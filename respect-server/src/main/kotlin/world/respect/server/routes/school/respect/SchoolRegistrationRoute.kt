@@ -85,7 +85,7 @@ fun Route.SchoolRegistrationRoute() {
                                             placeholder = "schoolname"
                                         }
                                         // Show the suffix to the user
-                                        +".${schoolConfig.registration.topLevelDomain}"
+                                        +".${schoolConfig.registration.subdomainParent}"
                                     }
                                 }
                             }
@@ -120,10 +120,10 @@ fun Route.SchoolRegistrationRoute() {
                             }
                         }
 
-                        schoolConfig.registration.topLevelDomain?.also { topLevelDomain ->
+                        schoolConfig.registration.subdomainParent?.also { topLevelDomain ->
                             input(
                                 type = InputType.hidden,
-                                name = RegisterSchoolUseCase.PARAM_TOP_LEVEL_DOMAIN,
+                                name = RegisterSchoolUseCase.PARAM_SUBDOMAIN_PARENT,
                             ) {
                                 value = topLevelDomain
                             }
@@ -133,6 +133,13 @@ fun Route.SchoolRegistrationRoute() {
                                 name = RegisterSchoolUseCase.PARAM_SUBDOMAIN_PROTO,
                             ) {
                                 value = virtualHost.protocol.name
+                            }
+
+                            input(
+                                type = InputType.hidden,
+                                name = RegisterSchoolUseCase.PARAM_SUBDOMAIN_PORT
+                            ) {
+                                value = schoolConfig.registration.subdomainPort.toString()
                             }
                         }
 

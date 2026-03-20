@@ -10,7 +10,7 @@ class RegisterSchoolUseCaseTest {
     @Test
     fun givenSubdomainParams_whenFromParamsCalled_thenUrlIsAsExpected() {
         val params = parametersOf(
-            RegisterSchoolUseCase.PARAM_TOP_LEVEL_DOMAIN to listOf("example.org"),
+            RegisterSchoolUseCase.PARAM_SUBDOMAIN_PARENT to listOf("example.org"),
             RegisterSchoolUseCase.PARAM_SUBDOMAIN to listOf("schoolname"),
             RegisterSchoolUseCase.PARAM_SUBDOMAIN_PROTO to listOf("https"),
         )

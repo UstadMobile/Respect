@@ -1,5 +1,6 @@
 package world.respect.shared.domain.school.add
 
+import io.ktor.http.DEFAULT_PORT
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
@@ -40,8 +41,9 @@ interface RegisterSchoolUseCase {
                             protocol = URLProtocol.createOrDefault(
                                 params[PARAM_SUBDOMAIN_PROTO]!!
                             ),
-                            host = "$subdomain.${params[PARAM_TOP_LEVEL_DOMAIN]!!}",
-                            pathSegments = listOf()
+                            host = "$subdomain.${params[PARAM_SUBDOMAIN_PARENT]!!}",
+                            pathSegments = listOf(),
+                            port = params[PARAM_SUBDOMAIN_PORT]?.toInt() ?: DEFAULT_PORT,
                         ).build().toString()
                     )
                 }
@@ -70,9 +72,11 @@ interface RegisterSchoolUseCase {
         /**
          * If registration is being done by subdomain, then this is the domain it will be under
          */
-        const val PARAM_TOP_LEVEL_DOMAIN = "subdomainSuffix"
+        const val PARAM_SUBDOMAIN_PARENT = "subdomainParent"
 
         const val PARAM_SUBDOMAIN_PROTO = "subdomainProto"
+
+        const val PARAM_SUBDOMAIN_PORT = "subdomainPort"
 
         const val PARAM_SCHOOL_FULL_URL = "schoolUrl"
 

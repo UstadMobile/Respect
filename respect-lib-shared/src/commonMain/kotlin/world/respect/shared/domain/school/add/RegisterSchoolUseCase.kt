@@ -32,7 +32,6 @@ interface RegisterSchoolUseCase {
                         schoolUrl = fullUrlParam
                     )
                 }else {
-                    //TODO: validate this
                     val subdomain = params[PARAM_SUBDOMAIN]!!
 
                     RegisterSchoolRequest(

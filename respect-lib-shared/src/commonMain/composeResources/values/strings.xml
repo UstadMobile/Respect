@@ -588,7 +588,12 @@
     <string name="playlist_section_description">Links to other playlists.</string>
     <string name="learning_item_section">Learning item section</string>
     <string name="learning_item_section_description">Links direct to items e.g. lessons, assessments, videos, etc</string>
-
+    <string name="section_title">Section title</string>
+    <string name="add_item">+ Item</string>
+    <string name="add_new_playlist">+ Playlist</string>
+    <string name="move">Move</string>
+    <string name="select_count_items">Select %1$d item(s)</string>
+    <string name="make_a_copy">Make a copy</string>
 
 
 

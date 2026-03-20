@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.playlists.mapping.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +24,11 @@ import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.PlaylistList
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -43,6 +47,8 @@ data class PlaylistListUiState(
 ) {
     /**
      * Playlists visible under the active filter chip.
+     *
+     * MY_PLAYLISTS: those where the publication has an owner link whose href matches the active
      * user's owner href. Owner is identified via:
      * rel = MakePlaylistOpdsFeedUseCase.REL_OWNER
      * href = "{schoolBaseUrl}user/{userGuid}"
@@ -67,6 +73,7 @@ data class PlaylistListUiState(
 class PlaylistListViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -77,6 +84,8 @@ class PlaylistListViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    private val route: PlaylistList = savedStateHandle.toRoute()
+
     init {
         _appUiState.update {
             it.copy(title = Res.string.home.asUiText())
@@ -84,10 +93,13 @@ class PlaylistListViewModel(
 
         val activeAccount = accountManager.activeAccount
             ?: throw IllegalStateException(
-                "No active account"
+                "No active account when initializing PlaylistListViewModel"
             )
 
-        val playlistFeedUrl = Url(
+        // The playlist list feed is stored locally at {schoolUrl}playlist
+        // It is updated by PlaylistEditViewModel.onClickSave() each time
+        // a playlist is created or edited.
+        val playlistListUrl = Url(
             "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
         )
 
@@ -121,7 +133,7 @@ class PlaylistListViewModel(
 
         viewModelScope.launch {
             schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                url = playlistFeedUrl,
+                url = playlistListUrl,
                 params = DataLoadParams()
             ).collect { result ->
                 when (result) {
@@ -146,11 +158,20 @@ class PlaylistListViewModel(
         }?.href ?: throw IllegalStateException(
             "Playlist publication has no self link: ${publication.metadata.title}"
         )
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                PlaylistDetail.create(playlistUrl = Url(selfHref))
+
+        if (
+            !resultReturner.sendResultIfResultExpected(
+                route = route,
+                navCommandFlow = _navCommandFlow,
+                result = selfHref,
             )
-        )
+        ) {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    PlaylistDetail.create(playlistUrl = Url(selfHref))
+                )
+            )
+        }
     }
 
     fun onClickCreatePlaylist() {

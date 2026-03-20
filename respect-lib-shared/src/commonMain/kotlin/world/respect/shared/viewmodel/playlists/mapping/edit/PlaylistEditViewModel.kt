@@ -1,0 +1,458 @@
+package world.respect.shared.viewmodel.playlists.mapping.edit
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataReadyState
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.datalayer.school.opds.ext.selfUrl
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsFeedMetadata
+import world.respect.lib.opds.model.OpdsGroup
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.LangMapStringValue
+import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ReadiumMetadata
+import world.respect.libutil.util.time.systemTimeInMillis
+import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_playlist
+import world.respect.shared.generated.resources.copy_playlist
+import world.respect.shared.generated.resources.edit_playlist
+import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.PlaylistList
+import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RouteResultDest
+import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
+
+/**
+ * Section type for a playlist group, as per implementation notes:
+ * - NAVIGATION: links to other playlists (OpdsFeed group with navigation links)
+ * - PUBLICATION: links directly to learning items (OpdsFeed group with publications)
+ */
+enum class PlaylistSectionType {
+    NAVIGATION,
+    PUBLICATION,
+}
+
+data class PlaylistEditUiState(
+    val feed: OpdsFeed? = null,
+    val isSectionTypeDialogVisible: Boolean = false,
+    val titleError: Boolean = false,
+) {
+    val title: String
+        get() = feed?.metadata?.title ?: ""
+
+    val description: String
+        get() = feed?.metadata?.description ?: ""
+
+    val sections: List<OpdsGroup>
+        get() = feed?.groups ?: emptyList()
+}
+
+class PlaylistEditViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val accountManager: RespectAccountManager,
+    private val resultReturner: NavResultReturner,
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+    override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
+    private val route: PlaylistEdit = savedStateHandle.toRoute()
+
+    private val _uiState = MutableStateFlow(PlaylistEditUiState())
+
+    val uiState = _uiState.asStateFlow()
+
+    private var pendingAddItemSectionIndex: Int? = null
+    private var pendingAddPlaylistSectionIndex: Int? = null
+
+    init {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = when {
+                    route.isCopy -> Res.string.copy_playlist.asUiText()
+                    route.playlistUrl == null -> Res.string.add_playlist.asUiText()
+                    else -> Res.string.edit_playlist.asUiText()
+                },
+                userAccountIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = Res.string.save.asUiText(),
+                    onClick = ::onClickSave,
+                ),
+                hideBottomNavigation = true,
+            )
+        }
+
+        val existingPlaylistUrl = route.playlistUrl
+        if (existingPlaylistUrl != null) {
+            viewModelScope.launch {
+                schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
+                    url = existingPlaylistUrl,
+                    params = DataLoadParams(),
+                ).collect { result ->
+                    when (result) {
+                        is DataReadyState -> {
+                            _uiState.update { it.copy(feed = result.data) }
+                        }
+                        else -> { /* loading/error states handled by app bar loading indicator */ }
+                    }
+                }
+            }
+        } else {
+            val activeAccount = accountManager.activeAccount
+                ?: throw IllegalStateException(
+                    "No active account when initializing PlaylistEditViewModel"
+                )
+            @OptIn(ExperimentalUuidApi::class)
+            _uiState.update {
+                it.copy(
+                    feed = MakePlaylistOpdsFeedUseCase(
+                        schoolUrl = activeAccount.school.self
+                    ).invoke(
+                        base = OpdsFeed(
+                            metadata = OpdsFeedMetadata(title = ""),
+                            links = emptyList(),
+                            publications = emptyList(),
+                            groups = emptyList(),
+                        ),
+                        userGuid = activeAccount.userGuid,
+                    )
+                )
+            }
+        }
+
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
+                val sectionIndex = pendingAddItemSectionIndex
+                    ?: throw IllegalStateException(
+                        "Received learning unit result but no pending section index"
+                    )
+                pendingAddItemSectionIndex = null
+
+                val selections: List<LearningUnitSelection> = when (val r = result.result) {
+                    is LearningUnitSelection -> listOf(r)
+                    is List<*> -> r.filterIsInstance<LearningUnitSelection>()
+                    else -> throw IllegalStateException(
+                        "Expected LearningUnitSelection or List but got: ${result.result}"
+                    )
+                }
+
+                _uiState.update { prev ->
+                    val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+                    val section = sections.getOrNull(sectionIndex)
+                        ?: throw IllegalStateException(
+                            "No section at index $sectionIndex"
+                        )
+                    sections[sectionIndex] = section.copy(
+                        publications = (section.publications ?: emptyList()) +
+                                selections.map { it.selectedPublication }
+                    )
+                    prev.copy(feed = prev.feed?.copy(groups = sections))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            resultReturner.filteredResultFlowForKey(KEY_PLAYLIST).collect { result ->
+                val sectionIndex = pendingAddPlaylistSectionIndex
+                    ?: throw IllegalStateException(
+                        "Received playlist result but no pending section index"
+                    )
+                pendingAddPlaylistSectionIndex = null
+
+                val selfHref = result.result as? String
+                    ?: throw IllegalStateException(
+                        "Expected String playlist href but got: ${result.result}"
+                    )
+
+                val navLink = ReadiumLink(
+                    href = selfHref,
+                    rel = listOf(REL_SELF),
+                    type = OpdsFeed.MEDIA_TYPE,
+                )
+
+                _uiState.update { prev ->
+                    val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+                    val section = sections.getOrNull(sectionIndex)
+                        ?: throw IllegalStateException(
+                            "No section at index $sectionIndex"
+                        )
+                    sections[sectionIndex] = section.copy(
+                        navigation = (section.navigation ?: emptyList()) + navLink
+                    )
+                    prev.copy(feed = prev.feed?.copy(groups = sections))
+                }
+            }
+        }
+    }
+
+    fun onTitleChanged(title: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                feed = prev.feed?.copy(
+                    metadata = prev.feed.metadata.copy(title = title)
+                ),
+                titleError = false,
+            )
+        }
+    }
+
+    fun onDescriptionChanged(description: String) {
+        _uiState.update { prev ->
+            prev.copy(
+                feed = prev.feed?.copy(
+                    metadata = prev.feed.metadata.copy(description = description)
+                )
+            )
+        }
+    }
+
+    fun onSectionTitleChanged(sectionIndex: Int, title: String) {
+        _uiState.update { prev ->
+            val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+            val section = sections.getOrNull(sectionIndex)
+                ?: throw IllegalStateException("No section at index $sectionIndex")
+            sections[sectionIndex] = section.copy(
+                metadata = section.metadata.copy(title = title)
+            )
+            prev.copy(feed = prev.feed?.copy(groups = sections))
+        }
+    }
+
+    fun onClickAddSection() {
+        _uiState.update { it.copy(isSectionTypeDialogVisible = true) }
+    }
+
+    fun onDismissSectionTypeDialog() {
+        _uiState.update { it.copy(isSectionTypeDialogVisible = false) }
+    }
+
+    fun onClickSectionType(sectionType: PlaylistSectionType) {
+        _uiState.update { prev ->
+            val newSection = OpdsGroup(
+                metadata = OpdsFeedMetadata(title = ""),
+                navigation = if (sectionType == PlaylistSectionType.NAVIGATION) {
+                    emptyList()
+                } else {
+                    null
+                },
+                publications = if (sectionType == PlaylistSectionType.PUBLICATION) {
+                    emptyList()
+                } else {
+                    null
+                },
+            )
+            prev.copy(
+                feed = prev.feed?.copy(
+                    groups = (prev.feed.groups ?: emptyList()) + newSection
+                ),
+                isSectionTypeDialogVisible = false,
+            )
+        }
+    }
+
+    fun onClickDeleteSection(sectionIndex: Int) {
+        _uiState.update { prev ->
+            val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+            sections.removeAt(sectionIndex)
+            prev.copy(feed = prev.feed?.copy(groups = sections))
+        }
+    }
+
+    fun onSectionsReordered(sections: List<OpdsGroup>) {
+        _uiState.update { prev ->
+            prev.copy(feed = prev.feed?.copy(groups = sections))
+        }
+    }
+
+    fun onItemsReordered(sectionIndex: Int, items: List<Any>) {
+        _uiState.update { prev ->
+            val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+            val section = sections.getOrNull(sectionIndex)
+                ?: throw IllegalStateException("No section at index $sectionIndex")
+            sections[sectionIndex] = if (section.navigation != null) {
+                section.copy(navigation = items.filterIsInstance<ReadiumLink>())
+            } else {
+                section.copy(publications = items.filterIsInstance<OpdsPublication>())
+            }
+            prev.copy(feed = prev.feed?.copy(groups = sections))
+        }
+    }
+
+    fun onClickDeleteItem(sectionIndex: Int, itemIndex: Int) {
+        _uiState.update { prev ->
+            val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+            val section = sections.getOrNull(sectionIndex)
+                ?: throw IllegalStateException("No section at index $sectionIndex")
+            sections[sectionIndex] = if (section.navigation != null) {
+                val items = (section.navigation ?: emptyList()).toMutableList()
+                items.removeAt(itemIndex)
+                section.copy(navigation = items)
+            } else {
+                val items = (section.publications ?: emptyList()).toMutableList()
+                items.removeAt(itemIndex)
+                section.copy(publications = items)
+            }
+            prev.copy(feed = prev.feed?.copy(groups = sections))
+        }
+    }
+
+    fun onClickMoveItem(sectionIndex: Int, itemIndex: Int, targetSectionIndex: Int) {
+        _uiState.update { prev ->
+            val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+            val fromSection = sections.getOrNull(sectionIndex)
+                ?: throw IllegalStateException("No section at index $sectionIndex")
+            val toSection = sections.getOrNull(targetSectionIndex)
+                ?: throw IllegalStateException("No section at index $targetSectionIndex")
+
+            sections[sectionIndex] = if (fromSection.navigation != null) {
+                val items = (fromSection.navigation ?: emptyList()).toMutableList()
+                val item = items.removeAt(itemIndex)
+                sections[targetSectionIndex] = toSection.copy(
+                    navigation = (toSection.navigation ?: emptyList()) + item
+                )
+                fromSection.copy(navigation = items)
+            } else {
+                val items = (fromSection.publications ?: emptyList()).toMutableList()
+                val item = items.removeAt(itemIndex)
+                sections[targetSectionIndex] = toSection.copy(
+                    publications = (toSection.publications ?: emptyList()) + item
+                )
+                fromSection.copy(publications = items)
+            }
+            prev.copy(feed = prev.feed?.copy(groups = sections))
+        }
+    }
+
+    fun onClickAddItem(sectionIndex: Int) {
+        pendingAddItemSectionIndex = sectionIndex
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                RespectAppLauncher.create(
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_LEARNING_UNIT,
+                    )
+                )
+            )
+        )
+    }
+
+    fun onClickAddPlaylist(sectionIndex: Int) {
+        pendingAddPlaylistSectionIndex = sectionIndex
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                PlaylistList.create(
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_PLAYLIST,
+                    )
+                )
+            )
+        )
+    }
+
+    fun onClickSave() {
+        val feed = _uiState.value.feed ?: return
+        if (feed.metadata.title.isBlank()) {
+            _uiState.update { it.copy(titleError = true) }
+            return
+        }
+
+        viewModelScope.launch {
+            val activeAccount = accountManager.activeAccount
+                ?: throw IllegalStateException(
+                    "No active account when saving playlist"
+                )
+
+            val playlistListUrl = Url(
+                "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
+            )
+
+            val selfHref = feed.selfUrl()?.toString()
+                ?: throw IllegalStateException("Playlist has no self URL")
+
+            val sectionCount = feed.groups?.size ?: 0
+            val itemCount = feed.groups?.sumOf { group ->
+                (group.publications?.size ?: 0) + (group.navigation?.size ?: 0)
+            } ?: 0
+
+            val playlistAsPublication = OpdsPublication(
+                metadata = ReadiumMetadata(
+                    title = LangMapStringValue(feed.metadata.title),
+                    description = feed.metadata.description,
+                    modified = feed.metadata.modified?.toString(),
+                    numberOfPages = sectionCount,
+                    duration = itemCount.toDouble(),
+                ),
+                links = feed.links,
+            )
+
+            val existingListFeed = schoolDataSource.opdsFeedDataSource
+                .getByUrl(url = playlistListUrl, params = DataLoadParams())
+                .dataOrNull()
+
+            val updatedPublications = if (existingListFeed != null) {
+                val others = (existingListFeed.publications ?: emptyList()).filter { pub ->
+                    pub.links.none { link ->
+                        link.rel?.contains(REL_SELF) == true && link.href == selfHref
+                    }
+                }
+                others + playlistAsPublication
+            } else {
+                listOf(playlistAsPublication)
+            }
+
+            val listModified = Instant.fromEpochMilliseconds(systemTimeInMillis())
+
+            val listFeed = OpdsFeed(
+                metadata = OpdsFeedMetadata(
+                    title = existingListFeed?.metadata?.title ?: "Playlists",
+                    modified = listModified,
+                ),
+                links = existingListFeed?.links ?: listOf(
+                    ReadiumLink(
+                        href = playlistListUrl.toString(),
+                        rel = listOf(REL_SELF),
+                        type = OpdsFeed.MEDIA_TYPE,
+                    )
+                ),
+                publications = updatedPublications,
+                groups = existingListFeed?.groups ?: emptyList(),
+            )
+
+            schoolDataSource.opdsFeedDataSource.store(listOf(feed, listFeed))
+            _navCommandFlow.tryEmit(NavCommand.PopUp())
+        }
+    }
+
+    companion object {
+        const val KEY_LEARNING_UNIT = "result_learning_unit"
+        const val KEY_PLAYLIST = "result_playlist"
+        private const val REL_SELF = "self"
+    }
+}

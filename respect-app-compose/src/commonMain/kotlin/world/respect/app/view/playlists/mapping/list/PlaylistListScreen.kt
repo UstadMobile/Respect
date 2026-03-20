@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -45,6 +47,7 @@ import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.my_playlists
 import world.respect.shared.generated.resources.no_playlist_yet
 import world.respect.shared.generated.resources.no_playlist_yet_description
+import world.respect.shared.generated.resources.sections_and_items
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistFilter
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
@@ -151,6 +154,7 @@ fun PlaylistListScreen(
                 color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f),
             ) {}
         }
+
         if (uiState.isFabMenuExpanded) {
             Column(
                 modifier = Modifier
@@ -192,32 +196,53 @@ fun PlaylistListScreen(
         }
     }
 }
-
 @Composable
 private fun PlaylistListItem(
     publication: OpdsPublication,
     onClickPublication: () -> Unit,
 ) {
-    val authorName = publication.metadata.author
-        ?.mapNotNull { contributor ->
-            when (contributor) {
-                is ReadiumContributorObject -> contributor.name
-                is ReadiumContributorStringValue -> contributor.value
-            }
-        }
-        ?.joinToString(", ")
+    val sectionCount = publication.metadata.numberOfPages ?: 0
+    val itemCount = publication.metadata.duration?.toInt() ?: 0
 
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClickPublication() }
             .testTag("playlist_item_${publication.metadata.identifier}"),
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Filled.MenuBook,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        },
         headlineContent = {
-            Text(text = publication.metadata.title.getTitle())
+            Text(
+                text = publication.metadata.title.getTitle(),
+                style = MaterialTheme.typography.bodyLarge,
+            )
         },
         supportingContent = {
-            authorName?.let {
-                Text(text = it)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.MenuBook,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = stringResource(
+                        Res.string.sections_and_items,
+                        sectionCount,
+                        itemCount,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         },
     )

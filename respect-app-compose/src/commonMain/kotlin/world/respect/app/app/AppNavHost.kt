@@ -17,13 +17,11 @@ import world.respect.app.view.assignment.list.AssignmentListScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
-import world.respect.app.view.playlists.mapping.list.PlaylistListScreenForViewModel
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
-import world.respect.app.view.learningunit.list.PlaylistDetailScreen
 import world.respect.app.view.learningunit.list.PlaylistDetailScreenForViewModel
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
@@ -51,6 +49,7 @@ import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
 import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.list.PlaylistListScreenForViewModel
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -159,7 +158,6 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
-
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -169,7 +167,6 @@ fun AppNavHost(
     onSetAppUiState: (AppUiState) -> Unit,
     modifier: Modifier,
 ) {
-
     NavHost(
         navController = navController,
         startDestination = Acknowledgement(),
@@ -552,6 +549,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<PlaylistDetail> {
             PlaylistDetailScreenForViewModel(
                 viewModel = respectViewModel(
@@ -560,6 +558,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<PlaylistEdit> {
             PlaylistEditScreenForViewModel(
                 viewModel = respectViewModel(
@@ -568,6 +567,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<SchoolDirectoryList> {
             val viewModel: SchoolDirectoryListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

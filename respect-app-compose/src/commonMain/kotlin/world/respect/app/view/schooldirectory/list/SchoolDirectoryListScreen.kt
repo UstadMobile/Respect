@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.generated.resources.Res
@@ -69,7 +70,10 @@ fun SchoolDirectoryListItem(
                 }
             },
         headlineContent = {
-            Text(text = directory.baseUrl.toString())
+            Text(
+                text = directory.baseUrl.toString(),
+                modifier = Modifier.testTag("host_url")
+            )
         },
         trailingContent = {
             if (mode == SchoolDirectoryMode.MANAGE) {

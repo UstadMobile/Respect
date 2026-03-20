@@ -1,9 +1,7 @@
 package world.respect.server.domain.school.add
 
-import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
-import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -13,35 +11,29 @@ import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.LangMapStringValue
+import world.respect.libutil.ext.normalizeForEndpoint
+import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.SchoolConfig
+import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.ext.HttpStatusException
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
+import world.respect.shared.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
-class RegisterSchoolUseCase : KoinComponent {
-
-    @Serializable
-    data class RegisterSchoolRequest(
-        val schoolName: String,
-        val schoolUrl: String,
-    )
-
-    @Serializable
-    data class RegisterSchoolResponse(
-        val schoolUrl: Url,
-        val redirectUrl: Url
-    )
+class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
 
     private val addSchoolUseCase: AddSchoolUseCase by inject()
     private val schoolConfig: SchoolConfig by inject()
     private val urlToCustomDeepLinkUseCase: UrlToCustomDeepLinkUseCase  by inject()
+    private val verifySchoolUrlUseCase: VerifySchoolUrlPointsToThisServerUseCase by inject()
 
-    suspend operator fun invoke(request: RegisterSchoolRequest): RegisterSchoolResponse {
-        // Check if registration is enabled
+    override suspend operator fun invoke(
+        request: RegisterSchoolUseCase.RegisterSchoolRequest
+    ): RegisterSchoolUseCase.RegisterSchoolResponse {
         if (!schoolConfig.registration.enabled) {
             throw HttpStatusException("School registration is disabled", HttpStatusCode.Forbidden)
         }
@@ -53,7 +45,7 @@ class RegisterSchoolUseCase : KoinComponent {
 
         // Parse and validate URL
         val parsedUrl = try {
-            Url(request.schoolUrl)
+            Url(request.schoolUrl).normalizeForEndpoint()
         } catch (e: Exception) {
             throw HttpStatusException(
                 "Invalid URL format: ${request.schoolUrl}",
@@ -61,16 +53,8 @@ class RegisterSchoolUseCase : KoinComponent {
             )
         }
 
-        // Extract subdomain from URL for use as dbUrl and rpId
-        val schoolSubdomain = when (schoolConfig.registration.mode) {
-            SchoolConfig.RegistrationConfig.RegistrationMode.SUBDOMAIN -> {
-                parsedUrl.host.removeSuffix(".${schoolConfig.registration.topLevelDomain}")
-            }
-            else -> {
-                // For any-url mode, use a sanitized version of the host as subdomain
-                parsedUrl.host
-            }
-        }
+        // Verify school URL - will throw SchoolUrlVerificationException if verification fails
+        verifySchoolUrlUseCase(parsedUrl)
 
         // Create school using AddSchoolUseCase
         addSchoolUseCase(
@@ -82,11 +66,11 @@ class RegisterSchoolUseCase : KoinComponent {
                         xapi = Url("${request.schoolUrl}/api/school/xapi"),
                         oneRoster = Url("${request.schoolUrl}/api/school/oneroster"),
                         respectExt = Url("${request.schoolUrl}/api/school/respect"),
-                        rpId = schoolSubdomain,
+                        rpId = parsedUrl.host,
                         lastModified = Clock.System.now(),
                         stored = Clock.System.now(),
                     ),
-                    dbUrl = schoolSubdomain,
+                    dbUrl = parsedUrl.sanitizedForFilename(),
                     adminUsername = null,
                     adminPassword = null
                 )
@@ -124,9 +108,9 @@ class RegisterSchoolUseCase : KoinComponent {
         // Convert to custom deep link so it opens directly in the app
         val customDeepLinkUrl = urlToCustomDeepLinkUseCase(regularInviteUrl)
 
-        return RegisterSchoolResponse(
+        return RegisterSchoolUseCase.RegisterSchoolResponse(
             schoolUrl = Url(request.schoolUrl),
-            redirectUrl = customDeepLinkUrl
+            redirectUrl = customDeepLinkUrl,
         )
     }
 

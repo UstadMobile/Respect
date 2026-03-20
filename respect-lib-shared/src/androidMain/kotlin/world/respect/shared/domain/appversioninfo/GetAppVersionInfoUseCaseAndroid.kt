@@ -45,6 +45,7 @@ class GetAppVersionInfoUseCaseAndroid(
         return GetAppVersionInfoUseCase.AppVersionInfo(
             version = packageInfo.versionName ?: "",
             versionCode = versionCode,
+            packageName = context.packageName,
             buildTag = buildInfoProperties.getProperty("buildtag"),
             buildTime = buildInfoProperties.getProperty("buildtime"),
         )

@@ -186,7 +186,7 @@ fun AppGridItem(
         ) {
             appData?.findIcons()?.firstOrNull()?.also { icon ->
                 RespectAsyncImage(
-                    uri = icon.toString(),
+                    uri = icon.href,
                     contentDescription = "",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier

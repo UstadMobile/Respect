@@ -57,6 +57,7 @@ import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
+import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
@@ -182,6 +183,7 @@ fun Application.module() {
             get("assetlinks.json") {
                 call.respondFile(assetLinksFile)
             }
+            SchoolValidationRoute()
         }
 
         swaggerUI(

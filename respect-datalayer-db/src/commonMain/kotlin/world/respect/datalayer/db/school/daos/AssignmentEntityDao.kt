@@ -7,7 +7,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.adapters.AssignmentEntities
+import world.respect.datalayer.db.school.daos.PersonEntityDao.Companion.SELECT_AUTHENTICATED_PERMISSION_PERSON_UIDS_SQL
 import world.respect.datalayer.db.school.entities.AssignmentEntity
+import world.respect.datalayer.school.model.PermissionFlags
+import world.respect.datalayer.school.model.StatusEnum
 
 @Dao
 interface AssignmentEntityDao {
@@ -26,12 +29,20 @@ interface AssignmentEntityDao {
     ): List<AssignmentEntities>
 
     @Query("""
+          WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},
+               ${ClassEntityDao.AUTHENTICATED_USER_ENROLLMENTS_CTE_SQL}
+              
         SELECT AssignmentEntity.*
           FROM AssignmentEntity
+               JOIN ClassEntity 
+                    ON ClassEntity.cGuidHash = AssignmentEntity.aeClassUidNum
          WHERE (:uidNum = 0 OR AssignmentEntity.aeUidNum = :uidNum)
+           AND (${ClassEntityDao.CLASS_PERMISSION_CHECK_SQL})
     """)
     fun listAsPagingSource(
-        uidNum: Long
+        authenticatedPersonUidNum: Long,
+        uidNum: Long,
+        requiredPermission: Long = PermissionFlags.CLASS_READ,
     ): PagingSource<Int, AssignmentEntities>
 
 
@@ -62,5 +73,11 @@ interface AssignmentEntityDao {
          WHERE AssignmentEntity.aeUidNum IN (:uidNums)
     """)
     suspend fun findByUidNums(uidNums: List<Long>): List<AssignmentEntities>
+
+    companion object {
+
+
+
+    }
 
 }

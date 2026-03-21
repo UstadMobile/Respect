@@ -14,7 +14,7 @@ import world.respect.datalayer.db.school.adapters.asModel
 import world.respect.datalayer.school.PersonPasskeyDataSource.GetListParams
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.model.PersonPasskey
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.libutil.util.throwable.ForbiddenException
 import kotlin.time.Clock
 
 class PersonPasskeyDataSourceDb(
@@ -22,33 +22,6 @@ class PersonPasskeyDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
 ) : PersonPasskeyDataSourceLocal {
-
-    private suspend fun upsert(
-        list: List<PersonPasskey>,
-        forceOverwrite: Boolean
-    ) {
-        val timeNow = Clock.System.now()
-
-        if(list.any { it.personGuid != authenticatedUser.guid })
-            throw IllegalArgumentException("Cannot store passkeys for other user")
-                .withHttpStatus(401)
-
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val toUpdate = list.filter {
-                    forceOverwrite || (schoolDb.getPersonPasskeyEntityDao().getLastModifiedByPersonUidAndKeyId(
-                        personUidNum = uidNumberMapper(authenticatedUser.guid),
-                        passKeyId = it.credentialId
-                    ) ?: 0) < it.lastModified.toEpochMilliseconds()
-                }.map {
-                    it.copy(stored = timeNow).asEntity(uidNumberMapper)
-                }
-
-                schoolDb.getPersonPasskeyEntityDao().takeIf { toUpdate.isNotEmpty() }
-                    ?.upsertAsync(toUpdate)
-            }
-        }
-    }
 
     override suspend fun listAll(
         listParams: GetListParams
@@ -67,7 +40,23 @@ class PersonPasskeyDataSourceDb(
         list: List<PersonPasskey>,
         forceOverwrite: Boolean
     ) {
-        upsert(list, false)
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val timeNow = Clock.System.now()
+
+                val toUpdate = list.filter {
+                    forceOverwrite || (schoolDb.getPersonPasskeyEntityDao().getLastModifiedByPersonUidAndKeyId(
+                        personUidNum = uidNumberMapper(authenticatedUser.guid),
+                        passKeyId = it.credentialId
+                    ) ?: 0) < it.lastModified.toEpochMilliseconds()
+                }.map {
+                    it.copy(stored = timeNow).asEntity(uidNumberMapper)
+                }
+
+                schoolDb.getPersonPasskeyEntityDao().takeIf { toUpdate.isNotEmpty() }
+                    ?.upsertAsync(toUpdate)
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<PersonPasskey> {
@@ -88,7 +77,13 @@ class PersonPasskeyDataSourceDb(
     }
 
     override suspend fun store(list: List<PersonPasskey>) {
-        upsert(list, true)
+        if(list.any { it.personGuid != authenticatedUser.guid })
+            throw ForbiddenException("Cannot store passkeys for other user")
+
+        val timeNow = Clock.System.now()
+        schoolDb.getPersonPasskeyEntityDao().upsertAsync(
+            list.map { it.copy(stored = timeNow).asEntity(uidNumberMapper) }
+        )
     }
 
 }

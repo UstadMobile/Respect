@@ -1,5 +1,6 @@
 package world.respect.server
 
+import io.github.aakira.napier.Napier
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -10,6 +11,8 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
+import io.ktor.server.http.content.staticFiles
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -19,7 +22,6 @@ import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.getKoin
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import world.respect.Greeting
 import world.respect.libutil.ext.randomString
 import world.respect.server.routes.AUTH_CONFIG_DIRECTORY_ADMIN_BASIC
 import world.respect.server.routes.AuthRoute
@@ -29,23 +31,36 @@ import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
 import org.koin.ktor.ext.inject
+import world.respect.Greeting
+import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.qrcode.PersonQrBadgeRoute
+import world.respect.server.routes.school.respect.AddChildAccountRoute
 import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
+import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolRegistrationRoute
+import world.respect.server.routes.school.respect.SchoolLinkRoute
+import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
+import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
+import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -54,6 +69,8 @@ const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
 
 @Suppress("unused") // Used via application.conf
 fun Application.module() {
+    Napier.takeLogarithm()
+    Napier.base(LogbackAntiLog())
 
     val serverProperties = Properties().apply {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
@@ -88,6 +105,7 @@ fun Application.module() {
         )
     }
 
+
     install(Authentication) {
         basic(AUTH_CONFIG_DIRECTORY_ADMIN_BASIC) {
             realm = "Access realm directory admin"
@@ -116,6 +134,14 @@ fun Application.module() {
                 validateAuthorizationUseCase(
                     ValidateAuthorizationUseCase.BearerTokenCredential(tokenCredential.token)
                 )?.let {
+                    val serverAccountScopeManager: ServerAccountScopeManager = schoolScope.get()
+
+                    //Ensure that the account scope is created and safely linked to the school scope.
+                    //See ServerAccountScopeManager doc for more info.
+                    serverAccountScopeManager.getOrCreateAccountScope(
+                        AuthenticatedUserPrincipalId(it.guid)
+                    )
+
                     UserIdPrincipal(it.guid)
                 }
             }
@@ -150,19 +176,32 @@ fun Application.module() {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }
-
+        SchoolRegistrationRoute()
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
 
             get("assetlinks.json") {
                 call.respondFile(assetLinksFile)
             }
+            SchoolValidationRoute()
         }
 
         swaggerUI(
             path = "swagger",
             swaggerFile = "openapi/openapi.yaml",
         )
+
+        environment.config.filePropertyOrNull(
+            propertyName = SERVER_CONFIG_KEY_STATICFILES
+        )?.also { staticFilesDir ->
+            staticFiles("/static-extra", staticFilesDir)
+        }
+
+        staticResources("/static-resources", "http")
+
+        route(RESPECT_SCHOOL_LINK_SEGMENT) {
+            SchoolLinkRoute()
+        }
 
         route("api") {
             route("passkey"){
@@ -188,7 +227,6 @@ fun Application.module() {
                     route("auth") {
                         AuthRoute()
                     }
-
                     route("invite") {
                         RedeemInviteRoute(
                             redeemInviteUseCase = { it.getSchoolKoinScope().get() }
@@ -197,19 +235,31 @@ fun Application.module() {
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     route("username"){
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
+                        SchoolPermissionGrantRoute()
                         PersonRoute()
+                        InviteRoute()
                         PersonPasskeyRoute()
                         PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
                         AssignmentRoute()
+                        PersonQrBadgeRoute()
+                        AddChildAccountRoute(
+                            addChildAccountUseCase = { it.requireAccountScope().get() }
+                        )
+                    }
+
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                        PlaylistRoute()
                     }
                 }
             }

@@ -13,7 +13,7 @@ import androidx.paging.PagingState
  */
 abstract class FilterPagingSource<Key: Any, Value: Any>(
     protected val src: PagingSource<Key, Value>,
-    tag: String? = null
+    tag: LogPrefixFunction = NO_TAG,
 ) : DelegatedInvalidationPagingSource<Key, Value>(src, tag){
 
 

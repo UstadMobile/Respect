@@ -1,0 +1,6 @@
+appId: world.respect.app
+
+---
+- assertVisible: "Create passkey to sign in to Respect?"
+- tapOn: "Create"
+- assertVisible: "Use your screen lock"

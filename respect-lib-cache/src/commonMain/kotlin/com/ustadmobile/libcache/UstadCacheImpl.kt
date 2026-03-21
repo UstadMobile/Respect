@@ -27,9 +27,12 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCase
+import com.ustadmobile.libcache.headers.hasCacheValidators
 import com.ustadmobile.libcache.headers.integrity
+import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
 import io.ktor.http.Url
@@ -52,6 +55,7 @@ import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
 import kotlin.concurrent.withLock
 import kotlin.time.Clock
@@ -87,6 +91,7 @@ class UstadCacheImpl(
     override val storageCompressionFilter: CacheStorageCompressionFilter = DefaultCacheCompressionFilter(),
     private val xxStringHasher: XXStringHasher,
     private val enqueuePinPublicationPrepareUseCase: EnqueuePinPublicationPrepareUseCase,
+    private val freshnessChecker: CacheControlFreshnessChecker,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -605,18 +610,40 @@ class UstadCacheImpl(
                 pendingLastAccessedUpdates.update { prev ->
                     prev + LastAccessedUpdate(key, Clock.System.now().toEpochMilliseconds())
                 }
+                val responseHeaders = iHeadersBuilder {
+                    takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
+                    header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
+                }
 
-                return CacheResponse(
-                    fileSystem = fileSystem,
-                    request = request,
-                    headers = iHeadersBuilder {
-                        takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
-                        header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
-                    },
-                    storageUri = entry.storageUri,
-                    httpResponseCode = entry.statusCode,
-                    uncompressedSize = entry.uncompressedSize,
-                )
+                /*
+                 * If the request received had its own explicitly set validation info AND the cache
+                 * is already fresh THEN we can reply an empty 304 not modified response.
+                 */
+                val requestHasValidators = request.headers.hasCacheValidators()
+                val reply304 = requestHasValidators && freshnessChecker(
+                    requestHeaders = request.headers,
+                    responseHeaders = responseHeaders,
+                    responseLastValidated = entry.lastValidated,
+                    responseFirstStoredTime = systemTimeInMillis() //TODO: Set this properly
+                ).isFresh
+
+                return if(reply304) {
+                    ByteArrayResponse(
+                        request = request,
+                        mimeType = responseHeaders["content-type"] ?: "application/octet-stream",
+                        responseCode = 304,
+                        body = ByteArray(0),
+                    )
+                }else {
+                    CacheResponse(
+                        fileSystem = fileSystem,
+                        request = request,
+                        headers = responseHeaders,
+                        storageUri = entry.storageUri,
+                        httpResponseCode = entry.statusCode,
+                        uncompressedSize = entry.uncompressedSize,
+                    )
+                }
             }else {
                 logger?.d(LOG_TAG, "$logPrefix Entry deleted externally:  ${request.url}")
                 if(entryAndLocks.locks.isEmpty()) {

@@ -25,7 +25,6 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Assignment
-import world.respect.datalayer.school.model.AssignmentAssigneeRef
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.opds.model.OpdsPublication
@@ -41,6 +40,7 @@ import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
@@ -72,7 +72,7 @@ class AssignmentEditViewModel(
     private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val route: AssignmentEdit = savedStateHandle.toRoute()
 
@@ -139,7 +139,7 @@ class AssignmentEditViewModel(
                     },
                     uiUpdateFn = { entity ->
                         _uiState.update { prev ->
-                            val assigneeClassUid = entity.dataOrNull()?.assignees?.firstOrNull()?.uid
+                            val assigneeClassUid = entity.dataOrNull()?.classUid
                             prev.copy(
                                 assignment = entity,
                                 assigneeText = classes.firstOrNull {
@@ -157,6 +157,7 @@ class AssignmentEditViewModel(
                                 uid = uid,
                                 title = "",
                                 description = "",
+                                classUid = "",
                                 learningUnits = route.learningUnitSelected?.let {
                                     listOf(it.toRef())
                                 } ?: emptyList()
@@ -188,7 +189,7 @@ class AssignmentEditViewModel(
     }
 
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
-        return respectAppDataSource.opdsDataSource.loadOpdsPublication(
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )
     }
@@ -199,9 +200,7 @@ class AssignmentEditViewModel(
             it.copy(
                 assignment = DataReadyState(
                     assignment.copy(
-                        assignees = listOf(
-                            AssignmentAssigneeRef(uid = clazz.guid)
-                        )
+                        classUid = clazz.guid
                     )
                 ),
                 assigneeText = clazz.title,
@@ -236,8 +235,10 @@ class AssignmentEditViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 RespectAppLauncher.create(
-                    resultPopUpTo = AssignmentEdit::class,
-                    resultKey = KEY_LEARNING_UNIT,
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_LEARNING_UNIT,
+                    )
                 )
             )
         )
@@ -270,7 +271,7 @@ class AssignmentEditViewModel(
                     assignmentVal?.title.isNullOrBlank()
                 },
                 classError = Res.string.required_field.asUiText().takeIf {
-                    assignmentVal?.assignees?.isEmpty() != false
+                    assignmentVal?.classUid.isNullOrEmpty()
                 }
             )
         }

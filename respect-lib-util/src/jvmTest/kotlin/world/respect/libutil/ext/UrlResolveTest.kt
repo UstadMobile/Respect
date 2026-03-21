@@ -44,4 +44,23 @@ class UrlResolveTest {
             endpointWithSlash.appendEndpointSegments(listOf("actor/profile")).toString())
     }
 
+    @Test
+    fun testEndpointNormalization() {
+        assertEquals("https://school.example.org/",
+            Url("https://school.example.org/").normalizeForEndpoint().toString())
+
+        assertEquals("https://school.example.org/",
+            Url("https://school.example.org").normalizeForEndpoint().toString())
+
+        assertEquals("https://school.example.org/",
+            Url("https://school.EXAMPLE.org/").normalizeForEndpoint().toString())
+
+        assertEquals("https://school.example.org/subpath/",
+            Url("https://school.example.org/subpath").normalizeForEndpoint().toString())
+
+        assertEquals("https://school.example.org/subpath/",
+            Url("https://school.example.org/subpath/").normalizeForEndpoint().toString())
+    }
+
+
 }

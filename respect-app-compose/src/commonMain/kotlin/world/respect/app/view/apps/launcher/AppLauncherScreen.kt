@@ -1,5 +1,6 @@
 package world.respect.app.view.apps.launcher
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CrueltyFree
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,20 +34,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.emptyFlow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.respectRememberPager
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
-import world.respect.shared.generated.resources.empty_list_description
 import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.remove
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -70,11 +75,21 @@ fun AppLauncherScreen(
 @Composable
 fun AppLauncherScreen(
     uiState: AppLauncherUiState,
-    onClickApp: (DataLoadState<RespectAppManifest>) -> Unit,
-    onClickRemove: (DataLoadState<RespectAppManifest>) -> Unit,
+    onClickApp: (DataLoadState<OpdsPublication>) -> Unit,
+    onClickRemove: (DataLoadState<OpdsPublication>) -> Unit,
 ) {
     val pager = respectRememberPager(uiState.apps)
     val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
+
+    /**
+     * Maestro end to end tests can be flakey: When running the login sometimes the keyboard stays
+     * visible even after going from the login screen to the app launcher screen, which then
+     * hides the bottom navigation buttons.
+     */
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(Unit) {
+        keyboardController?.hide()
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -87,23 +102,21 @@ fun AppLauncherScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Filled.CrueltyFree,
-                    contentDescription = null,
-                    modifier = Modifier.size(100.dp)
+                Image(
+                    painter = painterResource(Res.drawable.empty),
+                    contentDescription = stringResource(resource = Res.string.empty_list),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(200.dp)
                 )
                 Spacer(
                     modifier = Modifier.height(16.dp)
                 )
                 Text(
-                    text = stringResource(resource = Res.string.empty_list),
-                )
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-                Text(
-                    text = stringResource(resource = Res.string.empty_list_description),
-                    textAlign = TextAlign.Center
+                    text = uiState.emptyListDescription?.let {
+                        uiTextStringResource(it)
+                    } ?: "",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
         } else {
@@ -123,13 +136,14 @@ fun AppLauncherScreen(
                     }
                 ) { index ->
                     val schoolApp = lazyPagingItems[index]
-                    val respectAppFlow = remember(schoolApp, uiState.respectAppForSchoolApp) {
-                        schoolApp?.let { uiState.respectAppForSchoolApp(schoolApp) } ?: emptyFlow()
+                    val respectAppFlow = remember(schoolApp, uiState.respectPublicationForSchoolApp) {
+                        schoolApp?.let { uiState.respectPublicationForSchoolApp(schoolApp) } ?: emptyFlow()
                     }
                     val respectApp by respectAppFlow.collectAsState(NoDataLoadedState.notFound())
 
                     AppGridItem(
                         app = respectApp,
+                        clickEnabled = uiState.isAppClickable(respectApp),
                         onClickApp = {
                             onClickApp(respectApp)
                         },
@@ -146,7 +160,8 @@ fun AppLauncherScreen(
 
 @Composable
 fun AppGridItem(
-    app: DataLoadState<RespectAppManifest>,
+    app: DataLoadState<OpdsPublication>,
+    clickEnabled: Boolean,
     onClickApp: () -> Unit,
     onClickRemove: () -> Unit,
     showRemove: Boolean = false,
@@ -159,7 +174,9 @@ fun AppGridItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)
-            .clickable { onClickApp() },
+            .clickable(enabled = clickEnabled) {
+                onClickApp()
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -167,9 +184,9 @@ fun AppGridItem(
                 .fillMaxWidth()
                 .aspectRatio(1f)
         ) {
-            appData?.icon.also { icon ->
+            appData?.findIcons()?.firstOrNull()?.also { icon ->
                 RespectAsyncImage(
-                    uri = icon.toString(),
+                    uri = icon.href,
                     contentDescription = "",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
@@ -221,7 +238,7 @@ fun AppGridItem(
         )
 
         Text(
-            text = appData?.name?.getTitle() ?: "",
+            text = appData?.metadata?.title?.getTitle() ?: "",
             modifier = Modifier.align(Alignment.Start)
         )
 

@@ -23,6 +23,8 @@ import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
 import world.respect.credentials.password.SavePasswordUseCaseProcessor
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.shared.domain.biometric.BiometricAuthProcessor
+import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
@@ -35,11 +37,14 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
         checkNotNull(scope)
 
-        val createPasskeyChannelHost = getKoin().get<CreatePasskeyUseCaseAndroidChannelHost>()
-        val getCredentialUseCase = getKoin().get<GetCredentialUseCase>()
+        val koin = getKoin()
+
+        val createPasskeyChannelHost = koin.get<CreatePasskeyUseCaseAndroidChannelHost>()
+        val getCredentialUseCase = koin.get<GetCredentialUseCase>()
                 as GetCredentialUseCaseAndroidImpl
-        val savePasswordUseCase = getKoin().get<SavePasswordUseCase>()
+        val savePasswordUseCase = koin.get<SavePasswordUseCase>()
                 as SavePasswordUseCaseAndroidImpl
+        val biometricUseCase = koin.get<BiometricAuthUseCaseAndroidImpl>()
 
         val createPasskeyProcessor = CreatePasskeyUseCaseProcessor(
             activityContext = this,
@@ -59,18 +64,26 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             processOnScope = lifecycleScope
         )
 
+        val biometricProcessor = BiometricAuthProcessor(
+            activity = this,
+            jobChannel = biometricUseCase.requestChannel,
+            processOnScope = lifecycleScope
+        )
+
         //Launch processors for jobs that need an activity context.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 launch {
                     createPasskeyProcessor.receiveJobs()
                 }
-
                 launch {
                     getCredentialProcessor.receiveJobs()
                 }
                 launch {
                     savePasswordProcessor.receiveJobs()
+                }
+                launch {
+                    biometricProcessor.receiveJobs()
                 }
             }
         }

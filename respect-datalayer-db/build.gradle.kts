@@ -31,15 +31,15 @@ kotlin {
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            implementation(libs.androidx.room.runtime)
-            implementation(libs.androidx.paging.common)
-            implementation(libs.androidx.room.paging)
+            api(libs.androidx.room.runtime)
+            api(libs.androidx.paging.common)
+            api(libs.androidx.room.paging)
             implementation(libs.napier)
 
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.room.ktx)
+            api(libs.androidx.room.ktx)
         }
 
         jvmMain.dependencies {

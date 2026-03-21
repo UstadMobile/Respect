@@ -51,7 +51,7 @@ import world.respect.shared.generated.resources.clazz
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.lesson_assessment
-import world.respect.shared.generated.resources.name
+import world.respect.shared.generated.resources.assignment_name
 import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -100,7 +100,7 @@ fun AssignmentEditScreen(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("title"),
             value = assignment?.title ?: "",
             label = {
-                Text(stringResource(Res.string.name) + "*")
+                Text(stringResource(Res.string.assignment_name) + "*")
             },
             onValueChange = { newTitle ->
                 assignment?.also {
@@ -123,6 +123,7 @@ fun AssignmentEditScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth()
                     .defaultItemPadding()
+                    .testTag("class_dropdown_textfield")
                     .menuAnchor(MenuAnchorType.PrimaryEditable),
                 value = uiState.assigneeText,
                 label = {
@@ -188,7 +189,9 @@ fun AssignmentEditScreen(
                         )
                     )
                 }
-            }
+            },
+            dateTestTag = "due_date",
+            timeTestTag = "due_time",
         )
 
         Text(

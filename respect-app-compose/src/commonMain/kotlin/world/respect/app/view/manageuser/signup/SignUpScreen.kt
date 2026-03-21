@@ -65,6 +65,8 @@ fun SignupScreen(
             label = { uiState.nameLabel?.let { Text(uiTextStringResource(it) + "*") } },
             isError = uiState.fullNameError != null,
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            maxLines = 1,
             supportingText = {
                 Text(uiState.fullNameError?.let { uiTextStringResource(it) }
                     ?: stringResource(Res.string.required)
@@ -75,20 +77,22 @@ fun SignupScreen(
         Spacer(Modifier.height(16.dp))
 
         RespectGenderExposedDropDownMenuField(
-            modifier = Modifier.testTag("gender").fillMaxWidth(),
             value = uiState.personInfo.gender,
             onValueChanged = onGenderChanged,
+            modifier = Modifier.testTag("gender").fillMaxWidth(),
             isError = uiState.genderError != null,
+            errorText = uiState.genderError
         )
 
         Spacer(Modifier.height(16.dp))
 
         RespectLocalDateField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("dateOfBirth"),
             value = uiState.personInfo.dateOfBirth.takeIf {
                 it != RespectRedeemInviteRequest.DATE_OF_BIRTH_EPOCH
             },
             onValueChange = {onDateOfBirthChanged(it) },
+            isError = uiState.dateOfBirthError!=null,
             label = {
                 uiState.dateOfBirthLabel?.let {  Text(uiTextStringResource(it) + "*") }
             },

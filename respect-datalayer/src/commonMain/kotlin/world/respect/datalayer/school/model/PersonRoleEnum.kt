@@ -18,6 +18,17 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
 
     companion object {
 
+        const val SITE_ADMINISTRATOR_INT = 1
+
+        const val STUDENT_INT = 2
+
+        const val SYSTEM_ADMINISTRATOR_INT = 3
+
+        const val TEACHER_INT = 4
+
+        const val PARENT_INT = 5
+
+
         fun fromValue(value: String): PersonRoleEnum {
             return entries.first { it.value == value }
         }

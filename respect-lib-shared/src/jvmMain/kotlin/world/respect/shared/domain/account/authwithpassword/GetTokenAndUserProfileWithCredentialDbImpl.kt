@@ -4,6 +4,7 @@ import io.ktor.http.Url
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
+import world.respect.credentials.passkey.RespectQRBadgeCredential
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toEntity
@@ -18,6 +19,7 @@ import world.respect.datalayer.school.model.DeviceInfo
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import java.lang.IllegalStateException
@@ -36,6 +38,7 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
     private val verifyPasskeyUseCase: VerifySignInWithPasskeyUseCase?,
     private val respectAppDataSource: RespectAppDataSource,
     private val authenticatePasswordUseCase: AuthenticatePasswordUseCase,
+    private val authenticateQrBadgeUseCase: AuthenticateQrBadgeUseCase
 ): GetTokenAndUserProfileWithCredentialUseCase {
 
     override suspend fun invoke(
@@ -69,6 +72,10 @@ class GetTokenAndUserProfileWithCredentialDbImpl(
                 schoolDb.getPersonEntityDao().findByGuidNum(
                     personPasskey.ppPersonUidNum
                 )?.toPersonEntities()?.toModel() ?: throw ForbiddenException("Person not found")
+            }
+
+            is RespectQRBadgeCredential -> {
+                authenticateQrBadgeUseCase(credential).authenticatedPerson
             }
         }
 

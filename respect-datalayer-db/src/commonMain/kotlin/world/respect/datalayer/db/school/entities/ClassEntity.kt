@@ -15,6 +15,6 @@ data class ClassEntity(
     val cDescription: String?,
     val cLastModified: Instant,
     val cStored: Instant,
-    val cTeacherInviteCode: String?,
-    val cStudentInviteCode: String?,
+    val cTeacherInviteGuid: String?,
+    val cStudentInviteGuid: String?,
 )

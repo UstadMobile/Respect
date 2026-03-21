@@ -28,6 +28,7 @@ kotlin {
             api(projects.respectCredentials)
             api(projects.respectLibOpdsModel)
             api(projects.respectLibSerializers)
+            api(projects.respectLibUtil)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)

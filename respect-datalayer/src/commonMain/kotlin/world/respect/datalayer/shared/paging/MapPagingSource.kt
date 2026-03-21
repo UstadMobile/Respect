@@ -10,11 +10,11 @@ import io.github.aakira.napier.Napier
  */
 internal class MapPagingSource<T: Any, R: Any>(
     private val src: PagingSource<Int, T>,
-    private val transform: (T) -> R,
-    tag: String? = null
+    private val transform: suspend (T) -> R,
+    tag: LogPrefixFunction = NO_TAG,
 ): DelegatedInvalidationPagingSource<Int, R>(src, tag) {
 
-    val logPrefix = "MapPagingSource(tag=$tag)"
+    val logPrefix = "MapPagingSource(tag=${tag()})"
 
     override fun getRefreshKey(state: PagingState<Int, R>): Int? {
         return state.getClippedRefreshKey()
@@ -24,12 +24,12 @@ internal class MapPagingSource<T: Any, R: Any>(
         Napier.d("$logPrefix: load ${params.toPrettyString()}")
 
         registerInvalidationCallbackIfNeeded()
-        val srcResult = src.load(params)
-
-        return when (srcResult) {
+        return when (val srcResult = src.load(params)) {
             is LoadResult.Page -> {
                 LoadResult.Page(
-                    data = srcResult.data.map(transform),
+                    data = srcResult.data.map {
+                        transform(it)
+                    },
                     prevKey = srcResult.prevKey,
                     nextKey = srcResult.nextKey,
                     itemsAfter = srcResult.itemsAfter,
@@ -51,8 +51,8 @@ internal class MapPagingSource<T: Any, R: Any>(
 }
 
 fun <T: Any, R: Any> PagingSource<Int, T>.map(
-    tag: String? = null,
-    transform: (T) -> R
+    tag: LogPrefixFunction = DelegatedInvalidationPagingSource.NO_TAG,
+    transform: suspend (T) -> R
 ): PagingSource<Int, R> {
     return MapPagingSource(this, transform, tag)
 }

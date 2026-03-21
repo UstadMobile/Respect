@@ -11,6 +11,8 @@ class AssignmentEntity(
     val aeUidNum: Long,
     val aeTitle: String,
     val aeDescription: String,
+    val aeClassUid: String,
+    val aeClassUidNum: Long,
     val aeDeadline: Instant?,
     val aeLastModified: Instant,
     val aeStored: Instant,

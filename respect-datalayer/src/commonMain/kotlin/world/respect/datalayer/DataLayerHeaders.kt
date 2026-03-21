@@ -9,4 +9,6 @@ object DataLayerHeaders {
 
     const val XTotalCount = "X-Total-Count"
 
+    const val XPermissionsLastModified = "X-Permissions-Last-Modified"
+
 }

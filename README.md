@@ -1,5 +1,13 @@
 # RESPECT
 
+RESPECT is an open source digital library for EdTech apps. It makes it easier for educators to 
+discover and use high-quality apps with a single account in all settings, while giving developers 
+the platform they need to grow their impact globally.
+
+[<img src="https://devserver3.ustadmobile.com/jenkins/job/RESPECT-Primary/badge/icon?subject=Build">](https://devserver3.ustadmobile.com/jenkins/job/RESPECT-Primary)
+
+[<img src="https://devserver3.ustadmobile.com/jenkins/job/RESPECT-end-to-end//badge/icon?subject=End-To-End-Tests">](https://devserver3.ustadmobile.com/jenkins/job/RESPECT-end-to-end)
+
 ## Development environment setup:
 
 These instructions are intended for developers who wish to build/run from source code. Development
@@ -61,8 +69,24 @@ list (default or local)
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
  details on running via the command line etc.
 
+## Community
+
+Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3t8dpyxxs-0nSsFsLGau5MjVZQzrlvqA).
+
+## Build environment variables
+
+The following environment variables can be set:
+
+```
+RESPECT_DEFAULT_APPLIST - the default list of RESPECT Compatible app manifest URLs e.g. https://respect.world/respect-ds/manifestlist.json
+```
+
 ## Legal and license
 
 Copyright 2024-2025 UstadMobile FZ-LLC. This code is substantially derived from [UstadMobile](https://www.github.com/UstadMobile/UstadMobile/).
 Documentation: [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
 Code and all other works: [AGPLv3](LICENSE) license.
+
+‘RESPECT™’ and ‘RESPECT compatible™’ are trademarks of the Spix Foundation.
+‘OneRoster®’ and ‘LTI®’ are registered trademarks of 1EdTech Consortium Inc.
+All other trademarks and registered trademarks are the properties of their respective owners.

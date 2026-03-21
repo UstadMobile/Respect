@@ -13,15 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
-import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.defaultItemPadding
-import world.respect.app.components.respectPagingItems
-import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
@@ -31,7 +27,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment_tasks
 import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.students
-import world.respect.shared.util.ext.fullName
+import world.respect.shared.generated.resources.clazz
 import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
@@ -59,12 +55,6 @@ fun AssignmentDetailScreen(
         timeZoneId = TimeZone.currentSystemDefault().id,
     )
 
-    val assigneePagersAndLazyItems = uiState.assignees.map {
-        val pager = respectRememberPager(it)
-        val items = pager.flow.collectAsLazyPagingItems()
-        Pair(pager, items)
-    }
-
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item("description") {
             Text(
@@ -82,6 +72,20 @@ fun AssignmentDetailScreen(
                     },
                     value = {
                         Text(dueDateFormatted)
+                    }
+                )
+            }
+        }
+
+        uiState.assignmentClass.dataOrNull()?.also { clazz ->
+            item("class_name") {
+                RespectDetailField(
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                    value = {
+                        Text(clazz.title)
+                    },
+                    label = {
+                        Text(stringResource(Res.string.clazz))
                     }
                 )
             }
@@ -135,27 +139,5 @@ fun AssignmentDetailScreen(
             )
         }
 
-        assigneePagersAndLazyItems.forEachIndexed { listIndex, (_, items) ->
-            respectPagingItems(
-                items = items,
-                key = { person, index -> person?.guid?.let { "$listIndex-$it" } ?: "$listIndex-$index" },
-                contentType = { "assigneeperson" }
-            ) { person ->
-                ListItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingContent = {
-                        RespectPersonAvatar(
-                            name = person?.fullName() ?: ""
-                        )
-                    },
-                    headlineContent = {
-                        Text(person?.fullName() ?: "")
-                    },
-                    trailingContent = {
-                        Text("-")
-                    }
-                )
-            }
-        }
     }
 }

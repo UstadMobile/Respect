@@ -8,6 +8,10 @@ import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.time.Clock
 
 
+/**
+ * @property removedAt the end date does not have a specified time - only a date. If the teacher/
+ *           admin removes someone from a class, we need to know who is actively enrolled.
+ */
 @Serializable
 data class Enrollment(
     val uid: String,
@@ -20,6 +24,7 @@ data class Enrollment(
     val role: EnrollmentRoleEnum,
     val beginDate: LocalDate? = null,
     val endDate: LocalDate? = null,
+    val removedAt: InstantAsISO8601? = null,
     val inviteCode: String? = null,
     val approvedByPersonUid: String? = null,
 ): ModelWithTimes {

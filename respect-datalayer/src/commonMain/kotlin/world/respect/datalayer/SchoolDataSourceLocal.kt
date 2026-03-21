@@ -1,13 +1,18 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
+import world.respect.datalayer.school.InviteDataSourceLocal
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
+import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
+import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
+import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal
@@ -17,6 +22,8 @@ import world.respect.datalayer.school.SchoolAppDataSourceLocal
 interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSourceLocal
+
+    override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceLocal
 
     override val personDataSource: PersonDataSourceLocal
 
@@ -28,7 +35,16 @@ interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val classDataSource: ClassDataSourceLocal
 
+    override val personQrBadgeDataSource: PersonQrCodeBadgeDataSourceLocal
+
     override val enrollmentDataSource: EnrollmentDataSourceLocal
 
     override val assignmentDataSource: AssignmentDataSourceLocal
+
+    override val inviteDataSource: InviteDataSourceLocal
+
+    override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal
+
+    override val opdsFeedDataSource: OpdsFeedDataSourceLocal
+
 }

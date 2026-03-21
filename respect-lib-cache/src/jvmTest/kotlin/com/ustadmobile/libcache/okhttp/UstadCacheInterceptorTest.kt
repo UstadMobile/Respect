@@ -38,8 +38,6 @@ import kotlin.test.assertTrue
 
 class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
 
-
-
     private fun ByteArray.sha256(): ByteArray {
         val digest = MessageDigest.getInstance("SHA-256")
         digest.update(this)
@@ -54,6 +52,26 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
                 },
                 anyOrNull()
             )
+        }
+    }
+
+    private fun dispatcherWithETag(
+        etagVal: String,
+        resourceName: String = "/testfile1.png",
+    ) = object: ResourcesDispatcher(javaClass) {
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            val resourceBytes = javaClass.getResourceAsStream(resourceName)!!.readAllBytes()
+
+            val response = super.dispatch(request)
+                .setHeader("etag", etagVal)
+                .setHeader("cache-control", "must-revalidate")
+            return if(request.headers["if-none-match"] == etagVal) {
+                //Validation response will not normally contain content-length and content-type headers
+                response.setBody("").setResponseCode(304)
+            }else {
+                response.setHeader("content-type", "image/png")
+                    .setHeader("content-length", resourceBytes.size.toString())
+            }
         }
     }
 
@@ -198,31 +216,58 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
         interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
+
+    /**
+     * When a request coming into the interceptor has cache validation info (e.g. if-none-match,
+     * if-modified-since) and the cached response is validated, then we should return a 304
+     * response directly.
+     */
+    @Test
+    fun givenEntryIsStale_whenRequestedWithValidationHeader_thenResponseShouldBe304NotModified() {
+        val etagVal = "abc"
+
+        val mockWebServer = MockWebServer().also {
+            it.dispatcher = dispatcherWithETag(etagVal)
+
+            it.start()
+        }
+
+        val requestUrl = mockWebServer.url("/testfile1.png").toString()
+        val request = Request.Builder().url(requestUrl)
+            .addHeader("cache-control", "must-revalidate")
+            .build()
+
+        okHttpClient.newCall(request).execute().use {
+            it.body!!.bytes()
+        }
+
+        val notModifiedRequest = Request.Builder()
+            .url(requestUrl)
+            .addHeader("if-none-match", etagVal)
+            .build()
+
+        okHttpClient.newCall(notModifiedRequest).execute().use { notModifiedResponse ->
+            assertEquals(304, notModifiedResponse.code)
+        }
+
+        assertEquals(2, mockWebServer.requestCount)
+    }
+
     @Test
     fun givenEntryIsStaleAndValidatable_whenRequested_thenIsValidated() {
         val etagVal = "etagVal"
         val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes()
 
         val mockWebServer = MockWebServer().also {
-            it.dispatcher = object: ResourcesDispatcher(javaClass) {
-                override fun dispatch(request: RecordedRequest): MockResponse {
-                    val response = super.dispatch(request)
-                        .setHeader("etag", etagVal)
-                    return if(request.headers["if-none-match"] == etagVal) {
-                        //Validation response will not normally contain content-length and content-type headers
-                        response.setBody("").setResponseCode(304)
-                    }else {
-                        response.setHeader("content-type", "image/png")
-                            .setHeader("content-length", resourceBytes.size.toString())
-                    }
-                }
-            }
+            it.dispatcher = dispatcherWithETag(etagVal)
 
             it.start()
         }
 
         val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder().url(requestUrl).build()
+        val request = Request.Builder().url(requestUrl)
+            .addHeader("cache-control", "must-revalidate")
+            .build()
         val initResponseBytes = okHttpClient.newCall(request).execute().use {
             it.body!!.bytes()
         }

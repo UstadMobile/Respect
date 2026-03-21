@@ -22,6 +22,14 @@ enum class PersonStatusEnum(val value: String, val flag: Int) {
 
     companion object {
 
+        @Suppress("unused") //Reserved
+        const val ACTIVE_INT = 1
+
+        const val TO_BE_DELETED_INT = 0
+
+        @Suppress("unused") //Reserved
+        const val PENDING_APPROVAL_INT = -1
+
         fun fromFlag(flag: Int): PersonStatusEnum {
             return entries.first { it.flag == flag }
         }

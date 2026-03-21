@@ -1,0 +1,22 @@
+appId: world.respect.app
+
+---
+- clearState
+- launchApp:
+      arguments:
+          respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+      file: "get_started_select_school_by_name.yaml"
+      env:
+          SCHOOL_NAME: ${SCHOOL_NAME}
+
+- runFlow:
+    when:
+      visible: "Choose a saved passkey for Respect"
+    file: "choose_passkey_prompt.yaml"
+    env:
+        USERNAME: ${USERNAME}
+- assertVisible: "Apps"

@@ -13,7 +13,15 @@ enum class StatusEnum(val value: String, val flag: Int) {
 
     ACTIVE("active", 1), TO_BE_DELETED("tobedeleted", 0);
 
+
+
     companion object {
+
+        const val ACTIVE_INT = 1
+
+        @Suppress("unused") //Reserved for future use in DB queries which require const val
+        const val TO_BE_DELETED_INT = 0
+
 
         fun fromFlag(flag: Int) = entries.first { it.flag == flag }
 

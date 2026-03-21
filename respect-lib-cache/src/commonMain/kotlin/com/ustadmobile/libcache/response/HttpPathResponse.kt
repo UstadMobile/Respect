@@ -34,8 +34,7 @@ class HttpPathResponse(
     override val headers: IHttpHeaders
 
     init {
-        val metadata = fileSystem.metadataOrNull(path)
-            ?: throw IOException("Cannot read from path")
+        val metadata = fileSystem.metadataOrNull(path) ?: throw IOException("Cannot read from path")
         headers = iHeadersBuilder {
             header("Content-Length", metadata.size.toString())
             header("Content-Type", mimeType)

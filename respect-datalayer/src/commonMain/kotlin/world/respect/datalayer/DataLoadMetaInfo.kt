@@ -3,6 +3,7 @@ package world.respect.datalayer
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 /**
  * Combined metadata (e.g. data about data) on loaded data. This includes the loading status and
@@ -30,6 +31,9 @@ import kotlinx.serialization.Serializable
  *
  * @param varyHeader where this is from a remote server that provides an HTTP vary header, this is
  *        the value of the vary header (such that a varyHash can be calculated for subsequent requests).
+ *
+ * @param permissionsLastModified often required for subsequent requests that use the
+ *        consistentThrough header to set GetListCommonParams.since
  */
 @Serializable
 data class DataLoadMetaInfo(
@@ -42,13 +46,15 @@ data class DataLoadMetaInfo(
 
     val url: Url? = null,
 
-    val consistentThrough: Long = -1,
+    val consistentThrough: Instant? = null,
 
     val validationInfoKey: Long = 0,
 
     val varyHeader: String? = null,
 
     val headers: IHttpHeaders? = null,
+
+    val permissionsLastModified: Instant? = null,
 
 ) {
 

@@ -29,3 +29,4 @@ This helps maximize code reusage:
  * Server app: uses only the local (database based) implementation on its own as the datasource, 
    primarily to serve REST API endpoints.
 
+Recommended reading: see the offline first conceptual note in the [Repository README.md](../respect-datalayer-repository/)

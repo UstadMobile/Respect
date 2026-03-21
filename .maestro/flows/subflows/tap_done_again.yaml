@@ -1,0 +1,7 @@
+appId: world.respect.app
+
+---
+- tapOn:
+    text: "Done"
+    retryTapIfNoChange: true
+    waitToSettleTimeoutMs: 1000

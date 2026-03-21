@@ -10,7 +10,6 @@ import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
-import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.model.Person
@@ -19,7 +18,6 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import kotlin.time.Instant
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class PersonDataSourceRepository(
@@ -27,7 +25,6 @@ class PersonDataSourceRepository(
     override val remote: PersonDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
-    private val enrollmentDataSourceRepository: EnrollmentDataSourceRepository,
 ) : PersonDataSource, RepositoryModelDataSource<Person> {
 
     override suspend fun findByUsername(username: String): Person? {
@@ -38,10 +35,12 @@ class PersonDataSourceRepository(
         loadParams: DataLoadParams,
         guid: String
     ): DataLoadState<Person> {
-        val remote = remote.findByGuid(loadParams, guid)
-        local.updateFromRemoteIfNeeded(
-            remote, validationHelper
-        )
+        if(!loadParams.onlyIfCached) {
+            val remote = remote.findByGuid(loadParams, guid)
+            local.updateFromRemoteIfNeeded(
+                remote, validationHelper
+            )
+        }
 
         return local.findByGuid(loadParams, guid)
     }
@@ -56,51 +55,44 @@ class PersonDataSourceRepository(
 
     override fun listAsFlow(
         loadParams: DataLoadParams,
-        searchQuery: String?
+        params: PersonDataSource.GetListParams,
     ): Flow<DataLoadState<List<Person>>> {
-        return local.listAsFlow(loadParams, searchQuery)
+        return local.listAsFlow(loadParams, params)
     }
 
     override suspend fun list(
         loadParams: DataLoadParams,
-        searchQuery: String?,
-        since: Instant?,
+        params: PersonDataSource.GetListParams,
     ): DataLoadState<List<Person>> {
-        val remote = remote.list(loadParams, searchQuery, since)
+        val remote = remote.list(loadParams, params)
         if(remote is DataReadyState) {
             local.updateLocal(remote.data)
             validationHelper.updateValidationInfo(remote.metaInfo)
         }
 
-        return local.list(loadParams, searchQuery, since).combineWithRemote(remote)
+        return local.list(loadParams, params).combineWithRemote(remote)
     }
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
         params: PersonDataSource.GetListParams,
     ): IPagingSourceFactory<Int, Person> {
-        val remoteSource = remote.listAsPagingSource(loadParams, params).invoke()
-        val enrollmentRemoteSource = enrollmentDataSourceRepository.remote
-            .takeIf { params.filterByClazzUid != null }
-            ?.listAsPagingSource(
-                loadParams,
-                EnrollmentDataSource.GetListParams(
-                    classUid = params.filterByClazzUid
-                )
-            )?.invoke()
+        val remoteSource = remote.takeIf { !loadParams.onlyIfCached }?.listAsPagingSource(
+            loadParams = loadParams,
+            params = params.copy(
+                common = params.common.copy(includeDeleted = true),
+                inClassOnDay = null,
+            )
+        )?.invoke()
 
         return RepositoryPagingSourceFactory(
             onRemoteLoad = { remoteLoadParams ->
-                remoteSource.loadAndUpdateLocal2(
+                remoteSource?.loadAndUpdateLocal2(
                     remoteLoadParams, local::updateLocal,
-                )
-
-                enrollmentRemoteSource?.loadAndUpdateLocal2(
-                    remoteLoadParams, enrollmentDataSourceRepository.local::updateLocal,
                 )
             },
             local = local.listAsPagingSource(loadParams, params),
-            tag = "Repo.listAsPaging"
+            tag = { "Repo.listAsPaging(params=$params)" },
         )
     }
 
@@ -115,7 +107,7 @@ class PersonDataSourceRepository(
                 )
             },
             local = local.listDetailsAsPagingSource(loadParams, listParams),
-            tag = "Repo.listDetailsAsPaging"
+            tag = { "Repo.listDetailsAsPaging(params=$listParams)" },
         )
     }
 

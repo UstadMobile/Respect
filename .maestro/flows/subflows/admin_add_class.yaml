@@ -1,0 +1,16 @@
+appId: world.respect.app
+
+---
+#  Admin add new class
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- tapOn:
+    id: "floating_action_button"   #  +Class button
+- assertVisible:
+    id: "app_title"
+    text: "Add class"
+- tapOn: "Class name*"
+- inputText: ${CLASSNAME}
+- tapOn: "Save"

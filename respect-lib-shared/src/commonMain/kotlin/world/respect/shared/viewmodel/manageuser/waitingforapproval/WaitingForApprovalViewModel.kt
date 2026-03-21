@@ -13,12 +13,14 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.waiting_title
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -33,7 +35,7 @@ class WaitingForApprovalViewModel(
     private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(WaitingForApprovalUiState())
 
@@ -52,14 +54,23 @@ class WaitingForApprovalViewModel(
         }
 
         viewModelScope.launch {
-            val activeUserUid = accountManager.selectedAccount?.userGuid ?: return@launch
+            val activeUserUid = accountManager.activeAccount?.userGuid ?: return@launch
 
             while(true) {
-                val personLoaded = schoolDataSource.personDataSource
-                    .findByGuid(DataLoadParams(), activeUserUid)
-                if(personLoaded.dataOrNull()?.status == PersonStatusEnum.ACTIVE) {
+                val personsLoaded = schoolDataSource.personDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        common = GetListCommonParams(
+                            guid = activeUserUid,
+                        ),
+                        includeRelated = true,
+                    )
+                ).dataOrNull()
+
+                val personLoaded = personsLoaded?.firstOrNull { it.guid == activeUserUid }
+                if(personLoaded?.status == PersonStatusEnum.ACTIVE) {
                     _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(RespectAppLauncher())
+                        NavCommand.Navigate(Home)
                     )
                     return@launch
                 }

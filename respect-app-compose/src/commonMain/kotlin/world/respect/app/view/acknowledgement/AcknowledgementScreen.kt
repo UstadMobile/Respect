@@ -62,13 +62,9 @@ fun AcknowledgementScreen(
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(64.dp))
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text =  stringResource(Res.string.network_powered_by))
-            Spacer(Modifier.height(8.dp))
 
-        }
+        Text(stringResource(Res.string.developed_by))
     }
 }

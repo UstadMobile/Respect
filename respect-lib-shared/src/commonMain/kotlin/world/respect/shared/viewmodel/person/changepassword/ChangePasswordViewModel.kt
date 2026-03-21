@@ -29,7 +29,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.canAdminAccountFor
+import world.respect.datalayer.db.school.ext.canAdminAccountFor
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -52,7 +52,7 @@ class ChangePasswordViewModel(
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource : SchoolDataSource by inject()
 

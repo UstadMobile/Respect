@@ -19,7 +19,7 @@ adb install ./respect-app-compose/build/outputs/apk/debug/respect-app-compose-de
 maestro test \
     -e SCHOOL_URL=http://192.168.1.2:8094/ \
     -e SCHOOL_ADMIN_PASSWORD=adminpassword \
-    -e SCHOOL_NAME=TestSchool
+    -e SCHOOL_NAME=TestSchool \
     .maestro/flows/flow_name.yaml
 ```
 
@@ -38,5 +38,10 @@ Running multiple tests with Maestro requires a blank server installation for eac
 [TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a new blank server instance on a free port as
 required.
 
-See run-maestro-ci.sh (work in progress).
+```
+export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
+./ci-run-maestro.sh 
+```
 
+Where:
+* 192.168.1.2 is the local IP of the developer's laptop

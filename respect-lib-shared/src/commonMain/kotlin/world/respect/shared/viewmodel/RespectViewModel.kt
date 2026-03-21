@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,10 +21,13 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResult
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.libutil.util.time.systemTimeInMillis
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 
@@ -131,14 +135,28 @@ abstract class RespectViewModel(
      * b) Try loading locally (using DataLoadParams) so we can (immediately) show the entity to the
      *    user.
      * c) Check/refresh the entity from the remote server.
+     *
+     * @param initialStateKey if not null, then save data loaded from the database/remotely to the
+     *        specified key in the SavedStateHandle. This can be used by a ViewModel to detect if
+     *        data has been changed since loading.
      */
     suspend fun <T: Any> loadEntity(
         json: Json,
         serializer: KSerializer<T>,
         savedStateKey: String = DEFAULT_SAVED_STATE_KEY,
+        initialStateKey: String? = null,
         loadFn: suspend (DataLoadParams) -> DataLoadState<T>,
         uiUpdateFn: (DataLoadState<T>) -> Unit,
     ): DataLoadState<T> {
+        fun setInitialStateIfNeeded(loadState: DataLoadState<T>) {
+            val dataLoaded = loadState.dataOrNull()
+            if (dataLoaded != null && initialStateKey != null) {
+                savedStateHandle[initialStateKey] = json.encodeToString(
+                    serializer, dataLoaded
+                )
+            }
+        }
+
         val entityInSavedState = savedStateHandle.get<String>(savedStateKey)?.let {
             json.decodeFromString(serializer, it)
         }
@@ -153,6 +171,7 @@ abstract class RespectViewModel(
         val localEntity = try {
             loadFn(DataLoadParams(onlyIfCached = true)).also {
                 uiUpdateFn(it)
+                setInitialStateIfNeeded(it)
             }
         }catch(_: Throwable) {
             //Log it
@@ -162,6 +181,7 @@ abstract class RespectViewModel(
         val remoteEntity = try {
             loadFn(DataLoadParams()).also {
                 uiUpdateFn(it)
+                setInitialStateIfNeeded(it)
             }
         }catch(e: Throwable) {
             //Log it
@@ -183,19 +203,35 @@ abstract class RespectViewModel(
      *
      * @param runIfAlreadyLoading by default, if loading is already in progress, the block will not
      *        be run.
+     * @param onShowError optional function that will show an error message to the user e.g. by
+     *        updating the UiState. If this is non-null, the exception will be considered handled
+     *        and WILL NOT be rethrown.
      * @param block suspended function to run
      */
     fun launchWithLoadingIndicator(
         runIfAlreadyLoading: Boolean = false,
+        onShowError: ((UiText) -> Unit)? = null,
         block: suspend () -> Unit,
     ) {
-        if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE)
+        if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE) {
+            Napier.d("launchWithLoadingIndicator: already loading")
             return
+        }
 
         viewModelScope.launch {
             loadingState = LoadingUiState.INDETERMINATE
             try {
                 block()
+            }catch(e: Throwable) {
+                if(onShowError != null) {
+                    Napier.w(
+                        message = "Error in launchWithLoadingIndicator - displaying to user",
+                        throwable = e
+                    )
+                    onShowError(e.getUiTextOrGeneric())
+                }else {
+                    throw e
+                }
             }finally {
                 loadingState = LoadingUiState.NOT_LOADING
             }
@@ -207,6 +243,8 @@ abstract class RespectViewModel(
         const val DEFAULT_SAVED_STATE_KEY = "entity"
 
         const val KEY_LAST_COLLECTED_TS = "collectedTs"
+
+        const val KEY_INITIAL_STATE = "initstate"
 
     }
 }

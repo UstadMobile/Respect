@@ -1,6 +1,7 @@
 package world.respect.datalayer.db.networkvalidation.entities
 
 import androidx.room.Entity
+import kotlin.time.Instant
 
 /**
  * @property nviUrlHash XXHash64 of the URL
@@ -13,7 +14,7 @@ data class NetworkValidationInfoEntity(
     val nviVaryHeader: String?,
     val nviLastModified: Long,
     val nviEtag: String?,
-    val nviConsistentThrough: Long,
+    val nviConsistentThrough: Instant?,
     val nviLastChecked: Long,
 )
 

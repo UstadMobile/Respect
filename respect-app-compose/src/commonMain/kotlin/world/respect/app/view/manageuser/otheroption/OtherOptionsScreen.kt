@@ -80,11 +80,13 @@ fun OtherOptionsScreen(
             )
         }
 
-        OutlinedButton(
-            onClick = onClickManageSchoolDirectories,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        ) {
-            Text(stringResource(Res.string.manage_school_directories))
+        if(uiState.manageDirectoriesVisible) {
+            OutlinedButton(
+                onClick = onClickManageSchoolDirectories,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            ) {
+                Text(stringResource(Res.string.manage_school_directories))
+            }
         }
     }
 }

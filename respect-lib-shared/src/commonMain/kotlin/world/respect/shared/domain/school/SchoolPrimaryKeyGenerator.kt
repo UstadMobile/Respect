@@ -1,13 +1,7 @@
 package world.respect.shared.domain.school
 
-import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
-import world.respect.datalayer.school.model.Assignment
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.Clazz
-import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
-import world.respect.datalayer.school.model.Indicator
-import world.respect.datalayer.school.model.Report
 
 /**
  * Wrapper class used only for purposes of differentiating it for dependency injection purposes
@@ -17,14 +11,7 @@ data class SchoolPrimaryKeyGenerator(
 ) {
     companion object {
 
-        val TABLE_IDS = listOf(
-            Person.TABLE_ID,
-            Report.TABLE_ID,
-            Indicator.TABLE_ID,
-            Enrollment.TABLE_ID,
-            Clazz.TABLE_ID,
-            PersonPasskeyEntity.TABLE_ID,
-            Assignment.TABLE_ID,
-        )
+        val TABLE_IDS = RespectSchoolDatabase.TABLE_IDS
+
     }
 }

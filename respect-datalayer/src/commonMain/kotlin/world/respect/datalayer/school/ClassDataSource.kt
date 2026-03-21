@@ -13,14 +13,14 @@ interface ClassDataSource: WritableDataSource<Clazz> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
-        val inviteCode: String? = null,
+        val inviteGuid: String? = null,
     ) {
         companion object {
 
             fun fromParams(params: StringValues) : GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
-                    inviteCode = params[PARAM_NAME_INVITE_CODE],
+                    inviteGuid = params[PARAM_NAME_INVITE_CODE],
                 )
             }
 

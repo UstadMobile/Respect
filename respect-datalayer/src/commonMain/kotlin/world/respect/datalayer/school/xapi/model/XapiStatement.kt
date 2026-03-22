@@ -2,6 +2,7 @@ package world.respect.datalayer.school.xapi.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import world.respect.lib.serializers.InstantAsISO8601
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
@@ -26,8 +27,8 @@ data class XapiStatement(
     val `object`: XapiStatementObject,
     val result: XapiResult? = null,
     val context: XapiContext? = null,
-    val timestamp: String? = null,
-    val stored: String? = null,
+    val timestamp: InstantAsISO8601? = null,
+    val stored: InstantAsISO8601? = null,
     val authority: XapiActor? = null,
     val version: String? = null,
     val attachments: List<Attachment>? = null,

@@ -2,11 +2,11 @@ package world.respect.datalayer.db.school.composite.xapi
 
 import androidx.room.Embedded
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.db.school.entities.xapi.ActivityEntity
-import world.respect.datalayer.db.school.entities.xapi.ActivityLangMapEntry
-import world.respect.datalayer.db.school.entities.xapi.StatementEntity
-import world.respect.datalayer.db.school.entities.xapi.VerbEntity
-import world.respect.datalayer.db.school.entities.xapi.VerbLangMapEntry
+import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
+import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntry
+import world.respect.datalayer.db.school.xapi.entities.StatementEntity
+import world.respect.datalayer.db.school.xapi.entities.VerbEntity
+import world.respect.datalayer.db.school.xapi.entities.VerbLangMapEntry
 
 @Serializable
 class StatementEntityAndVerb(

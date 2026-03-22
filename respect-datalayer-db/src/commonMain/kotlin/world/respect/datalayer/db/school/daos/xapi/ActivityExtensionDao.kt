@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import world.respect.datalayer.db.school.entities.xapi.ActivityExtensionEntity
+import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
 
 @Dao
 interface ActivityExtensionDao {

@@ -2,9 +2,9 @@ package world.respect.datalayer.db.school.composite.xapi
 
 import androidx.room.Embedded
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.db.school.entities.xapi.ActorEntity
-import world.respect.datalayer.db.school.entities.xapi.GroupMemberActorJoin
-import world.respect.datalayer.db.school.entities.xapi.StatementEntity
+import world.respect.datalayer.db.school.xapi.entities.ActorEntity
+import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
+import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 
 @Serializable
 class StatementEntityAndRelated(

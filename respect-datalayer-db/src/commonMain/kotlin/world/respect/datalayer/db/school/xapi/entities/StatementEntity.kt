@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.entities.xapi
+package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.Entity
 import androidx.room.Index
@@ -46,86 +46,90 @@ import kotlinx.serialization.Serializable
  */
 @Entity(
     primaryKeys = ["statementIdHi", "statementIdLo"],
-    indices = [Index("statementActorPersonUid", name = "idx_stmt_actor_person"), Index("statementClazzUid", "statementActorPersonUid", name = "idx_statement_clazz_person"), Index("statementCbUid", "statementActorUid", name = "idx_statement_cbuid_actor")]
+    indices = [
+        Index("statementActorPersonUid", name = "idx_stmt_actor_person"),
+        Index("statementClazzUid", "statementActorPersonUid", name = "idx_statement_clazz_person"),
+        Index("statementCbUid", "statementActorUid", name = "idx_statement_cbuid_actor")
+    ]
 )
 @Serializable
 data class StatementEntity(
-    var statementIdHi: Long = 0,
+    val statementIdHi: Long = 0,
 
-    var statementIdLo: Long = 0,
+    val statementIdLo: Long = 0,
 
-    var statementActorPersonUid: Long = 0,
+    val statementActorPersonUid: Long = 0,
 
-    var statementVerbUid: Long = 0,
+    val statementVerbUid: Long = 0,
 
     //As per the spec could be Activity, Agent, Group, StatementRef, or SubStatement
-    var statementObjectType: Int = 0,
+    val statementObjectType: Int = 0,
 
-    var statementObjectUid1: Long = 0,
+    val statementObjectUid1: Long = 0,
 
-    var statementObjectUid2: Long = 0,
+    val statementObjectUid2: Long = 0,
 
-    var statementActorUid: Long = 0,
+    val statementActorUid: Long = 0,
 
-    var authorityActorUid: Long = 0,
+    val authorityActorUid: Long = 0,
 
-    var teamUid: Long = 0,
+    val teamUid: Long = 0,
 
-    var resultCompletion: Boolean? = null,
+    val resultCompletion: Boolean? = null,
 
-    var resultSuccess: Boolean? = null,
+    val resultSuccess: Boolean? = null,
 
-    var resultScoreScaled: Float? = null,
+    val resultScoreScaled: Float? = null,
 
-    var resultScoreRaw: Float? = null,
+    val resultScoreRaw: Float? = null,
 
-    var resultScoreMin: Float? = null,
+    val resultScoreMin: Float? = null,
 
-    var resultScoreMax: Float? = null,
+    val resultScoreMax: Float? = null,
 
-    var resultDuration: Long? = null,
+    val resultDuration: Long? = null,
 
-    var resultResponse: String? = null,
+    val resultResponse: String? = null,
 
-    var timestamp: Long = 0,
+    val timestamp: Long = 0,
 
-    var stored: Long = 0,
+    val stored: Long = 0,
 
-    var contextRegistrationHi: Long = 0,
+    val contextRegistrationHi: Long = 0,
 
-    var contextRegistrationLo: Long = 0,
+    val contextRegistrationLo: Long = 0,
 
-    var contextRegistrationHash: Long = 0,
+    val contextRegistrationHash: Long = 0,
 
-    var contextPlatform: String? = null,
+    val contextPlatform: String? = null,
 
-    var contextStatementRefIdHi: Long = 0,
+    val contextStatementRefIdHi: Long = 0,
 
-    var contextStatementRefIdLo: Long = 0,
+    val contextStatementRefIdLo: Long = 0,
 
-    var contextInstructorActorUid: Long = 0,
+    val contextInstructorActorUid: Long = 0,
 
-    var statementLct: Long = 0,
+    val statementLct: Long = 0,
 
-    var extensionProgress: Int? = null,
+    val extensionProgress: Int? = null,
 
-    var completionOrProgress: Boolean = false,
+    val completionOrProgress: Boolean = false,
 
     /**
      * Though technically the XObject is what really links to ContentEntry, the ContentEntryUid is
      * here to simplify queries used to check on student progress and avoid an extra join
      */
-    var statementContentEntryUid: Long = 0,
+    val statementContentEntryUid: Long = 0,
 
-    var statementLearnerGroupUid: Long = 0,
+    val statementLearnerGroupUid: Long = 0,
 
-    var statementClazzUid: Long = 0,
+    val statementClazzUid: Long = 0,
 
-    var statementCbUid: Long = 0,
+    val statementCbUid: Long = 0,
 
-    var statementDoorNode: Long = 0,
+    val statementDoorNode: Long = 0,
 
-    var isSubStatement: Boolean = false,
+    val isSubStatement: Boolean = false,
 ) {
     companion object {
         const val TABLE_ID = 60

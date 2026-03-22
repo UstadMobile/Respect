@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import world.respect.datalayer.db.school.entities.xapi.GroupMemberActorJoin
+import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
 
 @Dao
 interface GroupMemberActorJoinDao {

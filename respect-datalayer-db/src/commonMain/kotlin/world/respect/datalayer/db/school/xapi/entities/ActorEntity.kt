@@ -1,16 +1,21 @@
-package world.respect.datalayer.db.school.entities.xapi
+package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import world.respect.datalayer.db.school.entities.xapi.XapiEntityObjectTypeFlags.AGENT
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Entity(
-    indices = [Index("actorPersonUid", name = "idx_actorentity_uid_personuid"), Index("actorObjectType", name= "idx_actorentity_actorobjecttype")]
+    indices = [
+        Index("actorPersonUid", name = "idx_actorentity_uid_personuid"),
+        Index("actorObjectType", name= "idx_actorentity_actorobjecttype")
+    ]
 )
+
 /**
- * Represents an xAPI Actor (Agent or Group). Various properties on a Statement are an actor that
+ * Represents an xAPI Actor (Agent or Group). valious properties on a Statement are an actor that
  * can be a group or agent e.g. the actor themselves, instructor / team context, etc.
  *
  * Where the ActorEntity represents a group, then GroupMemberActorJoin is used to join the group
@@ -33,35 +38,31 @@ import kotlinx.serialization.Serializable
  *        recording assignment marks, attendance, etc) and then a username is created. In this case
  *        there will be multiple actors which will all link to the same personUid.
  *
- * @param actorEtag For an Agent this is the hash of the accountName (if non-null), otherwise,
- * 0. For a Group this is the hash of all members hash, where the member
- * list is sorted by the hash. This makes it easy to detect if an identified Group has been modified
- * (which means that all GroupMemberActorJoin last modified times will need updated).
  */
 @Serializable
 data class ActorEntity(
     @PrimaryKey(autoGenerate = true)
-    var actorUid: Long = 0,
+    val actorUid: Long = 0,
 
-    var actorPersonUid: Long = 0,
+    val actorPersonUid: Long = 0,
 
-    var actorName: String? = null,
+    val actorName: String? = null,
 
-    var actorMbox: String? = null,
+    val actorMbox: String? = null,
 
-    var actorMbox_sha1sum: String? = null,
+    val actorMbox_sha1sum: String? = null,
 
-    var actorOpenid: String? = null,
+    val actorOpenid: String? = null,
 
-    var actorAccountName: String? = null,
+    val actorAccountName: String? = null,
 
-    var actorAccountHomePage: String? = null,
+    val actorAccountHomePage: String? = null,
 
-    var actorEtag: Long = 0,
+    val actorStored: Instant = Clock.System.now(),
 
-    var actorLct: Long = 0,
+    val actorLastModified: Instant = Clock.System.now(),
 
-    var actorObjectType: Int = AGENT,
+    val actorObjectType: Int = XapiEntityObjectTypeFlags.AGENT,
 ) {
     companion object {
         const val TABLE_ID = 68

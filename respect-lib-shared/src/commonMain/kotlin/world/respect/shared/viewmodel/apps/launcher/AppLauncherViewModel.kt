@@ -44,6 +44,7 @@ import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.respectAppDefaultLessonList
 import world.respect.libutil.ext.resolve
+import world.respect.shared.generated.resources.home
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -92,7 +93,7 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
@@ -203,4 +204,3 @@ class AppLauncherViewModel(
         }
     }
 }
-

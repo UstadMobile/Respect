@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
@@ -52,6 +53,7 @@ import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.continue_using_fingerprint_or
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList
@@ -83,8 +85,8 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = Home,
-        icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        icon = Icons.Filled.Home,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
     ),
     TopNavigationItem(

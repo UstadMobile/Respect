@@ -46,7 +46,7 @@ import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
@@ -84,7 +84,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
     ),
     TopNavigationItem(
@@ -116,7 +116,7 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
     ),
 )

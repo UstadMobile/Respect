@@ -245,6 +245,7 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -384,7 +385,7 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
-
+    viewModelOf(::BookmarkListViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

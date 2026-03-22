@@ -6,6 +6,7 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.repository.opds.OpdsPublicationDataSourceRepository
 import world.respect.datalayer.repository.opds.OpdsFeedDataSourceRepository
 import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
+import world.respect.datalayer.repository.school.ChangeHistoryDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
@@ -121,6 +122,14 @@ class SchoolDataSourceRepository(
             remote = remote.inviteDataSource,
             remoteWriteQueue = remoteWriteQueue,
             validationHelper = validationHelper
+        )
+    }
+    override val changeHistoryDataSource: ChangeHistoryDataSourceRepository by lazy {
+        ChangeHistoryDataSourceRepository(
+            local = local.changeHistoryDataSource,
+            remote = remote.changeHistoryDataSource,
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
         )
     }
 

@@ -38,6 +38,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 import world.respect.server.logging.LogbackAntiLog
+import world.respect.server.routes.ChangeHistoryRoute
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
@@ -253,6 +254,7 @@ fun Application.module() {
                         EnrollmentRoute()
                         AssignmentRoute()
                         PersonQrBadgeRoute()
+                        ChangeHistoryRoute()
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )

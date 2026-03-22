@@ -15,33 +15,35 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
+import world.respect.shared.navigation.ChangeHistory
+import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.util.ext.asUiText
-import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.db.school.ext.isAdmin
-import world.respect.datalayer.db.school.ext.isAdminOrTeacher
-import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import kotlin.getValue
 
 data class PersonDetailUiState(
     val guid: String = "",
     val persons: DataLoadState<List<Person>> = DataLoadingState(),
     val manageAccountVisible: Boolean = false,
     val createAccountVisible: Boolean = false,
+    val changeHistoryButtonVisible: Boolean = false,
 ) {
 
     val person: Person?
@@ -118,6 +120,7 @@ class PersonDetailViewModel(
                     prev.copy(
                         persons = persons,
                         manageAccountVisible = hasAccountPermission && personVal?.username != null,
+                        changeHistoryButtonVisible = activeAccount?.person?.isAdmin() == true,
                         createAccountVisible = personVal != null &&
                                 activeAccount?.person?.isAdminOrTeacher() == true &&
                                 personVal.username == null,
@@ -160,6 +163,17 @@ class PersonDetailViewModel(
             NavCommand.Navigate(
                 PersonDetail(
                     guid = guid
+                )
+            )
+        )
+    }
+
+    fun onClickChangeHistoryButton(){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                ChangeHistory(
+                    guid = route.guid,
+                    table = ChangeHistoryTableEnum.PERSON.value
                 )
             )
         )

@@ -3,6 +3,7 @@ package world.respect.datalayer.school.xapi.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import world.respect.lib.serializers.InstantAsISO8601
+import kotlin.uuid.Uuid
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
@@ -20,7 +21,7 @@ val XAPI_PROGRESSED_EXTENSIONS = listOf(
  */
 @Serializable
 data class XapiStatement(
-    val id: String? = null,
+    val id: Uuid? = null,
     val actor: XapiActor,
     val verb: XapiVerb,
     @SerialName("object")

@@ -86,9 +86,7 @@ fun XapiStatement.toEntities(
     exactJson: String?,
     isSubStatement: Boolean = false,
 ): List<StatementEntities> {
-    val statementUuid = id?.let {
-        Uuid.parse(it)
-    } ?: throw IllegalArgumentException("id is null")
+    val statementUuid = id ?: throw IllegalArgumentException("Statement must have id set before conversion to entities")
 
     if(isSubStatement && `object` is XapiStatement)
         throw XapiException(
@@ -113,7 +111,7 @@ fun XapiStatement.toEntities(
     val statementObjectForeignKeys = `object`.objectForeignKeys(uidNumberMapper, statementUuid)
 
     val (stmtUuidHi, stmtUuidLo) = statementUuid.toLongPair()
-    val contextRegHiLo = contextRegistration?.let { Uuid.parse(it) }?.toLongPair()
+    val contextRegHiLo = contextRegistration?.toLongPair()
 
 
     return listOf(

@@ -2,12 +2,13 @@ package world.respect.datalayer.school.xapi.model
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlin.uuid.Uuid
 
 @Serializable
 data class XapiContext(
     val instructor: XapiActor? = null,
 
-    val registration: String? = null,
+    val registration: Uuid? = null,
 
     val language: String? = null,
 

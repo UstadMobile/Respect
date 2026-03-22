@@ -69,7 +69,7 @@ fun XapiStatementObject.objectToEntities(
             this.copy(
                 id = parentStatementUuid.toLongs { mostSignificantBits, leastSignificantBits ->
                     Uuid.fromLongs(mostSignificantBits, leastSignificantBits)
-                }.toString()
+                }
             ).toEntities(
                 uidNumberMapper = uidNumberMapper,
                 primaryKeyGenerator = primaryKeyGenerator,

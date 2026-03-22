@@ -9,7 +9,7 @@ const val VERB_PROGRESSED = "http://adlnet.gov/expapi/verbs/progressed"
 
 @Serializable
 data class XapiVerb(
-    val id: String? = null,
+    val id: String,
 
     val display: Map<String, String>? = null,
 )

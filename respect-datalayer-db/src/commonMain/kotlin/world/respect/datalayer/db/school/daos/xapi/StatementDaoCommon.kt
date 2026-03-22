@@ -1,6 +1,6 @@
 package world.respect.datalayer.db.school.daos.xapi
 
-import world.respect.datalayer.db.school.entities.xapi.XapiEntityObjectTypeFlags
+import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.shared.daos.SystemPermissionDaoCommon
 import world.respect.datalayer.db.shared.ext.PermissionFlags
 

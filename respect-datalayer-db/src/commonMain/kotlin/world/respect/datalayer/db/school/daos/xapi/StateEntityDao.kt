@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import world.respect.datalayer.db.school.composite.StateIdAndLastModified
-import world.respect.datalayer.db.school.entities.xapi.StateEntity
+import world.respect.datalayer.db.school.xapi.entities.StateEntity
 
 @Dao
 interface StateEntityDao {

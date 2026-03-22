@@ -3,7 +3,7 @@ package world.respect.datalayer.db.school.daos.xapi
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import world.respect.datalayer.db.school.entities.xapi.StateDeleteCommand
+import world.respect.datalayer.db.school.xapi.entities.StateDeleteCommand
 
 @Dao
 interface StateDeleteCommandDao {

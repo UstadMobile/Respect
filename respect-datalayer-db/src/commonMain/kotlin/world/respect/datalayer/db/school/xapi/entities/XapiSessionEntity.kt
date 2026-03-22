@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.entities.xapi
+package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

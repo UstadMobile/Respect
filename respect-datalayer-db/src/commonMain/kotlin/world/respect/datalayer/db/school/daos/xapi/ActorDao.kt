@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import world.respect.datalayer.db.school.composite.ActorUidEtagAndLastMod
-import world.respect.datalayer.db.school.entities.xapi.ActorEntity
+import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 
 @Dao
 interface ActorDao {

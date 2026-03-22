@@ -3,7 +3,7 @@ package world.respect.datalayer.db.school.daos.xapi
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import world.respect.datalayer.db.school.entities.xapi.XapiSessionEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiSessionEntity
 
 @Dao
 interface XapiSessionEntityDao {

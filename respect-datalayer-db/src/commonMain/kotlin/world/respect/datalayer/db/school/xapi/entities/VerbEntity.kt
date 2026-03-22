@@ -1,8 +1,9 @@
-package world.respect.datalayer.db.school.entities.xapi
+package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.school.model.StatusEnum
 
 @Serializable
 @Entity
@@ -16,13 +17,10 @@ import kotlinx.serialization.Serializable
  */
 data class VerbEntity(
     @PrimaryKey
-    var verbUid: Long = 0,
-
-    var verbUrlId: String? = null,
-
-    var verbDeleted: Boolean = false,
-
-    var verbLct: Long = 0,
+    val verbUid: Long,
+    val verbUrlId: String,
+    val verbStatus: StatusEnum = StatusEnum.ACTIVE,
+    val verbLct: Long = 0,
 ) {
     companion object {
         const val TABLE_ID = 62

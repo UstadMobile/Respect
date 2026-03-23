@@ -64,7 +64,13 @@ import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 import world.respect.datalayer.db.school.xapi.daos.ActivityEntityDao
 import world.respect.datalayer.db.school.xapi.daos.ActivityExtensionDao
 import world.respect.datalayer.db.school.xapi.daos.ActivityInteractionDao
+import world.respect.datalayer.db.school.xapi.daos.ActorDao
+import world.respect.datalayer.db.school.xapi.daos.GroupMemberActorJoinDao
 import world.respect.datalayer.db.school.xapi.daos.StatementContextActivityJoinDao
+import world.respect.datalayer.db.school.xapi.daos.StatementDao
+import world.respect.datalayer.db.school.xapi.daos.StatementEntityJsonDao
+import world.respect.datalayer.db.school.xapi.daos.VerbDao
+import world.respect.datalayer.db.school.xapi.daos.VerbLangMapEntryDao
 import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity
@@ -200,6 +206,18 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getActivityLangMapEntryDao(): ActivityLangMapEntryDao
 
     abstract fun getStatementContextActivityJoinDao(): StatementContextActivityJoinDao
+
+    abstract fun getStatementDao(): StatementDao
+
+    abstract fun getStatementEntityJsonDao(): StatementEntityJsonDao
+
+    abstract fun getActorDao(): ActorDao
+
+    abstract fun getGroupMemberActorJoinDao(): GroupMemberActorJoinDao
+
+    abstract fun getVerbDao(): VerbDao
+
+    abstract fun getVerbLangMapEntryDao(): VerbLangMapEntryDao
 
 
     companion object {

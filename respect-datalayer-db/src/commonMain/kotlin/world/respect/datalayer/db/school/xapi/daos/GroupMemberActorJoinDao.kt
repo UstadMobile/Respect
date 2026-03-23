@@ -9,24 +9,17 @@ import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
 @Dao
 interface GroupMemberActorJoinDao {
 
+
+    @Query("""
+        DELETE FROM GroupMemberActorJoin
+         WHERE GroupMemberActorJoin.gmajGroupActorUid = :groupActorUid
+    """)
+    suspend fun deleteByGroupActorUidAsync(groupActorUid: Long)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreListAsync(entities: List<GroupMemberActorJoin>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertListAsync(entities: List<GroupMemberActorJoin>)
 
-    @Query(
-        """
-        UPDATE GroupMemberActorJoin
-           SET gmajLastMod = :lastModTime
-         WHERE gmajGroupActorUid = :gmajGroupActorUid
-           AND gmajMemberActorUid = :gmajMemberActorUid
-           AND gmajLastMod != :lastModTime 
-    """
-    )
-    suspend fun updateLastModifiedTimeIfNeededAsync(
-        gmajGroupActorUid: Long,
-        gmajMemberActorUid: Long,
-        lastModTime: Long
-    )
 }

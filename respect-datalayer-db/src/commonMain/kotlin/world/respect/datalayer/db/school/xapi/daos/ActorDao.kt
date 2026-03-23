@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import world.respect.datalayer.db.school.composite.ActorUidEtagAndLastMod
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 
 @Dao
@@ -20,7 +19,7 @@ interface ActorDao {
         """
         UPDATE ActorEntity
            SET actorName = :name,
-               actorLct = :updateTime
+               actorLastModified = :updateTime
          WHERE actorUid = :uid
            AND ActorEntity.actorName != :name
     """
@@ -53,30 +52,4 @@ interface ActorDao {
         accountPersonUid: Long,
     ): ActorEntity?
 
-
-    @Query(
-        """
-        SELECT ActorEntity.actorUid, ActorEntity.actorEtag, ActorEntity.actorLct
-          FROM ActorEntity
-         WHERE ActorEntity.actorUid IN (:uidList)
-    """
-    )
-    suspend fun findUidAndEtagByListAsync(uidList: List<Long>): List<ActorUidEtagAndLastMod>
-
-    @Query(
-        """
-        SELECT ActorEntity.*
-          FROM ActorEntity
-         WHERE ActorEntity.actorUid IN (
-               SELECT GroupMemberActorJoin.gmajMemberActorUid
-                 FROM GroupMemberActorJoin
-                WHERE GroupMemberActorJoin.gmajGroupActorUid = :groupActorUid
-                  AND GroupMemberActorJoin.gmajLastMod = (
-                      SELECT GroupActorEntity.actorLct
-                        FROM ActorEntity GroupActorEntity
-                       WHERE GroupActorEntity.actorUid = :groupActorUid)
-              ) 
-    """
-    )
-    suspend fun findGroupMembers(groupActorUid: Long): List<ActorEntity>
 }

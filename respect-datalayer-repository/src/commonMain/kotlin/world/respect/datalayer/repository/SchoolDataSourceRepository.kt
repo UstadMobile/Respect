@@ -140,7 +140,7 @@ class SchoolDataSourceRepository(
         )
     }
 
-    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
+    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSourceRepository by lazy {
         SchoolConfigSettingDataSourceRepository(
             local = local.schoolConfigSettingDataSource,
             remote = remote.schoolConfigSettingDataSource,

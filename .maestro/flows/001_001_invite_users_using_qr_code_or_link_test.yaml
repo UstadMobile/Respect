@@ -102,9 +102,9 @@ onFlowComplete:
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
 - tapOn: "People"
-- tapOn: "TeacherA User"
+
 - tapOn:
-    id: "floating_action_button"   # Edit button
+    id: "floating_action_bu- tapOn: "TeacherA User"tton"   # Edit button
 - tapOn: "First names*"
 - runFlow:
     file: "subflows/erase_text.yaml"
@@ -122,7 +122,7 @@ onFlowComplete:
 - assertVisible: "Person name changed from “TeacherA User” to “TeacherB User”"
 
 - runFlow:
-    file: "subflows/admin_add_class.yaml"
+    file: "subflows/add_class.yaml"
     env:
       CLASSNAME: "New Class"
 - assertVisible:
@@ -225,6 +225,12 @@ onFlowComplete:
     text: "Change History"
 - assertVisible: "Join request approved for “Student User”"
 - assertVisible: "Teacher added: “TeacherB User”"
+- tapOn: "TeacherB User"
+- tapOn: "Change History"
+- assertVisible:
+    id: "app_title"
+    text: "Change History"
+- assertVisible: "Person name changed from “TeacherA User” to “TeacherB User”"
 
 # E) Teacher share invite link for parent device based signup
 - tapOn: "Add student"

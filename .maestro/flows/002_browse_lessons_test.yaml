@@ -60,19 +60,19 @@ onFlowComplete:
 - back
 - assertVisible: "Lesson 002"
 - tapOn: "Lesson 002"
-- tapOn: "Bookmarks"
+- tapOn: "Bookmark"
 - tapOn: "Home"
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 - assertVisible: "Lesson 002"
-#- tapOn:
-#    text: "Bookmark"
-#    index: 1
-#- assertVisible: "1 Remove Bookmark"
-#- assertVisible: "Undo"
-#- assertNotVisible: "Lesson 001"
-#- tapOn: "Undo"
-#- assertVisible: "Lesson 001"
+- tapOn:
+    text: "Bookmark"
+    index: 1
+- assertVisible: "1 Remove Bookmark"
+- assertVisible: "Undo"
+- assertNotVisible: "Lesson 001"
+- tapOn: "Undo"
+- assertVisible: "Lesson 001"
 
 - clearState: world.respect.app
 - runFlow: "subflows/school_admin_login_flow.yaml"
@@ -80,7 +80,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Home"
-- tapOn: "Bookmark"
+- tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 
 # -------------------------------------------------------------------------------------------------------------

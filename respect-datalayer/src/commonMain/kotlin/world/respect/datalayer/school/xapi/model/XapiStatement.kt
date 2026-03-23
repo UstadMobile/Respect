@@ -32,7 +32,7 @@ data class XapiStatement(
     val stored: InstantAsISO8601? = null,
     val authority: XapiActor? = null,
     val version: String? = null,
-    val attachments: List<Attachment>? = null,
+    val attachments: List<XapiAttachment>? = null,
     override val objectType: XapiObjectType? = null,
 ): XapiStatementObject
 

@@ -1,6 +1,6 @@
 package world.respect.datalayer.school.xapi.model
 
-class State(
+class XapiState(
     val stateId: String?,
     val agent: XapiActor?,
     val activityId: String?,

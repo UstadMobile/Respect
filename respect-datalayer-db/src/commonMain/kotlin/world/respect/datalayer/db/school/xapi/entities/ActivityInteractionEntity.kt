@@ -21,17 +21,17 @@ import kotlinx.serialization.Serializable
 )
 @Serializable
 data class ActivityInteractionEntity(
-    var aieActivityUid: Long = 0,
+    val aieActivityUid: Long = 0,
 
-    var aieHash: Long = 0,
+    val aieHash: Long = 0,
 
-    var aieProp: Int = 0,
+    val aieProp: Int = 0,
 
-    var aieId: String? = null,
+    val aieId: String? = null,
 
-    var aieLastMod: Long = 0,
+    val aieLastMod: Long = 0,
 
-    var aieIsDeleted: Boolean = false,
+    val aieIsDeleted: Boolean = false,
 ) {
 
     companion object {

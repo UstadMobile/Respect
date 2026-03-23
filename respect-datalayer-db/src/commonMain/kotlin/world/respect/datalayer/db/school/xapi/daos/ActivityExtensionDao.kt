@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.daos.xapi
+package world.respect.datalayer.db.school.xapi.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -12,12 +12,12 @@ interface ActivityExtensionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertListAsync(list: List<ActivityExtensionEntity>)
 
-    @Query(
-        """
+    @Query("""
         SELECT ActivityExtensionEntity.*
           FROM ActivityExtensionEntity
          WHERE ActivityExtensionEntity.aeeActivityUid = :activityUid 
-    """
-    )
+    """)
     suspend fun findAllByActivityUid(activityUid: Long): List<ActivityExtensionEntity>
+
+
 }

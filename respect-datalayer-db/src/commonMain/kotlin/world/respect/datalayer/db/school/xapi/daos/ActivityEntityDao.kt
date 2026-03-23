@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.daos.xapi
+package world.respect.datalayer.db.school.xapi.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -12,23 +12,20 @@ interface ActivityEntityDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreAsync(entities: List<ActivityEntity>)
 
-    @Query(
-        """
+    @Query("""
         UPDATE ActivityEntity
            SET actMoreInfo = :actMoreInfo,
                actLct = :actLct
         WHERE actUid = :activityUid
           AND actMoreInfo != :actMoreInfo      
-    """
-    )
+    """)
     suspend fun updateIfMoreInfoChanged(
         activityUid: Long,
         actMoreInfo: String?,
         actLct: Long,
     )
 
-    @Query(
-        """
+    @Query("""
         UPDATE ActivityEntity
            SET actType = :actType,
                actMoreInfo = :actMoreInfo,
@@ -45,8 +42,7 @@ interface ActivityEntityDao {
            AND (SELECT ActivityEntityInternal.actCorrectResponsePatterns 
                   FROM ActivityEntity ActivityEntityInternal 
                  WHERE ActivityEntityInternal.actUid = :actUid) IS NULL      
-    """
-    )
+    """)
     suspend fun updateIfNotYetDefined(
         actUid: Long,
         actType: String?,
@@ -56,12 +52,11 @@ interface ActivityEntityDao {
         actLct: Long,
     )
 
-    @Query(
-        """
+    @Query("""
         SELECT ActivityEntity.*
           FROM ActivityEntity
          WHERE ActivityEntity.actUid = :activityUid 
-    """
-    )
+    """)
     suspend fun findByUidAsync(activityUid: Long): ActivityEntity?
+
 }

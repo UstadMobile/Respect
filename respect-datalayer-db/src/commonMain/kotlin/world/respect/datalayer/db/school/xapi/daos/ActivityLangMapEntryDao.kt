@@ -1,9 +1,10 @@
-package world.respect.datalayer.db.school.daos.xapi
+package com.ustadmobile.core.db.dao.xapi
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import world.respect.datalayer.db.school.xapi.daos.ActivityLangMapEntryDaoCommon
 import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntry
 
 @Dao
@@ -16,11 +17,9 @@ interface ActivityLangMapEntryDao {
      * Upsert the lang map entity for an interaction entity if the related interaction entity exists
      * The interaction entity might not exists if the Activity is already defined.
      */
-    @Query(
-        """
+    @Query("""
         INSERT OR REPLACE ${ActivityLangMapEntryDaoCommon.INTO_LANG_MAP_WHERE_INTERACTION_ENTITY_EXISTS}      
-    """
-    )
+    """)
     suspend fun upsertIfInteractionEntityExists(
         almeActivityUid: Long,
         almeHash: Long,
@@ -31,16 +30,14 @@ interface ActivityLangMapEntryDao {
         almeLastMod: Long,
     )
 
-    @Query(
-        """
+    @Query("""
         UPDATE ActivityLangMapEntry
            SET almeValue = :almeValue,
                almeLastMod = :almeLastMod
          WHERE almeActivityUid = :almeActivityUid
            AND almeHash = :almeHash
            AND almeValue != :almeValue       
-    """
-    )
+    """)
     suspend fun updateIfChanged(
         almeActivityUid: Long,
         almeHash: Long,
@@ -48,12 +45,12 @@ interface ActivityLangMapEntryDao {
         almeLastMod: Long,
     )
 
-    @Query(
-        """
+    @Query("""
         SELECT ActivityLangMapEntry.*
           FROM ActivityLangMapEntry
          WHERE ActivityLangMapEntry.almeActivityUid = :activityUid
-    """
-    )
+    """)
     suspend fun findAllByActivityUid(activityUid: Long): List<ActivityLangMapEntry>
+
+
 }

@@ -19,19 +19,19 @@ import androidx.room.Entity
  * @param scajEtag a constant etag - always simply 1, because a statement is immutable.
  */
 data class StatementContextActivityJoin(
-    var scajFromStatementIdHi: Long = 0,
+    val scajFromStatementIdHi: Long = 0,
 
-    var scajFromStatementIdLo: Long = 0,
+    val scajFromStatementIdLo: Long = 0,
 
-    var scajToHash: Long = 0,
+    val scajToHash: Long = 0,
 
-    var scajContextType: Int = 0,
+    val scajContextType: Int = 0,
 
-    var scajToActivityUid: Long = 0,
+    val scajToActivityUid: Long = 0,
 
-    var scajToActivityId: String? = null,
+    val scajToActivityId: String? = null,
 
-    var scajEtag: Long = 1,
+    val scajEtag: Long = 1,
 ) {
     companion object {
         const val TYPE_PARENT = 1

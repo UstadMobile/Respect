@@ -24,19 +24,19 @@ import kotlinx.serialization.Serializable
  * as per ActivityInteractionEntity.aieHash
  */
 data class ActivityLangMapEntry(
-    var almeActivityUid: Long = 0,
+    val almeActivityUid: Long = 0,
 
-    var almeHash: Long = 0,
+    val almeHash: Long = 0,
 
-    var almeLangCode: String? = null,
+    val almeLangCode: String? = null,
 
-    var almePropName: String? = null,
+    val almePropName: String? = null,
 
-    var almeValue: String? = null,
+    val almeValue: String? = null,
 
-    var almeAieHash: Long = 0,
+    val almeAieHash: Long = 0,
 
-    var almeLastMod: Long = 0,
+    val almeLastMod: Long = 0,
 ) {
     companion object {
         const val TABLE_ID = 6442

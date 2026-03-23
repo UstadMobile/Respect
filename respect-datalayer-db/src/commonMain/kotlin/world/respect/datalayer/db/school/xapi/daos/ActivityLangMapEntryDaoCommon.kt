@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.daos.xapi
+package world.respect.datalayer.db.school.xapi.daos
 
 object ActivityLangMapEntryDaoCommon {
 

@@ -104,16 +104,13 @@ onFlowComplete:
 - tapOn: "People"
 
 - tapOn:
-    id: "floating_action_bu- tapOn: "TeacherA User"tton"   # Edit button
+    id: "floating_action_button"   # Edit button
 - tapOn: "First names*"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
       TEXT: "First names*"
 - inputText: "TeacherB"
-- runScript:
-    file: "scripts/setDate.js"
-- inputText: ${output.pastYearDateC}
 - tapOn: "Save"
 - tapOn: "Change History"
 - assertVisible:
@@ -128,6 +125,16 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "New Class"
+
+- tapOn: "Add Teacher"
+- tapOn: "TeacherB User"
+- tapOn: "Change History"
+- assertVisible:
+    id: "app_title"
+    text: "Change History"
+- assertVisible: "Teacher added: “TeacherB User”"
+- back
+
 - tapOn: "Add Student"
 - tapOn: "Invite person"
 - assertVisible:

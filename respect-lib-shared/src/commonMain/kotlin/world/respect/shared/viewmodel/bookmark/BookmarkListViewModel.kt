@@ -2,6 +2,9 @@ package world.respect.shared.viewmodel.bookmark
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,6 +20,7 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.BookmarkDataSource
+import world.respect.datalayer.school.model.BookmarkDetails
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
@@ -28,7 +32,7 @@ import world.respect.shared.util.ext.asUiText
 import kotlin.getValue
 
 data class BookmarkListUiState(
-    val bookmarks: List<Bookmark> = emptyList(),
+    val bookmarkDetails: List<BookmarkDetails> = emptyList(),
     val app: DataLoadState<OpdsPublication> = DataLoadingState(),
 )
 
@@ -64,13 +68,13 @@ class BookmarkListViewModel(
 
                     val bookmarks = state.dataOrNull() ?: emptyList()
 
-                    _uiState.update {
-                        it.copy(bookmarks = bookmarks)
-                    }
-
                     loadMissingBookmarks(personUid)
 
-                    loadApps(bookmarks)
+                    val bookmarkDetails = loadApps(bookmarks)
+
+                    _uiState.update {
+                        it.copy(bookmarkDetails = bookmarkDetails)
+                    }
                 }
         }
     }
@@ -86,8 +90,8 @@ class BookmarkListViewModel(
 
             _uiState.update {
                 it.copy(
-                    bookmarks = it.bookmarks.filterNot {
-                        b -> b.learningUnitManifestUrl == bookmark.learningUnitManifestUrl
+                    bookmarkDetails = it.bookmarkDetails.filterNot {
+                        b -> b.bookmark.learningUnitManifestUrl == bookmark.learningUnitManifestUrl
                     }
                 )
             }
@@ -107,30 +111,23 @@ class BookmarkListViewModel(
             )
         }
     }
-    private fun loadApps(bookmarks: List<Bookmark>) {
 
-        bookmarks.forEach { bookmark ->
-
-            viewModelScope.launch {
-
-                schoolDataSource.opdsPublicationDataSource
-                    .getByUrlAsFlow(
+    private suspend fun loadApps(bookmarks: List<Bookmark>): List<BookmarkDetails> = coroutineScope {
+        bookmarks.map { bookmark ->
+            async {
+                val app = schoolDataSource.opdsPublicationDataSource
+                    .getByUrl(
                         url = bookmark.appManifestUrl,
                         params = DataLoadParams(),
                         referrerUrl = null,
                         expectedPublicationId = null
                     )
-                    .collect { app ->
-
-                        _uiState.update { state ->
-                            state.copy(app = app)
-                        }
-                    }
+                BookmarkDetails(bookmark, app)
             }
-        }
+        }.awaitAll()
     }
-    fun onClickBookmark(bookmark: Bookmark) {
 
+    fun onClickBookmark(bookmark: Bookmark) {
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(

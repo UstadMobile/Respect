@@ -46,13 +46,8 @@ interface BookmarkDataSource : WritableDataSource<Bookmark> {
 
     fun listAsFlow(
         loadParams: DataLoadParams = DataLoadParams(),
-        listParams: BookmarkDataSource.GetListParams = GetListParams(),
+        listParams: GetListParams = GetListParams(),
     ): Flow<DataLoadState<List<Bookmark>>>
-
-    fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        listParams: BookmarkDataSource.GetListParams,
-    ): IPagingSourceFactory<Int, Bookmark>
 
     companion object {
 

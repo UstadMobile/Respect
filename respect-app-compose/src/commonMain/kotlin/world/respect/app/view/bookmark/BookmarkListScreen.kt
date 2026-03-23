@@ -31,10 +31,9 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
-import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Bookmark
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.datalayer.school.model.BookmarkDetails
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
@@ -65,14 +64,13 @@ fun BookmarkListScreen(
 ) {
 
     when {
-        uiState.bookmarks.isEmpty() -> {
+        uiState.bookmarkDetails.isEmpty() -> {
             EmptyBookmarkState()
         }
 
         else -> {
             BookmarkListContent(
-                uiState.app,
-                uiState.bookmarks,
+                uiState.bookmarkDetails,
                 onClickRemoveBookmark,
                 onClickBookmark
             )
@@ -111,8 +109,7 @@ private fun EmptyBookmarkState() {
 
 @Composable
 private fun BookmarkListContent(
-    app: DataLoadState<OpdsPublication>,
-    bookmarks: List<Bookmark>,
+    bookmarkDetails: List<BookmarkDetails>,
     onClickRemoveBookmark: (Bookmark) -> Unit,
     onClickBookmark: (Bookmark) -> Unit
 ) {
@@ -123,11 +120,11 @@ private fun BookmarkListContent(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(bookmarks) { bookmark ->
+        items(bookmarkDetails) { bookmarkDetails ->
             ListItem(
                 modifier = Modifier.fillMaxWidth()
                     .clickable {
-                        onClickBookmark(bookmark)
+                        onClickBookmark(bookmarkDetails.bookmark)
                     },
 
                 leadingContent = {
@@ -139,7 +136,7 @@ private fun BookmarkListContent(
                         contentAlignment = Alignment.Center
                     ) {
                         RespectAsyncImage(
-                            uri = bookmark.imageUrl.toString(),
+                            uri = bookmarkDetails.bookmark.imageUrl.toString(),
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -151,7 +148,7 @@ private fun BookmarkListContent(
 
                 headlineContent = {
                     Text(
-                        text = bookmark.title?.getTitle() ?: ""
+                        text = bookmarkDetails.bookmark.title?.getTitle() ?: ""
                     )
                 },
 
@@ -160,7 +157,7 @@ private fun BookmarkListContent(
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
+                            bookmarkDetails.app?.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
                                 .also { icon ->
                                     RespectAsyncImage(
                                         uri = icon,
@@ -176,7 +173,7 @@ private fun BookmarkListContent(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = app.dataOrNull()?.metadata?.title?.getTitle()
+                                text = bookmarkDetails.app?.dataOrNull()?.metadata?.title?.getTitle()
                                     .orEmpty()
                             )
                         }
@@ -188,7 +185,7 @@ private fun BookmarkListContent(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            bookmark.language?.let {
+                            bookmarkDetails.bookmark.language?.let {
                                 Text(text = it)
                             }
                             /**Currently there is no data in grade**/
@@ -196,7 +193,7 @@ private fun BookmarkListContent(
                                 Text(text = it)
                             }*/
 
-                            bookmark.type?.let {
+                            bookmarkDetails.bookmark.type?.let {
                                 Text(text = it)
                             }
                         }
@@ -208,15 +205,13 @@ private fun BookmarkListContent(
                 trailingContent = {
                     Icon(
                         modifier = Modifier.clickable {
-                            onClickRemoveBookmark(bookmark)
+                            onClickRemoveBookmark(bookmarkDetails.bookmark)
                         },
                         imageVector = Icons.Default.Bookmark,
                         contentDescription = stringResource(Res.string.bookmark),
                     )
                 }
-
             )
-
         }
     }
 }

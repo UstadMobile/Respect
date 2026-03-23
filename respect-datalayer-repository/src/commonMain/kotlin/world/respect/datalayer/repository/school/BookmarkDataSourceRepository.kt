@@ -10,8 +10,6 @@ import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.combineWithRemoteIfNotNull
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
-import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSourceLocal
 import world.respect.datalayer.school.model.Bookmark
@@ -19,7 +17,6 @@ import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.DataLayerTags
 import world.respect.datalayer.shared.RepositoryModelDataSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.libutil.util.time.systemTimeInMillis
 
 
@@ -84,25 +81,6 @@ class BookmarkDataSourceRepository(
             ).onEach {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
             }
-        )
-    }
-
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        listParams: BookmarkDataSource.GetListParams
-    ): IPagingSourceFactory<Int, Bookmark> {
-        val remoteSource = remote.takeIf { !loadParams.onlyIfCached }?.listAsPagingSource(
-            loadParams = loadParams,
-            listParams = listParams
-        )?.invoke()
-        return RepositoryPagingSourceFactory(
-            onRemoteLoad = { remoteLoadParams ->
-                remoteSource?.loadAndUpdateLocal2(
-                    remoteLoadParams, local::updateLocal,
-                )
-            },
-            local = local.listAsPagingSource(loadParams, listParams),
-            tag = { "Repo.listAsPaging(params=$listParams)" },
         )
     }
 }

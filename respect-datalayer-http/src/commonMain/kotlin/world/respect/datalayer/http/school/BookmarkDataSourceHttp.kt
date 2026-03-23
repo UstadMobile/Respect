@@ -7,7 +7,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.DataLoadParams
@@ -19,14 +18,11 @@ import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
 import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
-import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSource.Companion.PERSON_UID
 import world.respect.datalayer.school.model.Bookmark
-import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
 
 
 class BookmarkDataSourceHttp(
@@ -96,25 +92,6 @@ class BookmarkDataSourceHttp(
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
-        }
-    }
-
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        listParams: BookmarkDataSource.GetListParams
-    ): IPagingSourceFactory<Int, Bookmark> {
-        return IPagingSourceFactory {
-            OffsetLimitHttpPagingSource(
-                baseUrlProvider = { listParams.urlWithParams() },
-                httpClient = httpClient,
-                validationHelper = validationHelper,
-                typeInfo = typeInfo<List<Person>>(),
-                requestBuilder = {
-                    useTokenProvider(tokenProvider)
-                    useValidationCacheControl(validationHelper)
-                },
-                logPrefixExtra =  { "Person-HTTP-listAsPagingSource(params=$listParams)" },
-            )
         }
     }
 }

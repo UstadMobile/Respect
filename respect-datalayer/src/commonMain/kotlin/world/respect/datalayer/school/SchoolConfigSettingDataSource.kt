@@ -2,6 +2,7 @@ package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.SchoolConfigSetting
@@ -20,7 +21,8 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
 
             fun fromParams(params: StringValues): GetListParams {
                 return GetListParams(
-                    common = GetListCommonParams.fromParams(params)
+                    common = GetListCommonParams.fromParams(params),
+                    key = params[DataLayerParams.KEY]
                 )
             }
         }

@@ -14,6 +14,7 @@ import world.respect.datalayer.repository.school.PersonPasskeyDataSourceReposito
 import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
+import world.respect.datalayer.repository.school.SchoolConfigSettingDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
@@ -140,6 +141,11 @@ class SchoolDataSourceRepository(
     }
 
     override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
-        local.schoolConfigSettingDataSource
+        SchoolConfigSettingDataSourceRepository(
+            local = local.schoolConfigSettingDataSource,
+            remote = remote.schoolConfigSettingDataSource,
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
+        )
     }
 }

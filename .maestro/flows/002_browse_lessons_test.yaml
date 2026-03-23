@@ -65,14 +65,6 @@ onFlowComplete:
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 - assertVisible: "Lesson 002"
-- tapOn:
-    text: "Bookmark"
-    index: 0
-#- assertVisible: "1 Remove Bookmark"
-#- assertVisible: "Undo"
-#- assertNotVisible: "Lesson 001"
-#- tapOn: "Undo"
-#- assertVisible: "Lesson 001"
 
 - clearState: world.respect.app
 - runFlow: "subflows/school_admin_login_flow.yaml"
@@ -82,23 +74,13 @@ onFlowComplete:
     text: "Home"
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
+- assertVisible: "Lesson 002"
+- tapOn:                       #Remove bookmark
+    text: "Bookmark"
+    index: 0
+- assertVisible: "1 Remove Bookmark"
+- assertVisible: "Undo"
+- assertNotVisible: "Lesson 001"
+- tapOn: "Undo"
+- assertVisible: "Lesson 001"
 
-# -------------------------------------------------------------------------------------------------------------
-# Commented out until the Playlist branch is merged into Bookmarks.
-#---------------------------------------------------------------------------------------------------------------
-#- assertVisible:
-#    id: "bookmark_btn"
-#- tapOn:
-#    id: "bookmark_btn"
-#- assertVisible: "Playlist added to bookmark list"
-#- tapOn: "Home"
-#- tapOn: "Bookmarks"
-#- assertVisible: "Lesson 001"
-#- assertVisible: "Playlist - Grade 1"
-#- tapOn:                                #RemoveBookmark
-#    id: "bookmark_icon"
-#- assertVisible: "1 Remove Bookmark"
-#- assertVisible: "Undo"
-#- assertNotVisible: "Lesson 001"
-#- tapOn: "Undo"
-#- assertVisible: "Lesson 001"

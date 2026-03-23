@@ -246,6 +246,8 @@ import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCa
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.learningunit.list.PlaylistDetailViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
+import world.respect.shared.domain.sharelink.CreatePlaylistShareLinkUseCase
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -386,6 +388,7 @@ val appKoinModule = module {
     viewModelOf(::PlaylistListViewModel)
     viewModelOf(::PlaylistDetailViewModel)
     viewModelOf(::PlaylistEditViewModel)
+    viewModelOf(::PlaylistShareViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {
@@ -758,6 +761,11 @@ val appKoinModule = module {
         }
         scoped<CreateInviteLinkUseCase> {
             CreateInviteLinkUseCase(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+            )
+        }
+        scoped<CreatePlaylistShareLinkUseCase> {
+            CreatePlaylistShareLinkUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
             )
         }

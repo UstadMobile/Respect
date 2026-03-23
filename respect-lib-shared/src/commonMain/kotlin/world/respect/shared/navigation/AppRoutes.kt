@@ -741,9 +741,23 @@ class PlaylistEdit private constructor(
     }
 }
 @Serializable
+class PlaylistShare private constructor(
+    private val playlistUrlStr: String,
+) : RespectAppRoute {
+
+    @Transient
+    val playlistUrl = Url(playlistUrlStr)
+
+    companion object {
+        fun create(playlistUrl: Url) = PlaylistShare(
+            playlistUrlStr = playlistUrl.toString()
+        )
+    }
+}
+@Serializable
 data class CreateAccountSetUsername(
     val guid: String
-) : RespectAppRoute
+): RespectAppRoute
 
 @Serializable
 data class CreateAccountSetPassword(

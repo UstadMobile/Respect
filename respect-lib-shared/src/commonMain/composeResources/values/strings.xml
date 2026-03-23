@@ -594,6 +594,25 @@
     <string name="move">Move</string>
     <string name="select_count_items">Select %1$d item(s)</string>
     <string name="make_a_copy">Make a copy</string>
+    <string name="permanently_delete">Permanently delete?</string>
+    <string name="permanently_delete_description">Permanently delete this playlist</string>
+    <string name="created_by">Created by: %1$s</string>
+    <string name="select_all">Select all</string>
+    <string name="select_none">Select none</string>
+    <string name="copy_of_playlist">copy the %1$s</string>
+    <string name="add_tasks_to_assignment">Add %1$d task to assignment</string>
+    <string name="move_to_section">Move to section…</string>
+    <string name="n_items">%1$d items</string>
+    <string name="share_playlist">Share Playlist</string>
+    <string name="who_can_view">Who can view</string>
+    <string name="who_can_edit">Who can edit</string>
+    <string name="anyone_with_the_link">Anyone with the link</string>
+    <string name="anyone_in_my_school">Anyone in my school</string>
+    <string name="teachers_and_admins_in_my_school">Teachers and admins in my school</string>
+    <string name="admins_in_my_school">Admins in my school</string>
+    <string name="send_link_via_sms">Send link via SMS</string>
+    <string name="send_link_via_email">Send link via email</string>
+    <string name="share_link">Share link</string>
 
 
 

@@ -12,21 +12,21 @@ import kotlinx.serialization.Serializable
 data class ActivityEntity(
 
     @PrimaryKey
-    var actUid: Long = 0,
+    val actUid: Long = 0,
 
-    var actIdIri: String? = null,
+    val actIdIri: String? = null,
 
-    var actType: String? = null,
+    val actType: String? = null,
 
-    var actMoreInfo: String? = null,
+    val actMoreInfo: String? = null,
 
-    var actInteractionType: Int = TYPE_UNSET,
+    val actInteractionType: Int = TYPE_UNSET,
 
-    var actCorrectResponsePatterns: String? = null,
+    val actCorrectResponsePatterns: String? = null,
 
-    var actLct: Long = 0,
+    val actLct: Long = 0,
 
-    ) {
+) {
     companion object {
         const val TYPE_UNSET = 0
         const val TYPE_TRUE_FALSE = 1

@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.daos.xapi
+package world.respect.datalayer.db.school.xapi.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -12,27 +12,24 @@ interface ActivityInteractionDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreAsync(entities: List<ActivityInteractionEntity>)
 
-    @Query(
-        """
+    @Query("""
         SELECT DISTINCT ActivityInteractionEntity.aieActivityUid
           FROM ActivityInteractionEntity
          WHERE ActivityInteractionEntity.aieActivityUid IN (:activityUids)
-    """
-    )
+    """)
     suspend fun findActivityUidsWithInteractionEntitiesAsync(
         activityUids: List<Long>
     ): List<Long>
 
-    @Query(
-        """
+    @Query("""
         SELECT ActivityInteractionEntity.*
           FROM ActivityInteractionEntity
          WHERE ActivityInteractionEntity.aieActivityUid = :activityUid 
-    """
-    )
+    """)
     suspend fun findAllByActivityUidAsync(
         activityUid: Long
     ): List<ActivityInteractionEntity>
+
 
 
 }

@@ -3,7 +3,7 @@ package world.respect.datalayer.school.xapi.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Attachment(
+data class XapiAttachment(
     val usageType: String? = null,
 
     val display: Map<String, String>? = null,

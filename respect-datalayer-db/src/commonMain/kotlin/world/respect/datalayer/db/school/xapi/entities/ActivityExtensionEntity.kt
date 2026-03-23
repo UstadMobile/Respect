@@ -4,17 +4,17 @@ import androidx.room.Entity
 
 @Entity(primaryKeys = ["aeeActivityUid", "aeeKeyHash"])
 data class ActivityExtensionEntity(
-    var aeeActivityUid: Long = 0,
+    val aeeActivityUid: Long = 0,
 
-    var aeeKeyHash: Long = 0,
+    val aeeKeyHash: Long = 0,
 
-    var aeeKey: String? = null,
+    val aeeKey: String? = null,
 
-    var aeeJson: String? = null,
+    val aeeJson: String? = null,
 
-    var aeeLastMod: Long = 0,
+    val aeeLastMod: Long = 0,
 
-    var aeeIsDeleted: Boolean = false,
+    val aeeIsDeleted: Boolean = false,
 ) {
     companion object {
         const val TABLE_ID = 6405

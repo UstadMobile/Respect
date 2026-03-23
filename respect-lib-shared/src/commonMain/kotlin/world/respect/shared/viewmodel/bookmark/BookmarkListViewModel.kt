@@ -27,7 +27,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.remove_bookmark
-import world.respect.shared.generated.resources.saved
+import world.respect.shared.generated.resources.undo
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
@@ -100,7 +100,6 @@ class BookmarkListViewModel(
                     }
                 )
             }
-            snackBarDispatcher.showSnackBar(Snack(Res.string.saved.asUiText()))
 
             snackBarDispatcher.showSnackBar(
                 Snack(

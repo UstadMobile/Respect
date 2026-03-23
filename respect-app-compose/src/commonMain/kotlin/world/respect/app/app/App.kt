@@ -13,8 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -177,8 +179,8 @@ fun App(
     val koin = getKoin()
 
     LaunchedEffect(Unit) {
-        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
-            val uiText = it.message
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack->
+            val uiText = snack.message
             val message = if(uiText is StringUiText) {
                 uiText.text
             }else if(uiText is StringResourceUiText) {
@@ -187,7 +189,14 @@ fun App(
                 ""
             }
 
-            snackbarHostState.showSnackbar(message, it.action)
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = snack.action,
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                snack.onAction?.invoke()
+            }
         }
     }
 

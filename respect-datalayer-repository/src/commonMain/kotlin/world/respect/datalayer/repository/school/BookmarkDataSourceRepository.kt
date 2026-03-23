@@ -52,7 +52,7 @@ class BookmarkDataSourceRepository(
         listParams: BookmarkDataSource.GetListParams
     ): DataLoadState<List<Bookmark>> {
         val remote = try {
-            remote.list(loadParams, listParams).also {
+            remote.list(loadParams, listParams.copy(includeDeleted = true)).also {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
             }
         } catch (e: Throwable) {
@@ -77,7 +77,7 @@ class BookmarkDataSourceRepository(
     ): Flow<DataLoadState<List<Bookmark>>> {
         return local.listAsFlow(loadParams, listParams).combineWithRemote(
             remoteFlow = remote.listAsFlow(
-                loadParams, listParams
+                loadParams, listParams.copy(includeDeleted = true)
             ).onEach {
                 local.updateFromRemoteListIfNeeded(it, validationHelper)
             }

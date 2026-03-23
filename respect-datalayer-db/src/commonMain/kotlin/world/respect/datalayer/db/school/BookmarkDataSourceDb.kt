@@ -61,7 +61,7 @@ class BookmarkDataSourceDb(
             data = schoolDb.getBookmarkDao()
                 .list(
                     personUid = requireNotNull(listParams.personUid),
-                    includeDeleted = listParams.common.includeDeleted ?: false
+                    includeDeleted = listParams.includeDeleted
                 )
                 .map {
                     it.toModel(json)
@@ -83,7 +83,7 @@ class BookmarkDataSourceDb(
     ): Flow<DataLoadState<List<Bookmark>>> {
         return schoolDb.getBookmarkDao().listAsFlow(
             personUid = requireNotNull(listParams.personUid),
-            includeDeleted = listParams.common.includeDeleted ?: false
+            includeDeleted = listParams.includeDeleted
         ).map { entityList ->
             DataReadyState(
                 data = entityList.map { it.toModel(json) }

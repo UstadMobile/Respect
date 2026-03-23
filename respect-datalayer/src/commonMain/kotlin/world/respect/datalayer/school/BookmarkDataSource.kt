@@ -14,13 +14,15 @@ interface BookmarkDataSource : WritableDataSource<Bookmark> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
-        val personUid: String? = null
+        val personUid: String? = null,
+        val includeDeleted: Boolean = false,
     ) {
         companion object {
             fun fromParams(params: StringValues): GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
                     personUid = params[PERSON_UID],
+                    includeDeleted = params[INCLUDE_DELETED]?.toBoolean() ?: false,
                 )
             }
         }
@@ -53,6 +55,7 @@ interface BookmarkDataSource : WritableDataSource<Bookmark> {
 
         const val ENDPOINT_NAME = "bookmark"
         const val PERSON_UID = "personUid"
+        const val INCLUDE_DELETED = "includeDeleted"
 
     }
 }

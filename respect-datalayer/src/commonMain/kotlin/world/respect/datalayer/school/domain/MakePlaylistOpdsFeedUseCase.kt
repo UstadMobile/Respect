@@ -17,7 +17,7 @@ import kotlin.uuid.Uuid
  *    e.g. https://schoolname.example.org/playlist/00112233-4455-6677-8899-aabbccddeeff
  * 2) Set the last modified time.
  * 3) Add an owner link to identify the creator of the playlist.
- */
+*/
 class MakePlaylistOpdsFeedUseCase(
     private val schoolUrl: Url
 ) {
@@ -25,13 +25,13 @@ class MakePlaylistOpdsFeedUseCase(
     @OptIn(ExperimentalUuidApi::class)
     operator fun invoke(
         base: OpdsFeed,
-        userGuid: String,
+        username: String,
         uuid: Uuid = Uuid.random(),
     ): OpdsFeed {
         val feedUrl = schoolUrl.appendEndpointSegments("playlist/$uuid")
 
         val ownerLink = ReadiumLink(
-            href = "${schoolUrl}user/$userGuid",
+            href = "${schoolUrl}user/$username",
             rel = listOf(REL_OWNER),
         )
 
@@ -46,5 +46,6 @@ class MakePlaylistOpdsFeedUseCase(
 
     companion object {
         const val REL_OWNER = "https://respect.ustadmobile.com/ns/owner"
+
     }
 }

@@ -10,6 +10,8 @@ These guidelines help us communicate and organise all contributors including the
 
 ### Contributions we welcome:
 
+There are many ways you might be able to contribute to RESPECT! Yes, coding is one way, but there are many other ways:
+
 * Writing code (pull request)
 * New RESPECT compatible apps
 * Feature suggestions

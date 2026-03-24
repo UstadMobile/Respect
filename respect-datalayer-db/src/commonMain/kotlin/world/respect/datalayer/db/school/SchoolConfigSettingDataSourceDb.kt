@@ -10,29 +10,35 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
+import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.asEntity
 import world.respect.datalayer.db.school.adapters.asModel
+import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSourceLocal
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.map
 import kotlin.time.Clock
 
 class SchoolConfigSettingDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val uidNumberMapper: UidNumberMapper,
 ) : SchoolConfigSettingDataSourceLocal {
+
+    private val authenticatedUserUidNum: Long
+        get() = uidNumberMapper(authenticatedUser.guid)
 
     override suspend fun findByGuid(
         params: DataLoadParams,
         guid: String
     ): DataLoadState<SchoolConfigSetting> {
-        return schoolDb.getSchoolConfigSettingEntityDao().findByKey(guid)
-            ?.asModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
+        return schoolDb.getSchoolConfigSettingEntityDao().findByKey(
+            authenticatedPersonUidNum = authenticatedUserUidNum,
+            key = guid
+        )?.asModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
     }
 
     override fun listAsFlow(
@@ -40,6 +46,7 @@ class SchoolConfigSettingDataSourceDb(
         params: SchoolConfigSettingDataSource.GetListParams
     ): Flow<DataLoadState<List<SchoolConfigSetting>>> {
         return schoolDb.getSchoolConfigSettingEntityDao().listAsFlow(
+            authenticatedPersonUidNum = authenticatedUserUidNum,
             key = params.key,
             since = params.common.since?.toEpochMilliseconds() ?: 0
         ).map { list ->
@@ -49,26 +56,13 @@ class SchoolConfigSettingDataSourceDb(
         }
     }
 
-    override fun listAsPagingSource(
-        loadParams: DataLoadParams,
-        params: SchoolConfigSettingDataSource.GetListParams
-    ): IPagingSourceFactory<Int, SchoolConfigSetting> {
-        return IPagingSourceFactory {
-            schoolDb.getSchoolConfigSettingEntityDao().listAsPagingSource(
-                key = params.key,
-                since = params.common.since?.toEpochMilliseconds() ?: 0
-            ).map(tag = { "SchoolConfigSettingDataSourceDb/listAsPagingSource(params=$params)" }) {
-                it.asModel()
-            }
-        }
-    }
-
     override suspend fun list(
         loadParams: DataLoadParams,
         params: SchoolConfigSettingDataSource.GetListParams
     ): DataLoadState<List<SchoolConfigSetting>> {
         val queryTime = Clock.System.now()
         val data = schoolDb.getSchoolConfigSettingEntityDao().list(
+            authenticatedPersonUidNum = authenticatedUserUidNum,
             key = params.key,
             since = params.common.since?.toEpochMilliseconds() ?: 0
         ).map { it.asModel() }
@@ -87,6 +81,18 @@ class SchoolConfigSettingDataSourceDb(
         if (list.isEmpty()) return
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.forEach { setting ->
+                    val lastModAndPermission = schoolDb.getSchoolConfigSettingEntityDao()
+                        .getLastModifiedAndHasPermission(
+                            authenticatedPersonUidNum = authenticatedUserUidNum,
+                            key = setting.key
+                        )
+
+                    if (!lastModAndPermission.hasPermission) {
+                        throw ForbiddenException()
+                    }
+                }
+
                 schoolDb.getSchoolConfigSettingEntityDao().insert(
                     list.map { it.copy(stored = Clock.System.now()).asEntity() }
                 )
@@ -101,18 +107,23 @@ class SchoolConfigSettingDataSourceDb(
         if (list.isEmpty()) return
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                list.filter { item ->
+                val toInsert = list.filter { item ->
                     forceOverwrite || schoolDb.getSchoolConfigSettingEntityDao().getLastModifiedByKey(
-                        item.key
+                        key = item.key
                     ).let { it ?: 0L } < item.lastModified.toEpochMilliseconds()
-                }.forEach { item ->
-                    schoolDb.getSchoolConfigSettingEntityDao().insert(item.asEntity())
+                }.map { it.asEntity() }
+
+                if (toInsert.isNotEmpty()) {
+                    schoolDb.getSchoolConfigSettingEntityDao().insert(toInsert)
                 }
             }
         }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<SchoolConfigSetting> {
-        return schoolDb.getSchoolConfigSettingEntityDao().findByKeys(uids).map { it.asModel() }
+        return schoolDb.getSchoolConfigSettingEntityDao().findByKeys(
+            authenticatedPersonUidNum = authenticatedUserUidNum,
+            keys = uids
+        ).map { it.asModel() }
     }
 }

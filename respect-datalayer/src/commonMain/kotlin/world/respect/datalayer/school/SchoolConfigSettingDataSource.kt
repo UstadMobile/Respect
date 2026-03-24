@@ -7,7 +7,6 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.shared.WritableDataSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting> {
@@ -38,11 +37,6 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
         loadParams: DataLoadParams = DataLoadParams(),
         params: GetListParams = GetListParams(),
     ): Flow<DataLoadState<List<SchoolConfigSetting>>>
-
-    fun listAsPagingSource(
-        loadParams: DataLoadParams = DataLoadParams(),
-        params: GetListParams = GetListParams(),
-    ): IPagingSourceFactory<Int, SchoolConfigSetting>
 
     suspend fun list(
         loadParams: DataLoadParams = DataLoadParams(),

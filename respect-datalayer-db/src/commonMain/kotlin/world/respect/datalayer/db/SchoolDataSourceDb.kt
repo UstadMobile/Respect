@@ -139,6 +139,7 @@ class SchoolDataSourceDb(
         SchoolConfigSettingDataSourceDb(
             schoolDb = schoolDb,
             authenticatedUser = authenticatedUser,
+            uidNumberMapper = uidNumberMapper,
         )
     }
 }

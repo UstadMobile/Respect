@@ -73,7 +73,7 @@ list (default or local)
 
 ## Contributing
 
-We welcome community contributions including code, bug reports, feature requests, localization and more. Please see [CONTRIBUTING.md].
+We welcome community contributions including code, bug reports, feature requests, localization and more. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community
 

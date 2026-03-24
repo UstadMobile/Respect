@@ -47,7 +47,6 @@ import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.bookmark
@@ -79,9 +78,6 @@ fun LearningUnitDetailScreen(
     onClickAssign: () -> Unit,
     onClickBookmark: () -> Unit
 ) {
-
-    val appData = uiState.app.dataOrNull()
-    val appIcon = appData?.findIcons()?.firstOrNull()?.toString()
 
     LazyColumn(
         modifier = Modifier
@@ -128,10 +124,10 @@ fun LearningUnitDetailScreen(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                uiState.app.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
+                                uiState.app.dataOrNull()?.findIcons()?.firstOrNull()
                                     ?.let { icon ->
                                         RespectAsyncImage(
-                                            uri = icon,
+                                            uri = icon.href,
                                             contentDescription = "",
                                             contentScale = ContentScale.Fit,
                                             modifier = Modifier.size(20.dp)

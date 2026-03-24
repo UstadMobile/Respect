@@ -19,6 +19,7 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.ext.map
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.BookmarkDetails
 import world.respect.datalayer.school.model.StatusEnum
@@ -31,6 +32,7 @@ import world.respect.shared.generated.resources.undo
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.getValue
@@ -142,7 +144,9 @@ class BookmarkListViewModel(
                             params = DataLoadParams(),
                             referrerUrl = null,
                             expectedPublicationId = null
-                        )
+                        ).map { publication ->
+                            publication.resolve(bookmark.appManifestUrl)
+                        }
                     BookmarkDetails(bookmark, app)
                 }
             }.awaitAll()

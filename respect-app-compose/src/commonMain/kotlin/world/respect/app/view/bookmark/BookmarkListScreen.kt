@@ -158,10 +158,9 @@ private fun BookmarkListContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             bookmarkDetails.app?.dataOrNull()?.findIcons()?.firstOrNull()
-                                ?.toString()
-                                .also { icon ->
+                                ?.also { icon ->
                                     RespectAsyncImage(
-                                        uri = icon,
+                                        uri = icon.href,
                                         contentDescription = "",
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier

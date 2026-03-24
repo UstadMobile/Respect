@@ -20,6 +20,7 @@ import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.datalayer.school.model.Bookmark
@@ -115,8 +116,14 @@ class LearningUnitDetailViewModel(
                 referrerUrl = null,
                 expectedPublicationId = null,
             ).collect { app ->
-                _uiState.update { it.copy(app = app) }
-            }
+                    _uiState.update {
+                        it.copy(
+                            app = app.map { publication ->
+                                publication.resolve(route.appManifestUrl)
+                            }
+                        )
+                    }
+                }
         }
 
         viewModelScope.launch {

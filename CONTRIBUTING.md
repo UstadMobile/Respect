@@ -27,6 +27,7 @@ There are many ways you might be able to contribute to RESPECT! This is an open 
 * Ensure that changes are in the best interest of as many of our users and potential users as possible.
 * Be welcoming to newcomers and encourage new contributors from all backgrounds
 * DO remind others of applicable standards, engineer practices, best practices, documentation, etc. DO NOT insult or demean users (e.g. no RTFM type responses).
+* Core admins (those who have write access to the main branch) must be qualified to review code as per the architecture and have a long history of contributions that adhere to the [coding guidelines](https://github.com/UstadMobile/Respect/blob/main/CODING_GUIDELINES.md).
 
 # Your First Contribution
 Unsure where to start? You could:

@@ -67,25 +67,20 @@ If you find a security vulnerability, do NOT open an issue. Email mike@ustadmobi
 * Schools can use your app on RESPECT. RESPECT's architecture is built around digital sovereignty and privacy: no party can block an app. Any app developer can publish a compatible app and any school admin can add an app to their school using the manifest URL as above.
 * If an app meets the [Google Play Family policy](https://play.google.com/console/about/programs/families/) e.g. it does not contain material widely considered as unacceptable for children then it can be added to the RESPECT default catalog of apps available for admins to add to their school. Create an [issue](https://github.com/UstadMobile/Respect/) and select the _Request to add compatible app to default catalog_ template.
 
+# Translation/localization
+
+RESPECT Compatible apps and lessons can be offered in any language, even when that language is not directly supported in the RESPECT app. If you want to add a new language to RESPECT:
+
+* Create a new [issue](https://github.com/UstadMobile/Respect/issues) and select the add new language template.
+* Include a link to any other software translation you have done before in the issue
+* You'll be provided with a link to Weblate (an online translation platform) where you can add translations.
+
 # Community
-If there are other channels you use besides GitHub to discuss contributions, mention them here. You can also list the author, maintainers, and/or contributors here, or set expectations for response time.
 
-> You can chat with the core team on https://gitter.im/cucumber/cucumber. We try to have office hours on Fridays.
+We're social people. You can discuss with the core team and other community members through:
 
-[source: [cucumber-ruby](https://github.com/cucumber/cucumber-ruby/blob/master/CONTRIBUTING.md#talking-with-other-devs)] **Need more inspiration?**
- [1] [Chef](https://github.com/chef/chef/blob/master/CONTRIBUTING.md#-developer-office-hours) [2] [Cookiecutter](https://github.com/audreyr/cookiecutter#community)
+* Slack: Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3t8dpyxxs-0nSsFsLGau5MjVZQzrlvqA)
+* [Github Discussions](https://github.com/UstadMobile/Respect/discussions) on this repository.
 
-# BONUS: Code, commit message and labeling conventions
-These sections are not necessary, but can help streamline the contributions you receive.
+> Credit: This CONTRIBUTING.md was dervied from [contributing-template](https://github.com/nayafia/contributing-template).
 
-### Explain your preferred style for code, if you have any.
-
-**Need inspiration?** [1] [Requirejs](http://requirejs.org/docs/contributing.html#codestyle) [2] [Elasticsearch](https://github.com/elastic/elasticsearch/blob/master/CONTRIBUTING.md#contributing-to-the-elasticsearch-codebase)
-
-### Explain if you use any commit message conventions.
-
-**Need inspiration?** [1] [Angular](https://github.com/angular/material/blob/master/.github/CONTRIBUTING.md#submit) [2] [Node.js](https://github.com/nodejs/node/blob/master/CONTRIBUTING.md#step-3-commit)
-
-### Explain if you use any labeling conventions for issues.
-
-**Need inspiration?** [1] [StandardIssueLabels](https://github.com/wagenet/StandardIssueLabels#standardissuelabels) [2] [Atom](https://github.com/atom/atom/blob/master/CONTRIBUTING.md#issue-and-pull-request-labels)

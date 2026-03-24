@@ -95,7 +95,6 @@ import world.respect.shared.navigation.IndicatorDetail
 import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
-import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList

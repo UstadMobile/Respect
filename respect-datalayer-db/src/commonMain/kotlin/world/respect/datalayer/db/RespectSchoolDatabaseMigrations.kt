@@ -20,24 +20,6 @@ val MIGRATION_11_12 = object: Migration(11, 12) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `OpdsFeedMetadataEntity` (`ofmeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ofmeOfeUid` INTEGER NOT NULL, `ofmePropType` INTEGER NOT NULL, `ofmePropFk` INTEGER NOT NULL, `ofmeIdentifier` TEXT, `ofmeType` TEXT, `ofmeTitle` TEXT NOT NULL, `ofmeSubtitle` TEXT, `ofmeModified` INTEGER, `ofmeDescription` TEXT, `ofmeItemsPerPage` INTEGER, `ofmeCurrentPage` INTEGER, `ofmeNumberOfItems` INTEGER)")
     }
 }
-val MIGRATION_8_9 = object : Migration(8, 9) {
-    override fun migrate(connection: SQLiteConnection) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        connection.execSQL("""
-            INSERT OR IGNORE INTO SchoolPermissionGrantEntity 
-            (spgUid, spgUidNum, spgStatusEnum, spgToRole, spgPermissions, spgLastModified, spgStored)
-            VALUES 
-            ('shared_device_default', 
-             ${System.currentTimeMillis()}, 
-             'ACTIVE', 
-             'sharedschooldevice', 
-             ${PermissionFlags.SHARED_DEVICE_DEFAULT_SCHOOL_PERMISSIONS}, 
-             $now, 
-             $now)
-        """.trimIndent())
-    }
-}
-
 
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 

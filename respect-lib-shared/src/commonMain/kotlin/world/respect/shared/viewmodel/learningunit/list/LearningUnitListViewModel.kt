@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -15,24 +16,30 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
+import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
+import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
@@ -41,6 +48,8 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
 data class LearningUnitListUiState(
@@ -61,18 +70,15 @@ data class LearningUnitListUiState(
     val selectedPublications: Set<String> = emptySet(),
     val showCopyDialog: Boolean = false,
     val copyDialogName: String = "",
+    val showDeleteDialog: Boolean = false,
 ) {
-    fun isSectionCollapsed(sectionTitle: String) = sectionTitle in collapsedSections
+    fun isSectionCollapsed(sectionKey: String) = sectionKey in collapsedSections
 
     fun isPublicationSelected(publication: OpdsPublication): Boolean =
         publication.metadata.identifier?.toString() in selectedPublications
 
     val selectedCount: Int
         get() = selectedPublications.size
-
-    val hasLearningItems: Boolean
-        get() = publications.isNotEmpty() ||
-                group.any { it.publications?.isNotEmpty() == true }
 }
 
 private fun LearningUnitListUiState.withFeedContent(feed: OpdsFeed): LearningUnitListUiState {
@@ -103,9 +109,7 @@ class LearningUnitListViewModel(
     init {
         viewModelScope.launch {
             _appUiState.update {
-                it.copy(
-                    searchState = AppBarSearchUiState(visible = true)
-                )
+                it.copy(searchState = AppBarSearchUiState(visible = true))
             }
 
             schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
@@ -138,7 +142,6 @@ class LearningUnitListViewModel(
                             )
                         }
                     }
-
                     else -> {}
                 }
             }
@@ -146,11 +149,15 @@ class LearningUnitListViewModel(
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
-        _uiState.update {
-            it.copy(activeSortOrderOption = sortOption)
-        }
+        _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
 
+    /**
+     * Single tap:
+     * - In pick mode (resultDest set): enters multi-select mode and toggles selection
+     * - In multi-select mode: toggles selection
+     * - Otherwise: navigates to detail
+     */
     fun onClickPublication(publication: OpdsPublication) {
         val isPickMode = route.resultDest != null
 
@@ -178,6 +185,10 @@ class LearningUnitListViewModel(
             )
         )
     }
+
+    /**
+     * Long press — enters multi-select mode and selects the item.
+     */
     fun onLongPressPublication(publication: OpdsPublication) {
         _uiState.update { it.copy(isMultiSelectMode = true) }
         toggleSelection(publication)
@@ -194,6 +205,28 @@ class LearningUnitListViewModel(
             prev.copy(
                 selectedPublications = updated,
                 isMultiSelectMode = updated.isNotEmpty(),
+            )
+        }
+    }
+
+    fun onClickSelectAll() {
+        val allIds = (_uiState.value.publications +
+                _uiState.value.group.flatMap { it.publications ?: emptyList() })
+            .mapNotNull { it.metadata.identifier?.toString() }
+            .toSet()
+        _uiState.update { prev ->
+            prev.copy(
+                selectedPublications = allIds,
+                isMultiSelectMode = allIds.isNotEmpty(),
+            )
+        }
+    }
+
+    fun onClickSelectNone() {
+        _uiState.update { prev ->
+            prev.copy(
+                selectedPublications = emptySet(),
+                isMultiSelectMode = false,
             )
         }
     }
@@ -289,29 +322,32 @@ class PlaylistDetailViewModel(
                         _appUiState.update {
                             it.copy(title = result.data.metadata.title.asUiText())
                         }
-                        _uiState.update {
-                            it.withFeedContent(result.data)
-                        }
+                        _uiState.update { it.withFeedContent(result.data) }
                     }
                     else -> {}
                 }
             }
         }
     }
-
-    fun onClickToggleSection(sectionTitle: String) {
+    fun onClickToggleSection(sectionKey: String) {
         _uiState.update { prev ->
-            val updatedCollapsed = if (sectionTitle in prev.collapsedSections) {
-                prev.collapsedSections - sectionTitle
+            val updatedCollapsed = if (sectionKey in prev.collapsedSections) {
+                prev.collapsedSections - sectionKey
             } else {
-                prev.collapsedSections + sectionTitle
+                prev.collapsedSections + sectionKey
             }
             prev.copy(collapsedSections = updatedCollapsed)
         }
     }
 
     fun onClickShare() {
-        // TODO: implement share playlist
+        val playlistUrl = _uiState.value.feed?.selfUrl()
+            ?: throw IllegalStateException(
+                "Cannot share playlist: feed has no self URL"
+            )
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(PlaylistShare.create(playlistUrl = playlistUrl))
+        )
     }
 
     fun onClickCopyPlaylist() {
@@ -319,7 +355,7 @@ class PlaylistDetailViewModel(
         _uiState.update {
             it.copy(
                 showCopyDialog = true,
-                copyDialogName = "Copy the ${feed.metadata.title}",
+                copyDialogName = feed.metadata.title,
             )
         }
     }
@@ -337,12 +373,22 @@ class PlaylistDetailViewModel(
         val newName = _uiState.value.copyDialogName.trim()
         if (newName.isBlank()) return
 
-        val activeAccount = accountManager.activeAccount
-            ?: throw IllegalStateException(
-                "No active account when copying playlist"
-            )
-
         viewModelScope.launch {
+            val activeAccount = accountManager.activeAccount
+                ?: throw IllegalStateException("No active account when copying playlist")
+
+            val sessionAndPerson = accountManager.selectedAccountAndPersonFlow
+                .first { it != null }
+
+            val username = sessionAndPerson?.person?.username
+                ?.takeIf { it.isNotBlank() }
+                ?: listOfNotNull(
+                    sessionAndPerson?.person?.givenName?.takeIf { it.isNotBlank() },
+                    sessionAndPerson?.person?.familyName?.takeIf { it.isNotBlank() },
+                ).joinToString(" ").takeIf { it.isNotBlank() }
+                ?: sessionAndPerson?.person?.guid
+                ?: throw IllegalStateException("No username available when copying playlist")
+
             @OptIn(ExperimentalUuidApi::class)
             val copiedFeed = MakePlaylistOpdsFeedUseCase(
                 schoolUrl = activeAccount.school.self
@@ -350,7 +396,7 @@ class PlaylistDetailViewModel(
                 base = feed.copy(
                     metadata = feed.metadata.copy(title = newName)
                 ),
-                userGuid = activeAccount.userGuid,
+                username = username,
             )
 
             schoolDataSource.opdsFeedDataSource.store(listOf(copiedFeed))
@@ -359,6 +405,7 @@ class PlaylistDetailViewModel(
 
             val copiedUrl = copiedFeed.selfUrl()
                 ?: throw IllegalStateException("Copied feed has no self URL")
+
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     PlaylistEdit.create(
@@ -371,7 +418,121 @@ class PlaylistDetailViewModel(
     }
 
     fun onClickDelete() {
-        // TODO: implement delete playlist
+        _uiState.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun onDeleteDialogDismiss() {
+        _uiState.update { it.copy(showDeleteDialog = false) }
+    }
+
+    fun onDeleteDialogConfirm() {
+        viewModelScope.launch {
+            val feed = _uiState.value.feed ?: return@launch
+            val selfHref = feed.selfUrl()?.toString() ?: return@launch
+
+            val activeAccount = accountManager.activeAccount
+                ?: throw IllegalStateException(
+                    "No active account when deleting playlist"
+                )
+
+            val playlistListUrl = Url(
+                "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
+            )
+
+            val existingListFeed = schoolDataSource.opdsFeedDataSource
+                .getByUrl(url = playlistListUrl, params = DataLoadParams())
+                .dataOrNull()
+
+            if (existingListFeed != null) {
+                val updatedPublications = (existingListFeed.publications ?: emptyList())
+                    .filter { pub ->
+                        pub.links.none { link ->
+                            link.rel?.contains(PlaylistListUiState.REL_SELF) == true &&
+                                    link.href == selfHref
+                        }
+                    }
+
+                val updatedListFeed = OpdsFeed(
+                    metadata = OpdsFeedMetadata(
+                        title = existingListFeed.metadata.title,
+                        modified = Instant.fromEpochMilliseconds(systemTimeInMillis()),
+                    ),
+                    links = existingListFeed.links,
+                    publications = updatedPublications,
+                    groups = existingListFeed.groups ?: emptyList(),
+                )
+
+                schoolDataSource.opdsFeedDataSource.store(listOf(updatedListFeed))
+            }
+
+            _uiState.update { it.copy(showDeleteDialog = false) }
+            _navCommandFlow.tryEmit(NavCommand.PopUp())
+        }
+    }
+
+    fun onClickNavigation(navigation: ReadiumLink) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                PlaylistDetail.create(playlistUrl = Url(navigation.href))
+            )
+        )
+    }
+
+    fun onClickPublication(publication: OpdsPublication) {
+        val selfHref = publication.links.find {
+            it.rel?.contains(LearningUnitListViewModel.SELF) == true
+        }?.href ?: throw IllegalStateException(
+            "Publication has no self link: ${publication.metadata.title}"
+        )
+
+        val appManifestUrl = _uiState.value.feed?.selfUrl()
+            ?: throw IllegalStateException(
+                "Cannot navigate to publication: playlist feed has no self URL"
+            )
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = Url(selfHref),
+                    appManifestUrl = appManifestUrl,
+                    expectedIdentifier = publication.metadata.identifier?.toString(),
+                )
+            )
+        )
+    }
+
+    fun onClickAssignSection(sectionIndex: Int) {
+        val feed = _uiState.value.feed ?: throw IllegalStateException(
+            "Cannot assign: no playlist feed loaded"
+        )
+
+        val playlistUrl = feed.selfUrl()
+            ?: throw IllegalStateException(
+                "Cannot assign: playlist feed has no self URL"
+            )
+
+        val section = _uiState.value.group.getOrNull(sectionIndex)
+            ?: throw IllegalStateException(
+                "No section at index $sectionIndex"
+            )
+
+        val firstPublication = section.publications?.firstOrNull()
+            ?: throw IllegalStateException(
+                "Assign clicked but section at index $sectionIndex has no learning items"
+            )
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = AssignmentEdit.create(
+                    uid = null,
+                    learningUnitSelected = LearningUnitSelection(
+                        learningUnitManifestUrl = playlistUrl,
+                        selectedPublication = firstPublication,
+                        appManifestUrl = playlistUrl,
+                    )
+                )
+            )
+        )
     }
 
     fun onClickEdit() {

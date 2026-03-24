@@ -1,6 +1,5 @@
 package world.respect.shared.viewmodel.playlists.mapping.share
 
-
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -47,7 +46,6 @@ class PlaylistShareViewModel(
     private val shareLinkLauncher: LaunchShareLinkUseCase,
     private val smsLinkLauncher: LaunchSendSmsUseCase,
     private val emailLinkLauncher: LaunchSendEmailUseCase,
-    private val createPlaylistShareLinkUseCase: CreatePlaylistShareLinkUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -70,8 +68,16 @@ class PlaylistShareViewModel(
                 userAccountIconVisible = false,
             )
         }
-        val shareUrl = createPlaylistShareLinkUseCase(route.playlistUrl).toString()
 
+        val activeAccount = accountManager.activeAccount
+            ?: throw IllegalStateException(
+                "No active account when initializing PlaylistShareViewModel"
+            )
+        val createPlaylistShareLinkUseCase = CreatePlaylistShareLinkUseCase(
+            schoolUrl = activeAccount.school.self
+        )
+
+        val shareUrl = createPlaylistShareLinkUseCase(route.playlistUrl.toString()).toString()
         _uiState.update { it.copy(shareUrl = shareUrl) }
 
         viewModelScope.launch {

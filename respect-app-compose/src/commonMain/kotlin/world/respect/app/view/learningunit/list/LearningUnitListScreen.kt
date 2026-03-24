@@ -20,11 +20,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -37,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,14 +53,21 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_tasks_to_assignment
+import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.duration
 import world.respect.shared.generated.resources.make_a_copy
 import world.respect.shared.generated.resources.name
+import world.respect.shared.generated.resources.permanently_delete
+import world.respect.shared.generated.resources.permanently_delete_description
+import world.respect.shared.generated.resources.select_all
 import world.respect.shared.generated.resources.select_count_items
+import world.respect.shared.generated.resources.select_none
 import world.respect.shared.generated.resources.share
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -79,6 +89,8 @@ fun LearningUnitListScreen(
         onLongPressPublication = viewModel::onLongPressPublication,
         onClickNavigation = viewModel::onClickNavigation,
         onClickConfirmSelection = viewModel::onClickConfirmSelection,
+        onClickSelectAll = viewModel::onClickSelectAll,
+        onClickSelectNone = viewModel::onClickSelectNone,
     )
 }
 
@@ -90,6 +102,8 @@ fun LearningUnitListScreen(
     onLongPressPublication: (OpdsPublication) -> Unit = {},
     onClickNavigation: (ReadiumLink) -> Unit,
     onClickConfirmSelection: () -> Unit = {},
+    onClickSelectAll: () -> Unit = {},
+    onClickSelectNone: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -101,6 +115,30 @@ fun LearningUnitListScreen(
                 PaddingValues()
             },
         ) {
+            if (uiState.isMultiSelectMode) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        TextButton(
+                            onClick = onClickSelectAll,
+                            modifier = Modifier.testTag("select_all_button"),
+                        ) {
+                            Text(text = stringResource(Res.string.select_all))
+                        }
+                        TextButton(
+                            onClick = onClickSelectNone,
+                            modifier = Modifier.testTag("select_none_button"),
+                        ) {
+                            Text(text = stringResource(Res.string.select_none))
+                        }
+                    }
+                }
+            }
+
             itemsIndexed(
                 items = uiState.navigation,
                 key = { _, navigation -> navigation.href }
@@ -127,9 +165,7 @@ fun LearningUnitListScreen(
             uiState.group.forEach { group ->
                 item {
                     ListItem(
-                        headlineContent = {
-                            Text(text = group.metadata.title)
-                        }
+                        headlineContent = { Text(text = group.metadata.title) }
                     )
                 }
 
@@ -168,7 +204,10 @@ fun LearningUnitListScreen(
                     .testTag("confirm_selection_button"),
             ) {
                 Text(
-                    text = stringResource(Res.string.select_count_items, uiState.selectedCount),
+                    text = stringResource(
+                        Res.string.select_count_items,
+                        uiState.selectedCount,
+                    ),
                 )
             }
         }
@@ -180,6 +219,14 @@ fun PlaylistDetailScreenForViewModel(
     viewModel: PlaylistDetailViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val copyOfPlaylistTemplate = stringResource(Res.string.copy_of_playlist)
+    LaunchedEffect(uiState.showCopyDialog) {
+        if (uiState.showCopyDialog) {
+            viewModel.onCopyDialogNameChanged(
+                copyOfPlaylistTemplate.format(uiState.copyDialogName)
+            )
+        }
+    }
 
     PlaylistDetailScreen(
         uiState = uiState,
@@ -187,11 +234,14 @@ fun PlaylistDetailScreenForViewModel(
         onClickShare = viewModel::onClickShare,
         onClickCopyPlaylist = viewModel::onClickCopyPlaylist,
         onClickDelete = viewModel::onClickDelete,
-        onClickPublication = {},
-        onClickNavigation = {},
+        onClickAssignSection = viewModel::onClickAssignSection,
+        onClickPublication = viewModel::onClickPublication,
+        onClickNavigation = viewModel::onClickNavigation,
         onCopyDialogDismiss = viewModel::onCopyDialogDismiss,
         onCopyDialogNameChanged = viewModel::onCopyDialogNameChanged,
         onCopyDialogConfirm = viewModel::onCopyDialogConfirm,
+        onDeleteDialogDismiss = viewModel::onDeleteDialogDismiss,
+        onDeleteDialogConfirm = viewModel::onDeleteDialogConfirm,
     )
 }
 
@@ -202,11 +252,14 @@ fun PlaylistDetailScreen(
     onClickShare: () -> Unit,
     onClickCopyPlaylist: () -> Unit,
     onClickDelete: () -> Unit,
+    onClickAssignSection: (Int) -> Unit = {},
     onClickPublication: (OpdsPublication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit,
     onCopyDialogDismiss: () -> Unit = {},
     onCopyDialogNameChanged: (String) -> Unit = {},
     onCopyDialogConfirm: () -> Unit = {},
+    onDeleteDialogDismiss: () -> Unit = {},
+    onDeleteDialogConfirm: () -> Unit = {},
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
@@ -219,21 +272,21 @@ fun PlaylistDetailScreen(
             HorizontalDivider()
         }
 
-        uiState.group.forEach { group ->
-            item(key = "section_${group.metadata.title}") {
+        uiState.group.forEachIndexed { sectionIndex, group ->
+            item(key = "section_$sectionIndex") {
                 PlaylistSectionHeader(
                     title = group.metadata.title,
-                    isCollapsed = uiState.isSectionCollapsed(group.metadata.title),
-                    onClickToggle = { onClickToggleSection(group.metadata.title) },
+                    isCollapsed = uiState.isSectionCollapsed(sectionIndex.toString()),
+                    showAssignButton = group.publications?.isNotEmpty() == true,
+                    onClickToggle = { onClickToggleSection(sectionIndex.toString()) },
+                    onClickAssign = { onClickAssignSection(sectionIndex) },
                 )
             }
 
-            if (!uiState.isSectionCollapsed(group.metadata.title)) {
+            if (!uiState.isSectionCollapsed(sectionIndex.toString())) {
                 itemsIndexed(
                     items = group.navigation ?: emptyList(),
-                    key = { _, navigation ->
-                        "nav_${group.metadata.title}_${navigation.href}"
-                    }
+                    key = { itemIndex, _ -> "nav_${sectionIndex}_${itemIndex}" }
                 ) { _, navigation ->
                     NavigationListItem(
                         navigation = navigation,
@@ -242,9 +295,7 @@ fun PlaylistDetailScreen(
                 }
                 itemsIndexed(
                     items = group.publications ?: emptyList(),
-                    key = { _, publication ->
-                        "pub_${group.metadata.title}_${publication.metadata.identifier}"
-                    }
+                    key = { itemIndex, _ -> "pub_${sectionIndex}_${itemIndex}" }
                 ) { _, publication ->
                     PublicationListItem(
                         publication = publication,
@@ -266,6 +317,13 @@ fun PlaylistDetailScreen(
             onConfirm = onCopyDialogConfirm,
         )
     }
+
+    if (uiState.showDeleteDialog) {
+        DeletePlaylistDialog(
+            onDismiss = onDeleteDialogDismiss,
+            onConfirm = onDeleteDialogConfirm,
+        )
+    }
 }
 
 @Composable
@@ -277,9 +335,7 @@ private fun CopyPlaylistDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(Res.string.make_a_copy))
-        },
+        title = { Text(text = stringResource(Res.string.make_a_copy)) },
         text = {
             OutlinedTextField(
                 value = name,
@@ -311,6 +367,37 @@ private fun CopyPlaylistDialog(
 }
 
 @Composable
+private fun DeletePlaylistDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(imageVector = Icons.Filled.Delete, contentDescription = null) },
+        title = { Text(text = stringResource(Res.string.permanently_delete)) },
+        text = { Text(text = stringResource(Res.string.permanently_delete_description)) },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                modifier = Modifier.testTag("delete_dialog_confirm"),
+            ) {
+                Text(
+                    text = stringResource(Res.string.delete),
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("delete_dialog_dismiss"),
+            ) {
+                Text(text = stringResource(Res.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
 private fun PlaylistDetailHeader(
     uiState: LearningUnitListUiState,
     onClickShare: () -> Unit,
@@ -327,7 +414,9 @@ private fun PlaylistDetailHeader(
                     contentAlignment = Alignment.Center,
                 ) {
                     RespectAsyncImage(
-                        uri = uiState.publications.firstOrNull()
+                        uri = uiState.group
+                            .flatMap { it.publications ?: emptyList() }
+                            .firstOrNull()
                             ?.images?.firstOrNull()?.href,
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
@@ -355,17 +444,20 @@ private fun PlaylistDetailHeader(
                 icon = Icons.Filled.Share,
                 label = stringResource(Res.string.share),
                 onClick = onClickShare,
+                testTag = "share_btn",
             )
             PlaylistActionButton(
                 icon = Icons.Filled.ContentCopy,
                 label = stringResource(Res.string.copy_playlist),
                 onClick = onClickCopyPlaylist,
+                testTag = "copy_btn",
             )
             if (uiState.isTeacherOrAdmin) {
                 PlaylistActionButton(
                     icon = Icons.Filled.Delete,
                     label = stringResource(Res.string.delete),
                     onClick = onClickDelete,
+                    testTag = "delete_btn",
                 )
             }
         }
@@ -377,18 +469,16 @@ private fun PlaylistActionButton(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
+    testTag: String,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IconButton(onClick = onClick) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-            )
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier.testTag(testTag),
+        ) {
+            Icon(imageVector = icon, contentDescription = label)
         }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-        )
+        Text(text = label, style = MaterialTheme.typography.labelSmall)
     }
 }
 
@@ -396,25 +486,40 @@ private fun PlaylistActionButton(
 private fun PlaylistSectionHeader(
     title: String,
     isCollapsed: Boolean,
+    showAssignButton: Boolean,
     onClickToggle: () -> Unit,
+    onClickAssign: () -> Unit,
 ) {
     ListItem(
         headlineContent = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-            )
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
         },
         trailingContent = {
-            IconButton(onClick = onClickToggle) {
-                Icon(
-                    imageVector = if (isCollapsed) {
-                        Icons.Filled.ExpandMore
-                    } else {
-                        Icons.Filled.ExpandLess
-                    },
-                    contentDescription = null,
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showAssignButton) {
+                    IconButton(
+                        onClick = onClickAssign,
+                        modifier = Modifier.testTag("assign_btn"),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Task,
+                            contentDescription = stringResource(Res.string.assign),
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = onClickToggle,
+                    modifier = Modifier.testTag("expand_collapse_icon"),
+                ) {
+                    Icon(
+                        imageVector = if (isCollapsed) {
+                            Icons.Filled.ExpandMore
+                        } else {
+                            Icons.Filled.ExpandLess
+                        },
+                        contentDescription = null,
+                    )
+                }
             }
         },
     )
@@ -455,20 +560,14 @@ private fun FeedListItem(
                 )
             }
         },
-        headlineContent = {
-            Text(text = title)
-        },
+        headlineContent = { Text(text = title) },
         supportingContent = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(text = stringResource(Res.string.classes))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    language?.let {
-                        Text(text = it.joinToString(", "))
-                    }
+                    language?.let { Text(text = it.joinToString(", ")) }
                     duration?.let {
-                        Text(
-                            text = "${stringResource(Res.string.duration)} - $it"
-                        )
+                        Text(text = "${stringResource(Res.string.duration)} - $it")
                     }
                 }
             }
@@ -478,6 +577,7 @@ private fun FeedListItem(
                 Checkbox(
                     checked = isSelected,
                     onCheckedChange = null,
+                    modifier = Modifier.testTag("check_box"),
                 )
             }
         } else {
@@ -492,7 +592,9 @@ fun NavigationListItem(
     onClickNavigation: (ReadiumLink) -> Unit,
 ) {
     FeedListItem(
-        title = navigation.title.toString(),
+        title = navigation.title
+            ?.takeIf { it != "null" && it.isNotBlank() }
+            ?: navigation.href,
         iconUrl = navigation.alternate?.find {
             it.rel?.contains(ICON) == true
         }?.href,

@@ -102,7 +102,7 @@ onFlowComplete:
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
 - tapOn: "People"
-
+- tapOn: "TeacherA User"
 - tapOn:
     id: "floating_action_button"   # Edit button
 - tapOn: "First names*"

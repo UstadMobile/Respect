@@ -78,7 +78,5 @@ onFlowComplete:
 - tapOn:                       #Remove bookmark
     text: "Bookmark"
     index: 0
-- assertVisible: "1 Remove Bookmark"
-- assertVisible: "Undo"
 - assertNotVisible: "Lesson 001"
-
+- assertVisible: "Lesson 002"

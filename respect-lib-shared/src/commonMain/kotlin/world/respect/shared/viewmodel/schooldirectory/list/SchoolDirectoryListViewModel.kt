@@ -3,12 +3,16 @@ package world.respect.shared.viewmodel.schooldirectory.list
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
+import io.ktor.http.URLBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.libutil.ext.appendEndpointSegments
+import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.school_directories
@@ -20,7 +24,6 @@ import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import java.net.URLEncoder
 
 data class SchoolDirectoryListUiState(
     val schoolDirectory: List<RespectSchoolDirectory> = emptyList(),
@@ -31,6 +34,7 @@ class SchoolDirectoryListViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
     private val launchCustomTabUseCase: LaunchCustomTabUseCase,
+    private val getAppVersionInfoUseCase: GetAppVersionInfoUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val route: SchoolDirectoryList = savedStateHandle.toRoute()
@@ -86,13 +90,22 @@ class SchoolDirectoryListViewModel(
     fun onSelectDirectory(directory: RespectSchoolDirectory) {
         when (route.mode) {
             SchoolDirectoryMode.SELECT -> {
-                val encodedPackageName = URLEncoder.encode("world.respect.app", "UTF-8") //TODO Need to use package name from build config
-                val registrationUrl = "${directory.baseUrl}register-school?packageName=$encodedPackageName"
+                viewModelScope.launch {
+                    val appInfo = getAppVersionInfoUseCase()
 
-                launchCustomTabUseCase(url = registrationUrl)
+                    launchCustomTabUseCase(
+                        url = URLBuilder(
+                            directory.baseUrl.appendEndpointSegments("school-directory/register-school")
+                        ).apply {
+                            parameters.append("packageName", appInfo.packageName)
+                        }.build().toString()
+                    )
+                }
             }
 
-            else -> {}
+            else -> {
+                Napier.d { "SchoolDirectoryListViewModel: onSelectDirectory called but mode is ${route.mode}, not SELECT" }
+            }
         }
     }
 }

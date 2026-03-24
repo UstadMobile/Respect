@@ -20,10 +20,10 @@ import world.respect.shared.generated.resources.qr_code_invalid_format
 import world.respect.shared.generated.resources.scan_qr_code
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.CreateAccountSetUsername
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
@@ -177,7 +177,7 @@ class ScanQRCodeViewModel(
                 destination = if (route.isSharedDevice) {
                     AssignmentList
                 } else {
-                    RespectAppLauncher()
+                    Home
                 },
                 clearBackStack = true,
             )

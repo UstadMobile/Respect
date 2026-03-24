@@ -98,6 +98,9 @@ data class LoginScreen(
 }
 
 @Serializable
+object Home : RespectAppRoute
+
+@Serializable
 data class RespectAppLauncher(
     val resultDestStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest{

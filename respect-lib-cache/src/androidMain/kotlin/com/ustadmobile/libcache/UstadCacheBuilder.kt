@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import android.content.Context
 import androidx.room.Room
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseAndroid
@@ -43,7 +44,8 @@ class UstadCacheBuilder(
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseAndroid(
                 appContext = appContext, db = dbVal, xxStringHasher = xxStringHasher,
             ),
-            db = dbVal
+            db = dbVal,
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
     }
 

@@ -1,7 +1,11 @@
 package world.respect.server
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.Url
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -39,7 +43,9 @@ import world.respect.server.account.invite.username.UsernameSuggestionUseCaseSer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
-import world.respect.server.domain.school.add.RegisterSchoolUseCase
+import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
+import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
+import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
@@ -74,6 +80,7 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
@@ -116,9 +123,6 @@ fun serverKoinModule(
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-    single<PrimaryKeyGenerator> {
-        PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
-    }
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
@@ -131,7 +135,6 @@ fun serverKoinModule(
             respectAppDatabase = get(),
             json = get(),
             xxStringHasher = get(),
-            primaryKeyGenerator = get(),
         )
     }
 
@@ -151,7 +154,23 @@ fun serverKoinModule(
         )
     }
     single<RegisterSchoolUseCase> {
-        RegisterSchoolUseCase()
+        RegisterSchoolUseCaseImpl()
+    }
+    single<SchoolUrlVerificationManager> {
+        SchoolUrlVerificationManager()
+    }
+    single<HttpClient> {
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(json = get())
+            }
+        }
+    }
+    single<VerifySchoolUrlPointsToThisServerUseCase> {
+        VerifySchoolUrlPointsToThisServerUseCase(
+            verificationManager = get(),
+            httpClient = get()
+        )
     }
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
@@ -235,7 +254,7 @@ fun serverKoinModule(
             Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_8_9)
+                .addMigrations(MIGRATION_2_3(false))
                 .build()
         }
 
@@ -368,6 +387,9 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 checkPersonPermissionUseCase = get(),
+                json = get(),
+                primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator,
+                defaultAppCatalogUrl = RespectServerBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         }
 

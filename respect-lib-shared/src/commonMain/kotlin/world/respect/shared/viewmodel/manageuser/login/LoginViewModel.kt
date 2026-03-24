@@ -26,10 +26,10 @@ import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.EnterInviteCode
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
@@ -116,7 +116,7 @@ class LoginViewModel(
                                     destination = if(authResponse.person.status == PersonStatusEnum.PENDING_APPROVAL) {
                                         WaitingForApproval()
                                     }else {
-                                        RespectAppLauncher()
+                                        Home
                                     },
                                     clearBackStack = true
                                 )
@@ -225,7 +225,7 @@ class LoginViewModel(
                             destination = if(authResponse.person.status == PersonStatusEnum.PENDING_APPROVAL) {
                                 WaitingForApproval()
                             }else {
-                                RespectAppLauncher()
+                                Home
                             },
                             clearBackStack = true,
                         )

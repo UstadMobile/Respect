@@ -20,6 +20,7 @@ import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.waiting_title
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SelectClass
@@ -76,7 +77,7 @@ class WaitingForApprovalViewModel(
                             destination = if (personLoaded.roles.firstOrNull()?.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE) {
                                 SelectClass.create(deviceGuid = personLoaded.guid)
                             } else {
-                                RespectAppLauncher()
+                                Home
                             },
                             clearBackStack = true
                         )

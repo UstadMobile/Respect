@@ -1,6 +1,10 @@
 package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.shared.ModelWithTimes
+import world.respect.lib.serializers.InstantAsISO8601
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Serializable
 data class ChangeHistoryEntry(
@@ -9,8 +13,18 @@ data class ChangeHistoryEntry(
     val table: ChangeHistoryTableEnum,
     val timestamp: Long,
     val whoGuid: String,
-    val changes: List<ChangeHistoryChange>
-)
+    val changes: List<ChangeHistoryChange>,
+    override val lastModified: InstantAsISO8601 = Clock.System.now(),
+    override val stored: InstantAsISO8601 = Clock.System.now(),
+): ModelWithTimes  {
+
+    companion object {
+
+        const val TABLE_ID = 31
+
+    }
+}
+
 
 @Serializable
 data class ChangeHistoryEntryWithWhoDid(
@@ -20,7 +34,11 @@ data class ChangeHistoryEntryWithWhoDid(
 
 @Serializable
 data class ChangeHistoryChange(
+    val id : Long =0,
     val field: ChangeHistoryFieldEnum,
     val newVal: String,
-    val oldVal: String?
-)
+    val oldVal: String?,
+    val synced : Boolean = false,
+    override val lastModified: InstantAsISO8601 = Clock.System.now(),
+    override val stored: InstantAsISO8601 = Clock.System.now(),
+): ModelWithTimes

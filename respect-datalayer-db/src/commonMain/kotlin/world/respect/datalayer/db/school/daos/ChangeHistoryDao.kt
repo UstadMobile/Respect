@@ -34,7 +34,32 @@ interface ChangeHistoryDao {
         insertHistory(history)
         insertChanges(changes)
     }
+    @Query("""
+         SELECT * 
+           FROM ChangeHistoryEntity
+          WHERE hTable = :tableEnum
+           AND hTableGuid IN (:uids)
+    """)
+    suspend fun getByTableAndUids(
+        tableEnum: ChangeHistoryTableEnum,
+        uids: List<String>
+    ): List<ChangeHistoryWithChanges>
 
+    @Query("""
+         SELECT *
+           FROM ChangeHistoryEntity
+          WHERE hTable = :tableEnum
+           AND hTableGuid IN (:uids)
+           AND hGuidHash IN (
+              SELECT hcHistoryGuidHash
+                FROM ChangeHistoryChangeEntity
+               WHERE hcSynced = 0
+             )
+      """)
+    suspend fun getParentsWithUnsyncedChanges(
+        tableEnum: ChangeHistoryTableEnum,
+        uids: List<String>
+    ): List<ChangeHistoryEntity>
     @Query("""
          SELECT *
            FROM ChangeHistoryEntity
@@ -46,7 +71,17 @@ interface ChangeHistoryDao {
         table: ChangeHistoryTableEnum?,
         whoGuidHash: Long,
     ): PagingSource<Int, ChangeHistoryWithChanges>
+    @Query("""
+        SELECT *
+          FROM ChangeHistoryChangeEntity
+         WHERE hcHistoryGuidHash IN (:historyIds)
+           AND hcSynced = 0
+    """)
+    suspend fun getUnsyncedChanges(
+        historyIds: List<Long>
+    ): List<ChangeHistoryChangeEntity>
 
+    @Transaction
     @Query(
         """
         SELECT *
@@ -56,14 +91,20 @@ interface ChangeHistoryDao {
     )
     suspend fun findByGuid(tableGuid: String): List<ChangeHistoryWithChanges>?
 
-
     @Query("""
         SELECT *
           FROM ChangeHistoryEntity
-         WHERE hGuid = :guid
+         WHERE hTableGuid = :guid
      """)
-    fun findByGuidAsFlow(guid: String): Flow<ChangeHistoryWithChanges?>
+    fun findByGuidAsFlow(guid: String): Flow<List<ChangeHistoryWithChanges>>
 
+
+    @Query("""
+         UPDATE ChangeHistoryChangeEntity
+           SET hcSynced = 1
+             WHERE hcHistoryGuidHash IN (:historyGuids)
+      """)
+    suspend fun markByHistoryGuids(historyGuids: List<Long>)
 
     @Query("""
         SELECT *

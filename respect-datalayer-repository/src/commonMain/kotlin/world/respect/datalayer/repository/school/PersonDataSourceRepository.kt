@@ -12,6 +12,7 @@ import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFa
 import world.respect.datalayer.repository.shared.paging.loadAndUpdateLocal2
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
+import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -109,6 +110,13 @@ class PersonDataSourceRepository(
             local = local.listDetailsAsPagingSource(loadParams, listParams),
             tag = { "Repo.listDetailsAsPaging(params=$listParams)" },
         )
+    }
+
+    override suspend fun storeWithHistory(
+        data: List<Person>,
+        changeHistory: List<ChangeHistoryEntry>
+    ) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun store(list: List<Person>) {

@@ -106,7 +106,11 @@ class PersonDetailViewModel(
                     otherPersonKnownRole = null,
                     permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS,
                 )
-
+                val hasReadPermission = checkPersonPermissionUseCase(
+                    otherPersonUid = route.guid,
+                    otherPersonKnownRole = null,
+                    permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.READ_PERMISSIONS,
+                )
                 _appUiState.update { prev ->
                     prev.copy(
                         title = personVal?.fullName()?.asUiText(),
@@ -120,7 +124,7 @@ class PersonDetailViewModel(
                     prev.copy(
                         persons = persons,
                         manageAccountVisible = hasAccountPermission && personVal?.username != null,
-                        changeHistoryButtonVisible = activeAccount?.person?.isAdmin() == true,
+                        changeHistoryButtonVisible = hasReadPermission,
                         createAccountVisible = personVal != null &&
                                 activeAccount?.person?.isAdminOrTeacher() == true &&
                                 personVal.username == null,

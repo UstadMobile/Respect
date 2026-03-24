@@ -56,6 +56,8 @@ import world.respect.credentials.passkey.request.GetPasskeyProviderInfoUseCase
 import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.ChangeHistoryProvider
+import world.respect.datalayer.ChangeHistoryMarkSentToServer
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
@@ -66,6 +68,8 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.ChangeHistoryProviderDb
+import world.respect.datalayer.db.school.ChangeHistoryMarkSentToServerDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
@@ -901,7 +905,17 @@ val appKoinModule = module {
                 defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         }
-
+        scoped<ChangeHistoryProvider> {
+            ChangeHistoryProviderDb(
+                schoolDb = get(),
+            )
+        }
+        scoped<ChangeHistoryMarkSentToServer> {
+            ChangeHistoryMarkSentToServerDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
         scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
             val localDs = get<SchoolDataSourceLocal>()
@@ -918,7 +932,9 @@ val appKoinModule = module {
                     defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
                     opdsFeedValidationHelper = localDs.opdsFeedDataSource,
                     opdsPublicationValidationHelper = localDs.opdsPublicationDataSource
-                        .publicationNetworkValidationHelper
+                        .publicationNetworkValidationHelper,
+                    changeHistoryProvider = get(),
+                    markSentToServer = get(),
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),

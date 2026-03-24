@@ -1,20 +1,14 @@
 package world.respect.datalayer.http.school
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
-import io.ktor.http.contentType
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
@@ -52,6 +46,7 @@ class ChangeHistoryDataSourceHttp(
         loadParams: DataLoadParams,
         guid: String
     ): DataLoadState<List<ChangeHistoryEntry>> {
+
         return httpClient.getAsDataLoadState<List<ChangeHistoryEntry>>(
             ChangeHistoryDataSource.GetListParams(
                 common = GetListCommonParams(guid = guid)
@@ -63,21 +58,31 @@ class ChangeHistoryDataSourceHttp(
     }
 
     override fun findByGuidAsFlow(
-        loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<ChangeHistoryEntry>> {
+    ): Flow<DataLoadState<List<ChangeHistoryEntry>>> {
+
         return httpClient.getDataLoadResultAsFlow<List<ChangeHistoryEntry>>(
             urlFn = {
                 ChangeHistoryDataSource.GetListParams(
                     common = GetListCommonParams(guid = guid)
                 ).urlWithParams()
             },
-            dataLoadParams = loadParams,
+            dataLoadParams = DataLoadParams()
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
-        }.map {
-            it.firstOrNotLoaded()
+        }
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ChangeHistoryDataSource.GetListParams
+    ): DataLoadState<List<ChangeHistoryEntry>> {
+        return httpClient.getAsDataLoadState(
+            url = params.urlWithParams()
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
         }
     }
 
@@ -101,13 +106,11 @@ class ChangeHistoryDataSourceHttp(
         }
     }
 
+    override suspend fun markSentToServer(changeHistoryEntries: List<ChangeHistoryEntry>) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun store(list: List<ChangeHistoryEntry>) {
-        httpClient.post(
-            respectEndpointUrl(ChangeHistoryDataSource.ENDPOINT_NAME)
-        ) {
-            useTokenProvider(tokenProvider)
-            contentType(ContentType.Application.Json)
-            setBody(list)
-        }
+
     }
 }

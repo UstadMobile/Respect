@@ -38,15 +38,29 @@ class ChangeHistoryDataSourceDb(
     }
 
     override fun findByGuidAsFlow(
-        loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<ChangeHistoryEntry>> {
+    ): Flow<DataLoadState<List<ChangeHistoryEntry>>> {
         return schoolDb.getChangeHistoryDao()
-            .findByGuidAsFlow(guid).map {
-                it?.let {
-                    DataReadyState(it.toModel())
-                } ?: NoDataLoadedState.notFound()
+            .findByGuidAsFlow(guid)
+            .map { list ->
+                if (list.isNotEmpty()) {
+                    DataReadyState(list.map { it.toModel() })
+                } else {
+                    NoDataLoadedState.notFound()
+                }
             }
+    }
+
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ChangeHistoryDataSource.GetListParams
+    ): DataLoadState<List<ChangeHistoryEntry>> {
+        val result = schoolDb.getChangeHistoryDao().findByGuid(params.common.guid?:"")
+        return if (!result.isNullOrEmpty()) {
+            DataReadyState(result.map { it.toModel() })
+        } else {
+            NoDataLoadedState.notFound()
+        }
     }
 
     override fun listAsPagingSource(
@@ -63,6 +77,19 @@ class ChangeHistoryDataSourceDb(
         }
     }
 
+    override suspend fun markSentToServer(
+        changeHistoryEntries: List<ChangeHistoryEntry>
+    ) {
+        if (changeHistoryEntries.isEmpty()) return
+
+        val historyGuidHashes = changeHistoryEntries
+            .map { uidNumberMapper(it.guid) }
+
+        if (historyGuidHashes.isEmpty()) return
+
+        schoolDb.getChangeHistoryDao().markByHistoryGuids(historyGuidHashes)
+    }
+
     override suspend fun store(list: List<ChangeHistoryEntry>) {
         if(list.isEmpty())
             return
@@ -70,9 +97,10 @@ class ChangeHistoryDataSourceDb(
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 list.forEach {
+                    val entities = it.toEntities(uidNumberMapper)
                     schoolDb.getChangeHistoryDao().insertHistoryWithChanges(
-                        history = it.toEntities(uidNumberMapper).changeHistoryEntity,
-                        changes = it.toEntities(uidNumberMapper).changeEntities
+                        history = entities.changeHistoryEntity,
+                        changes = entities.changeEntities
                     )
                 }
             }

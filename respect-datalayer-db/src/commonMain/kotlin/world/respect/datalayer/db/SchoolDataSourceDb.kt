@@ -79,7 +79,14 @@ class SchoolDataSourceDb(
     }
 
     override val personDataSource: PersonDataSourceLocal by lazy {
-        PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, checkPersonPermissionUseCase,changeHistoryDataSource)
+        PersonDataSourceDb(
+            schoolDb,
+            uidNumberMapper,
+            authenticatedUser,
+            checkPersonPermissionUseCase,
+            changeHistoryDataSource,
+            primaryKeyGenerator
+        )
     }
 
     override val personPasskeyDataSource: PersonPasskeyDataSourceLocal by lazy {
@@ -104,7 +111,7 @@ class SchoolDataSourceDb(
     }
 
     override val classDataSource: ClassDataSourceLocal by lazy {
-        ClassDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+        ClassDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser,changeHistoryDataSource)
     }
 
     override val inviteDataSource: InviteDataSourceLocal by lazy {

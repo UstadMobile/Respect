@@ -31,6 +31,8 @@ val MIGRATE_12_13 = object : Migration(12, 13) {
                 `hTimestamp` INTEGER NOT NULL,
                 `hWhoGuid` TEXT NOT NULL,
                 `hWhoGuidHash` INTEGER NOT NULL,
+                `hLastModified` INTEGER NOT NULL,
+                `hStored` INTEGER NOT NULL,
                 `hTableGuid` TEXT NOT NULL,
                 PRIMARY KEY(`hGuidHash`)
             )
@@ -42,16 +44,26 @@ val MIGRATE_12_13 = object : Migration(12, 13) {
                 `hcHistoryGuidHash` INTEGER NOT NULL,
                 `hcField` TEXT NOT NULL,
                 `hcOldVal` TEXT,
+                `hcLastModified` INTEGER NOT NULL,
+                `hcStored` INTEGER NOT NULL,
                 `hcNewVal` TEXT NOT NULL
             )
         """.trimIndent())
     }
 }
 
+val MIGRATE_13_14 = object : Migration(13, 14) {
 
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            ALTER TABLE `ChangeHistoryEntity` ADD COLUMN `hSynced` INTEGER NOT NULL DEFAULT 0
+        """.trimIndent())
+
+    }
+}
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(MIGRATION_11_12,MIGRATE_12_13)
+    return this.addMigrations(MIGRATION_11_12,MIGRATE_12_13,MIGRATE_13_14)
 }
 

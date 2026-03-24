@@ -14,7 +14,7 @@ fun <T> findDifference(
             ChangeHistoryChange(
                 field = field,
                 oldVal = oldString,
-                newVal = newString ?: ""
+                newVal = newString ?: "",
             )
         )
     }

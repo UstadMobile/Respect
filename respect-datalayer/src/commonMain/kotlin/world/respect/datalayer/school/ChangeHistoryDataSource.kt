@@ -41,14 +41,22 @@ interface ChangeHistoryDataSource : WritableDataSource<ChangeHistoryEntry> {
     ): DataLoadState<List<ChangeHistoryEntry>>
 
     fun findByGuidAsFlow(
-        loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<ChangeHistoryEntry>>
+    ): Flow<DataLoadState<List<ChangeHistoryEntry>>>
+
+    suspend fun list(
+        loadParams: DataLoadParams = DataLoadParams(),
+        params: GetListParams = GetListParams(),
+    ): DataLoadState<List<ChangeHistoryEntry>>
 
     fun listAsPagingSource(
         dataLoadParams: DataLoadParams,
         getListParams: GetListParams
     ): IPagingSourceFactory<Int, ChangeHistoryEntry>
+
+    suspend fun markSentToServer(
+        changeHistoryEntries : List<ChangeHistoryEntry>
+    )
 
     companion object {
 

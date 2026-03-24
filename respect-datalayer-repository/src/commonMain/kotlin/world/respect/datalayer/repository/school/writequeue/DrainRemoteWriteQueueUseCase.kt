@@ -5,6 +5,7 @@ import io.ktor.http.Url
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
@@ -69,7 +70,6 @@ class DrainRemoteWriteQueueUseCase(
                         repository.inviteDataSource.sendToRemote(listOf(item))
                     }
                     WriteQueueItem.Model.CHANGE_HISTORY -> {
-                        repository.changeHistoryDataSource.sendToRemote(listOf(item))
                     }
 
 

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.combineWithRemote
-import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.ext.updateFromRemoteListIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.shared.paging.RepositoryPagingSourceFactory
@@ -31,6 +30,7 @@ class ChangeHistoryDataSourceRepository(
         loadParams: DataLoadParams,
         guid: String
     ): DataLoadState<List<ChangeHistoryEntry>>{
+
         local.updateFromRemoteListIfNeeded(
             remoteLoad = remote.findByGuid(loadParams, guid),
             validationHelper = validationHelper,
@@ -40,16 +40,23 @@ class ChangeHistoryDataSourceRepository(
     }
 
     override fun findByGuidAsFlow(
-        loadParams: DataLoadParams,
         guid: String
-    ): Flow<DataLoadState<ChangeHistoryEntry>> {
-        return local.findByGuidAsFlow(loadParams, guid).combineWithRemote(
-            remoteFlow = remote.findByGuidAsFlow(loadParams, guid).onEach {
-                local.updateFromRemoteIfNeeded(it, validationHelper)
+    ): Flow<DataLoadState<List<ChangeHistoryEntry>>> {
+        return local.findByGuidAsFlow(guid).combineWithRemote(
+            remoteFlow = remote.findByGuidAsFlow(guid).onEach {
+                local.updateFromRemoteListIfNeeded(it, validationHelper)
             }
         )
     }
-
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ChangeHistoryDataSource.GetListParams
+    ): DataLoadState<List<ChangeHistoryEntry>> {
+        local.updateFromRemoteListIfNeeded(
+            remote.list(loadParams, params), validationHelper
+        )
+        return local.list(loadParams, params)
+    }
     override fun listAsPagingSource(
         dataLoadParams: DataLoadParams,
         getListParams: ChangeHistoryDataSource.GetListParams
@@ -69,6 +76,10 @@ class ChangeHistoryDataSourceRepository(
             },
             tag = { "ChangeHistoryDataSourceRepo(listParams=$getListParams)" }
         )
+    }
+
+    override suspend fun markSentToServer(changeHistoryEntries: List<ChangeHistoryEntry>) {
+        local.markSentToServer(changeHistoryEntries)
     }
 
 

@@ -12,17 +12,19 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.generateClassChanges
 import world.respect.datalayer.db.school.adapters.toClassEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.exceptions.ForbiddenException
+import world.respect.datalayer.school.ChangeHistoryLocal
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
-import kotlin.collections.map
+import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
 
 class ClassDatasourceDb(
@@ -30,7 +32,8 @@ class ClassDatasourceDb(
     private val uidNumberMapper: UidNumberMapper,
     @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-) : ClassDataSourceLocal {
+    private val changeHistoryDataSource: ChangeHistoryLocal,
+    ) : ClassDataSourceLocal {
 
 
     private suspend fun doUpsertClass(
@@ -119,7 +122,26 @@ class ClassDatasourceDb(
 
                     if(!lastModAndPermissionInDb.hasPermission)
                         throw ForbiddenException()
+                    val timeNow = systemTimeInMillis()
 
+                    val oldClazz = schoolDb.getClassEntityDao().findByGuid(
+                        guidHash = uidNumberMapper(clazz.guid)
+                    )
+
+                    if (oldClazz != null) {
+                        val changeEntries = generateClassChanges(
+                            hGuid = clazz.guid,
+                            old = oldClazz.toClassEntities().toModel(),
+                            new = clazz,
+                            whoGuid = authenticatedUser.guid,
+                            timestamp = timeNow,
+                            hTableGuid = clazz.guid
+                        )
+
+                        if (changeEntries != null) {
+                            changeHistoryDataSource.store(listOf(changeEntries))
+                        }
+                    }
                     doUpsertClass(clazz)
                 }
             }

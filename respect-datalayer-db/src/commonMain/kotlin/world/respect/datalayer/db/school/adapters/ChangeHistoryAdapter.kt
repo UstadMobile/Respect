@@ -8,8 +8,11 @@ import world.respect.datalayer.school.model.ChangeHistoryChange
 import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.school.model.ChangeHistoryFieldEnum
 import world.respect.datalayer.school.model.ChangeHistoryTableEnum
+import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.findDifference
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 
 data class ChangeHistoryEntities(
@@ -32,9 +35,11 @@ fun ChangeHistoryWithChanges.toModel(): ChangeHistoryEntry {
 
 fun ChangeHistoryChangeEntity.toModel(): ChangeHistoryChange {
     return ChangeHistoryChange(
+        id = hcId,
         field = hcField,
         oldVal = hcOldVal,
-        newVal = hcNewVal
+        newVal = hcNewVal,
+        synced = hcSynced
     )
 }
 
@@ -56,10 +61,12 @@ fun ChangeHistoryEntry.toEntities(
 
     val changeEntities = changes.map { change ->
         ChangeHistoryChangeEntity(
+            hcId = change.id ,
             hcHistoryGuidHash = guidHash,
             hcField = change.field,
             hcOldVal = change.oldVal,
-            hcNewVal = change.newVal
+            hcNewVal = change.newVal,
+            hcSynced = change.synced
         )
     }
 
@@ -68,8 +75,67 @@ fun ChangeHistoryEntry.toEntities(
         changeEntities = changeEntities
     )
 }
-fun generatePersonChanges(
+fun generateClassChanges(
     hGuid: String,
+    old: Clazz?,
+    new: Clazz,
+    whoGuid: String,
+    timestamp: Long,
+    hTableGuid: String
+): ChangeHistoryEntry? {
+
+    val changes = mutableListOf<ChangeHistoryChange>()
+
+
+    findDifference(ChangeHistoryFieldEnum.CLASS_TITLE, old?.title, new.title,changes)
+    findDifference(ChangeHistoryFieldEnum.CLASS_DESCRIPTION, old?.description, new.description,changes)
+    findDifference(ChangeHistoryFieldEnum.CLASS_STATUS, old?.status, new.status,changes)
+
+    if (changes.isEmpty()) return null
+
+    return ChangeHistoryEntry(
+        guid = hGuid,
+        table = ChangeHistoryTableEnum.CLASS,
+        tableGuid = hTableGuid,
+        whoGuid = whoGuid,
+        timestamp = timestamp,
+        changes = changes
+    )
+}
+
+
+fun generateEnrollmentChanges(
+    hGuid: String,
+    old: Enrollment?,
+    new: Enrollment,
+    whoGuid: String,
+    timestamp: Long,
+    hTableGuid: String
+): ChangeHistoryEntry? {
+
+    val changes = mutableListOf<ChangeHistoryChange>()
+
+
+
+    findDifference(ChangeHistoryFieldEnum.ENROLLMENT_ROLE, old?.role, new.role,changes)
+    findDifference(ChangeHistoryFieldEnum.ENROLLMENT_BEGIN_DATE, old?.beginDate, new.beginDate,changes)
+    findDifference(ChangeHistoryFieldEnum.ENROLLMENT_END_DATE, old?.endDate, new.endDate,changes)
+    findDifference(ChangeHistoryFieldEnum.ENROLLMENT_STATUS, old?.status, new.status,changes)
+
+    if (changes.isEmpty()) return null
+
+    return ChangeHistoryEntry(
+        guid = hGuid,
+        table = ChangeHistoryTableEnum.ENROLLMENT,
+        tableGuid = hTableGuid,
+        whoGuid = whoGuid,
+        timestamp = timestamp,
+        changes = changes
+    )
+}
+
+fun generatePersonChanges(
+    primaryKeyGenerator: PrimaryKeyGenerator,
     old: Person?,
     new: Person,
     whoGuid: String,
@@ -91,7 +157,7 @@ fun generatePersonChanges(
     if (changes.isEmpty()) return null
 
     return ChangeHistoryEntry(
-        guid = hGuid,
+        guid = primaryKeyGenerator.nextId(ChangeHistoryEntry.TABLE_ID).toString(),
         table = ChangeHistoryTableEnum.PERSON,
         timestamp = timestamp,
         whoGuid = whoGuid,

@@ -64,6 +64,7 @@ import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 import world.respect.datalayer.school.model.Assignment
+import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.Indicator
@@ -111,7 +112,7 @@ import world.respect.datalayer.school.model.Report
         ChangeHistoryEntity::class,
         ChangeHistoryChangeEntity::class,
     ],
-    version = 12,
+    version = 14,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -186,6 +187,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
+            ChangeHistoryEntry.TABLE_ID,
         )
 
     }

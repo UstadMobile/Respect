@@ -10,36 +10,23 @@ These guidelines help us communicate and organise all contributors including the
 
 ### Contributions we welcome:
 
-There are many ways you might be able to contribute to RESPECT! Yes, coding is one way, but there are many other ways:
+There are many ways you might be able to contribute to RESPECT! This is an open source project and we welcome contributions. Yes, coding is one way, but there are many other ways:
 
+* Feature suggestions
 * Writing code (pull request)
 * New RESPECT compatible apps
 * Feature suggestions
 * Translation/localization
 * Bug reports
 * Tutorials and blog posts
-* Feature suggestions
-
-Keep an open mind! Improving documentation, bug triaging, or writing tutorials are all examples of helpful contributions that mean less work for you.
-
-> Elasticsearch is an open source project and we love to receive contributions from our community — you! There are many ways to contribute, from writing tutorials or blog posts, improving the documentation, submitting bug reports and feature requests or writing code which can be incorporated into Elasticsearch itself.
-
-[source: [Elasticsearch](https://github.com/elastic/elasticsearch/blob/master/CONTRIBUTING.md)] **Need more inspiration?** [1] [Devise](https://github.com/plataformatec/devise/wiki/Contributing) [2] [Geocoder](https://github.com/alexreisner/geocoder#known-issues) (“known issues”)
-
 
 # Ground Rules
-### Set expectations for behavior (yours, and theirs).
-This includes not just how to communicate with others (being respectful, considerate, etc) but also technical responsibilities (importance of testing, project dependencies, etc). Mention and link to your code of conduct, if you have one.
-
-> Responsibilities
-> * Ensure cross-platform compatibility for every change that's accepted. Windows, Mac, Debian & Ubuntu Linux.
-> * Ensure that code that goes into core meets all requirements in this checklist: https://gist.github.com/audreyr/4feef90445b9680475f2
-> * Create issues for any major changes and enhancements that you wish to make. Discuss things transparently and get community feedback.
-> * Don't add any classes to the codebase unless absolutely needed. Err on the side of using functions.
-> * Keep feature versions as small as possible, preferably one new feature per version.
-> * Be welcoming to newcomers and encourage diverse new contributors from all backgrounds. See the [Python Community Code of Conduct](https://www.python.org/psf/codeofconduct/).
-
-[source: [cookiecutter](https://github.com/audreyr/cookiecutter/blob/master/CONTRIBUTING.rst)] **Need more inspiration?** [1] [Celery](https://github.com/celery/celery/blob/master/CONTRIBUTING.rst#community-code-of-conduct) [2] [geocoder](https://github.com/alexreisner/geocoder#contributing)
+* Follow the [code of conduct](https://github.com/UstadMobile/Respect/tree/main?tab=coc-ov-file) e.g. be respectful.
+* Ensure that code that goes into main or is proposed to be merged into main meets the [coding guidelines](https://github.com/UstadMobile/Respect/blob/main/CODING_GUIDELINES.md).
+* Create issues for any major changes and enhancements that you wish to make. Discuss things transparently and get community feedback.
+* Ensure that changes are in the best interest of as many of our users and potential users as possible.
+* Be welcoming to newcomers and encourage new contributors from all backgrounds
+* DO remind others of applicable standards, engineer practices, best practices, documentation, etc. DO NOT insult or demean users (e.g. no RTFM type responses).
 
 # Your First Contribution
 Help people who are new to your project understand where they can be most helpful. This is also a good time to let people know if you follow a label convention for flagging beginner issues.

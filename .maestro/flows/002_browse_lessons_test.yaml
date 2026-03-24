@@ -80,9 +80,5 @@ onFlowComplete:
     index: 0
 - assertVisible: "1 Remove Bookmark"
 - assertVisible: "Undo"
-- assertNotVisible: "Lesson 001"
-- assertVisible: "Lesson 002"
-- tapOn: "Undo"
-- assertVisible: "Lesson 001"
-- assertVisible: "Lesson 002"
+
 

@@ -592,7 +592,7 @@
     <string name="add_item">+ Item</string>
     <string name="add_new_playlist">+ Playlist</string>
     <string name="move">Move</string>
-    <string name="select_count_items">Select %1$d item(s)</string>
+    <string name="select_count_items">Select %1$d item</string>
     <string name="make_a_copy">Make a copy</string>
     <string name="permanently_delete">Permanently delete?</string>
     <string name="permanently_delete_description">Permanently delete this playlist</string>

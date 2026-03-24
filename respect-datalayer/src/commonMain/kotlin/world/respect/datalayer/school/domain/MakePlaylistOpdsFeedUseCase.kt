@@ -17,7 +17,7 @@ import kotlin.uuid.Uuid
  *    e.g. https://schoolname.example.org/playlist/00112233-4455-6677-8899-aabbccddeeff
  * 2) Set the last modified time.
  * 3) Add an owner link to identify the creator of the playlist.
-*/
+ */
 class MakePlaylistOpdsFeedUseCase(
     private val schoolUrl: Url
 ) {

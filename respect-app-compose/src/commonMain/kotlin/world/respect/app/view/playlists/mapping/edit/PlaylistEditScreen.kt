@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -53,12 +55,15 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_item
 import world.respect.shared.generated.resources.add_new_playlist
 import world.respect.shared.generated.resources.add_section
+import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.choose_section_type
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.learning_item_section
 import world.respect.shared.generated.resources.learning_item_section_description
 import world.respect.shared.generated.resources.move
+import world.respect.shared.generated.resources.move_to_section
+import world.respect.shared.generated.resources.n_items
 import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.playlist_section_description
 import world.respect.shared.generated.resources.required
@@ -67,6 +72,7 @@ import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.shared.viewmodel.playlists.mapping.edit.MovingItemState
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionType
@@ -91,6 +97,8 @@ fun PlaylistEditScreenForViewModel(
         onClickAddPlaylist = viewModel::onClickAddPlaylist,
         onClickDeleteItem = viewModel::onClickDeleteItem,
         onClickMoveItem = viewModel::onClickMoveItem,
+        onClickMoveItemToSection = viewModel::onClickMoveItemToSection,
+        onDismissMoveDialog = viewModel::onDismissMoveDialog,
         onItemsReordered = viewModel::onItemsReordered,
     )
 }
@@ -109,7 +117,9 @@ fun PlaylistEditScreen(
     onClickAddItem: (Int) -> Unit = {},
     onClickAddPlaylist: (Int) -> Unit = {},
     onClickDeleteItem: (Int, Int) -> Unit = { _, _ -> },
-    onClickMoveItem: (Int, Int, Int) -> Unit = { _, _, _ -> },
+    onClickMoveItem: (Int, Int) -> Unit = { _, _ -> },
+    onClickMoveItemToSection: (Int) -> Unit = {},
+    onDismissMoveDialog: () -> Unit = {},
     onItemsReordered: (Int, List<Any>) -> Unit = { _, _ -> },
 ) {
     Column(
@@ -120,10 +130,12 @@ fun PlaylistEditScreen(
         OutlinedTextField(
             value = uiState.title,
             onValueChange = onTitleChanged,
-            label = { Text(stringResource(Res.string.title) + "*") },
+            label = { Text(stringResource(Res.string.title)) },
             isError = uiState.titleError,
             supportingText = {
-                Text(uiTextStringResource(Res.string.required.asUiText()))
+                if (uiState.titleError) {
+                    Text(uiTextStringResource(Res.string.required.asUiText()))
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,23 +155,23 @@ fun PlaylistEditScreen(
             minLines = 2,
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = stringResource(Res.string.sections),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.defaultItemPadding(),
         )
-
-        // + Section button at top, left-aligned per prototype
         OutlinedButton(
             onClick = onClickAddSection,
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .testTag("add_section_button"),
         ) {
             Text(text = stringResource(Res.string.add_section))
         }
 
-        // Top layer ReorderableColumn for sections
         ReorderableColumn(
             list = uiState.sections,
             onSettle = { fromIndex, toIndex ->
@@ -181,27 +193,13 @@ fun PlaylistEditScreen(
                         section = section,
                         allSections = uiState.sections,
                         dragHandleModifier = sectionDragHandleModifier,
-                        onSectionTitleChanged = { t ->
-                            onSectionTitleChanged(sectionIndex, t)
-                        },
-                        onClickDeleteSection = {
-                            onClickDeleteSection(sectionIndex)
-                        },
-                        onClickAddItem = {
-                            onClickAddItem(sectionIndex)
-                        },
-                        onClickAddPlaylist = {
-                            onClickAddPlaylist(sectionIndex)
-                        },
-                        onClickDeleteItem = { itemIndex ->
-                            onClickDeleteItem(sectionIndex, itemIndex)
-                        },
-                        onClickMoveItem = { itemIndex, targetSectionIndex ->
-                            onClickMoveItem(sectionIndex, itemIndex, targetSectionIndex)
-                        },
-                        onItemsReordered = { items ->
-                            onItemsReordered(sectionIndex, items)
-                        },
+                        onSectionTitleChanged = { t -> onSectionTitleChanged(sectionIndex, t) },
+                        onClickDeleteSection = { onClickDeleteSection(sectionIndex) },
+                        onClickAddItem = { onClickAddItem(sectionIndex) },
+                        onClickAddPlaylist = { onClickAddPlaylist(sectionIndex) },
+                        onClickDeleteItem = { itemIndex -> onClickDeleteItem(sectionIndex, itemIndex) },
+                        onClickMoveItem = { itemIndex -> onClickMoveItem(sectionIndex, itemIndex) },
+                        onItemsReordered = { items -> onItemsReordered(sectionIndex, items) },
                     )
                 }
             }
@@ -214,6 +212,14 @@ fun PlaylistEditScreen(
         SectionTypeBottomSheet(
             onDismiss = onDismissSectionTypeBottomSheet,
             onClickSectionType = onClickSectionType,
+        )
+    }
+
+    uiState.movingItem?.let { movingItem ->
+        MoveToSectionDialog(
+            sections = movingItem.compatibleSections,
+            onClickSection = onClickMoveItemToSection,
+            onDismiss = onDismissMoveDialog,
         )
     }
 }
@@ -229,7 +235,7 @@ private fun PlaylistSectionEditItem(
     onClickAddItem: () -> Unit,
     onClickAddPlaylist: () -> Unit,
     onClickDeleteItem: (Int) -> Unit,
-    onClickMoveItem: (Int, Int) -> Unit,
+    onClickMoveItem: (Int) -> Unit,
     onItemsReordered: (List<Any>) -> Unit,
 ) {
     val isNavigationSection = section.navigation != null
@@ -237,20 +243,19 @@ private fun PlaylistSectionEditItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(vertical = 4.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
         ) {
             IconButton(
                 onClick = {},
                 modifier = dragHandleModifier,
             ) {
-                Icon(
-                    imageVector = Icons.Filled.DragHandle,
-                    contentDescription = null,
-                )
+                Icon(imageVector = Icons.Filled.DragHandle, contentDescription = null)
             }
 
             OutlinedTextField(
@@ -262,6 +267,7 @@ private fun PlaylistSectionEditItem(
                     .testTag("section_title_field_$sectionIndex"),
                 singleLine = true,
             )
+
             IconButton(
                 onClick = onClickDeleteSection,
                 modifier = Modifier.testTag("delete_section_$sectionIndex"),
@@ -288,28 +294,27 @@ private fun PlaylistSectionEditItem(
             ) { itemIndex, navLink, _ ->
                 key(itemIndex) {
                     ReorderableItem {
-                        val itemDragHandleModifier = Modifier
-                            .draggableHandle()
-                            .testTag("nav_drag_handle_${sectionIndex}_$itemIndex")
-
                         PlaylistNavItemRow(
                             itemIndex = itemIndex,
                             navLink = navLink,
                             sectionIndex = sectionIndex,
-                            allSections = allSections,
-                            dragHandleModifier = itemDragHandleModifier,
-                            onClickDelete = { onClickDeleteItem(itemIndex) },
-                            onClickMove = { targetIndex ->
-                                onClickMoveItem(itemIndex, targetIndex)
+                            hasMovableSections = allSections.any { s ->
+                                s != section && s.navigation != null
                             },
+                            dragHandleModifier = Modifier
+                                .draggableHandle()
+                                .testTag("nav_drag_handle_${sectionIndex}_$itemIndex"),
+                            onClickDelete = { onClickDeleteItem(itemIndex) },
+                            onClickMove = { onClickMoveItem(itemIndex) },
                         )
                     }
                 }
             }
+
             OutlinedButton(
                 onClick = onClickAddPlaylist,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(start = 16.dp)
                     .testTag("add_playlist_button_$sectionIndex"),
             ) {
                 Text(text = stringResource(Res.string.add_new_playlist))
@@ -329,30 +334,27 @@ private fun PlaylistSectionEditItem(
             ) { itemIndex, publication, _ ->
                 key(itemIndex) {
                     ReorderableItem {
-                        val itemDragHandleModifier = Modifier
-                            .draggableHandle()
-                            .testTag("pub_drag_handle_${sectionIndex}_$itemIndex")
-
                         PlaylistPublicationItemRow(
                             itemIndex = itemIndex,
                             publication = publication,
                             sectionIndex = sectionIndex,
-                            allSections = allSections,
-                            dragHandleModifier = itemDragHandleModifier,
-                            onClickDelete = { onClickDeleteItem(itemIndex) },
-                            onClickMove = { targetIndex ->
-                                onClickMoveItem(itemIndex, targetIndex)
+                            hasMovableSections = allSections.any { s ->
+                                s != section && s.publications != null
                             },
+                            dragHandleModifier = Modifier
+                                .draggableHandle()
+                                .testTag("pub_drag_handle_${sectionIndex}_$itemIndex"),
+                            onClickDelete = { onClickDeleteItem(itemIndex) },
+                            onClickMove = { onClickMoveItem(itemIndex) },
                         )
                     }
                 }
             }
 
-            // + Item button left aligned per prototype
             OutlinedButton(
                 onClick = onClickAddItem,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(start = 16.dp)
                     .testTag("add_item_button_$sectionIndex"),
             ) {
                 Text(text = stringResource(Res.string.add_item))
@@ -366,43 +368,33 @@ private fun PlaylistNavItemRow(
     itemIndex: Int,
     navLink: ReadiumLink,
     sectionIndex: Int,
-    allSections: List<OpdsGroup>,
+    hasMovableSections: Boolean,
     dragHandleModifier: Modifier,
     onClickDelete: () -> Unit,
-    onClickMove: (Int) -> Unit,
+    onClickMove: () -> Unit,
 ) {
-    val movableSections = allSections.mapIndexedNotNull { index, section ->
-        if (index != sectionIndex && section.navigation != null) index else null
-    }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .testTag("nav_item_${sectionIndex}_$itemIndex"),
     ) {
-        IconButton(
-            onClick = {},
-            modifier = dragHandleModifier,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.DragHandle,
-                contentDescription = null,
-            )
+        IconButton(onClick = {}, modifier = dragHandleModifier) {
+            Icon(imageVector = Icons.Filled.DragHandle, contentDescription = null)
         }
         ListItem(
             headlineContent = {
-                Text(text = navLink.title ?: navLink.href)
+                Text(
+                    text = navLink.title?.takeIf { it.isNotBlank() } ?: navLink.href,
+                )
             },
             modifier = Modifier.weight(1f),
         )
-        // Box wraps the menu button so dropdown appears near it (right side)
         Box {
             ItemMenuButton(
                 sectionIndex = sectionIndex,
                 itemIndex = itemIndex,
-                movableSections = movableSections,
-                allSections = allSections,
+                hasMovableSections = hasMovableSections,
                 onClickDelete = onClickDelete,
                 onClickMove = onClickMove,
             )
@@ -415,48 +407,32 @@ private fun PlaylistPublicationItemRow(
     itemIndex: Int,
     publication: OpdsPublication,
     sectionIndex: Int,
-    allSections: List<OpdsGroup>,
+    hasMovableSections: Boolean,
     dragHandleModifier: Modifier,
     onClickDelete: () -> Unit,
-    onClickMove: (Int) -> Unit,
+    onClickMove: () -> Unit,
 ) {
-    val movableSections = allSections.mapIndexedNotNull { index, section ->
-        if (index != sectionIndex && section.publications != null) index else null
-    }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .testTag("pub_item_${sectionIndex}_$itemIndex"),
     ) {
-        IconButton(
-            onClick = {},
-            modifier = dragHandleModifier,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.DragHandle,
-                contentDescription = null,
-            )
+        IconButton(onClick = {}, modifier = dragHandleModifier) {
+            Icon(imageVector = Icons.Filled.DragHandle, contentDescription = null)
         }
         ListItem(
-            headlineContent = {
-                Text(text = publication.metadata.title.getTitle())
-            },
+            headlineContent = { Text(text = publication.metadata.title.getTitle()) },
             supportingContent = {
-                publication.metadata.description?.let {
-                    Text(text = it)
-                }
+                publication.metadata.description?.let { Text(text = it) }
             },
             modifier = Modifier.weight(1f),
         )
-        // Box wraps the menu button so dropdown appears near it (right side)
         Box {
             ItemMenuButton(
                 sectionIndex = sectionIndex,
                 itemIndex = itemIndex,
-                movableSections = movableSections,
-                allSections = allSections,
+                hasMovableSections = hasMovableSections,
                 onClickDelete = onClickDelete,
                 onClickMove = onClickMove,
             )
@@ -468,10 +444,9 @@ private fun PlaylistPublicationItemRow(
 private fun ItemMenuButton(
     sectionIndex: Int,
     itemIndex: Int,
-    movableSections: List<Int>,
-    allSections: List<OpdsGroup>,
+    hasMovableSections: Boolean,
     onClickDelete: () -> Unit,
-    onClickMove: (Int) -> Unit,
+    onClickMove: () -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -479,34 +454,63 @@ private fun ItemMenuButton(
         onClick = { menuExpanded = true },
         modifier = Modifier.testTag("item_menu_${sectionIndex}_$itemIndex"),
     ) {
-        Icon(
-            imageVector = Icons.Filled.MoreVert,
-            contentDescription = stringResource(Res.string.move),
-        )
+        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = stringResource(Res.string.move))
     }
     DropdownMenu(
         expanded = menuExpanded,
         onDismissRequest = { menuExpanded = false },
     ) {
-        if (movableSections.isNotEmpty()) {
+        if (hasMovableSections) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.move)) },
-                onClick = {
-                    menuExpanded = false
-                    onClickMove(movableSections.first())
-                },
+                onClick = { menuExpanded = false; onClickMove() },
                 modifier = Modifier.testTag("item_move_${sectionIndex}_$itemIndex"),
             )
         }
         DropdownMenuItem(
             text = { Text(stringResource(Res.string.delete)) },
-            onClick = {
-                menuExpanded = false
-                onClickDelete()
-            },
+            onClick = { menuExpanded = false; onClickDelete() },
             modifier = Modifier.testTag("item_delete_${sectionIndex}_$itemIndex"),
         )
     }
+}
+
+@Composable
+private fun MoveToSectionDialog(
+    sections: List<MovingItemState.CompatibleSection>,
+    onClickSection: (Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(Res.string.move_to_section)) },
+        text = {
+            Column {
+                sections.forEach { section ->
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = section.title.takeIf { it.isNotBlank() }
+                                    ?: stringResource(Res.string.section_title),
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(Res.string.n_items, section.itemCount))
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onClickSection(section.sectionIndex) },
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(Res.string.cancel))
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -517,10 +521,7 @@ private fun SectionTypeBottomSheet(
 ) {
     val sheetState = rememberModalBottomSheetState()
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-    ) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Text(
             text = stringResource(Res.string.choose_section_type),
             style = MaterialTheme.typography.titleLarge,

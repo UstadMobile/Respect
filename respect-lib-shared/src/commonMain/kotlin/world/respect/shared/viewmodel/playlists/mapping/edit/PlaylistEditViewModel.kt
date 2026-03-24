@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -42,23 +43,32 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
-/**
- * Section type for a playlist group, as per implementation notes:
- * - NAVIGATION: links to other playlists (OpdsFeed group with navigation links)
- * - PUBLICATION: links directly to learning items (OpdsFeed group with publications)
- */
 enum class PlaylistSectionType {
     NAVIGATION,
     PUBLICATION,
+}
+
+data class MovingItemState(
+    val fromSectionIndex: Int,
+    val itemIndex: Int,
+    val compatibleSections: List<CompatibleSection>,
+) {
+    data class CompatibleSection(
+        val sectionIndex: Int,
+        val title: String,
+        val itemCount: Int,
+    )
 }
 
 data class PlaylistEditUiState(
     val feed: OpdsFeed? = null,
     val isSectionTypeDialogVisible: Boolean = false,
     val titleError: Boolean = false,
+    val movingItem: MovingItemState? = null,
 ) {
     val title: String
         get() = feed?.metadata?.title ?: ""
@@ -86,8 +96,13 @@ class PlaylistEditViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    private var pendingAddItemSectionIndex: Int? = null
-    private var pendingAddPlaylistSectionIndex: Int? = null
+    private var pendingAddItemSectionIndex: Int?
+        get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_ITEM_SECTION_INDEX)
+        set(value) { savedStateHandle[KEY_PENDING_ADD_ITEM_SECTION_INDEX] = value }
+
+    private var pendingAddPlaylistSectionIndex: Int?
+        get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX)
+        set(value) { savedStateHandle[KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX] = value }
 
     init {
         _appUiState.update { prev ->
@@ -118,30 +133,44 @@ class PlaylistEditViewModel(
                         is DataReadyState -> {
                             _uiState.update { it.copy(feed = result.data) }
                         }
-                        else -> { /* loading/error states handled by app bar loading indicator */ }
+                        else -> { /* loading/error handled by app bar loading indicator */ }
                     }
                 }
             }
         } else {
-            val activeAccount = accountManager.activeAccount
-                ?: throw IllegalStateException(
-                    "No active account when initializing PlaylistEditViewModel"
-                )
-            @OptIn(ExperimentalUuidApi::class)
-            _uiState.update {
-                it.copy(
-                    feed = MakePlaylistOpdsFeedUseCase(
-                        schoolUrl = activeAccount.school.self
-                    ).invoke(
-                        base = OpdsFeed(
-                            metadata = OpdsFeedMetadata(title = ""),
-                            links = emptyList(),
-                            publications = emptyList(),
-                            groups = emptyList(),
-                        ),
-                        userGuid = activeAccount.userGuid,
+            viewModelScope.launch {
+                val activeAccount = accountManager.activeAccount
+                    ?: throw IllegalStateException(
+                        "No active account when initializing PlaylistEditViewModel"
                     )
-                )
+
+                val sessionAndPerson = accountManager.selectedAccountAndPersonFlow
+                    .first { it != null }
+
+                val username = sessionAndPerson?.person?.username
+                    ?.takeIf { it.isNotBlank() }
+                    ?: listOfNotNull(
+                        sessionAndPerson?.person?.givenName?.takeIf { it.isNotBlank() },
+                        sessionAndPerson?.person?.familyName?.takeIf { it.isNotBlank() },
+                    ).joinToString(" ").takeIf { it.isNotBlank() }
+                    ?: activeAccount.userGuid
+
+                @OptIn(ExperimentalUuidApi::class)
+                _uiState.update {
+                    it.copy(
+                        feed = MakePlaylistOpdsFeedUseCase(
+                            schoolUrl = activeAccount.school.self
+                        ).invoke(
+                            base = OpdsFeed(
+                                metadata = OpdsFeedMetadata(title = ""),
+                                links = emptyList(),
+                                publications = emptyList(),
+                                groups = emptyList(),
+                            ),
+                            username = username,
+                        )
+                    )
+                }
             }
         }
 
@@ -164,9 +193,7 @@ class PlaylistEditViewModel(
                 _uiState.update { prev ->
                     val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
                     val section = sections.getOrNull(sectionIndex)
-                        ?: throw IllegalStateException(
-                            "No section at index $sectionIndex"
-                        )
+                        ?: throw IllegalStateException("No section at index $sectionIndex")
                     sections[sectionIndex] = section.copy(
                         publications = (section.publications ?: emptyList()) +
                                 selections.map { it.selectedPublication }
@@ -189,18 +216,23 @@ class PlaylistEditViewModel(
                         "Expected String playlist href but got: ${result.result}"
                     )
 
+                val playlistTitle = schoolDataSource.opdsFeedDataSource
+                    .getByUrl(url = Url(selfHref), params = DataLoadParams())
+                    .dataOrNull()
+                    ?.metadata
+                    ?.title
+
                 val navLink = ReadiumLink(
                     href = selfHref,
-                    rel = listOf(REL_SELF),
+                    rel = listOf(PlaylistListUiState.REL_SELF),
                     type = OpdsFeed.MEDIA_TYPE,
+                    title = playlistTitle,
                 )
 
                 _uiState.update { prev ->
                     val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
                     val section = sections.getOrNull(sectionIndex)
-                        ?: throw IllegalStateException(
-                            "No section at index $sectionIndex"
-                        )
+                        ?: throw IllegalStateException("No section at index $sectionIndex")
                     sections[sectionIndex] = section.copy(
                         navigation = (section.navigation ?: emptyList()) + navLink
                     )
@@ -255,16 +287,8 @@ class PlaylistEditViewModel(
         _uiState.update { prev ->
             val newSection = OpdsGroup(
                 metadata = OpdsFeedMetadata(title = ""),
-                navigation = if (sectionType == PlaylistSectionType.NAVIGATION) {
-                    emptyList()
-                } else {
-                    null
-                },
-                publications = if (sectionType == PlaylistSectionType.PUBLICATION) {
-                    emptyList()
-                } else {
-                    null
-                },
+                navigation = if (sectionType == PlaylistSectionType.NAVIGATION) emptyList() else null,
+                publications = if (sectionType == PlaylistSectionType.PUBLICATION) emptyList() else null,
             )
             prev.copy(
                 feed = prev.feed?.copy(
@@ -321,7 +345,55 @@ class PlaylistEditViewModel(
         }
     }
 
-    fun onClickMoveItem(sectionIndex: Int, itemIndex: Int, targetSectionIndex: Int) {
+    fun onClickMoveItem(sectionIndex: Int, itemIndex: Int) {
+        val sections = _uiState.value.feed?.groups ?: emptyList()
+        val fromSection = sections.getOrNull(sectionIndex)
+            ?: throw IllegalStateException("No section at index $sectionIndex")
+
+        val compatibleSections = sections.mapIndexedNotNull { index, section ->
+            if (index == sectionIndex) return@mapIndexedNotNull null
+            val isCompatible = if (fromSection.navigation != null) {
+                section.navigation != null
+            } else {
+                section.publications != null
+            }
+            if (!isCompatible) return@mapIndexedNotNull null
+            MovingItemState.CompatibleSection(
+                sectionIndex = index,
+                title = section.metadata.title,
+                itemCount = (section.navigation?.size ?: 0) + (section.publications?.size ?: 0),
+            )
+        }
+
+        if (compatibleSections.size == 1) {
+            moveItemToSection(sectionIndex, itemIndex, compatibleSections.first().sectionIndex)
+        } else {
+            _uiState.update {
+                it.copy(
+                    movingItem = MovingItemState(
+                        fromSectionIndex = sectionIndex,
+                        itemIndex = itemIndex,
+                        compatibleSections = compatibleSections,
+                    )
+                )
+            }
+        }
+    }
+
+    fun onClickMoveItemToSection(targetSectionIndex: Int) {
+        val moving = _uiState.value.movingItem
+            ?: throw IllegalStateException(
+                "onClickMoveItemToSection called but no item is being moved"
+            )
+        _uiState.update { it.copy(movingItem = null) }
+        moveItemToSection(moving.fromSectionIndex, moving.itemIndex, targetSectionIndex)
+    }
+
+    fun onDismissMoveDialog() {
+        _uiState.update { it.copy(movingItem = null) }
+    }
+
+    private fun moveItemToSection(sectionIndex: Int, itemIndex: Int, targetSectionIndex: Int) {
         _uiState.update { prev ->
             val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
             val fromSection = sections.getOrNull(sectionIndex)
@@ -385,9 +457,7 @@ class PlaylistEditViewModel(
 
         viewModelScope.launch {
             val activeAccount = accountManager.activeAccount
-                ?: throw IllegalStateException(
-                    "No active account when saving playlist"
-                )
+                ?: throw IllegalStateException("No active account when saving playlist")
 
             val playlistListUrl = Url(
                 "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
@@ -401,6 +471,10 @@ class PlaylistEditViewModel(
                 (group.publications?.size ?: 0) + (group.navigation?.size ?: 0)
             } ?: 0
 
+            val existingListFeed = schoolDataSource.opdsFeedDataSource
+                .getByUrl(url = playlistListUrl, params = DataLoadParams())
+                .dataOrNull()
+
             val playlistAsPublication = OpdsPublication(
                 metadata = ReadiumMetadata(
                     title = LangMapStringValue(feed.metadata.title),
@@ -409,17 +483,16 @@ class PlaylistEditViewModel(
                     numberOfPages = sectionCount,
                     duration = itemCount.toDouble(),
                 ),
+                // Persist all links including owner so they are available when displaying
+                // the playlist list and detail screens.
                 links = feed.links,
             )
-
-            val existingListFeed = schoolDataSource.opdsFeedDataSource
-                .getByUrl(url = playlistListUrl, params = DataLoadParams())
-                .dataOrNull()
 
             val updatedPublications = if (existingListFeed != null) {
                 val others = (existingListFeed.publications ?: emptyList()).filter { pub ->
                     pub.links.none { link ->
-                        link.rel?.contains(REL_SELF) == true && link.href == selfHref
+                        link.rel?.contains(PlaylistListUiState.REL_SELF) == true &&
+                                link.href == selfHref
                     }
                 }
                 others + playlistAsPublication
@@ -431,13 +504,13 @@ class PlaylistEditViewModel(
 
             val listFeed = OpdsFeed(
                 metadata = OpdsFeedMetadata(
-                    title = existingListFeed?.metadata?.title ?: "Playlists",
+                    title = existingListFeed?.metadata?.title ?: "",
                     modified = listModified,
                 ),
                 links = existingListFeed?.links ?: listOf(
                     ReadiumLink(
                         href = playlistListUrl.toString(),
-                        rel = listOf(REL_SELF),
+                        rel = listOf(PlaylistListUiState.REL_SELF),
                         type = OpdsFeed.MEDIA_TYPE,
                     )
                 ),
@@ -453,6 +526,8 @@ class PlaylistEditViewModel(
     companion object {
         const val KEY_LEARNING_UNIT = "result_learning_unit"
         const val KEY_PLAYLIST = "result_playlist"
-        private const val REL_SELF = "self"
+        private const val KEY_PENDING_ADD_ITEM_SECTION_INDEX = "pending_add_item_section_index"
+        private const val KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX =
+            "pending_add_playlist_section_index"
     }
 }

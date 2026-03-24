@@ -2,33 +2,16 @@ package world.respect.app.view.playlists.mapping.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -36,22 +19,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.ReadiumContributorObject
-import world.respect.lib.opds.model.ReadiumContributorStringValue
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_from_a_link
-import world.respect.shared.generated.resources.add_new
-import world.respect.shared.generated.resources.all
-import world.respect.shared.generated.resources.empty
-import world.respect.shared.generated.resources.my_playlists
-import world.respect.shared.generated.resources.no_playlist_yet
-import world.respect.shared.generated.resources.no_playlist_yet_description
-import world.respect.shared.generated.resources.sections_and_items
+import world.respect.shared.generated.resources.*
 import world.respect.shared.viewmodel.app.appstate.getTitle
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistFilter
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.list.*
 
 @Composable
 fun PlaylistListScreenForViewModel(
@@ -91,7 +64,6 @@ fun PlaylistListScreen(
                         selected = uiState.activeFilter == PlaylistFilter.ALL,
                         onClick = { onClickFilter(PlaylistFilter.ALL) },
                         label = { Text(stringResource(Res.string.all)) },
-                        modifier = Modifier.testTag("filter_chip_all"),
                     )
                 }
                 item {
@@ -99,7 +71,6 @@ fun PlaylistListScreen(
                         selected = uiState.activeFilter == PlaylistFilter.MY_PLAYLISTS,
                         onClick = { onClickFilter(PlaylistFilter.MY_PLAYLISTS) },
                         label = { Text(stringResource(Res.string.my_playlists)) },
-                        modifier = Modifier.testTag("filter_chip_my_playlists"),
                     )
                 }
             }
@@ -114,27 +85,21 @@ fun PlaylistListScreen(
                 ) {
                     Image(
                         painter = painterResource(Res.drawable.empty),
-                        contentDescription = stringResource(Res.string.no_playlist_yet),
-                        contentScale = ContentScale.Fit,
+                        contentDescription = null,
                         modifier = Modifier.size(200.dp),
+                        contentScale = ContentScale.Fit,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(Res.string.no_playlist_yet),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = stringResource(Res.string.no_playlist_yet_description),
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                    Text(stringResource(Res.string.no_playlist_yet))
+                    Text(stringResource(Res.string.no_playlist_yet_description))
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(
                         items = uiState.showPlaylists,
-                        key = { _, publication ->
+                        key = { index, publication ->
                             publication.metadata.identifier?.toString()
-                                ?: publication.metadata.title.toString()
+                                ?: "${publication.metadata.title.getTitle()}_$index"
                         }
                     ) { _, publication ->
                         PlaylistListItem(
@@ -151,7 +116,6 @@ fun PlaylistListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .clickable { onClickDismissFabMenu() },
-                color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f),
             ) {}
         }
 
@@ -165,37 +129,19 @@ fun PlaylistListScreen(
             ) {
                 ExtendedFloatingActionButton(
                     onClick = onClickAddNew,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(Res.string.add_new),
-                        )
-                    },
-                    text = {
-                        Text(text = stringResource(Res.string.add_new))
-                    },
+                    icon = { Icon(Icons.Filled.Add, null) },
+                    text = { Text(stringResource(Res.string.add_new)) },
                 )
-
                 ExtendedFloatingActionButton(
                     onClick = onClickAddFromLink,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Link,
-                            contentDescription = stringResource(Res.string.add_from_a_link),
-                        )
-                    },
-                    text = {
-                        Text(text = stringResource(Res.string.add_from_a_link))
-                    },
+                    icon = { Icon(Icons.Filled.Link, null) },
+                    text = { Text(stringResource(Res.string.add_from_a_link)) },
                 )
             }
         }
     }
 }
+
 @Composable
 private fun PlaylistListItem(
     publication: OpdsPublication,
@@ -204,45 +150,43 @@ private fun PlaylistListItem(
     val sectionCount = publication.metadata.numberOfPages ?: 0
     val itemCount = publication.metadata.duration?.toInt() ?: 0
 
+    val ownerUsername = publication.links
+        .firstOrNull { link ->
+            link.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
+        }
+        ?.href
+        ?.trimEnd('/')
+        ?.substringAfterLast('/')
+        ?.takeIf { it.isNotBlank() }
+
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClickPublication() }
-            .testTag("playlist_item_${publication.metadata.identifier}"),
+            .clickable { onClickPublication() },
         leadingContent = {
             Icon(
-                imageVector = Icons.Filled.MenuBook,
+                imageVector = Icons.Filled.Book,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary,
             )
         },
         headlineContent = {
-            Text(
-                text = publication.metadata.title.getTitle(),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Text(publication.metadata.title.getTitle())
         },
         supportingContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.MenuBook,
-                    contentDescription = null,
-                    modifier = Modifier.size(12.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Column {
                 Text(
-                    text = stringResource(
+                    stringResource(
                         Res.string.sections_and_items,
                         sectionCount,
                         itemCount,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 )
+                if (ownerUsername != null) {
+                    Text(
+                        text = stringResource(Res.string.created_by, ownerUsername),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             }
         },
     )

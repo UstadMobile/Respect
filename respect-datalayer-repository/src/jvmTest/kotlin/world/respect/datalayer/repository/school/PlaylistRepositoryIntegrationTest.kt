@@ -54,7 +54,7 @@ class PlaylistRepositoryIntegrationTest {
 
                 val playlistFeed = MakePlaylistOpdsFeedUseCase(schoolUrl = schoolUrl).invoke(
                     base = baseFeed,
-                    userGuid = "test-user-guid",
+                    username = "test-user-name",
                 )
 
                 serverSchoolDataSource.opdsFeedDataSource.store(
@@ -95,7 +95,7 @@ class PlaylistRepositoryIntegrationTest {
 
                 val playlistFeed = MakePlaylistOpdsFeedUseCase(schoolUrl = schoolUrl).invoke(
                     base = baseFeed,
-                    userGuid = "test-user-guid",
+                    username =  "test-user-name",
                 )
                 clients.first().schoolDataSource.opdsFeedDataSource.store(
                     listOf(playlistFeed)

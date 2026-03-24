@@ -95,10 +95,6 @@ class PlaylistListViewModel(
             ?: throw IllegalStateException(
                 "No active account when initializing PlaylistListViewModel"
             )
-
-        // The playlist list feed is stored locally at {schoolUrl}playlist
-        // It is updated by PlaylistEditViewModel.onClickSave() each time
-        // a playlist is created or edited.
         val playlistListUrl = Url(
             "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
         )

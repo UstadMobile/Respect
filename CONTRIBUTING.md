@@ -75,6 +75,10 @@ RESPECT Compatible apps and lessons can be offered in any language, even when th
 * Include a link to any other software translation you have done before in the issue
 * You'll be provided with a link to Weblate (an online translation platform) where you can add translations.
 
+# Tutorials and blog posts
+
+Community contributions and posts that help others are very much welcome. You're of course free to do that on any channel or space you want, and it'd be great if you share a link with us on the [discussions board](https://github.com/UstadMobile/Respect/discussions).
+
 # Community
 
 We're social people. You can discuss with the core team and other community members through:

@@ -26,9 +26,13 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
+import world.respect.shared.generated.resources.remove_bookmark
+import world.respect.shared.generated.resources.undo
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.getValue
 
 data class BookmarkListUiState(
@@ -40,6 +44,7 @@ class BookmarkListViewModel(
 
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val _uiState = MutableStateFlow(BookmarkListUiState())
 
@@ -95,6 +100,21 @@ class BookmarkListViewModel(
                     }
                 )
             }
+
+            snackBarDispatcher.showSnackBar(
+                Snack(
+                    message = Res.string.remove_bookmark.asUiText(),
+                    action = Res.string.undo.asUiText(),
+                    onAction = {
+                        viewModelScope.launch {
+                            val restoredBookmark = bookmark.copy(
+                                status = StatusEnum.ACTIVE
+                            )
+                            schoolDataSource.bookmarkDataSource.store(listOf(restoredBookmark))
+                        }
+                    }
+                )
+            )
         }
     }
 

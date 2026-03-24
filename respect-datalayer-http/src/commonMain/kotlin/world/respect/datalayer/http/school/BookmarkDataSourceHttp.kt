@@ -85,7 +85,7 @@ class BookmarkDataSourceHttp(
         loadParams: DataLoadParams,
         listParams: BookmarkDataSource.GetListParams
     ): Flow<DataLoadState<List<Bookmark>>> {
-        return httpClient.getDataLoadResultAsFlow(
+        return httpClient.getDataLoadResultAsFlow<List<Bookmark>>(
             urlFn = { listParams.urlWithParams() },
             dataLoadParams = loadParams,
             validationHelper = validationHelper,

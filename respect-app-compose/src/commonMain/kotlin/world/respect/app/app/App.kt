@@ -13,8 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -60,8 +62,7 @@ import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RespectComposeNavController
-import world.respect.shared.resources.StringResourceUiText
-import world.respect.shared.resources.StringUiText
+import world.respect.shared.ext.asString
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
@@ -177,17 +178,18 @@ fun App(
     val koin = getKoin()
 
     LaunchedEffect(Unit) {
-        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
-            val uiText = it.message
-            val message = if(uiText is StringUiText) {
-                uiText.text
-            }else if(uiText is StringResourceUiText) {
-                getString(uiText.resource)
-            }else {
-                ""
-            }
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack->
+            val message = snack.message.asString()
+            val actionLabel = snack.action?.asString()
 
-            snackbarHostState.showSnackbar(message, it.action)
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = actionLabel,
+                duration = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                snack.onAction?.invoke()
+            }
         }
     }
 

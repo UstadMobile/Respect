@@ -184,7 +184,8 @@ fun App(
 
             val result = snackbarHostState.showSnackbar(
                 message = message,
-                actionLabel = actionLabel
+                actionLabel = actionLabel,
+                duration = SnackbarDuration.Long
             )
             if (result == SnackbarResult.ActionPerformed) {
                 snack.onAction?.invoke()

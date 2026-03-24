@@ -71,6 +71,10 @@ list (default or local)
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
  details on running via the command line etc.
 
+## Contributing
+
+We welcome community contributions including code, bug reports, feature requests, localization and more. Please see [CONTRIBUTING.md].
+
 ## Community
 
 Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3t8dpyxxs-0nSsFsLGau5MjVZQzrlvqA).

@@ -95,8 +95,8 @@ class BookmarkListViewModel(
 
             _uiState.update {
                 it.copy(
-                    bookmarkDetails = it.bookmarkDetails.filterNot {
-                        b -> b.bookmark.learningUnitManifestUrl == bookmark.learningUnitManifestUrl
+                    bookmarkDetails = it.bookmarkDetails.filterNot { b ->
+                        b.bookmark.learningUnitManifestUrl == bookmark.learningUnitManifestUrl
                     }
                 )
             }
@@ -132,20 +132,21 @@ class BookmarkListViewModel(
         }
     }
 
-    private suspend fun loadApps(bookmarks: List<Bookmark>): List<BookmarkDetails> = coroutineScope {
-        bookmarks.map { bookmark ->
-            async {
-                val app = schoolDataSource.opdsPublicationDataSource
-                    .getByUrl(
-                        url = bookmark.appManifestUrl,
-                        params = DataLoadParams(),
-                        referrerUrl = null,
-                        expectedPublicationId = null
-                    )
-                BookmarkDetails(bookmark, app)
-            }
-        }.awaitAll()
-    }
+    private suspend fun loadApps(bookmarks: List<Bookmark>): List<BookmarkDetails> =
+        coroutineScope {
+            bookmarks.map { bookmark ->
+                async {
+                    val app = schoolDataSource.opdsPublicationDataSource
+                        .getByUrl(
+                            url = bookmark.appManifestUrl,
+                            params = DataLoadParams(),
+                            referrerUrl = null,
+                            expectedPublicationId = null
+                        )
+                    BookmarkDetails(bookmark, app)
+                }
+            }.awaitAll()
+        }
 
     fun onClickBookmark(bookmark: Bookmark) {
         _navCommandFlow.tryEmit(

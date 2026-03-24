@@ -92,5 +92,4 @@ class DrainRemoteWriteQueueUseCase(
             }
         } while(true)
     }
-
 }

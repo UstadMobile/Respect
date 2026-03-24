@@ -28,7 +28,6 @@ class OpdsPublicationEntity(
     val opeUrlHash: Long,
     val opeLastModified: Long,
     val opeEtag: String?,
-
     val opeMdIdentifier: Uri?,
     val opeMdLanguage: List<String>?,
     val opeMdType: Uri? = null,

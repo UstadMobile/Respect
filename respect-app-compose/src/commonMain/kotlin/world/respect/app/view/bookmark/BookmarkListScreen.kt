@@ -157,7 +157,8 @@ private fun BookmarkListContent(
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            bookmarkDetails.app?.dataOrNull()?.findIcons()?.firstOrNull()?.toString()
+                            bookmarkDetails.app?.dataOrNull()?.findIcons()?.firstOrNull()
+                                ?.toString()
                                 .also { icon ->
                                     RespectAsyncImage(
                                         uri = icon,
@@ -178,9 +179,9 @@ private fun BookmarkListContent(
                             )
                         }
                         /**Currently there is no data in subtitle**/
-                       /* Text(
-                            text = bookmark.subTitle?.getTitle() ?: ""
-                        )*/
+                        /* Text(
+                             text = bookmark.subTitle?.getTitle() ?: ""
+                         )*/
 
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -189,9 +190,9 @@ private fun BookmarkListContent(
                                 Text(text = it)
                             }
                             /**Currently there is no data in grade**/
-                           /* bookmark.grade?.let {
-                                Text(text = it)
-                            }*/
+                            /* bookmark.grade?.let {
+                                 Text(text = it)
+                             }*/
 
                             bookmarkDetails.bookmark.type?.let {
                                 Text(text = it)

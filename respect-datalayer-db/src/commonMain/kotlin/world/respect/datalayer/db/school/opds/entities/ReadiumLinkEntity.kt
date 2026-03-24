@@ -27,7 +27,6 @@ class ReadiumLinkEntity(
     @PrimaryKey(autoGenerate = true)
     val rleId: Long,
 
-
     val rleOpdsParentType: OpdsParentType,
 
     val rleOpdsParentUid: Long,

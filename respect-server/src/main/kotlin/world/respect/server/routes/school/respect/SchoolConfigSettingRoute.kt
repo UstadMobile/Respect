@@ -13,9 +13,8 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.model.SchoolConfigSetting
-import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
-import world.respect.server.util.ext.respondOffsetLimitPaging
+import world.respect.server.util.ext.respondDataLoadState
 
 @Suppress("FunctionName")
 fun Route.SchoolConfigSettingRoute(
@@ -25,14 +24,13 @@ fun Route.SchoolConfigSettingRoute(
 ) {
     get(SchoolConfigSettingDataSource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
-        call.respondOffsetLimitPaging(
-            params = call.request.queryParameters.offsetLimitPagingLoadParams(),
-            pagingSource = schoolDataSource(call).schoolConfigSettingDataSource.listAsPagingSource(
+        call.respondDataLoadState(
+            schoolDataSource(call).schoolConfigSettingDataSource.list(
                 loadParams = DataLoadParams(),
                 params = SchoolConfigSettingDataSource.GetListParams.fromParams(
                     call.request.queryParameters
                 )
-            ).invoke()
+            )
         )
     }
 

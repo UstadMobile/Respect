@@ -21,9 +21,20 @@ val MIGRATION_11_12 = object: Migration(11, 12) {
     }
 }
 
+val MIGRATION_12_13 = object: Migration(12, 13) {
+    override fun migrate(connection: SQLiteConnection) {
+        //HERE: IMPORTANT: Need to run an update to change the flags in database on
+        //existing fields including permission grants.
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `SchoolConfigSettingEntity` (`scsKey` TEXT NOT NULL, `scsValue` TEXT NOT NULL, `scsStatus` INTEGER NOT NULL, `scsLastModified` INTEGER NOT NULL, `scsStored` INTEGER NOT NULL, `scsCanReadFlags` INTEGER NOT NULL, `scsAnonCanRead` INTEGER NOT NULL, `scsCanWriteFlags` INTEGER NOT NULL, PRIMARY KEY(`scsKey`))")
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(MIGRATION_11_12)
+    return this.addMigrations(
+        MIGRATION_11_12,
+        MIGRATION_12_13,
+    )
 }
 

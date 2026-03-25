@@ -151,13 +151,6 @@ class LearningUnitListViewModel(
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
-
-    /**
-     * Single tap:
-     * - In pick mode (resultDest set): enters multi-select mode and toggles selection
-     * - In multi-select mode: toggles selection
-     * - Otherwise: navigates to detail
-     */
     fun onClickPublication(publication: OpdsPublication) {
         val isPickMode = route.resultDest != null
 
@@ -186,9 +179,6 @@ class LearningUnitListViewModel(
         )
     }
 
-    /**
-     * Long press — enters multi-select mode and selects the item.
-     */
     fun onLongPressPublication(publication: OpdsPublication) {
         _uiState.update { it.copy(isMultiSelectMode = true) }
         toggleSelection(publication)

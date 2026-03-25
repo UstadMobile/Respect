@@ -133,7 +133,7 @@ class PlaylistEditViewModel(
                         is DataReadyState -> {
                             _uiState.update { it.copy(feed = result.data) }
                         }
-                        else -> { /* loading/error handled by app bar loading indicator */ }
+                        else -> {}
                     }
                 }
             }
@@ -483,8 +483,6 @@ class PlaylistEditViewModel(
                     numberOfPages = sectionCount,
                     duration = itemCount.toDouble(),
                 ),
-                // Persist all links including owner so they are available when displaying
-                // the playlist list and detail screens.
                 links = feed.links,
             )
 

@@ -128,14 +128,22 @@ fun PlaylistListScreen(
                 horizontalAlignment = Alignment.End,
             ) {
                 ExtendedFloatingActionButton(
+                    modifier = Modifier
+                        .testTag("add_new"),
                     onClick = onClickAddNew,
-                    icon = { Icon(Icons.Filled.Add, null) },
-                    text = { Text(stringResource(Res.string.add_new)) },
+                    icon =
+                        { Icon(Icons.Filled.Add, null) },
+                    text
+                    = { Text(stringResource(Res.string.add_new)) },
                 )
                 ExtendedFloatingActionButton(
+                    modifier = Modifier
+                        .testTag("add_from_a_link"),
                     onClick = onClickAddFromLink,
-                    icon = { Icon(Icons.Filled.Link, null) },
-                    text = { Text(stringResource(Res.string.add_from_a_link)) },
+                    icon =
+                        { Icon(Icons.Filled.Link, null) },
+                    text =
+                        { Text(stringResource(Res.string.add_from_a_link)) },
                 )
             }
         }

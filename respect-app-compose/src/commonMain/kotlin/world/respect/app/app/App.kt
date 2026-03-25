@@ -63,6 +63,8 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.ext.asString
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.StringUiText
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
@@ -179,7 +181,19 @@ fun App(
 
     LaunchedEffect(Unit) {
         koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack->
-            val message = snack.message.asString()
+            /**
+             * We can use ext function asString() and use as
+             * val message = snack.message.asString()
+             * **/
+
+            val uiText = snack.message
+            val message = if(uiText is StringUiText) {
+                uiText.text
+            }else if(uiText is StringResourceUiText) {
+                getString(uiText.resource)
+            }else {
+                ""
+            }
             val actionLabel = snack.action?.asString()
 
             val result = snackbarHostState.showSnackbar(

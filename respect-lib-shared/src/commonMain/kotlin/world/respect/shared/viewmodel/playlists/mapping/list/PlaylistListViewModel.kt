@@ -45,14 +45,6 @@ data class PlaylistListUiState(
     val activeUserOwnerHref: String = "",
     val isFabMenuExpanded: Boolean = false,
 ) {
-    /**
-     * Playlists visible under the active filter chip.
-     *
-     * MY_PLAYLISTS: those where the publication has an owner link whose href matches the active
-     * user's owner href. Owner is identified via:
-     * rel = MakePlaylistOpdsFeedUseCase.REL_OWNER
-     * href = "{schoolBaseUrl}user/{userGuid}"
-     */
     val showPlaylists: List<OpdsPublication>
         get() = when (activeFilter) {
             PlaylistFilter.ALL -> playlists
@@ -116,6 +108,7 @@ class PlaylistListViewModel(
 
                 _appUiState.update {
                     it.copy(
+                        title = Res.string.home.asUiText(),
                         fabState = FabUiState(
                             visible = isTeacherOrAdmin,
                             icon = FabUiState.FabIcon.ADD,
@@ -138,7 +131,7 @@ class PlaylistListViewModel(
                             it.copy(playlists = result.data.publications ?: emptyList())
                         }
                     }
-                    else -> { /* loading/error states handled by app bar loading indicator */ }
+                    else -> {}
                 }
             }
         }

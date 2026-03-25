@@ -118,7 +118,7 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
     ),
 )

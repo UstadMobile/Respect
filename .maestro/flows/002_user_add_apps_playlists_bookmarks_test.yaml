@@ -59,7 +59,7 @@ onFlowComplete:
 - assertVisible: "All"
 - assertVisible: "My Playlists"
 - assertVisible: "No playlist yet"
-- assertVisible: "Add a playlist by clicking on the +Playlist"
+- assertVisible: "Add a playlist by clicking on the + playlist"
 - tapOn: "Playlist"
 - assertVisible: "Add new"
 - assertVisible: "Add from a link"

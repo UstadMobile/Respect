@@ -1,0 +1,5 @@
+appId: world.respect.app
+
+---
+- tapOn: "Accept & continue"
+- tapOn: "No thanks"

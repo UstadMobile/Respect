@@ -1,5 +1,7 @@
 # RESPECT
 
+![RESPECT app screenshots](https://github.com/user-attachments/assets/32a25b61-cb8c-4fcf-8099-9f15ade408f0)
+
 RESPECT is an open source digital library for EdTech apps. It makes it easier for educators to 
 discover and use high-quality apps with a single account in all settings, while giving developers 
 the platform they need to grow their impact globally.
@@ -69,9 +71,13 @@ list (default or local)
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
  details on running via the command line etc.
 
+## Contributing
+
+We welcome community contributions including code, bug reports, feature requests, localization and more. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Community
 
-Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3h04mk3r6-SO1hBLbn0yj5kczPS7q2eg).
+Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3t8dpyxxs-0nSsFsLGau5MjVZQzrlvqA).
 
 ## Build environment variables
 

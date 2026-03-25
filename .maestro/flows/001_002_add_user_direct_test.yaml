@@ -363,7 +363,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- assertVisible: "Home"
+- assertVisible: "Apps"
 - assertNotVisible: "Classes"
 - assertNotVisible: "People"
 

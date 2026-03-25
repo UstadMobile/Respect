@@ -63,6 +63,7 @@ onFlowComplete:
 - tapOn: "Playlist"
 - assertVisible: "Add new"
 - assertVisible: "Add from a link"
+
 - tapOn:
     text: "Add new"
 - assertVisible:

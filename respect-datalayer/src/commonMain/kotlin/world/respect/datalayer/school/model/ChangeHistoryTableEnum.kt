@@ -17,19 +17,24 @@ enum class ChangeHistoryFieldEnum(
     val displayName: String
 ) {
 
-    PERSON_GIVEN_NAME("pGivenName", "First Name"),
-    PERSON_FAMILY_NAME("pFamilyName", "Last Name"),
-    PERSON_MIDDLE_NAME("pMiddleName", "Middle Name"),
+    PERSON_GIVEN_NAME("pGivenName", "Person name"),
+    PERSON_FAMILY_NAME("pFamilyName", "Person name"),
+    PERSON_MIDDLE_NAME("pMiddleName", "Person name"),
     PERSON_USERNAME("pUsername", "Username"),
     PERSON_GENDER("pGender", "Gender"),
     PERSON_EMAIL("pEmail", "Email"),
     PERSON_PHONE_NUMBER("pPhoneNumber", "Phone Number"),
-    PERSON_DATE_OF_BIRTH("pDateOfBirth", "Date of Birth"),
+    PERSON_DATE_OF_BIRTH("pDateOfBirth", "date of birth"),
 
+    CLASS_STATUS("cStatus", "Class Status"),
     CLASS_TITLE("cTitle", "Class Title"),
     CLASS_DESCRIPTION("cDescription", "Class Description"),
-    CLASS_STATUS("cStatus", "Class Status"),
-
+    CLASS_TEACHER_ADDED("cTeacherAdded", "Teacher Added"),
+    CLASS_TEACHER_REMOVED("cTeacherRemoved", "Teacher Removed"),
+    CLASS_STUDENT_ADDED("cStudentAdded", "Student Added"),
+    CLASS_STUDENT_REMOVED("cStudentRemoved", "Student Removed"),
+    JOIN_REQUEST_APPROVED("joinRequestApproved", "Join request approved for"),
+    JOIN_REQUEST_REJECTED("joinRequestRejected", "Join request rejected for"),
     ENROLLMENT_ROLE("eRole", "Role"),
     ENROLLMENT_BEGIN_DATE("eBeginDate", "Start Date"),
     ENROLLMENT_END_DATE("eEndDate", "End Date"),

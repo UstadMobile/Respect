@@ -102,15 +102,16 @@ onFlowComplete:
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
 - tapOn: "People"
-
+- tapOn: "TeacherA User"
 - tapOn:
     id: "floating_action_button"
-- tapOn: "TeacherA User"
+- tapOn: "First names*"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
       TEXT: "First names*"
 - inputText: "TeacherB"
+- tapOn: "Date of birth"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
@@ -119,8 +120,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Change History"
-- assertVisible: "Person name changed from “TeacherA User” to “TeacherB User”"
-
+- assertVisible: 'Person name changed from "TeacherA User" to "TeacherB User"'
 - runFlow:
     file: "subflows/add_class.yaml"
     env:
@@ -223,14 +223,14 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Change History"
-- assertVisible: "Join request approved for “Student User”"
-- assertVisible: "Teacher added: “TeacherB User”"
+- assertVisible: 'Join request approved for “Student User”'
+- tapOn: "People"
 - tapOn: "TeacherB User"
 - tapOn: "Change History"
 - assertVisible:
     id: "app_title"
     text: "Change History"
-- assertVisible: "Person name changed from “TeacherA User” to “TeacherB User”"
+- assertVisible: 'Person name changed from “TeacherA User” to “TeacherB User”'
 
 # E) Teacher share invite link for parent device based signup
 - tapOn: "Add student"

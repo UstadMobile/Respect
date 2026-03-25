@@ -119,7 +119,7 @@ class SchoolDataSourceDb(
     }
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal by lazy {
-        EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
+        EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser,changeHistoryDataSource,primaryKeyGenerator)
     }
 
     override val assignmentDataSource: AssignmentDataSourceLocal by lazy {

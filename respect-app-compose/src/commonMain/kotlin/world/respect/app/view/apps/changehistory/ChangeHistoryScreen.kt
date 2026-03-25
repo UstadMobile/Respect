@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.school.model.ChangeHistoryFieldEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.change_format
 import world.respect.shared.util.rememberFormattedDateTime
@@ -62,14 +63,32 @@ fun ChangeHistoryScreen(
                     )
 
                     Text(text = createdAtStr)
-                    Text(
-                        text = stringResource(
-                            Res.string.change_format,
-                            change.field.displayName,
-                            change.oldVal?:"",
-                            change.newVal
-                        )
-                    )
+                    val text = when (change.field) {
+
+                        ChangeHistoryFieldEnum.JOIN_REQUEST_APPROVED ->
+                            "${change.field.displayName} \"${change.newVal}\""
+
+                        ChangeHistoryFieldEnum.JOIN_REQUEST_REJECTED ->
+                            "${change.field.displayName} \"${change.oldVal}\""
+
+                        ChangeHistoryFieldEnum.CLASS_TEACHER_ADDED,
+                        ChangeHistoryFieldEnum.CLASS_STUDENT_ADDED ->
+                            "${change.field.displayName}: \"${change.newVal}\""
+
+                        ChangeHistoryFieldEnum.CLASS_TEACHER_REMOVED,
+                        ChangeHistoryFieldEnum.CLASS_STUDENT_REMOVED ->
+                            "${change.field.displayName}: \"${change.oldVal}\""
+
+                        else ->
+                            stringResource(
+                                Res.string.change_format,
+                                change.field.displayName,
+                                change.oldVal ?: "",
+                                change.newVal
+                            )
+                    }
+
+                    Text(text = text)
                     Spacer(modifier = Modifier.height(16.dp))
 
                 }

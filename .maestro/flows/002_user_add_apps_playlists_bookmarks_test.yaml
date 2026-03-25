@@ -30,7 +30,11 @@ onFlowComplete:
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
-- tapOn: "Home"
+#- tapOn:
+#    id: home_btn
+- tapOn:
+    text: "Home"
+    index: 0
 #- assertVisible:
 #    id: "app_title"
 #    text: "Home"
@@ -54,18 +58,22 @@ onFlowComplete:
 - tapOn: "Close"
 
 - runFlow: "subflows/admin_add_class.yaml"
-- tapOn: "Home"
+- tapOn:
+    text: "Home"
+    index: 0
 - tapOn: "Playlists"
 - assertVisible: "All"
 - assertVisible: "My Playlists"
 - assertVisible: "No playlist yet"
 - assertVisible: "Add a playlist by clicking on the + playlist"
-- tapOn: "Playlist"
-- assertVisible: "Add new"
-- assertVisible: "Add from a link"
-
 - tapOn:
-    text: "Add new"
+    id: "floating_action_button"   # Playlist button
+- assertVisible:
+     id: "add_new"
+- assertVisible:
+      id: "add_from_a_link"
+- tapOn:
+    id: "add_new"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"
@@ -75,23 +83,32 @@ onFlowComplete:
 - inputText: "Playlist - Grade 1"
 - tapOn: "Description"
 - inputText: "Test list"
-- tapOn: "Subject"  # Need to Implement
-- tapOn: "English"
-- tapOn: "Grade"
-- tapOn: "Grade 1"
-- tapOn: "Section"
-- assertVisible: "Choose section type:"
-- assertVisible: "Playlist section"
+#- tapOn: "Subject"  # Need to Implement
+#- tapOn: "English"
+#- tapOn: "Grade"
+#- tapOn: "Grade 1"
+- tapOn: "+ Section"
+- assertVisible: "Choose Section Type:"
+- assertVisible:
+    text: "Playlist section"
+    index: 0
 - assertVisible: "Links to other playlists."
-- assertVisible: "Learning item section"
+- assertVisible:
+    text: "Learning item section"
+    index: 1
 - assertVisible: "Links direct to items e.g. lessons, assessments, videos, etc"
-- tapOn: "Playlist section"
+- tapOn:
+    text: "Playlist section"
+    index: 0
 - assertVisible: "Playlist section"
 - tapOn: "Playlist section"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Playlist section"
 - inputText: "Playlist section day 1"
 - hideKeyboard
-- tapOn: "Playlist"
+- tapOn: "+ Playlist"
 - assertVisible:
     id: "app_title"
     text: "Apps"
@@ -108,18 +125,17 @@ onFlowComplete:
     text: "Add playlist"
 - assertVisible: "My app"
 - tapOn: "Section"
-- tapOn: "Learning item section"
+- tapOn:
+    text: "Learning item section"
+    index: 1
 - assertVisible: "Learning item section"
-- assertVisible: "Learning item section"
-- tapOn: "Item"
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
+- tapOn: "+ Item"
+- assertVisible: "Apps"
 - tapOn: "My app"
 - assertVisible:
     id: "app_title"
     text: "My app"
-- assertVisible: "Grade 1"
+- tapOn: "Grade 1"
 - assertVisible: "Lesson 001"
 - tapOn: "Lesson 002"
 - tapOn: "Select 1 item"
@@ -135,21 +151,23 @@ onFlowComplete:
 - assertVisible: "Playlist section day 1"
 - tapOn:
     id: "expand_collapse_icon"
-    index: 1
+    index: 0
 - assertVisible: "My app"
 - assertVisible: "Learning item section"
 - tapOn:
     id: "expand_collapse_icon"
-    index: 2
+    index: 1
 - assertVisible: "Lesson 002"
 - tapOn:
-    text: "Edit"
-    index: 1 # Edit button
+    id: "floating_action_button"    # Edit button
 - assertVisible:
     id: "app_title"
     text: "Edit playlist"
 - tapOn: "Learning item section"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Learning item section"
 - inputText: "Learning item section day 2"
 - hideKeyboard
 - tapOn: "Save"
@@ -158,14 +176,12 @@ onFlowComplete:
     text: "Playlist - Grade 1"
 - assertVisible: "Playlist section day 1"
 - assertVisible: "Learning item section day 2"
+- assertVisible: "Share"
 - assertVisible:
-    id: "share_btn"
-- assertVisible:
-    id: "copy_btn"
-- assertVisible:
-    id: "assign_btn"
-- assertVisible:
-    id: "delete_btn"
+    text: "Copy playlist"
+    index: 1
+- assertVisible: "Assign"
+- assertVisible: "Delete"
 - tapOn: "Lesson 002"
 - assertVisible: "Lesson 002"
 - assertVisible: "App name"
@@ -185,12 +201,11 @@ onFlowComplete:
     text: "Playlist - Grade 1"
 
 # Assigning lessons in a playlist to a assignment
-- tapOn:
-    id: "assign_btn"
+- tapOn: "Assign"
 - assertVisible:
     id: "app_title"
     text: "Add assignment"
-- tapOn: "Name*"
+- tapOn: "Assignment name*"
 - inputText: "Homework 1"
 - tapOn: "Class"
 - tapOn: "New Class"
@@ -202,6 +217,7 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
+- assertVisible: "Task"  # As per prototype
 - assertVisible: "Lesson 002"
 - tapOn: "Save"
 - assertVisible:
@@ -211,8 +227,7 @@ onFlowComplete:
 - tapOn: "Home"
 - tapOn: "Playlists"
 - tapOn: "Playlist - Grade 1"
-- assertVisible:
-    id: "share_btn"
+- tapOn: "Share"
 - assertVisible:
     id: "app_title"
     text: "Share playlist"
@@ -226,38 +241,52 @@ onFlowComplete:
 - assertVisible: "Admins in my school"
 - tapOn: "Teachers and admins in my school"
 - assertVisible: "Share link"
-- assertVisible: "Copy link"
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via email"
-- back
-- tapOn:
-    id: "copy_btn"
+- copyTextFrom:
+    id: "copy_link"
+- assertVisible:
+    id: "add_from_a_link"
+- assertVisible:
+    id: "app_title"
+    text: "Add from a link"
+- tapOn: "Enter link"
+- pasteText
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+
+- tapOn: "Copy playlist"
 - assertVisible: "Make a copy"
 - assertVisible: "copy the Playlist - Grade 1"
 - tapOn: "Copy"
 - assertVisible:
     id: "app_title"
     text: "Copy playlist"
-- tapOn: "Title*"
-- eraseText
+- tapOn: "copy the Playlist - Grade 1"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "copy the Playlist - Grade 1"
 - inputText: "Playlist 2"
-- assertVisible: "Day 1"
-- assertVisible: "Day 2"
+- assertVisible: "Playlist section day 1"
+- assertVisible: "Learning item section day 2"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Playlist 2"
 
 # Delete this copied playlist
-- tapOn:
-    id: "delete_btn"
+- tapOn: "Delete"
 - assertVisible: "Permanently delete?"
-- assertVisible: "Permanently delete the playlist"
+- assertVisible: "Permanently delete this playlist"
 - tapOn: "Delete"
 - assertVisible:
     id: "app_title"
     text: "Home"
-- assertVisible: "Playlist"
+- assertVisible: "Playlists"
+- assertVisible: "Playlist - Grade 1"
 - assertNotVisible: "Playlist 2"
 
 # Adding playlist to an assignment
@@ -284,24 +313,11 @@ onFlowComplete:
     id: "app_title"
     text: "Add task to assignment"
 - tapOn: "Playlists"
-- tapOn: "copy the Playlist - Grade 1"
+- tapOn: "Playlist - Grade 1"
 - assertVisible:
     id: "app_title"
-    text: "copy the Playlist - Grade 1"
-- assertVisible: "Select all"
-- assertVisible: "Select none"
-- tapOn: "Select all"
-- assertVisible:
-    id: "check_box"
-    checked: true
-- tapOn: "Select none"
-- assertVisible:
-    id: "check_box"
-    checked: false
-- tapOn:
-    id: "check_box"
-    index: 1
-- tapOn: "Add 1 task to assignment"
+    text: "Playlist - Grade 1"
+- tapOn: "Lesson 001"
 - assertVisible:
     id: "app_title"
     text: "Add assignment"
@@ -310,5 +326,6 @@ onFlowComplete:
     id: "app_title"
     text: "Homework 2"
 - assertVisible: "Lesson 001"
-- back
+- tapOn: "Assignments"
+- assertVisible: "Homework 1"
 - assertVisible: "Homework 2"

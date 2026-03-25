@@ -112,13 +112,6 @@ class PersonDataSourceRepository(
         )
     }
 
-    override suspend fun storeWithHistory(
-        data: List<Person>,
-        changeHistory: List<ChangeHistoryEntry>
-    ) {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun store(list: List<Person>) {
         local.store(list)
         val timeNow = systemTimeInMillis()

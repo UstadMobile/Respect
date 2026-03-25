@@ -24,6 +24,7 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
 
@@ -33,6 +34,7 @@ class ClassDatasourceDb(
     @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val changeHistoryDataSource: ChangeHistoryLocal,
+    private val primaryKeyGenerator: PrimaryKeyGenerator,
     ) : ClassDataSourceLocal {
 
 
@@ -130,7 +132,7 @@ class ClassDatasourceDb(
 
                     if (oldClazz != null) {
                         val changeEntries = generateClassChanges(
-                            hGuid = clazz.guid,
+                            primaryKeyGenerator = primaryKeyGenerator,
                             old = oldClazz.toClassEntities().toModel(),
                             new = clazz,
                             whoGuid = authenticatedUser.guid,

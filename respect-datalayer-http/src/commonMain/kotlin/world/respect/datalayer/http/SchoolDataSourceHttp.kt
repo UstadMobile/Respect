@@ -120,6 +120,8 @@ class SchoolDataSourceHttp(
             httpClient = httpClient,
             tokenProvider = tokenProvider,
             validationHelper = validationHelper,
+            changeHistoryProvider = changeHistoryProvider,
+            markSentToServer = markSentToServer,
         )
     }
 

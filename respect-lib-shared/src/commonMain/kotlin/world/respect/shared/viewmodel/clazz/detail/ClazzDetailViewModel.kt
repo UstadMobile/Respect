@@ -53,6 +53,7 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
@@ -110,6 +111,8 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
+
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase by inject()
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -183,11 +186,16 @@ class ClazzDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccountAndPerson ->
+                    val hasReadPermission = checkPersonPermissionUseCase(
+                        otherPersonUid = selectedAccountAndPerson?.person?.guid?:"",
+                        otherPersonKnownRole = null,
+                        permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.READ_PERMISSIONS,
+                    )
                     _uiState.update { prev ->
                         prev.copy(
                             showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
                             showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            changeHistoryButtonVisible = selectedAccountAndPerson?.person?.isAdmin() == true,
+                            changeHistoryButtonVisible = hasReadPermission,
                         )
                     }
 

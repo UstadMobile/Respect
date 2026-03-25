@@ -34,6 +34,14 @@ interface ChangeHistoryDao {
         insertHistory(history)
         insertChanges(changes)
     }
+
+    @Query("""
+        SELECT ChangeHistoryEntity.hLastModified
+          FROM ChangeHistoryEntity
+         WHERE ChangeHistoryEntity.hGuidHash = :uidNum
+    """)
+    suspend fun getLastModifiedByUidNum(uidNum: Long): Long?
+
     @Query("""
          SELECT * 
            FROM ChangeHistoryEntity

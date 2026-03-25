@@ -158,24 +158,7 @@ class PersonDataSourceHttp(
         }
     }
 
-    override suspend fun storeWithHistory(
-        data: List<Person>,
-        changeHistory: List<ChangeHistoryEntry>
-    ) {
 
-        httpClient.post(
-            respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)
-        ) {
-            useTokenProvider(tokenProvider)
-            contentType(ContentType.Application.Json)
-            setBody(
-                PersonWithHistoryRequest(
-                    person = data,
-                    changeHistory = changeHistory
-                )
-            )
-        }
-    }
 
     override suspend fun store(list: List<Person>) {
         val changeHistories = changeHistoryProvider.getChangeHistoryEntries(

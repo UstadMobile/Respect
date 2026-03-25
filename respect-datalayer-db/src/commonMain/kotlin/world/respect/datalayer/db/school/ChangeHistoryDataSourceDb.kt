@@ -10,6 +10,7 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.ChangeHistoryEntities
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.school.ChangeHistoryDataSource
@@ -17,6 +18,7 @@ import world.respect.datalayer.school.ChangeHistoryLocal
 import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import kotlin.time.Clock
 
 class ChangeHistoryDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -111,6 +113,32 @@ class ChangeHistoryDataSourceDb(
         list: List<ChangeHistoryEntry>,
         forceOverwrite: Boolean
     ) {
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                val now = Clock.System.now()
+
+                val toUpdate: List<ChangeHistoryEntities> = list
+                    .filter {
+                        forceOverwrite || (
+                                schoolDb.getChangeHistoryDao().getLastModifiedByUidNum(
+                                    uidNum = uidNumberMapper(it.guid)
+                                ) ?: 0L
+                                ) < it.lastModified.toEpochMilliseconds()
+                    }
+                    .map { entry ->
+                        entry.copy(stored = now).toEntities(uidNumberMapper)
+                    }
+
+                val dao = schoolDb.getChangeHistoryDao()
+
+                toUpdate.forEach { item ->
+                    dao.insertHistoryWithChanges(
+                        history = item.changeHistoryEntity,
+                        changes = item.changeEntities
+                    )
+                }
+            }
+        }
     }
 
     override suspend fun findByUidList(uids: List<String>): List<ChangeHistoryEntry> {

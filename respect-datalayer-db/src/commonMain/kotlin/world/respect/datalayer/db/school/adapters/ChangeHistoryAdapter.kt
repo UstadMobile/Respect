@@ -76,7 +76,7 @@ fun ChangeHistoryEntry.toEntities(
     )
 }
 fun generateClassChanges(
-    hGuid: String,
+    primaryKeyGenerator: PrimaryKeyGenerator,
     old: Clazz?,
     new: Clazz,
     whoGuid: String,
@@ -94,7 +94,7 @@ fun generateClassChanges(
     if (changes.isEmpty()) return null
 
     return ChangeHistoryEntry(
-        guid = hGuid,
+        guid = primaryKeyGenerator.nextId(Clazz.TABLE_ID).toString(),
         table = ChangeHistoryTableEnum.CLASS,
         tableGuid = hTableGuid,
         whoGuid = whoGuid,

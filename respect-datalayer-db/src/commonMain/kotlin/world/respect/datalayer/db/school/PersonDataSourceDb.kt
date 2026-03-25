@@ -267,11 +267,6 @@ class PersonDataSourceDb(
         }
     }
 
-    override suspend fun storeWithHistory(
-        data: List<Person>,
-        changeHistory: List<ChangeHistoryEntry>
-    ) {
-        TODO("Not yet implemented")
-    }
+
 
 }

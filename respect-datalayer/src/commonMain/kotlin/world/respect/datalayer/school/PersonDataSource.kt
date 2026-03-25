@@ -94,10 +94,6 @@ interface PersonDataSource: WritableDataSource<Person> {
         loadParams: DataLoadParams,
         listParams: GetListParams,
     ): IPagingSourceFactory<Int, PersonListDetails>
-    suspend fun storeWithHistory(
-        data: List<Person>,
-        changeHistory: List<ChangeHistoryEntry>
-    )
 
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on

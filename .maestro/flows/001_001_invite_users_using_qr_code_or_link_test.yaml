@@ -104,8 +104,8 @@ onFlowComplete:
 - tapOn: "People"
 
 - tapOn:
-    id: "floating_action_bu- tapOn: "TeacherA User"tton"   # Edit button
-- tapOn: "First names*"
+    id: "floating_action_button"
+- tapOn: "TeacherA User"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:

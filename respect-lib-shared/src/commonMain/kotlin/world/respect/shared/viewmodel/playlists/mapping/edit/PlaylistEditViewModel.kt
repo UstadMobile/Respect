@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -32,9 +33,12 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_playlist
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.edit_playlist
+import world.respect.shared.generated.resources.learning_item_section
+import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.RespectAppLauncher
@@ -105,23 +109,6 @@ class PlaylistEditViewModel(
         set(value) { savedStateHandle[KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX] = value }
 
     init {
-        _appUiState.update { prev ->
-            prev.copy(
-                title = when {
-                    route.isCopy -> Res.string.copy_playlist.asUiText()
-                    route.playlistUrl == null -> Res.string.add_playlist.asUiText()
-                    else -> Res.string.edit_playlist.asUiText()
-                },
-                userAccountIconVisible = false,
-                actionBarButtonState = ActionBarButtonUiState(
-                    visible = true,
-                    text = Res.string.save.asUiText(),
-                    onClick = ::onClickSave,
-                ),
-                hideBottomNavigation = true,
-            )
-        }
-
         val existingPlaylistUrl = route.playlistUrl
         if (existingPlaylistUrl != null) {
             viewModelScope.launch {
@@ -171,6 +158,7 @@ class PlaylistEditViewModel(
                         )
                     )
                 }
+                restoreAppBarState()
             }
         }
 
@@ -189,6 +177,7 @@ class PlaylistEditViewModel(
                         "Expected LearningUnitSelection or List but got: ${result.result}"
                     )
                 }
+                _uiState.first { it.feed != null }
 
                 _uiState.update { prev ->
                     val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
@@ -200,6 +189,7 @@ class PlaylistEditViewModel(
                     )
                     prev.copy(feed = prev.feed?.copy(groups = sections))
                 }
+                restoreAppBarState()
             }
         }
 
@@ -228,6 +218,7 @@ class PlaylistEditViewModel(
                     type = OpdsFeed.MEDIA_TYPE,
                     title = playlistTitle,
                 )
+                _uiState.first { it.feed != null }
 
                 _uiState.update { prev ->
                     val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
@@ -238,7 +229,27 @@ class PlaylistEditViewModel(
                     )
                     prev.copy(feed = prev.feed?.copy(groups = sections))
                 }
+                restoreAppBarState()
             }
+        }
+    }
+
+    fun restoreAppBarState() {
+        _appUiState.update { prev ->
+            prev.copy(
+                title = when {
+                    route.isCopy -> Res.string.copy_playlist.asUiText()
+                    route.playlistUrl == null -> Res.string.add_playlist.asUiText()
+                    else -> Res.string.edit_playlist.asUiText()
+                },
+                userAccountIconVisible = false,
+                actionBarButtonState = ActionBarButtonUiState(
+                    visible = true,
+                    text = Res.string.save.asUiText(),
+                    onClick = ::onClickSave,
+                ),
+                hideBottomNavigation = true,
+            )
         }
     }
 
@@ -284,18 +295,24 @@ class PlaylistEditViewModel(
     }
 
     fun onClickSectionType(sectionType: PlaylistSectionType) {
-        _uiState.update { prev ->
-            val newSection = OpdsGroup(
-                metadata = OpdsFeedMetadata(title = ""),
-                navigation = if (sectionType == PlaylistSectionType.NAVIGATION) emptyList() else null,
-                publications = if (sectionType == PlaylistSectionType.PUBLICATION) emptyList() else null,
-            )
-            prev.copy(
-                feed = prev.feed?.copy(
-                    groups = (prev.feed.groups ?: emptyList()) + newSection
-                ),
-                isSectionTypeDialogVisible = false,
-            )
+        viewModelScope.launch {
+            val sectionTitle = when (sectionType) {
+                PlaylistSectionType.NAVIGATION -> getString(Res.string.playlist_section)
+                PlaylistSectionType.PUBLICATION -> getString(Res.string.learning_item_section)
+            }
+            _uiState.update { prev ->
+                val newSection = OpdsGroup(
+                    metadata = OpdsFeedMetadata(title = sectionTitle),
+                    navigation = if (sectionType == PlaylistSectionType.NAVIGATION) emptyList() else null,
+                    publications = if (sectionType == PlaylistSectionType.PUBLICATION) emptyList() else null,
+                )
+                prev.copy(
+                    feed = prev.feed?.copy(
+                        groups = (prev.feed.groups ?: emptyList()) + newSection
+                    ),
+                    isSectionTypeDialogVisible = false,
+                )
+            }
         }
     }
 
@@ -424,12 +441,12 @@ class PlaylistEditViewModel(
         pendingAddItemSectionIndex = sectionIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                RespectAppLauncher.create(
+                destination = RespectAppLauncher.create(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = KEY_LEARNING_UNIT,
                     )
-                )
+                ),
             )
         )
     }
@@ -438,12 +455,12 @@ class PlaylistEditViewModel(
         pendingAddPlaylistSectionIndex = sectionIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                PlaylistList.create(
+                destination = RespectAppLauncher.create(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = KEY_PLAYLIST,
                     )
-                )
+                ),
             )
         )
     }
@@ -517,7 +534,17 @@ class PlaylistEditViewModel(
             )
 
             schoolDataSource.opdsFeedDataSource.store(listOf(feed, listFeed))
-            _navCommandFlow.tryEmit(NavCommand.PopUp())
+
+            val savedPlaylistUrl = feed.selfUrl()
+                ?: throw IllegalStateException("Saved playlist has no self URL")
+
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = PlaylistDetail.create(playlistUrl = savedPlaylistUrl),
+                    popUpTo = PlaylistList.create(),
+                    popUpToInclusive = false,
+                )
+            )
         }
     }
 

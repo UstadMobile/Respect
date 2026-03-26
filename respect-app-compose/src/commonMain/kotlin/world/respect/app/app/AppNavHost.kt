@@ -207,11 +207,10 @@ fun AppNavHost(
         }
 
         composable<RespectAppLauncher> {
-            val viewModel: AppLauncherViewModel = respectViewModel(
+            HomeScreen(
+                respectNavController = respectNavController,
                 onSetAppUiState = onSetAppUiState,
-                navController = respectNavController,
             )
-            AppLauncherScreen(viewModel = viewModel)
         }
 
         composable<Home> {

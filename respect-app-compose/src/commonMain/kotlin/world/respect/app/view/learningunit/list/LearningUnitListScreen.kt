@@ -68,6 +68,7 @@ import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_all
 import world.respect.shared.generated.resources.select_count_items
 import world.respect.shared.generated.resources.select_none
+import world.respect.shared.generated.resources.select_playlist
 import world.respect.shared.generated.resources.share
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -89,8 +90,7 @@ fun LearningUnitListScreen(
         onLongPressPublication = viewModel::onLongPressPublication,
         onClickNavigation = viewModel::onClickNavigation,
         onClickConfirmSelection = viewModel::onClickConfirmSelection,
-        onClickSelectAll = viewModel::onClickSelectAll,
-        onClickSelectNone = viewModel::onClickSelectNone,
+        onClickSelectPlaylist = viewModel::onClickSelectPlaylist,
     )
 }
 
@@ -104,12 +104,13 @@ fun LearningUnitListScreen(
     onClickConfirmSelection: () -> Unit = {},
     onClickSelectAll: () -> Unit = {},
     onClickSelectNone: () -> Unit = {},
+    onClickSelectPlaylist: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = if (uiState.isMultiSelectMode && uiState.selectedCount > 0) {
+            contentPadding = if (uiState.showSelectPlaylistButton || (uiState.isMultiSelectMode && uiState.selectedCount > 0)) {
                 PaddingValues(bottom = 72.dp)
             } else {
                 PaddingValues()
@@ -211,6 +212,18 @@ fun LearningUnitListScreen(
                 )
             }
         }
+        if (uiState.showSelectPlaylistButton) {
+            Button(
+                onClick = onClickSelectPlaylist,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .testTag("select_playlist_button"),
+            ) {
+                Text(text = stringResource(Res.string.select_playlist))
+            }
+        }
     }
 }
 
@@ -268,6 +281,7 @@ fun PlaylistDetailScreen(
                 onClickShare = onClickShare,
                 onClickCopyPlaylist = onClickCopyPlaylist,
                 onClickDelete = onClickDelete,
+                onClickAssign = { onClickAssignSection(PlaylistDetailViewModel.ASSIGN_HEADER_SECTION_INDEX) }
             )
             HorizontalDivider()
         }
@@ -403,6 +417,7 @@ private fun PlaylistDetailHeader(
     onClickShare: () -> Unit,
     onClickCopyPlaylist: () -> Unit,
     onClickDelete: () -> Unit,
+    onClickAssign: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ListItem(
@@ -452,6 +467,14 @@ private fun PlaylistDetailHeader(
                 onClick = onClickCopyPlaylist,
                 testTag = "copy_btn",
             )
+            if (uiState.isTeacherOrAdmin && uiState.hasLearningUnitSections) {
+                PlaylistActionButton(
+                    icon = Icons.Filled.Task,
+                    label = stringResource(Res.string.assign),
+                    onClick = onClickAssign,
+                    testTag = "header_assign_btn",
+                )
+            }
             if (uiState.isTeacherOrAdmin) {
                 PlaylistActionButton(
                     icon = Icons.Filled.Delete,

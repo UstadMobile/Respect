@@ -23,12 +23,12 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
 import world.respect.shared.navigation.EnterLink
+import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
-import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -95,10 +95,17 @@ class PlaylistListViewModel(
             accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
                 val isTeacherOrAdmin = sessionAndPerson?.person?.isAdmin() == true
 
-                val activeUserOwnerHref = sessionAndPerson?.session?.account?.let { account ->
-                    "${account.school.self}user/${account.userGuid}"
-                } ?: ""
+                val activeUserOwnerHref = sessionAndPerson?.let {
+                    val username = it.person.username
+                        ?.takeIf { name -> name.isNotBlank() }
+                        ?: listOfNotNull(
+                            it.person.givenName.takeIf { name -> name.isNotBlank() },
+                            it.person.familyName.takeIf { name -> name.isNotBlank() },
+                        ).joinToString(" ").takeIf { name -> name.isNotBlank() }
+                        ?: it.session.account.userGuid
 
+                    "${it.session.account.school.self}user/$username"
+                } ?: ""
                 _uiState.update {
                     it.copy(
                         isTeacherOrAdmin = isTeacherOrAdmin,
@@ -140,7 +147,6 @@ class PlaylistListViewModel(
     fun onClickFilter(filter: PlaylistFilter) {
         _uiState.update { it.copy(activeFilter = filter) }
     }
-
     fun onClickPlaylist(publication: OpdsPublication) {
         val selfHref = publication.links.find {
             it.rel?.contains(PlaylistListUiState.REL_SELF) == true
@@ -148,13 +154,18 @@ class PlaylistListViewModel(
             "Playlist publication has no self link: ${publication.metadata.title}"
         )
 
-        if (
-            !resultReturner.sendResultIfResultExpected(
-                route = route,
-                navCommandFlow = _navCommandFlow,
-                result = selfHref,
+        val isPickMode = route.resultDest != null
+        if (isPickMode) {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    LearningUnitList.create(
+                        opdsFeedUrl = Url(selfHref),
+                        appManifestUrl = Url(selfHref),
+                        resultDest = route.resultDest,
+                    )
+                )
             )
-        ) {
+        } else {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     PlaylistDetail.create(playlistUrl = Url(selfHref))
@@ -162,7 +173,6 @@ class PlaylistListViewModel(
             )
         }
     }
-
     fun onClickCreatePlaylist() {
         _uiState.update { it.copy(isFabMenuExpanded = !it.isFabMenuExpanded) }
     }

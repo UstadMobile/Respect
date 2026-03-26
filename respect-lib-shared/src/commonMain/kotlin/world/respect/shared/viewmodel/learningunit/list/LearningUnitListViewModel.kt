@@ -48,6 +48,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
@@ -71,6 +72,7 @@ data class LearningUnitListUiState(
     val showCopyDialog: Boolean = false,
     val copyDialogName: String = "",
     val showDeleteDialog: Boolean = false,
+    val showSelectPlaylistButton: Boolean = false,
 ) {
     fun isSectionCollapsed(sectionKey: String) = sectionKey in collapsedSections
 
@@ -79,6 +81,9 @@ data class LearningUnitListUiState(
 
     val selectedCount: Int
         get() = selectedPublications.size
+
+    val hasLearningUnitSections: Boolean
+        get() = group.any { it.publications != null }
 }
 
 private fun LearningUnitListUiState.withFeedContent(feed: OpdsFeed): LearningUnitListUiState {
@@ -107,6 +112,11 @@ class LearningUnitListViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {
+        _uiState.update {
+            it.copy(
+                showSelectPlaylistButton = route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST
+            )
+        }
         viewModelScope.launch {
             _appUiState.update {
                 it.copy(searchState = AppBarSearchUiState(visible = true))
@@ -199,28 +209,6 @@ class LearningUnitListViewModel(
         }
     }
 
-    fun onClickSelectAll() {
-        val allIds = (_uiState.value.publications +
-                _uiState.value.group.flatMap { it.publications ?: emptyList() })
-            .mapNotNull { it.metadata.identifier?.toString() }
-            .toSet()
-        _uiState.update { prev ->
-            prev.copy(
-                selectedPublications = allIds,
-                isMultiSelectMode = allIds.isNotEmpty(),
-            )
-        }
-    }
-
-    fun onClickSelectNone() {
-        _uiState.update { prev ->
-            prev.copy(
-                selectedPublications = emptySet(),
-                isMultiSelectMode = false,
-            )
-        }
-    }
-
     fun onClickConfirmSelection() {
         val currentState = _uiState.value
         if (currentState.selectedPublications.isEmpty()) return
@@ -260,6 +248,13 @@ class LearningUnitListViewModel(
                     resultDest = route.resultDest,
                 )
             )
+        )
+    }
+    fun onClickSelectPlaylist() {
+        resultReturner.sendResultIfResultExpected(
+            route = route,
+            navCommandFlow = _navCommandFlow,
+            result = route.opdsFeedUrl.toString(),
         )
     }
 
@@ -495,18 +490,18 @@ class PlaylistDetailViewModel(
         val feed = _uiState.value.feed ?: throw IllegalStateException(
             "Cannot assign: no playlist feed loaded"
         )
-
         val playlistUrl = feed.selfUrl()
-            ?: throw IllegalStateException(
-                "Cannot assign: playlist feed has no self URL"
-            )
+            ?: throw IllegalStateException("Cannot assign: playlist feed has no self URL")
 
-        val section = _uiState.value.group.getOrNull(sectionIndex)
-            ?: throw IllegalStateException(
-                "No section at index $sectionIndex"
-            )
+        val targetSection = if (sectionIndex == ASSIGN_HEADER_SECTION_INDEX) {
+            _uiState.value.group.firstOrNull { it.publications != null }
+                ?: throw IllegalStateException("No learning unit section found to assign")
+        } else {
+            _uiState.value.group.getOrNull(sectionIndex)
+                ?: throw IllegalStateException("No section at index $sectionIndex")
+        }
 
-        val firstPublication = section.publications?.firstOrNull()
+        val firstPublication = targetSection.publications?.firstOrNull()
             ?: throw IllegalStateException(
                 "Assign clicked but section at index $sectionIndex has no learning items"
             )
@@ -533,5 +528,8 @@ class PlaylistDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(PlaylistEdit.create(playlistUrl = playlistUrl))
         )
+    }
+    companion object {
+        const val ASSIGN_HEADER_SECTION_INDEX = -1
     }
 }

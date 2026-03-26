@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -81,8 +82,13 @@ import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionType
 fun PlaylistEditScreenForViewModel(
     viewModel: PlaylistEditViewModel,
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.restoreAppBarState()
+    }
     val uiState by viewModel.uiState.collectAsState()
-
+    LaunchedEffect(uiState) {
+        viewModel.restoreAppBarState()
+    }
     PlaylistEditScreen(
         uiState = uiState,
         onTitleChanged = viewModel::onTitleChanged,

@@ -74,8 +74,7 @@ onFlowComplete:
     id: "app_title"
     text: "Add assignment"
 - assertVisible: "Lesson 001"
-- tapOn:
-    id:"confirm_selection_button"
+- tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Homework 1"

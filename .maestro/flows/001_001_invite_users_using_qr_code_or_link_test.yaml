@@ -231,6 +231,10 @@ onFlowComplete:
     id: "app_title"
     text: "Change History"
 - assertVisible: 'Person name changed from "TeacherA User" to "TeacherB User"'
+- back
+- back
+- tapOn: "Classes"
+- tapOn: "New Class"
 
 # E) Teacher share invite link for parent device based signup
 - tapOn: "Add student"

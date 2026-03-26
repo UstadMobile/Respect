@@ -50,7 +50,7 @@ import world.respect.shared.generated.resources.assignment_tasks
 import world.respect.shared.generated.resources.clazz
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.lesson_assessment
+import world.respect.shared.generated.resources.task
 import world.respect.shared.generated.resources.assignment_name
 import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.asUiText
@@ -212,7 +212,7 @@ fun AssignmentEditScreen(
                 )
             },
             headlineContent = {
-                Text(stringResource(Res.string.lesson_assessment))
+                Text(stringResource(Res.string.task))
             }
         )
 

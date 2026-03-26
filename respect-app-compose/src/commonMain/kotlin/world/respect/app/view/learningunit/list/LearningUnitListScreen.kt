@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
@@ -146,6 +145,7 @@ fun LearningUnitListScreen(
             ) { _, navigation ->
                 NavigationListItem(
                     navigation = navigation,
+                    isSelected = uiState.isNavigationSelected(navigation),
                     onClickNavigation = { onClickNavigation(navigation) },
                 )
             }
@@ -176,6 +176,7 @@ fun LearningUnitListScreen(
                 ) { _, navigation ->
                     NavigationListItem(
                         navigation = navigation,
+                        isSelected = uiState.isNavigationSelected(navigation),
                         onClickNavigation = { onClickNavigation(navigation) },
                     )
                 }
@@ -215,6 +216,7 @@ fun LearningUnitListScreen(
         if (uiState.showSelectPlaylistButton) {
             Button(
                 onClick = onClickSelectPlaylist,
+                enabled = uiState.selectedNavigationHref != null,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
@@ -612,6 +614,7 @@ private fun FeedListItem(
 @Composable
 fun NavigationListItem(
     navigation: ReadiumLink,
+    isSelected: Boolean = false,
     onClickNavigation: (ReadiumLink) -> Unit,
 ) {
     FeedListItem(
@@ -623,8 +626,8 @@ fun NavigationListItem(
         }?.href,
         language = navigation.language,
         duration = navigation.duration,
-        isMultiSelectMode = false,
-        isSelected = false,
+        isMultiSelectMode = isSelected,
+        isSelected = isSelected,
         onClick = { onClickNavigation(navigation) },
         onLongPress = {},
     )

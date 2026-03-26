@@ -35,6 +35,7 @@ import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.edit_playlist
 import world.respect.shared.generated.resources.learning_item_section
 import world.respect.shared.generated.resources.playlist_section
+import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
@@ -43,6 +44,7 @@ import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RouteResultDest
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
@@ -71,7 +73,7 @@ data class MovingItemState(
 data class PlaylistEditUiState(
     val feed: OpdsFeed? = null,
     val isSectionTypeDialogVisible: Boolean = false,
-    val titleError: Boolean = false,
+    val titleError: UiText? = null,
     val movingItem: MovingItemState? = null,
 ) {
     val title: String
@@ -82,6 +84,9 @@ data class PlaylistEditUiState(
 
     val sections: List<OpdsGroup>
         get() = feed?.groups ?: emptyList()
+
+    val hasErrors: Boolean
+        get() = titleError!=null
 }
 
 class PlaylistEditViewModel(
@@ -259,7 +264,7 @@ class PlaylistEditViewModel(
                 feed = prev.feed?.copy(
                     metadata = prev.feed.metadata.copy(title = title)
                 ),
-                titleError = false,
+                titleError = null,
             )
         }
     }
@@ -468,8 +473,14 @@ class PlaylistEditViewModel(
     fun onClickSave() {
         val feed = _uiState.value.feed ?: return
         if (feed.metadata.title.isBlank()) {
-            _uiState.update { it.copy(titleError = true) }
-            return
+            _uiState.update {
+                it.copy(
+                    titleError =
+                        Res.string.required_field.asUiText()
+                )
+            }
+            if(uiState.value.hasErrors)
+                return
         }
 
         viewModelScope.launch {

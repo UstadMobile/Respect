@@ -111,19 +111,20 @@ onFlowComplete:
 - tapOn: "+ Playlist"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "My app"
 - assertVisible:
     id: "app_title"
     text: "My app"
 - assertVisible: "Grade 1"
-- assertVisible: "Lesson 001"
-- assertVisible: "Lesson 002"
+- tapOn: "Grade 1"
+#- assertVisible: "Lesson 001"
+#- assertVisible: "Lesson 002"
 - tapOn: "Select playlist"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"
-- assertVisible: "My app"
+- assertVisible: "Grade 1"
 - tapOn: "Section"
 - tapOn:
     text: "Learning item section"

@@ -73,11 +73,15 @@ data class LearningUnitListUiState(
     val copyDialogName: String = "",
     val showDeleteDialog: Boolean = false,
     val showSelectPlaylistButton: Boolean = false,
+    val selectedNavigationHref: String? = null,
 ) {
     fun isSectionCollapsed(sectionKey: String) = sectionKey in collapsedSections
 
     fun isPublicationSelected(publication: OpdsPublication): Boolean =
         publication.metadata.identifier?.toString() in selectedPublications
+
+    fun isNavigationSelected(navigation: ReadiumLink): Boolean =
+        navigation.href == selectedNavigationHref
 
     val selectedCount: Int
         get() = selectedPublications.size
@@ -240,21 +244,56 @@ class LearningUnitListViewModel(
 
     fun onClickNavigation(navigation: ReadiumLink) {
         val navigationHref = navigation.href
+        val resolvedUrl = route.opdsFeedUrl.resolve(navigationHref)
+
+        // In playlist-pick mode, clicking a navigation item (grade) selects it.
+        // The user then confirms by clicking the "Select Playlist" button.
+        if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
+            _uiState.update { prev ->
+                prev.copy(
+                    selectedNavigationHref = if (prev.selectedNavigationHref == resolvedUrl.toString()) {
+                        null // deselect if already selected
+                    } else {
+                        resolvedUrl.toString()
+                    }
+                )
+            }
+            return
+        }
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LearningUnitList.create(
-                    opdsFeedUrl = route.opdsFeedUrl.resolve(navigationHref),
+                    opdsFeedUrl = resolvedUrl,
                     appManifestUrl = route.appManifestUrl,
                     resultDest = route.resultDest,
                 )
             )
         )
     }
+
     fun onClickSelectPlaylist() {
+        val selectedHref = _uiState.value.selectedNavigationHref
+            ?: return // no grade selected, do nothing
+
+        // Find the selected navigation item to get its title (e.g. "Grade 1")
+        val allNavigation = _uiState.value.navigation +
+                _uiState.value.group.flatMap { it.navigation ?: emptyList() }
+
+        val selectedNav = allNavigation.find {
+            route.opdsFeedUrl.resolve(it.href).toString() == selectedHref
+        }
+
+        val resultLink = ReadiumLink(
+            href = selectedHref,
+            title = selectedNav?.title,
+            type = OpdsFeed.MEDIA_TYPE,
+        )
+
         resultReturner.sendResultIfResultExpected(
             route = route,
             navCommandFlow = _navCommandFlow,
-            result = route.opdsFeedUrl.toString(),
+            result = resultLink,
         )
     }
 

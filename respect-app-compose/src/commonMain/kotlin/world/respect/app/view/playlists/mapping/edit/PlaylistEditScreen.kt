@@ -136,12 +136,11 @@ fun PlaylistEditScreen(
         OutlinedTextField(
             value = uiState.title,
             onValueChange = onTitleChanged,
-            label = { Text(stringResource(Res.string.title)) },
-            isError = uiState.titleError,
+            label = { Text(stringResource(Res.string.title) + "*") },
+            isError = uiState.titleError != null,
             supportingText = {
-                if (uiState.titleError) {
-                    Text(uiTextStringResource(Res.string.required.asUiText()))
-                }
+                Text(uiTextStringResource(uiState.titleError ?: Res.string.required.asUiText()))
+
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -203,7 +202,12 @@ fun PlaylistEditScreen(
                         onClickDeleteSection = { onClickDeleteSection(sectionIndex) },
                         onClickAddItem = { onClickAddItem(sectionIndex) },
                         onClickAddPlaylist = { onClickAddPlaylist(sectionIndex) },
-                        onClickDeleteItem = { itemIndex -> onClickDeleteItem(sectionIndex, itemIndex) },
+                        onClickDeleteItem = { itemIndex ->
+                            onClickDeleteItem(
+                                sectionIndex,
+                                itemIndex
+                            )
+                        },
                         onClickMoveItem = { itemIndex -> onClickMoveItem(sectionIndex, itemIndex) },
                         onItemsReordered = { items -> onItemsReordered(sectionIndex, items) },
                     )
@@ -460,7 +464,10 @@ private fun ItemMenuButton(
         onClick = { menuExpanded = true },
         modifier = Modifier.testTag("item_menu_${sectionIndex}_$itemIndex"),
     ) {
-        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = stringResource(Res.string.move))
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(Res.string.move)
+        )
     }
     DropdownMenu(
         expanded = menuExpanded,

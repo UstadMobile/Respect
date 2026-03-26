@@ -58,7 +58,7 @@ fun ChangeHistoryScreen(
                         text = group.person.fullName(),
                     )
                     val createdAtStr = rememberFormattedDateTime(
-                        timeInMillis = entry.timestamp,
+                        timeInMillis = entry.lastModified.toEpochMilliseconds(),
                         timeZoneId = TimeZone.currentSystemDefault().id,
                     )
 
@@ -77,7 +77,7 @@ fun ChangeHistoryScreen(
 
                         ChangeHistoryFieldEnum.CLASS_TEACHER_REMOVED,
                         ChangeHistoryFieldEnum.CLASS_STUDENT_REMOVED ->
-                            "${change.field.displayName}: \"${change.oldVal}\""
+                            "${change.field.displayName}: \"${change.newVal}\""
 
                         else ->
                             stringResource(

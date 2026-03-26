@@ -9,10 +9,17 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.school.DataAndChangeHistory
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
+import world.respect.datalayer.school.model.Enrollment
 import world.respect.server.util.ext.offsetLimitPagingLoadParams
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.respondOffsetLimitPaging
@@ -38,9 +45,32 @@ fun Route.EnrollmentRoute(
     }
 
     post(EnrollmentDataSource.ENDPOINT_NAME) {
-        schoolDataSource(call).enrollmentDataSource.store(
-            list = call.receive()
-        )
+        val schoolDataSource = schoolDataSource(call)
+
+        when (val incoming = call.receive<JsonElement>()) {
+
+            is JsonArray -> {
+                val enrollments = Json.decodeFromJsonElement<List<Enrollment>>(incoming)
+
+                schoolDataSource.enrollmentDataSource.store(enrollments)
+            }
+
+            is JsonObject -> {
+                val request = Json.decodeFromJsonElement<DataAndChangeHistory<Enrollment>>(incoming)
+
+                schoolDataSource.enrollmentDataSource.store(request.data)
+
+                if (request.changeHistories.isNotEmpty()) {
+                    schoolDataSource.changeHistoryDataSource.store(request.changeHistories)
+                    schoolDataSource.changeHistoryDataSource.markSentToServer(request.changeHistories)
+                }
+            }
+
+            else -> {
+                throw IllegalArgumentException("Invalid request format")
+            }
+        }
+
         call.respond(HttpStatusCode.NoContent)
     }
 }

@@ -13,7 +13,6 @@ data class ChangeHistoryEntity(
     val hGuidHash: Long,
     val hTable: ChangeHistoryTableEnum,
     val hTableGuid: String,
-    val hTimestamp: Long,
     val hWhoGuid: String,
     val hWhoGuidHash: Long,
     val hLastModified: Instant = Clock.System.now(),

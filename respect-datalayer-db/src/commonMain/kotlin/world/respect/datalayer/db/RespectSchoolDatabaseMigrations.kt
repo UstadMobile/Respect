@@ -28,7 +28,6 @@ val MIGRATE_12_13 = object : Migration(12, 13) {
                 `hGuid` TEXT NOT NULL,
                 `hGuidHash` INTEGER NOT NULL,
                 `hTable` TEXT NOT NULL,
-                `hTimestamp` INTEGER NOT NULL,
                 `hWhoGuid` TEXT NOT NULL,
                 `hWhoGuidHash` INTEGER NOT NULL,
                 `hLastModified` INTEGER NOT NULL,

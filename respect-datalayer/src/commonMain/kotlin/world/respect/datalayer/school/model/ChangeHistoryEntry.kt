@@ -11,7 +11,6 @@ data class ChangeHistoryEntry(
     val guid: String,
     val tableGuid: String,
     val table: ChangeHistoryTableEnum,
-    val timestamp: Long,
     val whoGuid: String,
     val changes: List<ChangeHistoryChange>,
     override val lastModified: InstantAsISO8601 = Clock.System.now(),

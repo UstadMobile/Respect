@@ -28,7 +28,6 @@ fun ChangeHistoryWithChanges.toModel(): ChangeHistoryEntry {
     return ChangeHistoryEntry(
         guid = history.hGuid,
         table = history.hTable,
-        timestamp = history.hTimestamp,
         whoGuid = history.hWhoGuid,
         tableGuid = history.hTableGuid,
         changes = changes.map { it.toModel() }
@@ -56,7 +55,6 @@ fun ChangeHistoryEntry.toEntities(
         hGuid = guid,
         hGuidHash = guidHash,
         hTable = table,
-        hTimestamp = timestamp,
         hWhoGuid = whoGuid,
         hWhoGuidHash = uidNumberMapper(whoGuid),
         hTableGuid = tableGuid
@@ -103,7 +101,6 @@ fun generateClassChanges(
         table = ChangeHistoryTableEnum.CLASS,
         tableGuid = hTableGuid,
         whoGuid = whoGuid,
-        timestamp = timestamp,
         changes = changes
     )
 }
@@ -113,17 +110,14 @@ private fun roleChangeField(
     oldRole: EnrollmentRoleEnum?,
     newRole: EnrollmentRoleEnum
 ): ChangeHistoryFieldEnum? {
-    return when {
-        oldRole == EnrollmentRoleEnum.PENDING_STUDENT && newRole == EnrollmentRoleEnum.STUDENT ->
+    return when (oldRole) {
+        EnrollmentRoleEnum.PENDING_STUDENT if newRole == EnrollmentRoleEnum.STUDENT ->
             ChangeHistoryFieldEnum.JOIN_REQUEST_APPROVED
-
-        oldRole == EnrollmentRoleEnum.PENDING_TEACHER && newRole == EnrollmentRoleEnum.TEACHER ->
+        EnrollmentRoleEnum.PENDING_TEACHER if newRole == EnrollmentRoleEnum.TEACHER ->
             ChangeHistoryFieldEnum.JOIN_REQUEST_APPROVED
-
         else -> null
     }
 }
-
 
 fun generateEnrollmentChanges(
     hGuid: String,
@@ -150,15 +144,15 @@ fun generateEnrollmentChanges(
         )
     } else {
 
-        if (new.removedAt != null && old.removedAt == null) {
+        if (new.status == StatusEnum.TO_BE_DELETED && old.status == StatusEnum.ACTIVE) {
             changes += ChangeHistoryChange(
                 field = when (new.role) {
                     EnrollmentRoleEnum.TEACHER -> ChangeHistoryFieldEnum.CLASS_TEACHER_REMOVED
                     EnrollmentRoleEnum.STUDENT -> ChangeHistoryFieldEnum.CLASS_STUDENT_REMOVED
                     else -> ChangeHistoryFieldEnum.CLASS_STUDENT_REMOVED
                 },
-                oldVal = name,
-                newVal = ""
+                oldVal = "",
+                newVal = name
             )
 
             return ChangeHistoryEntry(
@@ -166,7 +160,6 @@ fun generateEnrollmentChanges(
                 table = ChangeHistoryTableEnum.CLASS,
                 tableGuid = hTableGuid,
                 whoGuid = whoGuid,
-                timestamp = timestamp,
                 changes = changes
             )
         }
@@ -183,7 +176,6 @@ fun generateEnrollmentChanges(
                 table = ChangeHistoryTableEnum.CLASS,
                 tableGuid = hTableGuid,
                 whoGuid = whoGuid,
-                timestamp = timestamp,
                 changes = changes
             )
         }
@@ -201,7 +193,6 @@ fun generateEnrollmentChanges(
         table = ChangeHistoryTableEnum.ENROLLMENT,
         tableGuid = hTableGuid,
         whoGuid = whoGuid,
-        timestamp = timestamp,
         changes = changes
     )
 }
@@ -229,7 +220,6 @@ fun generatePersonChanges(
     return ChangeHistoryEntry(
         guid = primaryKeyGenerator.nextId(ChangeHistoryEntry.TABLE_ID).toString(),
         table = ChangeHistoryTableEnum.PERSON,
-        timestamp = timestamp,
         whoGuid = whoGuid,
         changes = changes,
         tableGuid = hTableGuid

@@ -73,7 +73,7 @@ interface ChangeHistoryDao {
            FROM ChangeHistoryEntity
           WHERE (:table IS NULL OR hTable = :table)
             AND (:whoGuidHash = 0 OR hWhoGuidHash = :whoGuidHash)
-           ORDER BY hTimestamp DESC
+           ORDER BY hLastModified DESC
      """)
     fun listAsPagingSource(
         table: ChangeHistoryTableEnum?,
@@ -103,6 +103,7 @@ interface ChangeHistoryDao {
         SELECT *
           FROM ChangeHistoryEntity
          WHERE hTableGuid = :guid
+         ORDER BY hLastModified DESC
      """)
     fun findByGuidAsFlow(guid: String): Flow<List<ChangeHistoryWithChanges>>
 

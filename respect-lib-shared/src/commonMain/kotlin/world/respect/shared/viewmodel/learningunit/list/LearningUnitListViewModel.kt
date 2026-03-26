@@ -276,24 +276,10 @@ class LearningUnitListViewModel(
         val selectedHref = _uiState.value.selectedNavigationHref
             ?: return // no grade selected, do nothing
 
-        // Find the selected navigation item to get its title (e.g. "Grade 1")
-        val allNavigation = _uiState.value.navigation +
-                _uiState.value.group.flatMap { it.navigation ?: emptyList() }
-
-        val selectedNav = allNavigation.find {
-            route.opdsFeedUrl.resolve(it.href).toString() == selectedHref
-        }
-
-        val resultLink = ReadiumLink(
-            href = selectedHref,
-            title = selectedNav?.title,
-            type = OpdsFeed.MEDIA_TYPE,
-        )
-
         resultReturner.sendResultIfResultExpected(
             route = route,
             navCommandFlow = _navCommandFlow,
-            result = resultLink,
+            result = selectedHref,
         )
     }
 

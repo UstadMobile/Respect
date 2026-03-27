@@ -286,6 +286,7 @@ class LearningUnitList(
     private val opdsFeedUrlStr: String,
     private val appManifestUrlStr: String,
     private val resultDestStr: String?,
+    val title: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -302,11 +303,13 @@ class LearningUnitList(
             opdsFeedUrl: Url,
             appManifestUrl: Url,
             resultDest: ResultDest? = null,
+            title: String? = null,
         ): LearningUnitList {
             return LearningUnitList(
                 opdsFeedUrlStr = opdsFeedUrl.toString(),
                 appManifestUrlStr = appManifestUrl.toString(),
-                resultDestStr = resultDest.encodeToJsonStringOrNull()
+                resultDestStr = resultDest.encodeToJsonStringOrNull() ,
+                title = title,
             )
         }
     }

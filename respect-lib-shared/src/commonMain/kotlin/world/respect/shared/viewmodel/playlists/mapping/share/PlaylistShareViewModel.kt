@@ -22,6 +22,8 @@ import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.share_playlist
+import world.respect.shared.navigation.EnterLink
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -107,6 +109,7 @@ class PlaylistShareViewModel(
 
     fun onClickCopyLink() {
         setClipboardStringUseCase(_uiState.value.shareUrl)
+        _navCommandFlow.tryEmit(NavCommand.Navigate(EnterLink))
     }
 
     fun onClickShareLink() {

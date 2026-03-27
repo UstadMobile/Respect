@@ -141,10 +141,9 @@ class LearningUnitListViewModel(
                                 order = true
                             )
                         }
-
                         _appUiState.update {
                             it.copy(
-                                title = result.data.metadata.title.asUiText(),
+                                title = (route.title ?: result.data.metadata.title).asUiText(),
                                 searchState = AppBarSearchUiState(visible = true)
                             )
                         }
@@ -254,13 +253,11 @@ class LearningUnitListViewModel(
         val navigationHref = navigation.href
         val resolvedUrl = route.opdsFeedUrl.resolve(navigationHref)
 
-        // In playlist-pick mode, clicking a navigation item (grade) selects it.
-        // The user then confirms by clicking the "Select Playlist" button.
         if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
             _uiState.update { prev ->
                 prev.copy(
                     selectedNavigationHref = if (prev.selectedNavigationHref == resolvedUrl.toString()) {
-                        null // deselect if already selected
+                        null
                     } else {
                         resolvedUrl.toString()
                     }
@@ -275,36 +272,31 @@ class LearningUnitListViewModel(
                     opdsFeedUrl = resolvedUrl,
                     appManifestUrl = route.appManifestUrl,
                     resultDest = route.resultDest,
+                    title = route.title,
                 )
             )
         )
     }
-
     fun onClickSelectPlaylist() {
-        val selectedHref = _uiState.value.selectedNavigationHref
-            ?: return // no grade selected, do nothing
+        val selectedHref = _uiState.value.selectedNavigationHref ?: return
 
-        // Find the selected navigation item to get its title (e.g. "Grade 1")
+        if (route.resultDest?.resultKey != PlaylistEditViewModel.KEY_PLAYLIST) return
+
         val allNavigation = _uiState.value.navigation +
                 _uiState.value.group.flatMap { it.navigation ?: emptyList() }
 
-        val selectedNav = allNavigation.find {
-            route.opdsFeedUrl.resolve(it.href).toString() == selectedHref
-        }
-
-        val resultLink = ReadiumLink(
-            href = selectedHref,
-            title = selectedNav?.title,
-            type = OpdsFeed.MEDIA_TYPE,
-        )
+        val selectedTitle = allNavigation.find {
+            runCatching {
+                route.opdsFeedUrl.resolve(it.href).toString() == selectedHref
+            }.getOrDefault(false)
+        }?.title
 
         resultReturner.sendResultIfResultExpected(
             route = route,
             navCommandFlow = _navCommandFlow,
-            result = resultLink,
+            result = Pair(selectedHref, selectedTitle),
         )
     }
-
     companion object {
         const val SELF = "self"
         const val ICON = "icon"
@@ -553,12 +545,20 @@ class PlaylistDetailViewModel(
                 "Assign clicked but section at index $sectionIndex has no learning items"
             )
 
+        val publicationSelfHref = firstPublication.links.find {
+            it.rel?.contains(LearningUnitListViewModel.SELF) == true
+        }?.href ?: throw IllegalStateException(
+            "Publication has no self link: ${firstPublication.metadata.title}"
+        )
+
+        val learningUnitManifestUrl = playlistUrl.resolve(publicationSelfHref)
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
                     uid = null,
                     learningUnitSelected = LearningUnitSelection(
-                        learningUnitManifestUrl = playlistUrl,
+                        learningUnitManifestUrl = learningUnitManifestUrl,
                         selectedPublication = firstPublication,
                         appManifestUrl = playlistUrl,
                     )

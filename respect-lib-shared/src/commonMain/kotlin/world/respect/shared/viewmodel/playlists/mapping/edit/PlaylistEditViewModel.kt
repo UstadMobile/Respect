@@ -206,17 +206,22 @@ class PlaylistEditViewModel(
                     )
                 pendingAddPlaylistSectionIndex = null
 
-                val selfHref = result.result as? String
+                val pair = result.result as? Pair<*, *>
                     ?: throw IllegalStateException(
-                        "Expected String playlist href but got: ${result.result}"
+                        "Expected Pair playlist href but got: ${result.result}"
                     )
 
-                val playlistTitle = schoolDataSource.opdsFeedDataSource
-                    .getByUrl(url = Url(selfHref), params = DataLoadParams())
-                    .dataOrNull()
-                    ?.metadata
-                    ?.title
+                val selfHref = pair.first as? String
+                    ?: throw IllegalStateException("Expected String href but got: ${pair.first}")
 
+                val navTitle = pair.second as? String
+
+                val playlistTitle = navTitle
+                    ?: schoolDataSource.opdsFeedDataSource
+                        .getByUrl(url = Url(selfHref), params = DataLoadParams())
+                        .dataOrNull()
+                        ?.metadata
+                        ?.title
                 val navLink = ReadiumLink(
                     href = selfHref,
                     rel = listOf(PlaylistListUiState.REL_SELF),

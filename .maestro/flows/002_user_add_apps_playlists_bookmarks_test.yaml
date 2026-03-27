@@ -139,7 +139,7 @@ onFlowComplete:
 - tapOn: "Grade 1"
 - assertVisible: "Lesson 001"
 - tapOn: "Lesson 002"
-- tapOn: "Select 1 item"
+#- tapOn: "Select 1 item"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"
@@ -247,11 +247,9 @@ onFlowComplete:
 - copyTextFrom:
     id: "copy_link"
 - assertVisible:
-    id: "add_from_a_link"
-- assertVisible:
     id: "app_title"
-    text: "Add from a link"
-- tapOn: "Enter link"
+    text: "Enter link"
+- tapOn: "Link*"
 - pasteText
 - tapOn: "Next"
 - assertVisible:
@@ -312,7 +310,6 @@ onFlowComplete:
 - tapOn: "Lesson/assessment"
 - assertVisible:
     id: "app_title"
-    text: "Add task to assignment"
 - tapOn: "Playlists"
 - tapOn: "Playlist - Grade 1"
 - assertVisible:

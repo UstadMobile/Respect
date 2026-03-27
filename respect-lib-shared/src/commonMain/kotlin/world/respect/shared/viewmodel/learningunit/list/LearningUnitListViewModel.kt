@@ -142,7 +142,6 @@ class LearningUnitListViewModel(
                                 order = true
                             )
                         }
-
                         _appUiState.update {
                             it.copy(
                                 title = result.data.metadata.title.asUiText(),
@@ -233,8 +232,6 @@ class LearningUnitListViewModel(
             )
         }
     }
-
-
     fun onLongPressPublication(publication: OpdsPublication) {
         _uiState.update { it.copy(isMultiSelectMode = true) }
         toggleSelection(publication)
@@ -320,10 +317,8 @@ class LearningUnitListViewModel(
             route = route,
             navCommandFlow = _navCommandFlow,
             result =  _uiState.value.selectedNavigation ?: return
-            ,
         )
     }
-
     companion object {
         const val SELF = "self"
         const val ICON = "icon"

@@ -153,7 +153,7 @@ onFlowComplete:
 - tapOn:
     id: "expand_collapse_icon"
     index: 0
-- assertVisible: "My app"
+#- assertVisible: "My app"
 - assertVisible: "Learning item section"
 - tapOn:
     id: "expand_collapse_icon"

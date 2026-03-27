@@ -57,7 +57,10 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 
-- runFlow: "subflows/admin_add_class.yaml"
+- runFlow:
+    file: "subflows/admin_add_class.yaml"
+    env:
+      CLASSNAME: "New Class"
 - tapOn:
     text: "Home"
     index: 0
@@ -139,7 +142,7 @@ onFlowComplete:
 - tapOn: "Grade 1"
 - assertVisible: "Lesson 001"
 - tapOn: "Lesson 002"
-#- tapOn: "Select 1 item"
+- tapOn: "Select 1 item"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"
@@ -245,7 +248,7 @@ onFlowComplete:
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via email"
 - copyTextFrom:
-    id: "copy_link"
+    id: "copy_link_button"
 - assertVisible:
     id: "app_title"
     text: "Enter link"
@@ -316,7 +319,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Playlist - Grade 1"
-- tapOn: "Lesson 001"
+- tapOn: "Lesson 002"
 - assertVisible:
     id: "app_title"
     text: "Add assignment"
@@ -324,7 +327,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Homework 2"
-- assertVisible: "Lesson 001"
+- assertVisible: "Lesson 002"
 - tapOn: "Assignments"
 - assertVisible: "Homework 1"
 - assertVisible: "Homework 2"

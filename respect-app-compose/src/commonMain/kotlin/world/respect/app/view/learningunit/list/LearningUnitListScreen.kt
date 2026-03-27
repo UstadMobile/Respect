@@ -52,7 +52,6 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_tasks_to_assignment
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
@@ -64,9 +63,7 @@ import world.respect.shared.generated.resources.make_a_copy
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.permanently_delete
 import world.respect.shared.generated.resources.permanently_delete_description
-import world.respect.shared.generated.resources.select_all
 import world.respect.shared.generated.resources.select_count_items
-import world.respect.shared.generated.resources.select_none
 import world.respect.shared.generated.resources.select_playlist
 import world.respect.shared.generated.resources.share
 import world.respect.shared.util.SortOrderOption
@@ -101,8 +98,6 @@ fun LearningUnitListScreen(
     onLongPressPublication: (OpdsPublication) -> Unit = {},
     onClickNavigation: (ReadiumLink) -> Unit,
     onClickConfirmSelection: () -> Unit = {},
-    onClickSelectAll: () -> Unit = {},
-    onClickSelectNone: () -> Unit = {},
     onClickSelectPlaylist: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -115,36 +110,13 @@ fun LearningUnitListScreen(
                 PaddingValues()
             },
         ) {
-            if (uiState.isMultiSelectMode) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        TextButton(
-                            onClick = onClickSelectAll,
-                            modifier = Modifier.testTag("select_all_button"),
-                        ) {
-                            Text(text = stringResource(Res.string.select_all))
-                        }
-                        TextButton(
-                            onClick = onClickSelectNone,
-                            modifier = Modifier.testTag("select_none_button"),
-                        ) {
-                            Text(text = stringResource(Res.string.select_none))
-                        }
-                    }
-                }
-            }
-
             itemsIndexed(
                 items = uiState.navigation,
                 key = { _, navigation -> navigation.href }
             ) { _, navigation ->
                 NavigationListItem(
                     navigation = navigation,
+                    isMultiSelectMode = uiState.isMultiSelectMode,
                     isSelected = uiState.isNavigationSelected(navigation),
                     onClickNavigation = { onClickNavigation(navigation) },
                 )
@@ -176,6 +148,7 @@ fun LearningUnitListScreen(
                 ) { _, navigation ->
                     NavigationListItem(
                         navigation = navigation,
+                        isMultiSelectMode = uiState.isMultiSelectMode,
                         isSelected = uiState.isNavigationSelected(navigation),
                         onClickNavigation = { onClickNavigation(navigation) },
                     )
@@ -196,7 +169,19 @@ fun LearningUnitListScreen(
             }
         }
 
-        if (uiState.isMultiSelectMode && uiState.selectedCount > 0) {
+        if (uiState.showSelectPlaylistButton) {
+            Button(
+                onClick = onClickSelectPlaylist,
+                enabled = uiState.selectedNavigation != null,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .testTag("select_playlist_button"),
+            ) {
+                Text(text = stringResource(Res.string.select_playlist))
+            }
+        } else if (uiState.isMultiSelectMode && uiState.selectedCount > 0) {
             Button(
                 onClick = onClickConfirmSelection,
                 modifier = Modifier
@@ -213,19 +198,7 @@ fun LearningUnitListScreen(
                 )
             }
         }
-        if (uiState.showSelectPlaylistButton) {
-            Button(
-                onClick = onClickSelectPlaylist,
-                enabled = uiState.selectedNavigationHref != null,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .testTag("select_playlist_button"),
-            ) {
-                Text(text = stringResource(Res.string.select_playlist))
-            }
-        }
+
     }
 }
 
@@ -306,6 +279,8 @@ fun PlaylistDetailScreen(
                 ) { _, navigation ->
                     NavigationListItem(
                         navigation = navigation,
+                        isMultiSelectMode = uiState.isMultiSelectMode,
+                        isSelected = uiState.isNavigationSelected(navigation),
                         onClickNavigation = { onClickNavigation(navigation) },
                     )
                 }
@@ -614,6 +589,7 @@ private fun FeedListItem(
 @Composable
 fun NavigationListItem(
     navigation: ReadiumLink,
+    isMultiSelectMode: Boolean = false,
     isSelected: Boolean = false,
     onClickNavigation: (ReadiumLink) -> Unit,
 ) {
@@ -626,7 +602,7 @@ fun NavigationListItem(
         }?.href,
         language = navigation.language,
         duration = navigation.duration,
-        isMultiSelectMode = isSelected,
+        isMultiSelectMode = isMultiSelectMode,
         isSelected = isSelected,
         onClick = { onClickNavigation(navigation) },
         onLongPress = {},

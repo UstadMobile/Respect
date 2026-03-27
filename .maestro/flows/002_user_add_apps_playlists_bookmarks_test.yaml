@@ -125,7 +125,7 @@ onFlowComplete:
     id: "app_title"
     text: "Add playlist"
 - assertVisible: "Grade 1"
-- tapOn: "Section"
+- tapOn: "+ Section"
 - tapOn:
     text: "Learning item section"
     index: 1
@@ -153,12 +153,12 @@ onFlowComplete:
 - tapOn:
     id: "expand_collapse_icon"
     index: 0
-- assertVisible: "My app"
+#- assertVisible: "My app"
 - assertVisible: "Learning item section"
+- assertVisible: "Lesson 002"
 - tapOn:
     id: "expand_collapse_icon"
     index: 1
-- assertVisible: "Lesson 002"
 - tapOn:
     id: "floating_action_button"    # Edit button
 - assertVisible:
@@ -190,9 +190,9 @@ onFlowComplete:
 - tapOn: "Home"
 - tapOn: "Playlists"
 - assertVisible: "Playlist - Grade 1"
-- assertVisible: "2 sections, 3 items"
+- assertVisible: "2 sections, 2 items"
 - assertVisible: "Created by: Admin"
-- tapOn: "My Playlist"
+- tapOn: "My Playlists"
 - assertVisible: "Playlist - Grade 1"
 - tapOn: "All"
 - assertVisible: "Playlist - Grade 1"

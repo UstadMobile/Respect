@@ -51,6 +51,7 @@ import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
 import kotlin.time.Instant
+import kotlin.toString
 import kotlin.uuid.ExperimentalUuidApi
 
 data class LearningUnitListUiState(
@@ -73,7 +74,7 @@ data class LearningUnitListUiState(
     val copyDialogName: String = "",
     val showDeleteDialog: Boolean = false,
     val showSelectPlaylistButton: Boolean = false,
-    val selectedNavigationHref: String? = null,
+    val selectedNavigation: ReadiumLink? = null
 ) {
     fun isSectionCollapsed(sectionKey: String) = sectionKey in collapsedSections
 
@@ -81,7 +82,7 @@ data class LearningUnitListUiState(
         publication.metadata.identifier?.toString() in selectedPublications
 
     fun isNavigationSelected(navigation: ReadiumLink): Boolean =
-        navigation.href == selectedNavigationHref
+        navigation.href == selectedNavigation?.href
 
     val selectedCount: Int
         get() = selectedPublications.size
@@ -166,6 +167,37 @@ class LearningUnitListViewModel(
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
     fun onClickPublication(publication: OpdsPublication) {
+        if (route.resultDest != null &&
+            route.resultDest.resultKey != PlaylistEditViewModel.KEY_PLAYLIST
+        ) {
+            if (!_uiState.value.isMultiSelectMode) {
+                _uiState.update { it.copy(isMultiSelectMode = true) }
+            }
+            toggleSelection(publication)
+            return
+        }
+
+        // If in playlist-picking mode, don't allow publication multi-select
+        if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
+            // Navigate into the publication normally (or ignore)
+            val publicationHref = publication.links.find {
+                it.rel?.contains(SELF) == true
+            }?.href.toString()
+            val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
+            val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
+            _navCommandFlow.tryEmit(
+                value = NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = learningUnitManifestUrl,
+                        appManifestUrl = route.appManifestUrl,
+                        refererUrl = Url(refererUrl),
+                        expectedIdentifier = publication.metadata.identifier.toString()
+                    )
+                )
+            )
+            return
+        }
+
         if (_uiState.value.isMultiSelectMode) {
             toggleSelection(publication)
             return
@@ -201,6 +233,8 @@ class LearningUnitListViewModel(
             )
         }
     }
+
+
     fun onLongPressPublication(publication: OpdsPublication) {
         _uiState.update { it.copy(isMultiSelectMode = true) }
         toggleSelection(publication)
@@ -254,15 +288,15 @@ class LearningUnitListViewModel(
         val navigationHref = navigation.href
         val resolvedUrl = route.opdsFeedUrl.resolve(navigationHref)
 
-        // In playlist-pick mode, clicking a navigation item (grade) selects it.
-        // The user then confirms by clicking the "Select Playlist" button.
         if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
             _uiState.update { prev ->
+                val isDeselecting = prev.selectedNavigation?.href == resolvedUrl.toString()
                 prev.copy(
-                    selectedNavigationHref = if (prev.selectedNavigationHref == resolvedUrl.toString()) {
-                        null // deselect if already selected
+                    isMultiSelectMode = !isDeselecting,
+                    selectedNavigation = if (isDeselecting) {
+                        null
                     } else {
-                        resolvedUrl.toString()
+                        navigation.copy(href = resolvedUrl.toString())
                     }
                 )
             }
@@ -280,14 +314,13 @@ class LearningUnitListViewModel(
         )
     }
 
-    fun onClickSelectPlaylist() {
-        val selectedHref = _uiState.value.selectedNavigationHref
-            ?: return // no grade selected, do nothing
 
+    fun onClickSelectPlaylist() {
         resultReturner.sendResultIfResultExpected(
             route = route,
             navCommandFlow = _navCommandFlow,
-            result = selectedHref,
+            result =  _uiState.value.selectedNavigation ?: return
+            ,
         )
     }
 

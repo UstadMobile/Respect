@@ -82,13 +82,7 @@ import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionType
 fun PlaylistEditScreenForViewModel(
     viewModel: PlaylistEditViewModel,
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.restoreAppBarState()
-    }
     val uiState by viewModel.uiState.collectAsState()
-    LaunchedEffect(uiState) {
-        viewModel.restoreAppBarState()
-    }
     PlaylistEditScreen(
         uiState = uiState,
         onTitleChanged = viewModel::onTitleChanged,
@@ -248,7 +242,8 @@ private fun PlaylistSectionEditItem(
     onClickMoveItem: (Int) -> Unit,
     onItemsReordered: (List<Any>) -> Unit,
 ) {
-    val isNavigationSection = section.navigation != null
+    val isNavigationSection = !section.publications.isNullOrEmpty().not() &&
+        (section.navigation != null || section.publications == null)
 
     Column(
         modifier = Modifier

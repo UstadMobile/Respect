@@ -80,15 +80,6 @@ fun HomeScreen(
                     )
                 }
 
-                /* Temporary example.
-                HomeScreenTabs.PLAYLISTS -> {
-                    AssignmentListScreen(
-                        viewModel = respectViewModel(
-                            onSetAppUiState = onSetAppUiState,
-                            navController = respectNavController,
-                        )
-                    )
-                }*/
                 HomeScreenTabs.PLAYLISTS -> {
                     val viewModel: PlaylistListViewModel = respectViewModel(
                         onSetAppUiState = onSetAppUiState,

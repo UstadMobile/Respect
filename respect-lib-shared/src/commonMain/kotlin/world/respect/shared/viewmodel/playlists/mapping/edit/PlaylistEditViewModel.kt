@@ -114,6 +114,7 @@ class PlaylistEditViewModel(
         set(value) { savedStateHandle[KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX] = value }
 
     init {
+        restoreAppBarState()
         val existingPlaylistUrl = route.playlistUrl
         if (existingPlaylistUrl != null) {
             viewModelScope.launch {
@@ -197,7 +198,6 @@ class PlaylistEditViewModel(
                 restoreAppBarState()
             }
         }
-
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_PLAYLIST).collect { result ->
                 val sectionIndex = pendingAddPlaylistSectionIndex
@@ -206,37 +206,59 @@ class PlaylistEditViewModel(
                     )
                 pendingAddPlaylistSectionIndex = null
 
-                val selfHref = result.result as? String
-                    ?: throw IllegalStateException(
-                        "Expected String playlist href but got: ${result.result}"
+                val navLink = when (val data = result.result) {
+                    is OpdsPublication -> {
+                        val selfLink = data.links.firstOrNull {
+                            it.rel?.contains(PlaylistListUiState.REL_SELF) == true
+                        } ?: data.links.firstOrNull()
+
+                        ReadiumLink(
+                            href = selfLink?.href
+                                ?: throw IllegalStateException("No href for playlist"),
+                            title = data.metadata.title?.toString()?.takeIf { it.isNotBlank() }
+                                ?: selfLink?.title,
+                            rel = listOf(PlaylistListUiState.REL_SELF),
+                            type = OpdsFeed.MEDIA_TYPE,
+                        )
+                    }
+                    is ReadiumLink -> {
+                        if (data.title.isNullOrBlank()) {
+                            throw IllegalStateException(
+                                "ReadiumLink result has no title"
+                            )
+                        }
+                        data
+                    }
+                    else -> throw IllegalStateException(
+                        "Expected OpdsPublication or ReadiumLink but got: ${result.result}"
                     )
+                }
 
-                val playlistTitle = schoolDataSource.opdsFeedDataSource
-                    .getByUrl(url = Url(selfHref), params = DataLoadParams())
-                    .dataOrNull()
-                    ?.metadata
-                    ?.title
+                require(!navLink.title.isNullOrBlank()) {
+                    "Playlist navigation must have a title"
+                }
 
-                val navLink = ReadiumLink(
-                    href = selfHref,
-                    rel = listOf(PlaylistListUiState.REL_SELF),
-                    type = OpdsFeed.MEDIA_TYPE,
-                    title = playlistTitle,
-                )
                 _uiState.first { it.feed != null }
 
                 _uiState.update { prev ->
                     val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+
                     val section = sections.getOrNull(sectionIndex)
                         ?: throw IllegalStateException("No section at index $sectionIndex")
+
                     sections[sectionIndex] = section.copy(
                         navigation = (section.navigation ?: emptyList()) + navLink
                     )
-                    prev.copy(feed = prev.feed?.copy(groups = sections))
+
+                    prev.copy(
+                        feed = prev.feed?.copy(groups = sections)
+                    )
                 }
+
                 restoreAppBarState()
             }
         }
+
     }
 
     fun restoreAppBarState() {

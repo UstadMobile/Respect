@@ -55,6 +55,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
+import world.respect.shared.generated.resources.copy
 import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
@@ -343,7 +344,7 @@ private fun CopyPlaylistDialog(
                 onClick = onConfirm,
                 modifier = Modifier.testTag("copy_dialog_confirm"),
             ) {
-                Text(text = stringResource(Res.string.copy_playlist))
+                Text(text = stringResource(Res.string.copy))
             }
         },
         dismissButton = {

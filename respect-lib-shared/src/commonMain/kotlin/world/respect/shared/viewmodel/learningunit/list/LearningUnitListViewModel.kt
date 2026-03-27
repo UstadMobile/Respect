@@ -40,6 +40,7 @@ import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistShare
+import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
@@ -512,7 +513,11 @@ class PlaylistDetailViewModel(
             }
 
             _uiState.update { it.copy(showDeleteDialog = false) }
-            _navCommandFlow.tryEmit(NavCommand.PopUp())
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    destination = RespectAppLauncher.create()
+            )
+            )
         }
     }
 
@@ -546,7 +551,6 @@ class PlaylistDetailViewModel(
             )
         )
     }
-
     fun onClickAssignSection(sectionIndex: Int) {
         val feed = _uiState.value.feed ?: throw IllegalStateException(
             "Cannot assign: no playlist feed loaded"
@@ -555,8 +559,8 @@ class PlaylistDetailViewModel(
             ?: throw IllegalStateException("Cannot assign: playlist feed has no self URL")
 
         val targetSection = if (sectionIndex == ASSIGN_HEADER_SECTION_INDEX) {
-            _uiState.value.group.firstOrNull { it.publications != null }
-                ?: throw IllegalStateException("No learning unit section found to assign")
+            _uiState.value.group.firstOrNull { it.publications?.isNotEmpty() == true }
+                ?: throw IllegalStateException("No learning unit section with items found to assign")
         } else {
             _uiState.value.group.getOrNull(sectionIndex)
                 ?: throw IllegalStateException("No section at index $sectionIndex")
@@ -567,13 +571,20 @@ class PlaylistDetailViewModel(
                 "Assign clicked but section at index $sectionIndex has no learning items"
             )
 
+        val publicationSelfHref = firstPublication.links.find {
+            it.rel?.contains(LearningUnitListViewModel.SELF) == true
+        }?.href ?: throw IllegalStateException(
+            "Publication has no self link: ${firstPublication.metadata.title}"
+        )
+
+        val learningUnitManifestUrl = playlistUrl.resolve(publicationSelfHref)
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
                     uid = null,
                     learningUnitSelected = LearningUnitSelection(
-                        learningUnitManifestUrl = playlistUrl,
+                        learningUnitManifestUrl = learningUnitManifestUrl,
                         selectedPublication = firstPublication,
                         appManifestUrl = playlistUrl,
                     )

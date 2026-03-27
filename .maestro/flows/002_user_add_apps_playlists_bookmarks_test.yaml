@@ -285,6 +285,7 @@ onFlowComplete:
     id: "app_title"
     text: "Home"
 - assertVisible: "Playlists"
+- tapOn: "Playlists"
 - assertVisible: "Playlist - Grade 1"
 - assertNotVisible: "Playlist 2"
 

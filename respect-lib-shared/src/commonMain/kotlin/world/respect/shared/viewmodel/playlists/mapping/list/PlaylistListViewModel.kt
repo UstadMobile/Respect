@@ -158,9 +158,8 @@ class PlaylistListViewModel(
         if (isPickMode) {
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    LearningUnitList.create(
-                        opdsFeedUrl = Url(selfHref),
-                        appManifestUrl = Url(selfHref),
+                    PlaylistDetail.create(
+                        playlistUrl = Url(selfHref),
                         resultDest = route.resultDest,
                     )
                 )

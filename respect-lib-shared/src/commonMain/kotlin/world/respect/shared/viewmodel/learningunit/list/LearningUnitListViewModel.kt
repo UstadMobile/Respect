@@ -329,6 +329,7 @@ class LearningUnitListViewModel(
 class PlaylistDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -528,7 +529,6 @@ class PlaylistDetailViewModel(
             )
         )
     }
-
     fun onClickPublication(publication: OpdsPublication) {
         val selfHref = publication.links.find {
             it.rel?.contains(LearningUnitListViewModel.SELF) == true
@@ -541,15 +541,26 @@ class PlaylistDetailViewModel(
                 "Cannot navigate to publication: playlist feed has no self URL"
             )
 
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                LearningUnitDetail.create(
+        if (!resultReturner.sendResultIfResultExpected(
+                route = route,
+                navCommandFlow = _navCommandFlow,
+                result = LearningUnitSelection(
                     learningUnitManifestUrl = Url(selfHref),
+                    selectedPublication = publication,
                     appManifestUrl = appManifestUrl,
-                    expectedIdentifier = publication.metadata.identifier?.toString(),
                 )
             )
-        )
+        ) {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = Url(selfHref),
+                        appManifestUrl = appManifestUrl,
+                        expectedIdentifier = publication.metadata.identifier?.toString(),
+                    )
+                )
+            )
+        }
     }
     fun onClickAssignSection(sectionIndex: Int) {
         val feed = _uiState.value.feed ?: throw IllegalStateException(

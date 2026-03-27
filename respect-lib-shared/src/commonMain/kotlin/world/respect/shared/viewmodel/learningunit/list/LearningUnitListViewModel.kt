@@ -547,22 +547,25 @@ class PlaylistDetailViewModel(
         )
     }
 
-    fun onClickAssignSection(sectionIndex: Int?=null) {
-        val feed = _uiState.value.feed ?: return
+    fun onClickAssignSection(sectionIndex: Int) {
+        val feed = _uiState.value.feed ?: throw IllegalStateException(
+            "Cannot assign: no playlist feed loaded"
+        )
         val playlistUrl = feed.selfUrl()
-            ?: return
+            ?: throw IllegalStateException("Cannot assign: playlist feed has no self URL")
 
-
-        val sections = _uiState.value.group
-
-        val targetSection = if (sectionIndex != null) {
-            sections.getOrNull(sectionIndex)
+        val targetSection = if (sectionIndex == ASSIGN_HEADER_SECTION_INDEX) {
+            _uiState.value.group.firstOrNull { it.publications != null }
+                ?: throw IllegalStateException("No learning unit section found to assign")
         } else {
-            sections.firstOrNull { !it.publications.isNullOrEmpty() }
-        } ?: return
+            _uiState.value.group.getOrNull(sectionIndex)
+                ?: throw IllegalStateException("No section at index $sectionIndex")
+        }
 
         val firstPublication = targetSection.publications?.firstOrNull()
-            ?: return
+            ?: throw IllegalStateException(
+                "Assign clicked but section at index $sectionIndex has no learning items"
+            )
 
 
         _navCommandFlow.tryEmit(

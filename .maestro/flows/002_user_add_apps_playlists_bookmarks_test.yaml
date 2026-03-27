@@ -115,7 +115,7 @@ onFlowComplete:
 - tapOn: "My app"
 - assertVisible:
     id: "app_title"
-    text: "My app"
+    text: "My App"
 - assertVisible: "Grade 1"
 - tapOn: "Grade 1"
 #- assertVisible: "Lesson 001"

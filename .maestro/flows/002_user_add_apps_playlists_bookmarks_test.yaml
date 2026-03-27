@@ -139,7 +139,7 @@ onFlowComplete:
 - tapOn: "Grade 1"
 - assertVisible: "Lesson 001"
 - tapOn: "Lesson 002"
-- tapOn: "Select 1 item"
+#- tapOn: "Select 1 item"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"

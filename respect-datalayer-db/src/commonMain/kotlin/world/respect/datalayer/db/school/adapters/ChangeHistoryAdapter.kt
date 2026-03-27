@@ -16,6 +16,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.model.findDifference
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import kotlin.time.Instant
 
 
 data class ChangeHistoryEntities(
@@ -30,6 +31,8 @@ fun ChangeHistoryWithChanges.toModel(): ChangeHistoryEntry {
         table = history.hTable,
         whoGuid = history.hWhoGuid,
         tableGuid = history.hTableGuid,
+        lastModified = history.hLastModified,
+        stored = history.hStored,
         changes = changes.map { it.toModel() }
     )
 }
@@ -41,7 +44,9 @@ fun ChangeHistoryChangeEntity.toModel(): ChangeHistoryChange {
         field = hcField,
         oldVal = hcOldVal,
         newVal = hcNewVal,
-        synced = hcSynced
+        synced = hcSynced,
+        lastModified = hcLastModified,
+        stored = hcStored
     )
 }
 
@@ -56,6 +61,7 @@ fun ChangeHistoryEntry.toEntities(
         hGuidHash = guidHash,
         hTable = table,
         hWhoGuid = whoGuid,
+        hLastModified = lastModified,
         hWhoGuidHash = uidNumberMapper(whoGuid),
         hTableGuid = tableGuid
     )
@@ -66,6 +72,7 @@ fun ChangeHistoryEntry.toEntities(
             hcHistoryGuidHash = guidHash,
             hcField = change.field,
             hcOldVal = change.oldVal,
+            hcLastModified= change.lastModified,
             hcNewVal = change.newVal,
             hcSynced = change.synced
         )
@@ -84,6 +91,7 @@ fun generateClassChanges(
     timestamp: Long,
     hTableGuid: String
 ): ChangeHistoryEntry? {
+    val now = Instant.fromEpochMilliseconds(timestamp)
 
     val changes = mutableListOf<ChangeHistoryChange>()
 
@@ -101,7 +109,9 @@ fun generateClassChanges(
         table = ChangeHistoryTableEnum.CLASS,
         tableGuid = hTableGuid,
         whoGuid = whoGuid,
-        changes = changes
+        changes = changes,
+        lastModified = now,
+        stored = now
     )
 }
 
@@ -128,6 +138,7 @@ fun generateEnrollmentChanges(
     hTableGuid: String,
     personName: String?
 ): ChangeHistoryEntry? {
+    val now = Instant.fromEpochMilliseconds(timestamp)
 
     val changes = mutableListOf<ChangeHistoryChange>()
     val name = personName ?: new.personUid
@@ -140,7 +151,9 @@ fun generateEnrollmentChanges(
                 else -> ChangeHistoryFieldEnum.CLASS_STUDENT_ADDED
             },
             oldVal = null,
-            newVal = name
+            newVal = name,
+            lastModified = now,
+            stored = now
         )
     } else {
 
@@ -152,7 +165,9 @@ fun generateEnrollmentChanges(
                     else -> ChangeHistoryFieldEnum.CLASS_STUDENT_REMOVED
                 },
                 oldVal = "",
-                newVal = name
+                newVal = name,
+                lastModified = now,
+                stored = now
             )
 
             return ChangeHistoryEntry(
@@ -160,7 +175,9 @@ fun generateEnrollmentChanges(
                 table = ChangeHistoryTableEnum.CLASS,
                 tableGuid = hTableGuid,
                 whoGuid = whoGuid,
-                changes = changes
+                changes = changes,
+                lastModified = now,
+                stored = now
             )
         }
 
@@ -168,7 +185,9 @@ fun generateEnrollmentChanges(
             changes += ChangeHistoryChange(
                 field = it,
                 oldVal = name,
-                newVal = name
+                newVal = name,
+                lastModified = now,
+                stored = now
             )
 
             return ChangeHistoryEntry(
@@ -176,11 +195,13 @@ fun generateEnrollmentChanges(
                 table = ChangeHistoryTableEnum.CLASS,
                 tableGuid = hTableGuid,
                 whoGuid = whoGuid,
-                changes = changes
+                changes = changes,
+                lastModified = now,
+                stored = now
             )
         }
 
-        findDifference(ChangeHistoryFieldEnum.ENROLLMENT_ROLE, old.role, new.role, changes)
+        findDifference(ChangeHistoryFieldEnum.ENROLLMENT_ROLE, old.role, new.role, changes,now)
         findDifference(ChangeHistoryFieldEnum.ENROLLMENT_BEGIN_DATE, old.beginDate, new.beginDate, changes)
         findDifference(ChangeHistoryFieldEnum.ENROLLMENT_END_DATE, old.endDate, new.endDate, changes)
         findDifference(ChangeHistoryFieldEnum.ENROLLMENT_STATUS, old.status, new.status, changes)
@@ -193,7 +214,9 @@ fun generateEnrollmentChanges(
         table = ChangeHistoryTableEnum.ENROLLMENT,
         tableGuid = hTableGuid,
         whoGuid = whoGuid,
-        changes = changes
+        changes = changes,
+        lastModified = now,
+        stored = now
     )
 }
 
@@ -205,7 +228,7 @@ fun generatePersonChanges(
     timestamp: Long,
     hTableGuid: String
 ): ChangeHistoryEntry? {
-
+    val now = Instant.fromEpochMilliseconds(timestamp)
     val changes = mutableListOf<ChangeHistoryChange>()
 
     findDifference(ChangeHistoryFieldEnum.PERSON_GIVEN_NAME, old?.fullName(), new.fullName(), changes)
@@ -222,6 +245,8 @@ fun generatePersonChanges(
         table = ChangeHistoryTableEnum.PERSON,
         whoGuid = whoGuid,
         changes = changes,
-        tableGuid = hTableGuid
+        tableGuid = hTableGuid,
+        lastModified = now,
+        stored = now
     )
 }

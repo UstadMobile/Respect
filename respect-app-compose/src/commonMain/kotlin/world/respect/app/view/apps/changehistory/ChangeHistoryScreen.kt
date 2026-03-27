@@ -58,7 +58,7 @@ fun ChangeHistoryScreen(
                         text = group.person.fullName(),
                     )
                     val createdAtStr = rememberFormattedDateTime(
-                        timeInMillis = entry.lastModified.toEpochMilliseconds(),
+                        timeInMillis = change.lastModified.toEpochMilliseconds(),
                         timeZoneId = TimeZone.currentSystemDefault().id,
                     )
 

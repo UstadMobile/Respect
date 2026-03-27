@@ -13,8 +13,8 @@ data class ChangeHistoryEntry(
     val table: ChangeHistoryTableEnum,
     val whoGuid: String,
     val changes: List<ChangeHistoryChange>,
-    override val lastModified: InstantAsISO8601 = Clock.System.now(),
-    override val stored: InstantAsISO8601 = Clock.System.now(),
+    override val lastModified: InstantAsISO8601 ,
+    override val stored: InstantAsISO8601 ,
 ): ModelWithTimes  {
 
     companion object {
@@ -38,6 +38,6 @@ data class ChangeHistoryChange(
     val newVal: String,
     val oldVal: String?,
     val synced : Boolean = false,
-    override val lastModified: InstantAsISO8601 = Clock.System.now(),
-    override val stored: InstantAsISO8601 = Clock.System.now(),
+    override val lastModified: InstantAsISO8601 ,
+    override val stored: InstantAsISO8601 ,
 ): ModelWithTimes

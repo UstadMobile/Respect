@@ -51,61 +51,31 @@ class ChangeHistoryViewModel(
 
     init {
         viewModelScope.launch {
-            when (route.tableValue) {
-                ChangeHistoryTableEnum.PERSON -> {
 
-                    val changeHistoryFlow =
-                        schoolDataSource.changeHistoryDataSource
-                            .findByGuidAsFlow(route.guid)
-                            .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+            val changeHistoryFlow =
+                schoolDataSource.changeHistoryDataSource
+                    .findByGuidAsFlow(route.guid)
+                    .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
-                    viewModelScope.launch {
+            changeHistoryFlow.collect { state ->
 
-                        changeHistoryFlow.collect { state ->
+                val changeHistoryList = state.dataOrNull()?.map { entry ->
+                            entry.copy(
+                                changes = entry.changes.sortedByDescending { it.lastModified }
+                            )
+                }?.sortedByDescending { it.lastModified }
 
-                            val changeHistoryList = state.dataOrNull() ?: emptyList()
+                val grouped =
+                    changeHistoryList?.groupBy { it.whoGuid }
 
-                            val grouped = changeHistoryList.groupBy { it.whoGuid }
+                val resultList =
+                    grouped?.mapNotNull { (whoGuid, entries) ->
 
-                            val resultList = grouped.mapNotNull { (whoGuid, entries) ->
-
-                                val person = schoolDataSource.personDataSource.findByGuid(
-                                    loadParams = DataLoadParams(),
-                                    guid = whoGuid
-                                ).dataOrNull()
-
-                                person?.let {
-                                    ChangeHistoryEntryWithWhoDid(
-                                        person = it,
-                                        changeHistoryEntry = entries
-                                    )
-                                }
-                            }
-
-                            _uiState.update { prev ->
-                                prev.copy(
-                                    changeHistoryEntryWithWhoDid = resultList
-                                )
-                            }
-                        }
-                    }
-                }
-                ChangeHistoryTableEnum.CLASS -> {
-
-                    val changeHistoryList = schoolDataSource.changeHistoryDataSource
-                        .findByGuid(
-                            loadParams = DataLoadParams(),
-                            guid = route.guid,
-                        ).dataOrNull() ?: return@launch
-
-                    val whoGuids = changeHistoryList.groupBy { it.whoGuid }
-
-                    val resultList = whoGuids.mapNotNull { (whoGuid, entries) ->
-
-                        val person = schoolDataSource.personDataSource.findByGuid(
-                            loadParams = DataLoadParams(),
-                            guid = whoGuid,
-                        ).dataOrNull()
+                        val person =
+                            schoolDataSource.personDataSource.findByGuid(
+                                loadParams = DataLoadParams(),
+                                guid = whoGuid
+                            ).dataOrNull()
 
                         person?.let {
                             ChangeHistoryEntryWithWhoDid(
@@ -115,19 +85,14 @@ class ChangeHistoryViewModel(
                         }
                     }
 
-                    _uiState.update { prev ->
-                        prev.copy(
-                            changeHistoryEntryWithWhoDid = resultList
-                        )
-                    }
-                }
-
-                ChangeHistoryTableEnum.ENROLLMENT -> {
-
+                _uiState.update { previous ->
+                    previous.copy(
+                        changeHistoryEntryWithWhoDid = resultList
+                    )
                 }
             }
-
         }
+
         _appUiState.update { prev ->
             prev.copy(
                 title = Res.string.change_history.asUiText(),

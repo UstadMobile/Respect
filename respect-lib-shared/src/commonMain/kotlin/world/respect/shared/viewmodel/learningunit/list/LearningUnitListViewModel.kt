@@ -166,10 +166,7 @@ class LearningUnitListViewModel(
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
     fun onClickPublication(publication: OpdsPublication) {
-        val isPickMode = route.resultDest != null
-
-        if (isPickMode || _uiState.value.isMultiSelectMode) {
-            _uiState.update { it.copy(isMultiSelectMode = true) }
+        if (_uiState.value.isMultiSelectMode) {
             toggleSelection(publication)
             return
         }
@@ -181,18 +178,29 @@ class LearningUnitListViewModel(
         val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
         val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
 
-        _navCommandFlow.tryEmit(
-            value = NavCommand.Navigate(
-                LearningUnitDetail.create(
+        if (
+            !resultReturner.sendResultIfResultExpected(
+                route = route,
+                navCommandFlow = _navCommandFlow,
+                result = LearningUnitSelection(
                     learningUnitManifestUrl = learningUnitManifestUrl,
+                    selectedPublication = publication,
                     appManifestUrl = route.appManifestUrl,
-                    refererUrl = Url(refererUrl),
-                    expectedIdentifier = publication.metadata.identifier.toString()
                 )
             )
-        )
+        ) {
+            _navCommandFlow.tryEmit(
+                value = NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = learningUnitManifestUrl,
+                        appManifestUrl = route.appManifestUrl,
+                        refererUrl = Url(refererUrl),
+                        expectedIdentifier = publication.metadata.identifier.toString()
+                    )
+                )
+            )
+        }
     }
-
     fun onLongPressPublication(publication: OpdsPublication) {
         _uiState.update { it.copy(isMultiSelectMode = true) }
         toggleSelection(publication)

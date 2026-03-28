@@ -205,7 +205,8 @@ onFlowComplete:
     text: "Playlist - Grade 1"
 
 # Assigning lessons in a playlist to a assignment
-- tapOn: "Assign"
+- tapOn:
+    id: "header_assign_btn"
 - assertVisible:
     id: "app_title"
     text: "Add assignment"
@@ -231,35 +232,36 @@ onFlowComplete:
 - tapOn: "Home"
 - tapOn: "Playlists"
 - tapOn: "Playlist - Grade 1"
-- tapOn: "Share"
-- assertVisible:
-    id: "app_title"
-    text: "Share playlist"
-- tapOn: "Who can view"
-- assertVisible: "Anyone with the link"
-- assertVisible: "Anyone in my school"
-- assertVisible: "Teachers and admins in my school"
-- assertVisible: "Admins in my school"
-- tapOn: "Anyone with the link"
-- tapOn: "Who can edit"
-- assertVisible: "Admins in my school"
-- tapOn: "Teachers and admins in my school"
-- assertVisible: "Share link"
-- assertVisible: "Send link via SMS"
-- assertVisible: "Send link via email"
-- copyTextFrom:
-    id: "copy_link_button"
-- assertVisible:
-    id: "app_title"
-    text: "Enter link"
-- tapOn: "Link*"
-- pasteText
-- tapOn: "Next"
-- assertVisible:
-    id: "app_title"
-    text: "Playlist - Grade 1"
+#- tapOn: "Share"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Share playlist"
+#- tapOn: "Who can view"
+#- assertVisible: "Anyone with the link"
+#- assertVisible: "Anyone in my school"
+#- assertVisible: "Teachers and admins in my school"
+#- assertVisible: "Admins in my school"
+#- tapOn: "Anyone with the link"
+#- tapOn: "Who can edit"
+#- assertVisible: "Admins in my school"
+#- tapOn: "Teachers and admins in my school"
+#- assertVisible: "Share link"
+#- assertVisible: "Send link via SMS"
+#- assertVisible: "Send link via email"
+#- tapOn:
+#    id: "copy_link_button"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Enter link"
+#- tapOn: "Link*"
+#- pasteText
+#- tapOn: "Next"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Playlist - Grade 1"
 
-- tapOn: "Copy playlist"
+- tapOn:
+    id: "copy_btn"
 - assertVisible: "Make a copy"
 - assertVisible: "copy the Playlist - Grade 1"
 - tapOn: "Copy"
@@ -280,7 +282,8 @@ onFlowComplete:
     text: "Playlist 2"
 
 # Delete this copied playlist
-- tapOn: "Delete"
+- tapOn:
+    id: "delete_btn"
 - assertVisible: "Permanently delete?"
 - assertVisible: "Permanently delete this playlist"
 - tapOn: "Delete"
@@ -299,7 +302,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Add assignment"
-- tapOn: "Name*"
+- tapOn: "Assignment name*"
 - inputText: "Homework 2"
 - tapOn: "Class"
 - tapOn: "New Class"

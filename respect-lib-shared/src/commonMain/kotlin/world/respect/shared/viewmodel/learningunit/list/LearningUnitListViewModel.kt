@@ -48,6 +48,7 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
@@ -170,16 +171,29 @@ class LearningUnitListViewModel(
         if (route.resultDest != null &&
             route.resultDest.resultKey != PlaylistEditViewModel.KEY_PLAYLIST
         ) {
+            if (route.resultDest.resultKey == AssignmentEditViewModel.KEY_LEARNING_UNIT) {
+                val publicationHref = publication.links.find {
+                    it.rel?.contains(SELF) == true
+                }?.href.toString()
+                val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
+                resultReturner.sendResultIfResultExpected(
+                    route = route,
+                    navCommandFlow = _navCommandFlow,
+                    result = LearningUnitSelection(
+                        learningUnitManifestUrl = learningUnitManifestUrl,
+                        selectedPublication = publication,
+                        appManifestUrl = route.appManifestUrl,
+                    )
+                )
+                return
+            }
             if (!_uiState.value.isMultiSelectMode) {
                 _uiState.update { it.copy(isMultiSelectMode = true) }
             }
             toggleSelection(publication)
             return
         }
-
-        // If in playlist-picking mode, don't allow publication multi-select
         if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
-            // Navigate into the publication normally (or ignore)
             val publicationHref = publication.links.find {
                 it.rel?.contains(SELF) == true
             }?.href.toString()

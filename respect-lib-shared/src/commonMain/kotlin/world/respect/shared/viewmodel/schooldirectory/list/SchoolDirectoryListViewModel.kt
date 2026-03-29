@@ -102,7 +102,7 @@ class SchoolDirectoryListViewModel(
                                 directory.baseUrl.appendEndpointSegments("school-directory/register-school")
                             ).apply {
                                 parameters.append("packageName", appInfo.packageName)
-                            }.build().toString()
+                            }.build()
                         )
                     }
                 }

@@ -6,12 +6,13 @@ import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 
 class LaunchCustomTabUseCaseAndroid(
     private val appContext: Context
 ) : LaunchCustomTabUseCase {
 
-    override fun invoke(url: String) {
+    override fun invoke(url: Url) {
         try {
             // The package must be explicitly set otherwise, if the URL is included in the verified
             // app links then Chrome will not open and Android will try to send the intent to the
@@ -29,7 +30,7 @@ class LaunchCustomTabUseCaseAndroid(
 
             customTabsIntent.intent.setPackage(customTabPackage)
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            customTabsIntent.launchUrl(appContext, url.toUri())
+            customTabsIntent.launchUrl(appContext, url.toString().toUri())
             Napier.i("LaunchCustomTabUseCaseAndroid: Launched custom tab using package $customTabPackage for $url")
         } catch (e: Exception) {
             Napier.e(throwable = e) { "LaunchCustomTabUseCaseAndroid: Error launching custom tab" }

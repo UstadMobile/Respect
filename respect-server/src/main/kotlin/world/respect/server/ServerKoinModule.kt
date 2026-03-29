@@ -39,7 +39,6 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
-import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
@@ -58,15 +57,20 @@ import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.passkey.DecodeUserHandleUseCaseImpl
-import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysDbImpl
 import world.respect.shared.domain.account.passkey.GetActivePersonPasskeysUseCase
+import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
 import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCase
 import world.respect.shared.domain.account.passkey.LoadAaguidJsonUseCaseJvm
 import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
+import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
@@ -215,6 +219,12 @@ fun serverKoinModule(
                 json = get(),
                 decodeUserHandleUseCase = get(),
             )
+        }
+        scoped<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl()
+        }
+        scoped<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl()
         }
         scoped<RespectSchoolPath> {
             val schoolDirName = schoolUrl().sanitizedForFilename()

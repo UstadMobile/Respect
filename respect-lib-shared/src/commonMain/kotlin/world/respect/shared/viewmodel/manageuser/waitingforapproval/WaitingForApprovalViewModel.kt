@@ -14,6 +14,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
@@ -21,6 +22,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.waiting_title
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.SelectClass
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -68,9 +71,16 @@ class WaitingForApprovalViewModel(
                 ).dataOrNull()
 
                 val personLoaded = personsLoaded?.firstOrNull { it.guid == activeUserUid }
-                if(personLoaded?.status == PersonStatusEnum.ACTIVE) {
+                if (personLoaded?.status == PersonStatusEnum.ACTIVE) {
                     _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(Home)
+                        NavCommand.Navigate(
+                            destination = if (personLoaded.roles.firstOrNull()?.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE) {
+                                SelectClass.create(deviceGuid = personLoaded.guid)
+                            } else {
+                                Home
+                            },
+                            clearBackStack = true
+                        )
                     )
                     return@launch
                 }

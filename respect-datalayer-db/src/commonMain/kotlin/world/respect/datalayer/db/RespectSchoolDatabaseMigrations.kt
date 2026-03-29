@@ -4,6 +4,8 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
+import world.respect.datalayer.school.model.PermissionFlags
+import kotlin.time.Clock
 
 val MIGRATION_11_12 = object: Migration(11, 12) {
     override fun migrate(connection: SQLiteConnection) {

@@ -60,7 +60,7 @@ import world.respect.app.view.report.list.ReportTemplateListScreen
 import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
-import world.respect.app.view.settings.SettingsScreenForViewModel
+import world.respect.app.view.settings.SettingsScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
@@ -156,8 +156,6 @@ import world.respect.shared.viewmodel.report.list.ReportListViewModel
 import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
-import world.respect.shared.viewmodel.settings.SettingsViewModel
-
 
 @Composable
 fun AppNavHost(
@@ -548,12 +546,11 @@ fun AppNavHost(
             )
         }
         composable<Settings> {
-            val viewModel: SettingsViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            SettingsScreenForViewModel(
-                viewModel = viewModel
+            SettingsScreen(
+                viewModel  = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
             )
         }
         composable<ScanQRCode> {

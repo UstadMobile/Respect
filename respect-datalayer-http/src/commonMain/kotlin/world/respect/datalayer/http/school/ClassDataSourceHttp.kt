@@ -11,6 +11,8 @@ import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.ChangeHistoryMarkSentToServer
+import world.respect.datalayer.ChangeHistoryProvider
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.firstOrNotLoaded
@@ -25,6 +27,7 @@ import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.ClassDataSource.Companion.PARAM_NAME_INVITE_CODE
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -36,7 +39,9 @@ class ClassDataSourceHttp(
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
-) : ClassDataSource, SchoolUrlBasedDataSource {
+    private val changeHistoryProvider: ChangeHistoryProvider,
+    private val markSentToServer: ChangeHistoryMarkSentToServer
+    ) : ClassDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun ClassDataSource.GetListParams.urlWithParams(): Url {
         return URLBuilder(respectEndpointUrl(ClassDataSource.ENDPOINT_NAME))
@@ -108,12 +113,28 @@ class ClassDataSourceHttp(
     }
 
     override suspend fun store(list: List<Clazz>) {
+        val changeHistories = changeHistoryProvider.getChangeHistoryEntries(
+            tableId = ChangeHistoryTableEnum.CLASS,
+            uids = list.map { it.guid }
+        )
         httpClient.post(
-            respectEndpointUrl(ClassDataSource.ENDPOINT_NAME)
+            url = respectEndpointUrl(ClassDataSource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
-            setBody(list)
+
+            if (changeHistories.isEmpty()) {
+                setBody(list)
+            } else {
+                setBody<DataAndChangeHistory<Clazz>>(
+                    DataAndChangeHistory(
+                        data = list,
+                        changeHistories = changeHistories
+                    )
+                )
+            }
         }
+        markSentToServer.markSentToServer(changeHistories)
+
     }
 }

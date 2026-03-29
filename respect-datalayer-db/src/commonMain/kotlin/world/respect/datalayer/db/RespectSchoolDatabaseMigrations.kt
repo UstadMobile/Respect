@@ -19,9 +19,50 @@ val MIGRATION_11_12 = object: Migration(11, 12) {
     }
 }
 
+val MIGRATE_12_13 = object : Migration(12, 13) {
+
+    override fun migrate(connection: SQLiteConnection) {
+
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS `ChangeHistoryEntity` (
+                `hGuid` TEXT NOT NULL,
+                `hGuidHash` INTEGER NOT NULL,
+                `hTable` TEXT NOT NULL,
+                `hWhoGuid` TEXT NOT NULL,
+                `hWhoGuidHash` INTEGER NOT NULL,
+                `hLastModified` INTEGER NOT NULL,
+                `hStored` INTEGER NOT NULL,
+                `hTableGuid` TEXT NOT NULL,
+                PRIMARY KEY(`hGuidHash`)
+            )
+        """.trimIndent())
+
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS `ChangeHistoryChangeEntity` (
+                `hcId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `hcHistoryGuidHash` INTEGER NOT NULL,
+                `hcField` TEXT NOT NULL,
+                `hcOldVal` TEXT,
+                `hcLastModified` INTEGER NOT NULL,
+                `hcStored` INTEGER NOT NULL,
+                `hcNewVal` TEXT NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
+val MIGRATE_13_14 = object : Migration(13, 14) {
+
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            ALTER TABLE `ChangeHistoryEntity` ADD COLUMN `hSynced` INTEGER NOT NULL DEFAULT 0
+        """.trimIndent())
+
+    }
+}
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(MIGRATION_11_12)
+    return this.addMigrations(MIGRATION_11_12,MIGRATE_12_13,MIGRATE_13_14)
 }
 

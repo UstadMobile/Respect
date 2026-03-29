@@ -24,7 +24,12 @@ interface CheckPersonPermissionUseCase {
             )
 
         companion object {
-
+            val READ_PERMISSIONS = PermissionsRequiredByRole(
+                roleAdminPermissionRequired = PermissionFlags.SYSTEM_ADMIN,
+                roleTeacherPermissionRequired = PermissionFlags.PERSON_TEACHER_READ,
+                roleStudentPermissionRequired = PermissionFlags.PERSON_STUDENT_READ,
+                roleParentPermissionRequired = PermissionFlags.PERSON_PARENT_READ,
+            )
             val WRITE_PERMISSIONS = PermissionsRequiredByRole(
                 roleAdminPermissionRequired = PermissionFlags.SYSTEM_ADMIN,
                 roleTeacherPermissionRequired = PermissionFlags.PERSON_TEACHER_WRITE,

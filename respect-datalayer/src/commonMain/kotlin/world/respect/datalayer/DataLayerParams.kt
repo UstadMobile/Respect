@@ -34,6 +34,8 @@ object DataLayerParams {
     const val INVITE_REQUIRED = "inviteRequired"
 
     const val INVITE_STATUS = "inviteStatus"
+    const val FILTER_BY_TABLE = "filterByTable"
+    const val FILTER_BY_WHO_GUID = "filterByWhoGuid"
 
 
 }

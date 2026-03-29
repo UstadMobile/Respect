@@ -1,0 +1,336 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "002_user_add_apps_playlists_bookmarks_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add from Link"
+- tapOn: "Link*"
+- inputText: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/appmanifest.json
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "App detail"
+- assertVisible: "My app"
+- assertVisible: "Add App"
+# verify App got added to Apps section
+- tapOn: "Add App"
+#- tapOn:
+#    id: home_btn
+- tapOn:
+    text: "Home"
+    index: 0
+#- assertVisible:
+#    id: "app_title"
+#    text: "Home"
+- tapOn: "Apps"
+- assertVisible: "Playlists"
+- assertVisible: "My app"
+- tapOn: "My app"
+- assertVisible: "Lessons"
+- tapOn: "Lessons"
+- tapOn: "Grade 1"
+- assertVisible: "Lesson 001"
+- assertVisible: "Lesson 002"
+- tapOn: "Lesson 001"
+- assertVisible: "Lesson 001"
+- assertVisible: "App name"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 1000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+
+- runFlow:
+    file: "subflows/admin_add_class.yaml"
+    env:
+      CLASSNAME: "New Class"
+- tapOn:
+    text: "Home"
+    index: 0
+- tapOn: "Playlists"
+- assertVisible: "All"
+- assertVisible: "My Playlists"
+- assertVisible: "No playlist yet"
+- assertVisible: "Add a playlist by clicking on the + playlist"
+- tapOn:
+    id: "floating_action_button"   # Playlist button
+- assertVisible:
+     id: "add_new"
+- assertVisible:
+      id: "add_from_a_link"
+- tapOn:
+    id: "add_new"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- tapOn: "Save" # To test mandatory fields
+- assertVisible: "Required field"  #Title field is mandatory
+- tapOn: "Title*"
+- inputText: "Playlist - Grade 1"
+- tapOn: "Description"
+- inputText: "Test list"
+#- tapOn: "Subject"  # Need to Implement
+#- tapOn: "English"
+#- tapOn: "Grade"
+#- tapOn: "Grade 1"
+- tapOn: "+ Section"
+- assertVisible: "Choose Section Type:"
+- assertVisible:
+    text: "Playlist section"
+    index: 0
+- assertVisible: "Links to other playlists."
+- assertVisible:
+    text: "Learning item section"
+    index: 1
+- assertVisible: "Links direct to items e.g. lessons, assessments, videos, etc"
+- tapOn:
+    text: "Playlist section"
+    index: 0
+- assertVisible: "Playlist section"
+- tapOn: "Playlist section"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Playlist section"
+- inputText: "Playlist section day 1"
+- hideKeyboard
+- tapOn: "+ Playlist"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "My app"
+- assertVisible:
+    id: "app_title"
+    text: "My App"
+- assertVisible: "Grade 1"
+- tapOn: "Grade 1"
+#- assertVisible: "Lesson 001"
+#- assertVisible: "Lesson 002"
+- tapOn: "Select playlist"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- assertVisible: "Grade 1"
+- tapOn: "+ Section"
+- tapOn:
+    text: "Learning item section"
+    index: 1
+- assertVisible: "Learning item section"
+- tapOn: "+ Item"
+- assertVisible: "Apps"
+- tapOn: "My app"
+- assertVisible:
+    id: "app_title"
+    text: "My app"
+- tapOn: "Grade 1"
+- assertVisible: "Lesson 001"
+- tapOn: "Lesson 002"
+- tapOn: "Select 1 item"
+- assertVisible:
+    id: "app_title"
+    text: "Add playlist"
+- assertVisible: "Playlist section day 1"
+- assertVisible: "Learning item section"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- assertVisible: "Playlist section day 1"
+- tapOn:
+    id: "expand_collapse_icon"
+    index: 0
+#- assertVisible: "My app"
+- assertVisible: "Learning item section"
+- assertVisible: "Lesson 002"
+- tapOn:
+    id: "expand_collapse_icon"
+    index: 1
+- tapOn:
+    id: "floating_action_button"    # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit playlist"
+- tapOn: "Learning item section"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Learning item section"
+- inputText: "Learning item section day 2"
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- assertVisible: "Playlist section day 1"
+- assertVisible: "Learning item section day 2"
+- assertVisible: "Share"
+- assertVisible:
+    text: "Copy playlist"
+    index: 1
+- assertVisible: "Assign"
+- assertVisible: "Delete"
+- tapOn: "Lesson 002"
+- assertVisible: "Lesson 002"
+- assertVisible: "App name"
+- assertVisible: "Open"
+- tapOn: "Home"
+- tapOn: "Playlists"
+- assertVisible: "Playlist - Grade 1"
+- assertVisible: "2 sections, 2 items"
+- assertVisible: "Created by: Admin"
+- tapOn: "My Playlists"
+- assertVisible: "Playlist - Grade 1"
+- tapOn: "All"
+- assertVisible: "Playlist - Grade 1"
+- tapOn: "Playlist - Grade 1"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+
+# Assigning lessons in a playlist to a assignment
+- tapOn:
+    id: "header_assign_btn"
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Assignment name*"
+- inputText: "Homework 1"
+- tapOn: "Class"
+- tapOn: "New Class"
+- tapOn: "Date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
+- assertVisible: "Task"  # As per prototype
+- assertVisible: "Lesson 002"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "Lesson 002"
+- tapOn: "Home"
+- tapOn: "Playlists"
+- tapOn: "Playlist - Grade 1"
+#- tapOn: "Share"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Share playlist"
+#- tapOn: "Who can view"
+#- assertVisible: "Anyone with the link"
+#- assertVisible: "Anyone in my school"
+#- assertVisible: "Teachers and admins in my school"
+#- assertVisible: "Admins in my school"
+#- tapOn: "Anyone with the link"
+#- tapOn: "Who can edit"
+#- assertVisible: "Admins in my school"
+#- tapOn: "Teachers and admins in my school"
+#- assertVisible: "Share link"
+#- assertVisible: "Send link via SMS"
+#- assertVisible: "Send link via email"
+#- tapOn:
+#    id: "copy_link_button"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Enter link"
+#- tapOn: "Link*"
+#- pasteText
+#- tapOn: "Next"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Playlist - Grade 1"
+
+- tapOn:
+    id: "copy_btn"
+- assertVisible: "Make a copy"
+- assertVisible: "copy the Playlist - Grade 1"
+- tapOn: "Copy"
+- assertVisible:
+    id: "app_title"
+    text: "Copy playlist"
+- tapOn: "copy the Playlist - Grade 1"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "copy the Playlist - Grade 1"
+- inputText: "Playlist 2"
+- assertVisible: "Playlist section day 1"
+- assertVisible: "Learning item section day 2"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist 2"
+
+# Delete this copied playlist
+- tapOn:
+    id: "delete_btn"
+- assertVisible: "Permanently delete?"
+- assertVisible: "Permanently delete this playlist"
+- tapOn: "Delete"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- assertVisible: "Playlists"
+- tapOn: "Playlists"
+- assertVisible: "Playlist - Grade 1"
+- assertNotVisible: "Playlist 2"
+
+# Adding playlist to an assignment
+- tapOn: "Assignments"
+- tapOn:
+    id: "floating_action_button"   #  +Assignment button
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Assignment name*"
+- inputText: "Homework 2"
+- tapOn: "Class"
+- tapOn: "New Class"
+- tapOn: "Date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
+- tapOn: "Lesson/assessment"
+- assertVisible:
+    id: "app_title"
+- tapOn: "Playlists"
+- tapOn: "Playlist - Grade 1"
+- assertVisible:
+    id: "app_title"
+    text: "Playlist - Grade 1"
+- tapOn: "Lesson 002"
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 2"
+- assertVisible: "Lesson 002"
+- tapOn: "Assignments"
+- assertVisible: "Homework 1"
+- assertVisible: "Homework 2"

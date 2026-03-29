@@ -21,7 +21,7 @@ onFlowComplete:
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "People"
 - tapOn:
     id: "ExpandableFab"   #  +Person button
@@ -98,8 +98,8 @@ onFlowComplete:
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
-- assertVisible: "Apps"
+    text: "Home"
+- assertVisible: "Home"
 - assertVisible: "Assignments"
 - assertVisible: "People"
 - runFlow:
@@ -190,7 +190,7 @@ onFlowComplete:
     id : "password"
 - inputText: "test123"
 - tapOn: "Login"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

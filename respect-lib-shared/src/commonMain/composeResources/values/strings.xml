@@ -18,6 +18,7 @@
     <string name="add_app">Add App</string>
     <string name="lessons">Lessons</string>
     <string name="apps">Apps</string>
+    <string name="home">Home</string>
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
     <string name="assignment">Assignment</string>
@@ -43,6 +44,12 @@
     <string name="downloaded">Downloaded</string>
     <string name="share">Share</string>
     <string name="assign">Assign</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="no_bookmark">No bookmarks yet</string>
+    <string name="msg_see_bookmark">Bookmark a lesson or a playlist to see it here.</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="remove_bookmark">1 Remove bookmark</string>
+    <string name="undo">Undo</string>
     <string name="related_lessons">Related Lessons</string>
     <string name="duration">Duration</string>
     <string name="more_info">More Info</string>

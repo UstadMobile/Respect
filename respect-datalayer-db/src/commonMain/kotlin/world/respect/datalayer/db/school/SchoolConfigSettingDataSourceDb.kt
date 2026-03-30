@@ -35,10 +35,10 @@ class SchoolConfigSettingDataSourceDb(
         params: DataLoadParams,
         guid: String
     ): DataLoadState<SchoolConfigSetting> {
-        return schoolDb.getSchoolConfigSettingEntityDao().findByKey(
+        return schoolDb.getSchoolConfigSettingEntityDao().list(
             authenticatedPersonUidNum = authenticatedUserUidNum,
-            key = guid
-        )?.asModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
+            keys = listOf(guid)
+        ).firstOrNull()?.asModel()?.let { DataReadyState(it) } ?: NoDataLoadedState.notFound()
     }
 
     override fun listAsFlow(
@@ -47,7 +47,7 @@ class SchoolConfigSettingDataSourceDb(
     ): Flow<DataLoadState<List<SchoolConfigSetting>>> {
         return schoolDb.getSchoolConfigSettingEntityDao().listAsFlow(
             authenticatedPersonUidNum = authenticatedUserUidNum,
-            key = params.key,
+            keys = params.keys,
             since = params.common.since?.toEpochMilliseconds() ?: 0
         ).map { list ->
             DataReadyState(
@@ -63,7 +63,7 @@ class SchoolConfigSettingDataSourceDb(
         val queryTime = Clock.System.now()
         val data = schoolDb.getSchoolConfigSettingEntityDao().list(
             authenticatedPersonUidNum = authenticatedUserUidNum,
-            key = params.key,
+            keys = params.keys,
             since = params.common.since?.toEpochMilliseconds() ?: 0
         ).map { it.asModel() }
 
@@ -121,7 +121,7 @@ class SchoolConfigSettingDataSourceDb(
     }
 
     override suspend fun findByUidList(uids: List<String>): List<SchoolConfigSetting> {
-        return schoolDb.getSchoolConfigSettingEntityDao().findByKeys(
+        return schoolDb.getSchoolConfigSettingEntityDao().list(
             authenticatedPersonUidNum = authenticatedUserUidNum,
             keys = uids
         ).map { it.asModel() }

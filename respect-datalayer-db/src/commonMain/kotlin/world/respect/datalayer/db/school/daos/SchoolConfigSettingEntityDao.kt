@@ -14,35 +14,17 @@ interface SchoolConfigSettingEntityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entities: List<SchoolConfigSettingEntity>)
 
-    @Query(FIND_BY_KEY_SQL)
-    suspend fun findByKey(
-        authenticatedPersonUidNum: Long,
-        key: String
-    ): SchoolConfigSettingEntity?
-
-    @Query(FIND_BY_KEY_SQL)
-    fun findByKeyAsFlow(
-        authenticatedPersonUidNum: Long,
-        key: String
-    ): Flow<SchoolConfigSettingEntity?>
-
-    @Query(FIND_BY_KEYS_SQL)
-    suspend fun findByKeys(
-        authenticatedPersonUidNum: Long,
-        keys: List<String>
-    ): List<SchoolConfigSettingEntity>
-
     @Query(LIST_SQL)
     fun listAsFlow(
         authenticatedPersonUidNum: Long,
-        key: String? = null,
+        keys: List<String>? = null,
         since: Long = 0,
     ): Flow<List<SchoolConfigSettingEntity>>
 
     @Query(LIST_SQL)
     suspend fun list(
         authenticatedPersonUidNum: Long,
-        key: String? = null,
+        keys: List<String>? = null,
         since: Long = 0,
     ): List<SchoolConfigSettingEntity>
 
@@ -75,24 +57,10 @@ interface SchoolConfigSettingEntityDao {
             (($AUTHENTICATED_USER_ROLE_SQL) & scsCanWriteFlags) > 0
         """
 
-        private const val FIND_BY_KEY_SQL = """
-            SELECT SchoolConfigSettingEntity.*
-              FROM SchoolConfigSettingEntity
-             WHERE scsKey = :key
-               AND ($READ_PERMISSION_CHECK_SQL)
-        """
-
-        private const val FIND_BY_KEYS_SQL = """
-            SELECT SchoolConfigSettingEntity.*
-              FROM SchoolConfigSettingEntity
-             WHERE scsKey IN (:keys)
-               AND ($READ_PERMISSION_CHECK_SQL)
-        """
-
         private const val LIST_SQL = """
             SELECT SchoolConfigSettingEntity.*
               FROM SchoolConfigSettingEntity
-             WHERE ((:key IS NULL) OR scsKey = :key)
+             WHERE ((:keys IS NULL) OR scsKey IN (:keys))
                AND ((:since = 0) OR (scsStored > :since))
                AND ($READ_PERMISSION_CHECK_SQL)
         """

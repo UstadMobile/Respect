@@ -37,7 +37,7 @@ class SchoolConfigSettingDataSourceHttp(
         return URLBuilder(respectEndpointUrl(SchoolConfigSettingDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                parameters.appendIfNotNull(DataLayerParams.KEY, key)
+                keys?.forEach { parameters.append(DataLayerParams.KEYS, it) }
             }
             .build()
     }
@@ -48,7 +48,7 @@ class SchoolConfigSettingDataSourceHttp(
     ): DataLoadState<SchoolConfigSetting> {
         return httpClient.getAsDataLoadState<List<SchoolConfigSetting>>(
             SchoolConfigSettingDataSource.GetListParams(
-                key = guid
+                keys = listOf(guid)
             ).urlWithParams()
         ) {
             useTokenProvider(tokenProvider)

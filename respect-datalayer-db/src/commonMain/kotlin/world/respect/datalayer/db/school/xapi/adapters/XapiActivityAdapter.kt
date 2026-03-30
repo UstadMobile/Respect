@@ -1,5 +1,7 @@
 package world.respect.datalayer.db.school.xapi.adapters
 
+import androidx.room.Embedded
+import androidx.room.Relation
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import world.respect.datalayer.UidNumberMapper
@@ -24,10 +26,27 @@ import kotlin.collections.component2
  * contextActivities
  */
 data class ActivityEntities(
+    @Embedded
     val activityEntity: ActivityEntity,
+
+    @Relation(
+        parentColumn = "actUid",
+        entityColumn = "almeActivityUid"
+    )
     val activityLangMapEntries: List<ActivityLangMapEntry> = emptyList(),
+
+    @Relation(
+        parentColumn = "actUid",
+        entityColumn = "aieActivityUid"
+    )
     val activityInteractionEntities: List<ActivityInteractionEntity>  = emptyList(),
+
+    @Relation(
+        parentColumn = "actUid",
+        entityColumn = "aeeActivityUid"
+    )
     val activityExtensionEntities: List<ActivityExtensionEntity> = emptyList(),
+
     val statementContextActivityJoin: StatementContextActivityJoin? = null,
 )
 

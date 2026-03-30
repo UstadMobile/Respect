@@ -9,6 +9,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.school.model.AssignmentAssigneeRefTypeEnum
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -126,6 +127,16 @@ class SchoolTypeConverters {
     @TypeConverter
     fun toClassInviteModeEnum(value: Int): ClassInviteModeEnum {
         return ClassInviteModeEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromStatementEntityObjectTypeEnum(value: StatementEntityObjectTypeEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toStatementEntityObjectTypeEnum(value: Int): StatementEntityObjectTypeEnum {
+        return StatementEntityObjectTypeEnum.fromFlag(value)
     }
 
 

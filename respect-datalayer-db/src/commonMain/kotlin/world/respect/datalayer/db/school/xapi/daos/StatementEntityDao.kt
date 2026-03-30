@@ -11,7 +11,7 @@ import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
 
 @Dao
-interface StatementDao {
+interface StatementEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreListAsync(entityList: List<StatementEntity>)

@@ -48,8 +48,6 @@ import kotlinx.serialization.Serializable
     primaryKeys = ["statementIdHi", "statementIdLo"],
     indices = [
         Index("statementActorPersonUid", name = "idx_stmt_actor_person"),
-        Index("statementClazzUid", "statementActorPersonUid", name = "idx_statement_clazz_person"),
-        Index("statementCbUid", "statementActorUid", name = "idx_statement_cbuid_actor")
     ]
 )
 @Serializable
@@ -63,7 +61,7 @@ data class StatementEntity(
     val statementVerbUid: Long = 0,
 
     //As per the spec could be Activity, Agent, Group, StatementRef, or SubStatement
-    val statementObjectType: Int = 0,
+    val statementObjectType: StatementEntityObjectTypeEnum,
 
     val statementObjectUid1: Long = 0,
 
@@ -120,14 +118,6 @@ data class StatementEntity(
      * here to simplify queries used to check on student progress and avoid an extra join
      */
     val statementContentEntryUid: Long = 0,
-
-    val statementLearnerGroupUid: Long = 0,
-
-    val statementClazzUid: Long = 0,
-
-    val statementCbUid: Long = 0,
-
-    val statementDoorNode: Long = 0,
 
     val isSubStatement: Boolean = false,
 ) {

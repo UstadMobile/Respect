@@ -3,6 +3,8 @@ package world.respect.datalayer.db.school.xapi
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.domain.xapi.StoreActivitiesUseCase
@@ -11,6 +13,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.ext.insertOrUpdateActorsIfNameChanged
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
+import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiStatement
@@ -26,7 +29,7 @@ class XapiStatementDataSourceDb(
     private val primaryKeyGenerator: PrimaryKeyGenerator,
     private val json: Json,
     private val storeActivitiesUseCase: StoreActivitiesUseCase,
-) : XapiStatementDataSource{
+) : XapiStatementDataSource, XapiStatementDataSourceLocal{
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -47,7 +50,7 @@ class XapiStatementDataSourceDb(
             )
         )
 
-        val statementEntities = exactStatement.toEntities(
+        val statementEntity = exactStatement.toEntities(
             uidNumberMapper = uidNumberMapper,
             primaryKeyGenerator = primaryKeyGenerator,
             json = json,
@@ -55,16 +58,13 @@ class XapiStatementDataSourceDb(
             isSubStatement = false,
         )
 
-        schoolDb.getStatementDao().insertOrIgnoreListAsync(
-            statementEntities.mapNotNull { it.statementEntity }
-        )
+        schoolDb.getStatementDao().insertOrIgnoreListAsync(statementEntity.statements)
 
         schoolDb.getStatementEntityJsonDao().insertOrIgnoreListAsync(
-            statementEntities.mapNotNull { it.statementEntityJson }
+            statementEntity.statementEntityJson
         )
 
-        val actorEntities = statementEntities.flatMap { it.actorEntities ?: emptyList() }
-        actorEntities.map { it.actor }
+        statementEntity.actorEntities.map { it.actor }
             .filter { it.actorObjectType == XapiEntityObjectTypeFlags.AGENT }
             .takeIf { it.isNotEmpty() }
             ?.also { agents ->
@@ -74,7 +74,7 @@ class XapiStatementDataSourceDb(
             }
 
         //Handle groups
-        actorEntities.filter {
+        statementEntity.actorEntities.filter {
             it.actor.actorObjectType == XapiEntityObjectTypeFlags.GROUP
         }.distinctBy {
             it.actor.actorUid
@@ -94,14 +94,14 @@ class XapiStatementDataSourceDb(
         }
 
         schoolDb.getVerbDao().insertOrIgnoreAsync(
-            statementEntities.mapNotNull { it.verbEntities?.verbEntity }
+            statementEntity.verbEntities.map { it.verbEntity }
         )
 
         schoolDb.getVerbLangMapEntryDao().upsertList(
-            statementEntities.flatMap { it.verbEntities?.verbLangMapEntries ?: emptyList() }
+            statementEntity.verbEntities.flatMap { it.verbLangMapEntries }
         )
 
-        storeActivitiesUseCase(statementEntities.flatMap { it.activityEntities ?: emptyList() })
+        storeActivitiesUseCase(statementEntity.activityEntities)
     }
 
 
@@ -110,5 +110,25 @@ class XapiStatementDataSourceDb(
         list.forEach { statement ->
             doUpsertStatement(statement)
         }
+    }
+
+    override suspend fun updateLocal(
+        list: List<XapiStatement>,
+        forceOverwrite: Boolean
+    ) {
+        list.forEach { statement ->
+            doUpsertStatement(statement)
+        }
+    }
+
+    override suspend fun list(
+        listParams: XapiStatementDataSource.GetStatementParams,
+        dataLoadParams: DataLoadParams
+    ): DataLoadState<List<XapiStatement>> {
+        TODO()
+    }
+
+    override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {
+        TODO()
     }
 }

@@ -378,6 +378,7 @@ fun serverKoinModule(
                 json = get(),
                 primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator,
                 defaultAppCatalogUrl = RespectServerBuildConfig.RESPECT_DEFAULT_APPLIST,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 

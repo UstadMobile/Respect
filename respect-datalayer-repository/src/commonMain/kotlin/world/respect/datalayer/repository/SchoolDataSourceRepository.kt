@@ -21,6 +21,7 @@ import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.school.xapi.XapiStatementDataSource
 
 class SchoolDataSourceRepository(
     internal val local: SchoolDataSourceLocal,
@@ -137,6 +138,10 @@ class SchoolDataSourceRepository(
             remote = remote.opdsFeedDataSource,
             remoteWriteQueue = remoteWriteQueue,
         )
+    }
+
+    override val xapiStatementDataSource: XapiStatementDataSource by lazy {
+        local.xapiStatementDataSource
     }
 
     override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {

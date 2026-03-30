@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.domain
 
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -33,7 +34,11 @@ class TestCheckPersonPermissionUseCaseImpl {
             testSchoolDb(temporaryFolder.newFolder()) { db ->
                 val adminUid = "1"
                 val studentUid = "2"
-                val adminSchoolDs = db.toDataSource(adminUid)
+                val adminSchoolDs = db.toDataSource(
+                    authenticatedUserUid = adminUid,
+                    schoolUrl = Url("http://localhost:8098/"),
+                )
+
                 val adminPerson = adminSchoolDs.insertAdmin(adminUid)
                 AddDefaultSchoolPermissionGrantsUseCase(
                     schoolDb = db,

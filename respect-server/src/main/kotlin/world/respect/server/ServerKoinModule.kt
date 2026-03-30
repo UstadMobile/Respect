@@ -220,12 +220,6 @@ fun serverKoinModule(
                 decodeUserHandleUseCase = get(),
             )
         }
-        scoped<SetSharedDevicePINUseCase> {
-            SetSharedDevicePINUseCaseImpl()
-        }
-        scoped<GetSharedDevicePINUseCase> {
-            GetSharedDevicePINUseCaseImpl()
-        }
         scoped<RespectSchoolPath> {
             val schoolDirName = schoolUrl().sanitizedForFilename()
             val schoolDirFile = File(dataDir, schoolDirName).also {
@@ -413,6 +407,13 @@ fun serverKoinModule(
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 schoolDataSource = get(),
             )
+        }
+
+        factory<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl(schoolDataSource = get())
+        }
+        factory<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl(schoolDataSource = get())
         }
 
     }

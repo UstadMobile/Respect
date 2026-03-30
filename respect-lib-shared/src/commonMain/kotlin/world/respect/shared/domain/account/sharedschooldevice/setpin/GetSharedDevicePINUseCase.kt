@@ -1,22 +1,50 @@
 package world.respect.shared.domain.account.sharedschooldevice.setpin
 
-import org.koin.core.component.KoinComponent
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
+import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.datalayer.school.model.SchoolConfigSetting
 import kotlin.random.Random
 
 interface GetSharedDevicePINUseCase {
     suspend operator fun invoke(): String
 }
 
-class GetSharedDevicePINUseCaseImpl : GetSharedDevicePINUseCase, KoinComponent {
+class GetSharedDevicePINUseCaseImpl(
+    private val schoolDataSource: SchoolDataSource
+) : GetSharedDevicePINUseCase {
 
     override suspend fun invoke(): String {
-        // Check if PIN exists in database for this school/device
-        val existingPin = null
+        val params = DataLoadParams()
+        val existingPin = schoolDataSource.schoolConfigSettingDataSource.findByGuid(
+            params, SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_PIN
+        ).dataOrNull()
+        println("Existing PIN: $existingPin")
+
         return if (existingPin != null) {
-            existingPin
+            println("Existing PIN: ${existingPin.value}")
+            existingPin.value
         } else {
+            println("Existing PIN: null")
             val newPin = generateRandomPin()
-            // Save the generated PIN to database
+            println("Existing PIN Generated new PIN: $newPin")
+            val setting = SchoolConfigSetting(
+                key = SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_PIN,
+                value = newPin,
+                canRead = listOf(
+                    PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                    PersonRoleEnum.SITE_ADMINISTRATOR,
+                    PersonRoleEnum.TEACHER
+                ),
+                canWrite = listOf(
+                    PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                    PersonRoleEnum.SITE_ADMINISTRATOR,
+                    PersonRoleEnum.TEACHER
+                )
+            )
+            schoolDataSource.schoolConfigSettingDataSource.store(listOf(setting))
             newPin
         }
     }

@@ -65,7 +65,6 @@ interface SchoolConfigSettingEntityDao {
             SELECT PersonRoleEntity.prRoleEnum
               FROM PersonRoleEntity
              WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum
-             LIMIT 1
         """
 
         private const val READ_PERMISSION_CHECK_SQL = """

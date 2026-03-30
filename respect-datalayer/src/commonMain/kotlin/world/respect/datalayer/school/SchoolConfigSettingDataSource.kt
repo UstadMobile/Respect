@@ -51,5 +51,7 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
 
         const val KEY_APP_CATALOGS = "app-catalogs"
 
+        const val KEY_SHARED_DEVICE_PIN = "shared-device-pin"
+
     }
 }

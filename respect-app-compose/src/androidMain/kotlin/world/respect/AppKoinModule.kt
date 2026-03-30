@@ -762,12 +762,6 @@ val appKoinModule = module {
             )
         }
 
-        scoped<SetSharedDevicePINUseCase> {
-            SetSharedDevicePINUseCaseImpl()
-        }
-        scoped<GetSharedDevicePINUseCase> {
-            GetSharedDevicePINUseCaseImpl()
-        }
         scoped<GetSharedDeviceSelfSelectUseCase> {
             GetSharedDeviceSelfSelectUseCase(settings = get())
         }
@@ -958,6 +952,13 @@ val appKoinModule = module {
                 validationHelper = get(),
                 remoteWriteQueue = get(),
             )
+        }
+
+        scoped<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl(schoolDataSource = get())
+        }
+        scoped<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl(schoolDataSource = get())
         }
 
         scoped<ApproveOrDeclineInviteRequestUseCase> {

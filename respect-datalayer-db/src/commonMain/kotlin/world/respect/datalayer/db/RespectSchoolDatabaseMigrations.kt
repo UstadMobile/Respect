@@ -4,8 +4,6 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
-import world.respect.datalayer.school.model.PermissionFlags
-import kotlin.time.Clock
 
 val MIGRATION_11_12 = object: Migration(11, 12) {
     override fun migrate(connection: SQLiteConnection) {
@@ -23,14 +21,20 @@ val MIGRATION_11_12 = object: Migration(11, 12) {
 
 val MIGRATION_12_13 = object: Migration(12, 13) {
     override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `SchoolConfigSettingEntity` (`scsKey` TEXT NOT NULL, `scsValue` TEXT NOT NULL, `scsStatus` INTEGER NOT NULL, `scsLastModified` INTEGER NOT NULL, `scsStored` INTEGER NOT NULL, `scsCanReadFlags` INTEGER NOT NULL, `scsAnonCanRead` INTEGER NOT NULL, `scsCanWriteFlags` INTEGER NOT NULL, PRIMARY KEY(`scsKey`))")
+    }
+}
 
+val MIGRATION_13_14 = object: Migration(13, 14) {
+    override fun migrate(connection: SQLiteConnection) {
+        // Update PersonRoleEnum flags to bitmask values (powers of 2)
         connection.execSQL("UPDATE PersonRoleEntity SET prRoleEnum = CASE WHEN prRoleEnum = 3 THEN 4 WHEN prRoleEnum = 4 THEN 8 WHEN prRoleEnum = 5 THEN 16 ELSE prRoleEnum END WHERE prRoleEnum IN (3, 4, 5)")
 
+        // Update SchoolPermissionGrantEntity flags
         connection.execSQL("UPDATE SchoolPermissionGrantEntity SET spgToRole = CASE WHEN spgToRole = 3 THEN 4 WHEN spgToRole = 4 THEN 8 WHEN spgToRole = 5 THEN 16 ELSE spgToRole END WHERE spgToRole IN (3, 4, 5)")
 
+        // Update InviteEntity flags
         connection.execSQL("UPDATE InviteEntity SET iNewUserRole = CASE WHEN iNewUserRole = 3 THEN 4 WHEN iNewUserRole = 4 THEN 8 WHEN iNewUserRole = 5 THEN 16 ELSE iNewUserRole END WHERE iNewUserRole IN (3, 4, 5)")
-
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `SchoolConfigSettingEntity` (`scsKey` TEXT NOT NULL, `scsValue` TEXT NOT NULL, `scsStatus` INTEGER NOT NULL, `scsLastModified` INTEGER NOT NULL, `scsStored` INTEGER NOT NULL, `scsCanReadFlags` INTEGER NOT NULL, `scsAnonCanRead` INTEGER NOT NULL, `scsCanWriteFlags` INTEGER NOT NULL, PRIMARY KEY(`scsKey`))")
     }
 }
 
@@ -40,5 +44,6 @@ fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
     return this.addMigrations(
         MIGRATION_11_12,
         MIGRATION_12_13,
+        MIGRATION_13_14,
     )
 }

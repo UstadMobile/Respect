@@ -39,7 +39,6 @@ import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
-import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -80,6 +79,11 @@ class SharedDevicesSettingsViewmodel(
     private val schoolDataSource: SchoolDataSource by inject()
     private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
 
+    private val getSharedDevicePINUseCase: GetSharedDevicePINUseCase by inject()
+    private val setSharedDevicePINUseCase: SetSharedDevicePINUseCase by inject()
+    private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase by inject()
+    private val setSharedDeviceSelfSelectUseCase: SetSharedDeviceSelfSelectUseCase by inject()
+
     private val _uiState = MutableStateFlow(SharedDevicesSettingsUiState(isLoadingPin = true))
     val uiState = _uiState.asStateFlow()
 
@@ -109,21 +113,6 @@ class SharedDevicesSettingsViewmodel(
             )
         )
     }
-    private val getSharedDevicePINUseCase: GetSharedDevicePINUseCase
-        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
-            .get()
-
-    private val setSharedDevicePINUseCase: SetSharedDevicePINUseCase
-        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
-            .get()
-
-    private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase
-        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
-            .get()
-
-    private val setSharedDeviceSelfSelectUseCase: SetSharedDeviceSelfSelectUseCase
-        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
-            .get()
 
     init {
         loadSchoolPin()

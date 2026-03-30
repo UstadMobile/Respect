@@ -15,7 +15,7 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
     SYSTEM_ADMINISTRATOR("systemAdministrator", 4),
     TEACHER("teacher", 8),
     PARENT("parent", 16),
-    SHARED_SCHOOL_DEVICE("sharedschooldevice",32);
+    SHARED_SCHOOL_DEVICE("sharedschooldevice", 32);
 
     companion object {
 
@@ -29,8 +29,7 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
 
         const val PARENT_INT = 16
 
-        const val SHARED_SCHOOL_DEVICE_INT = 6
-
+        const val SHARED_SCHOOL_DEVICE_INT = 32
 
         fun fromValue(value: String): PersonRoleEnum {
             return entries.first { it.value == value }
@@ -65,4 +64,3 @@ object PersonRoleEnumSerializer: KSerializer<PersonRoleEnum> {
         return PersonRoleEnum.fromValue(decoder.decodeString())
     }
 }
-

@@ -5,6 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
+import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.school.xapi.ext.isCompletionOrProgress
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
@@ -48,8 +49,8 @@ fun List<StatementEntities>.flatten(): StatementEntities {
  * As per the spec, if the objectType is not specified, it defaults to Activity.
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2441-when-the-objecttype-is-activity
  */
-val XapiStatementObject.objectTypeFlag: Int
-    get() = objectType?.typeFlag ?: XapiEntityObjectTypeFlags.ACTIVITY
+val XapiStatementObject.objectTypeEnum: StatementEntityObjectTypeEnum
+    get() = objectType?.entityObjectTypeEnum ?: StatementEntityObjectTypeEnum.ACTIVITY
 
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatementObject.objectForeignKeys(
@@ -153,7 +154,7 @@ fun XapiStatement.toEntities(
                     contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
                     completionOrProgress = isCompletionOrProgress(),
                     extensionProgress = resultProgressExtension,
-                    statementObjectType = `object`.objectTypeFlag,
+                    statementObjectType = `object`.objectTypeEnum,
                     statementObjectUid1 = statementObjectForeignKeys.first,
                     statementObjectUid2 = statementObjectForeignKeys.second,
                     isSubStatement = isSubStatement,
@@ -189,5 +190,23 @@ fun XapiStatement.toEntities(
             parentStatementUuid = statementUuid,
         )
     ).flatten()
+}
+
+
+fun StatementEntities.toModel() : XapiStatement {
+    val primaryStatementEntity = statements.first { !it.isSubStatement }
+    val actors = actorEntities.associate { it.actor.actorUid to it.toModel() }
+
+    return XapiStatement(
+        id = Uuid.fromLongs(
+            primaryStatementEntity.statementIdHi,
+            primaryStatementEntity.statementIdLo
+        ),
+        actor = actors[primaryStatementEntity.statementActorUid] ?: throw IllegalStateException("no primary actor"),
+        verb = this.verbEntities.first {
+            primaryStatementEntity.statementVerbUid == it.verbEntity.verbUid
+        }.toModel(),
+        `object` = TODO()//when(primaryStatementEntity.statementObjectType)
+    )
 }
 

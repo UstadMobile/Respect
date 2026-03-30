@@ -67,7 +67,7 @@ import world.respect.datalayer.db.school.xapi.daos.ActivityInteractionDao
 import world.respect.datalayer.db.school.xapi.daos.ActorDao
 import world.respect.datalayer.db.school.xapi.daos.GroupMemberActorJoinDao
 import world.respect.datalayer.db.school.xapi.daos.StatementContextActivityJoinDao
-import world.respect.datalayer.db.school.xapi.daos.StatementDao
+import world.respect.datalayer.db.school.xapi.daos.StatementEntityDao
 import world.respect.datalayer.db.school.xapi.daos.StatementEntityJsonDao
 import world.respect.datalayer.db.school.xapi.daos.VerbDao
 import world.respect.datalayer.db.school.xapi.daos.VerbLangMapEntryDao
@@ -207,7 +207,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getStatementContextActivityJoinDao(): StatementContextActivityJoinDao
 
-    abstract fun getStatementDao(): StatementDao
+    abstract fun getStatementDao(): StatementEntityDao
 
     abstract fun getStatementEntityJsonDao(): StatementEntityJsonDao
 

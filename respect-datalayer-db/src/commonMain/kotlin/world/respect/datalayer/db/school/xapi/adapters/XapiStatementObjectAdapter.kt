@@ -5,7 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
-import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
+import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiObjectType
@@ -15,14 +15,18 @@ import world.respect.datalayer.school.xapi.model.XapiStatementRef
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-val XapiObjectType.typeFlag: Int
+val XapiObjectType.entityObjectTypeEnum: StatementEntityObjectTypeEnum
     get() = when(this) {
-        XapiObjectType.StatementRef -> XapiEntityObjectTypeFlags.STATEMENT_REF
-        XapiObjectType.SubStatement -> XapiEntityObjectTypeFlags.SUBSTATEMENT
-        XapiObjectType.Activity -> XapiEntityObjectTypeFlags.ACTIVITY
-        XapiObjectType.Agent -> XapiEntityObjectTypeFlags.AGENT
-        XapiObjectType.Group -> XapiEntityObjectTypeFlags.GROUP
-        XapiObjectType.Statement -> XapiEntityObjectTypeFlags.STATEMENT
+        XapiObjectType.StatementRef -> StatementEntityObjectTypeEnum.STATEMENT_REF
+        XapiObjectType.SubStatement -> StatementEntityObjectTypeEnum.SUBSTATEMENT
+        XapiObjectType.Activity -> StatementEntityObjectTypeEnum.ACTIVITY
+        XapiObjectType.Agent -> StatementEntityObjectTypeEnum.AGENT
+        XapiObjectType.Group -> StatementEntityObjectTypeEnum.GROUP
+        else -> {
+            throw IllegalArgumentException(
+                "Statement cannot be an object type for a statement itself, can only be substatement"
+            )
+        }
     }
 
 /**

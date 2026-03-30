@@ -4,9 +4,11 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
+import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.isAnonymous
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -118,3 +120,45 @@ fun XapiGroup.toGroupEntities(
         }
     )
 }
+
+fun ActorEntity.toAgentModel(): XapiAgent {
+    return XapiAgent(
+        name = actorName,
+        mbox = actorMbox,
+        mbox_sha1sum = actorMbox_sha1sum,
+        openid = actorOpenid,
+        account = XapiAccount.fromHomePageAndNameOrNull(actorAccountHomePage, actorAccountName),
+        objectType = XapiObjectType.Agent,
+    )
+}
+
+fun ActorEntities.toModel(): XapiActor {
+    return when(actor.actorObjectType) {
+        XapiEntityObjectTypeFlags.AGENT -> {
+            actor.toAgentModel()
+        }
+
+        XapiEntityObjectTypeFlags.GROUP -> {
+            XapiGroup(
+                name = actor.actorName,
+                mbox = actor.actorMbox,
+                mbox_sha1sum = actor.actorMbox_sha1sum,
+                openid = actor.actorOpenid,
+                objectType = XapiObjectType.Group,
+                account = XapiAccount.fromHomePageAndNameOrNull(
+                    actor.actorAccountHomePage, actor.actorAccountName
+                ),
+                member = groupMemberJoins.mapNotNull { groupMemberJoin ->
+                    groupMemberAgents.firstOrNull {
+                        it.actorUid == groupMemberJoin.gmajMemberActorUid
+                    }?.toAgentModel()
+                }
+            )
+        }
+
+        else -> {
+            throw IllegalArgumentException()
+        }
+    }
+}
+

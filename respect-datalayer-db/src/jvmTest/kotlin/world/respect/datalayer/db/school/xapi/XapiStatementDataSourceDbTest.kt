@@ -41,7 +41,7 @@ class XapiStatementDataSourceDbTest {
     fun givenStatement_canStore() {
         val resDir = "/world/respect/datalayer/school/xapi/model/"
         runBlocking {
-            testSchoolDb(File("/home/mike/tmp/db")) { db ->
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),

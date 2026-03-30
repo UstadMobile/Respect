@@ -13,7 +13,7 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
-        val key: String? = null,
+        val keys: List<String>? = null,
     ) {
 
         companion object {
@@ -21,7 +21,7 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
             fun fromParams(params: StringValues): GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
-                    key = params[DataLayerParams.KEY]
+                    keys = params.getAll(DataLayerParams.KEYS) ?: params[DataLayerParams.KEY]?.let { listOf(it) }
                 )
             }
         }

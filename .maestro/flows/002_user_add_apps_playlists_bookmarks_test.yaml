@@ -274,6 +274,7 @@ onFlowComplete:
     env:
       TEXT: "copy the Playlist - Grade 1"
 - inputText: "Playlist 2"
+- hideKeyboard
 - assertVisible: "Playlist section day 1"
 - assertVisible: "Learning item section day 2"
 - tapOn: "Save"

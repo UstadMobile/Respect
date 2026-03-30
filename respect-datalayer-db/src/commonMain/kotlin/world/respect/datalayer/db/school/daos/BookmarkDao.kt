@@ -103,7 +103,7 @@ interface BookmarkDao {
     @Query("""
         SELECT *
           FROM BookmarkEntity
-         WHERE bPersonUidHash IN (:uids)
+         WHERE bPersonUid IN (:uids)
     """)
     suspend fun findByUidList(
         uids: List<Long>

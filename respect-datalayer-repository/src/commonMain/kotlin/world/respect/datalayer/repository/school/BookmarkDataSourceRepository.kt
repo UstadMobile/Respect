@@ -35,16 +35,25 @@ class BookmarkDataSourceRepository(
 
     override suspend fun store(list: List<Bookmark>) {
         local.store(list)
-        val timeNow = systemTimeInMillis()
-        remoteWriteQueue.add(
-            list.map {
-                WriteQueueItem(
-                    model = WriteQueueItem.Model.BOOKMARK,
-                    uid = it.personUid,
-                    timeQueued = timeNow,
-                )
-            }
-        )
+        try {
+            remote.store(list)
+        } catch (e: Throwable) {
+            Napier.w(
+                message = "BookmarkDataSourceRepository: remote store failed, queuing for later",
+                throwable = e,
+                tag = DataLayerTags.TAG_DATALAYER
+            )
+            val timeNow = systemTimeInMillis()
+            remoteWriteQueue.add(
+                list.map {
+                    WriteQueueItem(
+                        model = WriteQueueItem.Model.BOOKMARK,
+                        uid = it.personUid,
+                        timeQueued = timeNow,
+                    )
+                }
+            )
+        }
     }
 
     override suspend fun list(

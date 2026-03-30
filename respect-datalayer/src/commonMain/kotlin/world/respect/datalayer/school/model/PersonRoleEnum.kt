@@ -23,11 +23,11 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
 
         const val STUDENT_INT = 2
 
-        const val SYSTEM_ADMINISTRATOR_INT = 3
+        const val SYSTEM_ADMINISTRATOR_INT = 4
 
-        const val TEACHER_INT = 4
+        const val TEACHER_INT = 8
 
-        const val PARENT_INT = 5
+        const val PARENT_INT = 16
 
         const val SHARED_SCHOOL_DEVICE_INT = 6
 
@@ -42,7 +42,7 @@ enum class PersonRoleEnum(val value: String, val flag: Int) {
 
         fun unfoldFromFlag(flag: Int): List<PersonRoleEnum> {
             return entries.filter { enum ->
-                flag.and(enum.flag) == flag
+                (flag and enum.flag) == enum.flag
             }
         }
 

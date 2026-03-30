@@ -17,6 +17,7 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
+import world.respect.datalayer.http.school.xapi.XapiStatementDataSourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
@@ -35,6 +36,7 @@ import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class SchoolDataSourceHttp(
@@ -176,4 +178,9 @@ class SchoolDataSourceHttp(
             defaultAppCatalogUrl = defaultAppCatalogUrl,
         )
     }
+
+    override val xapiStatementDataSource: XapiStatementDataSource by lazy {
+        XapiStatementDataSourceHttp()
+    }
+
 }

@@ -1,5 +1,7 @@
 package world.respect.datalayer.school.xapi
 
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import kotlin.uuid.Uuid
 
@@ -20,5 +22,11 @@ interface XapiStatementDataSource {
     suspend fun store(
         list: List<XapiStatement>
     )
+
+    suspend fun list(
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): DataLoadState<List<XapiStatement>>
+
 
 }

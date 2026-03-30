@@ -21,13 +21,28 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+/**
+ * @property statements a list because even a single statement can require multiple StatementEntity(s)
+ *           when it includes a sub statement.
+ */
 data class StatementEntities(
-    val statementEntity: StatementEntity? = null,
-    val statementEntityJson: StatementEntityJson? = null,
-    val actorEntities: List<ActorEntities>? = null,
-    val verbEntities: VerbEntities? = null,
-    val activityEntities: List<ActivityEntities>? = null,
+    val statements: List<StatementEntity> = emptyList(),
+    val statementEntityJson: List<StatementEntityJson> = emptyList(),
+    val actorEntities: List<ActorEntities> = emptyList(),
+    val verbEntities: List<VerbEntities> = emptyList(),
+    val activityEntities: List<ActivityEntities> = emptyList(),
 )
+
+fun List<StatementEntities>.flatten(): StatementEntities {
+    return StatementEntities(
+        statements = flatMap { it.statements },
+        statementEntityJson = flatMap { it.statementEntityJson },
+        actorEntities = flatMap { it.actorEntities },
+        verbEntities = flatMap { it.verbEntities },
+        activityEntities = flatMap { it.activityEntities }
+    )
+}
+
 
 /**
  * As per the spec, if the objectType is not specified, it defaults to Activity.
@@ -85,7 +100,7 @@ fun XapiStatement.toEntities(
     json: Json,
     exactJson: String?,
     isSubStatement: Boolean = false,
-): List<StatementEntities> {
+): StatementEntities {
     val statementUuid = id ?: throw IllegalArgumentException("Statement must have id set before conversion to entities")
 
     if(isSubStatement && `object` is XapiStatement)
@@ -113,46 +128,49 @@ fun XapiStatement.toEntities(
     val (stmtUuidHi, stmtUuidLo) = statementUuid.toLongPair()
     val contextRegHiLo = contextRegistration?.toLongPair()
 
-
     return listOf(
         StatementEntities(
-            statementEntity = StatementEntity(
-                statementIdHi = stmtUuidHi,
-                statementIdLo = stmtUuidLo,
-                statementActorUid = statementActorEntities.actor.actorUid,
-                authorityActorUid = authorityActor?.actor?.actorUid ?: 0,
-                statementVerbUid = uidNumberMapper(verb.id),
-                resultCompletion = result?.completion,
-                resultSuccess = result?.success,
-                resultScoreScaled = result?.score?.scaled,
-                resultScoreRaw = result?.score?.raw,
-                resultScoreMin = result?.score?.min,
-                resultScoreMax = result?.score?.max,
-                resultDuration = result?.duration?.inWholeMilliseconds,
-                resultResponse = result?.response,
-                timestamp = timestamp?.toEpochMilliseconds() ?: systemTimeInMillis(),
-                stored = systemTimeInMillis(),
-                contextRegistrationHi = contextRegHiLo?.first ?: 0,
-                contextRegistrationLo = contextRegHiLo?.second ?: 0,
-                contextPlatform = context?.platform,
-                contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
-                completionOrProgress = isCompletionOrProgress(),
-                extensionProgress = resultProgressExtension,
-                statementObjectType = `object`.objectTypeFlag,
-                statementObjectUid1 = statementObjectForeignKeys.first,
-                statementObjectUid2 = statementObjectForeignKeys.second,
-                isSubStatement = isSubStatement,
+            statements = listOf(
+                StatementEntity(
+                    statementIdHi = stmtUuidHi,
+                    statementIdLo = stmtUuidLo,
+                    statementActorUid = statementActorEntities.actor.actorUid,
+                    authorityActorUid = authorityActor?.actor?.actorUid ?: 0,
+                    statementVerbUid = uidNumberMapper(verb.id),
+                    resultCompletion = result?.completion,
+                    resultSuccess = result?.success,
+                    resultScoreScaled = result?.score?.scaled,
+                    resultScoreRaw = result?.score?.raw,
+                    resultScoreMin = result?.score?.min,
+                    resultScoreMax = result?.score?.max,
+                    resultDuration = result?.duration?.inWholeMilliseconds,
+                    resultResponse = result?.response,
+                    timestamp = timestamp?.toEpochMilliseconds() ?: systemTimeInMillis(),
+                    stored = systemTimeInMillis(),
+                    contextRegistrationHi = contextRegHiLo?.first ?: 0,
+                    contextRegistrationLo = contextRegHiLo?.second ?: 0,
+                    contextPlatform = context?.platform,
+                    contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
+                    completionOrProgress = isCompletionOrProgress(),
+                    extensionProgress = resultProgressExtension,
+                    statementObjectType = `object`.objectTypeFlag,
+                    statementObjectUid1 = statementObjectForeignKeys.first,
+                    statementObjectUid2 = statementObjectForeignKeys.second,
+                    isSubStatement = isSubStatement,
+                )
             ),
-            statementEntityJson = StatementEntityJson(
-                stmtJsonIdHi = stmtUuidHi,
-                stmtJsonIdLo = stmtUuidLo,
-                fullStatement = exactJson,
+            statementEntityJson = listOf(
+                StatementEntityJson(
+                    stmtJsonIdHi = stmtUuidHi,
+                    stmtJsonIdLo = stmtUuidLo,
+                    fullStatement = exactJson,
+                )
             ),
             actorEntities = buildList {
                 add(statementActorEntities)
                 contextInstructorActorEntities?.also { add(it) }
             },
-            verbEntities = verb.toVerbEntities(uidNumberMapper),
+            verbEntities = listOf(verb.toVerbEntities(uidNumberMapper)),
             /*
              * Note: object.objectToEntities will generate the ActivityEntities where an the object
              * of the statement is an activity.
@@ -164,12 +182,12 @@ fun XapiStatement.toEntities(
                     statementUuid = statementUuid,
                 ).toEmptyIfNull()
         ),
-    ) + `object`.objectToEntities(
-        uidNumberMapper = uidNumberMapper,
-        primaryKeyGenerator = primaryKeyGenerator,
-        json = json,
-        parentStatementUuid = statementUuid,
-    )
-
+        `object`.objectToEntities(
+            uidNumberMapper = uidNumberMapper,
+            primaryKeyGenerator = primaryKeyGenerator,
+            json = json,
+            parentStatementUuid = statementUuid,
+        )
+    ).flatten()
 }
 

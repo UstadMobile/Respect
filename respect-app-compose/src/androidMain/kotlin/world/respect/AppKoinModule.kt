@@ -897,6 +897,7 @@ val appKoinModule = module {
                 checkPersonPermissionUseCase = get(),
                 json = get(),
                 defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 

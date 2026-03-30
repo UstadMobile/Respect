@@ -35,26 +35,22 @@ fun XapiStatementObject.objectToEntities(
     primaryKeyGenerator: PrimaryKeyGenerator,
     json: Json,
     parentStatementUuid: Uuid,
-) : List<StatementEntities> {
+) : StatementEntities {
     @Suppress("REDUNDANT_ELSE_IN_WHEN")
     return when(this) {
         is XapiActivityStatementObject -> {
-            listOf(
-                StatementEntities(
-                    activityEntities = listOf(
-                        definition.toEntities(id, uidNumberMapper, json)
-                    )
+            StatementEntities(
+                activityEntities = listOf(
+                    definition.toEntities(id, uidNumberMapper, json)
                 )
             )
         }
 
         is XapiActor -> {
-            listOf(
-                StatementEntities(
-                    actorEntities = listOf(
-                        toEntities(
-                            uidNumberMapper, primaryKeyGenerator
-                        )
+            StatementEntities(
+                actorEntities = listOf(
+                    toEntities(
+                        uidNumberMapper, primaryKeyGenerator
                     )
                 )
             )
@@ -62,7 +58,7 @@ fun XapiStatementObject.objectToEntities(
 
         is XapiStatementRef -> {
             //When the object is a statement ref, there are no other entities. Its just a link by uuid
-            emptyList()
+            StatementEntities()
         }
 
         is XapiStatement -> {

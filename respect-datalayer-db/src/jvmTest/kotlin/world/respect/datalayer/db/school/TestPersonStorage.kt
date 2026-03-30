@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school
 
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -32,7 +33,10 @@ class TestPersonStorage {
 
         runBlocking {
             testSchoolDb(temporaryFolder.newFolder()) { db ->
-                val schoolDs = db.toDataSource(adminUid)
+                val schoolDs = db.toDataSource(
+                    authenticatedUserUid = adminUid,
+                    schoolUrl = Url("http://localhost:8098/"),
+                )
 
                 val parentPerson = Person(
                     guid = parentGuid,

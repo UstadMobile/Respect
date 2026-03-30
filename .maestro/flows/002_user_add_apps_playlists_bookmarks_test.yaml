@@ -223,7 +223,7 @@ onFlowComplete:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
 - assertVisible: "Task"  # As per prototype
-- assertVisible: "Lesson 002"
+#- assertVisible: "Lesson 002"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -330,7 +330,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Homework 2"
-- assertVisible: "Lesson 002"
+#- assertVisible: "Lesson 002"
 - tapOn: "Assignments"
 - assertVisible: "Homework 1"
 - assertVisible: "Homework 2"

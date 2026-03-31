@@ -13,8 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -46,7 +48,7 @@ import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
@@ -60,8 +62,7 @@ import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RespectComposeNavController
-import world.respect.shared.resources.StringResourceUiText
-import world.respect.shared.resources.StringUiText
+import world.respect.shared.ext.asString
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
@@ -84,7 +85,7 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
     ),
     TopNavigationItem(
@@ -116,7 +117,7 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
     ),
 )
@@ -177,17 +178,19 @@ fun App(
     val koin = getKoin()
 
     LaunchedEffect(Unit) {
-        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
-            val uiText = it.message
-            val message = if(uiText is StringUiText) {
-                uiText.text
-            }else if(uiText is StringResourceUiText) {
-                getString(uiText.resource)
-            }else {
-                ""
-            }
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack->
 
-            snackbarHostState.showSnackbar(message, it.action)
+            val message = snack.message.asString()
+            val actionLabel = snack.action?.asString()
+
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = actionLabel,
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                snack.onAction?.invoke()
+            }
         }
     }
 

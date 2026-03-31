@@ -1,6 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 
-val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/base.json"
+val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.directory/respect-ds/base.json"
 
 plugins {
     alias(libs.plugins.kotlinJvm)

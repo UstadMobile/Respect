@@ -35,9 +35,10 @@ class ChangeHistoryViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
-    private val schoolDataSource: SchoolDataSource by inject()
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
+
+    private val schoolDataSource: SchoolDataSource by inject()
 
     private val route: ChangeHistory = savedStateHandle.toRoute()
 
@@ -59,17 +60,11 @@ class ChangeHistoryViewModel(
 
             changeHistoryFlow.collect { state ->
 
-                val changeHistoryList = state.dataOrNull()?.map { entry ->
-                            entry.copy(
-                                changes = entry.changes.sortedByDescending { it.lastModified }
-                            )
-                }?.sortedByDescending { it.lastModified }
+                val changeHistoryList = state.dataOrNull().orEmpty()
 
-                val grouped =
-                    changeHistoryList?.groupBy { it.whoGuid }
+                val groupedByWho = changeHistoryList.groupBy { it.whoGuid }
 
-                val resultList =
-                    grouped?.mapNotNull { (whoGuid, entries) ->
+                val resultList = groupedByWho.mapNotNull { (whoGuid, entries) ->
 
                         val person =
                             schoolDataSource.personDataSource.findByGuid(
@@ -92,7 +87,6 @@ class ChangeHistoryViewModel(
                 }
             }
         }
-
         _appUiState.update { prev ->
             prev.copy(
                 title = Res.string.change_history.asUiText(),

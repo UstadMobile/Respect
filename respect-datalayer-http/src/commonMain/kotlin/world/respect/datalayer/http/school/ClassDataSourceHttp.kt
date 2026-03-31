@@ -113,7 +113,7 @@ class ClassDataSourceHttp(
     }
 
     override suspend fun store(list: List<Clazz>) {
-        val changeHistories = changeHistoryProvider.getChangeHistoryEntries(
+        val changeHistories = changeHistoryProvider.getPendingChangeHistoryEntries(
             tableId = ChangeHistoryTableEnum.CLASS,
             uids = list.map { it.guid }
         )

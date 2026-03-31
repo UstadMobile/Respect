@@ -10,7 +10,7 @@ class ChangeHistoryProviderDb(
     private val schoolDb: RespectSchoolDatabase,
 ) : ChangeHistoryProvider {
 
-    override suspend fun getChangeHistoryEntries(
+    override suspend fun getPendingChangeHistoryEntries(
         tableId: ChangeHistoryTableEnum,
         uids: List<String>
     ): List<ChangeHistoryEntry> {

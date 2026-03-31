@@ -18,7 +18,6 @@ class ChangeHistoryMarkSentToServerDb(
 
         if (historyGuidHashes.isEmpty()) return
 
-        schoolDb.getChangeHistoryDao().markByHistoryGuids(historyGuidHashes)    }
-
-
+        schoolDb.getChangeHistoryDao().markByHistoryGuids(historyGuidHashes)
+    }
 }

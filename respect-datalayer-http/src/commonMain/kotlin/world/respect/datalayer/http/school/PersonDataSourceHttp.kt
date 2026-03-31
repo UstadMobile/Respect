@@ -28,10 +28,8 @@ import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.adapters.asListDetails
-import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonWithHistoryRequest
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -161,7 +159,7 @@ class PersonDataSourceHttp(
 
 
     override suspend fun store(list: List<Person>) {
-        val changeHistories = changeHistoryProvider.getChangeHistoryEntries(
+        val changeHistories = changeHistoryProvider.getPendingChangeHistoryEntries(
             tableId = ChangeHistoryTableEnum.PERSON,
             uids = list.map { it.guid }
         )

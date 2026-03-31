@@ -84,13 +84,11 @@ fun PersonDetailScreen(
                     onClick = onClickCreateAccount,
                 )
             }
-            if(uiState.changeHistoryButtonVisible){
-                RespectQuickActionButton(
-                    labelText = stringResource(Res.string.change_history),
-                    imageVector = Icons.Default.Replay,
-                    onClick = onClickChangeHistoryButton,
-                )
-            }
+            RespectQuickActionButton(
+                labelText = stringResource(Res.string.change_history),
+                imageVector = Icons.Default.Replay,
+                onClick = onClickChangeHistoryButton,
+            )
         }
 
         HorizontalDivider()

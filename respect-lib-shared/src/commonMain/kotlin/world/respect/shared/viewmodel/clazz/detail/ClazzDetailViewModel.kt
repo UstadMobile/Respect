@@ -88,7 +88,6 @@ data class ClazzDetailUiState(
     val inviteCodePrefix: String? = null,
     val showAddStudent: Boolean = false,
     val showAddTeacher: Boolean = false,
-    val changeHistoryButtonVisible: Boolean = false,
     )
 
 class ClazzDetailViewModel(
@@ -186,16 +185,10 @@ class ClazzDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccountAndPerson ->
-                    val hasReadPermission = checkPersonPermissionUseCase(
-                        otherPersonUid = selectedAccountAndPerson?.person?.guid?:"",
-                        otherPersonKnownRole = null,
-                        permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.READ_PERMISSIONS,
-                    )
                     _uiState.update { prev ->
                         prev.copy(
                             showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
                             showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            changeHistoryButtonVisible = hasReadPermission,
                         )
                     }
 

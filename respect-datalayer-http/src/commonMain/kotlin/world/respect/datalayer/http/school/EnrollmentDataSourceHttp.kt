@@ -125,7 +125,7 @@ class EnrollmentDataSourceHttp(
 
     override suspend fun store(list: List<Enrollment>) {
 
-        val changeHistories = changeHistoryProvider.getChangeHistoryEntries(
+        val changeHistories = changeHistoryProvider.getPendingChangeHistoryEntries(
             tableId = ChangeHistoryTableEnum.ENROLLMENT,
             uids = list.map { it.uid }
         )

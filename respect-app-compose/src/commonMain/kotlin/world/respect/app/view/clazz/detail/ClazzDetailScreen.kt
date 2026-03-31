@@ -148,15 +148,13 @@ fun ClazzDetailScreen(
             )
         }
         item {
-            if(uiState.changeHistoryButtonVisible){
-                HorizontalDivider()
-                RespectQuickActionButton(
-                    labelText = stringResource(Res.string.change_history),
-                    imageVector = Icons.Default.Replay,
-                    onClick = onClickChangeHistoryButton,
-                )
-                HorizontalDivider()
-            }
+            HorizontalDivider()
+            RespectQuickActionButton(
+                labelText = stringResource(Res.string.change_history),
+                imageVector = Icons.Default.Replay,
+                onClick = onClickChangeHistoryButton,
+            )
+            HorizontalDivider()
         }
 
 

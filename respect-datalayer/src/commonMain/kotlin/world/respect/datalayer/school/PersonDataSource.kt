@@ -6,6 +6,7 @@ import kotlinx.datetime.LocalDate
 import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -93,7 +94,6 @@ interface PersonDataSource: WritableDataSource<Person> {
         loadParams: DataLoadParams,
         listParams: GetListParams,
     ): IPagingSourceFactory<Int, PersonListDetails>
-
 
     /**
      * Persists the list to the DataSource. The underlying DataSource WILL set the stored time on

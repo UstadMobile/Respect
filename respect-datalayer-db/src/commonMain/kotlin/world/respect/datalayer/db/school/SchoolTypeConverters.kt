@@ -9,6 +9,8 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
+import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.school.model.AssignmentAssigneeRefTypeEnum
 import world.respect.datalayer.school.model.ClassInviteModeEnum
@@ -137,6 +139,26 @@ class SchoolTypeConverters {
     @TypeConverter
     fun toStatementEntityObjectTypeEnum(value: Int): StatementEntityObjectTypeEnum {
         return StatementEntityObjectTypeEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromActivityInteractionEntityPropEnum(value: ActivityInteractionEntityPropEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toActivityInteractionEntityPropEnum(value: Int): ActivityInteractionEntityPropEnum {
+        return ActivityInteractionEntityPropEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromActivityLangMapEntryPropEnum(value: ActivityLangMapEntryPropEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toActivityLangMapEntryPropEnum(value: Int): ActivityLangMapEntryPropEnum {
+        return ActivityLangMapEntryPropEnum.fromFlag(value)
     }
 
 

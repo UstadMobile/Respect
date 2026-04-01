@@ -3,18 +3,15 @@ package world.respect.datalayer.db.school.xapi.daos
 object ActivityLangMapEntryDaoCommon {
 
     const val INTO_LANG_MAP_WHERE_INTERACTION_ENTITY_EXISTS = """
-        INTO ActivityLangMapEntry(almeActivityUid, almeHash, almeLangCode, almePropName, almeValue, almeAieHash, almeLastMod)
+        INTO ActivityLangMapEntry(almeActivityUid, almeProperty, almeLangCode, almeValue)
         SELECT :almeActivityUid AS almeActivityUid,
-               :almeHash AS almeHash,
+               :almeProperty AS almeProperty,
                :almeLangCode AS almeLangCode,
-               :almePropName AS almePropName,
-               :almeValue AS almeValue,
-               :almeAieHash AS almeAieHash,
-               :almeLastMod AS almeLastMod
+               :almeValue AS almeValue
          WHERE EXISTS(SELECT 1
                         FROM ActivityInteractionEntity
                        WHERE ActivityInteractionEntity.aieActivityUid = :almeActivityUid
-                         AND ActivityInteractionEntity.aieHash = :almeAieHash)
+                         AND ActivityInteractionEntity.aieProp = :aieProp)
     """
 
 }

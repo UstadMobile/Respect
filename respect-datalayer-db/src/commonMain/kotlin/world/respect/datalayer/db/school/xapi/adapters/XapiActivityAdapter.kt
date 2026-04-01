@@ -8,13 +8,12 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity.Companion.PROP_CHOICES
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity.Companion.PROP_SCALE
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity.Companion.PROP_SOURCE
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity.Companion.PROP_STEPS
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity.Companion.PROP_TARGET
+import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
 import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntry
+import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.ext.langMapPropEnum
+import world.respect.datalayer.db.school.xapi.ext.toLangMap
 import world.respect.datalayer.school.xapi.model.XapiActivity
 import world.respect.libutil.ext.toEmptyIfNull
 import kotlin.collections.component1
@@ -59,41 +58,55 @@ fun XapiActivity?.toEntities(
     val activityUid = uidNumberMapper(activityId)
 
     fun Map<String, String>.toLangMapEntries(
-        propName: String,
-        almeAieHash: Long = 0,
+        property: ActivityLangMapEntryPropEnum,
+        interactionId: String?,
     ) = entries.map { (lang, text) ->
         ActivityLangMapEntry(
             almeActivityUid = activityUid,
-            almeHash = uidNumberMapper("$propName-$lang"),
             almeLangCode = lang,
-            almePropName = propName,
+            almeProperty = property,
             almeValue = text,
-            almeAieHash = almeAieHash,
+            almeInteractionId = interactionId,
         )
     }
 
     fun XapiActivity.Interaction.toEntities(
-        propId: Int,
-        propName: String,
+        interactionProp: ActivityInteractionEntityPropEnum,
     ): Pair<ActivityInteractionEntity, List<ActivityLangMapEntry>> {
-        val aieHash = uidNumberMapper("$propId$id")
 
         return ActivityInteractionEntity(
             aieActivityUid = activityUid,
-            aieHash = aieHash,
-            aieProp = propId,
+            aieProp = interactionProp,
             aieId = id,
         ) to description?.toLangMapEntries(
-            "$propName-$id", almeAieHash = aieHash
+            property = interactionProp.langMapPropEnum,
+            interactionId = id,
         ).toEmptyIfNull()
     }
 
-    val interactionEntitiesAndLangMaps =
-        this?.choices?.map { it.toEntities(PROP_CHOICES, "choices") }.toEmptyIfNull() +
-        this?.scale?.map { it.toEntities(PROP_SCALE, "scale") }.toEmptyIfNull() +
-        this?.source?.map { it.toEntities(PROP_SOURCE, "source") }.toEmptyIfNull() +
-        this?.target?.map { it.toEntities(PROP_TARGET, "target") }.toEmptyIfNull() +
-        this?.steps?.map { it.toEntities(PROP_STEPS, "steps") }.toEmptyIfNull()
+    val interactionEntitiesAndLangMaps = buildList {
+        this@toEntities?.choices?.map {
+            it.toEntities(ActivityInteractionEntityPropEnum.CHOICES)
+        }?.also { addAll(it) }
+
+        this@toEntities?.scale?.map {
+            it.toEntities(ActivityInteractionEntityPropEnum.SCALE)
+        }?.also { addAll(it) }
+
+        this@toEntities?.source?.map {
+            it.toEntities(ActivityInteractionEntityPropEnum.SOURCE)
+        }?.also { addAll(it) }
+
+
+        this@toEntities?.target?.map {
+            it.toEntities(ActivityInteractionEntityPropEnum.TARGET)
+        }?.also { addAll(it) }
+
+        this@toEntities?.steps?.map {
+            it.toEntities(ActivityInteractionEntityPropEnum.STEPS)
+        }?.also { addAll(it) }
+    }
+
 
     return ActivityEntities(
         activityEntity = ActivityEntity(
@@ -104,10 +117,17 @@ fun XapiActivity?.toEntities(
             actInteractionType = this?.interactionType?.dbFlag ?: ActivityEntity.TYPE_UNSET,
             actCorrectResponsePatterns = this?.correctResponsesPattern?.let { json.encodeToString(it) },
         ),
-        activityLangMapEntries =
-            this?.name?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_NAME).toEmptyIfNull() +
-                    this?.description?.toLangMapEntries(ActivityLangMapEntry.PROPNAME_DESCRIPTION).toEmptyIfNull() +
-                    interactionEntitiesAndLangMaps.flatMap { it.second },
+        activityLangMapEntries = buildList {
+            this@toEntities?.name?.toLangMapEntries(
+                property = ActivityLangMapEntryPropEnum.NAME, interactionId = null
+            )?.also { addAll(it) }
+
+            this@toEntities?.description?.toLangMapEntries(
+                property = ActivityLangMapEntryPropEnum.DESCRIPTION, interactionId = null
+            )?.also { addAll(it) }
+
+            addAll(interactionEntitiesAndLangMaps.flatMap { it.second })
+        },
         activityInteractionEntities = interactionEntitiesAndLangMaps.map { it.first },
         activityExtensionEntities = this?.extensions?.map { (key, value) ->
             ActivityExtensionEntity(
@@ -120,3 +140,44 @@ fun XapiActivity?.toEntities(
     )
 }
 
+fun ActivityEntities.toModel(
+    json: Json
+) : XapiActivity {
+
+    fun interactionsForProp(
+        interactionProp: ActivityInteractionEntityPropEnum,
+    ): List<XapiActivity.Interaction> = activityInteractionEntities.filter {
+        it.aieProp == interactionProp
+    }.map { interactionEntity ->
+        XapiActivity.Interaction(
+            id = interactionEntity.aieId,
+            description = activityLangMapEntries.toLangMap {
+                it.almeProperty == interactionEntity.aieProp.langMapPropEnum &&
+                        it.almeInteractionId == interactionEntity.aieId
+            }
+        )
+    }
+
+    return XapiActivity(
+        name = activityLangMapEntries.toLangMap {
+            it.almeProperty == ActivityLangMapEntryPropEnum.NAME
+        },
+        description = activityLangMapEntries.toLangMap {
+            it.almeProperty == ActivityLangMapEntryPropEnum.DESCRIPTION
+        },
+        type = activityEntity.actType,
+        extensions = activityExtensionEntities.associate {
+            it.aeeKey to json.decodeFromString(
+                JsonElement.serializer(), it.aeeJson
+            )
+        },
+        moreInfo = activityEntity.actMoreInfo,
+        //TODO: interaction type - should be enum
+        choices = interactionsForProp(ActivityInteractionEntityPropEnum.CHOICES),
+        scale = interactionsForProp(ActivityInteractionEntityPropEnum.SCALE),
+        source = interactionsForProp(ActivityInteractionEntityPropEnum.SOURCE),
+        target = interactionsForProp(ActivityInteractionEntityPropEnum.TARGET),
+        steps = interactionsForProp(ActivityInteractionEntityPropEnum.STEPS),
+
+    )
+}

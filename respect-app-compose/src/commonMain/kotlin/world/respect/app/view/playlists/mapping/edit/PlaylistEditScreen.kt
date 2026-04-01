@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -46,7 +45,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableColumn
-import sh.calvin.reorderable.ReorderableItem
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.opds.model.OpdsGroup
@@ -221,7 +219,8 @@ fun PlaylistEditScreen(
 
     uiState.movingItem?.let { movingItem ->
         MoveToSectionDialog(
-            sections = movingItem.compatibleSections,
+            compatibleSections = movingItem.compatibleSections,
+            allSections = uiState.sections,
             onClickSection = onClickMoveItemToSection,
             onDismiss = onDismissMoveDialog,
         )
@@ -242,8 +241,7 @@ private fun PlaylistSectionEditItem(
     onClickMoveItem: (Int) -> Unit,
     onItemsReordered: (List<Any>) -> Unit,
 ) {
-    val isNavigationSection = !section.publications.isNullOrEmpty().not() &&
-        (section.navigation != null || section.publications == null)
+    val isNavigationSection = section.navigation != null
 
     Column(
         modifier = Modifier
@@ -485,7 +483,8 @@ private fun ItemMenuButton(
 
 @Composable
 private fun MoveToSectionDialog(
-    sections: List<MovingItemState.CompatibleSection>,
+    compatibleSections: List<MovingItemState.CompatibleSection>,
+    allSections: List<OpdsGroup>,
     onClickSection: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -493,24 +492,23 @@ private fun MoveToSectionDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(Res.string.move_to_section)) },
         text = {
-            Column {
-                sections.forEach { section ->
+                compatibleSections.forEach { section ->
+                    val actualSection = allSections[section.sectionIndex]
+                    val sectionTitle = actualSection.metadata.title
+                        .takeIf { it.isNotBlank() }
+                        ?: stringResource(Res.string.section_title)
+                    val itemCount = (actualSection.navigation?.size ?: 0) +
+                            (actualSection.publications?.size ?: 0)
                     ListItem(
-                        headlineContent = {
-                            Text(
-                                text = section.title.takeIf { it.isNotBlank() }
-                                    ?: stringResource(Res.string.section_title),
-                            )
-                        },
+                        headlineContent = { Text(text = sectionTitle) },
                         supportingContent = {
-                            Text(text = stringResource(Res.string.n_items, section.itemCount))
+                            Text(text = stringResource(Res.string.n_items, itemCount))
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onClickSection(section.sectionIndex) },
                     )
                 }
-            }
         },
         confirmButton = {},
         dismissButton = {

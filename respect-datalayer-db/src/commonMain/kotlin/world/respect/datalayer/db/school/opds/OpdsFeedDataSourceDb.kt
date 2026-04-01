@@ -24,10 +24,12 @@ import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.ext.dataLoadMetaInfoForPlaylist
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.libutil.ext.appendEndpointSegments
 import kotlin.time.Clock
 
 class OpdsFeedDataSourceDb(
@@ -141,6 +143,34 @@ class OpdsFeedDataSourceDb(
                         dataLoadMetaInfo = feed.dataLoadMetaInfoForPlaylist()
                     )
                 }
+            }
+        }
+    }
+
+    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
+        val playlistPrefix =
+            schoolUrl.appendEndpointSegments(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME)
+                .toString() + "/"
+        return schoolDb.getOpdsFeedEntityDao().findByUrlPrefixAsFlow(playlistPrefix)
+            .map { feedEntities ->
+                schoolDb.useReaderConnection {
+                    DataReadyState(
+                        data = feedEntities.map { it.loadModel() }
+                    )
+                }
+            }
+    }
+
+    override suspend fun deleteByUrl(url: Url) {
+        val feedUid = uidNumberMapper(url.toString())
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                schoolDb.getOpdsFeedEntityDao().deleteByFeedUid(feedUid)
+                schoolDb.getOpdsFeedMetadataEntityDao().deleteByFeedUid(feedUid)
+                schoolDb.getLangMapEntityDao().deleteAllByFeedUid(feedUid)
+                schoolDb.getReadiumLinkEntityDao().deleteAllByFeedUid(feedUid)
+                schoolDb.getOpdsPublicationEntityDao().deleteAllByFeedUid(feedUid)
+                schoolDb.getOpdsGroupEntityDao().deleteByFeedUid(feedUid)
             }
         }
     }

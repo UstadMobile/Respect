@@ -6,7 +6,6 @@ import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -16,19 +15,16 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
-import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
@@ -51,9 +47,6 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
-import kotlin.time.Instant
-import kotlin.toString
 import kotlin.uuid.ExperimentalUuidApi
 
 data class LearningUnitListUiState(
@@ -117,6 +110,7 @@ class LearningUnitListViewModel(
     private val route: LearningUnitList = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
+
 
     init {
         _uiState.update {
@@ -350,6 +344,8 @@ class PlaylistDetailViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
+
     private val route: PlaylistDetail = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(LearningUnitListUiState())
@@ -438,19 +434,8 @@ class PlaylistDetailViewModel(
         viewModelScope.launch {
             val activeAccount = accountManager.activeAccount
                 ?: throw IllegalStateException("No active account when copying playlist")
-
-            val sessionAndPerson = accountManager.selectedAccountAndPersonFlow
-                .first { it != null }
-
-            val username = sessionAndPerson?.person?.username
-                ?.takeIf { it.isNotBlank() }
-                ?: listOfNotNull(
-                    sessionAndPerson?.person?.givenName?.takeIf { it.isNotBlank() },
-                    sessionAndPerson?.person?.familyName?.takeIf { it.isNotBlank() },
-                ).joinToString(" ").takeIf { it.isNotBlank() }
-                ?: sessionAndPerson?.person?.guid
-                ?: throw IllegalStateException("No username available when copying playlist")
-
+            
+            val username = getActiveUsernameUseCase()
             @OptIn(ExperimentalUuidApi::class)
             val copiedFeed = MakePlaylistOpdsFeedUseCase(
                 schoolUrl = activeAccount.school.self
@@ -490,48 +475,15 @@ class PlaylistDetailViewModel(
     fun onDeleteDialogConfirm() {
         viewModelScope.launch {
             val feed = _uiState.value.feed ?: return@launch
-            val selfHref = feed.selfUrl()?.toString() ?: return@launch
+            val selfUrl = feed.selfUrl() ?: return@launch
 
-            val activeAccount = accountManager.activeAccount
-                ?: throw IllegalStateException(
-                    "No active account when deleting playlist"
-                )
-
-            val playlistListUrl = Url(
-                "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
-            )
-
-            val existingListFeed = schoolDataSource.opdsFeedDataSource
-                .getByUrl(url = playlistListUrl, params = DataLoadParams())
-                .dataOrNull()
-
-            if (existingListFeed != null) {
-                val updatedPublications = (existingListFeed.publications ?: emptyList())
-                    .filter { pub ->
-                        pub.links.none { link ->
-                            link.rel?.contains(PlaylistListUiState.REL_SELF) == true &&
-                                    link.href == selfHref
-                        }
-                    }
-
-                val updatedListFeed = OpdsFeed(
-                    metadata = OpdsFeedMetadata(
-                        title = existingListFeed.metadata.title,
-                        modified = Instant.fromEpochMilliseconds(systemTimeInMillis()),
-                    ),
-                    links = existingListFeed.links,
-                    publications = updatedPublications,
-                    groups = existingListFeed.groups ?: emptyList(),
-                )
-
-                schoolDataSource.opdsFeedDataSource.store(listOf(updatedListFeed))
-            }
+            schoolDataSource.opdsFeedDataSource.deleteByUrl(selfUrl)
 
             _uiState.update { it.copy(showDeleteDialog = false) }
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = RespectAppLauncher.create()
-            )
+                )
             )
         }
     }

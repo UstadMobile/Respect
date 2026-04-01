@@ -20,10 +20,9 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.*
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.playlists.mapping.list.*
 
 @Composable
@@ -46,7 +45,7 @@ fun PlaylistListScreenForViewModel(
 fun PlaylistListScreen(
     uiState: PlaylistListUiState = PlaylistListUiState(),
     onClickFilter: (PlaylistFilter) -> Unit = {},
-    onClickPlaylist: (OpdsPublication) -> Unit = {},
+    onClickPlaylist: (OpdsFeed) -> Unit = {},
     onClickDismissFabMenu: () -> Unit = {},
     onClickAddNew: () -> Unit = {},
     onClickAddFromLink: () -> Unit = {},
@@ -97,14 +96,14 @@ fun PlaylistListScreen(
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(
                         items = uiState.showPlaylists,
-                        key = { index, publication ->
-                            publication.metadata.identifier?.toString()
-                                ?: "${publication.metadata.title.getTitle()}_$index"
+                        key = { index, feed ->
+                            feed.metadata.identifier?.toString()
+                                ?: "${feed.metadata.title}_$index"
                         }
-                    ) { _, publication ->
+                    ) { _, feed ->
                         PlaylistListItem(
-                            publication = publication,
-                            onClickPublication = { onClickPlaylist(publication) },
+                            feed = feed,
+                            onClickFeed = { onClickPlaylist(feed) },
                         )
                     }
                 }
@@ -152,13 +151,15 @@ fun PlaylistListScreen(
 
 @Composable
 private fun PlaylistListItem(
-    publication: OpdsPublication,
-    onClickPublication: () -> Unit,
+    feed: OpdsFeed,
+    onClickFeed: () -> Unit,
 ) {
-    val sectionCount = publication.metadata.numberOfPages ?: 0
-    val itemCount = publication.metadata.duration?.toInt() ?: 0
+    val sectionCount = feed.groups?.size ?: 0
+    val itemCount = feed.groups?.sumOf { group ->
+        (group.publications?.size ?: 0) + (group.navigation?.size ?: 0)
+    } ?: 0
 
-    val ownerUsername = publication.links
+    val ownerUsername = feed.links
         .firstOrNull { link ->
             link.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
         }
@@ -170,7 +171,7 @@ private fun PlaylistListItem(
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClickPublication() },
+            .clickable { onClickFeed() },
         leadingContent = {
             Icon(
                 imageVector = Icons.Filled.Book,
@@ -178,7 +179,7 @@ private fun PlaylistListItem(
             )
         },
         headlineContent = {
-            Text(publication.metadata.title.getTitle())
+            Text(feed.metadata.title)
         },
         supportingContent = {
             Column {

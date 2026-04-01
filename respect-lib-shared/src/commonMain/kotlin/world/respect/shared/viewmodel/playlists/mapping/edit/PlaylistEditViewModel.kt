@@ -3,7 +3,6 @@ package world.respect.shared.viewmodel.playlists.mapping.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -16,19 +15,15 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
-import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.ReadiumLink
-import world.respect.lib.opds.model.ReadiumMetadata
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_playlist
 import world.respect.shared.generated.resources.copy_playlist
@@ -50,7 +45,6 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
-import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
 enum class PlaylistSectionType {
@@ -65,8 +59,6 @@ data class MovingItemState(
 ) {
     data class CompatibleSection(
         val sectionIndex: Int,
-        val title: String,
-        val itemCount: Int,
     )
 }
 
@@ -98,6 +90,8 @@ class PlaylistEditViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
+
 
     private val route: PlaylistEdit = savedStateHandle.toRoute()
 
@@ -124,7 +118,14 @@ class PlaylistEditViewModel(
                 ).collect { result ->
                     when (result) {
                         is DataReadyState -> {
-                            _uiState.update { it.copy(feed = result.data) }
+                            val fixedFeed = result.data.copy(
+                                groups = result.data.groups?.map { group ->
+                                    group.copy(
+                                        navigation = group.navigation?.takeIf { it.isNotEmpty() },
+                                    )
+                                }
+                            )
+                            _uiState.update { it.copy(feed = fixedFeed) }
                         }
                         else -> {}
                     }
@@ -136,17 +137,7 @@ class PlaylistEditViewModel(
                     ?: throw IllegalStateException(
                         "No active account when initializing PlaylistEditViewModel"
                     )
-
-                val sessionAndPerson = accountManager.selectedAccountAndPersonFlow
-                    .first { it != null }
-
-                val username = sessionAndPerson?.person?.username
-                    ?.takeIf { it.isNotBlank() }
-                    ?: listOfNotNull(
-                        sessionAndPerson?.person?.givenName?.takeIf { it.isNotBlank() },
-                        sessionAndPerson?.person?.familyName?.takeIf { it.isNotBlank() },
-                    ).joinToString(" ").takeIf { it.isNotBlank() }
-                    ?: activeAccount.userGuid
+                val username = getActiveUsernameUseCase()
 
                 @OptIn(ExperimentalUuidApi::class)
                 _uiState.update {
@@ -215,8 +206,8 @@ class PlaylistEditViewModel(
                         ReadiumLink(
                             href = selfLink?.href
                                 ?: throw IllegalStateException("No href for playlist"),
-                            title = data.metadata.title?.toString()?.takeIf { it.isNotBlank() }
-                                ?: selfLink?.title,
+                            title = data.metadata.title.toString().takeIf { it.isNotBlank() }
+                                ?: selfLink.title,
                             rel = listOf(PlaylistListUiState.REL_SELF),
                             type = OpdsFeed.MEDIA_TYPE,
                         )
@@ -404,8 +395,6 @@ class PlaylistEditViewModel(
             if (!isCompatible) return@mapIndexedNotNull null
             MovingItemState.CompatibleSection(
                 sectionIndex = index,
-                title = section.metadata.title,
-                itemCount = (section.navigation?.size ?: 0) + (section.publications?.size ?: 0),
             )
         }
 
@@ -493,7 +482,8 @@ class PlaylistEditViewModel(
     }
 
     fun onClickSave() {
-        val feed = _uiState.value.feed ?: return
+        val feed = _uiState.value.feed
+            ?: throw IllegalStateException("onClickSave called but feed is null")
         if (feed.metadata.title.isBlank()) {
             _uiState.update {
                 it.copy(
@@ -506,67 +496,7 @@ class PlaylistEditViewModel(
         }
 
         viewModelScope.launch {
-            val activeAccount = accountManager.activeAccount
-                ?: throw IllegalStateException("No active account when saving playlist")
-
-            val playlistListUrl = Url(
-                "${activeAccount.school.self}${OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME}"
-            )
-
-            val selfHref = feed.selfUrl()?.toString()
-                ?: throw IllegalStateException("Playlist has no self URL")
-
-            val sectionCount = feed.groups?.size ?: 0
-            val itemCount = feed.groups?.sumOf { group ->
-                (group.publications?.size ?: 0) + (group.navigation?.size ?: 0)
-            } ?: 0
-
-            val existingListFeed = schoolDataSource.opdsFeedDataSource
-                .getByUrl(url = playlistListUrl, params = DataLoadParams())
-                .dataOrNull()
-
-            val playlistAsPublication = OpdsPublication(
-                metadata = ReadiumMetadata(
-                    title = LangMapStringValue(feed.metadata.title),
-                    description = feed.metadata.description,
-                    modified = feed.metadata.modified?.toString(),
-                    numberOfPages = sectionCount,
-                    duration = itemCount.toDouble(),
-                ),
-                links = feed.links,
-            )
-
-            val updatedPublications = if (existingListFeed != null) {
-                val others = (existingListFeed.publications ?: emptyList()).filter { pub ->
-                    pub.links.none { link ->
-                        link.rel?.contains(PlaylistListUiState.REL_SELF) == true &&
-                                link.href == selfHref
-                    }
-                }
-                others + playlistAsPublication
-            } else {
-                listOf(playlistAsPublication)
-            }
-
-            val listModified = Instant.fromEpochMilliseconds(systemTimeInMillis())
-
-            val listFeed = OpdsFeed(
-                metadata = OpdsFeedMetadata(
-                    title = existingListFeed?.metadata?.title ?: "",
-                    modified = listModified,
-                ),
-                links = existingListFeed?.links ?: listOf(
-                    ReadiumLink(
-                        href = playlistListUrl.toString(),
-                        rel = listOf(PlaylistListUiState.REL_SELF),
-                        type = OpdsFeed.MEDIA_TYPE,
-                    )
-                ),
-                publications = updatedPublications,
-                groups = existingListFeed?.groups ?: emptyList(),
-            )
-
-            schoolDataSource.opdsFeedDataSource.store(listOf(feed, listFeed))
+            schoolDataSource.opdsFeedDataSource.store(listOf(feed))
 
             val savedPlaylistUrl = feed.selfUrl()
                 ?: throw IllegalStateException("Saved playlist has no self URL")

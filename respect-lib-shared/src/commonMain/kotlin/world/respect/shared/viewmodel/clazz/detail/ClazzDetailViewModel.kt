@@ -55,6 +55,7 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -84,6 +85,9 @@ data class ClazzDetailUiState(
     val inviteCodePrefix: String? = null,
     val showAddStudent: Boolean = false,
     val showAddTeacher: Boolean = false,
+
+    val showStudentGrouping: Boolean = false,
+    val isStudentGroupingExpanded: Boolean = true,
 )
 
 class ClazzDetailViewModel(
@@ -183,7 +187,9 @@ class ClazzDetailViewModel(
                         prev.copy(
                             showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
                             showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                        )
+                            showStudentGrouping = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
+
+                            )
                     }
 
                     _appUiState.update {
@@ -343,6 +349,14 @@ class ClazzDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 PersonDetail(guid = person.guid)
+            )
+        )
+    }
+
+    fun onClickCreateGroup(){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingEdit(guid = route.guid)
             )
         )
     }

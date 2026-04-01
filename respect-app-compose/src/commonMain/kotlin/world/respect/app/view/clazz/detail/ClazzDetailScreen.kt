@@ -1,19 +1,14 @@
 package world.respect.app.view.clazz.detail
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -39,16 +34,12 @@ import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.pending_requests
-import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
-import world.respect.shared.generated.resources.date_of_birth
-import world.respect.shared.generated.resources.dismiss_invite
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
-import world.respect.shared.generated.resources.gender_literal
 import world.respect.shared.generated.resources.students
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
@@ -62,6 +53,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import world.respect.shared.generated.resources.create_group
+import world.respect.shared.generated.resources.groups
 import world.respect.shared.generated.resources.manage_enrollments
 import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.remove_from_class
@@ -86,6 +79,7 @@ fun ClazzDetailScreen(
         onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
         onClickManageEnrollments = viewModel::onClickManageEnrollments,
         onClickPerson = viewModel::onClickPerson,
+        onClickCreateGroup=viewModel::onClickCreateGroup
     )
 }
 
@@ -103,6 +97,7 @@ fun ClazzDetailScreen(
     onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
     onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
     onClickPerson: (Person) -> Unit,
+    onClickCreateGroup:()-> Unit
 ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -359,6 +354,60 @@ fun ClazzDetailScreen(
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) },
                     showMenu = uiState.showAddStudent,
                     onClick = onClickPerson,
+                )
+            }
+        }
+
+        if (uiState.showStudentGrouping) {
+
+            item("student_grouping_header") {
+                ListItem(
+                    modifier = Modifier
+                        .clickable {},
+                    headlineContent = {
+                        Text(
+                            modifier = Modifier.padding(top = 24.dp),
+                            text = stringResource(
+                                resource = Res.string.groups
+                            )
+                        )
+                    },
+
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = if (uiState.showStudentGrouping) {
+                                stringResource(Res.string.collapse_students)
+                            } else {
+                                stringResource(Res.string.expand_students)
+                            },
+                            modifier = Modifier.size(24.dp)
+                                .rotate(
+                                    if (uiState.showStudentGrouping) 0f else -90f
+                                )
+                        )
+                    }
+                )
+            }
+
+            item("student_grouping") {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickCreateGroup()
+                    },
+                    leadingContent = {
+                        Icon(
+                            modifier = Modifier.size(40.dp).padding(8.dp),
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = stringResource(resource = Res.string.create_group)
+                        )
+                    },
+                    headlineContent = {
+                        Text(
+                            text =
+                                stringResource(resource = Res.string.create_group)
+                        )
+                    }
                 )
             }
         }

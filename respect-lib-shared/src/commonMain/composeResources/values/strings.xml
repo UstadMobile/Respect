@@ -142,6 +142,8 @@
     <string name="students">Students</string>
     <string name="add_teacher">Add Teacher</string>">
     <string name="add_student">Add Student</string>">
+    <string name="create_group">Create Group</string>">
+    <string name="groups">Groups</string>">
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
     <string name="pending_requests">Pending requests</string>">

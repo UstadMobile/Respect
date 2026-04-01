@@ -28,7 +28,7 @@ data class XapiActivity(
 
     @Serializable
     data class Interaction(
-        val id: String? = null,
+        val id: String,
         val description: Map<String, String>? = null
     )
 }

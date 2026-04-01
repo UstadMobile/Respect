@@ -15,34 +15,32 @@ interface ActivityLangMapEntryDao {
 
     /**
      * Upsert the lang map entity for an interaction entity if the related interaction entity exists
-     * The interaction entity might not exists if the Activity is already defined.
+     * The interaction entity might not exist if the Activity is already defined.
      */
     @Query("""
         INSERT OR REPLACE ${ActivityLangMapEntryDaoCommon.INTO_LANG_MAP_WHERE_INTERACTION_ENTITY_EXISTS}      
     """)
     suspend fun upsertIfInteractionEntityExists(
         almeActivityUid: Long,
-        almeHash: Long,
-        almePropName: String?,
-        almeLangCode: String?,
-        almeValue: String?,
-        almeAieHash: Long,
-        almeLastMod: Long,
+        almeProperty: Int,
+        almeLangCode: String,
+        almeValue: String,
+        aieProp: Int?,
     )
 
     @Query("""
         UPDATE ActivityLangMapEntry
-           SET almeValue = :almeValue,
-               almeLastMod = :almeLastMod
+           SET almeValue = :almeValue
          WHERE almeActivityUid = :almeActivityUid
-           AND almeHash = :almeHash
+           AND almeProperty = :almeProperty
+           AND almeInteractionId = :almeInteractionId
            AND almeValue != :almeValue       
     """)
     suspend fun updateIfChanged(
         almeActivityUid: Long,
-        almeHash: Long,
-        almeValue: String?,
-        almeLastMod: Long,
+        almeProperty: Int,
+        almeValue: String,
+        almeInteractionId: String?
     )
 
     @Query("""

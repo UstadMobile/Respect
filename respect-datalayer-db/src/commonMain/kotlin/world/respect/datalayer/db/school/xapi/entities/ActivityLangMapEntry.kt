@@ -1,47 +1,44 @@
 package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.school.xapi.model.XapiInteractionType
 
 @Serializable
-@Entity(
-    primaryKeys = ["almeActivityUid", "almeHash"]
-)
+@Entity
 /**
- * Entity used to store the string values for the langmap of Activity's name or display properties,
- * and the string values for the langmap associated with any of the interaction properties.
+ * As per Activity Definition:
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#activity-definition
  *
- * @param almeActivityUid the activity uid that this lang map is related to
- * @param almeHash hash of "propertyname-langcode" where  propertyname is PROPNAME_NAME or
- * PROPNAME_DESCRIPTION as per PROP_NAME_constants and langcode is almeLangCode OR
- * an interaction property name (choices,scale,source,target,steps) - id - lang code e.g.
- * "choices-choiceid-en-US"
+ * An Activity has a Name and Description property that are LangMaps. The Activity can also have
+ * interaction properties (e.g. choices), each of which can have a name.
+ *
+ * ActivityLangMapEntry is used to store all of these.
+ *
+ * @param almeActivityUid the activity uid that this lang map entry is related to
  * @param almeLangCode the lang code as per the xAPI language map eg en-US
- * @param almePropName the property name as per PROP_NAME_constants (description or name), OR, for
- * an interaction property name (choices,scale,source,target,steps), e.g. "choices-choiceid"
+ * @param almeProperty the property that this LangMapEntry is for : see ActivityLangMapEntryPropEnum
+ * @param almeInteractionId if this is an entry for an interaction, then the id of the interaction
  * @param almeValue the string value for the given language
- * @param almeAieHash where this entity represents a langmap for an interaction property, the hash
- * as per ActivityInteractionEntity.aieHash
  */
 data class ActivityLangMapEntry(
+    @PrimaryKey(autoGenerate = true)
+    val almeUid: Long = 0,
+
     val almeActivityUid: Long = 0,
 
-    val almeHash: Long = 0,
+    val almeProperty: ActivityLangMapEntryPropEnum,
 
-    val almeLangCode: String? = null,
+    val almeInteractionId: String?,
 
-    val almePropName: String? = null,
+    val almeLangCode: String,
 
-    val almeValue: String? = null,
+    val almeValue: String,
 
-    val almeAieHash: Long = 0,
-
-    val almeLastMod: Long = 0,
 ) {
     companion object {
         const val TABLE_ID = 6442
-        const val PROPNAME_NAME = "name"
-        const val PROPNAME_DESCRIPTION = "description"
     }
 }
 

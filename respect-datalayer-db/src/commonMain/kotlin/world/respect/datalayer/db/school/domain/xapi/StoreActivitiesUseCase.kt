@@ -5,6 +5,9 @@ import androidx.room.useWriterConnection
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.ActivityEntities
 import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
+import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.ext.interactionProp
+import world.respect.datalayer.db.school.xapi.ext.isActivityProp
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class StoreActivitiesUseCase(
@@ -94,29 +97,25 @@ class StoreActivitiesUseCase(
                  *   if those interaction entities exist.
                  */
                 val (nameAndDescriptionLangMapEntities, interactionLangMapEntities) =
-                    allLangMapEntries.partition {
-                        it.almeAieHash == 0L
-                    }
+                    allLangMapEntries.partition { it.almeProperty.isActivityProp }
 
                 schoolDatabase.getActivityLangMapEntryDao().upsertList(nameAndDescriptionLangMapEntities)
                 interactionLangMapEntities.forEach {
                     schoolDatabase.getActivityLangMapEntryDao().upsertIfInteractionEntityExists(
                         almeActivityUid = it.almeActivityUid,
-                        almeAieHash = it.almeAieHash,
-                        almePropName = it.almePropName,
+                        almeProperty = it.almeProperty.flag,
                         almeValue = it.almeValue,
-                        almeLastMod = timeNow,
                         almeLangCode = it.almeLangCode,
-                        almeHash = it.almeHash,
+                        aieProp = it.almeProperty.interactionProp?.flag
                     )
                 }
 
                 allLangMapEntries.forEach {
                     schoolDatabase.getActivityLangMapEntryDao().updateIfChanged(
                         almeActivityUid = it.almeActivityUid,
-                        almeHash = it.almeHash,
                         almeValue = it.almeValue,
-                        almeLastMod = timeNow,
+                        almeProperty = it.almeProperty.flag,
+                        almeInteractionId = it.almeInteractionId,
                     )
                 }
 

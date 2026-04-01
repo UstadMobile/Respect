@@ -192,7 +192,7 @@ fun XapiStatement.toEntities(
     ).flatten()
 }
 
-
+/*
 fun StatementEntities.toModel() : XapiStatement {
     val primaryStatementEntity = statements.first { !it.isSubStatement }
     val actors = actorEntities.associate { it.actor.actorUid to it.toModel() }
@@ -206,7 +206,15 @@ fun StatementEntities.toModel() : XapiStatement {
         verb = this.verbEntities.first {
             primaryStatementEntity.statementVerbUid == it.verbEntity.verbUid
         }.toModel(),
-        `object` = TODO()//when(primaryStatementEntity.statementObjectType)
+        `object` = when(primaryStatementEntity.statementObjectType) {
+            StatementEntityObjectTypeEnum.ACTIVITY -> {
+
+            }
+
+            else -> {
+                TODO()
+            }
+        }
     )
 }
-
+*/

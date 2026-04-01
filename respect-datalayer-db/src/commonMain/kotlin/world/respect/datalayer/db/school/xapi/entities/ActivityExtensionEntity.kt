@@ -8,9 +8,9 @@ data class ActivityExtensionEntity(
 
     val aeeKeyHash: Long = 0,
 
-    val aeeKey: String? = null,
+    val aeeKey: String,
 
-    val aeeJson: String? = null,
+    val aeeJson: String,
 
     val aeeLastMod: Long = 0,
 

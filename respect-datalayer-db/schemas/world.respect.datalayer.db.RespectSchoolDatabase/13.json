@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "a008e27e59aa3eeff7de74f52be93c76",
+    "identityHash": "8638a784602a279bb3f0ed104a746d44",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1833,17 +1833,17 @@
       },
       {
         "tableName": "ActivityInteractionEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aieActivityUid` INTEGER NOT NULL, `aieHash` INTEGER NOT NULL, `aieProp` INTEGER NOT NULL, `aieId` TEXT, `aieLastMod` INTEGER NOT NULL, `aieIsDeleted` INTEGER NOT NULL, PRIMARY KEY(`aieActivityUid`, `aieHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aieUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `aieActivityUid` INTEGER NOT NULL, `aieProp` INTEGER NOT NULL, `aieId` TEXT NOT NULL)",
         "fields": [
           {
-            "fieldPath": "aieActivityUid",
-            "columnName": "aieActivityUid",
+            "fieldPath": "aieUid",
+            "columnName": "aieUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "aieHash",
-            "columnName": "aieHash",
+            "fieldPath": "aieActivityUid",
+            "columnName": "aieActivityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1856,33 +1856,27 @@
           {
             "fieldPath": "aieId",
             "columnName": "aieId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "aieLastMod",
-            "columnName": "aieLastMod",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aieIsDeleted",
-            "columnName": "aieIsDeleted",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "aieActivityUid",
-            "aieHash"
+            "aieUid"
           ]
         }
       },
       {
         "tableName": "ActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeHash` INTEGER NOT NULL, `almeLangCode` TEXT, `almePropName` TEXT, `almeValue` TEXT, `almeAieHash` INTEGER NOT NULL, `almeLastMod` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `almeActivityUid` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "almeUid",
+            "columnName": "almeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "almeActivityUid",
             "columnName": "almeActivityUid",
@@ -1890,44 +1884,33 @@
             "notNull": true
           },
           {
-            "fieldPath": "almeHash",
-            "columnName": "almeHash",
+            "fieldPath": "almeProperty",
+            "columnName": "almeProperty",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "almeInteractionId",
+            "columnName": "almeInteractionId",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "almeLangCode",
             "columnName": "almeLangCode",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "almePropName",
-            "columnName": "almePropName",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           },
           {
             "fieldPath": "almeValue",
             "columnName": "almeValue",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "almeAieHash",
-            "columnName": "almeAieHash",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "almeLastMod",
-            "columnName": "almeLastMod",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "almeActivityUid",
-            "almeHash"
+            "almeUid"
           ]
         }
       },
@@ -2441,7 +2424,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a008e27e59aa3eeff7de74f52be93c76')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8638a784602a279bb3f0ed104a746d44')"
     ]
   }
 }

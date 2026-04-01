@@ -16,6 +16,15 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
 
+    <queries>
+        <!-- Required to determine the package name for Chrome Custom tab service.
+             See LaunchCustomTabUseCaseAndroid
+        -->
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
     <application
         android:name="world.respect.RespectApp"
         android:allowBackup="false"

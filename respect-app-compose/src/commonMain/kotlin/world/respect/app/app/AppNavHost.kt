@@ -61,6 +61,7 @@ import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
+import world.respect.app.view.studentgrouping.edit.StudentGroupingEditScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
@@ -116,6 +117,7 @@ import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -157,6 +159,7 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel
+import world.respect.shared.viewmodel.studentgrouping.edit.StudentGroupingEditViewModel
 
 
 @Composable
@@ -286,6 +289,16 @@ fun AppNavHost(
                 navController = respectNavController
             )
             ClazzDetailScreen(
+                viewModel = viewModel
+            )
+        }
+
+        composable<StudentGroupingEdit> {
+            val viewModel: StudentGroupingEditViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            StudentGroupingEditScreen(
                 viewModel = viewModel
             )
         }

@@ -235,6 +235,7 @@ import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccoun
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
+import world.respect.shared.viewmodel.apps.changehistory.ChangeHistoryViewModel
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
@@ -384,6 +385,7 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
+    viewModelOf(::ChangeHistoryViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {

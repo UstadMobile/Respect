@@ -55,6 +55,7 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.generated.resources.add_student_to_create_group
 import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -85,7 +86,6 @@ data class ClazzDetailUiState(
     val inviteCodePrefix: String? = null,
     val showAddStudent: Boolean = false,
     val showAddTeacher: Boolean = false,
-
     val showStudentGrouping: Boolean = false,
     val isStudentGroupingExpanded: Boolean = true,
 )
@@ -352,14 +352,35 @@ class ClazzDetailViewModel(
             )
         )
     }
+    fun onClickCreateGroup() {
+        viewModelScope.launch {
+            try {
+                val students = schoolDataSource.personDataSource.list(
+                    loadParams = DataLoadParams(),
+                    params = PersonDataSource.GetListParams(
+                        filterByClazzUid = route.guid,
+                        filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
+                        inClassOnDay = localDateInCurrentTimeZone(),
+                    )
+                ).dataOrNull()
 
-    fun onClickCreateGroup(){
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                StudentGroupingEdit(guid = route.guid)
-            )
-        )
+                if (students.isNullOrEmpty()) {
+                    snackBarDispatcher.showSnackBar(
+                        Snack(Res.string.add_student_to_create_group.asUiText())
+                    )} else {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            StudentGroupingEdit(guid = route.guid)
+                        )
+                    )
+                }
+            } catch (e: Throwable) {
+                Napier.e("onClickCreateGroup ERROR", throwable = e)
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+            }
+        }
     }
+
 
     fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(

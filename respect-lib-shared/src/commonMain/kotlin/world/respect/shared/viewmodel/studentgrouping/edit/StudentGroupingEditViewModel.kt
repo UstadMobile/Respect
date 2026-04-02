@@ -31,8 +31,10 @@ import kotlin.getValue
 data class StudentGroupingEditUiState(
     val nameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val selectedStudentIds: Set<String> = emptySet()
 
-    )
+
+)
 
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
@@ -84,6 +86,18 @@ class StudentGroupingEditViewModel(
 
     fun onClickSave() {
 
+    }
+
+    fun onStudentCheckedChange(person: Person, isChecked: Boolean) {
+        _uiState.update { prev ->
+            val updated = if (isChecked) {
+                prev.selectedStudentIds + person.guid
+            } else {
+                prev.selectedStudentIds - person.guid
+            }
+
+            prev.copy(selectedStudentIds = updated)
+        }
     }
 
 }

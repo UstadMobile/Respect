@@ -21,6 +21,9 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_group
 import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.ClazzDetail
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.StudentGroupingDetail
 import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -83,7 +86,11 @@ class StudentGroupingEditViewModel(
     }
 
     fun onClickSave() {
-
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingDetail
+            )
+        )
     }
 
     fun onStudentCheckedChange(person: Person, isChecked: Boolean) {

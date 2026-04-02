@@ -245,6 +245,7 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.viewmodel.studentgrouping.detail.StudentGroupingDetailViewModel
 import world.respect.shared.viewmodel.studentgrouping.edit.StudentGroupingEditViewModel
 
 
@@ -386,7 +387,7 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::StudentGroupingEditViewModel)
-
+    viewModelOf(::StudentGroupingDetailViewModel)
 
 
     single<GetOfflineStorageOptionsUseCase> {

@@ -225,6 +225,9 @@ data class StudentGroupingEdit(
 ) : RespectAppRoute
 
 @Serializable
+object StudentGroupingDetail : RespectAppRoute
+
+@Serializable
 object Report : RespectAppRoute
 
 @Serializable

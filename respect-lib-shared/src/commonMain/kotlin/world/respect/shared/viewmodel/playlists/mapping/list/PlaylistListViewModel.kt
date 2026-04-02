@@ -17,6 +17,7 @@ import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
@@ -53,7 +54,7 @@ data class PlaylistListUiState(
         }
 
     companion object {
-        val REL_OWNER = MakePlaylistOpdsFeedUseCase.REL_OWNER
+        const val REL_OWNER = MakePlaylistOpdsFeedUseCase.REL_OWNER
         const val REL_SELF = "self"
     }
 }
@@ -66,6 +67,7 @@ class PlaylistListViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
     private val _uiState = MutableStateFlow(PlaylistListUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -87,14 +89,7 @@ class PlaylistListViewModel(
                 val isTeacherOrAdmin = sessionAndPerson?.person?.isAdmin() == true
 
                 val activeUserOwnerHref = sessionAndPerson?.let {
-                    val username = it.person.username
-                        ?.takeIf { name -> name.isNotBlank() }
-                        ?: listOfNotNull(
-                            it.person.givenName.takeIf { name -> name.isNotBlank() },
-                            it.person.familyName.takeIf { name -> name.isNotBlank() },
-                        ).joinToString(" ").takeIf { name -> name.isNotBlank() }
-                        ?: it.session.account.userGuid
-
+                    val username = getActiveUsernameUseCase()
                     "${it.session.account.school.self}user/$username"
                 } ?: ""
                 _uiState.update {

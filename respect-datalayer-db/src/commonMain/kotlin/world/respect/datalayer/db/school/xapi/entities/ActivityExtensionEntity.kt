@@ -15,8 +15,4 @@ data class ActivityExtensionEntity(
     val aeeLastMod: Long = 0,
 
     val aeeIsDeleted: Boolean = false,
-) {
-    companion object {
-        const val TABLE_ID = 6405
-    }
-}
+)

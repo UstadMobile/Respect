@@ -58,7 +58,7 @@ class XapiStatementDataSourceDbTest {
 
                         dataSource.xapiStatementDataSource.store(listOf(statement))
                     }catch(e: Throwable) {
-                        throw Exception("Error loading $name", e)
+                        throw Exception("Error loading/storing $name", e)
                     }
                 }
             }

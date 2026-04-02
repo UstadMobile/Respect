@@ -15,7 +15,7 @@ data class ActivityEntity(
     @PrimaryKey
     val actUid: Long = 0,
 
-    val actIdIri: String? = null,
+    val actIdIri: String,
 
     val actType: String? = null,
 

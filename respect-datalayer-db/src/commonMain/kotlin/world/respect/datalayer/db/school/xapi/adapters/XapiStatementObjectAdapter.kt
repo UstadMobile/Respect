@@ -6,6 +6,7 @@ import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.ext.uuidForSubstatement
 import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiObjectType
@@ -67,9 +68,7 @@ fun XapiStatementObject.objectToEntities(
 
         is XapiStatement -> {
             this.copy(
-                id = parentStatementUuid.toLongs { mostSignificantBits, leastSignificantBits ->
-                    Uuid.fromLongs(mostSignificantBits, leastSignificantBits)
-                }
+                id = parentStatementUuid.uuidForSubstatement(),
             ).toEntities(
                 uidNumberMapper = uidNumberMapper,
                 primaryKeyGenerator = primaryKeyGenerator,

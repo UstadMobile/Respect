@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class XapiStatementRef(
-    override val objectType: XapiObjectType,
+    override val objectType: XapiObjectType = XapiObjectType.StatementRef,
     val id: String,
 ): XapiStatementObject
 

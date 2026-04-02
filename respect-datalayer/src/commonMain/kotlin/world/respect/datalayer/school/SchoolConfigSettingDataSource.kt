@@ -21,7 +21,7 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
             fun fromParams(params: StringValues): GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
-                    keys = params.getAll(DataLayerParams.KEYS) ?: params[DataLayerParams.KEY]?.let { listOf(it) }
+                    keys = params.getAll(DataLayerParams.KEYS)
                 )
             }
         }

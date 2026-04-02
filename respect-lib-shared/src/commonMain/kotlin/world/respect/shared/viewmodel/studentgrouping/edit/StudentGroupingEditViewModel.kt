@@ -32,8 +32,6 @@ data class StudentGroupingEditUiState(
     val nameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
     val selectedStudentIds: Set<String> = emptySet()
-
-
 )
 
 class StudentGroupingEditViewModel(
@@ -95,9 +93,7 @@ class StudentGroupingEditViewModel(
             } else {
                 prev.selectedStudentIds - person.guid
             }
-
             prev.copy(selectedStudentIds = updated)
         }
     }
-
 }

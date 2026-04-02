@@ -1,4 +1,3 @@
-
 package world.respect
 
 import android.content.Context
@@ -156,6 +155,7 @@ import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.sharelink.CreatePlaylistShareLinkUseCase
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
@@ -188,6 +188,7 @@ import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.learningunit.list.PlaylistDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
@@ -229,10 +230,11 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
@@ -370,8 +372,6 @@ val appKoinModule = module {
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::ScanQRCodeViewModel)
-    viewModelOf(::CurriculumMappingListViewModel)
-    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
@@ -384,7 +384,10 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
-
+    viewModelOf(::PlaylistListViewModel)
+    viewModelOf(::PlaylistDetailViewModel)
+    viewModelOf(::PlaylistEditViewModel)
+    viewModelOf(::PlaylistShareViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -695,15 +698,6 @@ val appKoinModule = module {
         )
     }
 
-    /**
-     * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
-     * per url.
-     *
-     * ScopeId is set as per SchoolDirectoryEntryScopeId
-     *
-     * If the upstream server provides a list of grants/permission rules then the school database
-     * can be shared
-     */
     scope<SchoolDirectoryEntry> {
         scoped<GetTokenAndUserProfileWithCredentialUseCase> {
             GetTokenAndUserProfileWithCredentialUseCaseClient(
@@ -745,7 +739,6 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
 
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
@@ -812,20 +805,9 @@ val appKoinModule = module {
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
-
     }
 
-    /**
-     * ScopeId is set as per RespectAccountScopeId
-     *
-     * The RespectAccount scope will be linked to SchoolDirectoryEntry (the parent) scope.
-     */
     scope<RespectAccount> {
-        /* Koin doesn't have an onScopeCreated kind of function or event listener. The
-         * RespectAccount scope is linked ot the SchoolDirectoryEntry scope when
-         * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
-         * dependency that all dependencies on RespectAccountScope require.
-         */
         scoped<RespectAccountSchoolScopeLink> {
             val accountScopeId = RespectAccountScopeId.parse(id)
             val schoolDirectoryScope = SchoolDirectoryEntryScopeId(
@@ -841,7 +823,6 @@ val appKoinModule = module {
 
             RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
         }
-
 
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
@@ -1008,7 +989,7 @@ val appKoinModule = module {
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
     }
-    single<ValidateEmailUseCase>{
+    single<ValidateEmailUseCase> {
         ValidateEmailUseCase()
     }
     single<CreateGraphFormatterUseCase> {

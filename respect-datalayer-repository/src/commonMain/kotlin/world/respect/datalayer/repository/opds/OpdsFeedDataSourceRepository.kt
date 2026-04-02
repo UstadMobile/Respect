@@ -69,4 +69,12 @@ class OpdsFeedDataSourceRepository(
             }
         )
     }
+
+    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
+        return local.getPlaylistsAsFlow(schoolUrl)
+    }
+
+    override suspend fun deleteByUrl(url: Url) {
+        local.deleteByUrl(url)
+    }
 }

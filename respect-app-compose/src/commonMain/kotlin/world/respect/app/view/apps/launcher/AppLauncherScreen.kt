@@ -63,14 +63,12 @@ fun AppLauncherScreen(
     viewModel: AppLauncherViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     AppLauncherScreen(
         uiState = uiState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
     )
 }
-
 
 @Composable
 fun AppLauncherScreen(

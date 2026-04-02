@@ -61,6 +61,12 @@ interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
         params: DataLoadParams
     ): DataLoadState<OpdsFeed>
 
+    fun getPlaylistsAsFlow(
+        schoolUrl: Url
+    ): Flow<DataLoadState<List<OpdsFeed>>>
+
+    suspend fun deleteByUrl(url: Url)
+
 
     companion object {
 

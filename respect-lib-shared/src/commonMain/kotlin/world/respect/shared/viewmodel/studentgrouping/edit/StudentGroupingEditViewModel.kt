@@ -18,10 +18,10 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_group
 import world.respect.shared.generated.resources.save
-import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.StudentGroupingDetail
 import world.respect.shared.navigation.StudentGroupingEdit

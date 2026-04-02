@@ -17,7 +17,7 @@ data class XapiActivity(
     val type: String? = null,
     val extensions: Map<String, JsonElement>? = null,
     val moreInfo: String? = null,
-    val interactionType: XapiInteractionType? = null,
+    val interactionType: XapiInteractionTypeEnum? = null,
     val correctResponsesPattern: List<String>? = null,
     val choices: List<Interaction>? = null,
     val scale: List<Interaction>? = null,

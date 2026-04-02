@@ -40,7 +40,7 @@ object XapiInteractionTypeFlags {
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#interaction-activities
  */
 @Serializable(with = XapiInteractionTypeSerializer::class)
-enum class XapiInteractionType(
+enum class XapiInteractionTypeEnum(
     val jsonFieldValue: String,
     val dbFlag: Int,
 ) {
@@ -59,12 +59,12 @@ enum class XapiInteractionType(
     companion object {
 
 
-        fun fromJsonFieldValue(value: String): XapiInteractionType {
+        fun fromJsonFieldValue(value: String): XapiInteractionTypeEnum {
             return entries.firstOrNull { it.jsonFieldValue == value } ?: Other
         }
 
         @Suppress("unused")
-        fun fromDbFlag(value: Int) : XapiInteractionType? {
+        fun fromDbFlag(value: Int) : XapiInteractionTypeEnum? {
             return entries.firstOrNull { it.dbFlag == value }
         }
     }
@@ -72,15 +72,15 @@ enum class XapiInteractionType(
 
 }
 
-object XapiInteractionTypeSerializer: KSerializer<XapiInteractionType> {
+object XapiInteractionTypeSerializer: KSerializer<XapiInteractionTypeEnum> {
     override val descriptor: SerialDescriptor
         get() = serialDescriptor<String>()
 
-    override fun deserialize(decoder: Decoder): XapiInteractionType {
-        return XapiInteractionType.fromJsonFieldValue(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): XapiInteractionTypeEnum {
+        return XapiInteractionTypeEnum.fromJsonFieldValue(decoder.decodeString())
     }
 
-    override fun serialize(encoder: Encoder, value: XapiInteractionType) {
+    override fun serialize(encoder: Encoder, value: XapiInteractionTypeEnum) {
         encoder.encodeString(value.jsonFieldValue)
     }
 

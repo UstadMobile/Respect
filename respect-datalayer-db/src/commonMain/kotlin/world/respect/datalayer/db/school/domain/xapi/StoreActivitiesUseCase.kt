@@ -18,7 +18,7 @@ class StoreActivitiesUseCase(
         get() {
             return actType == null
                     && actMoreInfo == null
-                    && actInteractionType == ActivityEntity.TYPE_UNSET
+                    && actInteractionType == null
                     && actCorrectResponsePatterns == null
         }
 
@@ -59,7 +59,7 @@ class StoreActivitiesUseCase(
                         actUid = it.actUid,
                         actType = it.actType,
                         actMoreInfo = it.actMoreInfo,
-                        actInteractionType = it.actInteractionType,
+                        actInteractionType = it.actInteractionType?.dbFlag ?: 0,
                         actCorrectResponsePatterns = it.actCorrectResponsePatterns,
                         actLct = timeNow,
                     )

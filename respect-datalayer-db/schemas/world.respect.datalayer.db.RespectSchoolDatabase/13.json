@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "8638a784602a279bb3f0ed104a746d44",
+    "identityHash": "488a72e580e8fb6942d7d9f546c36493",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1736,7 +1736,7 @@
       },
       {
         "tableName": "ActivityEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER NOT NULL, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
         "fields": [
           {
             "fieldPath": "actUid",
@@ -1762,8 +1762,7 @@
           {
             "fieldPath": "actInteractionType",
             "columnName": "actInteractionType",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "actCorrectResponsePatterns",
@@ -1786,7 +1785,7 @@
       },
       {
         "tableName": "ActivityExtensionEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeeActivityUid` INTEGER NOT NULL, `aeeKeyHash` INTEGER NOT NULL, `aeeKey` TEXT, `aeeJson` TEXT, `aeeLastMod` INTEGER NOT NULL, `aeeIsDeleted` INTEGER NOT NULL, PRIMARY KEY(`aeeActivityUid`, `aeeKeyHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeeActivityUid` INTEGER NOT NULL, `aeeKeyHash` INTEGER NOT NULL, `aeeKey` TEXT NOT NULL, `aeeJson` TEXT NOT NULL, `aeeLastMod` INTEGER NOT NULL, `aeeIsDeleted` INTEGER NOT NULL, PRIMARY KEY(`aeeActivityUid`, `aeeKeyHash`))",
         "fields": [
           {
             "fieldPath": "aeeActivityUid",
@@ -1803,12 +1802,14 @@
           {
             "fieldPath": "aeeKey",
             "columnName": "aeeKey",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           },
           {
             "fieldPath": "aeeJson",
             "columnName": "aeeJson",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           },
           {
             "fieldPath": "aeeLastMod",
@@ -2424,7 +2425,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8638a784602a279bb3f0ed104a746d44')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '488a72e580e8fb6942d7d9f546c36493')"
     ]
   }
 }

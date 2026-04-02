@@ -18,6 +18,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.writequeue.WriteQueueItem
+import world.respect.datalayer.school.xapi.model.XapiInteractionTypeEnum
 import kotlin.time.Instant
 
 class SchoolTypeConverters {
@@ -160,6 +161,17 @@ class SchoolTypeConverters {
     fun toActivityLangMapEntryPropEnum(value: Int): ActivityLangMapEntryPropEnum {
         return ActivityLangMapEntryPropEnum.fromFlag(value)
     }
+
+    @TypeConverter
+    fun fromXapiInteractionTypeEnum(value: XapiInteractionTypeEnum): Int {
+        return value.dbFlag
+    }
+
+    @TypeConverter
+    fun toXapiInteractionTypeEnum(value: Int): XapiInteractionTypeEnum? {
+        return XapiInteractionTypeEnum.fromDbFlag(value)
+    }
+
 
 
 }

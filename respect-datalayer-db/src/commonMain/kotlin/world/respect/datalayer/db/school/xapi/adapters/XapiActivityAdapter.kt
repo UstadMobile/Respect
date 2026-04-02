@@ -2,6 +2,8 @@ package world.respect.datalayer.db.school.xapi.adapters
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import world.respect.datalayer.UidNumberMapper
@@ -114,8 +116,10 @@ fun XapiActivity?.toEntities(
             actIdIri = activityId,
             actType = this?.type,
             actMoreInfo = this?.moreInfo,
-            actInteractionType = this?.interactionType?.dbFlag ?: ActivityEntity.TYPE_UNSET,
-            actCorrectResponsePatterns = this?.correctResponsesPattern?.let { json.encodeToString(it) },
+            actInteractionType = this?.interactionType,
+            actCorrectResponsePatterns = this?.correctResponsesPattern?.let {
+                json.encodeToString(it)
+            },
         ),
         activityLangMapEntries = buildList {
             this@toEntities?.name?.toLangMapEntries(
@@ -172,7 +176,12 @@ fun ActivityEntities.toModel(
             )
         },
         moreInfo = activityEntity.actMoreInfo,
-        //TODO: interaction type - should be enum
+        interactionType = activityEntity.actInteractionType,
+        correctResponsesPattern = activityEntity.actCorrectResponsePatterns?.let {
+            json.decodeFromString(
+                ListSerializer(String.serializer()), it
+            )
+        },
         choices = interactionsForProp(ActivityInteractionEntityPropEnum.CHOICES),
         scale = interactionsForProp(ActivityInteractionEntityPropEnum.SCALE),
         source = interactionsForProp(ActivityInteractionEntityPropEnum.SOURCE),

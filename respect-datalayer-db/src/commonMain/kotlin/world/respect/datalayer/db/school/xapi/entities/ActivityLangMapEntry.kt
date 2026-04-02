@@ -3,7 +3,6 @@ package world.respect.datalayer.db.school.xapi.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.school.xapi.model.XapiInteractionType
 
 @Serializable
 @Entity

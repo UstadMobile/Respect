@@ -1,20 +1,20 @@
 package world.respect.shared.domain.account.sharedschooldevice
 
-import com.russhwolf.settings.Settings
+import world.respect.datalayer.DataLoadParams
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 
 class GetSharedDeviceSelfSelectUseCase(
-    private val settings: Settings
+    private val schoolDataSource: SchoolDataSource
 ) {
-    companion object {
-        const val PREF_SELF_SELECT_CLASS = "self_select_class"
-    }
 
-    operator fun invoke(): Boolean {
-        // TODO GET FROM DB
-        val isSelfSelectClass = settings.getBoolean(
-            key = PREF_SELF_SELECT_CLASS,
-            defaultValue = true
-        )
-        return isSelfSelectClass
+    suspend operator fun invoke(): Boolean {
+        val setting = schoolDataSource.schoolConfigSettingDataSource.findByGuid(
+            DataLoadParams(),
+            SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_SELF_SELECT
+        ).dataOrNull()
+
+        return setting?.value?.toBoolean() ?: true
     }
 }

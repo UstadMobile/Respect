@@ -762,13 +762,6 @@ val appKoinModule = module {
             )
         }
 
-        scoped<GetSharedDeviceSelfSelectUseCase> {
-            GetSharedDeviceSelfSelectUseCase(settings = get())
-        }
-        scoped<SetSharedDeviceSelfSelectUseCase> {
-            SetSharedDeviceSelfSelectUseCase(settings = get())
-        }
-
         scoped<RedeemInviteUseCase> {
             RedeemInviteUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -958,9 +951,17 @@ val appKoinModule = module {
             SetSharedDevicePINUseCaseImpl(schoolDataSource = get())
         }
         scoped<GetSharedDevicePINUseCase> {
-            GetSharedDevicePINUseCaseImpl(schoolDataSource = get())
+            GetSharedDevicePINUseCaseImpl(
+                schoolDataSource = get(),
+                setSharedDevicePINUseCase = get()
+            )
         }
-
+        scoped<GetSharedDeviceSelfSelectUseCase> {
+            GetSharedDeviceSelfSelectUseCase(schoolDataSource = get())
+        }
+        scoped<SetSharedDeviceSelfSelectUseCase> {
+            SetSharedDeviceSelfSelectUseCase(schoolDataSource = get())
+        }
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),

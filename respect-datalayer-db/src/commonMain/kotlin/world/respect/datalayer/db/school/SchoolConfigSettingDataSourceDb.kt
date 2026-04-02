@@ -17,6 +17,7 @@ import world.respect.datalayer.db.school.adapters.asModel
 import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSourceLocal
+import world.respect.datalayer.school.ext.foldToFlag
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
@@ -85,7 +86,8 @@ class SchoolConfigSettingDataSourceDb(
                     val lastModAndPermission = schoolDb.getSchoolConfigSettingEntityDao()
                         .getLastModifiedAndHasPermission(
                             authenticatedPersonUidNum = authenticatedUserUidNum,
-                            key = setting.key
+                            key = setting.key,
+                            canWriteRolesMask = setting.canWrite.foldToFlag()
                         )
 
                     if (!lastModAndPermission.hasPermission) {
@@ -108,9 +110,10 @@ class SchoolConfigSettingDataSourceDb(
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 val toInsert = list.filter { item ->
-                    forceOverwrite || schoolDb.getSchoolConfigSettingEntityDao().getLastModifiedByKey(
-                        key = item.key
-                    ).let { it ?: 0L } < item.lastModified.toEpochMilliseconds()
+                    forceOverwrite || schoolDb.getSchoolConfigSettingEntityDao()
+                        .getLastModifiedByKey(
+                            key = item.key
+                        ).let { it ?: 0L } < item.lastModified.toEpochMilliseconds()
                 }.map { it.asEntity() }
 
                 if (toInsert.isNotEmpty()) {

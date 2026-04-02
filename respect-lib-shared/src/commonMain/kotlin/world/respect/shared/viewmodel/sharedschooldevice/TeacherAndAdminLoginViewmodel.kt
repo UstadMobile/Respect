@@ -14,6 +14,8 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.generated.resources.invalid
 
 data class TeacherAndAdminLoginUiState(
     val errorMessage: UiText? = null,
@@ -41,22 +43,29 @@ class TeacherAndAdminLoginViewmodel(
     }
 
     fun onPinChanged(pin: String) {
-        _uiState.update { it.copy(pin = pin) }
+        _uiState.update { it.copy(pin = pin, errorMessage = null) }
     }
 
     fun onClickNext() {
         viewModelScope.launch {
-            val schoolUrl = accountManager.activeAccount?.school?.self
-            schoolUrl?.let { url ->
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(LoginScreen.create(url, true))
-                )
+            if (verifyTeacherPin(_uiState.value.pin)) {
+                val schoolUrl = accountManager.activeAccount?.school?.self
+                schoolUrl?.let { url ->
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(LoginScreen.create(url, true))
+                    )
+                }
+            } else {
+                _uiState.update { it.copy(errorMessage = Res.string.invalid.asUiText()) }
             }
         }
     }
 
-    fun verifyTeacherPin(enteredPin: String): Boolean {
-        // TODO: Implement actual PIN verification logic
-        return true
+    private suspend fun verifyTeacherPin(enteredPin: String): Boolean {
+        val activeAccount = accountManager.activeAccount ?: return false
+        val accountScope = accountManager.getOrCreateAccountScope(activeAccount)
+        val getPinUseCase: GetSharedDevicePINUseCase = accountScope.get()
+        val correctPin = getPinUseCase()
+        return enteredPin == correctPin
     }
 }

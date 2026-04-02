@@ -29,7 +29,6 @@ import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.StudentList
 import world.respect.shared.navigation.TeacherAndAdminLogin
 import world.respect.shared.resources.UiText
-import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -63,9 +62,7 @@ class SelectClassViewModel(
         )
     }
 
-    private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase
-        get() = getKoin().getScope(SchoolDirectoryEntryScopeId(schoolUrl = schoolUrl, null).scopeId)
-            .get()
+    private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase by inject()
 
     init {
         loadSelfSelectSetting()

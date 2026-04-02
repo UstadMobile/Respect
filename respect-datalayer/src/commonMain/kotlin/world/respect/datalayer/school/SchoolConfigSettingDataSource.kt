@@ -21,7 +21,7 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
             fun fromParams(params: StringValues): GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
-                    keys = params.getAll(DataLayerParams.KEYS) ?: params[DataLayerParams.KEY]?.let { listOf(it) }
+                    keys = params.getAll(DataLayerParams.KEYS)
                 )
             }
         }
@@ -52,6 +52,8 @@ interface SchoolConfigSettingDataSource: WritableDataSource<SchoolConfigSetting>
         const val KEY_APP_CATALOGS = "app-catalogs"
 
         const val KEY_SHARED_DEVICE_PIN = "shared-device-pin"
+
+        const val KEY_SHARED_DEVICE_SELF_SELECT = "shared-device-self-select"
 
     }
 }

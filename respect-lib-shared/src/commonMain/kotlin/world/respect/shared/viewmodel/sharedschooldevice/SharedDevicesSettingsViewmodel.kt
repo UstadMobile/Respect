@@ -144,7 +144,6 @@ class SharedDevicesSettingsViewmodel(
         _uiState.update { currentState ->
             currentState.copy(isSelfSelectClassAndName = enabled)
         }
-        // Save to database
         viewModelScope.launch {
             try {
                 setSharedDeviceSelfSelectUseCase(enabled)

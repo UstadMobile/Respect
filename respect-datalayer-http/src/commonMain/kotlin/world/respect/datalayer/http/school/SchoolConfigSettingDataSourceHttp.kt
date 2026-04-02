@@ -18,7 +18,6 @@ import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
 import world.respect.datalayer.http.ext.appendCommonListParams
-import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
@@ -37,7 +36,7 @@ class SchoolConfigSettingDataSourceHttp(
         return URLBuilder(respectEndpointUrl(SchoolConfigSettingDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                keys?.forEach { parameters.append(DataLayerParams.KEYS, it) }
+                keys?.let { parameters.appendAll(DataLayerParams.KEYS, it) }
             }
             .build()
     }

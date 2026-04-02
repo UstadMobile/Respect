@@ -38,7 +38,8 @@ interface SchoolConfigSettingEntityDao {
     @Query(GET_LAST_MODIFIED_AND_HAS_PERMISSION_SQL)
     suspend fun getLastModifiedAndHasPermission(
         authenticatedPersonUidNum: Long,
-        key: String
+        key: String,
+        canWriteRolesMask: Int = 0
     ): LastModifiedAndPermission
 
     companion object {
@@ -47,6 +48,7 @@ interface SchoolConfigSettingEntityDao {
             SELECT PersonRoleEntity.prRoleEnum
               FROM PersonRoleEntity
              WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum
+             LIMIT 1
         """
 
         private const val READ_PERMISSION_CHECK_SQL = """
@@ -60,9 +62,9 @@ interface SchoolConfigSettingEntityDao {
         private const val LIST_SQL = """
             SELECT SchoolConfigSettingEntity.*
               FROM SchoolConfigSettingEntity
-             WHERE ((:keys IS NULL) OR scsKey IN (:keys))
-               AND ((:since = 0) OR (scsStored > :since))
-               AND ($READ_PERMISSION_CHECK_SQL)
+             WHERE scsKey IN (:keys)
+             AND SchoolConfigSettingEntity.scsStored > :since
+             AND ($READ_PERMISSION_CHECK_SQL)
         """
 
         private const val GET_LAST_MODIFIED_AND_HAS_PERMISSION_SQL = """
@@ -70,12 +72,19 @@ interface SchoolConfigSettingEntityDao {
                (SELECT SchoolConfigSettingEntity.scsLastModified
                   FROM SchoolConfigSettingEntity
                  WHERE SchoolConfigSettingEntity.scsKey = :key) AS lastModified,
-               (EXISTS (
+               (
+                -- for existing records
+                EXISTS (
                    SELECT 1
                      FROM SchoolConfigSettingEntity
                     WHERE SchoolConfigSettingEntity.scsKey = :key
                       AND ($WRITE_PERMISSION_CHECK_SQL)
-               )) AS hasPermission
+                ) 
+                OR 
+                -- for new records (using the passed mask)
+                (NOT EXISTS (SELECT 1 FROM SchoolConfigSettingEntity WHERE scsKey = :key) 
+                 AND ($AUTHENTICATED_USER_ROLE_SQL) & :canWriteRolesMask > 0)
+               ) AS hasPermission
         """
     }
 }

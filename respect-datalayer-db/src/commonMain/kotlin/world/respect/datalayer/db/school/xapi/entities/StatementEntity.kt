@@ -89,6 +89,8 @@ data class StatementEntity(
 
     val resultResponse: String? = null,
 
+    val resultExtensions: String? = null,
+
     val timestamp: Long = 0,
 
     val stored: Long = 0,
@@ -98,6 +100,8 @@ data class StatementEntity(
     val contextRegistrationLo: Long = 0,
 
     val contextRegistrationHash: Long = 0,
+
+    val contextLanguage: String? = null,
 
     val contextPlatform: String? = null,
 

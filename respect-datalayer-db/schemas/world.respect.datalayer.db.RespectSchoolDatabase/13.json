@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "488a72e580e8fb6942d7d9f546c36493",
+    "identityHash": "c0648c3e3d0251736e2e674f14ad583c",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1736,7 +1736,7 @@
       },
       {
         "tableName": "ActivityEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT NOT NULL, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
         "fields": [
           {
             "fieldPath": "actUid",
@@ -1747,7 +1747,8 @@
           {
             "fieldPath": "actIdIri",
             "columnName": "actIdIri",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           },
           {
             "fieldPath": "actType",
@@ -2115,7 +2116,7 @@
       },
       {
         "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextPlatform` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
         "fields": [
           {
             "fieldPath": "statementIdHi",
@@ -2218,6 +2219,11 @@
             "affinity": "TEXT"
           },
           {
+            "fieldPath": "resultExtensions",
+            "columnName": "resultExtensions",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "timestamp",
             "columnName": "timestamp",
             "affinity": "INTEGER",
@@ -2246,6 +2252,11 @@
             "columnName": "contextRegistrationHash",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "contextLanguage",
+            "columnName": "contextLanguage",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "contextPlatform",
@@ -2425,7 +2436,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '488a72e580e8fb6942d7d9f546c36493')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c0648c3e3d0251736e2e674f14ad583c')"
     ]
   }
 }

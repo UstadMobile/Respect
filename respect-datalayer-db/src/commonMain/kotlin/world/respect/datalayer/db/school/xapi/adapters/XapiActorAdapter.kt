@@ -132,6 +132,25 @@ fun ActorEntity.toAgentModel(): XapiAgent {
     )
 }
 
+fun ActorEntities.toGroupModel(): XapiGroup {
+    return XapiGroup(
+        name = actor.actorName,
+        mbox = actor.actorMbox,
+        mbox_sha1sum = actor.actorMbox_sha1sum,
+        openid = actor.actorOpenid,
+        objectType = XapiObjectType.Group,
+        account = XapiAccount.fromHomePageAndNameOrNull(
+            actor.actorAccountHomePage, actor.actorAccountName
+        ),
+        member = groupMemberJoins.mapNotNull { groupMemberJoin ->
+            groupMemberAgents.firstOrNull {
+                it.actorUid == groupMemberJoin.gmajMemberActorUid
+            }?.toAgentModel()
+        }
+    )
+}
+
+
 fun ActorEntities.toModel(): XapiActor {
     return when(actor.actorObjectType) {
         XapiEntityObjectTypeFlags.AGENT -> {
@@ -139,21 +158,7 @@ fun ActorEntities.toModel(): XapiActor {
         }
 
         XapiEntityObjectTypeFlags.GROUP -> {
-            XapiGroup(
-                name = actor.actorName,
-                mbox = actor.actorMbox,
-                mbox_sha1sum = actor.actorMbox_sha1sum,
-                openid = actor.actorOpenid,
-                objectType = XapiObjectType.Group,
-                account = XapiAccount.fromHomePageAndNameOrNull(
-                    actor.actorAccountHomePage, actor.actorAccountName
-                ),
-                member = groupMemberJoins.mapNotNull { groupMemberJoin ->
-                    groupMemberAgents.firstOrNull {
-                        it.actorUid == groupMemberJoin.gmajMemberActorUid
-                    }?.toAgentModel()
-                }
-            )
+            this.toGroupModel()
         }
 
         else -> {

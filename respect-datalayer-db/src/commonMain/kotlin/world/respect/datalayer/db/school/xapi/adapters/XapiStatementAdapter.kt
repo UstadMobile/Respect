@@ -6,13 +6,18 @@ import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
-import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
+import world.respect.datalayer.db.school.xapi.ext.hasResult
+import world.respect.datalayer.db.school.xapi.ext.hasResultScore
+import world.respect.datalayer.db.school.xapi.ext.uuidForSubstatement
+import world.respect.datalayer.db.school.xapi.xapiExtensionsSerializer
 import world.respect.datalayer.school.xapi.ext.isCompletionOrProgress
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiException
 import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.datalayer.school.xapi.model.XapiObjectType
+import world.respect.datalayer.school.xapi.model.XapiResult
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementObject
 import world.respect.datalayer.school.xapi.model.XapiStatementRef
@@ -146,6 +151,9 @@ fun XapiStatement.toEntities(
                     resultScoreMax = result?.score?.max,
                     resultDuration = result?.duration?.inWholeMilliseconds,
                     resultResponse = result?.response,
+                    resultExtensions = result?.extensions?.let {
+                        json.encodeToString(xapiExtensionsSerializer, it)
+                    },
                     timestamp = timestamp?.toEpochMilliseconds() ?: systemTimeInMillis(),
                     stored = systemTimeInMillis(),
                     contextRegistrationHi = contextRegHiLo?.first ?: 0,
@@ -192,29 +200,94 @@ fun XapiStatement.toEntities(
     ).flatten()
 }
 
-/*
-fun StatementEntities.toModel() : XapiStatement {
-    val primaryStatementEntity = statements.first { !it.isSubStatement }
+fun StatementEntities.toModel(
+    json: Json,
+    statementIdHi: Long,
+    statementIdLo: Long,
+) : XapiStatement {
+    val primaryStatementEntity = statements.first {
+        it.statementIdHi == statementIdHi && it.statementIdLo == statementIdLo
+    }
+
     val actors = actorEntities.associate { it.actor.actorUid to it.toModel() }
 
+    val statementUuid = Uuid.fromLongs(
+        primaryStatementEntity.statementIdHi,
+        primaryStatementEntity.statementIdLo
+    )
+
     return XapiStatement(
-        id = Uuid.fromLongs(
-            primaryStatementEntity.statementIdHi,
-            primaryStatementEntity.statementIdLo
-        ),
+        id = statementUuid,
         actor = actors[primaryStatementEntity.statementActorUid] ?: throw IllegalStateException("no primary actor"),
         verb = this.verbEntities.first {
             primaryStatementEntity.statementVerbUid == it.verbEntity.verbUid
         }.toModel(),
         `object` = when(primaryStatementEntity.statementObjectType) {
             StatementEntityObjectTypeEnum.ACTIVITY -> {
+                val entitiesForObject = activityEntities.first {
+                    it.activityEntity.actUid == primaryStatementEntity.statementObjectUid1
+                }
 
+                XapiActivityStatementObject(
+                    objectType = XapiObjectType.Activity,
+                    id = entitiesForObject.activityEntity.actIdIri,
+                    definition = entitiesForObject.toModel(json),
+                )
             }
 
-            else -> {
-                TODO()
+            StatementEntityObjectTypeEnum.SUBSTATEMENT -> {
+                val substatementUuidVals = statementUuid.uuidForSubstatement().toLongPair()
+
+                this.toModel(
+                    json = json,
+                    statementIdHi = substatementUuidVals.first,
+                    statementIdLo = substatementUuidVals.second,
+                )
             }
-        }
+
+            StatementEntityObjectTypeEnum.STATEMENT_REF -> {
+                XapiStatementRef(
+                    id = Uuid.fromLongs(
+                        primaryStatementEntity.statementObjectUid1,
+                        primaryStatementEntity.statementObjectUid2,
+                    ).toString()
+                )
+            }
+
+            StatementEntityObjectTypeEnum.AGENT -> {
+                actorEntities.first {
+                    it.actor.actorUid == primaryStatementEntity.statementObjectUid1
+                }.actor.toAgentModel()
+            }
+
+            StatementEntityObjectTypeEnum.GROUP -> {
+                actorEntities.first {
+                    it.actor.actorUid == primaryStatementEntity.statementObjectUid1
+                }.toGroupModel()
+            }
+        },
+        result = if(primaryStatementEntity.hasResult) {
+            XapiResult(
+                completion = primaryStatementEntity.resultCompletion,
+                success = primaryStatementEntity.resultSuccess,
+                score = if(primaryStatementEntity.hasResultScore) {
+                    XapiResult.Score(
+                        scaled = primaryStatementEntity.resultScoreScaled,
+                        raw = primaryStatementEntity.resultScoreRaw,
+                        max = primaryStatementEntity.resultScoreMax,
+                        min = primaryStatementEntity.resultScoreMin,
+                    )
+                }else {
+                    null
+                },
+                extensions = primaryStatementEntity.resultExtensions?.let {
+                    json.decodeFromString(
+                        xapiExtensionsSerializer, it
+                    )
+                },
+            )
+        }else {
+            null
+        },
     )
 }
-*/

@@ -13,6 +13,9 @@
   a user to the detail screen after clicking Save on adding a new entity).
 * Screens should be as intuitive as possible. Explicit text explanations of what to do next are a _last resort_ (e.g. as used with passkeys, as per
   Google's UX guidance because users are not familiar with them).
+* When the user performs an action (e.g. Save, Accept invite, etc) they need to be able to see something which confirms their action has been processed/done.
+  e.g. when the user clicks save, we normally (as above) take them to the detail screen for what they just saved. If there isn't another elegant solution, a
+  snackbar can be used.
 
 ### Final designs for development:
 

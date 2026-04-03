@@ -12,8 +12,6 @@ object DataLayerParams {
 
     const val GUID = "guid"
 
-    const val KEY = "key"
-
     const val KEYS = "keys"
 
     const val INCLUDE_RELATED = "includeRelated"

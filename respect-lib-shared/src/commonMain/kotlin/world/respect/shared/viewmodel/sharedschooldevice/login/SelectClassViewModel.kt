@@ -27,7 +27,7 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.StudentList
-import world.respect.shared.navigation.TeacherAndAdminLogin
+import world.respect.shared.navigation.TeacherPinConfirmation
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -104,7 +104,7 @@ class SelectClassViewModel(
 
     fun onClickTeacherAdminLogin() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(TeacherAndAdminLogin)
+            NavCommand.Navigate(TeacherPinConfirmation)
         )
     }
 

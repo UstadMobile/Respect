@@ -114,19 +114,16 @@ class InvitePersonViewModel(
             is InvitePerson.NewUserInviteOptions -> {
                 options.presetRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
             }
-
             else -> false
         }
         _uiState.update { it.copy(isSharedDeviceMode = isSharedDeviceMode) }
-
-        val title = if (isSharedDeviceMode) {
-            Res.string.add_shared_school_device.asUiText()
-        } else {
-            Res.string.invite_person.asUiText()
-        }
         _appUiState.update {
             it.copy(
-                title = title,
+                title = if (isSharedDeviceMode) {
+                    Res.string.add_shared_school_device.asUiText()
+                } else {
+                    Res.string.invite_person.asUiText()
+                },
                 searchState = AppBarSearchUiState(visible = false),
                 showBackButton = true,
                 hideBottomNavigation = true,

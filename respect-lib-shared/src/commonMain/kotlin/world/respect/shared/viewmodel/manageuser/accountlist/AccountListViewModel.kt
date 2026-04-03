@@ -55,8 +55,8 @@ data class AccountListUiState(
 
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
-    savedStateHandle: SavedStateHandle,
-) : RespectViewModel(savedStateHandle) {
+    savedStateHandle: SavedStateHandle
+) : RespectViewModel(savedStateHandle){
 
     private val _uiState = MutableStateFlow(AccountListUiState())
 

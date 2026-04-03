@@ -17,17 +17,17 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
 import world.respect.shared.generated.resources.invalid
 
-data class TeacherAndAdminLoginUiState(
+data class TeacherPinConfirmationUiState(
     val errorMessage: UiText? = null,
     val pin: String = "",
 )
 
-class TeacherAndAdminLoginViewmodel(
+class TeacherPinConfirmationViewmodel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle) {
 
-    private val _uiState = MutableStateFlow(TeacherAndAdminLoginUiState())
+    private val _uiState = MutableStateFlow(TeacherPinConfirmationUiState())
 
     val uiState = _uiState.asStateFlow()
 

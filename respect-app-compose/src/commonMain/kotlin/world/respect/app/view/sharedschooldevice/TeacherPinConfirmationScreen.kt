@@ -31,16 +31,16 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_school_device_pin
 import world.respect.shared.generated.resources.next
-import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginUiState
-import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherPinConfirmationUiState
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherPinConfirmationViewmodel
 
 
 @Composable
-fun TeacherAndAdminLoginScreen(
-    viewModel: TeacherAndAdminLoginViewmodel,
+fun TeacherPinConfirmationScreen(
+    viewModel: TeacherPinConfirmationViewmodel,
 ) {
     val uiState by viewModel.uiState.collectAsState(context = Dispatchers.Main.immediate)
-    TeacherAndAdminLoginScreen(
+    TeacherPinConfirmationScreen(
         uiState = uiState,
         onPinChanged = viewModel::onPinChanged,
         onClickNext = viewModel::onClickNext
@@ -48,8 +48,8 @@ fun TeacherAndAdminLoginScreen(
 }
 
 @Composable
-fun TeacherAndAdminLoginScreen(
-    uiState: TeacherAndAdminLoginUiState,
+fun TeacherPinConfirmationScreen(
+    uiState: TeacherPinConfirmationUiState,
     onPinChanged: (String) -> Unit,
     onClickNext: () -> Unit
 ) {

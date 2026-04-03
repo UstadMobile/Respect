@@ -252,7 +252,7 @@ import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListVi
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
-import world.respect.shared.viewmodel.sharedschooldevice.TeacherAndAdminLoginViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherPinConfirmationViewmodel
 import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
 import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
@@ -398,7 +398,7 @@ val appKoinModule = module {
     viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::SchoolSettingsViewModel)
     viewModelOf(::SharedDevicesSettingsViewmodel)
-    viewModelOf(::TeacherAndAdminLoginViewmodel)
+    viewModelOf(::TeacherPinConfirmationViewmodel)
     viewModelOf(::SelectClassViewModel)
     viewModelOf(::StudentListViewModel)
 

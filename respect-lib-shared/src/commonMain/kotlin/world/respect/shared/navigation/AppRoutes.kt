@@ -793,7 +793,7 @@ data class SelectClass(
 }
 
 @Serializable
-data object TeacherAndAdminLogin : RespectAppRoute
+data object TeacherPinConfirmation : RespectAppRoute
 
 @Serializable
 data class StudentList(

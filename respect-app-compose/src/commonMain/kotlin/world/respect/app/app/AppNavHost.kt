@@ -63,7 +63,7 @@ import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
 import world.respect.app.view.sharedschooldevice.SchoolSettingsScreen
 import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
-import world.respect.app.view.sharedschooldevice.TeacherAndAdminLoginScreen
+import world.respect.app.view.sharedschooldevice.TeacherPinConfirmationScreen
 import world.respect.app.view.sharedschooldevice.login.SelectClassScreen
 import world.respect.app.view.sharedschooldevice.login.StudentListScreen
 import world.respect.app.viewmodel.respectViewModel
@@ -125,7 +125,7 @@ import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.StudentList
-import world.respect.shared.navigation.TeacherAndAdminLogin
+import world.respect.shared.navigation.TeacherPinConfirmation
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -610,8 +610,8 @@ fun AppNavHost(
                 )
             )
         }
-        composable<TeacherAndAdminLogin> {
-            TeacherAndAdminLoginScreen(
+        composable<TeacherPinConfirmation> {
+            TeacherPinConfirmationScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

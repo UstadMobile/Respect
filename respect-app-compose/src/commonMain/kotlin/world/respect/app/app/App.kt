@@ -2,7 +2,6 @@ package world.respect.app.app
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -20,16 +19,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import kotlin.Boolean
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -49,10 +50,10 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
 import world.respect.shared.generated.resources.assignments
+import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.continue_using_fingerprint_or
-import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList

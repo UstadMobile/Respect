@@ -80,9 +80,7 @@ fun XapiStatementObject.objectForeignKeys(
         is XapiStatement -> {
             //As per the doc on StatementEntity itself, where there is a substatement, the
             //statement uid is the uid of the statement itself + 1.
-            statementUuid.toLongs { mostSignificantBits, leastSignificantBits ->
-                Pair(mostSignificantBits, leastSignificantBits + 1)
-            }
+            statementUuid.uuidForSubstatement().toLongPair()
         }
     }
 }

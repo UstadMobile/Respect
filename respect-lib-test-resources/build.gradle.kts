@@ -4,13 +4,11 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
-    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     androidTarget {
@@ -21,22 +19,17 @@ kotlin {
 
     jvm()
 
+    /*
+     * This module MUST NOT depend on any other module within this project to avoid circular
+     * dependencies. It provides utility functions that may be used in any other module.
+     */
     sourceSets {
         commonMain.dependencies {
-            api(projects.respectLibIhttpCore)
-            api(projects.respectLibXxhash)
-            api(projects.respectCredentials)
-            api(projects.respectLibOpdsModel)
-            api(projects.respectLibSerializers)
-            api(projects.respectLibUtil)
-            implementation(libs.kotlinx.serialization.json)
+            implementation(projects.respectLibUtil)
             api(libs.uri.kmp)
-            api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            api(libs.androidx.paging.common)
-            implementation(libs.atomicfu)
-            implementation(libs.napier)
-
+            implementation(libs.kotlinx.date.time)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         jvmMain.dependencies {
@@ -44,7 +37,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-            implementation(projects.respectLibTestResources)
+
         }
 
         val commonTest by getting {
@@ -56,7 +49,7 @@ kotlin {
 }
 
 android {
-    namespace = "world.respect.datalayer"
+    namespace = "world.respect.lib.test.resources"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -18,6 +18,7 @@ import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.paste_url
 import world.respect.shared.generated.resources.qr_code_invalid_format
 import world.respect.shared.generated.resources.scan_qr_code
+import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.ManageAccount
@@ -157,14 +158,27 @@ class ScanQRCodeViewModel(
             return
         }
 
-        respectAccountManager.login(
-            credential = credential,
-            schoolUrl = schoolUrl
-        )
+        if (route.isSharedDevice) {
+            // For shared device: login without creating a new account
+            respectAccountManager.loginAsProfileOnSharedDevice(
+                credential = credential,
+                schoolUrl = schoolUrl
+            )
+        } else {
+            // For normal device: regular login creates new account
+            respectAccountManager.login(
+                credential = credential,
+                schoolUrl = schoolUrl
+            )
+        }
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = Home,
+                destination = if (route.isSharedDevice) {
+                    AssignmentList
+                } else {
+                    Home
+                },
                 clearBackStack = true,
             )
         )

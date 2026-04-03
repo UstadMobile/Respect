@@ -7,9 +7,16 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
+import world.respect.datalayer.db.school.xapi.adapters.toEntities
+import world.respect.datalayer.db.school.xapi.adapters.toModel
+import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 import world.respect.datalayer.school.xapi.model.XapiStatement
-import java.io.File
+import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.test.res.forXapiSampleStatements
+import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class XapiStatementDataSourceDbTest {
 
@@ -18,28 +25,47 @@ class XapiStatementDataSourceDbTest {
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
+    val json = Json
 
-    val statementNames = listOf(
-        "appendix-a-long-statement.json",
-        "group-statement.json",
-        "simple-statement.json",
-        "likert-response-statement.json",
-        "matching-response-statement.json",
-        "multi-choice-statement-invalid-response.json",
-        "multi-choice-statement.json",
-        "multi-choice-statement-multiple-responses.json",
-        "performance-response-statement.json",
-        "sequencing-response-statement.json",
-        "statement-with-object-actor.json",
-        "statement-with-object-statementref.json",
-        "statement-with-object-substatement.json",
-        "true-false-response-statement.json",
-    )
+    fun XapiStatement.assertMatches(other : XapiStatement) {
+        assertEquals(id, other.id)
+        assertEquals(actor, other.actor)
+    }
 
+    @Test
+    fun givenStatement_whenConvertedToEntitiesAndBack_thenShouldMatch() {
+
+        forXapiSampleStatements { sampleStmt ->
+            val statement = Json.decodeFromJsonElement(
+                XapiStatement.serializer(), sampleStmt,
+            )
+
+            val uidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm())
+            val primaryKeyGenerator = PrimaryKeyGenerator(listOf(ActorEntity.TABLE_ID))
+
+            val entities = statement.toEntities(
+                uidNumberMapper = uidNumberMapper,
+                primaryKeyGenerator = primaryKeyGenerator,
+                json = json,
+                exactJson = null,
+                isSubStatement = false,
+            )
+
+            val primaryStatementEntity = entities.statements.first { !it.isSubStatement }
+            val statementFromEntities = entities.toModel(
+                json = json,
+                statementIdHi = primaryStatementEntity.statementIdHi,
+                statementIdLo = primaryStatementEntity.statementIdLo,
+            )
+
+            statement.assertMatches(statementFromEntities)
+
+
+        }
+    }
 
     @Test
     fun givenStatement_canStore() {
-        val resDir = "/world/respect/datalayer/school/xapi/model/"
         runBlocking {
             testSchoolDb(temporaryFolder.newFolder()) { db ->
                 val dataSource = db.toDataSource(
@@ -47,19 +73,12 @@ class XapiStatementDataSourceDbTest {
                     schoolUrl = Url("http://localhost:8098/"),
                 )
 
-                statementNames.forEach { name ->
-                    try {
-                        val resourceName = "$resDir$name"
-                        val testStr = this::class.java.getResourceAsStream(resourceName)!!.bufferedReader()
-                            .use { it.readText() }
-                        val statement = Json.decodeFromString(
-                            XapiStatement.serializer(), testStr
-                        )
+                forXapiSampleStatements { statement ->
+                    val statement = Json.decodeFromJsonElement(
+                        XapiStatement.serializer(), statement
+                    )
 
-                        dataSource.xapiStatementDataSource.store(listOf(statement))
-                    }catch(e: Throwable) {
-                        throw Exception("Error loading/storing $name", e)
-                    }
+                    dataSource.xapiStatementDataSource.store(listOf(statement))
                 }
             }
         }

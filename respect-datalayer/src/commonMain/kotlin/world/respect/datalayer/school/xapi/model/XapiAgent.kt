@@ -11,6 +11,6 @@ data class XapiAgent(
     override val mbox: String? = null,
     override val mbox_sha1sum: String? = null,
     override val openid: String? = null,
-    override val objectType: XapiObjectType? = null,
+    override val objectType: XapiObjectType? = XapiObjectType.Agent,
     override val account: XapiAccount? = null,
 ): XapiActor, XapiStatementObject

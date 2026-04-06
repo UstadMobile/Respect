@@ -127,12 +127,6 @@ data class StatementEntity(
 ) {
     companion object {
         const val TABLE_ID = 60
-        const val RESULT_UNSET = 0.toByte()
-        const val RESULT_SUCCESS = 2.toByte()
-        const val RESULT_FAILURE = 1.toByte()
-        const val CONTENT_COMPLETE = 100
-        const val CONTENT_INCOMPLETE = 101
-        const val CONTENT_PASSED = 102
-        const val CONTENT_FAILED = 103
+
     }
 }

@@ -10,13 +10,15 @@ import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
+import world.respect.datalayer.school.xapi.ext.addStatementIdIfNotPresent
 import world.respect.datalayer.school.xapi.model.XapiStatement
+import world.respect.datalayer.school.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.uuid.Uuid
 
 class XapiStatementDataSourceDbTest {
 
@@ -27,18 +29,13 @@ class XapiStatementDataSourceDbTest {
 
     val json = Json
 
-    fun XapiStatement.assertMatches(other : XapiStatement) {
-        assertEquals(id, other.id)
-        assertEquals(actor, other.actor)
-    }
-
     @Test
     fun givenStatement_whenConvertedToEntitiesAndBack_thenShouldMatch() {
-
-        forXapiSampleStatements { sampleStmt ->
+        forXapiSampleStatements { sample ->
             val statement = Json.decodeFromJsonElement(
-                XapiStatement.serializer(), sampleStmt,
-            )
+                XapiStatementTransformingSerializer,
+                sample.jsonObject.addStatementIdIfNotPresent(),
+            ).let { it.copy(id = it.id ?: Uuid.random()) }
 
             val uidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm())
             val primaryKeyGenerator = PrimaryKeyGenerator(listOf(ActorEntity.TABLE_ID))
@@ -58,9 +55,15 @@ class XapiStatementDataSourceDbTest {
                 statementIdLo = primaryStatementEntity.statementIdLo,
             )
 
-            statement.assertMatches(statementFromEntities)
-
-
+            try {
+                assertXapiStatementMatches(
+                    expected = statement,
+                    actual = statementFromEntities
+                )
+            }catch(e: Throwable) {
+                e.printStackTrace()
+                throw e
+            }
         }
     }
 
@@ -75,7 +78,7 @@ class XapiStatementDataSourceDbTest {
 
                 forXapiSampleStatements { statement ->
                     val statement = Json.decodeFromJsonElement(
-                        XapiStatement.serializer(), statement
+                        XapiStatement.serializer(), statement.jsonObject
                     )
 
                     dataSource.xapiStatementDataSource.store(listOf(statement))

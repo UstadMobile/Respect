@@ -16,6 +16,9 @@ import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropE
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
 import world.respect.datalayer.db.school.xapi.ext.langMapPropEnum
 import world.respect.datalayer.db.school.xapi.ext.toLangMap
+import world.respect.datalayer.school.xapi.ext.flagsOf
+import world.respect.datalayer.school.xapi.ext.hasFlag
+import world.respect.datalayer.school.xapi.ext.takeIfNotEmpty
 import world.respect.datalayer.school.xapi.model.XapiActivity
 import world.respect.libutil.ext.toEmptyIfNull
 import kotlin.collections.component1
@@ -120,6 +123,9 @@ fun XapiActivity?.toEntities(
             actCorrectResponsePatterns = this?.correctResponsesPattern?.let {
                 json.encodeToString(it)
             },
+            actFlags = flagsOf(
+                ActivityEntity.FLAG_EXTENSIONS_NULL to (this?.extensions == null),
+            )
         ),
         activityLangMapEntries = buildList {
             this@toEntities?.name?.toLangMapEntries(
@@ -144,6 +150,12 @@ fun XapiActivity?.toEntities(
     )
 }
 
+/**
+ * As per the xAPI spec: Statements and other objects SHOULD NOT include properties with a value of
+ * an empty object.
+ *
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#22-formatting-requirements
+ */
 fun ActivityEntities.toModel(
     json: Json
 ) : XapiActivity {
@@ -165,12 +177,14 @@ fun ActivityEntities.toModel(
     return XapiActivity(
         name = activityLangMapEntries.toLangMap {
             it.almeProperty == ActivityLangMapEntryPropEnum.NAME
-        },
+        }.takeIfNotEmpty(),
         description = activityLangMapEntries.toLangMap {
             it.almeProperty == ActivityLangMapEntryPropEnum.DESCRIPTION
-        },
+        }.takeIfNotEmpty(),
         type = activityEntity.actType,
-        extensions = activityExtensionEntities.associate {
+        extensions = activityExtensionEntities.takeIf {
+           !activityEntity.actFlags.hasFlag(ActivityEntity.FLAG_EXTENSIONS_NULL)
+        }?.associate {
             it.aeeKey to json.decodeFromString(
                 JsonElement.serializer(), it.aeeJson
             )

@@ -2,6 +2,12 @@ package world.respect.datalayer.school.xapi.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import world.respect.datalayer.school.xapi.ext.putAllExcept
 import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.uuid.Uuid
 
@@ -18,6 +24,8 @@ val XAPI_PROGRESSED_EXTENSIONS = listOf(
 /**
  * XapiStatement represents both a Statement and a SubStatement, therefor it implements the sealed
  * interface XapiStatementObject
+ *
+ * @property objectType ObjectType is only found on a SubStatement, not a statement.
  */
 @Serializable
 data class XapiStatement(
@@ -35,4 +43,41 @@ data class XapiStatement(
     val attachments: List<XapiAttachment>? = null,
     override val objectType: XapiObjectType? = null,
 ): XapiStatementObject
+
+
+/**
+ * Transforming serializer that will handle the difference between a statement and a substatement.
+ *
+ * When Deserializing: the serializer will determine whether or not the object is a SubStatement
+ * based on whether it has an objectType value of SubStatement (as required by the xAPI spec for
+ * SubStatements).
+ *
+ * As per:
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#substatements
+ *
+ */
+object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiStatement>(
+    XapiStatement.serializer()
+) {
+
+    private val statementExcludedProperties = listOf("objectType")
+
+    private val substatementExcludedProperties = listOf("id", "stored", "authority", "version")
+
+    override fun transformSerialize(element: JsonElement): JsonElement {
+        val jsonObject = element as JsonObject
+        return buildJsonObject {
+            val objectType = jsonObject["objectType"]?.jsonPrimitive?.content
+            putAllExcept(
+                other = jsonObject,
+                exceptKeys = if(objectType == "SubStatement") {
+                    substatementExcludedProperties
+                }else {
+                    statementExcludedProperties
+                }
+            )
+        }
+    }
+
+}
 

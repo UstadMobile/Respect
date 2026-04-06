@@ -287,5 +287,10 @@ fun StatementEntities.toModel(
         }else {
             null
         },
+        objectType = if(primaryStatementEntity.isSubStatement) {
+            XapiObjectType.SubStatement
+        }else {
+            null
+        },
     )
 }

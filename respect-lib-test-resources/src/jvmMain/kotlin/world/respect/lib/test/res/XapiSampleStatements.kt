@@ -25,18 +25,30 @@ val STATEMENT_NAMES = listOf(
 
 val RES_DIR = "/world/respect/datalayer/school/xapi/model/"
 
+data class SampleXapiStatement(
+    val jsonObject: JsonObject,
+    val string: String,
+    val name: String,
+)
+
 inline fun forXapiSampleStatements(
-    block: (JsonObject) -> Unit
+    block: (SampleXapiStatement) -> Unit
 ) {
     STATEMENT_NAMES.forEach { name ->
         try {
             val resourceName = "$RES_DIR$name"
             val statementStr =DummyClass::class.java.getResourceAsStream(resourceName)!!.bufferedReader()
                 .use { it.readText() }
+
             block(
-                Json.decodeFromString<JsonObject>(statementStr)
+                SampleXapiStatement(
+                    name = name,
+                    string = statementStr,
+                    jsonObject = Json.decodeFromString<JsonObject>(statementStr)
+                )
             )
         }catch(e: Throwable) {
+            println("Error handling statement: $name")
             throw Exception("Error w/statement: $name", e)
         }
 

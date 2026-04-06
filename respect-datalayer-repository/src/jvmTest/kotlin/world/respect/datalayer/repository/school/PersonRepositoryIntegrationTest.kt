@@ -7,8 +7,11 @@ import io.github.aakira.napier.Napier
 import io.ktor.server.routing.route
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
@@ -299,7 +302,16 @@ class PersonRepositoryIntegrationTest {
                 }
 
                 server.start()
-
+                startKoin {
+                    modules(module {
+                        single<Json> {
+                            Json {
+                                encodeDefaults = false
+                                ignoreUnknownKeys = true
+                            }
+                        }
+                    })
+                }
                 clients.first().insertServerAdminAndDefaultGrants()
 
                 clients.first().schoolDataSource.personDataSource.store(

@@ -30,8 +30,9 @@
       it must be explicitly noted and linked on the task card.
 * Screens must be linked so that the developer can understand the flow.
 * Should not include existing screens that are not going to be modified within the scope of the task.
-  Exception: where clicking on a new or modified screen (A) takes a user to an existing screen (B) that is not
-  going to be modified, screen B itself should be included. Nothing on screen B should be clickable.
+  Exception: where an existing screen that is not going to be modified is within the flow of the task.
+  Existing screens that are not intended to be modified must match those in the existing app such that
+  it is unambiguous that the existing screen is not going to be modified.
 
 ### Standard behavior unless noted otherwise:
 

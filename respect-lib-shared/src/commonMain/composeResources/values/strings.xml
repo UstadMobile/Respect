@@ -524,6 +524,25 @@
 
     <string name="regenerate_invite_code">Regenerate invite code</string>
     <string name="copy_link">Copy link</string>
+    <string name="invite_how_title">How to use an invite code</string>
+
+    <string name="invite_step_share_title">Share the Invite Code</string>
+    <string name="invite_step_share_desc">Give the invite code (%1$s) to the person you want to join the class. They can enter this code in the Respect app.</string>
+
+    <string name="invite_step_open_app_title">Open the Respect App</string>
+    <string name="invite_step_open_app_desc">Download and open the Respect app on your device. Tap Get Started to begin the joining process.</string>
+
+    <string name="invite_step_search_school_title">Search for Your School</string>
+    <string name="invite_step_search_school_desc">Type School name (e.g. %1$s) in the search bar. Select %1$s from the results list.</string>
+
+    <string name="invite_step_enter_code_title">Enter the Invite Code</string>
+    <string name="invite_step_enter_code_desc">Tap on "I have an Invite Code". Enter the code shared by your teacher.</string>
+
+    <string name="invite_step_confirm_title">Confirm the class details</string>
+    <string name="invite_step_confirm_desc">Confirm the class details shown on the screen. Create your profile and wait for teacher approval to join.</string>
+
+    <string name="invite_step_review_title">Review and Complete Setup</string>
+
     <string name="invite_settings">Invite settings</string>
     <string name="invite_multiple_allowed">Invite multiple people</string>
     <string name="approval_required">Approval required</string>

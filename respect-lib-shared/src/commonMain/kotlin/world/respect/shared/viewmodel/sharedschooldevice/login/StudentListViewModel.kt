@@ -49,19 +49,25 @@ class StudentListViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val pagingSourceHolder = PagingSourceFactoryHolder {
-        schoolDataSource.personDataSource.listAsPagingSource(
-            loadParams = DataLoadParams(),
-            params = PersonDataSource.GetListParams(
-                filterByClazzUid = route.guid,
-                filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
-                inClassOnDay = localDateInCurrentTimeZone()
-            )
+        println("StudentListViewModel: pagingSourceHolder: callback triggered for class guid=${route.guid}")
+        val params = PersonDataSource.GetListParams(
+            filterByClazzUid = route.guid,
+            filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
+            inClassOnDay = localDateInCurrentTimeZone()
         )
+        println("StudentListViewModel: pagingSourceHolder: params=$params")
+        val result = schoolDataSource.personDataSource.listAsPagingSource(
+            loadParams = DataLoadParams(),
+            params = params
+        )
+        println("StudentListViewModel: pagingSourceHolder: result=$result")
+        result
     }
     private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
 
 
     init {
+        println("StudentListViewModel: init: route=$route")
         _appUiState.update {
             it.copy(
                 title = route.className.asUiText(),
@@ -71,16 +77,19 @@ class StudentListViewModel(
         }
 
         _uiState.update { prev ->
+            println("StudentListViewModel: init: updating uiState with pagingSourceHolder")
             prev.copy(
                 students = pagingSourceHolder,
             )
         }
         viewModelScope.launch {
+            println("StudentListViewModel: init: launching enqueuePullSyncUseCase")
             enqueuePullSyncUseCase()
         }
     }
 
     fun onClickStudent(person: Person) {
+        println("StudentListViewModel: onClickStudent: guid=${person.guid} name=${person.givenName} ${person.familyName}")
         viewModelScope.launch {
             try {
                 accountManager.switchProfile(person.guid)
@@ -95,6 +104,7 @@ class StudentListViewModel(
                     )
                 )
             } catch (e: Exception) {
+                println("StudentListViewModel: onClickStudent: error=${e.message}")
                 _uiState.update {
                     it.copy(
                         error = e.message?.asUiText(),

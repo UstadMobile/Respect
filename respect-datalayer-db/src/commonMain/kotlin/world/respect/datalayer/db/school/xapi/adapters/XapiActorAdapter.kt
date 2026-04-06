@@ -20,8 +20,8 @@ data class ActorEntities(
     val groupMemberJoins: List<GroupMemberActorJoin> = emptyList(),
 )
 
-fun XapiActor.identifierHash(uidNumberMapper: UidNumberMapper): Long {
-    val idStr = when {
+internal val XapiActor.idStr: String?
+    get() = when {
         account != null -> "${account?.name}@${account?.homePage}"
         mbox != null -> mbox
         mbox_sha1sum != null -> mbox_sha1sum
@@ -29,6 +29,7 @@ fun XapiActor.identifierHash(uidNumberMapper: UidNumberMapper): Long {
         else -> null
     }
 
+fun XapiActor.identifierHash(uidNumberMapper: UidNumberMapper): Long {
     return idStr?.let { uidNumberMapper(it) } ?: 0
 }
 
@@ -51,6 +52,7 @@ fun XapiAgent.toActorEntity(
     val uid = identifierHash(uidNumberMapper)
     return ActorEntity(
         actorUid = uid,
+        actorName = name,
         actorPersonUid = 0L,
         actorMbox = mbox,
         actorMbox_sha1sum = mbox_sha1sum,

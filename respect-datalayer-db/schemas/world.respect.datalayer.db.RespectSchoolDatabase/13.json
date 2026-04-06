@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "c0648c3e3d0251736e2e674f14ad583c",
+    "identityHash": "c0a9db407044185274fd62a4caaf031f",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1736,7 +1736,7 @@
       },
       {
         "tableName": "ActivityEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT NOT NULL, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT NOT NULL, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, `actFlags` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
         "fields": [
           {
             "fieldPath": "actUid",
@@ -1773,6 +1773,12 @@
           {
             "fieldPath": "actLct",
             "columnName": "actLct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actFlags",
+            "columnName": "actFlags",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -2436,7 +2442,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c0648c3e3d0251736e2e674f14ad583c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c0a9db407044185274fd62a4caaf031f')"
     ]
   }
 }

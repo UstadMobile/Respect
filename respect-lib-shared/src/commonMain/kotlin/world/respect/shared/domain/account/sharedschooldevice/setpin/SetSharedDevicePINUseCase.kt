@@ -29,7 +29,8 @@ class SetSharedDevicePINUseCaseImpl(
             canRead = existingSetting?.canRead ?: listOf(
                 PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                 PersonRoleEnum.SITE_ADMINISTRATOR,
-                PersonRoleEnum.TEACHER
+                PersonRoleEnum.TEACHER,
+                PersonRoleEnum.SHARED_SCHOOL_DEVICE
             ),
             canWrite = existingSetting?.canWrite ?: listOf(
                 PersonRoleEnum.SYSTEM_ADMINISTRATOR,

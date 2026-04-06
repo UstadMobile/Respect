@@ -65,14 +65,19 @@ class SelectClassViewModel(
     private val getSharedDeviceSelfSelectUseCase: GetSharedDeviceSelfSelectUseCase by inject()
 
     init {
-        loadSelfSelectSetting()
-        _appUiState.update {
-            it.copy(
-                title = if (_uiState.value.isSelfSelectClassAndName) Res.string.select_class.asUiText() else Res.string.login.asUiText(),
-                hideBottomNavigation = true,
-                userAccountIconVisible = false,
-                showBackButton = false
-            )
+        viewModelScope.launch {
+            val selfEnableValue = getSharedDeviceSelfSelectUseCase()
+            _uiState.update {
+                it.copy(isSelfSelectClassAndName = selfEnableValue)
+            }
+            _appUiState.update {
+                it.copy(
+                    title = if (_uiState.value.isSelfSelectClassAndName) Res.string.select_class.asUiText() else Res.string.login.asUiText(),
+                    hideBottomNavigation = true,
+                    userAccountIconVisible = false,
+                    showBackButton = false
+                )
+            }
         }
         viewModelScope.launch {
             val device = schoolDataSource.personDataSource.findByGuid(DataLoadParams(), route.deviceGuid)
@@ -82,14 +87,6 @@ class SelectClassViewModel(
                     classes = pagingSourceHolder,
                     deviceName = device.dataOrNull()?.givenName ?: ""
                 )
-            }
-        }
-    }
-    private fun loadSelfSelectSetting() {
-        viewModelScope.launch {
-            val selfEnableValue = getSharedDeviceSelfSelectUseCase()
-            _uiState.update {
-                it.copy(isSelfSelectClassAndName = selfEnableValue)
             }
         }
     }

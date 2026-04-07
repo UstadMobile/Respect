@@ -215,7 +215,7 @@ fun StatementEntities.toModel(
     )
 
     return XapiStatement(
-        id = statementUuid,
+        id = statementUuid.takeIf { !primaryStatementEntity.isSubStatement },
         actor = actors[primaryStatementEntity.statementActorUid] ?: throw IllegalStateException("no primary actor"),
         verb = this.verbEntities.first {
             primaryStatementEntity.statementVerbUid == it.verbEntity.verbUid

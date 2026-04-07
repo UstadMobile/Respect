@@ -4,9 +4,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.delay
-import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
-import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
-import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -40,17 +37,12 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
+import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
-import world.respect.shared.generated.resources.invite_step_enter_code_desc
-import world.respect.shared.generated.resources.invite_step_enter_code_title
-import world.respect.shared.generated.resources.invite_step_open_app_desc
-import world.respect.shared.generated.resources.invite_step_share_desc
-import world.respect.shared.generated.resources.invite_step_share_title
-import world.respect.shared.generated.resources.invite_step_search_school_title
-import world.respect.shared.generated.resources.invite_step_open_app_title
-import world.respect.shared.generated.resources.invite_step_search_school_desc
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -64,7 +56,6 @@ import kotlin.time.Duration.Companion.minutes
  *           the time runs out, even though the invite itself hasn't changed.
  */
 data class InvitePersonUiState(
-    val sliderPages: List<InviteSliderPageUi> = emptyList(),
     val currentSliderPage: Int = 0,
     val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
     val invite: DataLoadState<Invite2> = DataLoadingState(),
@@ -135,11 +126,11 @@ class InvitePersonViewModel(
 
             val writableRoles = getWritableRolesListUseCase(currentPersonRole)
             val selectedRole = writableRoles.firstOrNull() ?: PersonRoleEnum.STUDENT
-
             _uiState.update {
                 it.copy(
                     roleOptions =  writableRoles,
-                    selectedRole = selectedRole
+                    selectedRole = selectedRole,
+                    schoolName =    accountManager.activeAccount?.school?.name?.toStringMap()?.values?.firstOrNull()
                 )
             }
 
@@ -162,33 +153,7 @@ class InvitePersonViewModel(
                                 approvalRequired = invite.dataOrNull()?.isApprovalRequiredNow() ?: true,
                                 inviteUrl = invite.dataOrNull()?.let {
                                     createInviteLinkUseCase(it.code)
-                                },
-                                sliderPages = listOf(
-                                    InviteSliderPageUi(
-                                        title = getString(Res.string.invite_step_share_title),
-                                        description = getString(
-                                            Res.string.invite_step_share_desc,
-                                            code
-                                        )
-                                    ),
-                                    InviteSliderPageUi(
-                                        title = getString(Res.string.invite_step_open_app_title),
-                                        description = getString(Res.string.invite_step_open_app_desc)
-                                    ),
-                                    InviteSliderPageUi(
-                                        title = getString(Res.string.invite_step_search_school_title),
-                                        description = getString(
-                                            Res.string.invite_step_search_school_desc,
-                                            schoolName
-                                        )
-                                    ),
-                                    InviteSliderPageUi(
-                                        title = getString(Res.string.invite_step_enter_code_title),
-                                        description = getString(
-                                            Res.string.invite_step_enter_code_desc
-                                        )
-                                    )
-                                )
+                                }
                             )
                         }
 

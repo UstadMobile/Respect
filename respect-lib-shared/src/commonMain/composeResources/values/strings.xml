@@ -538,9 +538,7 @@
     <string name="invite_step_enter_code_title">Enter the Invite Code</string>
     <string name="invite_step_enter_code_desc">Tap on "I have an Invite Code". Enter the code shared by your teacher.</string>
 
-    <string name="invite_step_confirm_title">Confirm the class details</string>
     <string name="invite_step_confirm_desc">Confirm the class details shown on the screen. Create your profile and wait for teacher approval to join.</string>
-
     <string name="invite_step_review_title">Review and Complete Setup</string>
 
     <string name="invite_settings">Invite settings</string>

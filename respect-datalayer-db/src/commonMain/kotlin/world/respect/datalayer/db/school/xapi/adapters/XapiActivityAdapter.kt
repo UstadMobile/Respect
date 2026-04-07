@@ -112,7 +112,6 @@ fun XapiActivity?.toEntities(
         }?.also { addAll(it) }
     }
 
-
     return ActivityEntities(
         activityEntity = ActivityEntity(
             actUid = activityUid,
@@ -125,6 +124,11 @@ fun XapiActivity?.toEntities(
             },
             actFlags = flagsOf(
                 ActivityEntity.FLAG_EXTENSIONS_NULL to (this?.extensions == null),
+                ActivityEntity.FLAG_CHOICES_NULL to (this?.choices == null),
+                ActivityEntity.FLAG_SCALE_NULL to (this?.scale == null),
+                ActivityEntity.FLAG_SOURCE_NULL to (this?.source == null),
+                ActivityEntity.FLAG_TARGET_NULL to (this?.target == null),
+                ActivityEntity.FLAG_STEPS_NULL to (this?.steps == null),
             )
         ),
         activityLangMapEntries = buildList {
@@ -162,7 +166,7 @@ fun ActivityEntities.toModel(
 
     fun interactionsForProp(
         interactionProp: ActivityInteractionEntityPropEnum,
-    ): List<XapiActivity.Interaction> = activityInteractionEntities.filter {
+    ): List<XapiActivity.Interaction>? = activityInteractionEntities.filter {
         it.aieProp == interactionProp
     }.map { interactionEntity ->
         XapiActivity.Interaction(
@@ -172,6 +176,8 @@ fun ActivityEntities.toModel(
                         it.almeInteractionId == interactionEntity.aieId
             }
         )
+    }.takeIf {
+        it.isNotEmpty() || !activityEntity.actFlags.hasFlag(interactionProp.listIsNullFlag)
     }
 
     return XapiActivity(
@@ -201,6 +207,5 @@ fun ActivityEntities.toModel(
         source = interactionsForProp(ActivityInteractionEntityPropEnum.SOURCE),
         target = interactionsForProp(ActivityInteractionEntityPropEnum.TARGET),
         steps = interactionsForProp(ActivityInteractionEntityPropEnum.STEPS),
-
     )
 }

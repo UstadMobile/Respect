@@ -78,6 +78,8 @@ fun assertLangMapEquals(
     expected: Map<String, String>?,
     actual: Map<String, String>?,
 ) {
+    //As per the xAPI spec: empty objects SHOULD be avoided. Therefor we will treat an empty object
+    //and a missing object (null) as the same.
     assertEquals(expected?.size ?: 0, actual?.size ?: 0)
     expected?.forEach { (key, value) ->
         assertEquals(value, actual?.get(key))
@@ -88,6 +90,17 @@ fun assertXapiActivityMatches(
     expected: XapiActivity,
     actual: XapiActivity
 ) {
+    fun assertInteractionListMatches(
+        expected: List<XapiActivity.Interaction>?,
+        actual: List<XapiActivity.Interaction>?,
+    ) {
+        assertEquals(expected?.size, actual?.size)
+        expected?.forEachIndexed { index, interaction ->
+            assertEquals(interaction.id, actual!![index].id)
+            assertLangMapEquals(interaction.description, actual[index].description)
+        }
+    }
+
     assertLangMapEquals(expected.name, actual.name)
     assertLangMapEquals(expected.description, actual.description)
     assertEquals(expected.type, actual.type)
@@ -95,6 +108,11 @@ fun assertXapiActivityMatches(
     assertEquals(expected.moreInfo, actual.moreInfo)
     assertEquals(expected.interactionType, actual.interactionType)
     assertEquals(expected.correctResponsesPattern, actual.correctResponsesPattern)
+    assertInteractionListMatches(expected.choices, actual.choices)
+    assertInteractionListMatches(expected.scale, actual.scale)
+    assertInteractionListMatches(expected.source, actual.source)
+    assertInteractionListMatches(expected.target, actual.target)
+    assertInteractionListMatches(expected.steps, actual.steps)
 }
 
 fun assertXapiActorCommonPropsMatch(

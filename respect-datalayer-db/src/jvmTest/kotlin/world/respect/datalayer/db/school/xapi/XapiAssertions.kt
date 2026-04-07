@@ -8,6 +8,7 @@ import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
 import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.XapiStatement
+import world.respect.datalayer.school.xapi.model.XapiStatementRef
 import world.respect.datalayer.school.xapi.model.XapiVerb
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -58,10 +59,31 @@ fun assertXapiStatementMatches(
                 XapiObjectType.SubStatement, actual.`object`.objectType,
                 message = "$messagePrefix When Xapi object is a statement, then objectType must be a SubStatement"
             )
+
+            assertXapiStatementMatches(
+                expected = expectedStmtObject,
+                actual = actual.`object` as XapiStatement,
+            )
         }
 
-        else -> {
-            //nothing yet
+        is XapiAgent -> {
+            assertXapiActorMatches(
+                expected = expectedStmtObject,
+                actual = actual.`object` as XapiAgent
+            )
+        }
+
+        is XapiGroup -> {
+            assertXapiActorMatches(
+                expected = expectedStmtObject,
+                actual = actual.`object` as XapiGroup
+            )
+        }
+
+        is XapiStatementRef -> {
+            val actualStatementObject = actual.`object`
+            assertTrue(actualStatementObject is XapiStatementRef)
+            assertEquals(expectedStmtObject.id, actualStatementObject.id)
         }
     }
 }

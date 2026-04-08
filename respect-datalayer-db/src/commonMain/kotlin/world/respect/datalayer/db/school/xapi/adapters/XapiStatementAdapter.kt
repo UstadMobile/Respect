@@ -6,6 +6,7 @@ import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.ext.hasContext
 import world.respect.datalayer.db.school.xapi.ext.hasResult
 import world.respect.datalayer.db.school.xapi.ext.hasResultScore
 import world.respect.datalayer.db.school.xapi.ext.uuidForSubstatement
@@ -14,6 +15,7 @@ import world.respect.datalayer.school.xapi.ext.isCompletionOrProgress
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
 import world.respect.datalayer.school.xapi.model.XapiAgent
+import world.respect.datalayer.school.xapi.model.XapiContext
 import world.respect.datalayer.school.xapi.model.XapiException
 import world.respect.datalayer.school.xapi.model.XapiGroup
 import world.respect.datalayer.school.xapi.model.XapiObjectType
@@ -21,9 +23,9 @@ import world.respect.datalayer.school.xapi.model.XapiResult
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementObject
 import world.respect.datalayer.school.xapi.model.XapiStatementRef
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.toEmptyIfNull
 import world.respect.libutil.util.time.systemTimeInMillis
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -39,11 +41,11 @@ data class StatementEntities(
     val activityEntities: List<ActivityEntities> = emptyList(),
 )
 
-fun List<StatementEntities>.flatten(): StatementEntities {
+fun List<StatementEntities>.flattenStatements(): StatementEntities {
     return StatementEntities(
         statements = flatMap { it.statements },
         statementEntityJson = flatMap { it.statementEntityJson },
-        actorEntities = flatMap { it.actorEntities },
+        actorEntities = flatMap { it.actorEntities }.flattenActors(),
         verbEntities = flatMap { it.verbEntities },
         activityEntities = flatMap { it.activityEntities }
     )
@@ -100,7 +102,6 @@ fun XapiStatementObject.objectForeignKeys(
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatement.toEntities(
     uidNumberMapper: UidNumberMapper,
-    primaryKeyGenerator: PrimaryKeyGenerator,
     json: Json,
     exactJson: String?,
     isSubStatement: Boolean = false,
@@ -115,17 +116,13 @@ fun XapiStatement.toEntities(
 
     val contextRegistration = context?.registration
 
-    val statementActorEntities = actor.toEntities(
-        uidNumberMapper, primaryKeyGenerator
-    )
+    val statementActorEntities = actor.toEntities(uidNumberMapper)
 
-    val authorityActor = authority?.toEntities(
-        uidNumberMapper, primaryKeyGenerator,
-    )
+    val authorityActor = authority?.toEntities(uidNumberMapper)
 
-    val contextInstructorActorEntities = context?.instructor?.toEntities(
-        uidNumberMapper, primaryKeyGenerator,
-    )
+    val contextInstructorActorEntities = context?.instructor?.toEntities(uidNumberMapper)
+
+    val contextTeamActorEntities = context?.team?.toEntities(uidNumberMapper)
 
     val statementObjectForeignKeys = `object`.objectForeignKeys(uidNumberMapper, statementUuid)
 
@@ -157,6 +154,9 @@ fun XapiStatement.toEntities(
                     contextRegistrationHi = contextRegHiLo?.first ?: 0,
                     contextRegistrationLo = contextRegHiLo?.second ?: 0,
                     contextPlatform = context?.platform,
+                    contextLanguage = context?.language,
+                    contextRevision = context?.revision,
+                    contextTeamActorUid = contextTeamActorEntities?.actor?.actorUid ?: 0,
                     contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
                     completionOrProgress = isCompletionOrProgress(),
                     extensionProgress = resultProgressExtension,
@@ -164,6 +164,7 @@ fun XapiStatement.toEntities(
                     statementObjectUid1 = statementObjectForeignKeys.first,
                     statementObjectUid2 = statementObjectForeignKeys.second,
                     isSubStatement = isSubStatement,
+                    statementVersion = version,
                 )
             ),
             statementEntityJson = listOf(
@@ -175,7 +176,9 @@ fun XapiStatement.toEntities(
             ),
             actorEntities = buildList {
                 add(statementActorEntities)
+                authorityActor?.also { add(it) }
                 contextInstructorActorEntities?.also { add(it) }
+                contextTeamActorEntities?.also { add(it) }
             },
             verbEntities = listOf(verb.toVerbEntities(uidNumberMapper)),
             /*
@@ -191,11 +194,10 @@ fun XapiStatement.toEntities(
         ),
         `object`.objectToEntities(
             uidNumberMapper = uidNumberMapper,
-            primaryKeyGenerator = primaryKeyGenerator,
             json = json,
             parentStatementUuid = statementUuid,
         )
-    ).flatten()
+    ).flattenStatements()
 }
 
 fun StatementEntities.toModel(
@@ -278,6 +280,8 @@ fun StatementEntities.toModel(
                 }else {
                     null
                 },
+                duration = primaryStatementEntity.resultDuration?.milliseconds,
+                response = primaryStatementEntity.resultResponse,
                 extensions = primaryStatementEntity.resultExtensions?.let {
                     json.decodeFromString(
                         xapiExtensionsSerializer, it
@@ -287,10 +291,33 @@ fun StatementEntities.toModel(
         }else {
             null
         },
+        context = if(primaryStatementEntity.hasContext) {
+            val hasRegistration = primaryStatementEntity.contextRegistrationHi != 0L &&
+                    primaryStatementEntity.contextRegistrationLo != 0L
+            XapiContext(
+                instructor = actors[primaryStatementEntity.contextInstructorActorUid],
+                registration = if(hasRegistration) {
+                    Uuid.fromLongs(
+                        primaryStatementEntity.contextRegistrationHi,
+                        primaryStatementEntity.contextRegistrationLo,
+                    )
+                }else {
+                    null
+                },
+                language = primaryStatementEntity.contextLanguage,
+                platform = primaryStatementEntity.contextPlatform,
+                revision = primaryStatementEntity.contextRevision,
+                team = actors[primaryStatementEntity.contextTeamActorUid],
+            )
+        }else {
+            null
+        },
         objectType = if(primaryStatementEntity.isSubStatement) {
             XapiObjectType.SubStatement
         }else {
             null
         },
+        authority = actors[primaryStatementEntity.authorityActorUid],
+        version = primaryStatementEntity.statementVersion,
     )
 }

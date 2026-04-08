@@ -9,7 +9,7 @@ class XapiStatementSerializationTest {
     @Test
     fun givenValidStatements_whenDeserialized_shouldLoadWithoutException() {
         forXapiSampleStatements { sampleStmt ->
-            Json.decodeFromJsonElement(XapiStatement.serializer(), sampleStmt)
+            Json.decodeFromJsonElement(XapiStatement.serializer(), sampleStmt.jsonObject)
         }
     }
 }

@@ -37,7 +37,6 @@ val XapiObjectType.entityObjectTypeEnum: StatementEntityObjectTypeEnum
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatementObject.objectToEntities(
     uidNumberMapper: UidNumberMapper,
-    primaryKeyGenerator: PrimaryKeyGenerator,
     json: Json,
     parentStatementUuid: Uuid,
 ) : StatementEntities {
@@ -53,11 +52,7 @@ fun XapiStatementObject.objectToEntities(
 
         is XapiActor -> {
             StatementEntities(
-                actorEntities = listOf(
-                    toEntities(
-                        uidNumberMapper, primaryKeyGenerator
-                    )
-                )
+                actorEntities = listOf(toEntities(uidNumberMapper))
             )
         }
 
@@ -71,7 +66,6 @@ fun XapiStatementObject.objectToEntities(
                 id = parentStatementUuid.uuidForSubstatement(),
             ).toEntities(
                 uidNumberMapper = uidNumberMapper,
-                primaryKeyGenerator = primaryKeyGenerator,
                 json = json,
                 exactJson = null,
                 isSubStatement = true,

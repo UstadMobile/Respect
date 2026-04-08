@@ -9,12 +9,10 @@ import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
-import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 import world.respect.datalayer.school.xapi.ext.addStatementIdIfNotPresent
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
@@ -38,11 +36,9 @@ class XapiStatementDataSourceDbTest {
             ).let { it.copy(id = it.id ?: Uuid.random()) }
 
             val uidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm())
-            val primaryKeyGenerator = PrimaryKeyGenerator(listOf(ActorEntity.TABLE_ID))
 
             val entities = statement.toEntities(
                 uidNumberMapper = uidNumberMapper,
-                primaryKeyGenerator = primaryKeyGenerator,
                 json = json,
                 exactJson = null,
                 isSubStatement = false,

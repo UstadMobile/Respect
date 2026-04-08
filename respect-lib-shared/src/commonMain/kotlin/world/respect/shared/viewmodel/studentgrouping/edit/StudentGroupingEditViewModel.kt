@@ -93,6 +93,7 @@ class StudentGroupingEditViewModel(
         )
     }
 
+    //this needs to be changed according to xapi
     fun onStudentCheckedChange(person: Person, isChecked: Boolean) {
         _uiState.update { prev ->
             val updated = if (isChecked) {

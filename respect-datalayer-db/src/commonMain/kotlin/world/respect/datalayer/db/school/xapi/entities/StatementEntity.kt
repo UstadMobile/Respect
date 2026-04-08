@@ -71,8 +71,6 @@ data class StatementEntity(
 
     val authorityActorUid: Long = 0,
 
-    val teamUid: Long = 0,
-
     val resultCompletion: Boolean? = null,
 
     val resultSuccess: Boolean? = null,
@@ -105,11 +103,15 @@ data class StatementEntity(
 
     val contextPlatform: String? = null,
 
+    val contextRevision: String? = null,
+
     val contextStatementRefIdHi: Long = 0,
 
     val contextStatementRefIdLo: Long = 0,
 
     val contextInstructorActorUid: Long = 0,
+
+    val contextTeamActorUid: Long = 0,
 
     val statementLct: Long = 0,
 
@@ -124,6 +126,8 @@ data class StatementEntity(
     val statementContentEntryUid: Long = 0,
 
     val isSubStatement: Boolean = false,
+
+    val statementVersion: String? = null,
 ) {
     companion object {
         const val TABLE_ID = 60

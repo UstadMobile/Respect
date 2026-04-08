@@ -52,7 +52,6 @@ class XapiStatementDataSourceDb(
 
         val statementEntity = exactStatement.toEntities(
             uidNumberMapper = uidNumberMapper,
-            primaryKeyGenerator = primaryKeyGenerator,
             json = json,
             exactJson = json.encodeToString(XapiStatement.serializer(), exactStatement),
             isSubStatement = false,

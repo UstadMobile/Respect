@@ -11,6 +11,7 @@ import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementRef
 import world.respect.datalayer.school.xapi.model.XapiVerb
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -45,10 +46,9 @@ fun assertXapiStatementMatches(
 
             val expectedDefinition = expectedStmtObject.definition
             if(expectedDefinition != null) {
-                assertXapiActivityMatches(
-                    expected = expectedDefinition,
-                    actual = actualObject.definition!!
-                )
+                val actualDefinition = actualObject.definition
+                assertNotNull(actualDefinition)
+                assertXapiActivityMatches(expectedDefinition, actualDefinition)
             }else {
                 assertNull(actualObject.definition)
             }
@@ -86,6 +86,61 @@ fun assertXapiStatementMatches(
             assertEquals(expectedStmtObject.id, actualStatementObject.id)
         }
     }
+
+    val expectedResult = expected.result
+    val actualResult = actual.result
+    if(expectedResult != null) {
+        assertNotNull(actualResult)
+        assertEquals(expectedResult.completion, actualResult.completion)
+        assertEquals(expectedResult.success, actualResult.success)
+        assertEquals(expectedResult.score, actualResult.score)
+        assertEquals(expectedResult.duration, actualResult.duration)
+        assertEquals(expectedResult.response, actualResult.response)
+        assertEquals(expectedResult.extensions, actualResult.extensions)
+    }else {
+        assertNull(actual.result)
+    }
+
+    val expectedContext = expected.context
+    val actualContext = actual.context
+    if(expectedContext != null) {
+        assertNotNull(actualContext)
+
+        val expectedInstructor = expectedContext.instructor
+        if(expectedInstructor != null) {
+            val actualInstructor = actualContext.instructor
+            assertNotNull(actualInstructor)
+            assertXapiActorMatches(expectedInstructor, actualInstructor)
+        }else {
+            assertNull(actualContext.instructor)
+        }
+
+        assertEquals(expectedContext.registration, actualContext.registration)
+        assertEquals(expectedContext.language, actualContext.language)
+        assertEquals(expectedContext.platform, actualContext.platform)
+        assertEquals(expectedContext.revision, actualContext.revision)
+
+        val expectedTeam = expectedContext.team
+        if(expectedTeam != null) {
+            val actualTeam = actualContext.team
+            assertNotNull(actualTeam)
+            assertXapiActorMatches(expectedTeam, actualTeam)
+        }else {
+            assertNull(actualContext.team)
+        }
+    }else {
+        assertNull(actualContext)
+    }
+
+    val expectedAuthority = expected.authority
+    if(expectedAuthority != null) {
+        val actualAuthority = actual.authority
+        assertNotNull(actualAuthority)
+        assertXapiActorMatches(expectedAuthority, actualAuthority)
+    }else {
+        assertNull(actual.authority)
+    }
+    assertEquals(expected.version, actual.version)
 }
 
 fun assertXapiVerbMatches(
@@ -159,11 +214,23 @@ fun assertXapiActorMatches(
     assertEquals(expected is XapiAgent, actual is XapiAgent)
     assertEquals(expected is XapiGroup, actual is XapiGroup)
     if(expected is XapiGroup && actual is XapiGroup) {
-        assertEquals(expected.member.size, actual.member.size,
-            "Expected and actual member size should match")
+        /**
+         * As per the xAPI spec : an identified group can be referenced without including the members
+         * themselves.
+         */
+        expected.member?.size?.also { expectedMemberSize ->
+            assertEquals(expectedMemberSize, actual.member?.size,
+                "Expected and actual member size should match in group ${expected.idStr}")
+        }
+
         try {
-            expected.member.forEach { expectedMember ->
-                val memberInActual = actual.member.firstOrNull {
+            /**
+             * As per the spec: order does not matter:
+             * An LRS returning a Statement MAY return the list of Group members in any order.
+             * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2422-when-the-actor-objecttype-is-group
+             */
+            expected.member?.forEach { expectedMember ->
+                val memberInActual = actual.member?.firstOrNull {
                     it.idStr == expectedMember.idStr
                 } ?: throw AssertionError("Member $expectedMember not found in other group")
                 assertXapiActorMatches(

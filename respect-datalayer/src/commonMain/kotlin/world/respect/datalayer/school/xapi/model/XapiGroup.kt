@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
  *
  * Note: the member list may be returned in any order as per the xAPI spec, so we can reorder it to
  * produce a consistent hash
+ *
+ * @property member as per the xAPI spec the member property is optional for identified groups.
  */
 @Serializable
 data class XapiGroup(
@@ -16,7 +18,7 @@ data class XapiGroup(
     override val openid: String? = null,
     override val objectType: XapiObjectType? = null,
     override val account: XapiAccount? = null,
-    val member: List<XapiAgent> = emptyList(),
+    val member: List<XapiAgent>? = null,
 ): XapiActor, XapiStatementObject
 
 val XapiGroup.isAnonymous: Boolean

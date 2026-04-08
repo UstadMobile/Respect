@@ -27,10 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import world.respect.images.RespectImage
-import world.respect.images.respectImagePainter
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.enter_invite_code
 import world.respect.shared.generated.resources.invite_how_title
 import world.respect.shared.generated.resources.invite_step_confirm_desc
 import world.respect.shared.generated.resources.invite_step_enter_code_desc
@@ -42,6 +43,10 @@ import world.respect.shared.generated.resources.invite_step_search_school_desc
 import world.respect.shared.generated.resources.invite_step_search_school_title
 import world.respect.shared.generated.resources.invite_step_share_desc
 import world.respect.shared.generated.resources.invite_step_share_title
+import world.respect.shared.generated.resources.open_respect_app
+import world.respect.shared.generated.resources.review_and_complete_setup
+import world.respect.shared.generated.resources.search_school
+import world.respect.shared.generated.resources.share_invite_code
 import world.respect.shared.viewmodel.person.inviteperson.InvitePersonUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +58,7 @@ fun InviteSliderBottomSheet(
 ) {
     val sliderPages = listOf(
         InviteSliderPageUi(
-            sliderImage = RespectImage.SHARE_INVITE_CODE,
+            sliderImage = Res.drawable.share_invite_code,
             title = stringResource(Res.string.invite_step_share_title),
             description = stringResource(
                 Res.string.invite_step_share_desc,
@@ -61,12 +66,12 @@ fun InviteSliderBottomSheet(
             )
         ),
         InviteSliderPageUi(
-            sliderImage = RespectImage.OPEN_RESPECT_APP,
+            sliderImage = Res.drawable.open_respect_app,
             title = stringResource(Res.string.invite_step_open_app_title),
             description = stringResource(Res.string.invite_step_open_app_desc)
         ),
         InviteSliderPageUi(
-            sliderImage = RespectImage.SEARCH_SCHOOL,
+            sliderImage = Res.drawable.search_school,
             title = stringResource(Res.string.invite_step_search_school_title),
             description = stringResource(
                 Res.string.invite_step_search_school_desc,
@@ -74,12 +79,12 @@ fun InviteSliderBottomSheet(
             )
         ),
         InviteSliderPageUi(
-            sliderImage = RespectImage.REVIEW_AND_COMPLETE_SETUP,
+            sliderImage = Res.drawable.review_and_complete_setup,
             title = stringResource(Res.string.invite_step_review_title),
             description = stringResource(Res.string.invite_step_confirm_desc)
         ),
         InviteSliderPageUi(
-            sliderImage = RespectImage.ENTER_INVITE_CODE,
+            sliderImage = Res.drawable.enter_invite_code,
             title = stringResource(Res.string.invite_step_enter_code_title),
             description = stringResource(
                 Res.string.invite_step_enter_code_desc
@@ -119,7 +124,7 @@ fun InviteSliderBottomSheet(
                             fontWeight = FontWeight.Bold
                         )
                         Image(
-                            painter = respectImagePainter(item.sliderImage),
+                            painter = painterResource(item.sliderImage),
                             contentDescription = null,
                             modifier = Modifier.size(200.dp).padding(8.dp)
                                 .align(Alignment.CenterHorizontally)
@@ -160,7 +165,7 @@ fun InviteSliderBottomSheet(
 }
 
 data class InviteSliderPageUi(
-    val sliderImage: RespectImage,
+    val sliderImage: DrawableResource,
     val title: String,
     val description: String
 )

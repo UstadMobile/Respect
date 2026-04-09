@@ -2,10 +2,6 @@ package world.respect.datalayer.db.school.xapi.adapters
 
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.ext.toLongPair
-import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.uuidForSubstatement
 import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
@@ -84,32 +80,12 @@ fun XapiStatementObject.objectToEntities(
 fun List<XapiActivityStatementObject>.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
-    statementUuid: Uuid,
-    contextType: StatementContextActivityJoinTypeEnum,
 ) : List<ActivityEntities> {
-    return map { contextActivityObj ->
-        val activityUid = uidNumberMapper(contextActivityObj.id)
-        val scajToHash = uidNumberMapper("$contextType-${contextActivityObj.id}")
-        val stmtUuidLongs = statementUuid.toLongPair()
-        val statementContextActivityJoin = StatementContextActivityJoin(
-            scajFromStatementIdHi = stmtUuidLongs.first,
-            scajFromStatementIdLo = stmtUuidLongs.second,
-            scajToActivityUid = scajToHash,
-            scajContextType = contextType,
-            scajToActivityId = contextActivityObj.id,
-        )
-
+    return mapNotNull { contextActivityObj ->
         contextActivityObj.definition?.toEntities(
             activityId = contextActivityObj.id,
             uidNumberMapper = uidNumberMapper,
             json = json,
-        )?.copy(statementContextActivityJoin = statementContextActivityJoin)
-            ?: ActivityEntities(
-                activityEntity = ActivityEntity(
-                    actUid = activityUid,
-                    actIdIri = contextActivityObj.id,
-                ),
-                statementContextActivityJoin = statementContextActivityJoin,
-            )
+        )
     }
 }

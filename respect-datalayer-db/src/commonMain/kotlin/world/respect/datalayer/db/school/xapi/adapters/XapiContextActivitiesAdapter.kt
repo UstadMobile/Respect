@@ -26,7 +26,7 @@ fun XapiContextActivities.toEntities(
     fun List<XapiActivityStatementObject>?.toActivityEntitiesInternal(
         type: StatementContextActivityJoinTypeEnum,
     ) : List<ActivityEntities> {
-        return this?.toEntities(uidNumberMapper, json, statementUuid, type).toEmptyIfNull()
+        return this?.toEntities(uidNumberMapper, json).toEmptyIfNull()
     }
 
     val statementUuidLongs = statementUuid.toLongPair()

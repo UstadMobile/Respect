@@ -9,12 +9,16 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
+import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.school.model.AssignmentAssigneeRefTypeEnum
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.writequeue.WriteQueueItem
+import world.respect.datalayer.school.xapi.model.XapiInteractionTypeEnum
 import kotlin.time.Instant
 
 class SchoolTypeConverters {
@@ -127,6 +131,47 @@ class SchoolTypeConverters {
     fun toClassInviteModeEnum(value: Int): ClassInviteModeEnum {
         return ClassInviteModeEnum.fromFlag(value)
     }
+
+    @TypeConverter
+    fun fromStatementEntityObjectTypeEnum(value: StatementEntityObjectTypeEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toStatementEntityObjectTypeEnum(value: Int): StatementEntityObjectTypeEnum {
+        return StatementEntityObjectTypeEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromActivityInteractionEntityPropEnum(value: ActivityInteractionEntityPropEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toActivityInteractionEntityPropEnum(value: Int): ActivityInteractionEntityPropEnum {
+        return ActivityInteractionEntityPropEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromActivityLangMapEntryPropEnum(value: ActivityLangMapEntryPropEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toActivityLangMapEntryPropEnum(value: Int): ActivityLangMapEntryPropEnum {
+        return ActivityLangMapEntryPropEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromXapiInteractionTypeEnum(value: XapiInteractionTypeEnum): Int {
+        return value.dbFlag
+    }
+
+    @TypeConverter
+    fun toXapiInteractionTypeEnum(value: Int): XapiInteractionTypeEnum? {
+        return XapiInteractionTypeEnum.fromDbFlag(value)
+    }
+
 
 
 }

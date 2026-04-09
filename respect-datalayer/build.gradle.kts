@@ -44,7 +44,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-
+            implementation(projects.respectLibTestResources)
         }
 
         val commonTest by getting {

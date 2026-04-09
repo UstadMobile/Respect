@@ -1,0 +1,18 @@
+package world.respect.datalayer.db.school.xapi.entities
+
+import androidx.room.Entity
+
+@Entity(primaryKeys = ["aeeActivityUid", "aeeKeyHash"])
+data class ActivityExtensionEntity(
+    val aeeActivityUid: Long = 0,
+
+    val aeeKeyHash: Long = 0,
+
+    val aeeKey: String,
+
+    val aeeJson: String,
+
+    val aeeLastMod: Long = 0,
+
+    val aeeIsDeleted: Boolean = false,
+)

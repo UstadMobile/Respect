@@ -122,12 +122,6 @@ class StoreActivitiesUseCase(
                 schoolDatabase.getActivityExtensionDao().upsertListAsync(
                     activityEntities.flatMap { it.activityExtensionEntities }
                 )
-
-                activityEntities.mapNotNull { it.statementContextActivityJoin }
-                    .takeIf { it.isNotEmpty() }
-                    ?.also {
-                        schoolDatabase.getStatementContextActivityJoinDao().insertOrIgnoreListAsync(it)
-                    }
             }
         }
     }

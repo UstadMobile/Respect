@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.xapi.adapters
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
+import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
 import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
@@ -39,6 +40,7 @@ data class StatementEntities(
     val actorEntities: List<ActorEntities> = emptyList(),
     val verbEntities: List<VerbEntities> = emptyList(),
     val activityEntities: List<ActivityEntities> = emptyList(),
+    val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
 )
 
 fun List<StatementEntities>.flattenStatements(): StatementEntities {
@@ -47,7 +49,8 @@ fun List<StatementEntities>.flattenStatements(): StatementEntities {
         statementEntityJson = flatMap { it.statementEntityJson },
         actorEntities = flatMap { it.actorEntities }.flattenActors(),
         verbEntities = flatMap { it.verbEntities },
-        activityEntities = flatMap { it.activityEntities }
+        activityEntities = flatMap { it.activityEntities }.flattenActivities(),
+        statementContextActivityJoins = flatMap { it.statementContextActivityJoins },
     )
 }
 
@@ -128,6 +131,11 @@ fun XapiStatement.toEntities(
 
     val (stmtUuidHi, stmtUuidLo) = statementUuid.toLongPair()
     val contextRegHiLo = contextRegistration?.toLongPair()
+    val contextActivityEntities = context?.contextActivities?.toEntities(
+        uidNumberMapper = uidNumberMapper,
+        json = json,
+        statementUuid = statementUuid,
+    )
 
     return listOf(
         StatementEntities(
@@ -185,12 +193,9 @@ fun XapiStatement.toEntities(
              * Note: object.objectToEntities will generate the ActivityEntities where an the object
              * of the statement is an activity.
              */
-            activityEntities = context?.contextActivities
-                ?.toEntities(
-                    uidNumberMapper = uidNumberMapper,
-                    json = json,
-                    statementUuid = statementUuid,
-                )?.activityEntities.toEmptyIfNull()
+            activityEntities = buildList {
+                contextActivityEntities?.activityEntities?.also { addAll(it) }
+            }
         ),
         `object`.objectToEntities(
             uidNumberMapper = uidNumberMapper,

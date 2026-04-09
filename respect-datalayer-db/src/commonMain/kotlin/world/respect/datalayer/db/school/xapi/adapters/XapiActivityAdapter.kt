@@ -25,10 +25,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 
-/**
- * @param statementContextActivityJoin Join entity used where the activity is part of a Statement's
- * contextActivities
- */
 data class ActivityEntities(
     @Embedded
     val activityEntity: ActivityEntity,
@@ -50,8 +46,6 @@ data class ActivityEntities(
         entityColumn = "aeeActivityUid"
     )
     val activityExtensionEntities: List<ActivityExtensionEntity> = emptyList(),
-
-    val statementContextActivityJoin: StatementContextActivityJoin? = null,
 )
 
 
@@ -208,4 +202,33 @@ fun ActivityEntities.toModel(
         target = interactionsForProp(ActivityInteractionEntityPropEnum.TARGET),
         steps = interactionsForProp(ActivityInteractionEntityPropEnum.STEPS),
     )
+}
+
+fun List<ActivityEntities>.flattenActivities(): List<ActivityEntities> {
+    return distinctBy { it.activityEntity.actUid }.map { distinctActivity ->
+        val allByUid = this.filter {
+            it.activityEntity.actUid == distinctActivity.activityEntity.actUid
+        }
+
+        val interactions = allByUid.flatMap { it.activityInteractionEntities }
+
+        ActivityEntities(
+            activityEntity = ActivityEntity(
+                actUid = distinctActivity.activityEntity.actUid,
+                actIdIri = distinctActivity.activityEntity.actIdIri,
+                actType = allByUid.firstNotNullOfOrNull { it.activityEntity.actType },
+                actMoreInfo = allByUid.firstNotNullOfOrNull { it.activityEntity.actMoreInfo },
+                actInteractionType = allByUid.firstNotNullOfOrNull { it.activityEntity.actInteractionType },
+                actCorrectResponsePatterns = allByUid.firstNotNullOfOrNull {
+                    it.activityEntity.actCorrectResponsePatterns
+                },
+                actFlags = allByUid.firstOrNull {
+                    it.activityEntity.actFlags != 0
+                }?.activityEntity?.actFlags ?: 0,
+            ),
+            activityLangMapEntries = allByUid.flatMap { it.activityLangMapEntries },
+            activityExtensionEntities = allByUid.flatMap { it.activityExtensionEntities },
+            activityInteractionEntities = interactions,
+        )
+    }
 }

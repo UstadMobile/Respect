@@ -8,6 +8,8 @@ import world.respect.datalayer.school.xapi.model.XapiInteractionTypeEnum
 @Entity
 @Serializable
 /**
+ * @param actUid ActivityUid: the XXHash of actIdIri. The probability of a hash collision on a URL
+ *        based ID using a 64bit hash is negligible.
  * @param actCorrectResponsePatterns the JSON of the correct responses pattern (array of strings)
  * @param actFlags In xAPI a property being omitted and a property being empty are not the same thing.
  *        In an SQL database that uses joins it impossible to tell the difference. This could be

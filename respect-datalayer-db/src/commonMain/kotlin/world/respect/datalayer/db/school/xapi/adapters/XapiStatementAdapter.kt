@@ -190,7 +190,7 @@ fun XapiStatement.toEntities(
                     uidNumberMapper = uidNumberMapper,
                     json = json,
                     statementUuid = statementUuid,
-                ).toEmptyIfNull()
+                )?.activityEntities.toEmptyIfNull()
         ),
         `object`.objectToEntities(
             uidNumberMapper = uidNumberMapper,

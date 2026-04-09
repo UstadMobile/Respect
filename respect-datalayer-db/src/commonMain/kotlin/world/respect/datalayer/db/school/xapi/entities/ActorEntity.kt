@@ -62,7 +62,7 @@ data class ActorEntity(
 
     val actorLastModified: Instant = Clock.System.now(),
 
-    val actorObjectType: Int = XapiEntityObjectTypeFlags.AGENT,
+    val actorObjectType: ActorEntityTypeEnum = ActorEntityTypeEnum.AGENT,
 ) {
     companion object {
         const val TABLE_ID = 68

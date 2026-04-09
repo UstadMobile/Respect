@@ -5,6 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.uuidForSubstatement
 import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
@@ -13,7 +14,6 @@ import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementObject
 import world.respect.datalayer.school.xapi.model.XapiStatementRef
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 val XapiObjectType.entityObjectTypeEnum: StatementEntityObjectTypeEnum
@@ -85,7 +85,7 @@ fun List<XapiActivityStatementObject>.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
     statementUuid: Uuid,
-    contextType: Int,
+    contextType: StatementContextActivityJoinTypeEnum,
 ) : List<ActivityEntities> {
     return map { contextActivityObj ->
         val activityUid = uidNumberMapper(contextActivityObj.id)
@@ -94,9 +94,8 @@ fun List<XapiActivityStatementObject>.toEntities(
         val statementContextActivityJoin = StatementContextActivityJoin(
             scajFromStatementIdHi = stmtUuidLongs.first,
             scajFromStatementIdLo = stmtUuidLongs.second,
-            scajToHash = scajToHash,
+            scajToActivityUid = scajToHash,
             scajContextType = contextType,
-            scajToActivityUid = activityUid,
             scajToActivityId = contextActivityObj.id,
         )
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "8779f265b6132b6de7f30b779c29dafa",
+    "identityHash": "5c65f9ed6bed8cbee8da0f062a8b1cc2",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2067,8 +2067,14 @@
       },
       {
         "tableName": "StatementContextActivityJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajToHash` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT, `scajEtag` INTEGER NOT NULL, PRIMARY KEY(`scajFromStatementIdHi`, `scajFromStatementIdLo`, `scajToHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL, PRIMARY KEY(`scajUid`))",
         "fields": [
+          {
+            "fieldPath": "scajUid",
+            "columnName": "scajUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "scajFromStatementIdHi",
             "columnName": "scajFromStatementIdHi",
@@ -2078,12 +2084,6 @@
           {
             "fieldPath": "scajFromStatementIdLo",
             "columnName": "scajFromStatementIdLo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scajToHash",
-            "columnName": "scajToHash",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2102,21 +2102,14 @@
           {
             "fieldPath": "scajToActivityId",
             "columnName": "scajToActivityId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "scajEtag",
-            "columnName": "scajEtag",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "scajFromStatementIdHi",
-            "scajFromStatementIdLo",
-            "scajToHash"
+            "scajUid"
           ]
         }
       },
@@ -2452,7 +2445,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8779f265b6132b6de7f30b779c29dafa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c65f9ed6bed8cbee8da0f062a8b1cc2')"
     ]
   }
 }

@@ -13,14 +13,14 @@ import kotlinx.serialization.Serializable
 @Serializable()
 data class XapiContextActivities(
     @Serializable(with = XapiActivityStatementObjectListSerializer::class)
-    val parent: List<XapiActivityStatementObject>? = null,
+    val parent: List<XapiActivity>? = null,
 
     @Serializable(with = XapiActivityStatementObjectListSerializer::class)
-    val grouping: List<XapiActivityStatementObject>? = null,
+    val grouping: List<XapiActivity>? = null,
 
     @Serializable(with = XapiActivityStatementObjectListSerializer::class)
-    val category: List<XapiActivityStatementObject>? = null,
+    val category: List<XapiActivity>? = null,
 
     @Serializable(with = XapiActivityStatementObjectListSerializer::class)
-    val other: List<XapiActivityStatementObject>? = null,
+    val other: List<XapiActivity>? = null,
 )

@@ -4,6 +4,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 import world.respect.datalayer.db.school.xapi.entities.ActorEntityTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
+import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
@@ -19,14 +20,7 @@ data class ActorEntities(
     val groupMemberJoins: List<GroupMemberActorJoin> = emptyList(),
 )
 
-internal val XapiActor.idStr: String?
-    get() = when {
-        account != null -> "${account?.name}@${account?.homePage}"
-        mbox != null -> mbox
-        mbox_sha1sum != null -> mbox_sha1sum
-        openid != null -> openid
-        else -> null
-    }
+
 
 fun XapiActor.identifierHash(uidNumberMapper: UidNumberMapper): Long {
     return idStr?.let { uidNumberMapper(it) } ?: 0

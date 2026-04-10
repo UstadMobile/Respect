@@ -34,10 +34,10 @@ sealed interface XapiStatementObject {
 }
 
 @Serializable
-data class XapiActivityStatementObject(
+data class XapiActivity(
     override val objectType: XapiObjectType? = null,
     val id: String,
-    val definition: XapiActivity? = null,
+    val definition: XapiActivityDefinition? = null,
 ): XapiStatementObject
 
 
@@ -59,7 +59,7 @@ object XapiStatementObjectSerializer: JsonContentPolymorphicSerializer<XapiState
             ?: XapiObjectType.Activity
 
         return when(objectType) {
-            XapiObjectType.Activity -> XapiActivityStatementObject.serializer()
+            XapiObjectType.Activity -> XapiActivity.serializer()
             XapiObjectType.Agent -> XapiAgent.serializer()
             XapiObjectType.Group -> XapiGroup.serializer()
             XapiObjectType.StatementRef -> XapiStatementRef.serializer()

@@ -1,0 +1,38 @@
+package world.respect.datalayer.school.xapi.ext
+
+import world.respect.datalayer.school.xapi.model.XapiActor
+import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.datalayer.school.xapi.model.isAnonymous
+
+val XapiActor.idStr: String?
+    get() = when {
+        account != null -> "${account?.name}@${account?.homePage}"
+        mbox != null -> mbox
+        mbox_sha1sum != null -> mbox_sha1sum
+        openid != null -> openid
+        else -> null
+    }
+
+/**
+ * A list of actors can include Agents, identified groups, and anonymous groups. The same actor may
+ * be in the list more than once.
+ *
+ * The hazard: an identified group can be reference
+ */
+fun List<XapiActor>.distinctMerged(): List<XapiActor> {
+    val actorsById = groupBy { it.idStr }
+    return actorsById.map { (_, actors) ->
+        val first = actors.first()
+        if(first is XapiGroup && !first.isAnonymous) {
+            //edge case to handle: if member is null, keep it null, so that the store routine knows
+            //not to attempt to update the member list.
+            first.copy(
+                member = actors.mapNotNull {
+                    (it as? XapiGroup)?.member
+                }.flatten().distinctBy { it.idStr }
+            )
+        }else {
+            first
+        }
+    }
+}

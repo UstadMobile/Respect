@@ -26,6 +26,13 @@ import kotlinx.serialization.Serializable
  * the statementId will be set to the same as statementIdHi
  * @param statementObjectUid2 where the object type is an Activity, Agent, or Group, then 0. When a
  * StatementRef, the least significant uuid bits (lo). When a substatement, then statementIdLo + 1
+ * @param statementObjectActivityId where the object type is an Activity, the Activity ID (IRI). An
+ *        Activity might or might not have a definition. If there is no definition, there will
+ *        be no related entity in the XapiActivity table. The Activity ID is therefor always kept
+ *        on the StatementEntity so it is available for canonical return results.
+ * @param statementVerbId where a verb has any display lang map properties, it will be stored in the
+ *        verb table. If not, no entry will be created or changed. The Verb ID is therefor always
+ *        kept on the StatementEntity so it is available for canonical return results.
  * @param isSubStatement if true, this is a substatement which cannot be independently retrieved.
  * @param completionOrProgress Indicates whether or not the statement is completion or progress
  * (excludes xAPI statements that are progress or completion of child activities for statements
@@ -60,8 +67,12 @@ data class StatementEntity(
 
     val statementVerbUid: Long = 0,
 
+    val statementVerbId: String,
+
     //As per the spec could be Activity, Agent, Group, StatementRef, or SubStatement
     val statementObjectType: StatementEntityObjectTypeEnum,
+
+    val statementObjectActivityId: String? = null,
 
     val statementObjectUid1: Long = 0,
 
@@ -112,8 +123,6 @@ data class StatementEntity(
     val contextInstructorActorUid: Long = 0,
 
     val contextTeamActorUid: Long = 0,
-
-    val statementLct: Long = 0,
 
     val extensionProgress: Int? = null,
 

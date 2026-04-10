@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school.xapi
 
-import world.respect.datalayer.db.school.xapi.adapters.idStr
+import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.datalayer.school.xapi.model.XapiActivityDefinition
 import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
@@ -35,9 +35,9 @@ fun assertXapiStatementMatches(
     val expectedStmtObject = expected.`object`
 
     when(expectedStmtObject) {
-        is XapiActivityStatementObject -> {
+        is XapiActivity -> {
             val actualObject = actual.`object`
-            assertTrue(actualObject is XapiActivityStatementObject)
+            assertTrue(actualObject is XapiActivity)
             assertEquals(
                 expected = XapiObjectType.Activity,
                 actual = actual.`object`.objectType ?: XapiObjectType.Activity,
@@ -164,12 +164,12 @@ fun assertLangMapEquals(
 }
 
 fun assertXapiActivityMatches(
-    expected: XapiActivity,
-    actual: XapiActivity
+    expected: XapiActivityDefinition,
+    actual: XapiActivityDefinition
 ) {
     fun assertInteractionListMatches(
-        expected: List<XapiActivity.Interaction>?,
-        actual: List<XapiActivity.Interaction>?,
+        expected: List<XapiActivityDefinition.Interaction>?,
+        actual: List<XapiActivityDefinition.Interaction>?,
     ) {
         assertEquals(expected?.size, actual?.size)
         expected?.forEachIndexed { index, interaction ->

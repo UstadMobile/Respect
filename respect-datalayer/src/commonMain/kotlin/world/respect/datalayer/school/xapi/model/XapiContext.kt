@@ -18,7 +18,7 @@ data class XapiContext(
 
     val team: XapiActor? = null,
 
-    val statement: XapiActivityStatementObject? = null,
+    val statement: XapiActivity? = null,
 
     val contextActivities: XapiContextActivities? = null,
 

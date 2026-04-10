@@ -3,7 +3,9 @@ package world.respect.datalayer.db.school.xapi.adapters
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
+import world.respect.datalayer.db.school.xapi.adapters.flattenStatements
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.StatementEntity
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
@@ -14,7 +16,8 @@ import world.respect.datalayer.db.school.xapi.ext.uuidForSubstatement
 import world.respect.datalayer.db.school.xapi.xapiExtensionsSerializer
 import world.respect.datalayer.school.xapi.ext.isCompletionOrProgress
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
-import world.respect.datalayer.school.xapi.model.XapiActivityStatementObject
+import world.respect.datalayer.school.xapi.model.XapiActivity
+import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiContext
 import world.respect.datalayer.school.xapi.model.XapiException
@@ -24,7 +27,8 @@ import world.respect.datalayer.school.xapi.model.XapiResult
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementObject
 import world.respect.datalayer.school.xapi.model.XapiStatementRef
-import world.respect.libutil.ext.toEmptyIfNull
+import world.respect.datalayer.school.xapi.model.XapiStatementTransformingSerializer
+import world.respect.datalayer.school.xapi.model.XapiVerb
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.ExperimentalUuidApi
@@ -37,9 +41,6 @@ import kotlin.uuid.Uuid
 data class StatementEntities(
     val statements: List<StatementEntity> = emptyList(),
     val statementEntityJson: List<StatementEntityJson> = emptyList(),
-    val actorEntities: List<ActorEntities> = emptyList(),
-    val verbEntities: List<VerbEntities> = emptyList(),
-    val activityEntities: List<ActivityEntities> = emptyList(),
     val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
 )
 
@@ -47,9 +48,6 @@ fun List<StatementEntities>.flattenStatements(): StatementEntities {
     return StatementEntities(
         statements = flatMap { it.statements },
         statementEntityJson = flatMap { it.statementEntityJson },
-        actorEntities = flatMap { it.actorEntities }.flattenActors(),
-        verbEntities = flatMap { it.verbEntities },
-        activityEntities = flatMap { it.activityEntities }.flattenActivities(),
         statementContextActivityJoins = flatMap { it.statementContextActivityJoins },
     )
 }
@@ -68,7 +66,7 @@ fun XapiStatementObject.objectForeignKeys(
     statementUuid: Uuid,
 ): Pair<Long, Long> {
     return when(this) {
-        is XapiActivityStatementObject -> {
+        is XapiActivity -> {
             Pair(uidNumberMapper(id), 0)
         }
         is XapiAgent -> {
@@ -106,10 +104,28 @@ fun XapiStatementObject.objectForeignKeys(
 fun XapiStatement.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
-    exactJson: String?,
     isSubStatement: Boolean = false,
 ): StatementEntities {
     val statementUuid = id ?: throw IllegalArgumentException("Statement must have id set before conversion to entities")
+    val (stmtUuidHi, stmtUuidLo) = statementUuid.toLongPair()
+
+    fun MutableList<StatementContextActivityJoin>.addStatementContextJoins(
+        activities: List<XapiActivity>?,
+        typeEnum: StatementContextActivityJoinTypeEnum,
+    ) {
+        activities?.also { activityList ->
+            addAll(
+                activityList.map {
+                    it.toContextActivityJoinEntity(
+                        type = typeEnum,
+                        uidNumberMapper = uidNumberMapper,
+                        statementUuidHi = stmtUuidHi,
+                        statementUuidLo = stmtUuidLo,
+                    )
+                }
+            )
+        }
+    }
 
     if(isSubStatement && `object` is XapiStatement)
         throw XapiException(
@@ -129,92 +145,101 @@ fun XapiStatement.toEntities(
 
     val statementObjectForeignKeys = `object`.objectForeignKeys(uidNumberMapper, statementUuid)
 
-    val (stmtUuidHi, stmtUuidLo) = statementUuid.toLongPair()
+
     val contextRegHiLo = contextRegistration?.toLongPair()
-    val contextActivityEntities = context?.contextActivities?.toEntities(
+
+    val substatementEntities = (`object` as? XapiStatement)?.copy(
+       id = statementUuid.uuidForSubstatement(),
+    )?.toEntities(
         uidNumberMapper = uidNumberMapper,
         json = json,
-        statementUuid = statementUuid,
+        isSubStatement = true,
     )
 
-    return listOf(
-        StatementEntities(
-            statements = listOf(
-                StatementEntity(
-                    statementIdHi = stmtUuidHi,
-                    statementIdLo = stmtUuidLo,
-                    statementActorUid = statementActorEntities.actor.actorUid,
-                    authorityActorUid = authorityActor?.actor?.actorUid ?: 0,
-                    statementVerbUid = uidNumberMapper(verb.id),
-                    resultCompletion = result?.completion,
-                    resultSuccess = result?.success,
-                    resultScoreScaled = result?.score?.scaled,
-                    resultScoreRaw = result?.score?.raw,
-                    resultScoreMin = result?.score?.min,
-                    resultScoreMax = result?.score?.max,
-                    resultDuration = result?.duration?.inWholeMilliseconds,
-                    resultResponse = result?.response,
-                    resultExtensions = result?.extensions?.let {
-                        json.encodeToString(xapiExtensionsSerializer, it)
-                    },
-                    timestamp = timestamp?.toEpochMilliseconds() ?: systemTimeInMillis(),
-                    stored = systemTimeInMillis(),
-                    contextRegistrationHi = contextRegHiLo?.first ?: 0,
-                    contextRegistrationLo = contextRegHiLo?.second ?: 0,
-                    contextPlatform = context?.platform,
-                    contextLanguage = context?.language,
-                    contextRevision = context?.revision,
-                    contextTeamActorUid = contextTeamActorEntities?.actor?.actorUid ?: 0,
-                    contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
-                    completionOrProgress = isCompletionOrProgress(),
-                    extensionProgress = resultProgressExtension,
-                    statementObjectType = `object`.objectTypeEnum,
-                    statementObjectUid1 = statementObjectForeignKeys.first,
-                    statementObjectUid2 = statementObjectForeignKeys.second,
-                    isSubStatement = isSubStatement,
-                    statementVersion = version,
+    return StatementEntities(
+        statements = listOf(
+            StatementEntity(
+                statementIdHi = stmtUuidHi,
+                statementIdLo = stmtUuidLo,
+                statementActorUid = statementActorEntities.actor.actorUid,
+                authorityActorUid = authorityActor?.actor?.actorUid ?: 0,
+                statementVerbUid = uidNumberMapper(verb.id),
+                statementVerbId = verb.id,
+                resultCompletion = result?.completion,
+                resultSuccess = result?.success,
+                resultScoreScaled = result?.score?.scaled,
+                resultScoreRaw = result?.score?.raw,
+                resultScoreMin = result?.score?.min,
+                resultScoreMax = result?.score?.max,
+                resultDuration = result?.duration?.inWholeMilliseconds,
+                resultResponse = result?.response,
+                resultExtensions = result?.extensions?.let {
+                    json.encodeToString(xapiExtensionsSerializer, it)
+                },
+                timestamp = timestamp?.toEpochMilliseconds() ?: systemTimeInMillis(),
+                stored = systemTimeInMillis(),
+                contextRegistrationHi = contextRegHiLo?.first ?: 0,
+                contextRegistrationLo = contextRegHiLo?.second ?: 0,
+                contextPlatform = context?.platform,
+                contextLanguage = context?.language,
+                contextRevision = context?.revision,
+                contextTeamActorUid = contextTeamActorEntities?.actor?.actorUid ?: 0,
+                contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
+                completionOrProgress = isCompletionOrProgress(),
+                extensionProgress = resultProgressExtension,
+                statementObjectType = `object`.objectTypeEnum,
+                statementObjectUid1 = statementObjectForeignKeys.first,
+                statementObjectUid2 = statementObjectForeignKeys.second,
+                statementObjectActivityId = (`object` as? XapiActivity)?.id,
+                isSubStatement = isSubStatement,
+                statementVersion = version,
+            )
+        ) + (substatementEntities?.statements ?: emptyList()),
+        statementEntityJson = listOf(
+            StatementEntityJson(
+                stmtJsonIdHi = stmtUuidHi,
+                stmtJsonIdLo = stmtUuidLo,
+                fullStatement = json.encodeToString(
+                    serializer = XapiStatementTransformingSerializer, this
+                ),
+            )
+        ) + (substatementEntities?.statementEntityJson ?: emptyList()),
+        statementContextActivityJoins = buildList {
+            context?.contextActivities?.also { contextActivities ->
+                addStatementContextJoins(
+                    contextActivities.parent, StatementContextActivityJoinTypeEnum.PARENT
                 )
-            ),
-            statementEntityJson = listOf(
-                StatementEntityJson(
-                    stmtJsonIdHi = stmtUuidHi,
-                    stmtJsonIdLo = stmtUuidLo,
-                    fullStatement = exactJson,
+                addStatementContextJoins(
+                    contextActivities.grouping, StatementContextActivityJoinTypeEnum.GROUPING
                 )
-            ),
-            actorEntities = buildList {
-                add(statementActorEntities)
-                authorityActor?.also { add(it) }
-                contextInstructorActorEntities?.also { add(it) }
-                contextTeamActorEntities?.also { add(it) }
-            },
-            verbEntities = listOf(verb.toVerbEntities(uidNumberMapper)),
-            /*
-             * Note: object.objectToEntities will generate the ActivityEntities where an the object
-             * of the statement is an activity.
-             */
-            activityEntities = buildList {
-                contextActivityEntities?.activityEntities?.also { addAll(it) }
+                addStatementContextJoins(
+                    contextActivities.category, StatementContextActivityJoinTypeEnum.CATEGORY
+                )
+                addStatementContextJoins(
+                    contextActivities.other, StatementContextActivityJoinTypeEnum.OTHER
+                )
             }
-        ),
-        `object`.objectToEntities(
-            uidNumberMapper = uidNumberMapper,
-            json = json,
-            parentStatementUuid = statementUuid,
-        )
-    ).flattenStatements()
+        } + (substatementEntities?.statementContextActivityJoins ?: emptyList())
+    )
 }
 
 fun StatementEntities.toModel(
     json: Json,
     statementIdHi: Long,
     statementIdLo: Long,
+    uidNumberMapper: UidNumberMapper,
+    actors: List<XapiActor>,
+    activities: List<XapiActivity>,
+    verbs: List<XapiVerb>,
 ) : XapiStatement {
     val primaryStatementEntity = statements.first {
         it.statementIdHi == statementIdHi && it.statementIdLo == statementIdLo
     }
 
-    val actors = actorEntities.associate { it.actor.actorUid to it.toModel() }
+    val actorMap = actors.associateBy { it.identifierHash(uidNumberMapper) }
+    val verbMap = verbs.associateBy { uidNumberMapper(it.id) }
+    val activityMap = activities.associateBy { uidNumberMapper(it.id) }
+
 
     val statementUuid = Uuid.fromLongs(
         primaryStatementEntity.statementIdHi,
@@ -223,20 +248,17 @@ fun StatementEntities.toModel(
 
     return XapiStatement(
         id = statementUuid.takeIf { !primaryStatementEntity.isSubStatement },
-        actor = actors[primaryStatementEntity.statementActorUid] ?: throw IllegalStateException("no primary actor"),
-        verb = this.verbEntities.first {
-            primaryStatementEntity.statementVerbUid == it.verbEntity.verbUid
-        }.toModel(),
+        actor = actorMap[primaryStatementEntity.statementActorUid] ?: throw IllegalStateException("no primary actor"),
+        verb = verbMap[primaryStatementEntity.statementVerbUid] ?: XapiVerb(
+            id = primaryStatementEntity.statementVerbId
+        ),
         `object` = when(primaryStatementEntity.statementObjectType) {
             StatementEntityObjectTypeEnum.ACTIVITY -> {
-                val entitiesForObject = activityEntities.first {
-                    it.activityEntity.actUid == primaryStatementEntity.statementObjectUid1
-                }
-
-                XapiActivityStatementObject(
+                XapiActivity(
                     objectType = XapiObjectType.Activity,
-                    id = entitiesForObject.activityEntity.actIdIri,
-                    definition = entitiesForObject.toModel(json),
+                    id = primaryStatementEntity.statementObjectActivityId
+                        ?: throw IllegalStateException("Statement.toModel: object is an activity but statementObjectActivityId is null"),
+                    definition = activityMap[primaryStatementEntity.statementObjectUid1]?.definition,
                 )
             }
 
@@ -245,6 +267,10 @@ fun StatementEntities.toModel(
 
                 this.toModel(
                     json = json,
+                    uidNumberMapper = uidNumberMapper,
+                    actors = actors,
+                    activities = activities,
+                    verbs = verbs,
                     statementIdHi = substatementUuidVals.first,
                     statementIdLo = substatementUuidVals.second,
                 )
@@ -260,15 +286,15 @@ fun StatementEntities.toModel(
             }
 
             StatementEntityObjectTypeEnum.AGENT -> {
-                actorEntities.first {
-                    it.actor.actorUid == primaryStatementEntity.statementObjectUid1
-                }.actor.toAgentModel()
+                val actor = actorMap[primaryStatementEntity.statementObjectUid1]
+                    ?: throw IllegalStateException("Object type is agent, but agent not in actor list")
+                actor as XapiAgent
             }
 
             StatementEntityObjectTypeEnum.GROUP -> {
-                actorEntities.first {
-                    it.actor.actorUid == primaryStatementEntity.statementObjectUid1
-                }.toGroupModel()
+                val actor = actorMap[primaryStatementEntity.statementObjectUid1]
+                    ?: throw IllegalStateException("Object type is group, but group not in actor list")
+                actor as XapiGroup
             }
         },
         result = if(primaryStatementEntity.hasResult) {
@@ -300,7 +326,7 @@ fun StatementEntities.toModel(
             val hasRegistration = primaryStatementEntity.contextRegistrationHi != 0L &&
                     primaryStatementEntity.contextRegistrationLo != 0L
             XapiContext(
-                instructor = actors[primaryStatementEntity.contextInstructorActorUid],
+                instructor = actorMap[primaryStatementEntity.contextInstructorActorUid],
                 registration = if(hasRegistration) {
                     Uuid.fromLongs(
                         primaryStatementEntity.contextRegistrationHi,
@@ -312,7 +338,7 @@ fun StatementEntities.toModel(
                 language = primaryStatementEntity.contextLanguage,
                 platform = primaryStatementEntity.contextPlatform,
                 revision = primaryStatementEntity.contextRevision,
-                team = actors[primaryStatementEntity.contextTeamActorUid],
+                team = actorMap[primaryStatementEntity.contextTeamActorUid],
             )
         }else {
             null
@@ -322,7 +348,7 @@ fun StatementEntities.toModel(
         }else {
             null
         },
-        authority = actors[primaryStatementEntity.authorityActorUid],
+        authority = actorMap[primaryStatementEntity.authorityActorUid],
         version = primaryStatementEntity.statementVersion,
     )
 }

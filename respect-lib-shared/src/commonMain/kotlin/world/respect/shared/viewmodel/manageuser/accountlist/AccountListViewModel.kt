@@ -23,6 +23,7 @@ import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.navigation.AssignmentList
+import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
@@ -207,6 +208,17 @@ class AccountListViewModel(
                 NavCommand.Navigate(
                     PersonDetail(
                         guid = it.session.account.userGuid
+                    )
+                )
+            )
+        }
+    }
+    fun onClickEnterInviteCode() {
+        uiState.value.selectedAccount?.also {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    EnterInviteCode(
+                        schoolUrlStr = it.session.account.school.self.toString(),
                     )
                 )
             )

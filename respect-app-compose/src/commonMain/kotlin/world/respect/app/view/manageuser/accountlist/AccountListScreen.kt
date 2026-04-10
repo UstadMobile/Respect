@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -30,6 +31,8 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_account
 import world.respect.shared.generated.resources.developed_by
+import world.respect.shared.generated.resources.enter_code_label
+import world.respect.shared.generated.resources.enter_invite_code_message
 import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.license_text
 import world.respect.shared.generated.resources.logout
@@ -51,6 +54,7 @@ fun AccountListScreen(
         onClickLogout = viewModel::onClickLogout,
         onClickFamilyPerson = viewModel::onClickFamilyPerson,
         onClickProfile = viewModel::onClickProfile,
+        onClickProfileonClickEnterInviteCode = viewModel::onClickEnterInviteCode,
     )
 }
 
@@ -60,6 +64,7 @@ fun AccountListScreen(
     onClickAccount: (RespectAccount) -> Unit,
     onClickFamilyPerson: (Person) -> Unit,
     onClickAddAccount: () -> Unit,
+    onClickEnterInviteCode: () -> Unit,
     onClickLogout: () -> Unit,
     onClickProfile: () -> Unit,
 ) {
@@ -87,6 +92,20 @@ fun AccountListScreen(
                                 Text(stringResource(Res.string.logout))
                             }
                         }
+                    }
+                )
+            }
+
+            item("enter_invite_code") {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onClickEnterInviteCode()
+                    },
+                    headlineContent = {
+                        Text(stringResource(Res.string.enter_code_label))
+                    },
+                    leadingContent = {
+                        Icon(Icons.Default.Code, contentDescription = "")
                     }
                 )
             }

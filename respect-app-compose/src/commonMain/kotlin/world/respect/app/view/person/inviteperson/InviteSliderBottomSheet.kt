@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,9 +16,9 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -98,13 +99,17 @@ fun InviteSliderBottomSheet(
     LaunchedEffect(pagerState.currentPage) {
         onPageChange(pagerState.currentPage)
     }
-
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     if (uiState.showSlider) {
-        ModalBottomSheet(onDismissRequest = onDismiss) {
+        ModalBottomSheet(onDismissRequest = onDismiss,
+            sheetState = sheetState
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(420.dp)
+                    .height(390.dp)
             ) {
                 HorizontalPager(
                     state = pagerState,
@@ -129,14 +134,16 @@ fun InviteSliderBottomSheet(
                             modifier = Modifier.size(200.dp).padding(8.dp)
                                 .align(Alignment.CenterHorizontally)
                         )
-                        ListItem(
-                            headlineContent = {
-                                Text(item.title)
-                            },
-                            supportingContent = {
-                                Text(item.description)
-                            }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = item.title,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.fillMaxWidth(),
                         )
+                        Text(item.description)
                     }
                 }
 

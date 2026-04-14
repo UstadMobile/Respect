@@ -10,9 +10,13 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.xapi.model.XapiAccount
+import world.respect.datalayer.school.xapi.model.XapiAgent
+import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
@@ -33,12 +37,13 @@ import kotlin.getValue
 data class StudentGroupingEditUiState(
     val nameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val selectedStudentIds: Set<String> = emptySet()
+    val selectedStudentIds: List<String> = emptyList(),
+    val selectedStudentNames: List<String> = emptyList()
 )
 
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    var accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
@@ -63,7 +68,7 @@ class StudentGroupingEditViewModel(
         }
     }
 
-    private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+    private val studentPagingSource = pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     init {
 
@@ -85,6 +90,19 @@ class StudentGroupingEditViewModel(
     }
 
     fun onClickSave() {
+        val schoolSelfUrl = accountManager.activeAccount?.school?.self
+        val members = _uiState.value.selectedStudentNames.map { studentName ->
+            XapiAgent(
+                name = studentName,
+                objectType = XapiObjectType.Agent,
+                account = XapiAccount(
+                    name = studentName,
+                    homePage = schoolSelfUrl.toString()
+                )
+            )
+        }
+
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 StudentGroupingDetail
@@ -92,15 +110,25 @@ class StudentGroupingEditViewModel(
         )
     }
 
-    //this needs to be changed according to xapi
     fun onStudentCheckedChange(person: Person, isChecked: Boolean) {
         _uiState.update { prev ->
-            val updated = if (isChecked) {
+
+            val updatedIds = if (isChecked) {
                 prev.selectedStudentIds + person.guid
             } else {
                 prev.selectedStudentIds - person.guid
             }
-            prev.copy(selectedStudentIds = updated)
+
+            val updatedNames = if (isChecked) {
+                prev.selectedStudentNames + person.fullName()
+            } else {
+                prev.selectedStudentNames - person.fullName()
+            }
+
+            prev.copy(
+                selectedStudentIds = updatedIds,
+                selectedStudentNames = updatedNames
+            )
         }
     }
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "8779f265b6132b6de7f30b779c29dafa",
+    "identityHash": "1e651060b244d0b1140417d821cf7c54",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2067,8 +2067,14 @@
       },
       {
         "tableName": "StatementContextActivityJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajToHash` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT, `scajEtag` INTEGER NOT NULL, PRIMARY KEY(`scajFromStatementIdHi`, `scajFromStatementIdLo`, `scajToHash`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL, PRIMARY KEY(`scajUid`))",
         "fields": [
+          {
+            "fieldPath": "scajUid",
+            "columnName": "scajUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "scajFromStatementIdHi",
             "columnName": "scajFromStatementIdHi",
@@ -2078,12 +2084,6 @@
           {
             "fieldPath": "scajFromStatementIdLo",
             "columnName": "scajFromStatementIdLo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scajToHash",
-            "columnName": "scajToHash",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2102,27 +2102,20 @@
           {
             "fieldPath": "scajToActivityId",
             "columnName": "scajToActivityId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "scajEtag",
-            "columnName": "scajEtag",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "scajFromStatementIdHi",
-            "scajFromStatementIdLo",
-            "scajToHash"
+            "scajUid"
           ]
         }
       },
       {
         "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextRevision` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `contextTeamActorUid` INTEGER NOT NULL, `statementLct` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, `statementVersion` TEXT, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementVerbId` TEXT NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectActivityId` TEXT, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextRevision` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `contextTeamActorUid` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, `statementVersion` TEXT, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
         "fields": [
           {
             "fieldPath": "statementIdHi",
@@ -2149,10 +2142,21 @@
             "notNull": true
           },
           {
+            "fieldPath": "statementVerbId",
+            "columnName": "statementVerbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "statementObjectType",
             "columnName": "statementObjectType",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "statementObjectActivityId",
+            "columnName": "statementObjectActivityId",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "statementObjectUid1",
@@ -2289,12 +2293,6 @@
           {
             "fieldPath": "contextTeamActorUid",
             "columnName": "contextTeamActorUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "statementLct",
-            "columnName": "statementLct",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2452,7 +2450,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8779f265b6132b6de7f30b779c29dafa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1e651060b244d0b1140417d821cf7c54')"
     ]
   }
 }

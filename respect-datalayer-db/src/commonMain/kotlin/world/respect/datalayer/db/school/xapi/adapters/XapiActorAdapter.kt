@@ -2,8 +2,9 @@ package world.respect.datalayer.db.school.xapi.adapters
 
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
+import world.respect.datalayer.db.school.xapi.entities.ActorEntityTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
-import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
+import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
@@ -19,14 +20,7 @@ data class ActorEntities(
     val groupMemberJoins: List<GroupMemberActorJoin> = emptyList(),
 )
 
-internal val XapiActor.idStr: String?
-    get() = when {
-        account != null -> "${account?.name}@${account?.homePage}"
-        mbox != null -> mbox
-        mbox_sha1sum != null -> mbox_sha1sum
-        openid != null -> openid
-        else -> null
-    }
+
 
 fun XapiActor.identifierHash(uidNumberMapper: UidNumberMapper): Long {
     return idStr?.let { uidNumberMapper(it) } ?: 0
@@ -55,7 +49,7 @@ fun XapiAgent.toActorEntity(
         actorOpenid = openid,
         actorAccountName = account?.name,
         actorAccountHomePage = account?.homePage,
-        actorObjectType = XapiEntityObjectTypeFlags.AGENT,
+        actorObjectType = ActorEntityTypeEnum.AGENT,
     )
 }
 
@@ -95,7 +89,7 @@ fun XapiGroup.toGroupEntities(
         }else {
             identifierHash(uidNumberMapper)
         },
-        actorObjectType = XapiEntityObjectTypeFlags.GROUP,
+        actorObjectType = ActorEntityTypeEnum.GROUP,
         actorName = name,
         actorMbox = mbox,
         actorMbox_sha1sum = mbox_sha1sum,
@@ -149,17 +143,14 @@ fun ActorEntities.toGroupModel(): XapiGroup {
 
 fun ActorEntities.toModel(): XapiActor {
     return when(actor.actorObjectType) {
-        XapiEntityObjectTypeFlags.AGENT -> {
+        ActorEntityTypeEnum.AGENT -> {
             actor.toAgentModel()
         }
 
-        XapiEntityObjectTypeFlags.GROUP -> {
+        ActorEntityTypeEnum.GROUP -> {
             this.toGroupModel()
         }
 
-        else -> {
-            throw IllegalArgumentException()
-        }
     }
 }
 

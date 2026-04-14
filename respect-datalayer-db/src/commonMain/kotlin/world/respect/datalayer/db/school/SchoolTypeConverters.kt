@@ -11,6 +11,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
 import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.entities.ActorEntityTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.school.model.AssignmentAssigneeRefTypeEnum
 import world.respect.datalayer.school.model.ClassInviteModeEnum
@@ -172,6 +174,25 @@ class SchoolTypeConverters {
         return XapiInteractionTypeEnum.fromDbFlag(value)
     }
 
+    @TypeConverter
+    fun fromActorEntityTypeEnum(value: ActorEntityTypeEnum): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toActorEntityTypeEnum(value: Int): ActorEntityTypeEnum {
+        return ActorEntityTypeEnum.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromStatementContextActivityJoinTypeEnum(value: StatementContextActivityJoinTypeEnum): Int {
+        return value.dbFlag
+    }
+
+    @TypeConverter
+    fun toStatementContextActivityJoinTypeEnum(value: Int): StatementContextActivityJoinTypeEnum {
+        return StatementContextActivityJoinTypeEnum.fromDbFlag(value)
+    }
 
 
 }

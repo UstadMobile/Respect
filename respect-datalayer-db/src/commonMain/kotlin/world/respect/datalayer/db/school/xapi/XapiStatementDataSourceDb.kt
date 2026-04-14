@@ -9,9 +9,6 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.domain.xapi.StoreActivitiesUseCase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
-import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
-import world.respect.datalayer.db.school.xapi.ext.insertOrUpdateActorsIfNameChanged
-import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 import world.respect.datalayer.school.xapi.model.XapiAccount
@@ -53,7 +50,6 @@ class XapiStatementDataSourceDb(
         val statementEntity = exactStatement.toEntities(
             uidNumberMapper = uidNumberMapper,
             json = json,
-            exactJson = json.encodeToString(XapiStatement.serializer(), exactStatement),
             isSubStatement = false,
         )
 
@@ -63,8 +59,9 @@ class XapiStatementDataSourceDb(
             statementEntity.statementEntityJson
         )
 
+        /*
         statementEntity.actorEntities.map { it.actor }
-            .filter { it.actorObjectType == XapiEntityObjectTypeFlags.AGENT }
+            .filter { it.actorObjectType == ActorEntityTypeEnum.AGENT }
             .takeIf { it.isNotEmpty() }
             ?.also { agents ->
                 //Name is the only property that could be updated on the Agent. All other
@@ -74,7 +71,7 @@ class XapiStatementDataSourceDb(
 
         //Handle groups
         statementEntity.actorEntities.filter {
-            it.actor.actorObjectType == XapiEntityObjectTypeFlags.GROUP
+            it.actor.actorObjectType == ActorEntityTypeEnum.GROUP
         }.distinctBy {
             it.actor.actorUid
         }.forEach { group ->
@@ -101,6 +98,8 @@ class XapiStatementDataSourceDb(
         )
 
         storeActivitiesUseCase(statementEntity.activityEntities)
+
+         */
     }
 
 

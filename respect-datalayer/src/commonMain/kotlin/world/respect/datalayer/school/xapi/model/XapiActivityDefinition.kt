@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonElement
  */
 @Serializable
 @SerialName("Activity")
-data class XapiActivity(
+data class XapiActivityDefinition(
     val name: Map<String, String>? = null,
     val description: Map<String, String>? = null,
     val type: String? = null,

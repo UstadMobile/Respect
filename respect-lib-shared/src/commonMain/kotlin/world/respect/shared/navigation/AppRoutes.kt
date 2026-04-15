@@ -764,6 +764,24 @@ class PlaylistShare private constructor(
         )
     }
 }
+
+@Serializable
+class ExternalLinkEdit private constructor(
+    private val resultDestStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    companion object {
+        fun create(
+            resultDest: ResultDest? = null,
+        ) = ExternalLinkEdit(
+            resultDestStr = resultDest.encodeToJsonStringOrNull()
+        )
+    }
+}
+
 @Serializable
 data class CreateAccountSetUsername(
     val guid: String

@@ -615,6 +615,13 @@
     <string name="send_link_via_email">Send link via email</string>
     <string name="share_link">Share link</string>
     <string name="select_playlist">Select playlist</string>
+    <string name="choose_item_type">Choose Item Type:</string>
+    <string name="browse">Browse</string>
+    <string name="browse_description">Add from RESPECT apps, lessons, playlists</string>
+    <string name="use_link">Use Link</string>
+    <string name="use_link_description">Add from an external link</string>
+    <string name="external_link">External Link</string>
+
 
 
 

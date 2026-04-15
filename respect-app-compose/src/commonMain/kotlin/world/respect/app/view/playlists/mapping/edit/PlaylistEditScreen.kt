@@ -16,7 +16,9 @@ import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -54,7 +56,10 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_item
 import world.respect.shared.generated.resources.add_new_playlist
 import world.respect.shared.generated.resources.add_section
+import world.respect.shared.generated.resources.browse
+import world.respect.shared.generated.resources.browse_description
 import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.choose_item_type
 import world.respect.shared.generated.resources.choose_section_type
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.description
@@ -69,6 +74,8 @@ import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.section_title
 import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
+import world.respect.shared.generated.resources.use_link
+import world.respect.shared.generated.resources.use_link_description
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.playlists.mapping.edit.MovingItemState
@@ -98,6 +105,9 @@ fun PlaylistEditScreenForViewModel(
         onClickMoveItemToSection = viewModel::onClickMoveItemToSection,
         onDismissMoveDialog = viewModel::onDismissMoveDialog,
         onItemsReordered = viewModel::onItemsReordered,
+        onDismissAddItemTypeBottomSheet = viewModel::onDismissAddItemTypeBottomSheet,
+        onClickAddItemBrowse = viewModel::onClickAddItemBrowse,
+        onClickAddItemUseLink = viewModel::onClickAddItemUseLink,
     )
 }
 
@@ -119,6 +129,9 @@ fun PlaylistEditScreen(
     onClickMoveItemToSection: (Int) -> Unit = {},
     onDismissMoveDialog: () -> Unit = {},
     onItemsReordered: (Int, List<Any>) -> Unit = { _, _ -> },
+    onDismissAddItemTypeBottomSheet: () -> Unit = {},
+    onClickAddItemBrowse: () -> Unit = {},
+    onClickAddItemUseLink: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -132,7 +145,6 @@ fun PlaylistEditScreen(
             isError = uiState.titleError != null,
             supportingText = {
                 Text(uiTextStringResource(uiState.titleError ?: Res.string.required.asUiText()))
-
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -195,10 +207,7 @@ fun PlaylistEditScreen(
                         onClickAddItem = { onClickAddItem(sectionIndex) },
                         onClickAddPlaylist = { onClickAddPlaylist(sectionIndex) },
                         onClickDeleteItem = { itemIndex ->
-                            onClickDeleteItem(
-                                sectionIndex,
-                                itemIndex
-                            )
+                            onClickDeleteItem(sectionIndex, itemIndex)
                         },
                         onClickMoveItem = { itemIndex -> onClickMoveItem(sectionIndex, itemIndex) },
                         onItemsReordered = { items -> onItemsReordered(sectionIndex, items) },
@@ -214,6 +223,14 @@ fun PlaylistEditScreen(
         SectionTypeBottomSheet(
             onDismiss = onDismissSectionTypeBottomSheet,
             onClickSectionType = onClickSectionType,
+        )
+    }
+
+    if (uiState.isAddItemTypeBottomSheetVisible) {
+        AddItemTypeBottomSheet(
+            onDismiss = onDismissAddItemTypeBottomSheet,
+            onClickBrowse = onClickAddItemBrowse,
+            onClickUseLink = onClickAddItemUseLink,
         )
     }
 
@@ -459,7 +476,7 @@ private fun ItemMenuButton(
     ) {
         Icon(
             imageVector = Icons.Filled.MoreVert,
-            contentDescription = stringResource(Res.string.move)
+            contentDescription = stringResource(Res.string.move),
         )
     }
     DropdownMenu(
@@ -492,23 +509,23 @@ private fun MoveToSectionDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(Res.string.move_to_section)) },
         text = {
-                compatibleSections.forEach { section ->
-                    val actualSection = allSections[section.sectionIndex]
-                    val sectionTitle = actualSection.metadata.title
-                        .takeIf { it.isNotBlank() }
-                        ?: stringResource(Res.string.section_title)
-                    val itemCount = (actualSection.navigation?.size ?: 0) +
-                            (actualSection.publications?.size ?: 0)
-                    ListItem(
-                        headlineContent = { Text(text = sectionTitle) },
-                        supportingContent = {
-                            Text(text = stringResource(Res.string.n_items, itemCount))
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onClickSection(section.sectionIndex) },
-                    )
-                }
+            compatibleSections.forEach { section ->
+                val actualSection = allSections[section.sectionIndex]
+                val sectionTitle = actualSection.metadata.title
+                    .takeIf { it.isNotBlank() }
+                    ?: stringResource(Res.string.section_title)
+                val itemCount = (actualSection.navigation?.size ?: 0) +
+                        (actualSection.publications?.size ?: 0)
+                ListItem(
+                    headlineContent = { Text(text = sectionTitle) },
+                    supportingContent = {
+                        Text(text = stringResource(Res.string.n_items, itemCount))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onClickSection(section.sectionIndex) },
+                )
+            }
         },
         confirmButton = {},
         dismissButton = {
@@ -557,6 +574,49 @@ private fun SectionTypeBottomSheet(
             description = stringResource(Res.string.learning_item_section_description),
             onClick = { onClickSectionType(PlaylistSectionType.PUBLICATION) },
             testTag = "section_type_learning_item",
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddItemTypeBottomSheet(
+    onDismiss: () -> Unit,
+    onClickBrowse: () -> Unit,
+    onClickUseLink: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Text(
+            text = stringResource(Res.string.choose_item_type),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.defaultItemPadding(),
+        )
+        HorizontalDivider()
+        SectionTypeItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = stringResource(Res.string.browse),
+                )
+            },
+            title = stringResource(Res.string.browse),
+            description = stringResource(Res.string.browse_description),
+            onClick = onClickBrowse,
+            testTag = "add_item_type_browse",
+        )
+        SectionTypeItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Link,
+                    contentDescription = stringResource(Res.string.use_link),
+                )
+            },
+            title = stringResource(Res.string.use_link),
+            description = stringResource(Res.string.use_link_description),
+            onClick = onClickUseLink,
+            testTag = "add_item_type_use_link",
         )
         Spacer(modifier = Modifier.height(16.dp))
     }

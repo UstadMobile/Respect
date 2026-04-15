@@ -48,6 +48,7 @@ import world.respect.app.view.person.passkeyList.PasskeyListScreen
 import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
+import world.respect.app.view.playlists.mapping.edit.ExternalLinkEditScreenForViewModel
 import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
 import world.respect.app.view.playlists.mapping.list.PlaylistListScreenForViewModel
 import world.respect.app.view.playlists.mapping.share.PlaylistShareScreenForViewModel
@@ -90,6 +91,7 @@ import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.EnterInviteCode
+import world.respect.shared.navigation.ExternalLinkEdit
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
@@ -570,6 +572,14 @@ fun AppNavHost(
         }
         composable<PlaylistShare> {
             PlaylistShareScreenForViewModel(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<ExternalLinkEdit> {
+            ExternalLinkEditScreenForViewModel(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

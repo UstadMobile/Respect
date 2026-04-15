@@ -32,12 +32,14 @@ import world.respect.shared.generated.resources.learning_item_section
 import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
+import world.respect.shared.navigation.ExternalLinkEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.ResultDest
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -67,6 +69,7 @@ data class PlaylistEditUiState(
     val isSectionTypeDialogVisible: Boolean = false,
     val titleError: UiText? = null,
     val movingItem: MovingItemState? = null,
+    val addItemTypeSectionIndex: Int? = null,
 ) {
     val title: String
         get() = feed?.metadata?.title ?: ""
@@ -78,7 +81,10 @@ data class PlaylistEditUiState(
         get() = feed?.groups ?: emptyList()
 
     val hasErrors: Boolean
-        get() = titleError!=null
+        get() = titleError != null
+
+    val isAddItemTypeBottomSheetVisible: Boolean
+        get() = addItemTypeSectionIndex != null
 }
 
 class PlaylistEditViewModel(
@@ -91,7 +97,6 @@ class PlaylistEditViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
     private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
-
 
     private val route: PlaylistEdit = savedStateHandle.toRoute()
 
@@ -249,7 +254,6 @@ class PlaylistEditViewModel(
                 restoreAppBarState()
             }
         }
-
     }
 
     fun restoreAppBarState() {
@@ -452,12 +456,41 @@ class PlaylistEditViewModel(
             prev.copy(feed = prev.feed?.copy(groups = sections))
         }
     }
-
     fun onClickAddItem(sectionIndex: Int) {
+        _uiState.update { it.copy(addItemTypeSectionIndex = sectionIndex) }
+    }
+
+    fun onDismissAddItemTypeBottomSheet() {
+        _uiState.update { it.copy(addItemTypeSectionIndex = null) }
+    }
+    fun onClickAddItemBrowse() {
+        val sectionIndex = _uiState.value.addItemTypeSectionIndex
+            ?: throw IllegalStateException(
+                "onClickAddItemBrowse called but addItemTypeSectionIndex is null"
+            )
+        _uiState.update { it.copy(addItemTypeSectionIndex = null) }
         pendingAddItemSectionIndex = sectionIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = RespectAppLauncher.create(
+                    resultDest = RouteResultDest(
+                        resultPopUpTo = route,
+                        resultKey = KEY_LEARNING_UNIT,
+                    )
+                ),
+            )
+        )
+    }
+    fun onClickAddItemUseLink() {
+        val sectionIndex = _uiState.value.addItemTypeSectionIndex
+            ?: throw IllegalStateException(
+                "onClickAddItemUseLink called but addItemTypeSectionIndex is null"
+            )
+        _uiState.update { it.copy(addItemTypeSectionIndex = null) }
+        pendingAddItemSectionIndex = sectionIndex
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = ExternalLinkEdit.create(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = KEY_LEARNING_UNIT,
@@ -487,11 +520,10 @@ class PlaylistEditViewModel(
         if (feed.metadata.title.isBlank()) {
             _uiState.update {
                 it.copy(
-                    titleError =
-                        Res.string.required_field.asUiText()
+                    titleError = Res.string.required_field.asUiText()
                 )
             }
-            if(uiState.value.hasErrors)
+            if (uiState.value.hasErrors)
                 return
         }
 

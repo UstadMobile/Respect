@@ -56,8 +56,8 @@ fun XapiStatement.allDefinedActivities(): List<XapiActivity> {
 
         (`object` as? XapiActivity)?.takeIf { it.definition != null }?.also { add(it) }
 
-        (`object` as? XapiStatement)?.also {
-            addAll(it.allDefinedActivities())
+        (`object` as? XapiStatement)?.also { subStatement ->
+            addAll(subStatement.allDefinedActivities())
         }
 
         addAllDefinedActivitiesInternal(context?.contextActivities?.parent)

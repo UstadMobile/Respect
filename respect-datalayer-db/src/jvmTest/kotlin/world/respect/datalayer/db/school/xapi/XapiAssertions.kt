@@ -5,6 +5,7 @@ import world.respect.datalayer.school.xapi.model.XapiActivityDefinition
 import world.respect.datalayer.school.xapi.model.XapiActivity
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
+import world.respect.datalayer.school.xapi.model.XapiContextActivities
 import world.respect.datalayer.school.xapi.model.XapiGroup
 import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.XapiStatement
@@ -15,6 +16,51 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+
+fun assertContextActivitiesMatches(
+    expected: XapiContextActivities?,
+    actual: XapiContextActivities?,
+) {
+    fun assertContextActivityMatch(
+        expected: List<XapiActivity>?,
+        actual: List<XapiActivity>?,
+    ) {
+        if(expected != null) {
+            assertNotNull(actual)
+            assertEquals(expected.size, actual.size)
+
+            expected.forEach { expectedActivity ->
+                val actualActivity = actual.firstOrNull {
+                    it.id == expectedActivity.id
+                }
+                assertNotNull(actualActivity)
+
+                //The statement received might have only the id. The canonical response (actual)
+                //will include the definition if available, so we do not assert that if the
+                //expected activity definition is null that the actual activity definition will
+                //also be null
+                expectedActivity.definition?.also {
+                    val actualDefinition = actualActivity.definition
+                    assertNotNull(actualDefinition)
+                    assertXapiActivityDefinitionMatches(it, actualDefinition)
+                }
+            }
+        }else {
+            assertNull(actual)
+        }
+    }
+
+    if(expected != null) {
+        assertNotNull(actual)
+        assertContextActivityMatch(expected.parent, actual.parent)
+        assertContextActivityMatch(expected.grouping, actual.grouping)
+        assertContextActivityMatch(expected.category, actual.category)
+        assertContextActivityMatch(expected.other, actual.other)
+    }else {
+        assertNull(actual)
+    }
+}
+
 /*
  * Exact equality checks as provided by the data classes don't make sense here: e.g. the member list
  * is unordered as per https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2422-when-the-actor-objecttype-is-group
@@ -22,7 +68,6 @@ import kotlin.test.assertTrue
  * statement may include a useless Result object with no properties (as they are all optional).
  *
  */
-
 fun assertXapiStatementMatches(
     expected: XapiStatement,
     actual : XapiStatement,
@@ -48,7 +93,7 @@ fun assertXapiStatementMatches(
             if(expectedDefinition != null) {
                 val actualDefinition = actualObject.definition
                 assertNotNull(actualDefinition)
-                assertXapiActivityMatches(expectedDefinition, actualDefinition)
+                assertXapiActivityDefinitionMatches(expectedDefinition, actualDefinition)
             }else {
                 assertNull(actualObject.definition)
             }
@@ -128,6 +173,11 @@ fun assertXapiStatementMatches(
         }else {
             assertNull(actualContext.team)
         }
+
+        assertContextActivitiesMatches(
+            expected = expectedContext.contextActivities,
+            actual = actualContext.contextActivities
+        )
     }else {
         assertNull(actualContext)
     }
@@ -163,7 +213,7 @@ fun assertLangMapEquals(
     }
 }
 
-fun assertXapiActivityMatches(
+fun assertXapiActivityDefinitionMatches(
     expected: XapiActivityDefinition,
     actual: XapiActivityDefinition
 ) {
@@ -177,6 +227,7 @@ fun assertXapiActivityMatches(
             assertLangMapEquals(interaction.description, actual[index].description)
         }
     }
+
 
     assertLangMapEquals(expected.name, actual.name)
     assertLangMapEquals(expected.description, actual.description)

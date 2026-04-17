@@ -16,6 +16,8 @@ import world.respect.datalayer.school.xapi.model.XapiInteractionTypeEnum
  *        handled by adding a property here for each field e.g. choicesIsNull, scaleIsNull, etc.
  *        This can be done more efficiently using a single integer field with a bitmask and flag
  *        approach.
+ * @param objectTypeSet the objectType on an Activity can be omitted or set to Activity. If true,
+ *        included, otherwise, false,
  */
 data class ActivityEntity(
 
@@ -35,6 +37,8 @@ data class ActivityEntity(
     val actLct: Long = 0,
 
     val actFlags: Int = 0,
+
+    val actObjectTypeSet: Boolean = false,
 
 ) {
     companion object {

@@ -22,6 +22,7 @@ import world.respect.datalayer.school.xapi.ext.hasFlag
 import world.respect.datalayer.school.xapi.ext.takeIfNotEmpty
 import world.respect.datalayer.school.xapi.model.XapiActivity
 import world.respect.datalayer.school.xapi.model.XapiActivityDefinition
+import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.libutil.ext.toEmptyIfNull
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -51,12 +52,13 @@ data class ActivityEntities(
 )
 
 
-fun XapiActivityDefinition?.toEntities(
-    activityId: String,
+fun XapiActivity.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
-): ActivityEntities {
-    val activityUid = uidNumberMapper(activityId)
+): ActivityEntities? {
+    val actDefinition = definition ?: return null
+
+    val activityUid = uidNumberMapper(id)
 
     fun Map<String, String>.toLangMapEntries(
         property: ActivityLangMapEntryPropEnum,
@@ -86,24 +88,24 @@ fun XapiActivityDefinition?.toEntities(
     }
 
     val interactionEntitiesAndLangMaps = buildList {
-        this@toEntities?.choices?.map {
+        actDefinition.choices?.map {
             it.toEntities(ActivityInteractionEntityPropEnum.CHOICES)
         }?.also { addAll(it) }
 
-        this@toEntities?.scale?.map {
+        actDefinition.scale?.map {
             it.toEntities(ActivityInteractionEntityPropEnum.SCALE)
         }?.also { addAll(it) }
 
-        this@toEntities?.source?.map {
+        actDefinition.source?.map {
             it.toEntities(ActivityInteractionEntityPropEnum.SOURCE)
         }?.also { addAll(it) }
 
 
-        this@toEntities?.target?.map {
+        actDefinition.target?.map {
             it.toEntities(ActivityInteractionEntityPropEnum.TARGET)
         }?.also { addAll(it) }
 
-        this@toEntities?.steps?.map {
+        actDefinition.steps?.map {
             it.toEntities(ActivityInteractionEntityPropEnum.STEPS)
         }?.also { addAll(it) }
     }
@@ -111,35 +113,36 @@ fun XapiActivityDefinition?.toEntities(
     return ActivityEntities(
         activityEntity = ActivityEntity(
             actUid = activityUid,
-            actIdIri = activityId,
-            actType = this?.type,
-            actMoreInfo = this?.moreInfo,
-            actInteractionType = this?.interactionType,
-            actCorrectResponsePatterns = this?.correctResponsesPattern?.let {
+            actIdIri = id,
+            actObjectTypeSet = objectType != null,
+            actType = actDefinition.type,
+            actMoreInfo = actDefinition.moreInfo,
+            actInteractionType = actDefinition.interactionType,
+            actCorrectResponsePatterns = actDefinition.correctResponsesPattern?.let {
                 json.encodeToString(it)
             },
             actFlags = flagsOf(
-                ActivityEntity.FLAG_EXTENSIONS_NULL to (this?.extensions == null),
-                ActivityEntity.FLAG_CHOICES_NULL to (this?.choices == null),
-                ActivityEntity.FLAG_SCALE_NULL to (this?.scale == null),
-                ActivityEntity.FLAG_SOURCE_NULL to (this?.source == null),
-                ActivityEntity.FLAG_TARGET_NULL to (this?.target == null),
-                ActivityEntity.FLAG_STEPS_NULL to (this?.steps == null),
+                ActivityEntity.FLAG_EXTENSIONS_NULL to (actDefinition.extensions == null),
+                ActivityEntity.FLAG_CHOICES_NULL to (actDefinition.choices == null),
+                ActivityEntity.FLAG_SCALE_NULL to (actDefinition.scale == null),
+                ActivityEntity.FLAG_SOURCE_NULL to (actDefinition.source == null),
+                ActivityEntity.FLAG_TARGET_NULL to (actDefinition.target == null),
+                ActivityEntity.FLAG_STEPS_NULL to (actDefinition.steps == null),
             )
         ),
         activityLangMapEntries = buildList {
-            this@toEntities?.name?.toLangMapEntries(
+            actDefinition.name?.toLangMapEntries(
                 property = ActivityLangMapEntryPropEnum.NAME, interactionId = null
             )?.also { addAll(it) }
 
-            this@toEntities?.description?.toLangMapEntries(
+            actDefinition.description?.toLangMapEntries(
                 property = ActivityLangMapEntryPropEnum.DESCRIPTION, interactionId = null
             )?.also { addAll(it) }
 
             addAll(interactionEntitiesAndLangMaps.flatMap { it.second })
         },
         activityInteractionEntities = interactionEntitiesAndLangMaps.map { it.first },
-        activityExtensionEntities = this?.extensions?.map { (key, value) ->
+        activityExtensionEntities = actDefinition.extensions?.map { (key, value) ->
             ActivityExtensionEntity(
                 aeeActivityUid = activityUid,
                 aeeKeyHash = uidNumberMapper(key),
@@ -158,7 +161,7 @@ fun XapiActivityDefinition?.toEntities(
  */
 fun ActivityEntities.toModel(
     json: Json
-) : XapiActivityDefinition {
+) : XapiActivity {
 
     fun interactionsForProp(
         interactionProp: ActivityInteractionEntityPropEnum,
@@ -176,33 +179,37 @@ fun ActivityEntities.toModel(
         it.isNotEmpty() || !activityEntity.actFlags.hasFlag(interactionProp.listIsNullFlag)
     }
 
-    return XapiActivityDefinition(
-        name = activityLangMapEntries.toLangMap {
-            it.almeProperty == ActivityLangMapEntryPropEnum.NAME
-        }.takeIfNotEmpty(),
-        description = activityLangMapEntries.toLangMap {
-            it.almeProperty == ActivityLangMapEntryPropEnum.DESCRIPTION
-        }.takeIfNotEmpty(),
-        type = activityEntity.actType,
-        extensions = activityExtensionEntities.takeIf {
-           !activityEntity.actFlags.hasFlag(ActivityEntity.FLAG_EXTENSIONS_NULL)
-        }?.associate {
-            it.aeeKey to json.decodeFromString(
-                JsonElement.serializer(), it.aeeJson
-            )
-        },
-        moreInfo = activityEntity.actMoreInfo,
-        interactionType = activityEntity.actInteractionType,
-        correctResponsesPattern = activityEntity.actCorrectResponsePatterns?.let {
-            json.decodeFromString(
-                ListSerializer(String.serializer()), it
-            )
-        },
-        choices = interactionsForProp(ActivityInteractionEntityPropEnum.CHOICES),
-        scale = interactionsForProp(ActivityInteractionEntityPropEnum.SCALE),
-        source = interactionsForProp(ActivityInteractionEntityPropEnum.SOURCE),
-        target = interactionsForProp(ActivityInteractionEntityPropEnum.TARGET),
-        steps = interactionsForProp(ActivityInteractionEntityPropEnum.STEPS),
+    return XapiActivity(
+        id = this.activityEntity.actIdIri,
+        objectType = XapiObjectType.Activity.takeIf { this.activityEntity.actObjectTypeSet },
+        definition = XapiActivityDefinition(
+            name = activityLangMapEntries.toLangMap {
+                it.almeProperty == ActivityLangMapEntryPropEnum.NAME
+            }.takeIfNotEmpty(),
+            description = activityLangMapEntries.toLangMap {
+                it.almeProperty == ActivityLangMapEntryPropEnum.DESCRIPTION
+            }.takeIfNotEmpty(),
+            type = activityEntity.actType,
+            extensions = activityExtensionEntities.takeIf {
+                !activityEntity.actFlags.hasFlag(ActivityEntity.FLAG_EXTENSIONS_NULL)
+            }?.associate {
+                it.aeeKey to json.decodeFromString(
+                    JsonElement.serializer(), it.aeeJson
+                )
+            },
+            moreInfo = activityEntity.actMoreInfo,
+            interactionType = activityEntity.actInteractionType,
+            correctResponsesPattern = activityEntity.actCorrectResponsePatterns?.let {
+                json.decodeFromString(
+                    ListSerializer(String.serializer()), it
+                )
+            },
+            choices = interactionsForProp(ActivityInteractionEntityPropEnum.CHOICES),
+            scale = interactionsForProp(ActivityInteractionEntityPropEnum.SCALE),
+            source = interactionsForProp(ActivityInteractionEntityPropEnum.SOURCE),
+            target = interactionsForProp(ActivityInteractionEntityPropEnum.TARGET),
+            steps = interactionsForProp(ActivityInteractionEntityPropEnum.STEPS),
+        )
     )
 }
 
@@ -220,31 +227,4 @@ fun XapiActivity.toContextActivityJoinEntity(
         scajToActivityUid = uidNumberMapper(this.id)
     )
 }
-fun List<ActivityEntities>.flattenActivities(): List<ActivityEntities> {
-    return distinctBy { it.activityEntity.actUid }.map { distinctActivity ->
-        val allByUid = this.filter {
-            it.activityEntity.actUid == distinctActivity.activityEntity.actUid
-        }
 
-        val interactions = allByUid.flatMap { it.activityInteractionEntities }
-
-        ActivityEntities(
-            activityEntity = ActivityEntity(
-                actUid = distinctActivity.activityEntity.actUid,
-                actIdIri = distinctActivity.activityEntity.actIdIri,
-                actType = allByUid.firstNotNullOfOrNull { it.activityEntity.actType },
-                actMoreInfo = allByUid.firstNotNullOfOrNull { it.activityEntity.actMoreInfo },
-                actInteractionType = allByUid.firstNotNullOfOrNull { it.activityEntity.actInteractionType },
-                actCorrectResponsePatterns = allByUid.firstNotNullOfOrNull {
-                    it.activityEntity.actCorrectResponsePatterns
-                },
-                actFlags = allByUid.firstOrNull {
-                    it.activityEntity.actFlags != 0
-                }?.activityEntity?.actFlags ?: 0,
-            ),
-            activityLangMapEntries = allByUid.flatMap { it.activityLangMapEntries },
-            activityExtensionEntities = allByUid.flatMap { it.activityExtensionEntities },
-            activityInteractionEntities = interactions,
-        )
-    }
-}

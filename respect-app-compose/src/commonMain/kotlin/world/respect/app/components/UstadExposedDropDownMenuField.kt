@@ -34,7 +34,6 @@ fun <T> RespectExposedDropDownMenuField(
 
     var expanded by remember { mutableStateOf(false) }
 
-
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = expanded,
@@ -75,7 +74,6 @@ fun <T> RespectExposedDropDownMenuField(
                 )
             }
         }
-
     }
 }
 

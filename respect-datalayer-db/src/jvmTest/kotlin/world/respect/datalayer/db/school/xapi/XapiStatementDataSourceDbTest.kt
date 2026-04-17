@@ -47,8 +47,16 @@ class XapiStatementDataSourceDbTest {
                 isSubStatement = false,
             )
 
-            val actors = statement.allActors().distinctMerged()
-            val activities = statement.allDefinedActivities()
+            val actors = statement.allActors().distinctMerged().map {
+                it.toEntities(uidNumberMapper)
+            }.map {
+                it.toModel()
+            }
+            val activities = statement.allDefinedActivities().distinctMerged().mapNotNull {
+                it.toEntities(uidNumberMapper, json)
+            }.map {
+                it.toModel(json)
+            }
             val verbs = statement.allDefinedVerbs()
 
             val primaryStatementEntity = statementEntities.statements.first { !it.isSubStatement }

@@ -28,8 +28,7 @@ fun List<XapiActivity>.toEntities(
     json: Json,
 ) : List<ActivityEntities> {
     return mapNotNull { contextActivityObj ->
-        contextActivityObj.definition?.toEntities(
-            activityId = contextActivityObj.id,
+        contextActivityObj.toEntities(
             uidNumberMapper = uidNumberMapper,
             json = json,
         )

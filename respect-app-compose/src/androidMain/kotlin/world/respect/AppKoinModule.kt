@@ -141,6 +141,10 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.externallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.externallink.OpenExternalLinkUseCaseAndroid
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCase
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCaseImpl
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -233,6 +237,7 @@ import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.mapping.edit.ExternalLinkViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
@@ -330,6 +335,16 @@ val appKoinModule = module {
             appContext = androidContext().applicationContext
         )
     }
+    single<OpenExternalLinkUseCase> {
+        OpenExternalLinkUseCaseAndroid(
+            appContext = androidContext().applicationContext
+        )
+    }
+    single<ExtractWebPageMetadataUseCase> {
+        ExtractWebPageMetadataUseCaseImpl(
+            httpClient = get()
+        )
+    }
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -387,6 +402,7 @@ val appKoinModule = module {
     viewModelOf(::PlaylistListViewModel)
     viewModelOf(::PlaylistDetailViewModel)
     viewModelOf(::PlaylistEditViewModel)
+    viewModelOf(::ExternalLinkViewModel)
     viewModelOf(::PlaylistShareViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {

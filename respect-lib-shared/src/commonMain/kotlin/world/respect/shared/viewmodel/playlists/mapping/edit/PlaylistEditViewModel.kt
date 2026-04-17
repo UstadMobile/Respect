@@ -39,7 +39,6 @@ import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.RespectAppLauncher
-import world.respect.shared.navigation.ResultDest
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -172,9 +171,10 @@ class PlaylistEditViewModel(
                     )
                 pendingAddItemSectionIndex = null
 
-                val selections: List<LearningUnitSelection> = when (val r = result.result) {
-                    is LearningUnitSelection -> listOf(r)
-                    is List<*> -> r.filterIsInstance<LearningUnitSelection>()
+                val publications: List<OpdsPublication> = when (val r = result.result) {
+                    is LearningUnitSelection -> listOf(r.selectedPublication)
+                    is List<*> -> r.filterIsInstance<LearningUnitSelection>().map { it.selectedPublication }
+                    is OpdsPublication -> listOf(r)
                     else -> throw IllegalStateException(
                         "Expected LearningUnitSelection or List but got: ${result.result}"
                     )
@@ -186,8 +186,7 @@ class PlaylistEditViewModel(
                     val section = sections.getOrNull(sectionIndex)
                         ?: throw IllegalStateException("No section at index $sectionIndex")
                     sections[sectionIndex] = section.copy(
-                        publications = (section.publications ?: emptyList()) +
-                                selections.map { it.selectedPublication }
+                        publications = (section.publications ?: emptyList()) + publications
                     )
                     prev.copy(feed = prev.feed?.copy(groups = sections))
                 }

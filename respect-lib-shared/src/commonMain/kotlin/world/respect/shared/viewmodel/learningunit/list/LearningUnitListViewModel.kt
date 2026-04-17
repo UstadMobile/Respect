@@ -25,6 +25,7 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
+import world.respect.shared.domain.externallink.OpenExternalLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
@@ -338,6 +339,7 @@ class PlaylistDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -496,12 +498,18 @@ class PlaylistDetailViewModel(
         )
     }
     fun onClickPublication(publication: OpdsPublication) {
-        val selfHref = publication.links.find {
+        val selfLink = publication.links.find {
             it.rel?.contains(LearningUnitListViewModel.SELF) == true
-        }?.href ?: throw IllegalStateException(
+        } ?: throw IllegalStateException(
             "Publication has no self link: ${publication.metadata.title}"
         )
-
+        if (selfLink.type == "text/html") {
+            openExternalLinkUseCase(
+                url = selfLink.href,
+                title = publication.metadata.title.toString()
+            )
+            return
+        }
         val appManifestUrl = _uiState.value.feed?.selfUrl()
             ?: throw IllegalStateException(
                 "Cannot navigate to publication: playlist feed has no self URL"
@@ -511,7 +519,7 @@ class PlaylistDetailViewModel(
                 route = route,
                 navCommandFlow = _navCommandFlow,
                 result = LearningUnitSelection(
-                    learningUnitManifestUrl = Url(selfHref),
+                    learningUnitManifestUrl = Url(selfLink.href),
                     selectedPublication = publication,
                     appManifestUrl = appManifestUrl,
                 )
@@ -520,7 +528,7 @@ class PlaylistDetailViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     LearningUnitDetail.create(
-                        learningUnitManifestUrl = Url(selfHref),
+                        learningUnitManifestUrl = Url(selfLink.href),
                         appManifestUrl = appManifestUrl,
                         expectedIdentifier = publication.metadata.identifier?.toString(),
                     )

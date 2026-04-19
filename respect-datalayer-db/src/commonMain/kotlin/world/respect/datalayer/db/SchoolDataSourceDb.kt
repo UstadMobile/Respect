@@ -21,6 +21,7 @@ import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.db.school.domain.xapi.StoreActivitiesUseCase
+import world.respect.datalayer.db.school.xapi.XapiActivityDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiStatementDataSourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
@@ -39,6 +40,7 @@ import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
@@ -148,6 +150,15 @@ class SchoolDataSourceDb(
         )
     }
 
+    override val xapiActivityDataSource: XapiActivityDataSourceLocal by lazy {
+        XapiActivityDataSourceDb(
+            schoolDb = schoolDb,
+            authenticatedUser = authenticatedUser,
+            uidNumberMapper = uidNumberMapper,
+            json = json,
+        )
+    }
+
     override val xapiStatementDataSource: XapiStatementDataSourceLocal by lazy {
         XapiStatementDataSourceDb(
             schoolDb = schoolDb,
@@ -155,7 +166,7 @@ class SchoolDataSourceDb(
             schoolUrl = schoolUrl,
             uidNumberMapper = uidNumberMapper,
             primaryKeyGenerator = primaryKeyGenerator,
-            storeActivitiesUseCase = StoreActivitiesUseCase(schoolDb),
+            xapiActivityDataSourceLocal = xapiActivityDataSource,
             json = json,
         )
     }

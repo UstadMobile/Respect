@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school.xapi.ext
 
-import world.respect.datalayer.db.school.xapi.entities.StatementEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 
-internal val StatementEntity.hasResult: Boolean
+internal val XapiStatementEntity.hasResult: Boolean
     get() = resultCompletion != null ||
             resultSuccess != null ||
             resultResponse != null ||
@@ -10,13 +10,13 @@ internal val StatementEntity.hasResult: Boolean
             resultExtensions != null ||
             hasResultScore
 
-internal val StatementEntity.hasResultScore: Boolean
+internal val XapiStatementEntity.hasResultScore: Boolean
     get() = resultScoreScaled != null ||
             resultScoreRaw != null  ||
             resultScoreMin != null ||
             resultScoreMax != null
 
-internal val StatementEntity.hasContext: Boolean
+internal val XapiStatementEntity.hasContext: Boolean
     get() = contextRegistrationHi != 0L ||
             contextRegistrationLo != 0L ||
             contextInstructorActorUid != 0L

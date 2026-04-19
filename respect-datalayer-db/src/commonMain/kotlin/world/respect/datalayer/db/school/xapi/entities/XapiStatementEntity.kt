@@ -6,8 +6,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * The primary representation of an Xapi Statement in the database. Note that the full original
- * json is stored on StatementEntityJson (such that results data can be retrieved without downloading
- * the full json string).
+ * json is stored on XapiStatementEntityJson.
  *
  * @param statementIdHi the hi bits of the statement id (which is a UUID)
  * @param statementIdLo the lo bits of the statement id (which is a UUID)
@@ -58,7 +57,7 @@ import kotlinx.serialization.Serializable
     ]
 )
 @Serializable
-data class StatementEntity(
+data class XapiStatementEntity(
     val statementIdHi: Long = 0,
 
     val statementIdLo: Long = 0,

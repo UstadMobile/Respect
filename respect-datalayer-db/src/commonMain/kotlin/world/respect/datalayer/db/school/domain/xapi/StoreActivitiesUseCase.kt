@@ -1,20 +1,23 @@
 package world.respect.datalayer.db.school.domain.xapi
 
-import androidx.room.Transactor
-import androidx.room.useWriterConnection
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.xapi.adapters.ActivityEntities
-import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
-import world.respect.datalayer.db.school.xapi.ext.interactionProp
-import world.respect.datalayer.db.school.xapi.ext.isActivityProp
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityEntity
+import world.respect.datalayer.school.xapi.model.XapiActivity
 import world.respect.libutil.util.time.systemTimeInMillis
+import kotlin.time.Instant
 
+
+/**
+ * Handle storing activities and managing the canonical definition of activities.
+ *
+ * There will be an update local function for activity _because_ there is a get endpoint for activity
+ *
+ */
 class StoreActivitiesUseCase(
     private val schoolDatabase: RespectSchoolDatabase,
 ) {
 
-    private val ActivityEntity.isIdOnly: Boolean
+    private val XapiActivityEntity.isIdOnly: Boolean
         get() {
             return actType == null
                     && actMoreInfo == null
@@ -23,14 +26,19 @@ class StoreActivitiesUseCase(
         }
 
     suspend operator fun invoke(
-        activityEntities: List<ActivityEntities>
+        activities: List<XapiActivity>,
+        timestamp: Instant,
     ) {
         val timeNow = systemTimeInMillis()
+
+
+
+        /*
         schoolDatabase.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 val activities = activityEntities.map {
                     it.activityEntity.copy(
-                        actLct = timeNow
+                        actNamesLastChanged = timeNow
                     )
                 }
                 schoolDatabase.getActivityEntityDao().insertOrIgnoreAsync(activities)
@@ -123,7 +131,7 @@ class StoreActivitiesUseCase(
                     activityEntities.flatMap { it.activityExtensionEntities }
                 )
             }
-        }
+        }*/
     }
 
 }

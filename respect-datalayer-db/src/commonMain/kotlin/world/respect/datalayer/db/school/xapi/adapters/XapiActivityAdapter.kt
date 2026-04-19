@@ -7,7 +7,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
@@ -28,9 +28,9 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 
-data class ActivityEntities(
+data class XapiActivityEntities(
     @Embedded
-    val activityEntity: ActivityEntity,
+    val activityEntity: XapiActivityEntity,
 
     @Relation(
         parentColumn = "actUid",
@@ -55,7 +55,7 @@ data class ActivityEntities(
 fun XapiActivity.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
-): ActivityEntities? {
+): XapiActivityEntities? {
     val actDefinition = definition ?: return null
 
     val activityUid = uidNumberMapper(id)
@@ -110,8 +110,8 @@ fun XapiActivity.toEntities(
         }?.also { addAll(it) }
     }
 
-    return ActivityEntities(
-        activityEntity = ActivityEntity(
+    return XapiActivityEntities(
+        activityEntity = XapiActivityEntity(
             actUid = activityUid,
             actIdIri = id,
             actObjectTypeSet = objectType != null,
@@ -122,12 +122,12 @@ fun XapiActivity.toEntities(
                 json.encodeToString(it)
             },
             actFlags = flagsOf(
-                ActivityEntity.FLAG_EXTENSIONS_NULL to (actDefinition.extensions == null),
-                ActivityEntity.FLAG_CHOICES_NULL to (actDefinition.choices == null),
-                ActivityEntity.FLAG_SCALE_NULL to (actDefinition.scale == null),
-                ActivityEntity.FLAG_SOURCE_NULL to (actDefinition.source == null),
-                ActivityEntity.FLAG_TARGET_NULL to (actDefinition.target == null),
-                ActivityEntity.FLAG_STEPS_NULL to (actDefinition.steps == null),
+                XapiActivityEntity.FLAG_EXTENSIONS_NULL to (actDefinition.extensions == null),
+                XapiActivityEntity.FLAG_CHOICES_NULL to (actDefinition.choices == null),
+                XapiActivityEntity.FLAG_SCALE_NULL to (actDefinition.scale == null),
+                XapiActivityEntity.FLAG_SOURCE_NULL to (actDefinition.source == null),
+                XapiActivityEntity.FLAG_TARGET_NULL to (actDefinition.target == null),
+                XapiActivityEntity.FLAG_STEPS_NULL to (actDefinition.steps == null),
             )
         ),
         activityLangMapEntries = buildList {
@@ -159,7 +159,7 @@ fun XapiActivity.toEntities(
  *
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#22-formatting-requirements
  */
-fun ActivityEntities.toModel(
+fun XapiActivityEntities.toModel(
     json: Json
 ) : XapiActivity {
 
@@ -191,7 +191,7 @@ fun ActivityEntities.toModel(
             }.takeIfNotEmpty(),
             type = activityEntity.actType,
             extensions = activityExtensionEntities.takeIf {
-                !activityEntity.actFlags.hasFlag(ActivityEntity.FLAG_EXTENSIONS_NULL)
+                !activityEntity.actFlags.hasFlag(XapiActivityEntity.FLAG_EXTENSIONS_NULL)
             }?.associate {
                 it.aeeKey to json.decodeFromString(
                     JsonElement.serializer(), it.aeeJson

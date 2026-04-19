@@ -13,6 +13,9 @@ interface ActivityLangMapEntryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertList(entities: List<ActivityLangMapEntry>)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOrIgnore(entities: List<ActivityLangMapEntry>)
+
     /**
      * Upsert the lang map entity for an interaction entity if the related interaction entity exists
      * The interaction entity might not exist if the Activity is already defined.
@@ -34,13 +37,15 @@ interface ActivityLangMapEntryDao {
          WHERE almeActivityUid = :almeActivityUid
            AND almeProperty = :almeProperty
            AND almeInteractionId = :almeInteractionId
-           AND almeValue != :almeValue       
+           AND almeLastModified > :changeTime
+           AND almeValue != :almeValue
     """)
     suspend fun updateIfChanged(
         almeActivityUid: Long,
         almeProperty: Int,
         almeValue: String,
-        almeInteractionId: String?
+        almeInteractionId: String?,
+        changeTime: Long,
     )
 
     @Query("""

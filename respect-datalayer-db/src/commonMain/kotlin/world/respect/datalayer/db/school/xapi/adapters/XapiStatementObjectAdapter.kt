@@ -26,7 +26,7 @@ val XapiObjectType.entityObjectTypeEnum: StatementEntityObjectTypeEnum
 fun List<XapiActivity>.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
-) : List<ActivityEntities> {
+) : List<XapiActivityEntities> {
     return mapNotNull { contextActivityObj ->
         contextActivityObj.toEntities(
             uidNumberMapper = uidNumberMapper,

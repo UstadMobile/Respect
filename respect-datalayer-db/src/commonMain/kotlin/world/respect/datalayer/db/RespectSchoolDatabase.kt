@@ -61,25 +61,25 @@ import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
 import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
-import world.respect.datalayer.db.school.xapi.daos.ActivityEntityDao
+import world.respect.datalayer.db.school.xapi.daos.XapiActivityEntityDao
 import world.respect.datalayer.db.school.xapi.daos.ActivityExtensionDao
 import world.respect.datalayer.db.school.xapi.daos.ActivityInteractionDao
 import world.respect.datalayer.db.school.xapi.daos.ActorDao
 import world.respect.datalayer.db.school.xapi.daos.GroupMemberActorJoinDao
 import world.respect.datalayer.db.school.xapi.daos.StatementContextActivityJoinDao
-import world.respect.datalayer.db.school.xapi.daos.StatementEntityDao
+import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
 import world.respect.datalayer.db.school.xapi.daos.StatementEntityJsonDao
 import world.respect.datalayer.db.school.xapi.daos.VerbDao
 import world.respect.datalayer.db.school.xapi.daos.VerbLangMapEntryDao
-import world.respect.datalayer.db.school.xapi.entities.ActivityEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity
 import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntry
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
-import world.respect.datalayer.db.school.xapi.entities.StatementEntity
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
 import world.respect.datalayer.db.school.xapi.entities.VerbEntity
 import world.respect.datalayer.db.school.xapi.entities.VerbLangMapEntry
 import world.respect.datalayer.school.model.Assignment
@@ -129,15 +129,15 @@ import world.respect.datalayer.school.model.Report
         OpdsFeedMetadataEntity::class,
 
         //xAPI
-        ActivityEntity::class,
+        XapiActivityEntity::class,
         ActivityExtensionEntity::class,
         ActivityInteractionEntity::class,
         ActivityLangMapEntry::class,
         ActorEntity::class,
         GroupMemberActorJoin::class,
         StatementContextActivityJoin::class,
-        StatementEntity::class,
-        StatementEntityJson::class,
+        XapiStatementEntity::class,
+        XapiStatementEntityJson::class,
         VerbEntity::class,
         VerbLangMapEntry::class,
     ],
@@ -197,7 +197,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
-    abstract fun getActivityEntityDao(): ActivityEntityDao
+    abstract fun getActivityEntityDao(): XapiActivityEntityDao
 
     abstract fun getActivityExtensionDao(): ActivityExtensionDao
 
@@ -207,7 +207,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getStatementContextActivityJoinDao(): StatementContextActivityJoinDao
 
-    abstract fun getStatementDao(): StatementEntityDao
+    abstract fun getStatementDao(): XapiStatementEntityDao
 
     abstract fun getStatementEntityJsonDao(): StatementEntityJsonDao
 

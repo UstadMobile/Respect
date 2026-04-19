@@ -15,6 +15,7 @@ import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.datalayer.school.xapi.XapiActivityDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 
 /**
@@ -54,6 +55,9 @@ interface SchoolDataSource {
     val opdsFeedDataSource: OpdsFeedDataSource
 
     val schoolConfigSettingDataSource: SchoolConfigSettingDataSource
+
+
+    val xapiActivityDataSource: XapiActivityDataSource
 
     val xapiStatementDataSource: XapiStatementDataSource
 }

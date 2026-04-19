@@ -21,11 +21,10 @@ import kotlinx.serialization.Serializable
     primaryKeys = ["stmtJsonIdHi", "stmtJsonIdLo"]
 )
 @Serializable
-data class StatementEntityJson(
-    var stmtJsonIdHi: Long = 0,
-    var stmtJsonIdLo: Long = 0,
-    var stmtEtag: Long = 1,
-    var fullStatement: String? = null,
+data class XapiStatementEntityJson(
+    val stmtJsonIdHi: Long = 0,
+    val stmtJsonIdLo: Long = 0,
+    val fullStatement: String? = null,
 ) {
     companion object {
         const val TABLE_ID = 602

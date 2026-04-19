@@ -7,16 +7,20 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.domain.xapi.StoreActivitiesUseCase
+import world.respect.datalayer.db.school.ext.toLongPair
+import world.respect.datalayer.db.school.xapi.adapters.StatementEntities
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
+import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
+import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 
 class XapiStatementDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -25,7 +29,7 @@ class XapiStatementDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val primaryKeyGenerator: PrimaryKeyGenerator,
     private val json: Json,
-    private val storeActivitiesUseCase: StoreActivitiesUseCase,
+    private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
 ) : XapiStatementDataSource, XapiStatementDataSourceLocal{
 
     suspend fun doUpsertStatement(
@@ -58,6 +62,14 @@ class XapiStatementDataSourceDb(
         schoolDb.getStatementEntityJsonDao().insertOrIgnoreListAsync(
             statementEntity.statementEntityJson
         )
+
+        schoolDb.getStatementContextActivityJoinDao().insertOrIgnoreListAsync(
+            statementEntity.statementContextActivityJoins
+        )
+
+        val activities = stmt.allDefinedActivities()
+        xapiActivityDataSourceLocal.updateLocal(activities, stmtTimestamp)
+
 
         /*
         statementEntity.actorEntities.map { it.actor }
@@ -104,7 +116,6 @@ class XapiStatementDataSourceDb(
 
 
     override suspend fun store(list: List<XapiStatement>) {
-        //TODO: permission checks
         list.forEach { statement ->
             doUpsertStatement(statement)
         }
@@ -114,6 +125,9 @@ class XapiStatementDataSourceDb(
         list: List<XapiStatement>,
         forceOverwrite: Boolean
     ) {
+        //needs to check for existing statement, if existing, do nothing.
+
+
         list.forEach { statement ->
             doUpsertStatement(statement)
         }
@@ -123,6 +137,37 @@ class XapiStatementDataSourceDb(
         listParams: XapiStatementDataSource.GetStatementParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<XapiStatement>> {
+
+        val statementIds = listParams.statementId?.toLongPair()
+
+        val statementEntities = schoolDb.getStatementDao().list(
+            statementIdHi = statementIds?.first ?: 0,
+            statementIdLo = statementIds?.second ?: 0,
+        ).map { entity ->
+            val substatementEntity = schoolDb.takeIf {
+                entity.stmtEntity.statementObjectType == StatementEntityObjectTypeEnum.SUBSTATEMENT
+            }?.getStatementDao()?.getEntityForSubstatement(
+                subStatementIdHi = entity.stmtEntity.statementObjectUid1,
+                subStatementIdLo = entity.stmtEntity.statementObjectUid2,
+            )
+
+            //now get StatementContextActivityJoins
+            val contextActivityJoins = schoolDb.getStatementContextActivityJoinDao()
+                .findAllByStatementId(
+                    statementIdHi = entity.stmtEntity.statementIdHi,
+                    statementIdLo = entity.stmtEntity.statementIdLo,
+                )
+
+            StatementEntities(
+                statements = buildList {
+                    add(entity.stmtEntity)
+                    substatementEntity?.also { add(it) }
+                },
+                statementEntityJson = listOf(entity.stmtJsonEntity),
+                statementContextActivityJoins = contextActivityJoins,
+            )
+        }
+
         TODO()
     }
 

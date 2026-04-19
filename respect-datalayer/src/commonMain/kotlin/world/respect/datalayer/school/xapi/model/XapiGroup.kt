@@ -19,7 +19,13 @@ data class XapiGroup(
     override val objectType: XapiObjectType? = null,
     override val account: XapiAccount? = null,
     val member: List<XapiAgent>? = null,
-): XapiActor, XapiStatementObject
+): XapiActor, XapiStatementObject {
+
+    val isAnonymous: Boolean
+        get() = name == null && mbox == null && mbox_sha1sum == null &&
+                openid == null && account == null
+
+}
 
 val XapiGroup.isAnonymous: Boolean
     get() = mbox == null && openid == null && account == null

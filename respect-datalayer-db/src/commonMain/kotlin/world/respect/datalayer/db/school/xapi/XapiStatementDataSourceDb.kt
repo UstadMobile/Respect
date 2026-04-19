@@ -21,6 +21,8 @@ import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.ext.allActors
 
 class XapiStatementDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -30,6 +32,7 @@ class XapiStatementDataSourceDb(
     private val primaryKeyGenerator: PrimaryKeyGenerator,
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
+    private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
 ) : XapiStatementDataSource, XapiStatementDataSourceLocal{
 
     suspend fun doUpsertStatement(
@@ -69,7 +72,10 @@ class XapiStatementDataSourceDb(
 
         val activities = stmt.allDefinedActivities()
         xapiActivityDataSourceLocal.updateLocal(activities, stmtTimestamp)
-
+        xapiActorDataSourceLocal.updateLocal(
+            actors = stmt.allActors(),
+            timestamp = stmtTimestamp,
+        )
 
         /*
         statementEntity.actorEntities.map { it.actor }
@@ -108,8 +114,6 @@ class XapiStatementDataSourceDb(
         schoolDb.getVerbLangMapEntryDao().upsertList(
             statementEntity.verbEntities.flatMap { it.verbLangMapEntries }
         )
-
-        storeActivitiesUseCase(statementEntity.activityEntities)
 
          */
     }

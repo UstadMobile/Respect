@@ -1,7 +1,13 @@
 package world.respect.datalayer.school.xapi
 
 import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.shared.LocalModelDataSource
+import kotlin.time.Instant
 
-interface XapiActorDataSourceLocal: LocalModelDataSource<XapiActor> {
+interface XapiActorDataSourceLocal : XapiActorDataSource {
+
+    suspend fun updateLocal(
+        actors: List<XapiActor>,
+        timestamp: Instant,
+    )
+
 }

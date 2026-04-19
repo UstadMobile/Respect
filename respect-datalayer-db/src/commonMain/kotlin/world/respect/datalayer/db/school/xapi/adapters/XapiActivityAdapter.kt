@@ -26,6 +26,7 @@ import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.libutil.ext.toEmptyIfNull
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.time.Instant
 
 
 data class XapiActivityEntities(
@@ -55,6 +56,7 @@ data class XapiActivityEntities(
 fun XapiActivity.toEntities(
     uidNumberMapper: UidNumberMapper,
     json: Json,
+    lastModified: Instant,
 ): XapiActivityEntities? {
     val actDefinition = definition ?: return null
 
@@ -70,6 +72,7 @@ fun XapiActivity.toEntities(
             almeProperty = property,
             almeValue = text,
             almeInteractionId = interactionId,
+            almeLastModified = lastModified,
         )
     }
 
@@ -128,7 +131,9 @@ fun XapiActivity.toEntities(
                 XapiActivityEntity.FLAG_SOURCE_NULL to (actDefinition.source == null),
                 XapiActivityEntity.FLAG_TARGET_NULL to (actDefinition.target == null),
                 XapiActivityEntity.FLAG_STEPS_NULL to (actDefinition.steps == null),
-            )
+            ),
+            actSignificantLastModified = lastModified,
+            actNonSignificantLastModified = lastModified,
         ),
         activityLangMapEntries = buildList {
             actDefinition.name?.toLangMapEntries(

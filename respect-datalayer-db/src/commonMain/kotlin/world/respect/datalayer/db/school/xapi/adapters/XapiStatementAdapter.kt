@@ -128,16 +128,7 @@ fun XapiStatement.toEntities(
 
     val contextRegistration = context?.registration
 
-    val statementActorEntities = actor.toEntities(uidNumberMapper)
-
-    val authorityActor = authority?.toEntities(uidNumberMapper)
-
-    val contextInstructorActorEntities = context?.instructor?.toEntities(uidNumberMapper)
-
-    val contextTeamActorEntities = context?.team?.toEntities(uidNumberMapper)
-
     val statementObjectForeignKeys = `object`.objectForeignKeys(uidNumberMapper, statementUuid)
-
 
     val contextRegHiLo = contextRegistration?.toLongPair()
 
@@ -154,8 +145,8 @@ fun XapiStatement.toEntities(
             XapiStatementEntity(
                 statementIdHi = stmtUuidHi,
                 statementIdLo = stmtUuidLo,
-                statementActorUid = statementActorEntities.actor.actorUid,
-                authorityActorUid = authorityActor?.actor?.actorUid ?: 0,
+                statementActorUid = this.actor.identifierHash(uidNumberMapper),
+                authorityActorUid = this.authority?.identifierHash(uidNumberMapper) ?: 0,
                 statementVerbUid = uidNumberMapper(verb.id),
                 statementVerbId = verb.id,
                 resultCompletion = result?.completion,
@@ -176,8 +167,8 @@ fun XapiStatement.toEntities(
                 contextPlatform = context?.platform,
                 contextLanguage = context?.language,
                 contextRevision = context?.revision,
-                contextTeamActorUid = contextTeamActorEntities?.actor?.actorUid ?: 0,
-                contextInstructorActorUid = contextInstructorActorEntities?.actor?.actorUid ?: 0,
+                contextTeamActorUid = context?.team?.identifierHash(uidNumberMapper) ?: 0,
+                contextInstructorActorUid = context?.instructor?.identifierHash(uidNumberMapper) ?: 0,
                 completionOrProgress = isCompletionOrProgress(),
                 extensionProgress = resultProgressExtension,
                 statementObjectType = `object`.objectTypeEnum,

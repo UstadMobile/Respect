@@ -5,16 +5,8 @@ import world.respect.datalayer.school.xapi.model.XapiActor
 
 interface XapiActorDataSource {
 
-    data class GetListParams(
-        val actor: XapiActor? = null,
-    )
-
-    suspend fun store(
-        list: List<XapiActor>
-    )
-
-    suspend fun list(
-        getListParams: GetListParams,
+    suspend fun getPerson(
+        actor: XapiActor,
         dataLoadParams: DataLoadParams = DataLoadParams(),
     )
 

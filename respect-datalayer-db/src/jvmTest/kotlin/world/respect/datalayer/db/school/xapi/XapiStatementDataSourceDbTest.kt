@@ -20,6 +20,7 @@ import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class XapiStatementDataSourceDbTest {
@@ -47,13 +48,14 @@ class XapiStatementDataSourceDbTest {
                 isSubStatement = false,
             )
 
+            val timeNow = Clock.System.now()
             val actors = statement.allActors().distinctMerged().map {
-                it.toEntities(uidNumberMapper)
+                it.toEntities(uidNumberMapper, timeNow)
             }.map {
                 it.toModel()
             }
             val activities = statement.allDefinedActivities().distinctMerged().mapNotNull {
-                it.toEntities(uidNumberMapper, json)
+                it.toEntities(uidNumberMapper, json, timeNow)
             }.map {
                 it.toModel(json)
             }
@@ -85,7 +87,7 @@ class XapiStatementDataSourceDbTest {
     @Test
     fun givenStatement_canStore() {
         runBlocking {
-            testSchoolDb(temporaryFolder.newFolder()) { db ->
+            testSchoolDb(java.io.File("/home/mike/tmp/db")) { db ->
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),

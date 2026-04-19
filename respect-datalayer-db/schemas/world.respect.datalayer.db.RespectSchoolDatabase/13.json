@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "5b5acc1caf9efb620d5ff8f00feb531d",
+    "identityHash": "e7db848fe5cf5c8c03c7d64df6be08dc",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1973,7 +1973,7 @@
       },
       {
         "tableName": "ActorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "actorUid",
@@ -2030,6 +2030,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "actorGroupMembersLastUpdated",
+            "columnName": "actorGroupMembersLastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "actorObjectType",
             "columnName": "actorObjectType",
             "affinity": "INTEGER",
@@ -2065,7 +2071,7 @@
       },
       {
         "tableName": "GroupMemberActorJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gmajGroupActorUid` INTEGER NOT NULL, `gmajMemberActorUid` INTEGER NOT NULL, `gmajIndex` INTEGER NOT NULL, PRIMARY KEY(`gmajGroupActorUid`, `gmajMemberActorUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gmajGroupActorUid` INTEGER NOT NULL, `gmajMemberActorUid` INTEGER NOT NULL, PRIMARY KEY(`gmajGroupActorUid`, `gmajMemberActorUid`))",
         "fields": [
           {
             "fieldPath": "gmajGroupActorUid",
@@ -2076,12 +2082,6 @@
           {
             "fieldPath": "gmajMemberActorUid",
             "columnName": "gmajMemberActorUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "gmajIndex",
-            "columnName": "gmajIndex",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -2493,7 +2493,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5b5acc1caf9efb620d5ff8f00feb531d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e7db848fe5cf5c8c03c7d64df6be08dc')"
     ]
   }
 }

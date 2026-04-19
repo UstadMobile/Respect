@@ -52,4 +52,15 @@ interface ActorDao {
         accountPersonUid: Long,
     ): ActorEntity?
 
+    @Query("""
+        UPDATE ActorEntity
+           SET actorGroupMembersLastUpdated = :updateTime
+         WHERE actorUid = :actorUid
+    """)
+    suspend fun updateGroupMembersLastUpdated(
+        actorUid: Long,
+        updateTime: Long,
+    )
+
+
 }

@@ -53,7 +53,11 @@ class XapiActivityDataSourceDb(
                 activities.forEach { activity ->
                     val uid = uidNumberMapper(activity.id)
                     val timestampMillis = timestamp.toEpochMilliseconds()
-                    val entities = activity.toEntities(uidNumberMapper, json) ?: return@forEach
+                    val entities = activity.toEntities(
+                        uidNumberMapper = uidNumberMapper,
+                        json = json,
+                        lastModified = timestamp,
+                    ) ?: return@forEach
 
                     val activityInDb = schoolDb.getActivityEntityDao().findByUidAsync(uid)
 

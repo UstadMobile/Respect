@@ -18,12 +18,10 @@ interface StatementContextActivityJoinDao {
           FROM StatementContextActivityJoin
          WHERE StatementContextActivityJoin.scajFromStatementIdHi = :statementIdHi
            AND StatementContextActivityJoin.scajFromStatementIdLo = :statementIdLo
-           AND StatementContextActivityJoin.scajContextType = :scajContextType
     """
     )
     suspend fun findAllByStatementId(
         statementIdHi: Long,
         statementIdLo: Long,
-        scajContextType: Int,
     ): List<StatementContextActivityJoin>
 }

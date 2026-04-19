@@ -5,8 +5,8 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
 import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
-import world.respect.datalayer.db.school.xapi.entities.StatementEntity
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
 import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.hasContext
 import world.respect.datalayer.db.school.xapi.ext.hasResult
@@ -40,8 +40,8 @@ import kotlin.uuid.Uuid
  *           when it includes a sub statement.
  */
 data class StatementEntities(
-    val statements: List<StatementEntity> = emptyList(),
-    val statementEntityJson: List<StatementEntityJson> = emptyList(),
+    val statements: List<XapiStatementEntity> = emptyList(),
+    val statementEntityJson: List<XapiStatementEntityJson> = emptyList(),
     val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
 )
 
@@ -151,7 +151,7 @@ fun XapiStatement.toEntities(
 
     return StatementEntities(
         statements = listOf(
-            StatementEntity(
+            XapiStatementEntity(
                 statementIdHi = stmtUuidHi,
                 statementIdLo = stmtUuidLo,
                 statementActorUid = statementActorEntities.actor.actorUid,
@@ -189,7 +189,7 @@ fun XapiStatement.toEntities(
             )
         ) + (substatementEntities?.statements ?: emptyList()),
         statementEntityJson = listOf(
-            StatementEntityJson(
+            XapiStatementEntityJson(
                 stmtJsonIdHi = stmtUuidHi,
                 stmtJsonIdLo = stmtUuidLo,
                 fullStatement = json.encodeToString(

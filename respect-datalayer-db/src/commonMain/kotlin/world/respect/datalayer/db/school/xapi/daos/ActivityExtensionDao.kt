@@ -13,6 +13,12 @@ interface ActivityExtensionDao {
     suspend fun upsertListAsync(list: List<ActivityExtensionEntity>)
 
     @Query("""
+        DELETE FROM ActivityExtensionEntity 
+              WHERE aeeActivityUid = :activityUid
+    """)
+    suspend fun deleteByActivityUid(activityUid: Long)
+
+    @Query("""
         SELECT ActivityExtensionEntity.*
           FROM ActivityExtensionEntity
          WHERE ActivityExtensionEntity.aeeActivityUid = :activityUid 

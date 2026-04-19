@@ -36,6 +36,7 @@ import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.datalayer.school.xapi.XapiActivityDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
@@ -177,6 +178,10 @@ class SchoolDataSourceHttp(
         DummySchoolConfigSettingsDataSource(
             defaultAppCatalogUrl = defaultAppCatalogUrl,
         )
+    }
+
+    override val xapiActivityDataSource: XapiActivityDataSource by lazy {
+        TODO("No HTTP Activity datasource yet")
     }
 
     override val xapiStatementDataSource: XapiStatementDataSource by lazy {

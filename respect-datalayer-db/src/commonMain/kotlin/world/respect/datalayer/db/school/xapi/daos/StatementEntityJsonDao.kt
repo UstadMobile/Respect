@@ -4,18 +4,18 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityJson
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
 
 @Dao
 interface StatementEntityJsonDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertOrIgnoreListAsync(entityList: List<StatementEntityJson>)
+    suspend fun insertOrIgnoreListAsync(entityList: List<XapiStatementEntityJson>)
 
     @Query(
         """
-        SELECT StatementEntityJson.*
-          FROM StatementEntityJson
+        SELECT XapiStatementEntityJson.*
+          FROM XapiStatementEntityJson
          WHERE (    (:stmtJsonIdHi = 0 AND :stmtJsonIdLo = 0) 
                  OR (stmtJsonIdHi = :stmtJsonIdHi AND stmtJsonIdLo = :stmtJsonIdLo))
                   
@@ -24,5 +24,5 @@ interface StatementEntityJsonDao {
     suspend fun getStatements(
         stmtJsonIdHi: Long,
         stmtJsonIdLo: Long,
-    ): List<StatementEntityJson>
+    ): List<XapiStatementEntityJson>
 }

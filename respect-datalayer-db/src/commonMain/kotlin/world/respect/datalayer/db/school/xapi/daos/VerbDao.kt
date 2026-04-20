@@ -20,12 +20,4 @@ interface VerbDao {
     )
     suspend fun findByUid(uid: Long): VerbEntity?
 
-    @Query(
-        """
-        SELECT VerbEntity.*
-        FROM VerbEntity
-        WHERE VerbEntity.verbUrlId = :verbUrl 
-    """
-    )
-    suspend fun findByVerbUrl(verbUrl: String): VerbEntity?
 }

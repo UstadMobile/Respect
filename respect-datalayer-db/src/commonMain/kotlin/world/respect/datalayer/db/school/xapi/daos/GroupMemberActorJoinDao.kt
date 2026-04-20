@@ -22,4 +22,14 @@ interface GroupMemberActorJoinDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertListAsync(entities: List<GroupMemberActorJoin>)
 
+    @Query("""
+        SELECT GroupMemberActorJoin.*
+          FROM GroupMemberActorJoin
+         WHERE GroupMemberActorJoin.gmajGroupActorUid IN (:uidList)
+    """)
+    suspend fun findByGroupActorUidList(
+        uidList: List<Long>
+    ): List<GroupMemberActorJoin>
+
+
 }

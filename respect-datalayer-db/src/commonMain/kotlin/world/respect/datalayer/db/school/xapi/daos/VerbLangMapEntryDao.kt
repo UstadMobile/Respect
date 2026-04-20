@@ -20,4 +20,14 @@ interface VerbLangMapEntryDao {
     """
     )
     suspend fun findByVerbUidAsync(verbUid: Long): List<VerbLangMapEntry>
+
+    @Query("""
+        SELECT VerbLangMapEntry.*
+          FROM VerbLangMapEntry
+         WHERE VerbLangMapEntry.vlmeVerbUid = :uid1 
+            OR VerbLangMapEntry.vlmeVerbUid = :uid2
+    """)
+    suspend fun findByVerbUidPair(uid1: Long, uid2: Long): List<VerbLangMapEntry>
+
+
 }

@@ -213,10 +213,10 @@ fun AssignmentEditScreen(
         OutlinedButton(
             onClick = { onClickAddLearningUnit() },
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(28.dp), // Pill shape
+            shape = RoundedCornerShape(28.dp),
             border = BorderStroke(1.dp, Color.LightGray)
         ) {
-            Row{
+            Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("Task", style = MaterialTheme.typography.bodyLarge)

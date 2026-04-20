@@ -90,13 +90,13 @@ class XapiStatementDataSourceDbTest {
     @Test
     fun givenStatement_canStoreAndRetrieve() {
         runBlocking {
-            testSchoolDb(temporaryFolder.newFolder()) { db ->
-                val dataSource = db.toDataSource(
-                    authenticatedUserUid = "1",
-                    schoolUrl = Url("http://localhost:8098/"),
-                )
+            forXapiSampleStatements { statement ->
+                testSchoolDb(temporaryFolder.newFolder()) { db ->
+                    val dataSource = db.toDataSource(
+                        authenticatedUserUid = "1",
+                        schoolUrl = Url("http://localhost:8098/"),
+                    )
 
-                forXapiSampleStatements { statement ->
                     val stmtUuid = Uuid.random()
 
                     val statement = Json.decodeFromJsonElement(

@@ -258,7 +258,6 @@ fun TaskListItem(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Drag Handle (Horizontal lines icon)
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = null,
@@ -268,7 +267,6 @@ fun TaskListItem(
 
         Spacer(Modifier.width(12.dp))
 
-        // Learning Unit Icon (The 'A' icon in your screenshot)
         val iconLink = data?.findIcons()?.firstOrNull()
         AsyncImage(
             model = iconLink?.let { learningUnit.learningUnitManifestUrl.resolve(it.href).toString() },
@@ -278,7 +276,6 @@ fun TaskListItem(
 
         Spacer(Modifier.width(12.dp))
 
-        // Text Content
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = data?.metadata?.title?.getTitle() ?: "Loading...",
@@ -291,7 +288,6 @@ fun TaskListItem(
             )
         }
 
-        // Remove Button (The 'X')
         IconButton(onClick = onRemove) {
             Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(20.dp))
         }

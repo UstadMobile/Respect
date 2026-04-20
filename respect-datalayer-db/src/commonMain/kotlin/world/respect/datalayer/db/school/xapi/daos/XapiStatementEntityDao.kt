@@ -6,8 +6,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
+import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
 
@@ -24,16 +26,19 @@ interface XapiStatementEntityDao {
     suspend fun getAll(): List<XapiStatementEntity>
 
     @Query("""
-        SELECT XapiStatementEntity.*, XapiStatementEntityJson.*
+        SELECT XapiStatementEntity.*, XapiStatementEntityJson.*, VerbEntity.*
           FROM XapiStatementEntity
                JOIN XapiStatementEntityJson
                     ON (    XapiStatementEntityJson.stmtJsonIdHi = XapiStatementEntity.statementIdHi
                         AND XapiStatementEntityJson.stmtJsonIdLo = XapiStatementEntity.statementIdLo)
+               JOIN VerbEntity
+                    ON (    VerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
          WHERE (   (:statementIdHi = 0 AND :statementIdLo = 0) 
                 OR (     XapiStatementEntity.statementIdHi = :statementIdHi 
                      AND XapiStatementEntity.statementIdLo = :statementIdLo))
            AND NOT XapiStatementEntity.isSubStatement           
     """)
+    @Transaction
     suspend fun list(
         statementIdHi: Long,
         statementIdLo: Long,
@@ -44,8 +49,10 @@ interface XapiStatementEntityDao {
      * statement existed, it must also exist.
      */
     @Query("""
-        SELECT XapiStatementEntity.*
+        SELECT XapiStatementEntity.*, VerbEntity.*
           FROM XapiStatementEntity
+               JOIN VerbEntity
+                    ON (    VerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
          WHERE XapiStatementEntity.statementIdHi = :subStatementIdHi
            AND XapiStatementEntity.statementIdLo = :subStatementIdLo
            AND XapiStatementEntity.isSubStatement
@@ -53,7 +60,7 @@ interface XapiStatementEntityDao {
     suspend fun getEntityForSubstatement(
         subStatementIdHi: Long,
         subStatementIdLo: Long,
-    ): XapiStatementEntity
+    ): XapiSubstatementAndVerbEntity
 
 
     @RawQuery

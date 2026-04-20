@@ -63,4 +63,18 @@ interface ActorDao {
     )
 
 
+    @Query("""
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorUid IN (:uids)
+            OR ActorEntity.actorUid IN (
+               SELECT GroupMemberActorJoin.gmajMemberActorUid
+                 FROM GroupMemberActorJoin
+                WHERE GroupMemberActorJoin.gmajGroupActorUid IN (:uids))
+    """)
+    suspend fun findByUidList(
+        uids: List<Long>
+    ): List<ActorEntity>
+
+
 }

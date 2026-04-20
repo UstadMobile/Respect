@@ -167,26 +167,3 @@ fun ActorEntities.toModel(): XapiActor {
 
     }
 }
-
-/**
- * An identified group may omit the member property. We need keep only one ActorEntities object per
- * unique actor, and when that is a group, it must have all members identified (if any).
- *
- * Otherwise, there is a risk that the same identified group is in a statement in multiple different
- * places (e.g. the statement actor and team), and then the identified group with no members could
- * override the identified group with the members, and members information would be lost.
- */
-fun List<ActorEntities>.flattenActors(): List<ActorEntities> {
-    return map { it.actor.actorUid }.distinct().mapNotNull { actorUid ->
-        val allByUid = this.filter { it.actor.actorUid == actorUid }
-        allByUid.firstOrNull()?.let { first ->
-            ActorEntities(
-                actor = first.actor,
-                groupMemberAgents = this.flatMap { it.groupMemberAgents }.distinctBy { it.actorUid },
-                groupMemberJoins = this.flatMap { join ->
-                    join.groupMemberJoins.distinctBy { it.gmajMemberActorUid }
-                }
-            )
-        }
-    }
-}

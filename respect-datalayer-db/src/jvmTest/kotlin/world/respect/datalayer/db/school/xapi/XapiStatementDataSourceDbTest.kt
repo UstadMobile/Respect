@@ -112,7 +112,6 @@ class XapiStatementDataSourceDbTest {
                             statementId = stmtUuid
                         )
                     ).dataOrNull()?.first()
-                    println(stmtFromDb)
 
                     assertNotNull(stmtFromDb)
                     assertXapiStatementMatches(

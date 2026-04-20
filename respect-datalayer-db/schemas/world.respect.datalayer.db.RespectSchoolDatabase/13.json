@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "e7db848fe5cf5c8c03c7d64df6be08dc",
+    "identityHash": "c7360aa9114a2c027474aecf47acf5c5",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2116,7 +2116,7 @@
       },
       {
         "tableName": "StatementContextActivityJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL, PRIMARY KEY(`scajUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "scajUid",
@@ -2156,7 +2156,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "scajUid"
           ]
@@ -2493,7 +2493,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e7db848fe5cf5c8c03c7d64df6be08dc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c7360aa9114a2c027474aecf47acf5c5')"
     ]
   }
 }

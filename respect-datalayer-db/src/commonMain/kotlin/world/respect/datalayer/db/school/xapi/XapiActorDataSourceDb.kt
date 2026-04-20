@@ -1,15 +1,14 @@
 package world.respect.datalayer.db.school.xapi
 
-import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
+import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiGroup
-import kotlin.time.Clock
 import kotlin.time.Instant
 
 class XapiActorDataSourceDb(
@@ -26,7 +25,7 @@ class XapiActorDataSourceDb(
         actors.forEach { actor ->
             val entities = actor.toEntities(
                 uidNumberMapper = uidNumberMapper,
-                lastModified = timestamp
+                lastModified = timestamp,
             )
 
             val allActorEntities = (listOf(entities.actor) + entities.groupMemberAgents)
@@ -41,11 +40,11 @@ class XapiActorDataSourceDb(
                     ?.findByUidAsync(entities.actor.actorUid)
 
                 val updateMembers = members != null &&
-                    (timestamp > (existingEntityInDb?.actorGroupMembersLastUpdated ?: Clock.System.now()))
+                    (timestamp > (existingEntityInDb?.actorGroupMembersLastUpdated ?: EPOCH))
 
                 if(updateMembers) {
                     //If this is an identified group, we need to delete previous group member joins
-                    schoolDb.takeIf { actor.isAnonymous }?.getGroupMemberActorJoinDao()
+                    schoolDb.takeIf { !actor.isAnonymous }?.getGroupMemberActorJoinDao()
                         ?.deleteByGroupActorUidAsync(entities.actor.actorUid)
 
                     schoolDb.getGroupMemberActorJoinDao().insertOrIgnoreListAsync(

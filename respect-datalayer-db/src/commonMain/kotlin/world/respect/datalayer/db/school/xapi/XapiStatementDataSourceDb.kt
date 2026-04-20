@@ -56,12 +56,6 @@ class XapiStatementDataSourceDb(
             stored = timeNow,
             timestamp = stmtTimestamp,
             id = stmt.id ?: Uuid.random(),
-            authority = XapiAgent(
-                account = XapiAccount(
-                    name = authenticatedUser.guid,
-                    homePage = schoolUrl.toString(),
-                )
-            )
         )
 
         val statementEntity = exactStatement.toEntities(
@@ -138,7 +132,7 @@ class XapiStatementDataSourceDb(
             )
 
             //now get StatementContextActivityJoins
-            //This needs adjusted to include substatement
+            //TODO: TODO TODO TODO This needs adjusted to include substatement
             val contextActivityJoins = schoolDb.getStatementContextActivityJoinDao()
                 .findAllByStatementId(
                     statementIdHi = entity.stmtEntity.statementIdHi,

@@ -13,13 +13,15 @@ interface AssignmentDataSource: WritableDataSource<Assignment> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
+        val status: String? = null,
     ) {
 
         companion object {
 
             fun fromParams(params: StringValues): GetListParams {
                 return GetListParams(
-                    common = GetListCommonParams.fromParams(params)
+                    common = GetListCommonParams.fromParams(params),
+                    status = params["status"]
                 )
             }
         }

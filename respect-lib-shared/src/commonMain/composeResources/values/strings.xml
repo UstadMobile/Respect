@@ -502,6 +502,7 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Assignment tasks</string>
+    <string name="tasks">Tasks</string>
     <string name="assignment_name">Assignment name</string>
     <string name="lesson_assessment">Lesson/assessment</string>
 
@@ -569,5 +570,8 @@
     <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
 
     <string name="select_host">Select Host</string>
+
+    <string name="no_tasks_selected_yet">No task selected yet.</string>
+    <string name="please_click_plus_button_to_add_one">Please click the + button to add one</string>
 
 </resources>

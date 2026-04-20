@@ -32,12 +32,17 @@ import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.shared.util.AssignmentFilter
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class AssignmentListUiState(
     val assignments: IPagingSourceFactory<Int, Assignment> = EmptyPagingSourceFactory(),
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
+    val selectedFilter: AssignmentFilter = AssignmentFilter.ALL,
+    val completedCount: Int = 2,
+    val totalCount: Int = 3,
+    val className: String = "Class 1"
 )
 
 class AssignmentListViewModel(
@@ -54,11 +59,18 @@ class AssignmentListViewModel(
 
     val uiState: StateFlow<AssignmentListUiState> = _uiState.asStateFlow()
 
+    private val _selectedFilter = MutableStateFlow(AssignmentFilter.ALL)
 
     private val pagingSourceHolder = PagingSourceFactoryHolder {
+        val status = when(_selectedFilter.value) {
+            AssignmentFilter.PENDING -> "pending"
+            AssignmentFilter.COMPLETED -> "completed"
+            else -> null
+        }
+
         schoolDataSource.assignmentDataSource.listAsPagingSource(
             loadParams = DataLoadParams(),
-            params = AssignmentDataSource.GetListParams()
+            params = AssignmentDataSource.GetListParams(status = status)
         )
     }
 
@@ -94,6 +106,12 @@ class AssignmentListViewModel(
             }
         }
 
+    }
+
+    fun onFilterChanged(filter: AssignmentFilter) {
+        _selectedFilter.value = filter
+        _uiState.update { it.copy(selectedFilter = filter) }
+        pagingSourceHolder.invalidate()
     }
 
     fun onClickAssignment(assignment: Assignment) {

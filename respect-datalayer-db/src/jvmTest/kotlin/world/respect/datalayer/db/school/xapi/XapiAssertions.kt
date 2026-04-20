@@ -26,7 +26,7 @@ fun assertContextActivitiesMatches(
         actual: List<XapiActivity>?,
     ) {
         if(expected != null) {
-            assertNotNull(actual)
+            assertNotNull(actual, "Actual expected to have context activity")
             assertEquals(expected.size, actual.size)
 
             expected.forEach { expectedActivity ->
@@ -185,7 +185,7 @@ fun assertXapiStatementMatches(
     val expectedAuthority = expected.authority
     if(expectedAuthority != null) {
         val actualAuthority = actual.authority
-        assertNotNull(actualAuthority)
+        assertNotNull(actualAuthority ,"Expected statement has authority $expectedAuthority")
         assertXapiActorMatches(expectedAuthority, actualAuthority)
     }else {
         assertNull(actual.authority)
@@ -232,7 +232,8 @@ fun assertXapiActivityDefinitionMatches(
     assertLangMapEquals(expected.name, actual.name)
     assertLangMapEquals(expected.description, actual.description)
     assertEquals(expected.type, actual.type)
-    assertEquals(expected.extensions, actual.extensions)
+    assertEquals(expected.extensions, actual.extensions,
+        "Actual Xapi Activity extensions must match expected")
     assertEquals(expected.moreInfo, actual.moreInfo)
     assertEquals(expected.interactionType, actual.interactionType)
     assertEquals(expected.correctResponsesPattern, actual.correctResponsesPattern)

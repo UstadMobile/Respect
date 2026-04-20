@@ -78,6 +78,14 @@ class XapiActivityDataSourceDb(
                         schoolDb.getActivityInteractionDao().insertOrIgnoreAsync(
                             entities.activityInteractionEntities
                         )
+
+                        schoolDb.getActivityExtensionDao().takeIf {
+                            activityInDb != null
+                        }?.deleteByActivityUid(uid)
+
+                        schoolDb.getActivityExtensionDao().upsertListAsync(
+                            entities.activityExtensionEntities
+                        )
                     }
 
                     //For each langmap property: If it already exists, and we have newer data for that entry

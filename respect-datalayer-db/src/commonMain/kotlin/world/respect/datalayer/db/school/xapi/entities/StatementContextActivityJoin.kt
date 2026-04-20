@@ -15,7 +15,7 @@ import androidx.room.PrimaryKey
  * @param scajToActivityUid for key that joins to the activity (ActivityEntity.actUid)
  */
 data class StatementContextActivityJoin(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val scajUid: Long = 0,
     val scajFromStatementIdHi: Long,
     val scajFromStatementIdLo: Long,

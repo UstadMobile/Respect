@@ -19,7 +19,6 @@ import kotlinx.serialization.Serializable
 data class GroupMemberActorJoin(
     val gmajGroupActorUid: Long,
     val gmajMemberActorUid: Long,
-    val gmajIndex: Int,
 ) {
     companion object {
         const val TABLE_ID = 4232

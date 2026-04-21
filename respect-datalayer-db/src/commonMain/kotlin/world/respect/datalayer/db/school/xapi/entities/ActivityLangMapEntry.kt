@@ -1,11 +1,21 @@
 package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Serializable
-@Entity
+@Entity(
+    indices = [
+        Index(
+            value = ["almeActivityUid", "almeProperty", "almeInteractionId", "almeLangCode"],
+            unique = true
+        )
+    ]
+)
 /**
  * As per Activity Definition:
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#activity-definition
@@ -20,6 +30,7 @@ import kotlinx.serialization.Serializable
  * @param almeProperty the property that this LangMapEntry is for : see ActivityLangMapEntryPropEnum
  * @param almeInteractionId if this is an entry for an interaction, then the id of the interaction
  * @param almeValue the string value for the given language
+ * @property almeLastModified the time when this entry was last modified: used for conflict resolution
  */
 data class ActivityLangMapEntry(
     @PrimaryKey(autoGenerate = true)
@@ -34,6 +45,8 @@ data class ActivityLangMapEntry(
     val almeLangCode: String,
 
     val almeValue: String,
+
+    val almeLastModified: Instant = Clock.System.now(),
 
 ) {
     companion object {

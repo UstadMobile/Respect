@@ -9,6 +9,8 @@ import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.ext.addStatementIdIfNotPresent
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
@@ -20,6 +22,8 @@ import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
+import kotlin.test.assertNotNull
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class XapiStatementDataSourceDbTest {
@@ -47,8 +51,17 @@ class XapiStatementDataSourceDbTest {
                 isSubStatement = false,
             )
 
-            val actors = statement.allActors().distinctMerged()
-            val activities = statement.allDefinedActivities()
+            val timeNow = Clock.System.now()
+            val actors = statement.allActors().distinctMerged().map {
+                it.toEntities(uidNumberMapper, timeNow)
+            }.map {
+                it.toModel()
+            }
+            val activities = statement.allDefinedActivities().distinctMerged().mapNotNull {
+                it.toEntities(uidNumberMapper, json, timeNow)
+            }.map {
+                it.toModel(json)
+            }
             val verbs = statement.allDefinedVerbs()
 
             val primaryStatementEntity = statementEntities.statements.first { !it.isSubStatement }
@@ -75,20 +88,36 @@ class XapiStatementDataSourceDbTest {
     }
 
     @Test
-    fun givenStatement_canStore() {
+    fun givenStatement_canStoreAndRetrieve() {
         runBlocking {
-            testSchoolDb(temporaryFolder.newFolder()) { db ->
-                val dataSource = db.toDataSource(
-                    authenticatedUserUid = "1",
-                    schoolUrl = Url("http://localhost:8098/"),
-                )
+            forXapiSampleStatements { statement ->
+                testSchoolDb(temporaryFolder.newFolder()) { db ->
+                    val dataSource = db.toDataSource(
+                        authenticatedUserUid = "1",
+                        schoolUrl = Url("http://localhost:8098/"),
+                    )
 
-                forXapiSampleStatements { statement ->
+                    val stmtUuid = Uuid.random()
+
                     val statement = Json.decodeFromJsonElement(
                         XapiStatement.serializer(), statement.jsonObject
+                    ).copy(
+                        id = stmtUuid
                     )
 
                     dataSource.xapiStatementDataSource.store(listOf(statement))
+
+                    val stmtFromDb = dataSource.xapiStatementDataSource.list(
+                        listParams = XapiStatementDataSource.GetStatementParams(
+                            statementId = stmtUuid
+                        )
+                    ).dataOrNull()?.first()
+
+                    assertNotNull(stmtFromDb)
+                    assertXapiStatementMatches(
+                        expected = statement,
+                        actual = stmtFromDb,
+                    )
                 }
             }
         }

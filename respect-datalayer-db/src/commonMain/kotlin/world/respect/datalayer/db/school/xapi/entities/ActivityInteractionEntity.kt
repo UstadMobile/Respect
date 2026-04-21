@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.xapi.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
@@ -20,6 +21,7 @@ import kotlinx.serialization.Serializable
 data class ActivityInteractionEntity(
     @PrimaryKey(autoGenerate = true)
     val aieUid: Long = 0,
+    @ColumnInfo(index = true)
     val aieActivityUid: Long = 0,
     val aieProp: ActivityInteractionEntityPropEnum,
     val aieId: String,

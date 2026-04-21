@@ -15,11 +15,11 @@ enum class ActivityInteractionEntityPropEnum(
     val flag: Int,
     val listIsNullFlag: Int,
 ) {
-    CHOICES(1, ActivityEntity.FLAG_CHOICES_NULL),
-    SCALE(2, ActivityEntity.FLAG_SCALE_NULL),
-    SOURCE(3, ActivityEntity.FLAG_SOURCE_NULL),
-    TARGET(4, ActivityEntity.FLAG_TARGET_NULL),
-    STEPS(5, ActivityEntity.FLAG_STEPS_NULL);
+    CHOICES(1, XapiActivityEntity.FLAG_CHOICES_NULL),
+    SCALE(2, XapiActivityEntity.FLAG_SCALE_NULL),
+    SOURCE(3, XapiActivityEntity.FLAG_SOURCE_NULL),
+    TARGET(4, XapiActivityEntity.FLAG_TARGET_NULL),
+    STEPS(5, XapiActivityEntity.FLAG_STEPS_NULL);
 
     companion object {
 

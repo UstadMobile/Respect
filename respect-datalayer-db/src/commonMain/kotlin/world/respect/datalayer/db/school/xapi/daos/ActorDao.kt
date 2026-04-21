@@ -52,4 +52,29 @@ interface ActorDao {
         accountPersonUid: Long,
     ): ActorEntity?
 
+    @Query("""
+        UPDATE ActorEntity
+           SET actorGroupMembersLastUpdated = :updateTime
+         WHERE actorUid = :actorUid
+    """)
+    suspend fun updateGroupMembersLastUpdated(
+        actorUid: Long,
+        updateTime: Long,
+    )
+
+
+    @Query("""
+        SELECT ActorEntity.*
+          FROM ActorEntity
+         WHERE ActorEntity.actorUid IN (:uids)
+            OR ActorEntity.actorUid IN (
+               SELECT GroupMemberActorJoin.gmajMemberActorUid
+                 FROM GroupMemberActorJoin
+                WHERE GroupMemberActorJoin.gmajGroupActorUid IN (:uids))
+    """)
+    suspend fun findByUidList(
+        uids: List<Long>
+    ): List<ActorEntity>
+
+
 }

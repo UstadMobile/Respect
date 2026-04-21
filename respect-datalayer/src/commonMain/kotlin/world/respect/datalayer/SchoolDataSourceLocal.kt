@@ -13,6 +13,9 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActorDataSource
+import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 
 /**
@@ -47,6 +50,10 @@ interface SchoolDataSourceLocal: SchoolDataSource {
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal
 
     override val opdsFeedDataSource: OpdsFeedDataSourceLocal
+
+    override val xapiActivityDataSource: XapiActivityDataSourceLocal
+
+    override val xapiActorDataSource: XapiActorDataSourceLocal
 
     override val xapiStatementDataSource: XapiStatementDataSourceLocal
 

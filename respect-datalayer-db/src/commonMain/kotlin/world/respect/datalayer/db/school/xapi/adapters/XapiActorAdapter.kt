@@ -4,6 +4,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.ActorEntity
 import world.respect.datalayer.db.school.xapi.entities.ActorEntityTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
+import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiActor
@@ -11,6 +12,8 @@ import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
 import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.isAnonymous
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 
@@ -29,15 +32,21 @@ fun XapiActor.identifierHash(uidNumberMapper: UidNumberMapper): Long {
 
 fun XapiActor.toEntities(
     uidNumberMapper: UidNumberMapper,
+    lastModified: Instant,
 ): ActorEntities {
     return when(this) {
-        is XapiAgent -> ActorEntities(toActorEntity(uidNumberMapper))
-        is XapiGroup -> toGroupEntities(uidNumberMapper)
+        is XapiAgent -> ActorEntities(
+            toActorEntity(uidNumberMapper, lastModified)
+        )
+        is XapiGroup -> toGroupEntities(
+            uidNumberMapper, lastModified
+        )
     }
 }
 
 fun XapiAgent.toActorEntity(
     uidNumberMapper: UidNumberMapper,
+    lastModified: Instant,
 ) : ActorEntity {
     val uid = identifierHash(uidNumberMapper)
     return ActorEntity(
@@ -50,6 +59,7 @@ fun XapiAgent.toActorEntity(
         actorAccountName = account?.name,
         actorAccountHomePage = account?.homePage,
         actorObjectType = ActorEntityTypeEnum.AGENT,
+        actorLastModified = lastModified,
     )
 }
 
@@ -77,10 +87,14 @@ fun XapiAgent.toActorEntity(
  */
 fun XapiGroup.toGroupEntities(
     uidNumberMapper: UidNumberMapper,
+    lastModified: Instant,
 ) : ActorEntities {
 
     val memberActorEntities = member?.map {
-        it.toActorEntity(uidNumberMapper)
+        it.toActorEntity(
+            uidNumberMapper = uidNumberMapper,
+            lastModified = lastModified,
+        )
     } ?: emptyList()
 
     val groupActor = ActorEntity(
@@ -96,6 +110,7 @@ fun XapiGroup.toGroupEntities(
         actorOpenid = openid,
         actorAccountName = account?.name,
         actorAccountHomePage = account?.homePage,
+        actorLastModified = lastModified,
     )
 
     return ActorEntities(
@@ -105,7 +120,6 @@ fun XapiGroup.toGroupEntities(
             GroupMemberActorJoin(
                 gmajGroupActorUid = groupActor.actorUid,
                 gmajMemberActorUid = memberActorEntity.actorUid,
-                gmajIndex = index,
             )
         }
     )
@@ -151,28 +165,5 @@ fun ActorEntities.toModel(): XapiActor {
             this.toGroupModel()
         }
 
-    }
-}
-
-/**
- * An identified group may omit the member property. We need keep only one ActorEntities object per
- * unique actor, and when that is a group, it must have all members identified (if any).
- *
- * Otherwise, there is a risk that the same identified group is in a statement in multiple different
- * places (e.g. the statement actor and team), and then the identified group with no members could
- * override the identified group with the members, and members information would be lost.
- */
-fun List<ActorEntities>.flattenActors(): List<ActorEntities> {
-    return map { it.actor.actorUid }.distinct().mapNotNull { actorUid ->
-        val allByUid = this.filter { it.actor.actorUid == actorUid }
-        allByUid.firstOrNull()?.let { first ->
-            ActorEntities(
-                actor = first.actor,
-                groupMemberAgents = this.flatMap { it.groupMemberAgents }.distinctBy { it.actorUid },
-                groupMemberJoins = this.flatMap { join ->
-                    join.groupMemberJoins.distinctBy { it.gmajMemberActorUid }
-                }
-            )
-        }
     }
 }

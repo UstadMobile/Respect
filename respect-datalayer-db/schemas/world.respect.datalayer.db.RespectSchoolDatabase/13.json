@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "1e651060b244d0b1140417d821cf7c54",
+    "identityHash": "c7360aa9114a2c027474aecf47acf5c5",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1735,8 +1735,8 @@
         }
       },
       {
-        "tableName": "ActivityEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT NOT NULL, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actLct` INTEGER NOT NULL, `actFlags` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
+        "tableName": "XapiActivityEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT NOT NULL, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actNonSignificantLastModified` INTEGER NOT NULL, `actSignificantLastModified` INTEGER NOT NULL, `actStored` INTEGER NOT NULL, `actFlags` INTEGER NOT NULL, `actObjectTypeSet` INTEGER NOT NULL, PRIMARY KEY(`actUid`))",
         "fields": [
           {
             "fieldPath": "actUid",
@@ -1771,14 +1771,32 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "actLct",
-            "columnName": "actLct",
+            "fieldPath": "actNonSignificantLastModified",
+            "columnName": "actNonSignificantLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actSignificantLastModified",
+            "columnName": "actSignificantLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actStored",
+            "columnName": "actStored",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "actFlags",
             "columnName": "actFlags",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actObjectTypeSet",
+            "columnName": "actObjectTypeSet",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -1873,11 +1891,22 @@
           "columnNames": [
             "aieUid"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_ActivityInteractionEntity_aieActivityUid",
+            "unique": false,
+            "columnNames": [
+              "aieActivityUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ActivityInteractionEntity_aieActivityUid` ON `${TABLE_NAME}` (`aieActivityUid`)"
+          }
+        ]
       },
       {
         "tableName": "ActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `almeActivityUid` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `almeActivityUid` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "almeUid",
@@ -1913,6 +1942,12 @@
             "columnName": "almeValue",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "almeLastModified",
+            "columnName": "almeLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -1920,11 +1955,25 @@
           "columnNames": [
             "almeUid"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_ActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode",
+            "unique": true,
+            "columnNames": [
+              "almeActivityUid",
+              "almeProperty",
+              "almeInteractionId",
+              "almeLangCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode` ON `${TABLE_NAME}` (`almeActivityUid`, `almeProperty`, `almeInteractionId`, `almeLangCode`)"
+          }
+        ]
       },
       {
         "tableName": "ActorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "actorUid",
@@ -1981,6 +2030,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "actorGroupMembersLastUpdated",
+            "columnName": "actorGroupMembersLastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "actorObjectType",
             "columnName": "actorObjectType",
             "affinity": "INTEGER",
@@ -2016,7 +2071,7 @@
       },
       {
         "tableName": "GroupMemberActorJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gmajGroupActorUid` INTEGER NOT NULL, `gmajMemberActorUid` INTEGER NOT NULL, `gmajIndex` INTEGER NOT NULL, PRIMARY KEY(`gmajGroupActorUid`, `gmajMemberActorUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gmajGroupActorUid` INTEGER NOT NULL, `gmajMemberActorUid` INTEGER NOT NULL, PRIMARY KEY(`gmajGroupActorUid`, `gmajMemberActorUid`))",
         "fields": [
           {
             "fieldPath": "gmajGroupActorUid",
@@ -2027,12 +2082,6 @@
           {
             "fieldPath": "gmajMemberActorUid",
             "columnName": "gmajMemberActorUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "gmajIndex",
-            "columnName": "gmajIndex",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -2067,7 +2116,7 @@
       },
       {
         "tableName": "StatementContextActivityJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL, PRIMARY KEY(`scajUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "scajUid",
@@ -2107,14 +2156,14 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "scajUid"
           ]
         }
       },
       {
-        "tableName": "StatementEntity",
+        "tableName": "XapiStatementEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementVerbId` TEXT NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectActivityId` TEXT, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextRevision` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `contextTeamActorUid` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, `statementVersion` TEXT, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
         "fields": [
           {
@@ -2345,8 +2394,8 @@
         ]
       },
       {
-        "tableName": "StatementEntityJson",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stmtJsonIdHi` INTEGER NOT NULL, `stmtJsonIdLo` INTEGER NOT NULL, `stmtEtag` INTEGER NOT NULL, `fullStatement` TEXT, PRIMARY KEY(`stmtJsonIdHi`, `stmtJsonIdLo`))",
+        "tableName": "XapiStatementEntityJson",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stmtJsonIdHi` INTEGER NOT NULL, `stmtJsonIdLo` INTEGER NOT NULL, `fullStatement` TEXT, PRIMARY KEY(`stmtJsonIdHi`, `stmtJsonIdLo`))",
         "fields": [
           {
             "fieldPath": "stmtJsonIdHi",
@@ -2357,12 +2406,6 @@
           {
             "fieldPath": "stmtJsonIdLo",
             "columnName": "stmtJsonIdLo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "stmtEtag",
-            "columnName": "stmtEtag",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2450,7 +2493,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1e651060b244d0b1140417d821cf7c54')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c7360aa9114a2c027474aecf47acf5c5')"
     ]
   }
 }

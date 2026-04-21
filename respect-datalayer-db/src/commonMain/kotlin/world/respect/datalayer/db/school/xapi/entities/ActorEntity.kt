@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.ext.EPOCH
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -61,6 +62,8 @@ data class ActorEntity(
     val actorStored: Instant = Clock.System.now(),
 
     val actorLastModified: Instant = Clock.System.now(),
+
+    val actorGroupMembersLastUpdated: Instant = EPOCH,
 
     val actorObjectType: ActorEntityTypeEnum = ActorEntityTypeEnum.AGENT,
 ) {

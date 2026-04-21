@@ -5,18 +5,34 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.domain.xapi.StoreActivitiesUseCase
+import world.respect.datalayer.db.school.ext.toLongPair
+import world.respect.datalayer.db.school.xapi.adapters.ActorEntities
+import world.respect.datalayer.db.school.xapi.adapters.StatementEntities
+import world.respect.datalayer.db.school.xapi.adapters.VerbEntities
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
+import world.respect.datalayer.db.school.xapi.adapters.toModel
+import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
+import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
+import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.ext.allActivityUids
+import world.respect.datalayer.db.school.xapi.ext.allActorUids
+import world.respect.datalayer.ext.appendIfNotNull
+import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.ext.allActors
+import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
+import world.respect.datalayer.school.xapi.ext.distinctMerged
 
 class XapiStatementDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -25,7 +41,8 @@ class XapiStatementDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val primaryKeyGenerator: PrimaryKeyGenerator,
     private val json: Json,
-    private val storeActivitiesUseCase: StoreActivitiesUseCase,
+    private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
+    private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
 ) : XapiStatementDataSource, XapiStatementDataSourceLocal{
 
     suspend fun doUpsertStatement(
@@ -39,12 +56,6 @@ class XapiStatementDataSourceDb(
             stored = timeNow,
             timestamp = stmtTimestamp,
             id = stmt.id ?: Uuid.random(),
-            authority = XapiAgent(
-                account = XapiAccount(
-                    name = authenticatedUser.guid,
-                    homePage = schoolUrl.toString(),
-                )
-            )
         )
 
         val statementEntity = exactStatement.toEntities(
@@ -54,57 +65,35 @@ class XapiStatementDataSourceDb(
         )
 
         schoolDb.getStatementDao().insertOrIgnoreListAsync(statementEntity.statements)
-
         schoolDb.getStatementEntityJsonDao().insertOrIgnoreListAsync(
             statementEntity.statementEntityJson
         )
+        schoolDb.getStatementContextActivityJoinDao().insertOrIgnoreListAsync(
+            statementEntity.statementContextActivityJoins
+        )
 
-        /*
-        statementEntity.actorEntities.map { it.actor }
-            .filter { it.actorObjectType == ActorEntityTypeEnum.AGENT }
-            .takeIf { it.isNotEmpty() }
-            ?.also { agents ->
-                //Name is the only property that could be updated on the Agent. All other
-                //properties are identifiers
-                schoolDb.getActorDao().insertOrUpdateActorsIfNameChanged(agents)
-            }
-
-        //Handle groups
-        statementEntity.actorEntities.filter {
-            it.actor.actorObjectType == ActorEntityTypeEnum.GROUP
-        }.distinctBy {
-            it.actor.actorUid
-        }.forEach { group ->
-            val existingGroupEntity = schoolDb.getActorDao().findByUidAsync(group.actor.actorUid)
-            if((existingGroupEntity?.actorLastModified ?: EPOCH) > stmtTimestamp) {
-                schoolDb.getGroupMemberActorJoinDao().deleteByGroupActorUidAsync(
-                    group.actor.actorUid
-                )
-                schoolDb.getGroupMemberActorJoinDao().upsertListAsync(
-                    group.groupMemberJoins
-                )
-                schoolDb.getActorDao().insertOrUpdateActorsIfNameChanged(
-                    group.groupMemberAgents
-                )
-            }
+        val verbEntities = stmt.allDefinedVerbs().map {
+            it.toVerbEntities(uidNumberMapper)
         }
 
         schoolDb.getVerbDao().insertOrIgnoreAsync(
-            statementEntity.verbEntities.map { it.verbEntity }
+            verbEntities.map { it.verbEntity }
         )
 
         schoolDb.getVerbLangMapEntryDao().upsertList(
-            statementEntity.verbEntities.flatMap { it.verbLangMapEntries }
+            verbEntities.flatMap { it.verbLangMapEntries }
         )
 
-        storeActivitiesUseCase(statementEntity.activityEntities)
-
-         */
+        val activities = stmt.allDefinedActivities().distinctMerged()
+        xapiActivityDataSourceLocal.updateLocal(activities, stmtTimestamp)
+        xapiActorDataSourceLocal.updateLocal(
+            actors = stmt.allActors().distinctMerged(),
+            timestamp = stmtTimestamp,
+        )
     }
 
 
     override suspend fun store(list: List<XapiStatement>) {
-        //TODO: permission checks
         list.forEach { statement ->
             doUpsertStatement(statement)
         }
@@ -114,6 +103,9 @@ class XapiStatementDataSourceDb(
         list: List<XapiStatement>,
         forceOverwrite: Boolean
     ) {
+        //needs to check for existing statement, if existing, do nothing.
+
+
         list.forEach { statement ->
             doUpsertStatement(statement)
         }
@@ -123,7 +115,99 @@ class XapiStatementDataSourceDb(
         listParams: XapiStatementDataSource.GetStatementParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<XapiStatement>> {
-        TODO()
+
+        val statementIds = listParams.statementId?.toLongPair()
+
+        //Get the statement entities.
+        //Then get the activity entities
+        val statements =  schoolDb.getStatementDao().list(
+            statementIdHi = statementIds?.first ?: 0,
+            statementIdLo = statementIds?.second ?: 0,
+        ).map { entity ->
+            val substatementEntity = schoolDb.takeIf {
+                entity.stmtEntity.statementObjectType == StatementEntityObjectTypeEnum.SUBSTATEMENT
+            }?.getStatementDao()?.getEntityForSubstatement(
+                subStatementIdHi = entity.stmtEntity.statementObjectUid1,
+                subStatementIdLo = entity.stmtEntity.statementObjectUid2,
+            )
+
+            //now get StatementContextActivityJoins
+            //TODO: TODO TODO TODO This needs adjusted to include substatement
+            val contextActivityJoins = schoolDb.getStatementContextActivityJoinDao()
+                .findAllByStatementId(
+                    statementIdHi = entity.stmtEntity.statementIdHi,
+                    statementIdLo = entity.stmtEntity.statementIdLo,
+                )
+
+            val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao().findByVerbUidPair(
+                uid1 = entity.verbEntity.verbUid,
+                uid2 = substatementEntity?.verbEntity?.verbUid ?: 0,
+            )
+
+            val verbs = listOfNotNull(
+                entity.verbEntity, substatementEntity?.verbEntity,
+            ).map { verbEntity ->
+                VerbEntities(
+                    verbEntity = verbEntity,
+                    verbLangMapEntries = verbLangMapEntries.filter {
+                        it.vlmeVerbUid == verbEntity.verbUid
+                    }
+                ).toModel()
+            }
+
+            val allActorUids = entity.stmtEntity.allActorUids().appendIfNotNull(
+                substatementEntity?.stmtEntity?.allActorUids()
+            )
+
+            val actorEntities = schoolDb.getActorDao().findByUidList(uids = allActorUids)
+            val groupMemberJoins = schoolDb.getGroupMemberActorJoinDao().findByGroupActorUidList(
+                uidList = allActorUids
+            )
+
+            val actors = actorEntities.filter {
+                //Filter out agents that are referenced by being group members
+                it.actorUid in allActorUids
+            }.distinctBy {
+                it.actorUid
+            }.map { actorEntity ->
+                //Passing through all actor entitie is harmless because the ActorEntities.toModel
+                //will use the group member joins to select the actor entity for an agent member of
+                //the group
+                ActorEntities(
+                    actor = actorEntity,
+                    groupMemberJoins = groupMemberJoins.filter {
+                        it.gmajGroupActorUid == actorEntity.actorUid
+                    },
+                    groupMemberAgents = actorEntities,
+                ).toModel()
+            }
+
+            val activities = schoolDb.getActivityEntityDao().findByUidList(
+                entity.stmtEntity.allActivityUids(contextActivityJoins).appendIfNotNull(
+                    substatementEntity?.stmtEntity?.allActivityUids(contextActivityJoins)
+                )
+            ).map { it.toModel(json) }
+
+            StatementEntities(
+                statements = listOfNotNull(
+                    entity.stmtEntity, substatementEntity?.stmtEntity
+                ),
+                statementEntityJson = listOf(entity.stmtJsonEntity),
+                statementContextActivityJoins = contextActivityJoins,
+            ).toModel(
+                json = json,
+                statementIdHi = entity.stmtEntity.statementIdHi,
+                statementIdLo = entity.stmtEntity.statementIdLo,
+                uidNumberMapper = uidNumberMapper,
+                verbs = verbs,
+                actors = actors,
+                activities = activities
+            )
+        }
+
+        return DataReadyState(
+            data = statements,
+        )
     }
 
     override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {

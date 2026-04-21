@@ -12,14 +12,12 @@ interface ActivityInteractionDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreAsync(entities: List<ActivityInteractionEntity>)
 
+
     @Query("""
-        SELECT DISTINCT ActivityInteractionEntity.aieActivityUid
-          FROM ActivityInteractionEntity
-         WHERE ActivityInteractionEntity.aieActivityUid IN (:activityUids)
+        DELETE FROM ActivityInteractionEntity 
+         WHERE aieActivityUid = :activityUid
     """)
-    suspend fun findActivityUidsWithInteractionEntitiesAsync(
-        activityUids: List<Long>
-    ): List<Long>
+    suspend fun deleteByActivityUid(activityUid: Long)
 
     @Query("""
         SELECT ActivityInteractionEntity.*

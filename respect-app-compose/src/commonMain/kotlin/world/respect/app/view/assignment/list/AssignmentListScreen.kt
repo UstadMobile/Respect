@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -78,10 +78,20 @@ fun AssignmentListScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AssignmentFilter.entries.forEach { filter ->
+                val label = if (filter == AssignmentFilter.ALL) {
+                    filter.displayName
+                } else {
+                    val count = when (filter) {
+                        AssignmentFilter.COMPLETED -> uiState.completedCount
+                        AssignmentFilter.PENDING -> uiState.totalCount - uiState.completedCount
+                        else -> 0
+                    }
+                    "${filter.displayName} ($count)"
+                }
                 FilterChip(
                     selected = uiState.selectedFilter == filter,
                     onClick = { onFilterSelected(filter) },
-                    label = { Text(filter.displayName) },
+                    label = { Text(label) },
                     shape = RoundedCornerShape(50)
                 )
             }
@@ -98,7 +108,7 @@ fun AssignmentListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onClickAssignment(assignment) }
-                        .padding(16.dp),
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
@@ -145,17 +155,18 @@ fun AssignmentListScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.MenuBook,
+                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
                             tint = Color.Gray
                         )
                         Spacer(Modifier.width(6.dp))
-                        Text("Class 1", style = MaterialTheme.typography.bodyMedium)
+                        Text("Class 1", style = MaterialTheme.typography.bodySmall)
                     }
 
                     Row(
-                        modifier = Modifier.weight(1.2f),
+                        modifier = Modifier
+                            .weight(1f),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {

@@ -25,6 +25,8 @@
     <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
     <string name="clazz">Class</string>
+    <string name="assigned_to">Assigned to</string>
+    <string name="assign_to">Assign to</string>
     <string name="remove_from_class">Remove from class</string>
     <string name="manage_enrollments">Manage enrollments</string>
     <string name="report">Report</string>
@@ -504,7 +506,9 @@
     <string name="assignment_tasks">Assignment tasks</string>
     <string name="tasks">Tasks</string>
     <string name="assignment_name">Assignment name</string>
+    <string name="assignment_title">Assignment title</string>
     <string name="lesson_assessment">Lesson/assessment</string>
+    <string name="deadline">Deadline</string>
 
     <string name="due_date">Due date</string>
     <string name="family_members">Family members</string>

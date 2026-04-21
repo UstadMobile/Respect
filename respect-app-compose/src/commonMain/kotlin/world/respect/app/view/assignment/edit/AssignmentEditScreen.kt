@@ -57,10 +57,12 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.assignment_name
-import world.respect.shared.generated.resources.clazz
+import world.respect.shared.generated.resources.assign_to
+import world.respect.shared.generated.resources.assignment_title
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.fingerprint
+import world.respect.shared.generated.resources.no_tasks_selected_yet
+import world.respect.shared.generated.resources.please_click_plus_button_to_add_one
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.tasks
 import world.respect.shared.util.ext.asUiText
@@ -95,11 +97,11 @@ fun AssignmentEditScreen(
     onClickRemoveLearningUnit: (AssignmentLearningUnitRef) -> Unit,
 ) {
     val assignment = uiState.assignment.dataOrNull()
-    val filteredOptions = if(uiState.assigneeText.isNotBlank()) {
+    val filteredOptions = if (uiState.assigneeText.isNotBlank()) {
         uiState.classOptions.filter {
             it.title.contains(uiState.assigneeText, ignoreCase = true)
         }
-    }else {
+    } else {
         uiState.classOptions
     }
 
@@ -110,7 +112,7 @@ fun AssignmentEditScreen(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("title"),
             value = assignment?.title ?: "",
             label = {
-                Text(stringResource(Res.string.assignment_name) + "*")
+                Text(stringResource(Res.string.assignment_title) + "*")
             },
             onValueChange = { newTitle ->
                 assignment?.also {
@@ -128,7 +130,7 @@ fun AssignmentEditScreen(
         //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ExposedDropdownMenuBox(kotlin.Boolean,kotlin.Function1,androidx.compose.ui.Modifier,kotlin.Function1)
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange =  { expanded = it }
+            onExpandedChange = { expanded = it }
         ) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth()
@@ -137,7 +139,7 @@ fun AssignmentEditScreen(
                     .menuAnchor(MenuAnchorType.PrimaryEditable),
                 value = uiState.assigneeText,
                 label = {
-                    Text(stringResource(Res.string.clazz))
+                    Text(stringResource(Res.string.assign_to))
                 },
                 onValueChange = {
                     onAssigneeTextChanged(it)
@@ -212,15 +214,14 @@ fun AssignmentEditScreen(
 
         OutlinedButton(
             onClick = { onClickAddLearningUnit() },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             shape = RoundedCornerShape(28.dp),
             border = BorderStroke(1.dp, Color.LightGray)
         ) {
-            Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Task", style = MaterialTheme.typography.bodyLarge)
-            }
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Task", style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.weight(1f))
         }
         Spacer(Modifier.height(16.dp))
 
@@ -255,7 +256,7 @@ fun TaskListItem(
     val data = info.dataOrNull()
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -269,7 +270,9 @@ fun TaskListItem(
 
         val iconLink = data?.findIcons()?.firstOrNull()
         AsyncImage(
-            model = iconLink?.let { learningUnit.learningUnitManifestUrl.resolve(it.href).toString() },
+            model = iconLink?.let {
+                learningUnit.learningUnitManifestUrl.resolve(it.href).toString()
+            },
             contentDescription = null,
             modifier = Modifier.size(40.dp).clip(RoundedCornerShape(4.dp))
         )
@@ -289,7 +292,11 @@ fun TaskListItem(
         }
 
         IconButton(onClick = onRemove) {
-            Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Default.Close,
+                contentDescription = "Remove",
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -297,7 +304,7 @@ fun TaskListItem(
 @Composable
 fun EmptyTasksIllustration() {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -308,12 +315,12 @@ fun EmptyTasksIllustration() {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "No task selected yet.",
+            text = stringResource(Res.string.no_tasks_selected_yet),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.DarkGray
         )
         Text(
-            text = "Please click the + button to add one",
+            text = stringResource(Res.string.please_click_plus_button_to_add_one),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray
         )

@@ -37,6 +37,7 @@ import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.xapi.XapiActivityDataSource
+import world.respect.datalayer.school.xapi.XapiActorDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
@@ -188,4 +189,6 @@ class SchoolDataSourceHttp(
         XapiStatementDataSourceHttp()
     }
 
+    override val xapiActorDataSource: XapiActorDataSource
+        get() = TODO("No Xapi Actor DataSource yet")
 }

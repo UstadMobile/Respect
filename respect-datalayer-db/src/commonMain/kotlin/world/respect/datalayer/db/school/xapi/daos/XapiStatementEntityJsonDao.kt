@@ -7,7 +7,7 @@ import androidx.room.Query
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
 
 @Dao
-interface StatementEntityJsonDao {
+interface XapiStatementEntityJsonDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreListAsync(entityList: List<XapiStatementEntityJson>)

@@ -1,13 +1,13 @@
 package world.respect.datalayer.db.school.xapi.ext
 
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntityPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryPropEnum
 
-val ActivityInteractionEntityPropEnum.langMapPropEnum: ActivityLangMapEntryPropEnum
+val XapiActivityInteractionEntityPropEnum.langMapPropEnum: XapiActivityLangMapEntryPropEnum
     get() = when(this) {
-        ActivityInteractionEntityPropEnum.CHOICES -> ActivityLangMapEntryPropEnum.CHOICES_INTERACTIONS
-        ActivityInteractionEntityPropEnum.SCALE -> ActivityLangMapEntryPropEnum.SCALE_INTERACTIONS
-        ActivityInteractionEntityPropEnum.SOURCE -> ActivityLangMapEntryPropEnum.SOURCE_INTERACTIONS
-        ActivityInteractionEntityPropEnum.TARGET -> ActivityLangMapEntryPropEnum.TARGET_INTERACTIONS
-        ActivityInteractionEntityPropEnum.STEPS -> ActivityLangMapEntryPropEnum.STEPS_INTERACTIONS
+        XapiActivityInteractionEntityPropEnum.CHOICES -> XapiActivityLangMapEntryPropEnum.CHOICES_INTERACTIONS
+        XapiActivityInteractionEntityPropEnum.SCALE -> XapiActivityLangMapEntryPropEnum.SCALE_INTERACTIONS
+        XapiActivityInteractionEntityPropEnum.SOURCE -> XapiActivityLangMapEntryPropEnum.SOURCE_INTERACTIONS
+        XapiActivityInteractionEntityPropEnum.TARGET -> XapiActivityLangMapEntryPropEnum.TARGET_INTERACTIONS
+        XapiActivityInteractionEntityPropEnum.STEPS -> XapiActivityLangMapEntryPropEnum.STEPS_INTERACTIONS
     }

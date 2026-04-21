@@ -3,11 +3,11 @@ package world.respect.datalayer.db.school.xapi.adapters
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ext.toLongPair
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.hasContext
 import world.respect.datalayer.db.school.xapi.ext.hasResult
 import world.respect.datalayer.db.school.xapi.ext.hasResultScore
@@ -42,7 +42,7 @@ import kotlin.uuid.Uuid
 data class StatementEntities(
     val statements: List<XapiStatementEntity> = emptyList(),
     val statementEntityJson: List<XapiStatementEntityJson> = emptyList(),
-    val statementContextActivityJoins: List<StatementContextActivityJoin> = emptyList(),
+    val statementContextActivityJoins: List<XapiStatementContextActivityJoin> = emptyList(),
 )
 
 
@@ -50,8 +50,8 @@ data class StatementEntities(
  * As per the spec, if the objectType is not specified, it defaults to Activity.
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2441-when-the-objecttype-is-activity
  */
-val XapiStatementObject.objectTypeEnum: StatementEntityObjectTypeEnum
-    get() = objectType?.entityObjectTypeEnum ?: StatementEntityObjectTypeEnum.ACTIVITY
+val XapiStatementObject.objectTypeEnum: XapiStatementEntityObjectTypeEnum
+    get() = objectType?.entityObjectTypeEnum ?: XapiStatementEntityObjectTypeEnum.ACTIVITY
 
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatementObject.objectForeignKeys(
@@ -102,9 +102,9 @@ fun XapiStatement.toEntities(
     val statementUuid = id ?: throw IllegalArgumentException("Statement must have id set before conversion to entities")
     val (stmtUuidHi, stmtUuidLo) = statementUuid.toLongPair()
 
-    fun MutableList<StatementContextActivityJoin>.addStatementContextJoins(
+    fun MutableList<XapiStatementContextActivityJoin>.addStatementContextJoins(
         activities: List<XapiActivity>?,
-        typeEnum: StatementContextActivityJoinTypeEnum,
+        typeEnum: XapiStatementContextActivityJoinTypeEnum,
     ) {
         activities?.also { activityList ->
             addAll(
@@ -179,28 +179,32 @@ fun XapiStatement.toEntities(
                 statementVersion = version,
             )
         ) + (substatementEntities?.statements ?: emptyList()),
-        statementEntityJson = listOf(
-            XapiStatementEntityJson(
-                stmtJsonIdHi = stmtUuidHi,
-                stmtJsonIdLo = stmtUuidLo,
-                fullStatement = json.encodeToString(
-                    serializer = XapiStatementTransformingSerializer, this
-                ),
+        statementEntityJson = if(!isSubStatement) {
+            listOf(
+                XapiStatementEntityJson(
+                    stmtJsonIdHi = stmtUuidHi,
+                    stmtJsonIdLo = stmtUuidLo,
+                    fullStatement = json.encodeToString(
+                        serializer = XapiStatementTransformingSerializer, this
+                    ),
+                )
             )
-        ) + (substatementEntities?.statementEntityJson ?: emptyList()),
+        }else {
+            emptyList()
+        },
         statementContextActivityJoins = buildList {
             context?.contextActivities?.also { contextActivities ->
                 addStatementContextJoins(
-                    contextActivities.parent, StatementContextActivityJoinTypeEnum.PARENT
+                    contextActivities.parent, XapiStatementContextActivityJoinTypeEnum.PARENT
                 )
                 addStatementContextJoins(
-                    contextActivities.grouping, StatementContextActivityJoinTypeEnum.GROUPING
+                    contextActivities.grouping, XapiStatementContextActivityJoinTypeEnum.GROUPING
                 )
                 addStatementContextJoins(
-                    contextActivities.category, StatementContextActivityJoinTypeEnum.CATEGORY
+                    contextActivities.category, XapiStatementContextActivityJoinTypeEnum.CATEGORY
                 )
                 addStatementContextJoins(
-                    contextActivities.other, StatementContextActivityJoinTypeEnum.OTHER
+                    contextActivities.other, XapiStatementContextActivityJoinTypeEnum.OTHER
                 )
             }
         } + (substatementEntities?.statementContextActivityJoins ?: emptyList())
@@ -224,10 +228,13 @@ fun StatementEntities.toModel(
     val verbMap = verbs.associateBy { uidNumberMapper(it.id) }
     val activityMap = activities.associateBy { uidNumberMapper(it.id) }
 
-    fun List<StatementContextActivityJoin>.filterToModel(
-        type: StatementContextActivityJoinTypeEnum
+    fun List<XapiStatementContextActivityJoin>.filterToModel(
+        type: XapiStatementContextActivityJoinTypeEnum
     ) : List<XapiActivity>? {
         return filter {
+            //Check statement id to ensure it is not the substatement
+            it.scajFromStatementIdHi == statementIdHi &&
+            it.scajFromStatementIdLo == statementIdLo &&
             it.scajContextType == type
         }.map {
             activityMap[it.scajToActivityUid] ?: XapiActivity(
@@ -249,7 +256,7 @@ fun StatementEntities.toModel(
             id = primaryStatementEntity.statementVerbId
         ),
         `object` = when(primaryStatementEntity.statementObjectType) {
-            StatementEntityObjectTypeEnum.ACTIVITY -> {
+            XapiStatementEntityObjectTypeEnum.ACTIVITY -> {
                 XapiActivity(
                     objectType = XapiObjectType.Activity,
                     id = primaryStatementEntity.statementObjectActivityId
@@ -258,7 +265,7 @@ fun StatementEntities.toModel(
                 )
             }
 
-            StatementEntityObjectTypeEnum.SUBSTATEMENT -> {
+            XapiStatementEntityObjectTypeEnum.SUBSTATEMENT -> {
                 val substatementUuidVals = statementUuid.uuidForSubstatement().toLongPair()
 
                 this.toModel(
@@ -272,7 +279,7 @@ fun StatementEntities.toModel(
                 )
             }
 
-            StatementEntityObjectTypeEnum.STATEMENT_REF -> {
+            XapiStatementEntityObjectTypeEnum.STATEMENT_REF -> {
                 XapiStatementRef(
                     id = Uuid.fromLongs(
                         primaryStatementEntity.statementObjectUid1,
@@ -281,13 +288,13 @@ fun StatementEntities.toModel(
                 )
             }
 
-            StatementEntityObjectTypeEnum.AGENT -> {
+            XapiStatementEntityObjectTypeEnum.AGENT -> {
                 val actor = actorMap[primaryStatementEntity.statementObjectUid1]
                     ?: throw IllegalStateException("Object type is agent, but agent not in actor list")
                 actor as XapiAgent
             }
 
-            StatementEntityObjectTypeEnum.GROUP -> {
+            XapiStatementEntityObjectTypeEnum.GROUP -> {
                 val actor = actorMap[primaryStatementEntity.statementObjectUid1]
                     ?: throw IllegalStateException("Object type is group, but group not in actor list")
                 actor as XapiGroup
@@ -337,16 +344,16 @@ fun StatementEntities.toModel(
                 team = actorMap[primaryStatementEntity.contextTeamActorUid],
                 contextActivities = XapiContextActivities(
                     parent = statementContextActivityJoins.filterToModel(
-                        StatementContextActivityJoinTypeEnum.PARENT
+                        XapiStatementContextActivityJoinTypeEnum.PARENT
                     ),
                     grouping = statementContextActivityJoins.filterToModel(
-                        StatementContextActivityJoinTypeEnum.GROUPING
+                        XapiStatementContextActivityJoinTypeEnum.GROUPING
                     ),
                     category = statementContextActivityJoins.filterToModel(
-                        StatementContextActivityJoinTypeEnum.CATEGORY
+                        XapiStatementContextActivityJoinTypeEnum.CATEGORY
                     ),
                     other = statementContextActivityJoins.filterToModel(
-                        StatementContextActivityJoinTypeEnum.OTHER
+                        XapiStatementContextActivityJoinTypeEnum.OTHER
                     ),
                 ).takeIf {
                     it.parent != null || it.grouping != null || it.category != null || it.other != null

@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
     primaryKeys = ["sdcActorUid", "sdcHash"]
 )
 @Serializable
-data class StateDeleteCommand(
+data class XapiStateDeleteCommand(
     var sdcActorUid: Long = 0,
 
     var sdcHash: Long = 0,

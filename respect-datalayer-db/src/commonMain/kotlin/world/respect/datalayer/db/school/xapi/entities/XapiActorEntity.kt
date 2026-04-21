@@ -41,7 +41,7 @@ import kotlin.time.Instant
  *
  */
 @Serializable
-data class ActorEntity(
+data class XapiActorEntity(
     @PrimaryKey(autoGenerate = true)
     val actorUid: Long = 0,
 
@@ -65,7 +65,7 @@ data class ActorEntity(
 
     val actorGroupMembersLastUpdated: Instant = EPOCH,
 
-    val actorObjectType: ActorEntityTypeEnum = ActorEntityTypeEnum.AGENT,
+    val actorObjectType: XapiActorEntityTypeEnum = XapiActorEntityTypeEnum.AGENT,
 ) {
     companion object {
         const val TABLE_ID = 68

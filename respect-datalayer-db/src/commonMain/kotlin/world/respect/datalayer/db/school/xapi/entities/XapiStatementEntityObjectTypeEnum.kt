@@ -5,7 +5,7 @@ package world.respect.datalayer.db.school.xapi.entities
  * be an activity, substatement, statement ref, agent, or group as per the xAPI spec. It cannot be a
  * statement.
  */
-enum class StatementEntityObjectTypeEnum(
+enum class XapiStatementEntityObjectTypeEnum(
     val flag: Int,
 ) {
 
@@ -17,7 +17,7 @@ enum class StatementEntityObjectTypeEnum(
 
     companion object {
 
-        fun fromFlag(flag: Int): StatementEntityObjectTypeEnum {
+        fun fromFlag(flag: Int): XapiStatementEntityObjectTypeEnum {
             return entries.first { it.flag == flag }
         }
 

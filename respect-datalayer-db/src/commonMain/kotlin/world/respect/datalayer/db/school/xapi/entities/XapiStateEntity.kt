@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
  *        https://github.com/h5p/h5p-php-library/blob/4599291d7ce0cfb90edd188b181416f31514748e/js/h5p.js#L2460
  *        This defaults to '0' if storing H5P data and no subContentId is set
  */
-data class StateEntity(
+data class XapiStateEntity(
     var seActorUid: Long = 0,
 
     var seHash: Long = 0,

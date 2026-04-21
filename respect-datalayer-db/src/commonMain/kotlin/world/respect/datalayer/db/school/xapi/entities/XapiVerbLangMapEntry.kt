@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  * @param vlmeEntryString the actual string e.g. as will be displayed to the user e.g. 'Completed'
  * @param vlmeLangCode the lang code as per the Language Map
  */
-data class VerbLangMapEntry(
+data class XapiVerbLangMapEntry(
     val vlmeVerbUid: Long = 0L,
     val vlmeLangCode: String,
     val vlmeEntryString: String,

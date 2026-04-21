@@ -1,26 +1,23 @@
 package world.respect.datalayer.db.school.xapi.adapters
 
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.xapi.entities.ActorEntity
-import world.respect.datalayer.db.school.xapi.entities.ActorEntityTypeEnum
-import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
-import world.respect.datalayer.ext.EPOCH
+import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActorEntityTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiGroupMemberActorJoin
 import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
 import world.respect.datalayer.school.xapi.model.XapiObjectType
-import world.respect.datalayer.school.xapi.model.isAnonymous
-import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 
 data class ActorEntities(
-    val actor: ActorEntity,
-    val groupMemberAgents: List<ActorEntity> = emptyList(),
-    val groupMemberJoins: List<GroupMemberActorJoin> = emptyList(),
+    val actor: XapiActorEntity,
+    val groupMemberAgents: List<XapiActorEntity> = emptyList(),
+    val groupMemberJoins: List<XapiGroupMemberActorJoin> = emptyList(),
 )
 
 
@@ -47,9 +44,9 @@ fun XapiActor.toEntities(
 fun XapiAgent.toActorEntity(
     uidNumberMapper: UidNumberMapper,
     lastModified: Instant,
-) : ActorEntity {
+) : XapiActorEntity {
     val uid = identifierHash(uidNumberMapper)
-    return ActorEntity(
+    return XapiActorEntity(
         actorUid = uid,
         actorName = name,
         actorPersonUid = 0L,
@@ -58,7 +55,7 @@ fun XapiAgent.toActorEntity(
         actorOpenid = openid,
         actorAccountName = account?.name,
         actorAccountHomePage = account?.homePage,
-        actorObjectType = ActorEntityTypeEnum.AGENT,
+        actorObjectType = XapiActorEntityTypeEnum.AGENT,
         actorLastModified = lastModified,
     )
 }
@@ -97,13 +94,13 @@ fun XapiGroup.toGroupEntities(
         )
     } ?: emptyList()
 
-    val groupActor = ActorEntity(
+    val groupActor = XapiActorEntity(
         actorUid = if(isAnonymous) {
             uidNumberMapper(Uuid.random().toString())
         }else {
             identifierHash(uidNumberMapper)
         },
-        actorObjectType = ActorEntityTypeEnum.GROUP,
+        actorObjectType = XapiActorEntityTypeEnum.GROUP,
         actorName = name,
         actorMbox = mbox,
         actorMbox_sha1sum = mbox_sha1sum,
@@ -117,7 +114,7 @@ fun XapiGroup.toGroupEntities(
         actor = groupActor,
         groupMemberAgents = memberActorEntities,
         groupMemberJoins = memberActorEntities.mapIndexed { index, memberActorEntity ->
-            GroupMemberActorJoin(
+            XapiGroupMemberActorJoin(
                 gmajGroupActorUid = groupActor.actorUid,
                 gmajMemberActorUid = memberActorEntity.actorUid,
             )
@@ -125,7 +122,7 @@ fun XapiGroup.toGroupEntities(
     )
 }
 
-fun ActorEntity.toAgentModel(): XapiAgent {
+fun XapiActorEntity.toAgentModel(): XapiAgent {
     return XapiAgent(
         name = actorName,
         mbox = actorMbox,
@@ -157,11 +154,11 @@ fun ActorEntities.toGroupModel(): XapiGroup {
 
 fun ActorEntities.toModel(): XapiActor {
     return when(actor.actorObjectType) {
-        ActorEntityTypeEnum.AGENT -> {
+        XapiActorEntityTypeEnum.AGENT -> {
             actor.toAgentModel()
         }
 
-        ActorEntityTypeEnum.GROUP -> {
+        XapiActorEntityTypeEnum.GROUP -> {
             this.toGroupModel()
         }
 

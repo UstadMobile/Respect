@@ -76,7 +76,7 @@ class XapiStatementDataSourceDbTest {
             )
 
             try {
-                assertXapiStatementMatches(
+                assertXapiStatementCanonicallyEqual(
                     expected = statement,
                     actual = statementFromEntities
                 )
@@ -114,7 +114,7 @@ class XapiStatementDataSourceDbTest {
                     ).dataOrNull()?.first()
 
                     assertNotNull(stmtFromDb)
-                    assertXapiStatementMatches(
+                    assertXapiStatementCanonicallyEqual(
                         expected = statement,
                         actual = stmtFromDb,
                     )

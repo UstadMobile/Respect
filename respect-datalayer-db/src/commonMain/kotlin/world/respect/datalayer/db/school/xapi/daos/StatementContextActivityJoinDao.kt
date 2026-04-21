@@ -16,12 +16,16 @@ interface StatementContextActivityJoinDao {
         """
         SELECT StatementContextActivityJoin.*
           FROM StatementContextActivityJoin
-         WHERE StatementContextActivityJoin.scajFromStatementIdHi = :statementIdHi
-           AND StatementContextActivityJoin.scajFromStatementIdLo = :statementIdLo
-    """
-    )
-    suspend fun findAllByStatementId(
+         WHERE (      StatementContextActivityJoin.scajFromStatementIdHi = :statementIdHi
+                  AND StatementContextActivityJoin.scajFromStatementIdLo = :statementIdLo)
+            OR (     (:statementIdHi2 != 0 AND :statementIdLo2 != 0) 
+                 AND StatementContextActivityJoin.scajFromStatementIdHi = :statementIdHi2
+                 AND StatementContextActivityJoin.scajFromStatementIdLo = :statementIdLo2)
+    """)
+    suspend fun findAllByStatementIds(
         statementIdHi: Long,
         statementIdLo: Long,
+        statementIdHi2: Long,
+        statementIdLo2: Long,
     ): List<StatementContextActivityJoin>
 }

@@ -1,0 +1,20 @@
+appId: world.respect.app
+
+---
+
+- tapOn: "Classes"
+- assertVisible:
+        id: "app_title"
+        text: "Classes"
+- tapOn: ${CLASSNAME}
+- tapOn: ${MEMBERNAME}
+- tapOn: "Create account"
+- assertVisible:
+        id: "app_title"
+        text: "Create account"
+- assertVisible:
+        text: ${MEMBERUSERNAME}
+- tapOn: "Password"
+- inputText: "test1234"
+- tapOn: "Save"
+- assertVisible: "Manage account"

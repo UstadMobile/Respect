@@ -16,26 +16,25 @@ onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/admin_add_app_and_teacher.yaml"
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow: "subflows/admin_add_app.yaml"
+- runFlow: "subflows/admin_add_class_with_members.yaml"
 
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
-- inputText: "teacheruser"
+- inputText: "teacherauser"
 - tapOn:
     id : "password"
-- inputText: "testt1"
+- inputText: "test1234"
 - tapOn: "Login"
 - runFlow:
     when:
@@ -67,7 +66,8 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
-- tapOn: "Lesson/assessment"
+- hideKeyboard
+- tapOn: "Task"
 - assertVisible:
     id: "app_title"
 - tapOn: "My app"

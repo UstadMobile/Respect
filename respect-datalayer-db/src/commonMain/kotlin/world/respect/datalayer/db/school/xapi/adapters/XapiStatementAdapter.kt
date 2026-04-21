@@ -228,6 +228,9 @@ fun StatementEntities.toModel(
         type: StatementContextActivityJoinTypeEnum
     ) : List<XapiActivity>? {
         return filter {
+            //Check statement id to ensure it is not the substatement
+            it.scajFromStatementIdHi == statementIdHi &&
+            it.scajFromStatementIdLo == statementIdLo &&
             it.scajContextType == type
         }.map {
             activityMap[it.scajToActivityUid] ?: XapiActivity(

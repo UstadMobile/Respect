@@ -17,49 +17,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 
-fun assertContextActivitiesMatches(
-    expected: XapiContextActivities?,
-    actual: XapiContextActivities?,
-) {
-    fun assertContextActivityMatch(
-        expected: List<XapiActivity>?,
-        actual: List<XapiActivity>?,
-    ) {
-        if(expected != null) {
-            assertNotNull(actual, "Actual expected to have context activity")
-            assertEquals(expected.size, actual.size)
 
-            expected.forEach { expectedActivity ->
-                val actualActivity = actual.firstOrNull {
-                    it.id == expectedActivity.id
-                }
-                assertNotNull(actualActivity)
-
-                //The statement received might have only the id. The canonical response (actual)
-                //will include the definition if available, so we do not assert that if the
-                //expected activity definition is null that the actual activity definition will
-                //also be null
-                expectedActivity.definition?.also {
-                    val actualDefinition = actualActivity.definition
-                    assertNotNull(actualDefinition)
-                    assertXapiActivityDefinitionMatches(it, actualDefinition)
-                }
-            }
-        }else {
-            assertNull(actual)
-        }
-    }
-
-    if(expected != null) {
-        assertNotNull(actual)
-        assertContextActivityMatch(expected.parent, actual.parent)
-        assertContextActivityMatch(expected.grouping, actual.grouping)
-        assertContextActivityMatch(expected.category, actual.category)
-        assertContextActivityMatch(expected.other, actual.other)
-    }else {
-        assertNull(actual)
-    }
-}
 
 /*
  * Exact equality checks as provided by the data classes don't make sense here: e.g. the member list
@@ -67,16 +25,17 @@ fun assertContextActivitiesMatches(
  * so an assertEquals would fail when actually the result is entirely compliant with the spec. Or a
  * statement may include a useless Result object with no properties (as they are all optional).
  *
+ * These assertion statements check for a canonical equality as per the xAPI spec.
  */
-fun assertXapiStatementMatches(
+fun assertXapiStatementCanonicallyEqual(
     expected: XapiStatement,
     actual : XapiStatement,
     messagePrefix: String = "",
 ) {
 
     assertEquals(expected.id, actual.id)
-    assertXapiActorMatches(expected.actor, actual.actor)
-    assertXapiVerbMatches(expected.verb, actual.verb)
+    assertXapiActorCanonicallyEqual(expected.actor, actual.actor)
+    assertXapiVerbCanonicallyEqual(expected.verb, actual.verb)
     val expectedStmtObject = expected.`object`
 
     when(expectedStmtObject) {
@@ -93,7 +52,7 @@ fun assertXapiStatementMatches(
             if(expectedDefinition != null) {
                 val actualDefinition = actualObject.definition
                 assertNotNull(actualDefinition)
-                assertXapiActivityDefinitionMatches(expectedDefinition, actualDefinition)
+                assertXapiActivityDefinitionCanonicallyEqual(expectedDefinition, actualDefinition)
             }else {
                 assertNull(actualObject.definition)
             }
@@ -105,21 +64,21 @@ fun assertXapiStatementMatches(
                 message = "$messagePrefix When Xapi object is a statement, then objectType must be a SubStatement"
             )
 
-            assertXapiStatementMatches(
+            assertXapiStatementCanonicallyEqual(
                 expected = expectedStmtObject,
                 actual = actual.`object` as XapiStatement,
             )
         }
 
         is XapiAgent -> {
-            assertXapiActorMatches(
+            assertXapiActorCanonicallyEqual(
                 expected = expectedStmtObject,
                 actual = actual.`object` as XapiAgent
             )
         }
 
         is XapiGroup -> {
-            assertXapiActorMatches(
+            assertXapiActorCanonicallyEqual(
                 expected = expectedStmtObject,
                 actual = actual.`object` as XapiGroup
             )
@@ -155,7 +114,7 @@ fun assertXapiStatementMatches(
         if(expectedInstructor != null) {
             val actualInstructor = actualContext.instructor
             assertNotNull(actualInstructor)
-            assertXapiActorMatches(expectedInstructor, actualInstructor)
+            assertXapiActorCanonicallyEqual(expectedInstructor, actualInstructor)
         }else {
             assertNull(actualContext.instructor)
         }
@@ -169,12 +128,12 @@ fun assertXapiStatementMatches(
         if(expectedTeam != null) {
             val actualTeam = actualContext.team
             assertNotNull(actualTeam)
-            assertXapiActorMatches(expectedTeam, actualTeam)
+            assertXapiActorCanonicallyEqual(expectedTeam, actualTeam)
         }else {
             assertNull(actualContext.team)
         }
 
-        assertContextActivitiesMatches(
+        assertContextActivityCanonicallyEqual(
             expected = expectedContext.contextActivities,
             actual = actualContext.contextActivities
         )
@@ -186,14 +145,58 @@ fun assertXapiStatementMatches(
     if(expectedAuthority != null) {
         val actualAuthority = actual.authority
         assertNotNull(actualAuthority ,"Expected statement has authority $expectedAuthority")
-        assertXapiActorMatches(expectedAuthority, actualAuthority)
+        assertXapiActorCanonicallyEqual(expectedAuthority, actualAuthority)
     }else {
         assertNull(actual.authority)
     }
     assertEquals(expected.version, actual.version)
 }
 
-fun assertXapiVerbMatches(
+fun assertContextActivityCanonicallyEqual(
+    expected: XapiContextActivities?,
+    actual: XapiContextActivities?,
+) {
+    fun assertContextActivityMatch(
+        expected: List<XapiActivity>?,
+        actual: List<XapiActivity>?,
+    ) {
+        if(expected != null) {
+            assertNotNull(actual, "Actual expected to have context activity")
+            assertEquals(expected.size, actual.size)
+
+            expected.forEach { expectedActivity ->
+                val actualActivity = actual.firstOrNull {
+                    it.id == expectedActivity.id
+                }
+                assertNotNull(actualActivity)
+
+                //The statement received might have only the id. The canonical response (actual)
+                //will include the definition if available, so we do not assert that if the
+                //expected activity definition is null that the actual activity definition will
+                //also be null
+                expectedActivity.definition?.also {
+                    val actualDefinition = actualActivity.definition
+                    assertNotNull(actualDefinition)
+                    assertXapiActivityDefinitionCanonicallyEqual(it, actualDefinition)
+                }
+            }
+        }else {
+            assertNull(actual)
+        }
+    }
+
+    if(expected != null) {
+        assertNotNull(actual)
+        assertContextActivityMatch(expected.parent, actual.parent)
+        assertContextActivityMatch(expected.grouping, actual.grouping)
+        assertContextActivityMatch(expected.category, actual.category)
+        assertContextActivityMatch(expected.other, actual.other)
+    }else {
+        assertNull(actual)
+    }
+}
+
+fun assertXapiVerbCanonicallyEqual(
     expected: XapiVerb,
     actual: XapiVerb
 ) {
@@ -213,7 +216,7 @@ fun assertLangMapEquals(
     }
 }
 
-fun assertXapiActivityDefinitionMatches(
+fun assertXapiActivityDefinitionCanonicallyEqual(
     expected: XapiActivityDefinition,
     actual: XapiActivityDefinition
 ) {
@@ -257,7 +260,7 @@ fun assertXapiActorCommonPropsMatch(
     assertEquals(expected.account?.homePage, actual.account?.homePage)
 }
 
-fun assertXapiActorMatches(
+fun assertXapiActorCanonicallyEqual(
     expected: XapiActor,
     actual: XapiActor
 ) {
@@ -285,7 +288,7 @@ fun assertXapiActorMatches(
                 val memberInActual = actual.member?.firstOrNull {
                     it.idStr == expectedMember.idStr
                 } ?: throw AssertionError("Member $expectedMember not found in other group")
-                assertXapiActorMatches(
+                assertXapiActorCanonicallyEqual(
                     expected = expectedMember,
                     actual = memberInActual
                 )

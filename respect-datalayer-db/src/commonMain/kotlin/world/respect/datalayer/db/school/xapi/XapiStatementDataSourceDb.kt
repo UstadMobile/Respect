@@ -19,8 +19,6 @@ import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
-import world.respect.datalayer.school.xapi.model.XapiAccount
-import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
@@ -132,11 +130,12 @@ class XapiStatementDataSourceDb(
             )
 
             //now get StatementContextActivityJoins
-            //TODO: TODO TODO TODO This needs adjusted to include substatement
             val contextActivityJoins = schoolDb.getStatementContextActivityJoinDao()
-                .findAllByStatementId(
+                .findAllByStatementIds(
                     statementIdHi = entity.stmtEntity.statementIdHi,
                     statementIdLo = entity.stmtEntity.statementIdLo,
+                    statementIdHi2 = substatementEntity?.stmtEntity?.statementIdHi ?: 0,
+                    statementIdLo2 = substatementEntity?.stmtEntity?.statementIdLo ?: 0,
                 )
 
             val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao().findByVerbUidPair(

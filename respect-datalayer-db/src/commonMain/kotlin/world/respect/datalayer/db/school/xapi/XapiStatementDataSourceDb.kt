@@ -120,7 +120,6 @@ class XapiStatementDataSourceDb(
 
         val statementIds = listParams.statementId?.toLongPair()
         return schoolDb.useReaderConnection { con ->
-
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
                 val statements =  schoolDb.getStatementDao().list(
                     statementIdHi = statementIds?.first ?: 0,

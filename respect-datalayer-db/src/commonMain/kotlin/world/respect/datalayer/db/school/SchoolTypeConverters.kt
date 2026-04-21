@@ -9,11 +9,11 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
-import world.respect.datalayer.db.school.xapi.entities.ActorEntityTypeEnum
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntityPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActorEntityTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
 import world.respect.datalayer.school.model.AssignmentAssigneeRefTypeEnum
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -135,33 +135,33 @@ class SchoolTypeConverters {
     }
 
     @TypeConverter
-    fun fromStatementEntityObjectTypeEnum(value: StatementEntityObjectTypeEnum): Int {
+    fun fromStatementEntityObjectTypeEnum(value: XapiStatementEntityObjectTypeEnum): Int {
         return value.flag
     }
 
     @TypeConverter
-    fun toStatementEntityObjectTypeEnum(value: Int): StatementEntityObjectTypeEnum {
-        return StatementEntityObjectTypeEnum.fromFlag(value)
+    fun toStatementEntityObjectTypeEnum(value: Int): XapiStatementEntityObjectTypeEnum {
+        return XapiStatementEntityObjectTypeEnum.fromFlag(value)
     }
 
     @TypeConverter
-    fun fromActivityInteractionEntityPropEnum(value: ActivityInteractionEntityPropEnum): Int {
+    fun fromActivityInteractionEntityPropEnum(value: XapiActivityInteractionEntityPropEnum): Int {
         return value.flag
     }
 
     @TypeConverter
-    fun toActivityInteractionEntityPropEnum(value: Int): ActivityInteractionEntityPropEnum {
-        return ActivityInteractionEntityPropEnum.fromFlag(value)
+    fun toActivityInteractionEntityPropEnum(value: Int): XapiActivityInteractionEntityPropEnum {
+        return XapiActivityInteractionEntityPropEnum.fromFlag(value)
     }
 
     @TypeConverter
-    fun fromActivityLangMapEntryPropEnum(value: ActivityLangMapEntryPropEnum): Int {
+    fun fromActivityLangMapEntryPropEnum(value: XapiActivityLangMapEntryPropEnum): Int {
         return value.flag
     }
 
     @TypeConverter
-    fun toActivityLangMapEntryPropEnum(value: Int): ActivityLangMapEntryPropEnum {
-        return ActivityLangMapEntryPropEnum.fromFlag(value)
+    fun toActivityLangMapEntryPropEnum(value: Int): XapiActivityLangMapEntryPropEnum {
+        return XapiActivityLangMapEntryPropEnum.fromFlag(value)
     }
 
     @TypeConverter
@@ -175,23 +175,23 @@ class SchoolTypeConverters {
     }
 
     @TypeConverter
-    fun fromActorEntityTypeEnum(value: ActorEntityTypeEnum): Int {
+    fun fromActorEntityTypeEnum(value: XapiActorEntityTypeEnum): Int {
         return value.flag
     }
 
     @TypeConverter
-    fun toActorEntityTypeEnum(value: Int): ActorEntityTypeEnum {
-        return ActorEntityTypeEnum.fromFlag(value)
+    fun toActorEntityTypeEnum(value: Int): XapiActorEntityTypeEnum {
+        return XapiActorEntityTypeEnum.fromFlag(value)
     }
 
     @TypeConverter
-    fun fromStatementContextActivityJoinTypeEnum(value: StatementContextActivityJoinTypeEnum): Int {
+    fun fromStatementContextActivityJoinTypeEnum(value: XapiStatementContextActivityJoinTypeEnum): Int {
         return value.dbFlag
     }
 
     @TypeConverter
-    fun toStatementContextActivityJoinTypeEnum(value: Int): StatementContextActivityJoinTypeEnum {
-        return StatementContextActivityJoinTypeEnum.fromDbFlag(value)
+    fun toStatementContextActivityJoinTypeEnum(value: Int): XapiStatementContextActivityJoinTypeEnum {
+        return XapiStatementContextActivityJoinTypeEnum.fromDbFlag(value)
     }
 
 

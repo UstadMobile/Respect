@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
-import com.ustadmobile.core.db.dao.xapi.ActivityLangMapEntryDao
+import com.ustadmobile.core.db.dao.xapi.XapiActivityLangMapEntryDao
 import world.respect.datalayer.db.school.opds.OpdsTypeConverters
 import world.respect.datalayer.db.school.opds.daos.OpdsFeedEntityDao
 import world.respect.datalayer.db.school.opds.daos.OpdsFeedMetadataEntityDao
@@ -62,26 +62,26 @@ import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityEntityDao
-import world.respect.datalayer.db.school.xapi.daos.ActivityExtensionDao
-import world.respect.datalayer.db.school.xapi.daos.ActivityInteractionDao
-import world.respect.datalayer.db.school.xapi.daos.ActorDao
-import world.respect.datalayer.db.school.xapi.daos.GroupMemberActorJoinDao
-import world.respect.datalayer.db.school.xapi.daos.StatementContextActivityJoinDao
+import world.respect.datalayer.db.school.xapi.daos.XapiActivityExtensionDao
+import world.respect.datalayer.db.school.xapi.daos.XapiActivityInteractionDao
+import world.respect.datalayer.db.school.xapi.daos.XapiActorDao
+import world.respect.datalayer.db.school.xapi.daos.XapiGroupMemberActorJoinDao
+import world.respect.datalayer.db.school.xapi.daos.XapiStatementContextActivityJoinDao
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
-import world.respect.datalayer.db.school.xapi.daos.StatementEntityJsonDao
-import world.respect.datalayer.db.school.xapi.daos.VerbDao
-import world.respect.datalayer.db.school.xapi.daos.VerbLangMapEntryDao
+import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityJsonDao
+import world.respect.datalayer.db.school.xapi.daos.XapiVerbDao
+import world.respect.datalayer.db.school.xapi.daos.XapiVerbLangMapEntryDao
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntry
-import world.respect.datalayer.db.school.xapi.entities.ActorEntity
-import world.respect.datalayer.db.school.xapi.entities.GroupMemberActorJoin
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityExtensionEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
+import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiGroupMemberActorJoin
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoin
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
-import world.respect.datalayer.db.school.xapi.entities.VerbEntity
-import world.respect.datalayer.db.school.xapi.entities.VerbLangMapEntry
+import world.respect.datalayer.db.school.xapi.entities.XapiVerbEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiVerbLangMapEntry
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
@@ -130,16 +130,16 @@ import world.respect.datalayer.school.model.Report
 
         //xAPI
         XapiActivityEntity::class,
-        ActivityExtensionEntity::class,
-        ActivityInteractionEntity::class,
-        ActivityLangMapEntry::class,
-        ActorEntity::class,
-        GroupMemberActorJoin::class,
-        StatementContextActivityJoin::class,
+        XapiActivityExtensionEntity::class,
+        XapiActivityInteractionEntity::class,
+        XapiActivityLangMapEntry::class,
+        XapiActorEntity::class,
+        XapiGroupMemberActorJoin::class,
+        XapiStatementContextActivityJoin::class,
         XapiStatementEntity::class,
         XapiStatementEntityJson::class,
-        VerbEntity::class,
-        VerbLangMapEntry::class,
+        XapiVerbEntity::class,
+        XapiVerbLangMapEntry::class,
     ],
     version = 13,
 )
@@ -199,25 +199,25 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getActivityEntityDao(): XapiActivityEntityDao
 
-    abstract fun getActivityExtensionDao(): ActivityExtensionDao
+    abstract fun getActivityExtensionDao(): XapiActivityExtensionDao
 
-    abstract fun getActivityInteractionDao(): ActivityInteractionDao
+    abstract fun getActivityInteractionDao(): XapiActivityInteractionDao
 
-    abstract fun getActivityLangMapEntryDao(): ActivityLangMapEntryDao
+    abstract fun getActivityLangMapEntryDao(): XapiActivityLangMapEntryDao
 
-    abstract fun getStatementContextActivityJoinDao(): StatementContextActivityJoinDao
+    abstract fun getStatementContextActivityJoinDao(): XapiStatementContextActivityJoinDao
 
     abstract fun getStatementDao(): XapiStatementEntityDao
 
-    abstract fun getStatementEntityJsonDao(): StatementEntityJsonDao
+    abstract fun getStatementEntityJsonDao(): XapiStatementEntityJsonDao
 
-    abstract fun getActorDao(): ActorDao
+    abstract fun getActorDao(): XapiActorDao
 
-    abstract fun getGroupMemberActorJoinDao(): GroupMemberActorJoinDao
+    abstract fun getGroupMemberActorJoinDao(): XapiGroupMemberActorJoinDao
 
-    abstract fun getVerbDao(): VerbDao
+    abstract fun getVerbDao(): XapiVerbDao
 
-    abstract fun getVerbLangMapEntryDao(): VerbLangMapEntryDao
+    abstract fun getVerbLangMapEntryDao(): XapiVerbLangMapEntryDao
 
 
     companion object {

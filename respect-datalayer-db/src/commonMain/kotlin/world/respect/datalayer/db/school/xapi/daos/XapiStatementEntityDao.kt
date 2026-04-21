@@ -25,19 +25,21 @@ interface XapiStatementEntityDao {
     @Query("SELECT * FROM XapiStatementEntity")
     suspend fun getAll(): List<XapiStatementEntity>
 
-    @Query("""
-        SELECT XapiStatementEntity.*, XapiStatementEntityJson.*, VerbEntity.*
+    @Query(
+        """
+        SELECT XapiStatementEntity.*, XapiStatementEntityJson.*, XapiVerbEntity.*
           FROM XapiStatementEntity
                JOIN XapiStatementEntityJson
                     ON (    XapiStatementEntityJson.stmtJsonIdHi = XapiStatementEntity.statementIdHi
                         AND XapiStatementEntityJson.stmtJsonIdLo = XapiStatementEntity.statementIdLo)
-               JOIN VerbEntity
-                    ON (    VerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
+               JOIN XapiVerbEntity
+                    ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
          WHERE (   (:statementIdHi = 0 AND :statementIdLo = 0) 
                 OR (     XapiStatementEntity.statementIdHi = :statementIdHi 
                      AND XapiStatementEntity.statementIdLo = :statementIdLo))
            AND NOT XapiStatementEntity.isSubStatement           
-    """)
+    """
+    )
     @Transaction
     suspend fun list(
         statementIdHi: Long,
@@ -48,15 +50,17 @@ interface XapiStatementEntityDao {
      * When getting a StatementEntity that was used to represent a substatement, if the parent
      * statement existed, it must also exist.
      */
-    @Query("""
-        SELECT XapiStatementEntity.*, VerbEntity.*
+    @Query(
+        """
+        SELECT XapiStatementEntity.*, XapiVerbEntity.*
           FROM XapiStatementEntity
-               JOIN VerbEntity
-                    ON (    VerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
+               JOIN XapiVerbEntity
+                    ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
          WHERE XapiStatementEntity.statementIdHi = :subStatementIdHi
            AND XapiStatementEntity.statementIdLo = :subStatementIdLo
            AND XapiStatementEntity.isSubStatement
-    """)
+    """
+    )
     suspend fun getEntityForSubstatement(
         subStatementIdHi: Long,
         subStatementIdLo: Long,

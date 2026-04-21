@@ -18,11 +18,11 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-data class ActivityInteractionEntity(
+data class XapiActivityInteractionEntity(
     @PrimaryKey(autoGenerate = true)
     val aieUid: Long = 0,
     @ColumnInfo(index = true)
     val aieActivityUid: Long = 0,
-    val aieProp: ActivityInteractionEntityPropEnum,
+    val aieProp: XapiActivityInteractionEntityPropEnum,
     val aieId: String,
 )

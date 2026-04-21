@@ -8,13 +8,13 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityExtensionEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntity
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntry
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoinTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityExtensionEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntityPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.langMapPropEnum
 import world.respect.datalayer.db.school.xapi.ext.toLangMap
 import world.respect.datalayer.school.xapi.ext.flagsOf
@@ -37,19 +37,19 @@ data class XapiActivityEntities(
         parentColumn = "actUid",
         entityColumn = "almeActivityUid"
     )
-    val activityLangMapEntries: List<ActivityLangMapEntry> = emptyList(),
+    val activityLangMapEntries: List<XapiActivityLangMapEntry> = emptyList(),
 
     @Relation(
         parentColumn = "actUid",
         entityColumn = "aieActivityUid"
     )
-    val activityInteractionEntities: List<ActivityInteractionEntity>  = emptyList(),
+    val activityInteractionEntities: List<XapiActivityInteractionEntity>  = emptyList(),
 
     @Relation(
         parentColumn = "actUid",
         entityColumn = "aeeActivityUid"
     )
-    val activityExtensionEntities: List<ActivityExtensionEntity> = emptyList(),
+    val activityExtensionEntities: List<XapiActivityExtensionEntity> = emptyList(),
 )
 
 
@@ -63,10 +63,10 @@ fun XapiActivity.toEntities(
     val activityUid = uidNumberMapper(id)
 
     fun Map<String, String>.toLangMapEntries(
-        property: ActivityLangMapEntryPropEnum,
+        property: XapiActivityLangMapEntryPropEnum,
         interactionId: String?,
     ) = entries.map { (lang, text) ->
-        ActivityLangMapEntry(
+        XapiActivityLangMapEntry(
             almeActivityUid = activityUid,
             almeLangCode = lang,
             almeProperty = property,
@@ -77,10 +77,10 @@ fun XapiActivity.toEntities(
     }
 
     fun XapiActivityDefinition.Interaction.toEntities(
-        interactionProp: ActivityInteractionEntityPropEnum,
-    ): Pair<ActivityInteractionEntity, List<ActivityLangMapEntry>> {
+        interactionProp: XapiActivityInteractionEntityPropEnum,
+    ): Pair<XapiActivityInteractionEntity, List<XapiActivityLangMapEntry>> {
 
-        return ActivityInteractionEntity(
+        return XapiActivityInteractionEntity(
             aieActivityUid = activityUid,
             aieProp = interactionProp,
             aieId = id,
@@ -92,24 +92,24 @@ fun XapiActivity.toEntities(
 
     val interactionEntitiesAndLangMaps = buildList {
         actDefinition.choices?.map {
-            it.toEntities(ActivityInteractionEntityPropEnum.CHOICES)
+            it.toEntities(XapiActivityInteractionEntityPropEnum.CHOICES)
         }?.also { addAll(it) }
 
         actDefinition.scale?.map {
-            it.toEntities(ActivityInteractionEntityPropEnum.SCALE)
+            it.toEntities(XapiActivityInteractionEntityPropEnum.SCALE)
         }?.also { addAll(it) }
 
         actDefinition.source?.map {
-            it.toEntities(ActivityInteractionEntityPropEnum.SOURCE)
+            it.toEntities(XapiActivityInteractionEntityPropEnum.SOURCE)
         }?.also { addAll(it) }
 
 
         actDefinition.target?.map {
-            it.toEntities(ActivityInteractionEntityPropEnum.TARGET)
+            it.toEntities(XapiActivityInteractionEntityPropEnum.TARGET)
         }?.also { addAll(it) }
 
         actDefinition.steps?.map {
-            it.toEntities(ActivityInteractionEntityPropEnum.STEPS)
+            it.toEntities(XapiActivityInteractionEntityPropEnum.STEPS)
         }?.also { addAll(it) }
     }
 
@@ -137,18 +137,18 @@ fun XapiActivity.toEntities(
         ),
         activityLangMapEntries = buildList {
             actDefinition.name?.toLangMapEntries(
-                property = ActivityLangMapEntryPropEnum.NAME, interactionId = null
+                property = XapiActivityLangMapEntryPropEnum.NAME, interactionId = null
             )?.also { addAll(it) }
 
             actDefinition.description?.toLangMapEntries(
-                property = ActivityLangMapEntryPropEnum.DESCRIPTION, interactionId = null
+                property = XapiActivityLangMapEntryPropEnum.DESCRIPTION, interactionId = null
             )?.also { addAll(it) }
 
             addAll(interactionEntitiesAndLangMaps.flatMap { it.second })
         },
         activityInteractionEntities = interactionEntitiesAndLangMaps.map { it.first },
         activityExtensionEntities = actDefinition.extensions?.map { (key, value) ->
-            ActivityExtensionEntity(
+            XapiActivityExtensionEntity(
                 aeeActivityUid = activityUid,
                 aeeKeyHash = uidNumberMapper(key),
                 aeeKey = key, //must be valid IRI,
@@ -169,7 +169,7 @@ fun XapiActivityEntities.toModel(
 ) : XapiActivity {
 
     fun interactionsForProp(
-        interactionProp: ActivityInteractionEntityPropEnum,
+        interactionProp: XapiActivityInteractionEntityPropEnum,
     ): List<XapiActivityDefinition.Interaction>? = activityInteractionEntities.filter {
         it.aieProp == interactionProp
     }.map { interactionEntity ->
@@ -189,10 +189,10 @@ fun XapiActivityEntities.toModel(
         objectType = XapiObjectType.Activity.takeIf { this.activityEntity.actObjectTypeSet },
         definition = XapiActivityDefinition(
             name = activityLangMapEntries.toLangMap {
-                it.almeProperty == ActivityLangMapEntryPropEnum.NAME
+                it.almeProperty == XapiActivityLangMapEntryPropEnum.NAME
             }.takeIfNotEmpty(),
             description = activityLangMapEntries.toLangMap {
-                it.almeProperty == ActivityLangMapEntryPropEnum.DESCRIPTION
+                it.almeProperty == XapiActivityLangMapEntryPropEnum.DESCRIPTION
             }.takeIfNotEmpty(),
             type = activityEntity.actType,
             extensions = activityExtensionEntities.takeIf {
@@ -209,22 +209,22 @@ fun XapiActivityEntities.toModel(
                     ListSerializer(String.serializer()), it
                 )
             },
-            choices = interactionsForProp(ActivityInteractionEntityPropEnum.CHOICES),
-            scale = interactionsForProp(ActivityInteractionEntityPropEnum.SCALE),
-            source = interactionsForProp(ActivityInteractionEntityPropEnum.SOURCE),
-            target = interactionsForProp(ActivityInteractionEntityPropEnum.TARGET),
-            steps = interactionsForProp(ActivityInteractionEntityPropEnum.STEPS),
+            choices = interactionsForProp(XapiActivityInteractionEntityPropEnum.CHOICES),
+            scale = interactionsForProp(XapiActivityInteractionEntityPropEnum.SCALE),
+            source = interactionsForProp(XapiActivityInteractionEntityPropEnum.SOURCE),
+            target = interactionsForProp(XapiActivityInteractionEntityPropEnum.TARGET),
+            steps = interactionsForProp(XapiActivityInteractionEntityPropEnum.STEPS),
         )
     )
 }
 
 fun XapiActivity.toContextActivityJoinEntity(
-    type: StatementContextActivityJoinTypeEnum,
+    type: XapiStatementContextActivityJoinTypeEnum,
     uidNumberMapper: UidNumberMapper,
     statementUuidHi: Long,
     statementUuidLo: Long,
-) : StatementContextActivityJoin {
-    return StatementContextActivityJoin(
+) : XapiStatementContextActivityJoin {
+    return XapiStatementContextActivityJoin(
         scajFromStatementIdHi = statementUuidHi,
         scajFromStatementIdLo = statementUuidLo,
         scajContextType = type,

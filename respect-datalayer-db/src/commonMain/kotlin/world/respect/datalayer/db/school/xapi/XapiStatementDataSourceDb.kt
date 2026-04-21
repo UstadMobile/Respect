@@ -23,7 +23,7 @@ import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
@@ -123,7 +123,7 @@ class XapiStatementDataSourceDb(
             statementIdLo = statementIds?.second ?: 0,
         ).map { entity ->
             val substatementEntity = schoolDb.takeIf {
-                entity.stmtEntity.statementObjectType == StatementEntityObjectTypeEnum.SUBSTATEMENT
+                entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT
             }?.getStatementDao()?.getEntityForSubstatement(
                 subStatementIdHi = entity.stmtEntity.statementObjectUid1,
                 subStatementIdLo = entity.stmtEntity.statementObjectUid2,

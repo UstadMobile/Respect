@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "c7360aa9114a2c027474aecf47acf5c5",
+    "identityHash": "54c7aa0baa9afa1102cc81beb51e1978",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1809,7 +1809,7 @@
         }
       },
       {
-        "tableName": "ActivityExtensionEntity",
+        "tableName": "XapiActivityExtensionEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeeActivityUid` INTEGER NOT NULL, `aeeKeyHash` INTEGER NOT NULL, `aeeKey` TEXT NOT NULL, `aeeJson` TEXT NOT NULL, `aeeLastMod` INTEGER NOT NULL, `aeeIsDeleted` INTEGER NOT NULL, PRIMARY KEY(`aeeActivityUid`, `aeeKeyHash`))",
         "fields": [
           {
@@ -1858,7 +1858,7 @@
         }
       },
       {
-        "tableName": "ActivityInteractionEntity",
+        "tableName": "XapiActivityInteractionEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aieUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `aieActivityUid` INTEGER NOT NULL, `aieProp` INTEGER NOT NULL, `aieId` TEXT NOT NULL)",
         "fields": [
           {
@@ -1894,18 +1894,18 @@
         },
         "indices": [
           {
-            "name": "index_ActivityInteractionEntity_aieActivityUid",
+            "name": "index_XapiActivityInteractionEntity_aieActivityUid",
             "unique": false,
             "columnNames": [
               "aieActivityUid"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ActivityInteractionEntity_aieActivityUid` ON `${TABLE_NAME}` (`aieActivityUid`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XapiActivityInteractionEntity_aieActivityUid` ON `${TABLE_NAME}` (`aieActivityUid`)"
           }
         ]
       },
       {
-        "tableName": "ActivityLangMapEntry",
+        "tableName": "XapiActivityLangMapEntry",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `almeActivityUid` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL)",
         "fields": [
           {
@@ -1958,7 +1958,7 @@
         },
         "indices": [
           {
-            "name": "index_ActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode",
+            "name": "index_XapiActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode",
             "unique": true,
             "columnNames": [
               "almeActivityUid",
@@ -1967,12 +1967,12 @@
               "almeLangCode"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode` ON `${TABLE_NAME}` (`almeActivityUid`, `almeProperty`, `almeInteractionId`, `almeLangCode`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_XapiActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode` ON `${TABLE_NAME}` (`almeActivityUid`, `almeProperty`, `almeInteractionId`, `almeLangCode`)"
           }
         ]
       },
       {
-        "tableName": "ActorEntity",
+        "tableName": "XapiActorEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
         "fields": [
           {
@@ -2070,7 +2070,7 @@
         ]
       },
       {
-        "tableName": "GroupMemberActorJoin",
+        "tableName": "XapiGroupMemberActorJoin",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gmajGroupActorUid` INTEGER NOT NULL, `gmajMemberActorUid` INTEGER NOT NULL, PRIMARY KEY(`gmajGroupActorUid`, `gmajMemberActorUid`))",
         "fields": [
           {
@@ -2115,7 +2115,7 @@
         ]
       },
       {
-        "tableName": "StatementContextActivityJoin",
+        "tableName": "XapiStatementContextActivityJoin",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scajUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL)",
         "fields": [
           {
@@ -2424,7 +2424,7 @@
         }
       },
       {
-        "tableName": "VerbEntity",
+        "tableName": "XapiVerbEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`verbUid` INTEGER NOT NULL, `verbUrlId` TEXT NOT NULL, `verbStatus` INTEGER NOT NULL, `verbLct` INTEGER NOT NULL, PRIMARY KEY(`verbUid`))",
         "fields": [
           {
@@ -2460,7 +2460,7 @@
         }
       },
       {
-        "tableName": "VerbLangMapEntry",
+        "tableName": "XapiVerbLangMapEntry",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`vlmeVerbUid` INTEGER NOT NULL, `vlmeLangCode` TEXT NOT NULL, `vlmeEntryString` TEXT NOT NULL, PRIMARY KEY(`vlmeVerbUid`, `vlmeLangCode`))",
         "fields": [
           {
@@ -2493,7 +2493,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c7360aa9114a2c027474aecf47acf5c5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '54c7aa0baa9afa1102cc81beb51e1978')"
     ]
   }
 }

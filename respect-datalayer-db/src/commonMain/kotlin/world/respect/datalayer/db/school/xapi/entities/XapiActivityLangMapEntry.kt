@@ -32,13 +32,13 @@ import kotlin.time.Instant
  * @param almeValue the string value for the given language
  * @property almeLastModified the time when this entry was last modified: used for conflict resolution
  */
-data class ActivityLangMapEntry(
+data class XapiActivityLangMapEntry(
     @PrimaryKey(autoGenerate = true)
     val almeUid: Long = 0,
 
     val almeActivityUid: Long = 0,
 
-    val almeProperty: ActivityLangMapEntryPropEnum,
+    val almeProperty: XapiActivityLangMapEntryPropEnum,
 
     val almeInteractionId: String?,
 
@@ -48,7 +48,7 @@ data class ActivityLangMapEntry(
 
     val almeLastModified: Instant = Clock.System.now(),
 
-) {
+    ) {
     companion object {
         const val TABLE_ID = 6442
     }

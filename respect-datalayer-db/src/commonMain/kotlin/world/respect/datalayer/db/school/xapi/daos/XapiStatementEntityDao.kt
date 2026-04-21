@@ -10,6 +10,7 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
 
@@ -27,6 +28,17 @@ interface XapiStatementEntityDao {
 
     @Query(
         """
+            -- Get a list of all the actors that should be considered as related to agent parameter
+            -- Eg the actor uid itself and any group members
+          WITH AgentActorUids(uid) AS
+               (SELECT :agentUid AS uid
+                 UNION
+                SELECT XapiGroupMemberActorJoin.gmajGroupActorUid AS uid
+                  FROM XapiGroupMemberActorJoin
+                 WHERE :agentUid != 0 
+                   AND XapiGroupMemberActorJoin.gmajMemberActorUid = :agentUid)
+            
+            
         SELECT XapiStatementEntity.*, XapiStatementEntityJson.*, XapiVerbEntity.*
           FROM XapiStatementEntity
                JOIN XapiStatementEntityJson
@@ -34,16 +46,50 @@ interface XapiStatementEntityDao {
                         AND XapiStatementEntityJson.stmtJsonIdLo = XapiStatementEntity.statementIdLo)
                JOIN XapiVerbEntity
                     ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
+               LEFT JOIN XapiStatementEntity AS SubStatementEntity
+                    ON (    XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.SUBSTATEMENT}
+                        AND SubStatementEntity.statementIdHi = XapiStatementEntity.statementObjectUid1
+                        AND SubStatementEntity.statementIdLo = XapiStatementEntity.statementObjectUid2)
          WHERE (   (:statementIdHi = 0 AND :statementIdLo = 0) 
                 OR (     XapiStatementEntity.statementIdHi = :statementIdHi 
                      AND XapiStatementEntity.statementIdLo = :statementIdLo))
-           AND NOT XapiStatementEntity.isSubStatement           
+           
+           -- Handle agent parameter
+           AND (    :agentUid = 0 
+                  OR (    XapiStatementEntity.statementActorUid IN 
+                          (SELECT uid FROM AgentActorUids))
+                  OR (    (    XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.AGENT}
+                            OR XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.GROUP})
+                      AND (XapiStatementEntity.statementObjectUid1 IN (SELECT uid FROM AgentActorUids)))
+                  -- Handle related agents        
+                  OR (    :relatedAgents 
+                      AND (    XapiStatementEntity.authorityActorUid IN (SELECT uid FROM AgentActorUids)
+                            OR XapiStatementEntity.contextTeamActorUid IN (SELECT uid FROM AgentActorUids)
+                            OR XapiStatementEntity.contextInstructorActorUid IN (SELECT uid FROM AgentActorUids)
+                            -- check substatement if applicable
+                            OR (     SubStatementEntity.statementActorUid IS NOT NULL
+                                AND (    SubStatementEntity.statementActorUid IN (SELECT uid FROM AgentActorUids)
+                                      OR (     (   SubStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.AGENT}
+                                                OR SubStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.GROUP})
+                                           AND (SubStatementEntity.statementObjectUid1 IN (SELECT uid FROM AgentActorUids)))
+                                           
+                                      OR (SubStatementEntity.authorityActorUid IN (SELECT uid FROM AgentActorUids))
+                                      OR (SubStatementEntity.contextTeamActorUid IN (SELECT uid FROM AgentActorUids))
+                                      OR (SubStatementEntity.contextInstructorActorUid IN (SELECT uid FROM AgentActorUids))  
+                                    )
+                               )       
+                          )
+                     )
+               )
+           AND NOT XapiStatementEntity.isSubStatement
     """
     )
     @Transaction
     suspend fun list(
         statementIdHi: Long,
         statementIdLo: Long,
+        agentUid: Long,
+        relatedAgents: Boolean,
     ): List<XapiStatementAndJsonEntities>
 
     /**

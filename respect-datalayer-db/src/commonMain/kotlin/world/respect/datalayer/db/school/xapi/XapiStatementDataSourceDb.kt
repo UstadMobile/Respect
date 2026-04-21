@@ -12,6 +12,7 @@ import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.adapters.ActorEntities
 import world.respect.datalayer.db.school.xapi.adapters.StatementEntities
 import world.respect.datalayer.db.school.xapi.adapters.VerbEntities
+import world.respect.datalayer.db.school.xapi.adapters.identifierHash
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
@@ -41,7 +42,7 @@ class XapiStatementDataSourceDb(
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
-) : XapiStatementDataSource, XapiStatementDataSourceLocal{
+) : XapiStatementDataSourceLocal{
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -121,6 +122,8 @@ class XapiStatementDataSourceDb(
         val statements =  schoolDb.getStatementDao().list(
             statementIdHi = statementIds?.first ?: 0,
             statementIdLo = statementIds?.second ?: 0,
+            agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+            relatedAgents = listParams.relatedAgents ?: false,
         ).map { entity ->
             val substatementEntity = schoolDb.takeIf {
                 entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT

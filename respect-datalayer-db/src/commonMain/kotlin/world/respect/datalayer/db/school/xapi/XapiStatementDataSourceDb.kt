@@ -16,6 +16,7 @@ import world.respect.datalayer.db.school.xapi.adapters.identifierHash
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
+import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
@@ -124,6 +125,8 @@ class XapiStatementDataSourceDb(
             statementIdLo = statementIds?.second ?: 0,
             agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
             relatedAgents = listParams.relatedAgents ?: false,
+            since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+            until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
         ).map { entity ->
             val substatementEntity = schoolDb.takeIf {
                 entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT

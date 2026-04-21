@@ -53,7 +53,8 @@ interface XapiStatementEntityDao {
          WHERE (   (:statementIdHi = 0 AND :statementIdLo = 0) 
                 OR (     XapiStatementEntity.statementIdHi = :statementIdHi 
                      AND XapiStatementEntity.statementIdLo = :statementIdLo))
-           
+           AND (:since = $SINCE_UNSET OR XapiStatementEntity.stored > :since)
+           AND (:until = $UNTIL_UNSET OR XapiStatementEntity.stored <= :until)
            -- Handle agent parameter
            AND (    :agentUid = 0 
                   OR (    XapiStatementEntity.statementActorUid IN 
@@ -90,6 +91,8 @@ interface XapiStatementEntityDao {
         statementIdLo: Long,
         agentUid: Long,
         relatedAgents: Boolean,
+        since: Long,
+        until: Long,
     ): List<XapiStatementAndJsonEntities>
 
     /**
@@ -115,5 +118,13 @@ interface XapiStatementEntityDao {
 
     @RawQuery
     suspend fun runReportQuery(query: RoomRawQuery): List<StatementReportRow>
+
+    companion object {
+
+        const val SINCE_UNSET = Long.MIN_VALUE
+
+        const val UNTIL_UNSET = Long.MAX_VALUE
+
+    }
 
 }

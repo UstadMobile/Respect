@@ -82,6 +82,7 @@ interface XapiStatementEntityDao {
                           )
                      )
                )
+           AND (:verbUid = 0 OR XapiStatementEntity.statementVerbId = :verbUid)    
            AND NOT XapiStatementEntity.isSubStatement
     """
     )
@@ -90,6 +91,7 @@ interface XapiStatementEntityDao {
         statementIdHi: Long,
         statementIdLo: Long,
         agentUid: Long,
+        verbUid: Long,
         relatedAgents: Boolean,
         since: Long,
         until: Long,

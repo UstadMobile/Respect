@@ -8,6 +8,9 @@ import kotlinx.serialization.Serializable
  * we often need (e.g. score, duration, etc) can be retrieved without needing to retrieve the
  * Statement's full JSON string.
  *
+ * Note: there is no XapiStatementEntityJson created for a Substatement, because the exact json
+ * is included in the parent statement.
+ *
  * E.g. when running the course progress query, we might need to retrieve a few statements per
  * courseBlock per student, retrieving the data for 50 students could entail fetching 2000
  * statements.

@@ -1,23 +1,23 @@
 package world.respect.datalayer.db.school.xapi.ext
 
-import world.respect.datalayer.db.school.xapi.entities.ActivityInteractionEntityPropEnum
-import world.respect.datalayer.db.school.xapi.entities.ActivityLangMapEntryPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntityPropEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryPropEnum
 
 /**
  *
  */
-val ActivityLangMapEntryPropEnum.isActivityProp: Boolean
-    get() = this == ActivityLangMapEntryPropEnum.NAME ||
-            this == ActivityLangMapEntryPropEnum.DESCRIPTION
+val XapiActivityLangMapEntryPropEnum.isActivityProp: Boolean
+    get() = this == XapiActivityLangMapEntryPropEnum.NAME ||
+            this == XapiActivityLangMapEntryPropEnum.DESCRIPTION
 
 
-val ActivityLangMapEntryPropEnum.interactionProp: ActivityInteractionEntityPropEnum?
+val XapiActivityLangMapEntryPropEnum.interactionProp: XapiActivityInteractionEntityPropEnum?
     get() = when(this) {
-        ActivityLangMapEntryPropEnum.CHOICES_INTERACTIONS -> ActivityInteractionEntityPropEnum.CHOICES
-        ActivityLangMapEntryPropEnum.SCALE_INTERACTIONS -> ActivityInteractionEntityPropEnum.SCALE
-        ActivityLangMapEntryPropEnum.SOURCE_INTERACTIONS -> ActivityInteractionEntityPropEnum.SOURCE
-        ActivityLangMapEntryPropEnum.TARGET_INTERACTIONS -> ActivityInteractionEntityPropEnum.TARGET
-        ActivityLangMapEntryPropEnum.STEPS_INTERACTIONS -> ActivityInteractionEntityPropEnum.STEPS
+        XapiActivityLangMapEntryPropEnum.CHOICES_INTERACTIONS -> XapiActivityInteractionEntityPropEnum.CHOICES
+        XapiActivityLangMapEntryPropEnum.SCALE_INTERACTIONS -> XapiActivityInteractionEntityPropEnum.SCALE
+        XapiActivityLangMapEntryPropEnum.SOURCE_INTERACTIONS -> XapiActivityInteractionEntityPropEnum.SOURCE
+        XapiActivityLangMapEntryPropEnum.TARGET_INTERACTIONS -> XapiActivityInteractionEntityPropEnum.TARGET
+        XapiActivityLangMapEntryPropEnum.STEPS_INTERACTIONS -> XapiActivityInteractionEntityPropEnum.STEPS
         else -> null
     }
 

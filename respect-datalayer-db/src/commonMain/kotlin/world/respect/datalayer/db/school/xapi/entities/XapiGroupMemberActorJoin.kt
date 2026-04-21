@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
     ]
 )
 @Serializable
-data class GroupMemberActorJoin(
+data class XapiGroupMemberActorJoin(
     val gmajGroupActorUid: Long,
     val gmajMemberActorUid: Long,
 ) {

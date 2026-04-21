@@ -15,7 +15,7 @@ import world.respect.datalayer.school.model.StatusEnum
  *
  * @param verbUid The XXHash64 of verbUrlId
  */
-data class VerbEntity(
+data class XapiVerbEntity(
     @PrimaryKey
     val verbUid: Long,
     val verbUrlId: String,

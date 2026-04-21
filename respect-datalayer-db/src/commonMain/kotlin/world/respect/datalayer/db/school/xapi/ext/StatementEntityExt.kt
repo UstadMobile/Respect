@@ -1,8 +1,7 @@
 package world.respect.datalayer.db.school.xapi.ext
 
-import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.xapi.entities.StatementContextActivityJoin
-import world.respect.datalayer.db.school.xapi.entities.StatementEntityObjectTypeEnum
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoin
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 
 internal val XapiStatementEntity.hasResult: Boolean
@@ -33,8 +32,8 @@ fun XapiStatementEntity.allActorUids(): List<Long> {
     return listOfNotNull(
         statementActorUid,
         statementObjectUid1.takeIf {
-            statementObjectType == StatementEntityObjectTypeEnum.AGENT ||
-                    statementObjectType == StatementEntityObjectTypeEnum.GROUP
+            statementObjectType == XapiStatementEntityObjectTypeEnum.AGENT ||
+                    statementObjectType == XapiStatementEntityObjectTypeEnum.GROUP
         },
         contextTeamActorUid.takeIf { it != 0L },
         contextInstructorActorUid.takeIf { it != 0L },
@@ -47,11 +46,11 @@ fun XapiStatementEntity.allActorUids(): List<Long> {
  * include the substatement, if any.
  */
 fun XapiStatementEntity.allActivityUids(
-    joins: List<StatementContextActivityJoin>
+    joins: List<XapiStatementContextActivityJoin>
 ): List<Long> {
     return listOfNotNull(
         statementObjectUid1.takeIf {
-            statementObjectType == StatementEntityObjectTypeEnum.ACTIVITY
+            statementObjectType == XapiStatementEntityObjectTypeEnum.ACTIVITY
         }
     ) + joins.map { it.scajToActivityUid }
 }

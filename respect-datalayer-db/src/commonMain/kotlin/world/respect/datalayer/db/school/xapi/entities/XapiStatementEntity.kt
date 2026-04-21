@@ -69,7 +69,7 @@ data class XapiStatementEntity(
     val statementVerbId: String,
 
     //As per the spec could be Activity, Agent, Group, StatementRef, or SubStatement
-    val statementObjectType: StatementEntityObjectTypeEnum,
+    val statementObjectType: XapiStatementEntityObjectTypeEnum,
 
     val statementObjectActivityId: String? = null,
 

@@ -1,7 +1,10 @@
 package world.respect.datalayer.db.school.xapi.entities
 
 
-enum class ActivityLangMapEntryPropEnum(
+/**
+ * Enum class representing which property an LangMapEntry is for.
+ */
+enum class XapiActivityLangMapEntryPropEnum(
     val flag: Int,
 ) {
 
@@ -21,7 +24,7 @@ enum class ActivityLangMapEntryPropEnum(
 
     companion object {
 
-        fun fromFlag(flag: Int): ActivityLangMapEntryPropEnum {
+        fun fromFlag(flag: Int): XapiActivityLangMapEntryPropEnum {
             return entries.firstOrNull { it.flag == flag } ?: NAME
         }
 

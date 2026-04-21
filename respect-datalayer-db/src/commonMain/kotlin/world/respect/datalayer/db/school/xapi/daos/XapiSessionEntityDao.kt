@@ -45,9 +45,9 @@ interface XapiSessionEntityDao {
            AND XapiSessionEntity.xseClazzUid = :clazzUid
            AND EXISTS(
                SELECT 1
-                 FROM ActorEntity
-                WHERE ActorEntity.actorUid = :actorUid
-                  AND ActorEntity.actorPersonUid = :accountPersonUid)     
+                 FROM XapiActorEntity
+                WHERE XapiActorEntity.actorUid = :actorUid
+                  AND XapiActorEntity.actorPersonUid = :accountPersonUid)     
     """
     )
     suspend fun findMostRecentSessionByActorAndActivity(

@@ -8,10 +8,10 @@ package world.respect.datalayer.db.school.xapi.entities
  *
  * @property flag the constant for this enum which is used by the Room type converter to set a column
  *           value in the table
- * @property bitmask flag used with ActivityEntity.actFlag to indicate that this property is null
+ * @property listIsNullFlag flag used with ActivityEntity.actFlag to indicate that this property is null
  *           (omitted)
  */
-enum class ActivityInteractionEntityPropEnum(
+enum class XapiActivityInteractionEntityPropEnum(
     val flag: Int,
     val listIsNullFlag: Int,
 ) {
@@ -23,7 +23,7 @@ enum class ActivityInteractionEntityPropEnum(
 
     companion object {
 
-        fun fromFlag(flag: Int): ActivityInteractionEntityPropEnum {
+        fun fromFlag(flag: Int): XapiActivityInteractionEntityPropEnum {
             return entries.firstOrNull { it.flag == flag } ?: CHOICES
         }
 

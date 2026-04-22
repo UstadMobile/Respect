@@ -48,3 +48,10 @@ appId: world.respect.app
       CLASSNAME: "New Class"
       MEMBERNAME: TeacherA User
       MEMBERUSERNAME: teacherauser
+
+- runFlow:
+    file: "create_account_for_class_member.yaml"
+    env:
+      CLASSNAME: "New Class"
+      MEMBERNAME: StudentA User
+      MEMBERUSERNAME: studentauser

@@ -126,7 +126,9 @@ class XapiStatementDataSourceDb(
                     statementIdLo = statementIds?.second ?: 0,
                     agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
                     verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
-                    relatedAgents = listParams.relatedAgents ?: false,
+                    activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                    relatedAgents = listParams.relatedAgents,
+                    relatedActivities = listParams.relatedActivities,
                     since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
                     until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ).map { entity ->

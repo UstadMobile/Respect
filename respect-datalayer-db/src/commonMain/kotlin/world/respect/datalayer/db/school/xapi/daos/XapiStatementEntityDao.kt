@@ -91,12 +91,16 @@ interface XapiStatementEntityDao {
                         AND (    -- As per spec check if substatement activity matches when relatedActivities is set  
                                  (     SubStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY} 
                                    AND SubStatementEntity.statementObjectUid1 = :activityUid)
-                                 -- As per spec check if activity uid is part of the context activities.   
+                                 -- As per spec check if activity uid is part included in context activities.   
                                OR (:activityUid IN 
                                    (SELECT XapiStatementContextActivityJoin.scajToActivityUid
                                      FROM XapiStatementContextActivityJoin
-                                    WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
-                                      AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
+                                    WHERE (    XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                                           AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
+                                       OR (    SubStatementEntity.statementIdHi IS NOT NULL 
+                                           AND XapiStatementContextActivityJoin.scajFromStatementIdHi = SubStatementEntity.statementIdHi
+                                           AND XapiStatementContextActivityJoin.scajFromStatementIdLo = SubStatementEntity.statementIdLo)     
+                                   )
                                   )    
                             )
                       ) 

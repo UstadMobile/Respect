@@ -82,7 +82,25 @@ interface XapiStatementEntityDao {
                           )
                      )
                )
-           AND (:verbUid = 0 OR XapiStatementEntity.statementVerbId = :verbUid)    
+           AND (:verbUid = 0 OR XapiStatementEntity.statementVerbId = :verbUid)
+               -- Handle activity parameter
+           AND (      :activityUid = 0
+                   OR (     XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
+                       AND XapiStatementEntity.statementObjectUid1 = :activityUid)
+                   OR (     :relatedActivities    
+                        AND (    -- As per spec check if substatement activity matches when relatedActivities is set  
+                                 (     SubStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY} 
+                                   AND SubStatementEntity.statementObjectUid1 = :activityUid)
+                                 -- As per spec check if activity uid is part of the context activities.   
+                               OR (:activityUid IN 
+                                   (SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                                     FROM XapiStatementContextActivityJoin
+                                    WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                                      AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
+                                  )    
+                            )
+                      ) 
+               )          
            AND NOT XapiStatementEntity.isSubStatement
     """
     )
@@ -92,7 +110,9 @@ interface XapiStatementEntityDao {
         statementIdLo: Long,
         agentUid: Long,
         verbUid: Long,
+        activityUid: Long,
         relatedAgents: Boolean,
+        relatedActivities: Boolean,
         since: Long,
         until: Long,
     ): List<XapiStatementAndJsonEntities>

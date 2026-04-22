@@ -94,18 +94,28 @@ interface XapiStatementEntityDao {
                                  -- As per spec check if activity uid is part included in context activities.   
                                OR (:activityUid IN 
                                    (SELECT XapiStatementContextActivityJoin.scajToActivityUid
-                                     FROM XapiStatementContextActivityJoin
-                                    WHERE (    XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
-                                           AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
-                                       OR (    SubStatementEntity.statementIdHi IS NOT NULL 
-                                           AND XapiStatementContextActivityJoin.scajFromStatementIdHi = SubStatementEntity.statementIdHi
-                                           AND XapiStatementContextActivityJoin.scajFromStatementIdLo = SubStatementEntity.statementIdLo)     
+                                      FROM XapiStatementContextActivityJoin
+                                     WHERE (    XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                                            AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
+                                        OR (    SubStatementEntity.statementIdHi IS NOT NULL 
+                                            AND XapiStatementContextActivityJoin.scajFromStatementIdHi = SubStatementEntity.statementIdHi
+                                            AND XapiStatementContextActivityJoin.scajFromStatementIdLo = SubStatementEntity.statementIdLo)     
                                    )
                                   )    
                             )
                       ) 
                )          
            AND NOT XapiStatementEntity.isSubStatement
+     ORDER BY CASE(:ascending)
+               WHEN 1 THEN XapiStatementEntity.stored
+               ELSE 0
+               END ASC,
+                 
+               CASE(:ascending)
+               WHEN 1 THEN 0
+               ELSE XapiStatementEntity.stored
+               END DESC
+     LIMIT :limit      
     """
     )
     @Transaction
@@ -119,6 +129,8 @@ interface XapiStatementEntityDao {
         relatedActivities: Boolean,
         since: Long,
         until: Long,
+        ascending: Boolean,
+        limit: Int
     ): List<XapiStatementAndJsonEntities>
 
     /**

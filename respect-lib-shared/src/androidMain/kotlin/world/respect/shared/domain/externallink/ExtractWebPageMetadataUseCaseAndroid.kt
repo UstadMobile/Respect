@@ -2,14 +2,20 @@ package world.respect.shared.domain.externallink
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.io.ByteArrayInputStream
 import kotlin.coroutines.resume
 
 class ExtractWebPageMetadataUseCaseAndroid(
@@ -17,11 +23,43 @@ class ExtractWebPageMetadataUseCaseAndroid(
     private val json: Json,
 ) : ExtractWebPageMetadataUseCase {
 
+    class BlockHeavyResourcesFilter : OkHttpWebViewClient.ShouldInterceptRequestFilter {
+        override fun shouldIntercept(request: WebResourceRequest): Boolean {
+            if (!request.isForMainFrame) {
+                return true
+            }
+            return false
+        }
+    }
+
+    private val blockHeavyResourcesFilter: OkHttpWebViewClient.ShouldInterceptRequestFilter = 
+        BlockHeavyResourcesFilter()
+
     @SuppressLint("SetJavaScriptEnabled")
     override suspend fun invoke(url: String): WebPageMetadata = withContext(Dispatchers.Main) {
         suspendCancellableCoroutine { continuation ->
             var webView: WebView? = null
             var isResumed = false
+            var timeoutHandler: Handler? = null
+
+            fun cleanupWebView() {
+                try {
+                    webView?.stopLoading()
+                    webView?.destroy()
+                } catch (_: Exception) {
+
+                }
+            }
+
+            fun resumeWithMetadata(metadata: WebPageMetadata) {
+                if (!isResumed) {
+                    isResumed = true
+                    timeoutHandler?.removeCallbacksAndMessages(null)
+                    continuation.resume(metadata)
+
+                    cleanupWebView()
+                }
+            }
 
             try {
                 webView = WebView(context).apply {
@@ -31,6 +69,22 @@ class ExtractWebPageMetadataUseCaseAndroid(
                     settings.blockNetworkImage = true
                     settings.blockNetworkLoads = false
                     settings.mediaPlaybackRequiresUserGesture = true
+                    settings.setSupportZoom(false)
+                    settings.builtInZoomControls = false
+                    settings.displayZoomControls = false
+                    settings.allowFileAccess = false
+                    settings.allowContentAccess = false
+                    settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                    settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+                    settings.databaseEnabled = false
+                    settings.saveFormData = false
+                    settings.javaScriptCanOpenWindowsAutomatically = false
+                }
+
+                timeoutHandler = Handler(Looper.getMainLooper()).apply {
+                    postDelayed({
+                        resumeWithMetadata(WebPageMetadata())
+                    }, WEBVIEW_TIMEOUT_MS)
                 }
 
                 var capturedTitle: String? = null
@@ -43,6 +97,20 @@ class ExtractWebPageMetadataUseCaseAndroid(
                 }
 
                 webView.webViewClient = object : WebViewClient() {
+
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): WebResourceResponse? {
+                        if (request != null && blockHeavyResourcesFilter.shouldIntercept(request)) {
+                            return WebResourceResponse(
+                                "text/plain",
+                                "utf-8",
+                                ByteArrayInputStream(byteArrayOf())
+                            )
+                        }
+                        return null
+                    }
 
                     override fun onPageFinished(view: WebView?, pageUrl: String?) {
                         super.onPageFinished(view, pageUrl)
@@ -87,16 +155,29 @@ class ExtractWebPageMetadataUseCaseAndroid(
 
                                 if (!isResumed) {
                                     isResumed = true
+                                    timeoutHandler?.removeCallbacksAndMessages(null)
                                     continuation.resume(metadata)
+                                    cleanupWebView()
                                 }
                             } catch (_: Exception) {
                                 if (!isResumed) {
                                     isResumed = true
+                                    timeoutHandler?.removeCallbacksAndMessages(null)
                                     continuation.resume(WebPageMetadata(title = capturedTitle))
+                                    cleanupWebView()
                                 }
-                            } finally {
-                                webView?.destroy()
                             }
+                        }
+                    }
+
+                    override fun onReceivedError(
+                        view: WebView?,
+                        request: WebResourceRequest?,
+                        error: android.webkit.WebResourceError?
+                    ) {
+                        super.onReceivedError(view, request, error)
+                        if (request?.isForMainFrame == true) {
+                            resumeWithMetadata(WebPageMetadata())
                         }
                     }
 
@@ -108,25 +189,29 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         failingUrl: String?
                     ) {
                         super.onReceivedError(view, errorCode, description, failingUrl)
-                        if (!isResumed) {
-                            isResumed = true
-                            continuation.resume(WebPageMetadata())
-                            webView?.destroy()
-                        }
+                        resumeWithMetadata(WebPageMetadata())
+                    }
+
+                    override fun onRenderProcessGone(
+                        view: WebView?,
+                        detail: android.webkit.RenderProcessGoneDetail?
+                    ): Boolean {
+                        resumeWithMetadata(WebPageMetadata())
+                        return true
                     }
                 }
 
                 continuation.invokeOnCancellation {
-                    webView?.destroy()
+                    timeoutHandler?.removeCallbacksAndMessages(null)
+                    cleanupWebView()
                 }
 
                 webView.loadUrl(url)
 
             } catch (_: Exception) {
-                webView?.destroy()
-                if (!isResumed) {
-                    continuation.resume(WebPageMetadata())
-                }
+                timeoutHandler?.removeCallbacksAndMessages(null)
+                cleanupWebView()
+                resumeWithMetadata(WebPageMetadata())
             }
         }
     }
@@ -155,4 +240,8 @@ class ExtractWebPageMetadataUseCaseAndroid(
         val description: String = "",
         val image: String = ""
     )
+
+    companion object {
+        private const val WEBVIEW_TIMEOUT_MS = 10_000L
+    }
 }

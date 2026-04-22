@@ -37,8 +37,15 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.model.Clazz
+import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+
+data class GradebookUser(
+    val id: String,
+    val name: String,
+    val avatarUrl: String? = null
+)
 
 data class AssignmentDetailUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -46,6 +53,10 @@ data class AssignmentDetailUiState(
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
+    val gradeBookUsers: List<GradebookUser> = emptyList(),
+    val completion: Map<String, Map<String, Int?>> = emptyMap(), // userId -> (unitId -> percent)
+    val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
+    val isFullscreen: Boolean = false,
 )
 
 class AssignmentDetailViewModel(
@@ -63,6 +74,8 @@ class AssignmentDetailViewModel(
     private val _uiState = MutableStateFlow(AssignmentDetailUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private var _canEdit = false
 
     init {
         _appUiState.update {
@@ -113,15 +126,53 @@ class AssignmentDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
-                    _appUiState.update {
-                        it.copy(
-                            fabState = it.fabState.copy(
-                                visible = selectedAccount?.person?.isAdminOrTeacher() == true
-                            )
-                        )
-                    }
+                    _canEdit = selectedAccount?.person?.isAdminOrTeacher() == true
+                    updateAppUiState()
                 }
             }
+        }
+
+        // Dummy users and completion data for gradebook
+        val dummyUsers = listOf(
+            GradebookUser(id = "1", name = "Micky"),
+            GradebookUser(id = "2", name = "Mouse"),
+            GradebookUser(id = "3", name = "Jerry"),
+            GradebookUser(id = "4", name = "Micky"),
+            GradebookUser(id = "5", name = "Mouse"),
+            GradebookUser(id = "6", name = "Jerry"),
+            GradebookUser(id = "7", name = "Jerry")
+        )
+        // Dummy units (simulate after assignment is loaded)
+        val dummyCompletion = mapOf(
+            "1" to mapOf("A" to 90, "B" to 90),
+            "2" to mapOf("A" to 50, "B" to 0),
+            "3" to mapOf("A" to null, "B" to null),
+            "4" to mapOf("A" to 90, "B" to 90),
+            "5" to mapOf("A" to 50, "B" to 0),
+            "6" to mapOf("A" to null, "B" to null),
+            "7" to mapOf("a" to 50, "B" to 0),
+        )
+        _uiState.update {
+            it.copy(
+                gradeBookUsers = dummyUsers,
+                completion = dummyCompletion
+            )
+        }
+    }
+
+    private fun updateAppUiState() {
+        val isFullscreen = _uiState.value.isFullscreen
+        _appUiState.update {
+            it.copy(
+                hideAppBar = isFullscreen,
+                hideBottomNavigation = isFullscreen,
+                fabState = it.fabState.copy(
+                    visible = _canEdit && !isFullscreen
+                ),
+                fullscreenToggleVisible = true,
+                isFullscreen = isFullscreen,
+                onToggleFullscreen = ::onToggleFullscreen
+            )
         }
     }
 
@@ -146,5 +197,16 @@ class AssignmentDetailViewModel(
                 )
             )
         )
+    }
+
+    fun onStatusFilterChanged(filter: AssignmentStatusFilter) {
+        _uiState.update {
+            it.copy(selectedStatusFilter = filter)
+        }
+    }
+
+    fun onToggleFullscreen() {
+        _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
+        updateAppUiState()
     }
 }

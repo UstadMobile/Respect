@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
@@ -175,8 +177,8 @@ fun LearningUnitDetailScreen(
                 )
 
                 RespectQuickActionButton(
-                    imageVector = Icons.Filled.NearMe,
-                    labelText = stringResource(Res.string.assign),
+                    imageVector = if (uiState.isStudent) Icons.Filled.BookmarkBorder else Icons.Filled.NearMe,
+                    labelText = if (uiState.isStudent) stringResource(Res.string.bookmark) else stringResource(Res.string.assign),
                     onClick = onClickAssign,
                     enabled = uiState.buttonsEnabled,
                 )

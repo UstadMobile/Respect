@@ -1,5 +1,6 @@
 package world.respect.app.view.assignment.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -112,36 +114,71 @@ fun AssignmentListScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        modifier = Modifier.weight(1.5f),
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy((-12).dp) // Negative space for overlap
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy((-12).dp) // Negative space for overlap
-                        ) {
-                            assignment.learningUnits.take(3).forEach { unit ->
-                                AssignmentLearningUnitIcon(
-                                    manifestUrl = unit.learningUnitManifestUrl,
-                                    learningUnitInfoFlow = uiState.learningUnitInfoFlow
-                                )
-                            }
+                        assignment.learningUnits.take(3).forEach { unit ->
+                            AssignmentLearningUnitIcon(
+                                manifestUrl = unit.learningUnitManifestUrl,
+                                learningUnitInfoFlow = uiState.learningUnitInfoFlow
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = assignment.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        val dueDateStr = remember(assignment.deadline) {
+                            assignment.deadline?.let { instant ->
+                                val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                "${localDate.day.toString().padStart(2, '0')}/" +
+                                        "${localDate.month.number.toString().padStart(2, '0')}/" +
+                                        "${localDate.year}"
+                            } ?: ""
                         }
 
-                        Spacer(Modifier.width(12.dp))
-
-                        Column {
-                            Text(
-                                text = assignment.title,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-
-                            val dueDateStr = remember(assignment.deadline) {
-                                assignment.deadline?.let { instant ->
-                                    val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                    "${localDate.day.toString().padStart(2, '0')}/" +
-                                            "${localDate.month.number.toString().padStart(2, '0')}/" +
-                                            "${localDate.year}"
-                                } ?: ""
+                        if (uiState.isStudent) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarMonth,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = dueDateStr,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                                Spacer(Modifier.width(16.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.TaskAlt,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = "${uiState.completedCount}/${uiState.totalCount} task completed",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
                             }
+                            Text(
+                                text = "Assigned to:  ${uiState.personName}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        } else {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.CalendarMonth, null, Modifier.size(14.dp))
                                 Spacer(Modifier.width(4.dp))
@@ -149,39 +186,52 @@ fun AssignmentListScreen(
                             }
                         }
                     }
-                    Row(
-                        modifier = Modifier.weight(0.8f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.Gray
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text("Class 1", style = MaterialTheme.typography.bodySmall)
-                    }
 
-                    Row(
-                        modifier = Modifier
-                            .weight(1f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.TrackChanges,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.Gray
-                        )
-                        Spacer(Modifier.width(6.dp))
+                    if (uiState.isStudent) {
                         Text(
-                            text = "2/3 student completed",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
+                            text = "98%",
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color(0xFFAED581))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White
                         )
+                    } else {
+                        Row(
+                            modifier = Modifier.weight(0.8f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(uiState.className, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.TrackChanges,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "${uiState.completedCount}/${uiState.totalCount} student completed",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
             }

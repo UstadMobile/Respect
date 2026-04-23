@@ -36,6 +36,8 @@ import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.RespectViewModel
@@ -57,6 +59,9 @@ data class AssignmentDetailUiState(
     val completion: Map<String, Map<String, Int?>> = emptyMap(), // userId -> (unitId -> percent)
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
+    val isStudent: Boolean = false,
+    val personName: String = "",
+    val personGuid: String = ""
 )
 
 class AssignmentDetailViewModel(
@@ -126,7 +131,17 @@ class AssignmentDetailViewModel(
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
-                    _canEdit = selectedAccount?.person?.isAdminOrTeacher() == true
+                    val person = selectedAccount?.person
+                    val isStudent = person?.isStudent() == true
+                    _canEdit = person?.isAdminOrTeacher() == true
+                    
+                    _uiState.update { 
+                        it.copy(
+                            isStudent = isStudent,
+                            personName = person?.fullName() ?: "",
+                            personGuid = person?.guid ?: ""
+                        )
+                    }
                     updateAppUiState()
                 }
             }
@@ -151,6 +166,8 @@ class AssignmentDetailViewModel(
             "5" to mapOf("A" to 50, "B" to 0),
             "6" to mapOf("A" to null, "B" to null),
             "7" to mapOf("a" to 50, "B" to 0),
+            // Template for current student UI demo
+            "" to mapOf("A" to 98, "B" to 67, "C" to 50)
         )
         _uiState.update {
             it.copy(

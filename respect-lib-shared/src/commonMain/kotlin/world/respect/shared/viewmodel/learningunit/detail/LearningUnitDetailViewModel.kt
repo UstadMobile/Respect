@@ -32,6 +32,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.datalayer.db.school.ext.isStudent
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
@@ -39,6 +40,7 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
+    val isStudent: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -107,6 +109,13 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
             ustadCache.publicationPinState(route.learningUnitManifestUrl).collect { pinState ->
                 _uiState.update { it.copy(pinState = pinState) }
+            }
+        }
+
+        viewModelScope.launch {
+            accountMananger.selectedAccountAndPersonFlow.collect { selectedAccount ->
+                val isStudent = selectedAccount?.person?.isStudent() == true
+                _uiState.update { it.copy(isStudent = isStudent) }
             }
         }
 

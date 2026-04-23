@@ -32,6 +32,8 @@ import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.util.AssignmentFilter
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -42,7 +44,9 @@ data class AssignmentListUiState(
     val selectedFilter: AssignmentFilter = AssignmentFilter.ALL,
     val completedCount: Int = 2,
     val totalCount: Int = 3,
-    val className: String = "Class 1"
+    val className: String = "Class 1",
+    val isStudent: Boolean = false,
+    val personName: String = ""
 )
 
 class AssignmentListViewModel(
@@ -96,6 +100,19 @@ class AssignmentListViewModel(
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
+                val person = selectedAcct?.person
+                println("TEST Person: $person")
+                val isStudent = person?.isStudent() == true
+                println("TEST isStudent: $isStudent")
+                val personName = person?.fullName() ?: ""
+
+                _uiState.update {
+                    it.copy(
+                        isStudent = isStudent,
+                        personName = personName
+                    )
+                }
+
                 _appUiState.update { prev ->
                     prev.copy(
                         fabState = prev.fabState.copy(

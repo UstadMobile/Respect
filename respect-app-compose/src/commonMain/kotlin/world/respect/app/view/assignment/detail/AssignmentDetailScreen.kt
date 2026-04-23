@@ -2,6 +2,7 @@ package world.respect.app.view.assignment.detail
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,8 +23,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,12 +37,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
@@ -69,6 +76,7 @@ fun AssignmentDetailScreen(
     AssignmentDetailScreen(
         uiState = uiState,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
+        onClickLearningUnit = viewModel::onClickLearningUnit
     )
 }
 
@@ -77,6 +85,7 @@ fun AssignmentDetailScreen(
 fun AssignmentDetailScreen(
     uiState: AssignmentDetailUiState,
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
+    onClickLearningUnit: (AssignmentLearningUnitRef) -> Unit = { },
 ) {
     val assignment = uiState.assignment.dataOrNull()
     val horizontalScrollState = rememberScrollState()
@@ -126,8 +135,9 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
+                        val assignedTo = if (uiState.isStudent) uiState.personName else uiState.assignmentClass.dataOrNull()?.title ?: "-"
                         Text(
-                            text = uiState.assignmentClass.dataOrNull()?.title ?: "-",
+                            text = assignedTo,
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -162,107 +172,221 @@ fun AssignmentDetailScreen(
                 )
             }
         }
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-        ) {
-            val nameColWidth = minOf(maxWidth / 3, (NAME_COLUMN_WIDTH).dp)
-            val taskColWidth = (TASK_COLUMN_WIDTH).dp
-            val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                // STICKY HEADER: Task Icons and Names
-                stickyHeader {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(headerHeight)
-                            .background(color = MaterialTheme.colorScheme.surface)
-                    ) {
-                        Spacer(
-                            Modifier
-                                .width(nameColWidth)
-                                .height(headerHeight)
-                        )
+        if (uiState.isStudent) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val units = assignment?.learningUnits ?: emptyList()
+                items(units) { unit ->
+                    StudentLearningUnitItem(
+                        unit = unit,
+                        uiState = uiState,
+                        onClick = { onClickLearningUnit(unit) }
+                    )
+                }
+            }
+        } else {
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                val nameColWidth = minOf(maxWidth / 3, (NAME_COLUMN_WIDTH).dp)
+                val taskColWidth = (TASK_COLUMN_WIDTH).dp
+                val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                        // Scrollable Task Headers
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    // STICKY HEADER: Task Icons and Names
+                    stickyHeader {
                         Row(
                             modifier = Modifier
-                                .fillMaxHeight()
-                                .horizontalScroll(horizontalScrollState)
+                                .fillMaxWidth()
+                                .height(headerHeight)
+                                .background(color = MaterialTheme.colorScheme.surface)
                         ) {
-                            assignment?.learningUnits?.forEach { unit ->
-                                TaskHeaderCell(unit, uiState, taskColWidth, headerHeight)
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .width(taskColWidth)
-                                    .height(headerHeight),
-                                contentAlignment = Alignment.CenterStart
-                            ) {
-                                Text(
-                                    text = "Average",
-                                    modifier = Modifier.rotate(-90f),
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
+                            Spacer(
+                                Modifier
+                                    .width(nameColWidth)
+                                    .height(headerHeight)
+                            )
 
-                val students = uiState.gradeBookUsers
-                val completion = uiState.completion
-                val units = assignment?.learningUnits ?: emptyList()
-                when {
-                    students.isNotEmpty() -> {
-                        items(students, key = { it.id }) { student ->
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                // Fixed Student Name Column
-                                StudentNameCell(student, nameColWidth)
-                                // Scrollable Grades/Progress Cells
-                                Row(
+                            // Scrollable Task Headers
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .horizontalScroll(horizontalScrollState)
+                            ) {
+                                assignment?.learningUnits?.forEach { unit ->
+                                    TaskHeaderCell(unit, uiState, taskColWidth, headerHeight)
+                                }
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalScroll(horizontalScrollState)
+                                        .width(taskColWidth)
+                                        .height(headerHeight),
+                                    contentAlignment = Alignment.CenterStart
                                 ) {
-                                    units.forEach { unit ->
-                                        val percent =
-                                            completion[student.id]?.get(unit.learningUnitManifestUrl.toString())
-                                        GradeCell(percent, taskColWidth)
-                                    }
-                                    // Average Score Cell
-                                    val userCompletion =
-                                        completion[student.id]?.values?.filterNotNull()
-                                    val avg =
-                                        if (!userCompletion.isNullOrEmpty()) userCompletion.average() else null
-                                    AverageCell(avg, taskColWidth)
+                                    Text(
+                                        text = "Average",
+                                        modifier = Modifier.rotate(-90f),
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
                             }
                         }
                     }
 
-                    else -> {
-                        item("empty_state") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No student data available",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                    val students = uiState.gradeBookUsers
+                    val completion = uiState.completion
+                    val units = assignment?.learningUnits ?: emptyList()
+                    when {
+                        students.isNotEmpty() -> {
+                            items(students, key = { it.id }) { student ->
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    // Fixed Student Name Column
+                                    StudentNameCell(student, nameColWidth)
+                                    // Scrollable Grades/Progress Cells
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .horizontalScroll(horizontalScrollState)
+                                    ) {
+                                        units.forEach { unit ->
+                                            val percent =
+                                                completion[student.id]?.get(unit.learningUnitManifestUrl.toString())
+                                            GradeCell(percent, taskColWidth)
+                                        }
+                                        // Average Score Cell
+                                        val userCompletion =
+                                            completion[student.id]?.values?.filterNotNull()
+                                        val avg =
+                                            if (!userCompletion.isNullOrEmpty()) userCompletion.average() else null
+                                        AverageCell(avg, taskColWidth)
+                                    }
+                                }
+                            }
+                        }
+
+                        else -> {
+                            item("empty_state") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "No student data available",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun StudentLearningUnitItem(
+    unit: AssignmentLearningUnitRef,
+    uiState: AssignmentDetailUiState,
+    onClick: () -> Unit
+) {
+    val infoFlow = remember(unit.learningUnitManifestUrl) { uiState.learningUnitInfoFlow(unit.learningUnitManifestUrl) }
+    val state by infoFlow.collectAsState(DataLoadingState())
+    val publication = state.dataOrNull()
+    val iconLink = publication?.images?.firstOrNull()
+
+    // Mapping dummy data for UI demo based on image content
+    val (title, percent, color) = when {
+        unit.learningUnitManifestUrl.toString().contains("A") -> Triple("Alphabet A", 98, Color(0xFFAED581))
+        unit.learningUnitManifestUrl.toString().contains("B") -> Triple("Alphabet B", 67, Color(0xFFD48245))
+        else -> Triple("Alphabet C", 50, Color.LightGray)
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(contentAlignment = Alignment.BottomStart) {
+            if (iconLink != null) {
+                AsyncImage(
+                    model = unit.learningUnitManifestUrl.resolve(iconLink.href).toString(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(color, RoundedCornerShape(4.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(title.last().toString(), color = Color.White, style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+            if (percent > 90) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = Color(0xFFAED581),
+                    modifier = Modifier.size(16.dp).background(Color.White, CircleShape).padding(1.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = Color.Gray
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = if (title.contains("C")) "Chimple learning" else "Curious Learning",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+            }
+        }
+
+        if (percent < 60) {
+            Box(
+                modifier = Modifier.size(32.dp).background(Color.White, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "$percent%", style = MaterialTheme.typography.labelSmall, fontSize = 8.sp)
+            }
+        } else {
+            Text(
+                text = "$percent%",
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(color)
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White
+            )
         }
     }
 }

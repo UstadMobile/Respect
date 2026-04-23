@@ -121,14 +121,14 @@ fun ExternalLinkScreen(
                     if (uiState.imageUrl != null) {
                         RespectAsyncImage(
                             uri = uiState.imageUrl,
-                            contentDescription = "Link thumbnail",
+                            contentDescription = "",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.size(80.dp)
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Filled.Language,
-                            contentDescription = "Web link",
+                            contentDescription = null,
                             modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )

@@ -166,9 +166,10 @@ class PlaylistEditViewModel(
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
                 val sectionIndex = pendingAddItemSectionIndex
-                    ?: throw IllegalStateException(
-                        "Received learning unit result but no pending section index"
-                    )
+                if (sectionIndex == null) {
+                    _navCommandFlow.tryEmit(NavCommand.PopUp())
+                    return@collect
+                }
                 pendingAddItemSectionIndex = null
 
                 val publications: List<OpdsPublication> = when (val r = result.result) {
@@ -196,9 +197,10 @@ class PlaylistEditViewModel(
         viewModelScope.launch {
             resultReturner.filteredResultFlowForKey(KEY_PLAYLIST).collect { result ->
                 val sectionIndex = pendingAddPlaylistSectionIndex
-                    ?: throw IllegalStateException(
-                        "Received playlist result but no pending section index"
-                    )
+                if (sectionIndex == null) {
+                    _navCommandFlow.tryEmit(NavCommand.PopUp())
+                    return@collect
+                }
                 pendingAddPlaylistSectionIndex = null
 
                 val navLink = when (val data = result.result) {

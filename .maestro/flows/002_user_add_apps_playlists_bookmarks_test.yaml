@@ -179,7 +179,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "External link"
-- tapOn: "Link*"
+- tapOn:
+    id: "external_link_url_field"
 - inputText: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/grade1/lesson001/lesson001.html
 - tapOn: "Next"
 - assertVisible:

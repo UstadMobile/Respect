@@ -563,13 +563,10 @@ private fun FeedListItem(
         },
         headlineContent = { Text(text = title) },
         supportingContent = {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(text = stringResource(Res.string.classes))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    language?.let { Text(text = it.joinToString(", ")) }
-                    duration?.let {
-                        Text(text = "${stringResource(Res.string.duration)} - $it")
-                    }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                language?.let { Text(text = it.joinToString(", ")) }
+                duration?.let {
+                    Text(text = "${stringResource(Res.string.duration)} - $it")
                 }
             }
         },

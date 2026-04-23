@@ -144,7 +144,7 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.externallink.OpenExternalLinkUseCase
 import world.respect.shared.domain.externallink.OpenExternalLinkUseCaseAndroid
 import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCase
-import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCaseImpl
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -341,8 +341,9 @@ val appKoinModule = module {
         )
     }
     single<ExtractWebPageMetadataUseCase> {
-        ExtractWebPageMetadataUseCaseImpl(
-            httpClient = get()
+        ExtractWebPageMetadataUseCaseAndroid(
+            context = androidContext().applicationContext,
+            json = get()
         )
     }
     viewModelOf(::OnboardingViewModel)
@@ -713,7 +714,15 @@ val appKoinModule = module {
             settings = get(),
         )
     }
-
+    /**
+     * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
+     * per url.
+     *
+     * ScopeId is set as per SchoolDirectoryEntryScopeId
+     *
+     * If the upstream server provides a list of grants/permission rules then the school database
+     * can be shared
+     */
     scope<SchoolDirectoryEntry> {
         scoped<GetTokenAndUserProfileWithCredentialUseCase> {
             GetTokenAndUserProfileWithCredentialUseCaseClient(
@@ -755,7 +764,6 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -822,7 +830,11 @@ val appKoinModule = module {
             )
         }
     }
-
+    /**
+     * ScopeId is set as per RespectAccountScopeId
+     *
+     * The RespectAccount scope will be linked to SchoolDirectoryEntry (the parent) scope.
+     */
     scope<RespectAccount> {
         scoped<RespectAccountSchoolScopeLink> {
             val accountScopeId = RespectAccountScopeId.parse(id)
@@ -839,7 +851,6 @@ val appKoinModule = module {
 
             RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
         }
-
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
         }
@@ -1005,7 +1016,7 @@ val appKoinModule = module {
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()
     }
-    single<ValidateEmailUseCase> {
+    single<ValidateEmailUseCase>{
         ValidateEmailUseCase()
     }
     single<CreateGraphFormatterUseCase> {

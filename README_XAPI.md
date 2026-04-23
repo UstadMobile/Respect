@@ -97,7 +97,10 @@ already present to the contextActivities e.g.:
 		"duration": "PT1234S",
 		"contextActivities": {
 		    "grouping" : [
-		        "id": "https://schoolname.example.org/ns/assignment/uuid"
+		        {
+		            "id": "https://schoolname.example.org/ns/assignment/uuid",
+		            "objectType": "Activity"
+		        }
 		    ]
 		}
 	}
@@ -153,7 +156,10 @@ already present to the contextActivities e.g.:
 	"context": {
         "contextActivities": {
             "parent": [
-                "id": "https://schoolname.example.org/class/class-uid"
+                {
+                    "id": "https://schoolname.example.org/class/class-uid",
+                    "objectType": "Activity"
+                }
             ]
         }
 	}

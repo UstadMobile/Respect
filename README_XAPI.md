@@ -139,16 +139,16 @@ already present to the contextActivities e.g.:
                 "objectType": "Agent",
                 "name":"Member Name1",
                 "account": {
-                    name: "member1",
-                    homePage: "https://schoolname.example.org/"
+                    "name": "member1",
+                    "homePage": "https://schoolname.example.org/"
                 }
             },
             {
                 "objectType": "Agent",
                 "name":"Member Name2",
                 "account": {
-                    name: "member2",
-                    homePage: "https://schoolname.example.org/"
+                    "name": "member2",
+                    "homePage": "https://schoolname.example.org/"
                 }
             }
 		]

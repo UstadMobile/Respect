@@ -54,7 +54,6 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.copy
 import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.copy_playlist
@@ -531,6 +530,7 @@ private fun PlaylistSectionHeader(
 private fun FeedListItem(
     title: String,
     iconUrl: String?,
+    description: String?,
     language: List<String>?,
     duration: Double?,
     isMultiSelectMode: Boolean,
@@ -563,10 +563,15 @@ private fun FeedListItem(
         },
         headlineContent = { Text(text = title) },
         supportingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                language?.let { Text(text = it.joinToString(", ")) }
-                duration?.let {
-                    Text(text = "${stringResource(Res.string.duration)} - $it")
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                description?.takeIf { it.isNotBlank() }?.let {
+                    Text(text = it)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    language?.let { Text(text = it.joinToString(", ")) }
+                    duration?.let {
+                        Text(text = "${stringResource(Res.string.duration)} - $it")
+                    }
                 }
             }
         },
@@ -598,6 +603,7 @@ fun NavigationListItem(
         iconUrl = navigation.alternate?.find {
             it.rel?.contains(ICON) == true
         }?.href,
+        description = null,
         language = navigation.language,
         duration = navigation.duration,
         isMultiSelectMode = isMultiSelectMode,
@@ -620,6 +626,7 @@ fun PublicationListItem(
         iconUrl = publication.images?.firstOrNull()?.href,
         language = publication.metadata.language,
         duration = publication.metadata.duration,
+        description = publication.metadata.description,
         isMultiSelectMode = isMultiSelectMode,
         isSelected = isSelected,
         onClick = { onClickPublication(publication) },

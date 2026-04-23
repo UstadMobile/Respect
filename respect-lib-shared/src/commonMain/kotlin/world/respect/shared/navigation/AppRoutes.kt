@@ -48,14 +48,15 @@ data class Acknowledgement (
 }
 @Serializable
 data class EnterInviteCode(
-    val schoolUrlStr: String
+    val schoolUrlStr: String,
+    val personGuid: String? = null
 ) : RespectAppRoute {
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = EnterInviteCode(schoolUrl.toString())
+        fun create(schoolUrl: Url, guid: String? = null ) = EnterInviteCode(schoolUrl.toString(),guid)
     }
 
 }
@@ -403,6 +404,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
+    val personGuid: String? = null
 ) : RespectAppRoute {
 
     @Transient
@@ -413,10 +415,12 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
+            guid: String? = null
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
+            personGuid = guid
         )
     }
 }

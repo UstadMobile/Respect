@@ -219,6 +219,7 @@ class AccountListViewModel(
                 NavCommand.Navigate(
                     EnterInviteCode(
                         schoolUrlStr = it.session.account.school.self.toString(),
+                        personGuid = it.session.account.userGuid
                     )
                 )
             )

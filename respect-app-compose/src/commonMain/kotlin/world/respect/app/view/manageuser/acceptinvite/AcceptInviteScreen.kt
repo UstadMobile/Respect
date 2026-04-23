@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectChildrenExposedDropDownMenuField
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
+import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.loading
@@ -49,7 +51,8 @@ fun AcceptInviteScreen(
     AcceptInviteScreen(
         uiState = uiState,
         appUiState = appUiState,
-        onClickNext = viewModel::onClickNext
+        onClickNext = viewModel::onClickNext,
+        onChildSelected = viewModel::onChildSelected
     )
 }
 
@@ -57,7 +60,8 @@ fun AcceptInviteScreen(
 fun AcceptInviteScreen(
     uiState: AcceptInviteUiState,
     appUiState: AppUiState,
-    onClickNext: () -> Unit
+    onClickNext: () -> Unit,
+    onChildSelected: (Person) -> Unit
 ) {
     val invite = uiState.inviteInfo?.invite
     val errorText = uiState.errorText
@@ -136,6 +140,19 @@ fun AcceptInviteScreen(
                     modifier = Modifier.defaultItemPadding(),
                     label = { Text(stringResource(Res.string.school_server_url)) },
                     value = { Text(uiState.schoolUrl?.toString() ?: "") }
+                )
+
+                RespectChildrenExposedDropDownMenuField(
+                    value = uiState.selectedChild,
+                    options = uiState.children,
+                    onValueChanged = { child ->
+                         onChildSelected(child)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultItemPadding(),
+                    isError = uiState.childError != null,
+                    errorText = uiState.childError
                 )
 
                 Button(

@@ -109,7 +109,10 @@ import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestU
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteExistingUserUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
+import world.respect.shared.domain.account.invite.RedeemInviteExistingUserUseCaseClient
+import world.respect.shared.domain.navigation.inviteforexistingusernavigation.NavigateOnExistingUserInviteAcceptedUseCase
 import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.passkey.EncodeUserHandleUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
@@ -746,6 +749,12 @@ val appKoinModule = module {
             )
         }
 
+        scoped<RedeemInviteExistingUserUseCase> {
+            RedeemInviteExistingUserUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+            )
+        }
 
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
@@ -805,6 +814,9 @@ val appKoinModule = module {
             ValidateQrCodeUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
+        }
+        scoped<NavigateOnExistingUserInviteAcceptedUseCase> {
+            NavigateOnExistingUserInviteAcceptedUseCase()
         }
 
         scoped<NavigateOnAccountCreatedUseCase> {

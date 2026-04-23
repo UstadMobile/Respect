@@ -54,7 +54,7 @@ fun AccountListScreen(
         onClickLogout = viewModel::onClickLogout,
         onClickFamilyPerson = viewModel::onClickFamilyPerson,
         onClickProfile = viewModel::onClickProfile,
-        onClickProfileonClickEnterInviteCode = viewModel::onClickEnterInviteCode,
+        onClickEnterInviteCode = viewModel::onClickEnterInviteCode,
     )
 }
 

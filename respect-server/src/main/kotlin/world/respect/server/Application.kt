@@ -229,7 +229,8 @@ fun Application.module() {
                     }
                     route("invite") {
                         RedeemInviteRoute(
-                            redeemInviteUseCase = { it.getSchoolKoinScope().get() }
+                            redeemInviteUseCase = { it.getSchoolKoinScope().get() },
+                            redeemInviteExistingUserUseCase = { it.getSchoolKoinScope().get() }
                         )
                         InviteInfoRoute(
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }

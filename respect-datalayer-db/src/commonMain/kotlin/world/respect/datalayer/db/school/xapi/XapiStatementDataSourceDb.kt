@@ -24,7 +24,6 @@ import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.model.XapiStatement
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
@@ -41,7 +40,6 @@ class XapiStatementDataSourceDb(
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val schoolUrl: Url,
     private val uidNumberMapper: UidNumberMapper,
-    private val primaryKeyGenerator: PrimaryKeyGenerator,
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,

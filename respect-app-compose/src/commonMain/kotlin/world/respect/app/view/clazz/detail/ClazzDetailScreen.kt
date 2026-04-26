@@ -392,7 +392,7 @@ fun ClazzDetailScreen(
 
             item("student_grouping") {
                 ListItem(
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.padding(bottom = 40.dp).clickable {
                         onClickCreateGroup()
                     },
                     leadingContent = {

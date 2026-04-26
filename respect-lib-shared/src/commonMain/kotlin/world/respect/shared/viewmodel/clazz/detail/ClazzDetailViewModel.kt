@@ -326,7 +326,7 @@ class ClazzDetailViewModel(
                     it.copy(
                         lastModified = modTime,
                         status = if(it.beginDate == today) {
-                            StatusEnum.TO_BE_DELETED //probably was just added by mistake
+                            StatusEnum.TO_BE_DELETED
                         }else {
                             it.status
                         },

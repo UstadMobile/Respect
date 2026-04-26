@@ -39,15 +39,18 @@ fun StudentGroupingEditScreen(
     val uiState by viewModel.uiState.collectAsState()
     StudentGroupingEditScreen(
         uiState = uiState,
-        onStudentCheckedChange= viewModel::onStudentCheckedChange,
+        onStudentCheckedChange = viewModel::onStudentCheckedChange,
+        onGroupNameChanged = viewModel::onGroupNameChanged
     )
 }
 
 @Composable
 fun StudentGroupingEditScreen(
     uiState: StudentGroupingEditUiState,
-    onStudentCheckedChange : (Person, Boolean) -> Unit,
-) {
+    onStudentCheckedChange: (Person, Boolean) -> Unit,
+    onGroupNameChanged: (String) -> Unit,
+
+    ) {
 
     val studentPager = respectRememberPager(uiState.students)
     val studentLazyPagingItems = studentPager.flow.collectAsLazyPagingItems()
@@ -65,10 +68,11 @@ fun StudentGroupingEditScreen(
         item {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("name"),
-                value = "",
+                value = uiState.groupName,
                 onValueChange = { value ->
+                    onGroupNameChanged(value)
                 },
-                isError = uiState.nameError != null,
+                isError = uiState.groupNameError != null,
                 singleLine = true,
                 label = {
                     Text(stringResource(Res.string.name) + "*")
@@ -76,24 +80,10 @@ fun StudentGroupingEditScreen(
                 supportingText = {
                     Text(
                         uiTextStringResource(
-                            uiState.nameError ?: Res.string.required.asUiText()
+                            uiState.groupNameError ?: Res.string.required.asUiText()
                         )
                     )
                 }
-            )
-        }
-
-        item {
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag(("description")),
-                value = "",
-                onValueChange = { value ->
-                },
-                label = {
-                    Text(
-                        stringResource(Res.string.description)
-                    )
-                },
             )
         }
 

@@ -1,6 +1,7 @@
 package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.random.Random
@@ -12,6 +13,7 @@ data class Clazz(
     val title: String,
     val status: StatusEnum = StatusEnum.ACTIVE,
     val description: String? = null,
+    val metadata: JsonObject? = null,
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
     val teacherInviteGuid: String? = null,
@@ -36,6 +38,8 @@ data class Clazz(
 
         const val DEFAULT_INVITE_CODE_MAX = 100_000
         const val DEFAULT_INVITE_CODE_LEN = 6
+
+        const val GROUP_IDS = "groupIds"
     }
 
 }

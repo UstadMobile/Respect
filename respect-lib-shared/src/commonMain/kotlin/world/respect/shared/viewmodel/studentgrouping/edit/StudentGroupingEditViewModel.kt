@@ -88,7 +88,7 @@ class StudentGroupingEditViewModel(
             schoolDataSource.personDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
-                    filterByClazzUid = route.guid,
+                    filterByClazzUid = route.classUid,
                     filterByEnrolmentRole = role,
                     inClassOnDay = localDateInCurrentTimeZone(),
                 )
@@ -126,7 +126,7 @@ class StudentGroupingEditViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.classDataSource.findByGuidAsFlow(route.guid).collect { clazz ->
+            schoolDataSource.classDataSource.findByGuidAsFlow(route.classUid).collect { clazz ->
                 _uiState.update { it.copy(clazz = clazz) }
             }
         }
@@ -224,7 +224,7 @@ class StudentGroupingEditViewModel(
 
                 schoolDataSource.classDataSource.store(listOf(updatedClazz))
 
-                _navCommandFlow.tryEmit(NavCommand.Navigate(StudentGroupingDetail(groupId)))
+                _navCommandFlow.tryEmit(NavCommand.Navigate(StudentGroupingDetail(groupId = groupId, classId = route.classUid)))
             } catch (e: Throwable) {
                 Napier.e("onClickSave ERROR", throwable = e)
             }

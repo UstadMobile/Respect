@@ -80,5 +80,13 @@ interface XapiActorDao {
         uids: List<Long>
     ): List<XapiActorEntity>
 
-
+    @Query(
+        """
+        SELECT XapiActorEntity.*
+          FROM XapiActorEntity
+         WHERE XapiActorEntity.actorAccountName = :accountName
+         LIMIT 1
+    """
+    )
+    suspend fun findGroupByAccountNameAsync(accountName: String): XapiActorEntity?
 }

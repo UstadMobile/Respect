@@ -221,12 +221,13 @@ data class ClazzEdit(
 
 @Serializable
 data class StudentGroupingEdit(
-    val guid: String
+    val classUid: String
 ) : RespectAppRoute
 
 @Serializable
 data class StudentGroupingDetail(
-    val groupId: String
+    val groupId: String,
+    val classId: String
 ): RespectAppRoute
 
 @Serializable

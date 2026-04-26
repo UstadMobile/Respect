@@ -24,7 +24,6 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.asUiText

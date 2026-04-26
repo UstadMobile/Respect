@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -76,6 +77,7 @@ fun ClazzDetailScreen(
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
         onToggleStudentsSection = viewModel::onToggleStudentsSection,
+        onToggleStudentGroupingSection = viewModel::onToggleStudentGroupingSection,
         onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
         onClickManageEnrollments = viewModel::onClickManageEnrollments,
         onClickPerson = viewModel::onClickPerson,
@@ -94,6 +96,7 @@ fun ClazzDetailScreen(
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
     onToggleStudentsSection: () -> Unit,
+    onToggleStudentGroupingSection: () -> Unit,
     onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
     onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
     onClickPerson: (Person) -> Unit,
@@ -362,8 +365,7 @@ fun ClazzDetailScreen(
 
             item("student_grouping_header") {
                 ListItem(
-                    modifier = Modifier
-                        .clickable {},
+                    modifier = Modifier.clickable { onToggleStudentGroupingSection() },
                     headlineContent = {
                         Text(
                             modifier = Modifier.padding(top = 24.dp),
@@ -376,39 +378,63 @@ fun ClazzDetailScreen(
                     trailingContent = {
                         Icon(
                             imageVector = Icons.Outlined.KeyboardArrowDown,
-                            contentDescription = if (uiState.showStudentGrouping) {
+                            contentDescription = if (uiState.isStudentGroupingExpanded) {
                                 stringResource(Res.string.collapse_students)
                             } else {
                                 stringResource(Res.string.expand_students)
                             },
                             modifier = Modifier.size(24.dp)
                                 .rotate(
-                                    if (uiState.showStudentGrouping) 0f else -90f
+                                    if (uiState.isStudentGroupingExpanded) 0f else -90f
                                 )
                         )
                     }
                 )
             }
 
-            item("student_grouping") {
-                ListItem(
-                    modifier = Modifier.padding(bottom = 40.dp).clickable {
-                        onClickCreateGroup()
-                    },
-                    leadingContent = {
-                        Icon(
-                            modifier = Modifier.size(40.dp).padding(8.dp),
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(resource = Res.string.create_group)
-                        )
-                    },
-                    headlineContent = {
-                        Text(
-                            text =
-                                stringResource(resource = Res.string.create_group)
-                        )
-                    }
-                )
+            if (uiState.isStudentGroupingExpanded) {
+                item("student_grouping") {
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            onClickCreateGroup()
+                        },
+                        leadingContent = {
+                            Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(resource = Res.string.create_group)
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                text =
+                                    stringResource(resource = Res.string.create_group)
+                            )
+                        }
+                    )
+                }
+
+                items(uiState.groups.size) { index ->
+                    val groupData = uiState.groups[index]
+                    ListItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { },
+                        leadingContent = {
+                            Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
+                                imageVector = Icons.Filled.Groups,
+                                contentDescription = ""
+                            )
+                        },
+                        headlineContent = {
+                            Text(text = groupData.groupName)
+                        },
+                        supportingContent = {
+                            Text(text = "${groupData.memberCount} ${stringResource(Res.string.students)}")
+                        }
+                    )
+                }
             }
         }
     }

@@ -88,6 +88,14 @@ data class ClazzDetailUiState(
     val showAddTeacher: Boolean = false,
     val showStudentGrouping: Boolean = false,
     val isStudentGroupingExpanded: Boolean = true,
+    val groupIds: List<String> = emptyList(),
+    val groups: List<GroupDisplayData> = emptyList(),
+)
+
+data class GroupDisplayData(
+    val groupId: String,
+    val groupName: String,
+    val memberCount: Int,
 )
 
 class ClazzDetailViewModel(
@@ -176,7 +184,26 @@ class ClazzDetailViewModel(
                 _appUiState.update {
                     it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
-                _uiState.update { it.copy(clazz = clazz) }
+
+                // Extract group IDs from metadata
+                val clazzData = clazz.dataOrNull()
+                val groupIds = if (clazzData != null) {
+                    extractGroupIdsFromMetadata(clazzData)
+                } else {
+                    emptyList()
+                }
+
+                _uiState.update {
+                    it.copy(
+                        clazz = clazz,
+                        groupIds = groupIds
+                    )
+                }
+
+                // Load group details for each group ID
+                if (groupIds.isNotEmpty()) {
+                    loadGroupDetails(groupIds)
+                }
             }
         }
 
@@ -298,6 +325,10 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(isStudentsExpanded = !it.isStudentsExpanded) }
     }
 
+    fun onToggleStudentGroupingSection() {
+        _uiState.update { it.copy(isStudentGroupingExpanded = !it.isStudentGroupingExpanded) }
+    }
+
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ClazzEdit(route.guid))
@@ -353,34 +384,12 @@ class ClazzDetailViewModel(
         )
     }
     fun onClickCreateGroup() {
-        viewModelScope.launch {
-            try {
-                val students = schoolDataSource.personDataSource.list(
-                    loadParams = DataLoadParams(),
-                    params = PersonDataSource.GetListParams(
-                        filterByClazzUid = route.guid,
-                        filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
-                        inClassOnDay = localDateInCurrentTimeZone(),
-                    )
-                ).dataOrNull()
-
-                if (students.isNullOrEmpty()) {
-                    snackBarDispatcher.showSnackBar(
-                        Snack(Res.string.add_student_to_create_group.asUiText())
-                    )} else {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            StudentGroupingEdit(guid = route.guid)
-                        )
-                    )
-                }
-            } catch (e: Throwable) {
-                Napier.e("onClickCreateGroup ERROR", throwable = e)
-                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
-            }
-        }
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingEdit(classUid = route.guid)
+            )
+        )
     }
-
 
     fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(
@@ -392,6 +401,42 @@ class ClazzDetailViewModel(
                 )
             )
         )
+    }
+
+    private fun extractGroupIdsFromMetadata(clazz: Clazz): List<String> {
+        return try {
+            val metadata = clazz.metadata ?: return emptyList()
+            val groupIdsJsonArray = metadata["groupIds"] as? kotlinx.serialization.json.JsonArray
+            groupIdsJsonArray?.map { it.toString().trim('"') } ?: emptyList()
+        } catch (e: Throwable) {
+            Napier.w("Failed to extract group IDs from metadata", throwable = e)
+            emptyList()
+        }
+    }
+
+    private fun loadGroupDetails(groupIds: List<String>) {
+        viewModelScope.launch {
+            try {
+                val groups = schoolDataSource.xapiActorDataSource.getGroupsByIds(groupIds)
+                val groupDisplayDataList = groups.map { group ->
+                    val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
+                    Napier.i("Loaded Group: ${group.name}")
+                    Napier.i("Group Members: ${memberNames.joinToString(", ")}")
+
+                    GroupDisplayData(
+                        groupId = group.account?.name ?: "",
+                        groupName = group.name ?: "",
+                        memberCount = memberNames.size
+                    )
+                }
+
+                _uiState.update { prev ->
+                    prev.copy(groups = groupDisplayDataList)
+                }
+            } catch (e: Throwable) {
+                Napier.e("loadGroupDetails ERROR", throwable = e)
+            }
+        }
     }
 
     companion object {

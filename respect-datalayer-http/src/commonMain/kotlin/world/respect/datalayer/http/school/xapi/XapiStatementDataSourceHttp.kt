@@ -1,20 +1,16 @@
 package world.respect.datalayer.http.school.xapi
 
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.lib.xapi.model.XapiStatement
+import kotlin.uuid.Uuid
 
 class XapiStatementDataSourceHttp: XapiStatementDataSource {
 
-    override suspend fun post(list: List<XapiStatement>) {
+    override suspend fun post(list: List<XapiStatement>): List<Uuid> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun list(
-        listParams: XapiStatementDataSource.GetStatementParams,
-        dataLoadParams: DataLoadParams
-    ): DataLoadState<List<XapiStatement>> {
+    override suspend fun get(request: XapiStatementDataSource.GetStatementsRequest): XapiStatementDataSource.GetStatementsResponse {
         TODO("Not yet implemented")
     }
 }

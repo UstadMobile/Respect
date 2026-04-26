@@ -224,7 +224,7 @@ class StudentGroupingEditViewModel(
 
                 schoolDataSource.classDataSource.store(listOf(updatedClazz))
 
-                _navCommandFlow.tryEmit(NavCommand.Navigate(StudentGroupingDetail))
+                _navCommandFlow.tryEmit(NavCommand.Navigate(StudentGroupingDetail(groupId)))
             } catch (e: Throwable) {
                 Napier.e("onClickSave ERROR", throwable = e)
             }

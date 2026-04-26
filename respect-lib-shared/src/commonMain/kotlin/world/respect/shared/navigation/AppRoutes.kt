@@ -225,7 +225,9 @@ data class StudentGroupingEdit(
 ) : RespectAppRoute
 
 @Serializable
-object StudentGroupingDetail: RespectAppRoute
+data class StudentGroupingDetail(
+    val groupId: String
+): RespectAppRoute
 
 @Serializable
 object Report : RespectAppRoute

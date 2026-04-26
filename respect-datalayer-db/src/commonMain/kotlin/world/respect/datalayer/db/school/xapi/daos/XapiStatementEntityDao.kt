@@ -127,7 +127,7 @@ interface XapiStatementEntityDao {
         since: Long,
         until: Long,
         ascending: Boolean,
-        limit: Int
+        limit: Int,
     ): List<XapiStatementAndJsonEntities>
 
     /**

@@ -11,7 +11,8 @@ import kotlin.time.Instant
 @Entity(
     indices = [
         Index("actorPersonUid", name = "idx_actorentity_uid_personuid"),
-        Index("actorObjectType", name= "idx_actorentity_actorobjecttype")
+        Index("actorObjectType", name= "idx_actorentity_actorobjecttype"),
+        Index("actorIsAnonGroup", name ="idx_actorentity_actorIsAnonGroup")
     ]
 )
 
@@ -39,6 +40,11 @@ import kotlin.time.Instant
  *        recording assignment marks, attendance, etc) and then a username is created. In this case
  *        there will be multiple actors which will all link to the same personUid.
  *
+ * @param actorIsAnonGroup true if this is an anonymous group, false otherwise. Ordinarily storing
+ *        this on its own is a violation of the DRY principle. This can be derived by checking if
+ *        identifying properties are null, however that would make the standard group member join
+ *        query much slower.
+ *
  */
 @Serializable
 data class XapiActorEntity(
@@ -64,6 +70,8 @@ data class XapiActorEntity(
     val actorLastModified: Instant = Clock.System.now(),
 
     val actorGroupMembersLastUpdated: Instant = EPOCH,
+
+    val actorIsAnonGroup: Boolean = false,
 
     val actorObjectType: XapiActorEntityTypeEnum = XapiActorEntityTypeEnum.AGENT,
 ) {

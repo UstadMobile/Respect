@@ -21,11 +21,14 @@ data class XapiGroup(
     val member: List<XapiAgent>? = null,
 ): XapiActor, XapiStatementObject {
 
+    /**
+     * True if this is an anonymous group
+     */
     val isAnonymous: Boolean
         get() = name == null && mbox == null && mbox_sha1sum == null &&
                 openid == null && account == null
 
+    val isIdentified: Boolean = !isAnonymous
+
 }
 
-val XapiGroup.isAnonymous: Boolean
-    get() = mbox == null && openid == null && account == null

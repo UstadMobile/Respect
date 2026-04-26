@@ -31,12 +31,13 @@ import kotlin.test.assertTrue
 fun assertXapiStatementCanonicallyEqual(
     expected: XapiStatement,
     actual : XapiStatement,
+    idOnlyFormat: Boolean = false,
     messagePrefix: String = "",
 ) {
 
     assertEquals(expected.id, actual.id)
-    assertXapiActorCanonicallyEqual(expected.actor, actual.actor)
-    assertXapiVerbCanonicallyEqual(expected.verb, actual.verb)
+    assertXapiActorCanonicallyEqual(expected.actor, actual.actor, idOnlyFormat = idOnlyFormat)
+    assertXapiVerbCanonicallyEqual(expected.verb, actual.verb, idOnlyFormat = idOnlyFormat)
     val expectedStmtObject = expected.`object`
 
     when(expectedStmtObject) {
@@ -50,11 +51,13 @@ fun assertXapiStatementCanonicallyEqual(
             )
 
             val expectedDefinition = expectedStmtObject.definition
-            if(expectedDefinition != null) {
+            if(expectedDefinition != null && !idOnlyFormat) {
                 val actualDefinition = actualObject.definition
                 assertNotNull(actualDefinition)
                 assertXapiActivityDefinitionCanonicallyEqual(expectedDefinition, actualDefinition)
-            }else {
+            }
+
+            if(idOnlyFormat) {
                 assertNull(actualObject.definition)
             }
         }
@@ -68,20 +71,23 @@ fun assertXapiStatementCanonicallyEqual(
             assertXapiStatementCanonicallyEqual(
                 expected = expectedStmtObject,
                 actual = actual.`object` as XapiStatement,
+                idOnlyFormat = idOnlyFormat,
             )
         }
 
         is XapiAgent -> {
             assertXapiActorCanonicallyEqual(
                 expected = expectedStmtObject,
-                actual = actual.`object` as XapiAgent
+                actual = actual.`object` as XapiAgent,
+                idOnlyFormat = idOnlyFormat,
             )
         }
 
         is XapiGroup -> {
             assertXapiActorCanonicallyEqual(
                 expected = expectedStmtObject,
-                actual = actual.`object` as XapiGroup
+                actual = actual.`object` as XapiGroup,
+                idOnlyFormat = idOnlyFormat,
             )
         }
 
@@ -115,7 +121,7 @@ fun assertXapiStatementCanonicallyEqual(
         if(expectedInstructor != null) {
             val actualInstructor = actualContext.instructor
             assertNotNull(actualInstructor)
-            assertXapiActorCanonicallyEqual(expectedInstructor, actualInstructor)
+            assertXapiActorCanonicallyEqual(expectedInstructor, actualInstructor, idOnlyFormat = idOnlyFormat)
         }else {
             assertNull(actualContext.instructor)
         }
@@ -129,14 +135,15 @@ fun assertXapiStatementCanonicallyEqual(
         if(expectedTeam != null) {
             val actualTeam = actualContext.team
             assertNotNull(actualTeam)
-            assertXapiActorCanonicallyEqual(expectedTeam, actualTeam)
+            assertXapiActorCanonicallyEqual(expectedTeam, actualTeam, idOnlyFormat = idOnlyFormat)
         }else {
             assertNull(actualContext.team)
         }
 
         assertContextActivityCanonicallyEqual(
             expected = expectedContext.contextActivities,
-            actual = actualContext.contextActivities
+            actual = actualContext.contextActivities,
+            idOnlyFormat = idOnlyFormat,
         )
     }else {
         assertNull(actualContext)
@@ -146,7 +153,7 @@ fun assertXapiStatementCanonicallyEqual(
     if(expectedAuthority != null) {
         val actualAuthority = actual.authority
         assertNotNull(actualAuthority ,"Expected statement has authority $expectedAuthority")
-        assertXapiActorCanonicallyEqual(expectedAuthority, actualAuthority)
+        assertXapiActorCanonicallyEqual(expectedAuthority, actualAuthority, idOnlyFormat = idOnlyFormat)
     }else {
         assertNull(actual.authority)
     }
@@ -156,6 +163,7 @@ fun assertXapiStatementCanonicallyEqual(
 fun assertContextActivityCanonicallyEqual(
     expected: XapiContextActivities?,
     actual: XapiContextActivities?,
+    idOnlyFormat: Boolean = false,
 ) {
     fun assertContextActivityMatch(
         expected: List<XapiActivity>?,
@@ -175,10 +183,14 @@ fun assertContextActivityCanonicallyEqual(
                 //will include the definition if available, so we do not assert that if the
                 //expected activity definition is null that the actual activity definition will
                 //also be null
-                expectedActivity.definition?.also {
-                    val actualDefinition = actualActivity.definition
-                    assertNotNull(actualDefinition)
-                    assertXapiActivityDefinitionCanonicallyEqual(it, actualDefinition)
+                val actualDefinition = actualActivity.definition
+                if(!idOnlyFormat) {
+                    expectedActivity.definition?.also {
+                        assertNotNull(actualDefinition)
+                        assertXapiActivityDefinitionCanonicallyEqual(it, actualDefinition)
+                    }
+                }else {
+                    assertNull(actualDefinition)
                 }
             }
         }else {
@@ -199,10 +211,12 @@ fun assertContextActivityCanonicallyEqual(
 
 fun assertXapiVerbCanonicallyEqual(
     expected: XapiVerb,
-    actual: XapiVerb
+    actual: XapiVerb,
+    idOnlyFormat: Boolean = false,
 ) {
     assertEquals(expected.id, actual.id)
-    assertLangMapEquals(expected.display, actual.display)
+    if(!idOnlyFormat)
+        assertLangMapEquals(expected.display, actual.display)
 }
 
 fun assertLangMapEquals(
@@ -275,13 +289,19 @@ fun assertXapiActorCommonPropsMatch(
 
 fun assertXapiActorCanonicallyEqual(
     expected: XapiActor,
-    actual: XapiActor
+    actual: XapiActor,
+    idOnlyFormat: Boolean = false,
 ) {
     assertXapiActorCommonPropsMatch(expected, actual)
 
     assertEquals(expected is XapiAgent, actual is XapiAgent)
     assertEquals(expected is XapiGroup, actual is XapiGroup)
-    if(expected is XapiGroup && actual is XapiGroup) {
+
+    //When checking for id only format actual, identified groups member property should be omitted
+    val idOnlyFormatForIdentifiedGroup = expected is XapiGroup && expected.isIdentified
+            && idOnlyFormat
+
+    if(expected is XapiGroup && actual is XapiGroup && !idOnlyFormatForIdentifiedGroup) {
         /**
          * As per the xAPI spec : an identified group can be referenced without including the members
          * themselves.
@@ -291,25 +311,23 @@ fun assertXapiActorCanonicallyEqual(
                 "Expected and actual member size should match in group ${expected.idStr}")
         }
 
-        try {
-            /**
-             * As per the spec: order does not matter:
-             * An LRS returning a Statement MAY return the list of Group members in any order.
-             * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2422-when-the-actor-objecttype-is-group
-             */
-            expected.member?.forEach { expectedMember ->
-                val memberInActual = actual.member?.firstOrNull {
-                    it.idStr == expectedMember.idStr
-                } ?: throw AssertionError("Member $expectedMember not found in other group")
-                assertXapiActorCanonicallyEqual(
-                    expected = expectedMember,
-                    actual = memberInActual
-                )
-            }
-        }catch(e: Throwable) {
-            e.printStackTrace()
-            throw e
+        /**
+         * As per the spec: order does not matter:
+         * An LRS returning a Statement MAY return the list of Group members in any order.
+         * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2422-when-the-actor-objecttype-is-group
+         */
+        expected.member?.forEach { expectedMember ->
+            val memberInActual = actual.member?.firstOrNull {
+                it.idStr == expectedMember.idStr
+            } ?: throw AssertionError("Member $expectedMember not found in other group")
+            assertXapiActorCanonicallyEqual(
+                expected = expectedMember,
+                actual = memberInActual
+            )
         }
+    }
 
+    if(idOnlyFormatForIdentifiedGroup && actual is XapiGroup) {
+        assertNull(actual.member)
     }
 }

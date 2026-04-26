@@ -108,6 +108,7 @@ fun XapiGroup.toGroupEntities(
         actorAccountName = account?.name,
         actorAccountHomePage = account?.homePage,
         actorLastModified = lastModified,
+        actorIsAnonGroup = isAnonymous,
     )
 
     return ActorEntities(
@@ -133,7 +134,9 @@ fun XapiActorEntity.toAgentModel(): XapiAgent {
     )
 }
 
-fun ActorEntities.toGroupModel(): XapiGroup {
+fun ActorEntities.toGroupModel(
+    idOnlyFormat: Boolean,
+): XapiGroup {
     return XapiGroup(
         name = actor.actorName,
         mbox = actor.actorMbox,
@@ -143,23 +146,29 @@ fun ActorEntities.toGroupModel(): XapiGroup {
         account = XapiAccount.fromHomePageAndNameOrNull(
             actor.actorAccountHomePage, actor.actorAccountName
         ),
-        member = groupMemberJoins.mapNotNull { groupMemberJoin ->
-            groupMemberAgents.firstOrNull {
-                it.actorUid == groupMemberJoin.gmajMemberActorUid
-            }?.toAgentModel()
+        member = if(!idOnlyFormat) {
+            groupMemberJoins.mapNotNull { groupMemberJoin ->
+                groupMemberAgents.firstOrNull {
+                    it.actorUid == groupMemberJoin.gmajMemberActorUid
+                }?.toAgentModel()
+            }
+        }else {
+            null
         }
     )
 }
 
 
-fun ActorEntities.toModel(): XapiActor {
+fun ActorEntities.toModel(
+    idOnlyFormat: Boolean,
+): XapiActor {
     return when(actor.actorObjectType) {
         XapiActorEntityTypeEnum.AGENT -> {
             actor.toAgentModel()
         }
 
         XapiActorEntityTypeEnum.GROUP -> {
-            this.toGroupModel()
+            this.toGroupModel(idOnlyFormat = idOnlyFormat)
         }
 
     }

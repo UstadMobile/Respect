@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "548a3b929abe9eb95a9f8bcb72f47a4e",
+    "identityHash": "ae88430b6e112c754b27620d3204ed6a",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1973,7 +1973,7 @@
       },
       {
         "tableName": "XapiActorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorIsAnonGroup` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "actorUid",
@@ -2036,6 +2036,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "actorIsAnonGroup",
+            "columnName": "actorIsAnonGroup",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "actorObjectType",
             "columnName": "actorObjectType",
             "affinity": "INTEGER",
@@ -2066,6 +2072,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `idx_actorentity_actorobjecttype` ON `${TABLE_NAME}` (`actorObjectType`)"
+          },
+          {
+            "name": "idx_actorentity_actorIsAnonGroup",
+            "unique": false,
+            "columnNames": [
+              "actorIsAnonGroup"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_actorentity_actorIsAnonGroup` ON `${TABLE_NAME}` (`actorIsAnonGroup`)"
           }
         ]
       },
@@ -2491,7 +2506,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '548a3b929abe9eb95a9f8bcb72f47a4e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ae88430b6e112c754b27620d3204ed6a')"
     ]
   }
 }

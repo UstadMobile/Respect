@@ -22,6 +22,7 @@ import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
@@ -55,7 +56,7 @@ class XapiStatementDataSourceDbTest {
             val actors = statement.allActors().distinctMerged().map {
                 it.toEntities(uidNumberMapper, timeNow)
             }.map {
-                it.toModel()
+                it.toModel(idOnlyFormat = false)
             }
             val activities = statement.allDefinedActivities().distinctMerged().mapNotNull {
                 it.toEntities(uidNumberMapper, json, timeNow)
@@ -98,32 +99,52 @@ class XapiStatementDataSourceDbTest {
                     )
 
                     val stmtUuid = Uuid.random()
+                    val timeNow = Clock.System.now()
 
                     val statement = Json.decodeFromJsonElement(
                         XapiStatement.serializer(), statement.jsonObject
                     ).copy(
-                        id = stmtUuid
+                        id = stmtUuid,
+                        timestamp = timeNow,
+                        stored = Clock.System.now(),
                     )
 
                     dataSource.xapiStatementDataSource.store(listOf(statement))
 
-                    listOf(
-                        XapiStatementDataSource.GetStatementFormatEnum.EXACT,
-                        XapiStatementDataSource.GetStatementFormatEnum.CANONICAL,
-                    ).forEach { format ->
-                        val stmtFromDb = dataSource.xapiStatementDataSource.list(
-                            listParams = XapiStatementDataSource.GetStatementParams(
-                                format = format,
-                                statementId = stmtUuid
-                            )
-                        ).dataOrNull()?.first()
-
-                        assertNotNull(stmtFromDb)
-                        assertXapiStatementCanonicallyEqual(
-                            expected = statement,
-                            actual = stmtFromDb,
+                    //check canonical match
+                    val canonicalStmtFromDb = dataSource.xapiStatementDataSource.list(
+                        listParams = XapiStatementDataSource.GetStatementParams(
+                            format = XapiStatementDataSource.GetStatementFormatEnum.EXACT,
+                            statementId = stmtUuid
                         )
-                    }
+                    ).dataOrNull()?.first()
+
+                    assertNotNull(canonicalStmtFromDb)
+                    assertXapiStatementCanonicallyEqual(
+                        expected = statement,
+                        actual = canonicalStmtFromDb,
+                    )
+
+                    val exactStmtFromDb = dataSource.xapiStatementDataSource.list(
+                        listParams = XapiStatementDataSource.GetStatementParams(
+                            format = XapiStatementDataSource.GetStatementFormatEnum.EXACT,
+                            statementId = stmtUuid
+                        )
+                    ).dataOrNull()?.first()
+                    assertEquals(statement, exactStmtFromDb)
+
+                    val idOnlyStmtFromDb = dataSource.xapiStatementDataSource.list(
+                        listParams = XapiStatementDataSource.GetStatementParams(
+                            format = XapiStatementDataSource.GetStatementFormatEnum.IDS,
+                            statementId = stmtUuid
+                        )
+                    ).dataOrNull()?.first()
+                    assertNotNull(idOnlyStmtFromDb)
+                    assertXapiStatementCanonicallyEqual(
+                        expected = statement,
+                        actual = idOnlyStmtFromDb,
+                        idOnlyFormat = true,
+                    )
 
                 }
             }

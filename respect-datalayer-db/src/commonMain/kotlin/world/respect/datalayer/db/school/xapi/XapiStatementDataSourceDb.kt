@@ -49,12 +49,15 @@ class XapiStatementDataSourceDb(
     suspend fun doUpsertStatement(
         stmt: XapiStatement
     ) {
-        val timeNow = Clock.System.now()
+        //The statement received via HTTP should NOT have a stored time. If it does, we MUST remove
+        //it to ensure concurrency and consistency results work as expected. This is allowed here
+        //only to enable testing of exact statement storage.
+        val storedTime = stmt.stored ?: Clock.System.now()
 
-        val stmtTimestamp = stmt.timestamp ?: timeNow
+        val stmtTimestamp = stmt.timestamp ?: storedTime
 
         val exactStatement = stmt.copy(
-            stored = timeNow,
+            stored = storedTime,
             timestamp = stmtTimestamp,
             id = stmt.id ?: Uuid.random(),
         )
@@ -141,6 +144,8 @@ class XapiStatementDataSourceDb(
                         )
                     }
                 }else {
+                    val idOnly = format == XapiStatementDataSource.GetStatementFormatEnum.IDS
+
                     schoolDb.getStatementDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
@@ -170,10 +175,12 @@ class XapiStatementDataSourceDb(
                                 statementIdLo2 = substatementEntity?.stmtEntity?.statementIdLo ?: 0,
                             )
 
-                        val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao().findByVerbUidPair(
-                            uid1 = entity.verbEntity.verbUid,
-                            uid2 = substatementEntity?.verbEntity?.verbUid ?: 0,
-                        )
+                        val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao()
+                            .takeIf { !idOnly }
+                            ?.findByVerbUidPair(
+                                uid1 = entity.verbEntity.verbUid,
+                                uid2 = substatementEntity?.verbEntity?.verbUid ?: 0,
+                            ) ?: emptyList()
 
                         val verbs = listOfNotNull(
                             entity.verbEntity, substatementEntity?.verbEntity,
@@ -190,9 +197,13 @@ class XapiStatementDataSourceDb(
                             substatementEntity?.stmtEntity?.allActorUids()
                         )
 
-                        val actorEntities = schoolDb.getActorDao().findByUidList(uids = allActorUids)
+                        val actorEntities = schoolDb.getActorDao().findByUidList(
+                            uids = allActorUids
+                        )
+
                         val groupMemberJoins = schoolDb.getGroupMemberActorJoinDao().findByGroupActorUidList(
-                            uidList = allActorUids
+                            uidList = allActorUids,
+                            excludeIdentifiedGroups = idOnly,
                         )
 
                         val actors = actorEntities.filter {
@@ -210,14 +221,16 @@ class XapiStatementDataSourceDb(
                                     it.gmajGroupActorUid == actorEntity.actorUid
                                 },
                                 groupMemberAgents = actorEntities,
-                            ).toModel()
+                            ).toModel(idOnlyFormat = idOnly)
                         }
 
-                        val activities = schoolDb.getActivityEntityDao().findByUidList(
-                            entity.stmtEntity.allActivityUids(contextActivityJoins).appendIfNotNull(
-                                substatementEntity?.stmtEntity?.allActivityUids(contextActivityJoins)
-                            )
-                        ).map { it.toModel(json) }
+                        val activities = schoolDb.getActivityEntityDao()
+                            .takeIf { !idOnly }
+                            ?.findByUidList(
+                                entity.stmtEntity.allActivityUids(contextActivityJoins).appendIfNotNull(
+                                    substatementEntity?.stmtEntity?.allActivityUids(contextActivityJoins)
+                                )
+                            )?.map { it.toModel(json) } ?: emptyList()
 
                         StatementEntities(
                             statements = listOfNotNull(

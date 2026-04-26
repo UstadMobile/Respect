@@ -2,7 +2,6 @@ package world.respect.datalayer.school.xapi.ext
 
 import world.respect.datalayer.school.xapi.model.XapiActor
 import world.respect.datalayer.school.xapi.model.XapiGroup
-import world.respect.datalayer.school.xapi.model.isAnonymous
 
 val XapiActor.idStr: String?
     get() = when {

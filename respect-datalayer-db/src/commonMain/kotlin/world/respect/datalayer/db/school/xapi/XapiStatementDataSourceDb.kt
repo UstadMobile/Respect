@@ -2,12 +2,10 @@ package world.respect.datalayer.db.school.xapi
 
 import androidx.room.Transactor
 import androidx.room.useReaderConnection
+import androidx.room.useWriterConnection
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.ext.toLongPair
@@ -31,9 +29,13 @@ import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiStatementDataSource.GetStatementsRequest
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
+import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
+import world.respect.lib.xapi.XapiResponseHeaders
+import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 
 class XapiStatementDataSourceDb(
@@ -97,10 +99,20 @@ class XapiStatementDataSourceDb(
     }
 
 
-    override suspend fun store(list: List<XapiStatement>) {
-        list.forEach { statement ->
-            doUpsertStatement(statement)
+    override suspend fun post(list: List<XapiStatement>): List<Uuid> {
+        val statementsWithIdsSet = list.map {
+            it.copyWithIdIfNotSet()
         }
+
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                statementsWithIdsSet.forEach { statement ->
+                    doUpsertStatement(statement)
+                }
+            }
+        }
+
+        return statementsWithIdsSet.mapNotNull { it.id }
     }
 
     override suspend fun updateLocal(
@@ -115,13 +127,13 @@ class XapiStatementDataSourceDb(
         }
     }
 
-    override suspend fun list(
-        listParams: XapiStatementDataSource.GetStatementParams,
-        dataLoadParams: DataLoadParams
-    ): DataLoadState<List<XapiStatement>> {
+    override suspend fun get(
+        request: GetStatementsRequest,
+    ): XapiStatementDataSource.GetStatementsResponse {
 
-        val statementIds = listParams.statementId?.toLongPair()
-        val format = listParams.format ?: XapiStatementDataSource.GetStatementFormatEnum.EXACT
+        val statementIds = request.params.statementId?.toLongPair()
+        val format = request.params.format ?: XapiStatementDataSource.GetStatementFormatEnum.EXACT
+        val ascendingOrder = request.params.ascending ?: false
 
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
@@ -129,15 +141,15 @@ class XapiStatementDataSourceDb(
                     schoolDb.getStatementEntityJsonDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
-                        agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
-                        verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
-                        activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
-                        relatedAgents = listParams.relatedAgents,
-                        relatedActivities = listParams.relatedActivities,
-                        since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
-                        ascending = listParams.ascending ?: false,
-                        limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                        agentUid = request.params.agent?.identifierHash(uidNumberMapper) ?: 0,
+                        verbUid = request.params.verb?.let { uidNumberMapper(it) } ?: 0,
+                        activityUid = request.params.activity?.let { uidNumberMapper(it) } ?: 0,
+                        relatedAgents = request.params.relatedAgents,
+                        relatedActivities = request.params.relatedActivities,
+                        since = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                        until = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        ascending = ascendingOrder,
+                        limit = request.params.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).map { entity ->
                         json.decodeFromString(
                             XapiStatementTransformingSerializer, entity.fullStatement
@@ -149,15 +161,15 @@ class XapiStatementDataSourceDb(
                     schoolDb.getStatementDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
-                        agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
-                        verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
-                        activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
-                        relatedAgents = listParams.relatedAgents,
-                        relatedActivities = listParams.relatedActivities,
-                        since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
-                        ascending = listParams.ascending ?: false,
-                        limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                        agentUid = request.params.agent?.identifierHash(uidNumberMapper) ?: 0,
+                        verbUid = request.params.verb?.let { uidNumberMapper(it) } ?: 0,
+                        activityUid = request.params.activity?.let { uidNumberMapper(it) } ?: 0,
+                        relatedAgents = request.params.relatedAgents,
+                        relatedActivities = request.params.relatedActivities,
+                        since = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                        until = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        ascending = ascendingOrder,
+                        limit = request.params.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).map { entity ->
                         val substatementEntity = schoolDb.takeIf {
                             entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT
@@ -251,8 +263,21 @@ class XapiStatementDataSourceDb(
 
                 }
 
-                DataReadyState(
-                    data = statements,
+
+                XapiStatementDataSource.GetStatementsResponse(
+                    statementResult = XapiStatementResult(
+                        statements = statements,
+                        more = null,
+                    ),
+                    headers = XapiResponseHeaders(
+                        lastModified = if(ascendingOrder && statements.isNotEmpty()) {
+                            statements.last().stored ?: throw IllegalStateException("Stored statement must have stored set")
+                        }else if(!ascendingOrder && statements.isNotEmpty()) {
+                            statements.first().stored ?: throw IllegalStateException("Stored statement must have stored set")
+                        }else {
+                            Clock.System.now()
+                        }
+                    )
                 )
             }
         }

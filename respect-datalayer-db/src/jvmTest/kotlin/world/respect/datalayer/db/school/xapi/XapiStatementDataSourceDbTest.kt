@@ -9,7 +9,6 @@ import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.ext.addStatementIdIfNotPresent
 import world.respect.datalayer.school.xapi.ext.allActors
@@ -20,6 +19,7 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
+import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -109,15 +109,18 @@ class XapiStatementDataSourceDbTest {
                         stored = Clock.System.now(),
                     )
 
-                    dataSource.xapiStatementDataSource.store(listOf(statement))
+                    dataSource.xapiStatementDataSource.post(listOf(statement))
 
                     //check canonical match
-                    val canonicalStmtFromDb = dataSource.xapiStatementDataSource.list(
-                        listParams = XapiStatementDataSource.GetStatementParams(
-                            format = XapiStatementDataSource.GetStatementFormatEnum.EXACT,
-                            statementId = stmtUuid
+                    val canonicalStmtFromDb = dataSource.xapiStatementDataSource.get(
+                        XapiStatementDataSource.GetStatementsRequest(
+                            params = XapiStatementDataSource.GetStatementParams(
+                                format = XapiStatementDataSource.GetStatementFormatEnum.CANONICAL,
+                                statementId = stmtUuid
+                            ),
+                            headers = XapiRequestHeaders()
                         )
-                    ).dataOrNull()?.first()
+                    ).statementResult.statements.first()
 
                     assertNotNull(canonicalStmtFromDb)
                     assertXapiStatementCanonicallyEqual(
@@ -125,20 +128,26 @@ class XapiStatementDataSourceDbTest {
                         actual = canonicalStmtFromDb,
                     )
 
-                    val exactStmtFromDb = dataSource.xapiStatementDataSource.list(
-                        listParams = XapiStatementDataSource.GetStatementParams(
-                            format = XapiStatementDataSource.GetStatementFormatEnum.EXACT,
-                            statementId = stmtUuid
+                    val exactStmtFromDb = dataSource.xapiStatementDataSource.get(
+                        XapiStatementDataSource.GetStatementsRequest(
+                            params = XapiStatementDataSource.GetStatementParams(
+                                format = XapiStatementDataSource.GetStatementFormatEnum.EXACT,
+                                statementId = stmtUuid
+                            ),
+                            headers = XapiRequestHeaders()
                         )
-                    ).dataOrNull()?.first()
+                    ).statementResult.statements.first()
                     assertEquals(statement, exactStmtFromDb)
 
-                    val idOnlyStmtFromDb = dataSource.xapiStatementDataSource.list(
-                        listParams = XapiStatementDataSource.GetStatementParams(
-                            format = XapiStatementDataSource.GetStatementFormatEnum.IDS,
-                            statementId = stmtUuid
+                    val idOnlyStmtFromDb = dataSource.xapiStatementDataSource.get(
+                        XapiStatementDataSource.GetStatementsRequest(
+                            params = XapiStatementDataSource.GetStatementParams(
+                                format = XapiStatementDataSource.GetStatementFormatEnum.IDS,
+                                statementId = stmtUuid
+                            ),
+                            headers = XapiRequestHeaders()
                         )
-                    ).dataOrNull()?.first()
+                    ).statementResult.statements.first()
                     assertNotNull(idOnlyStmtFromDb)
                     assertXapiStatementCanonicallyEqual(
                         expected = statement,

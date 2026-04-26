@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.xapi.entities
 import androidx.room.Entity
 import androidx.room.Index
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 /**
  * The primary representation of an Xapi Statement in the database. Note that the full original
@@ -95,9 +96,9 @@ data class XapiStatementEntity(
 
     val resultExtensions: String? = null,
 
-    val timestamp: Long = 0,
+    val timestamp: Instant? = null,
 
-    val stored: Long = 0,
+    val stored: Instant? = null,
 
     val contextRegistrationHi: Long = 0,
 

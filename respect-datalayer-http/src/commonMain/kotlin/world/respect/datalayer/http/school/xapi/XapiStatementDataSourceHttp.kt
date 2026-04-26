@@ -7,7 +7,7 @@ import world.respect.lib.xapi.model.XapiStatement
 
 class XapiStatementDataSourceHttp: XapiStatementDataSource {
 
-    override suspend fun store(list: List<XapiStatement>) {
+    override suspend fun post(list: List<XapiStatement>) {
         TODO("Not yet implemented")
     }
 

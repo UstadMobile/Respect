@@ -30,7 +30,6 @@ import world.respect.lib.xapi.model.XapiStatementObject
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.lib.xapi.model.XapiVerb
-import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -160,8 +159,8 @@ fun XapiStatement.toEntities(
                 resultExtensions = result?.extensions?.let {
                     json.encodeToString(xapiExtensionsSerializer, it)
                 },
-                timestamp = timestamp?.toEpochMilliseconds() ?: systemTimeInMillis(),
-                stored = systemTimeInMillis(),
+                timestamp = timestamp,
+                stored = stored,
                 contextRegistrationHi = contextRegHiLo?.first ?: 0,
                 contextRegistrationLo = contextRegHiLo?.second ?: 0,
                 contextPlatform = context?.platform,
@@ -362,6 +361,8 @@ fun StatementEntities.toModel(
         }else {
             null
         },
+        timestamp = primaryStatementEntity.timestamp,
+        stored = primaryStatementEntity.stored,
         objectType = if(primaryStatementEntity.isSubStatement) {
             XapiObjectType.SubStatement
         }else {

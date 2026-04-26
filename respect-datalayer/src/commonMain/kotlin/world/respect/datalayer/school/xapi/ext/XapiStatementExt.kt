@@ -7,6 +7,7 @@ import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
+import kotlin.uuid.Uuid
 
 val XapiStatement.resultProgressExtension: Int?
     get() = result?.extensions?.let { extensions ->
@@ -73,5 +74,14 @@ fun XapiStatement.allDefinedVerbs(): List<XapiVerb> {
         (`object` as? XapiStatement)?.also {
             addAll(it.allDefinedVerbs())
         }
+    }
+}
+
+fun XapiStatement.copyWithIdIfNotSet() : XapiStatement {
+    val stmtId = id
+    return if(stmtId != null) {
+        this
+    }else {
+        copy(id = Uuid.random())
     }
 }

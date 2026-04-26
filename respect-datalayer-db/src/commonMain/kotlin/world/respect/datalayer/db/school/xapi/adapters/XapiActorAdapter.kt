@@ -5,11 +5,11 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActorEntityTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiGroupMemberActorJoin
 import world.respect.datalayer.school.xapi.ext.idStr
-import world.respect.datalayer.school.xapi.model.XapiAccount
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiAgent
-import world.respect.datalayer.school.xapi.model.XapiGroup
-import world.respect.datalayer.school.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 

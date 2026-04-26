@@ -1,7 +1,7 @@
 package world.respect.datalayer.school.xapi.ext
 
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiGroup
 
 val XapiActor.idStr: String?
     get() = when {

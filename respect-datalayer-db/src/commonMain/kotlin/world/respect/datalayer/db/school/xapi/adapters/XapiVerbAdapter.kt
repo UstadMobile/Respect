@@ -3,7 +3,7 @@ package world.respect.datalayer.db.school.xapi.adapters
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.xapi.entities.XapiVerbEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiVerbLangMapEntry
-import world.respect.datalayer.school.xapi.model.XapiVerb
+import world.respect.lib.xapi.model.XapiVerb
 
 data class VerbEntities(
     val verbEntity: XapiVerbEntity,

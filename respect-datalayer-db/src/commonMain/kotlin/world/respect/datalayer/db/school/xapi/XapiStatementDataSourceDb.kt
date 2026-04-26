@@ -23,7 +23,7 @@ import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
 import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
-import world.respect.datalayer.school.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatement
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
@@ -34,7 +34,7 @@ import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
-import world.respect.datalayer.school.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 
 class XapiStatementDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,

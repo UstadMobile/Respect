@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.xapi.model
+package world.respect.lib.xapi.model
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -19,7 +19,7 @@ enum class XapiObjectType(val value: String) {
     companion object {
 
         fun fromString(value: String): XapiObjectType {
-            return XapiObjectType.entries.first { it.value == value }
+            return entries.first { it.value == value }
         }
 
     }

@@ -20,7 +20,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.writequeue.WriteQueueItem
-import world.respect.datalayer.school.xapi.model.XapiInteractionTypeEnum
+import world.respect.lib.xapi.model.XapiInteractionTypeEnum
 import kotlin.time.Instant
 
 class SchoolTypeConverters {

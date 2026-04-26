@@ -16,8 +16,8 @@ import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
-import world.respect.datalayer.school.xapi.model.XapiStatement
-import world.respect.datalayer.school.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm

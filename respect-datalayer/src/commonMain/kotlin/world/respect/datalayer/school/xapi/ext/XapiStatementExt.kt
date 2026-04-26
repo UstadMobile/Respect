@@ -2,11 +2,11 @@ package world.respect.datalayer.school.xapi.ext
 
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import world.respect.datalayer.school.xapi.model.XAPI_PROGRESSED_EXTENSIONS
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiStatement
-import world.respect.datalayer.school.xapi.model.XapiVerb
+import world.respect.lib.xapi.model.XAPI_PROGRESSED_EXTENSIONS
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
 
 val XapiStatement.resultProgressExtension: Int?
     get() = result?.extensions?.let { extensions ->

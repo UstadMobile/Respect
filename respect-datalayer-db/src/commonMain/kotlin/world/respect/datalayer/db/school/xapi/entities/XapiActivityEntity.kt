@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.ext.EPOCH
-import world.respect.datalayer.school.xapi.model.XapiInteractionTypeEnum
+import world.respect.lib.xapi.model.XapiInteractionTypeEnum
 import kotlin.time.Clock
 import kotlin.time.Instant
 

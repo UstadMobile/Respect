@@ -2,7 +2,7 @@ package world.respect.datalayer.db.school.domain.xapi
 
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityEntity
-import world.respect.datalayer.school.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivity
 import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Instant
 

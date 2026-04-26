@@ -3,7 +3,7 @@ package world.respect.datalayer.http.school.xapi
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.school.xapi.XapiStatementDataSource
-import world.respect.datalayer.school.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatement
 
 class XapiStatementDataSourceHttp: XapiStatementDataSource {
 

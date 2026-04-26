@@ -4,40 +4,31 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
-    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
-    compilerOptions {
-        optIn.add("kotlin.time.ExperimentalTime")
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
-    }
-
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
+    jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
     jvm()
+
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.respectLibIhttpCore)
-            api(projects.respectLibXxhash)
-            api(projects.respectCredentials)
-            api(projects.respectLibOpdsModel)
-            api(projects.respectLibXapiModel)
             api(projects.respectLibSerializers)
-            api(projects.respectLibUtil)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            api(libs.androidx.paging.common)
-            implementation(libs.atomicfu)
-            implementation(libs.napier)
-
         }
 
         jvmMain.dependencies {
@@ -45,7 +36,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-            implementation(projects.respectLibTestResources)
+
         }
 
         val commonTest by getting {
@@ -57,7 +48,7 @@ kotlin {
 }
 
 android {
-    namespace = "world.respect.datalayer"
+    namespace = "world.respect.lib.xapi.model"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

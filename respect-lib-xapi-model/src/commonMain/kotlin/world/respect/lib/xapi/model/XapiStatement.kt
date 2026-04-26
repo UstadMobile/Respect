@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.xapi.model
+package world.respect.lib.xapi.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -7,8 +7,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import world.respect.datalayer.school.xapi.ext.putAllExcept
 import world.respect.lib.serializers.InstantAsISO8601
+import world.respect.lib.xapi.ext.putAllExcept
 import kotlin.uuid.Uuid
 
 const val XAPI_RESULT_EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"

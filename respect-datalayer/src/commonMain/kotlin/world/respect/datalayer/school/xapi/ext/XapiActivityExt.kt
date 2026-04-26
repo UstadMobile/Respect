@@ -1,8 +1,8 @@
 package world.respect.datalayer.school.xapi.ext
 
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiActivityDefinition
-import world.respect.datalayer.school.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiObjectType
 
 
 

@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.xapi.model
+package world.respect.lib.xapi.model
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

@@ -1,17 +1,16 @@
 package world.respect.datalayer.db.school.xapi
 
 import world.respect.datalayer.school.xapi.ext.idStr
-import world.respect.datalayer.school.xapi.model.XapiActivityDefinition
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiAgent
-import world.respect.datalayer.school.xapi.model.XapiContextActivities
-import world.respect.datalayer.school.xapi.model.XapiGroup
-import world.respect.datalayer.school.xapi.model.XapiObjectType
-import world.respect.datalayer.school.xapi.model.XapiStatement
-import world.respect.datalayer.school.xapi.model.XapiStatementRef
-import world.respect.datalayer.school.xapi.model.XapiVerb
-import kotlin.math.exp
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiContextActivities
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiVerb
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -27,6 +26,9 @@ import kotlin.test.assertTrue
  * statement may include a useless Result object with no properties (as they are all optional).
  *
  * These assertion statements check for a canonical equality as per the xAPI spec.
+ */
+
+/**
  */
 fun assertXapiStatementCanonicallyEqual(
     expected: XapiStatement,

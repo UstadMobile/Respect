@@ -2,8 +2,8 @@ package world.respect.datalayer.school.xapi
 
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.school.xapi.model.XapiAgent
-import world.respect.datalayer.school.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiStatement
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 

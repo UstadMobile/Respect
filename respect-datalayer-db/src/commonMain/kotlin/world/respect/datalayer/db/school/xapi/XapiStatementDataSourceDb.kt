@@ -117,6 +117,8 @@ class XapiStatementDataSourceDb(
     ): DataLoadState<List<XapiStatement>> {
 
         val statementIds = listParams.statementId?.toLongPair()
+        val format = listParams.format ?: XapiStatementDataSource.GetStatementFormatEnum.EXACT
+
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
                 val statements =  schoolDb.getStatementDao().list(
@@ -201,7 +203,7 @@ class XapiStatementDataSourceDb(
                         statements = listOfNotNull(
                             entity.stmtEntity, substatementEntity?.stmtEntity
                         ),
-                        statementEntityJson = listOf(entity.stmtJsonEntity),
+                        statementEntityJson = emptyList(),
                         statementContextActivityJoins = contextActivityJoins,
                     ).toModel(
                         json = json,

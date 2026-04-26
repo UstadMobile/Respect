@@ -10,9 +10,6 @@ import kotlinx.serialization.Serializable
  *
  * @param statementIdHi the hi bits of the statement id (which is a UUID)
  * @param statementIdLo the lo bits of the statement id (which is a UUID)
- * @param statementActorPersonUid where the actor is a single known person, the personUid. This is
- *        will be set for self-paced content such as videos / xAPI / H5P packages completed by an
- *        individual, but might not be set otherwise. It will not be set when the actor is a group
  * @param resultDuration the duration of the result in ms (if provided), otherwise 0
  * @param extensionProgress Captures the progress extension ( as per
  *        https://aicc.github.io/CMI-5_Spec_Current/samples/scenarios/13-progress_usage/ ) for use
@@ -53,7 +50,7 @@ import kotlinx.serialization.Serializable
 @Entity(
     primaryKeys = ["statementIdHi", "statementIdLo"],
     indices = [
-        Index("statementActorPersonUid", name = "idx_stmt_actor_person"),
+        Index("stored", name = "idx_stmt_stored"),
     ]
 )
 @Serializable
@@ -61,8 +58,6 @@ data class XapiStatementEntity(
     val statementIdHi: Long = 0,
 
     val statementIdLo: Long = 0,
-
-    val statementActorPersonUid: Long = 0,
 
     val statementVerbUid: Long = 0,
 
@@ -126,12 +121,6 @@ data class XapiStatementEntity(
     val extensionProgress: Int? = null,
 
     val completionOrProgress: Boolean = false,
-
-    /**
-     * Though technically the XObject is what really links to ContentEntry, the ContentEntryUid is
-     * here to simplify queries used to check on student progress and avoid an extra join
-     */
-    val statementContentEntryUid: Long = 0,
 
     val isSubStatement: Boolean = false,
 

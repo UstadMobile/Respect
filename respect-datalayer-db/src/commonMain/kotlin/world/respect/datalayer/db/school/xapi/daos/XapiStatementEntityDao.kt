@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
-import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
@@ -28,6 +27,15 @@ interface XapiStatementEntityDao {
 
     @Query(
         """
+            /*
+             Begin statement query : This query is the same for both XapiStatementEntity
+             based return results (used for canonical and id results) and exact (which uses 
+             XapiStatementEntityJson).
+             
+             Normally: it would be better to handle this as a constant: however because its only in
+             two places and syntax highlighting is important for it, it is copy/pasted.
+            */
+            
             -- Get a list of all the actors that should be considered as related to agent parameter
             -- Eg the actor uid itself and any group members
           WITH AgentActorUids(uid) AS
@@ -39,11 +47,8 @@ interface XapiStatementEntityDao {
                    AND XapiGroupMemberActorJoin.gmajMemberActorUid = :agentUid)
             
             
-        SELECT XapiStatementEntity.*, XapiStatementEntityJson.*, XapiVerbEntity.*
+        SELECT XapiStatementEntity.*, XapiVerbEntity.*
           FROM XapiStatementEntity
-               JOIN XapiStatementEntityJson
-                    ON (    XapiStatementEntityJson.stmtJsonIdHi = XapiStatementEntity.statementIdHi
-                        AND XapiStatementEntityJson.stmtJsonIdLo = XapiStatementEntity.statementIdLo)
                JOIN XapiVerbEntity
                     ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
                LEFT JOIN XapiStatementEntity AS SubStatementEntity
@@ -106,19 +111,11 @@ interface XapiStatementEntityDao {
                       ) 
                )          
            AND NOT XapiStatementEntity.isSubStatement
-     ORDER BY CASE(:ascending)
-               WHEN 1 THEN XapiStatementEntity.stored
-               ELSE 0
-               END ASC,
-                 
-               CASE(:ascending)
-               WHEN 1 THEN 0
-               ELSE XapiStatementEntity.stored
-               END DESC
-     LIMIT :limit      
+      ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
+               CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
+         LIMIT :limit      
     """
     )
-    @Transaction
     suspend fun list(
         statementIdHi: Long,
         statementIdLo: Long,

@@ -107,17 +107,24 @@ class XapiStatementDataSourceDbTest {
 
                     dataSource.xapiStatementDataSource.store(listOf(statement))
 
-                    val stmtFromDb = dataSource.xapiStatementDataSource.list(
-                        listParams = XapiStatementDataSource.GetStatementParams(
-                            statementId = stmtUuid
-                        )
-                    ).dataOrNull()?.first()
+                    listOf(
+                        XapiStatementDataSource.GetStatementFormatEnum.EXACT,
+                        XapiStatementDataSource.GetStatementFormatEnum.CANONICAL,
+                    ).forEach { format ->
+                        val stmtFromDb = dataSource.xapiStatementDataSource.list(
+                            listParams = XapiStatementDataSource.GetStatementParams(
+                                format = format,
+                                statementId = stmtUuid
+                            )
+                        ).dataOrNull()?.first()
 
-                    assertNotNull(stmtFromDb)
-                    assertXapiStatementCanonicallyEqual(
-                        expected = statement,
-                        actual = stmtFromDb,
-                    )
+                        assertNotNull(stmtFromDb)
+                        assertXapiStatementCanonicallyEqual(
+                            expected = statement,
+                            actual = stmtFromDb,
+                        )
+                    }
+
                 }
             }
         }

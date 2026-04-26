@@ -51,6 +51,7 @@ import kotlinx.serialization.Serializable
     primaryKeys = ["statementIdHi", "statementIdLo"],
     indices = [
         Index("stored", name = "idx_stmt_stored"),
+        Index("statementActorUid", name = "idx_stmt_actor"),
     ]
 )
 @Serializable

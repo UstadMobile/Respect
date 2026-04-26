@@ -11,6 +11,7 @@ import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiStatementRef
 import world.respect.datalayer.school.xapi.model.XapiVerb
+import kotlin.math.exp
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -255,7 +256,19 @@ fun assertXapiActorCommonPropsMatch(
     assertEquals(expected.mbox, actual.mbox)
     assertEquals(expected.mbox_sha1sum, actual.mbox_sha1sum)
     assertEquals(expected.openid, actual.openid)
-    assertEquals(expected.objectType, actual.objectType)
+
+    if(expected is XapiAgent) {
+        assertTrue(
+            actual.objectType == null ||
+            actual.objectType == XapiObjectType.Agent,
+            message = "When expected actor ($expected) is an XapiAgent, then the actual must be null (by default) or XapiAgent as per spec",
+        )
+    }
+
+    if(expected is XapiGroup) {
+        assertEquals(actual.objectType, XapiObjectType.Group)
+    }
+
     assertEquals(expected.account?.name, actual.account?.name)
     assertEquals(expected.account?.homePage, actual.account?.homePage)
 }

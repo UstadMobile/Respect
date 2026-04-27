@@ -22,7 +22,7 @@ class NavigateOnExistingUserInviteAcceptedUseCase() {
                 val approvalRequired = person?.status == PersonStatusEnum.PENDING_APPROVAL
 
                 if (approvalRequired) {
-                    AccountList
+                    AccountList()
                 } else {
                     ClazzDetail(
                         guid = invite.classUid
@@ -31,7 +31,7 @@ class NavigateOnExistingUserInviteAcceptedUseCase() {
             }
 
             else -> {
-                AccountList
+                AccountList()
             }
         }
 

@@ -305,24 +305,7 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
             )
         }
-        scoped<RedeemInviteExistingUserUseCase> {
-            val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
-            val accountScopeManager: ServerAccountScopeManager = get()
 
-            RedeemInviteExistingUserUseCaseDb(
-                schoolDb = get(),
-                schoolUrl = schoolScopeId.schoolUrl,
-                schoolPrimaryKeyGenerator = get(),
-                getTokenAndUserProfileUseCase = get(),
-                schoolDataSource = { _, user ->
-                    accountScopeManager.getOrCreateAccountScope(user).get()
-                },
-                uidNumberMapper = get(),
-                json = get(),
-                getPasskeyProviderInfoUseCase = get(),
-                encryptPersonPasswordUseCase = get(),
-            )
-        }
 
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
@@ -422,6 +405,15 @@ fun serverKoinModule(
                 schoolPrimaryKeyGenerator = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 schoolDataSource = get(),
+            )
+        }
+        factory<RedeemInviteExistingUserUseCase> {
+
+            RedeemInviteExistingUserUseCaseDb(
+                schoolDb = get(),
+                schoolPrimaryKeyGenerator = get(),
+                schoolDataSource = get(),
+                uidNumberMapper = get(),
             )
         }
 

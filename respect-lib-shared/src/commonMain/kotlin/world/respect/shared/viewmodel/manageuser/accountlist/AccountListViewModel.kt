@@ -2,19 +2,27 @@ package world.respect.shared.viewmodel.manageuser.accountlist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.datalayer.shared.paging.EmptyPagingSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
@@ -22,10 +30,14 @@ import world.respect.shared.domain.account.RespectSession
 import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
+import world.respect.shared.generated.resources.select_account
+import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.Home
+import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.WaitingForApproval
@@ -41,6 +53,10 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
+    val isPendingExpanded: Boolean = true,
+    val isSelectAccountMode : Boolean = false,
+    val pendingPersons: IPagingSourceFactory<Int, Person> =
+        IPagingSourceFactory { EmptyPagingSource() },
 ) {
     val showSelectedAccountProfileButton: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
@@ -53,18 +69,34 @@ data class AccountListUiState(
 class AccountListViewModel(
     private val respectAccountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle
-) : RespectViewModel(savedStateHandle){
+) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+    override val scope: Scope = respectAccountManager.requireActiveAccountScope()
 
-    private val _uiState = MutableStateFlow(AccountListUiState())
+    private val route: AccountList = savedStateHandle.toRoute()
+
+    private val _uiState = MutableStateFlow(AccountListUiState(isSelectAccountMode = route.inviteCode!=null))
+
+    private val schoolDataSource: SchoolDataSource by inject()
+
 
     val uiState = _uiState.asStateFlow()
+    private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
+        schoolDataSource.personDataSource.listAsPagingSource(
+            DataLoadParams(),
+            PersonDataSource.GetListParams(
+                includeRelated = true,
+                filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
+            )
+        )
+    }
 
     private var emittedNavToGetStartedCommand = false
 
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.accounts.asUiText(),
+                title = if (_uiState.value.isSelectAccountMode) Res.string.select_account.asUiText() else
+                    Res.string.accounts.asUiText(),
                 hideBottomNavigation = true,
                 userAccountIconVisible = false,
             )
@@ -153,6 +185,11 @@ class AccountListViewModel(
                 }
             }
         }
+        _uiState.update {
+            it.copy(
+                pendingPersons = pendingPersonsPagingSource,
+            )
+        }
     }
 
     fun onClickAccount(account: RespectAccount) {
@@ -168,7 +205,16 @@ class AccountListViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = if(person.dataOrNull()?.status != PersonStatusEnum.PENDING_APPROVAL) {
-                        Home
+                        if (uiState.value.isSelectAccountMode)
+                        {
+                            AcceptInvite.create(
+                                schoolUrl = account.school.self,
+                                code = route.inviteCode?:"",
+                                canGoBack = true,
+                            )
+                        }else{
+                            Home
+                        }
                     }else {
                         WaitingForApproval()
                     },
@@ -179,7 +225,9 @@ class AccountListViewModel(
 
 
     }
-
+    fun onTogglePendingSection() {
+        _uiState.update { it.copy(isPendingExpanded = !it.isPendingExpanded) }
+    }
     fun onClickFamilyPerson(person: Person) {
         viewModelScope.launch {
             respectAccountManager.switchProfile(person.guid)
@@ -198,7 +246,16 @@ class AccountListViewModel(
 
     fun onClickAddAccount() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(GetStartedScreen(canGoBack = true))
+            NavCommand.Navigate(
+                if (uiState.value.isSelectAccountMode){
+                    LoginScreen(
+                        schoolUrlStr = respectAccountManager.activeAccount?.school?.self.toString(),
+                        inviteCode = route.inviteCode
+                    )
+                }else{
+                    GetStartedScreen(canGoBack = true)
+                }
+            )
         )
     }
 

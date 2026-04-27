@@ -60,6 +60,7 @@ data class AcceptInviteUiState(
     val uid: String? = null,
     val persons: DataLoadState<List<Person>> = DataLoadingState(),
     val selectedChildGuid: String? = null,
+    val showSelectChildDropDown: Boolean = false,
     val childError: UiText? = null,
     ) {
     val person: Person?
@@ -99,8 +100,13 @@ class AcceptInviteViewModel(
         }
     }
 
-    val redeemInviteUseCase: RedeemInviteExistingUserUseCase by inject()
-
+    val redeemInviteUseCase: RedeemInviteExistingUserUseCase? by lazy {
+        if (route.personGuid != null) {
+            scope.get<RedeemInviteExistingUserUseCase>()
+        } else {
+            null
+        }
+    }
     private val schoolDataSource: SchoolDataSource by inject()
     private val schoolDataSourceLocal: SchoolDataSourceLocal by inject()
     private val navigateOnExistingUserInviteAcceptedUseCase
@@ -157,7 +163,13 @@ class AcceptInviteViewModel(
                         )
                     },
                     uiUpdateFn = { person ->
-                        _uiState.update { prev -> prev.copy(persons = person) }
+                        _uiState.update {
+                            prev -> prev.copy(
+                                persons = person,
+                                showSelectChildDropDown = (uiState.value.person?.roles?.firstOrNull()
+                                    ?.roleEnum == PersonRoleEnum.PARENT && uiState.value.children.isNotEmpty())
+                            )
+                        }
                     }
                 )
             }
@@ -203,12 +215,12 @@ class AcceptInviteViewModel(
             }
         )
 
-        if (route.personGuid!=null) {
+        if (route.personGuid!=null&&redeemInviteUseCase!=null) {
             viewModelScope.launch {
-              redeemInviteUseCase(
+              redeemInviteUseCase?.invoke(
                   inviteRedeemRequest,
                   uiState.value.selectedChildGuid
-                )
+              )
 
                 navigateOnExistingUserInviteAcceptedUseCase(
                     person = uiState.value.person,

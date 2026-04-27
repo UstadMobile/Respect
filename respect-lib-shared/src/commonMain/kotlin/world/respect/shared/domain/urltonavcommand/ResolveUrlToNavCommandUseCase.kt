@@ -2,8 +2,10 @@ package world.respect.shared.domain.urltonavcommand
 
 import io.ktor.http.Url
 import world.respect.libutil.ext.schoolUrlOrNull
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.NavCommand
 
 /**
@@ -11,7 +13,9 @@ import world.respect.shared.navigation.NavCommand
  * follows the respect school link format (See UrlExt.schoolUrlOrNull) resolve this into a
  * NavCommand.
  */
-class ResolveUrlToNavCommandUseCase {
+class ResolveUrlToNavCommandUseCase(
+    private val respectAccountManager: RespectAccountManager
+) {
 
     operator fun invoke(
         url: Url,
@@ -21,16 +25,26 @@ class ResolveUrlToNavCommandUseCase {
 
         val lastSegment = url.segments.lastOrNull() ?: return null
 
-        return when(lastSegment) {
+        return when (lastSegment) {
             CreateInviteLinkUseCase.PATH -> {
                 url.parameters[CreateInviteLinkUseCase.QUERY_PARAM]?.let { inviteCode ->
-                    NavCommand.Navigate(
-                        destination = AcceptInvite.create(
-                            schoolUrl = schoolUrl,
-                            code = inviteCode,
-                            canGoBack = canGoBack,
-                        ), clearBackStack = false
-                    )
+                    if (respectAccountManager.activeAccount != null) {
+                        NavCommand.Navigate(
+                            destination = AccountList(inviteCode = inviteCode),
+                            clearBackStack = false
+                        )
+
+                    } else {
+                        NavCommand.Navigate(
+                            destination = AcceptInvite.create(
+                                schoolUrl = schoolUrl,
+                                code = inviteCode,
+                                canGoBack = canGoBack,
+                            ), clearBackStack = false
+                        )
+                    }
+
+
                 }
             }
             else -> null

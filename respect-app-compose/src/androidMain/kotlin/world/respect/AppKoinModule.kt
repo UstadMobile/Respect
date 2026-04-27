@@ -623,7 +623,9 @@ val appKoinModule = module {
     }
 
     single<ResolveUrlToNavCommandUseCase> {
-        ResolveUrlToNavCommandUseCase()
+        ResolveUrlToNavCommandUseCase(
+            respectAccountManager = get()
+        )
     }
 
     single<InitDeepLinkUriProviderUseCaseAndroid> {
@@ -749,12 +751,7 @@ val appKoinModule = module {
             )
         }
 
-        scoped<RedeemInviteExistingUserUseCase> {
-            RedeemInviteExistingUserUseCaseClient(
-                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
-                httpClient = get(),
-            )
-        }
+
 
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
@@ -938,6 +935,14 @@ val appKoinModule = module {
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),
+            )
+        }
+
+        scoped<RedeemInviteExistingUserUseCase> {
+            RedeemInviteExistingUserUseCaseClient(
+                schoolUrl = RespectAccountScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+                authTokenProvider= get()
             )
         }
 

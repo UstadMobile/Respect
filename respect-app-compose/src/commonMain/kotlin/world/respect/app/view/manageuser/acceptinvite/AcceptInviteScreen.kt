@@ -141,20 +141,20 @@ fun AcceptInviteScreen(
                     label = { Text(stringResource(Res.string.school_server_url)) },
                     value = { Text(uiState.schoolUrl?.toString() ?: "") }
                 )
-
-                RespectChildrenExposedDropDownMenuField(
-                    value = uiState.selectedChild,
-                    options = uiState.children,
-                    onValueChanged = { child ->
-                         onChildSelected(child)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultItemPadding(),
-                    isError = uiState.childError != null,
-                    errorText = uiState.childError
-                )
-
+                if (uiState.showSelectChildDropDown) {
+                    RespectChildrenExposedDropDownMenuField(
+                        value = uiState.selectedChild,
+                        options = uiState.children,
+                        onValueChanged = { child ->
+                            onChildSelected(child)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding(),
+                        isError = uiState.childError != null,
+                        errorText = uiState.childError
+                    )
+                }
                 Button(
                     onClick = onClickNext,
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),

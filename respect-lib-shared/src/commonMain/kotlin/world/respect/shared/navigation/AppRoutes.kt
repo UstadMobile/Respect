@@ -86,6 +86,7 @@ object SchoolDirectoryEdit : RespectAppRoute
 @Serializable
 data class LoginScreen(
     val schoolUrlStr: String,
+    val inviteCode: String? = null
 ) : RespectAppRoute {
 
     @Transient
@@ -589,10 +590,11 @@ class LearningUnitViewer(
 
 }
 
+
 @Serializable
-object AccountList : RespectAppRoute
-
-
+data class AccountList(
+    val inviteCode: String? = null,
+) : RespectAppRoute
 /**
  * @property addToClassUid if the PersonList screen has been navigated when the user clicks
  *           add student or add teacher on the ClassDetail screen, then the classUid.

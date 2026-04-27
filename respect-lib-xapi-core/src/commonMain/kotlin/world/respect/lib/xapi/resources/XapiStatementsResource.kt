@@ -1,19 +1,21 @@
-package world.respect.datalayer.school.xapi
+package world.respect.lib.xapi.resources
 
+import io.ktor.http.parameters
 import io.ktor.util.StringValues
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.school.ClassDataSource
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.ext.getUuidOrNull
+import world.respect.lib.xapi.ext.setIfNotNull
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import kotlin.uuid.Uuid
 
-interface XapiStatementDataSource {
+interface XapiStatementsResource {
 
     enum class GetStatementFormatEnum(val value: String) {
         IDS("ids"), EXACT("exact"), CANONICAL("canonical");
@@ -43,9 +45,10 @@ interface XapiStatementDataSource {
         val until: InstantAsISO8601? = null,
         val limit: Int? = null,
         val format: GetStatementFormatEnum? = null,
-        val attachments: Boolean? = null,
-        val ascending: Boolean? = null,
+        val attachments: Boolean = false,
+        val ascending: Boolean = false,
     ) {
+
         companion object {
 
             fun fromParams(
@@ -63,8 +66,8 @@ interface XapiStatementDataSource {
                     relatedAgents = params["related_agents"]?.toBoolean() ?: false,
                     limit = params["limit"]?.toInt(),
                     format = params["format"]?.let { GetStatementFormatEnum.fromValue(it) },
-                    attachments = params["attachments"]?.toBoolean(),
-                    ascending = params["ascending"]?.toBoolean()
+                    attachments = params["attachments"]?.toBoolean() ?: false,
+                    ascending = params["ascending"]?.toBoolean() ?: false,
                 )
 
             }
@@ -93,4 +96,10 @@ interface XapiStatementDataSource {
         request: GetStatementsRequest,
     ): GetStatementsResponse
 
+
+    companion object {
+
+        const val ENDPOINT_NAME = "statements"
+
+    }
 }

@@ -18,8 +18,8 @@ import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
-import world.respect.datalayer.school.xapi.XapiStatementDataSource
-import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.lib.xapi.model.XapiStatement
 import kotlin.time.Clock
@@ -29,7 +29,7 @@ import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
-import world.respect.datalayer.school.xapi.XapiStatementDataSource.GetStatementsRequest
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementsRequest
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
@@ -38,7 +38,7 @@ import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 
-class XapiStatementDataSourceDb(
+class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val schoolUrl: Url,
@@ -46,7 +46,7 @@ class XapiStatementDataSourceDb(
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
-) : XapiStatementDataSourceLocal{
+) : XapiStatementsResourceLocal{
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -129,15 +129,15 @@ class XapiStatementDataSourceDb(
 
     override suspend fun get(
         request: GetStatementsRequest,
-    ): XapiStatementDataSource.GetStatementsResponse {
+    ): XapiStatementsResource.GetStatementsResponse {
 
         val statementIds = request.params.statementId?.toLongPair()
-        val format = request.params.format ?: XapiStatementDataSource.GetStatementFormatEnum.EXACT
+        val format = request.params.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
         val ascendingOrder = request.params.ascending ?: false
 
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
-                val statements =  if(format == XapiStatementDataSource.GetStatementFormatEnum.EXACT) {
+                val statements =  if(format == XapiStatementsResource.GetStatementFormatEnum.EXACT) {
                     schoolDb.getStatementEntityJsonDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
@@ -156,7 +156,7 @@ class XapiStatementDataSourceDb(
                         )
                     }
                 }else {
-                    val idOnly = format == XapiStatementDataSource.GetStatementFormatEnum.IDS
+                    val idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
 
                     schoolDb.getStatementDao().list(
                         statementIdHi = statementIds?.first ?: 0,
@@ -264,7 +264,7 @@ class XapiStatementDataSourceDb(
                 }
 
 
-                XapiStatementDataSource.GetStatementsResponse(
+                XapiStatementsResource.GetStatementsResponse(
                     statementResult = XapiStatementResult(
                         statements = statements,
                         more = null,

@@ -17,7 +17,7 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
-import world.respect.datalayer.http.school.xapi.XapiStatementDataSourceHttp
+import world.respect.datalayer.http.school.xapi.XapiStatementsResourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
@@ -38,7 +38,7 @@ import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.xapi.XapiActivityDataSource
 import world.respect.datalayer.school.xapi.XapiActorDataSource
-import world.respect.datalayer.school.xapi.XapiStatementDataSource
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
 class SchoolDataSourceHttp(
@@ -185,8 +185,14 @@ class SchoolDataSourceHttp(
         TODO("No HTTP Activity datasource yet")
     }
 
-    override val xapiStatementDataSource: XapiStatementDataSource by lazy {
-        XapiStatementDataSourceHttp()
+    override val xapiStatementsResource: XapiStatementsResource by lazy {
+        XapiStatementsResourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            json = json,
+        )
     }
 
     override val xapiActorDataSource: XapiActorDataSource

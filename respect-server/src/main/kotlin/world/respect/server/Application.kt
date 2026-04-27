@@ -58,7 +58,7 @@ import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
-import world.respect.server.routes.school.xapi.XapiStatementResourceRoute
+import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
@@ -245,7 +245,7 @@ fun Application.module() {
 
                     route("xapi") {
                         authenticate(AUTH_CONFIG_SCHOOL) {
-                            XapiStatementResourceRoute(json = json)
+                            XapiStatementsResourceRoute(json = json)
                         }
                     }
 

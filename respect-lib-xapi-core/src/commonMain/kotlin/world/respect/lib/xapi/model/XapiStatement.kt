@@ -8,6 +8,7 @@ import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import world.respect.lib.serializers.InstantAsISO8601
+import world.respect.lib.serializers.SingleItemToListTransformer
 import world.respect.lib.xapi.ext.putAllExcept
 import kotlin.uuid.Uuid
 
@@ -81,3 +82,9 @@ object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiState
 
 }
 
+/**
+ * Handle receiving post requests for Xapi Statements:
+ */
+object XapiSingleItemToListSerializer: SingleItemToListTransformer<XapiStatement>(
+    XapiStatementTransformingSerializer
+)

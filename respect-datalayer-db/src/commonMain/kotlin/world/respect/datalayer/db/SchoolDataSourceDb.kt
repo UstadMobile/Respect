@@ -22,7 +22,7 @@ import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiActivityDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiActorDataSourceDb
-import world.respect.datalayer.db.school.xapi.XapiStatementDataSourceDb
+import world.respect.datalayer.db.school.xapi.XapiStatementsResourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
@@ -42,7 +42,7 @@ import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
-import world.respect.datalayer.school.xapi.XapiStatementDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 /**
@@ -167,8 +167,8 @@ class SchoolDataSourceDb(
             uidNumberMapper = uidNumberMapper,
         )
     }
-    override val xapiStatementDataSource: XapiStatementDataSourceLocal by lazy {
-        XapiStatementDataSourceDb(
+    override val xapiStatementsResource: XapiStatementsResourceLocal by lazy {
+        XapiStatementsResourceDb(
             schoolDb = schoolDb,
             authenticatedUser = authenticatedUser,
             schoolUrl = schoolUrl,

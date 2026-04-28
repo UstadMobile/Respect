@@ -12,7 +12,7 @@ appId: world.respect.app
     id: "app_title"
     text: "Add class"
 - tapOn: "Class name*"
-- inputText: "New Class"
+- inputText: "TestClass"
 - tapOn: "Save"
 
 - runFlow:
@@ -45,6 +45,6 @@ appId: world.respect.app
 - runFlow:
       file: "create_account_for_class_member.yaml"
       env:
-          CLASSNAME: "New Class"
+          CLASSNAME: "TestClass"
           MEMBERNAME: TeacherA User
           MEMBERUSERNAME: teacherauser

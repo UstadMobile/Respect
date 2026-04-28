@@ -2,11 +2,6 @@ appId: world.respect.app
 
 ---
 
-- tapOn: "Classes"
-- assertVisible:
-    id: "app_title"
-    text: "Classes"
-- tapOn: ${CLASSNAME}
 - tapOn: ${MEMBERNAME}
 - tapOn: "Create account"
 - assertVisible:

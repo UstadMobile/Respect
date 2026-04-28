@@ -12,14 +12,18 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_group
-import world.respect.shared.navigation.ClazzDetail
+import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.StudentGroupingDetail
+import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 
 
@@ -44,7 +48,38 @@ class StudentGroupingDetailViewModel(
     private val route: StudentGroupingDetail = savedStateHandle.toRoute()
 
     init {
+        _appUiState.update {
+            it.copy(
+                fabState = FabUiState(
+                    visible = true,
+                    icon = FabUiState.FabIcon.EDIT,
+                    text = Res.string.edit.asUiText(),
+                    onClick = ::onClickEdit
+                )
+            )
+        }
         loadGroupDetail()
+
+        // Listen for result from edit screen and refresh
+        val navResultReturner: NavResultReturner = getKoin().get()
+        viewModelScope.launch {
+            navResultReturner.filteredResultFlowForKey(
+                RESULT_KEY_GROUP_UPDATED
+            ).collect {
+                loadGroupDetail()
+            }
+        }
+    }
+
+    fun onClickEdit() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingEdit(
+                    classUid = route.classId,
+                    groupId = route.groupId
+                )
+            )
+        )
     }
 
     private fun loadGroupDetail() {
@@ -53,17 +88,8 @@ class StudentGroupingDetailViewModel(
                 val group = schoolDataSource.xapiActorDataSource.getGroupDetail(route.groupId)
 
                 if (group != null) {
-                    // Extract member names from the group
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
 
-                    // Print group details and members
-                    Napier.i("Group Name: ${group.name}")
-                    Napier.i("Number of Members: ${memberNames.size}")
-                    memberNames.forEachIndexed { index, memberName ->
-                        Napier.i("Member ${index + 1}: $memberName")
-                    }
-
-                    // Update UI state with group information
                     _uiState.update { prev ->
                         prev.copy(
                             groupName = group.name ?: "",
@@ -84,13 +110,4 @@ class StudentGroupingDetailViewModel(
             }
         }
     }
-
-    fun onClickBack() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                ClazzDetail(route.classId), popUpTo = route, popUpToInclusive = true
-            )
-        )
-    }
 }
-

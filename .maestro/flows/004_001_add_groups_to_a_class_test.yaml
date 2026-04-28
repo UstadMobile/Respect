@@ -59,15 +59,12 @@ onFlowComplete:
     text: "Create group"
 - tapOn: "Name*"
 - inputText: "Test Group"
-- tapOn: "Description"
-- inputText: "This test group functionality"
 - tapOn: "StudentA USER"
 - tapOn: "StudentC USER"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test Group"
-- assertVisible: "This test group functionality"
 - assertVisible: "StudentA USER"
 - assertVisible: "StudentC USER"
 - assertVisible:

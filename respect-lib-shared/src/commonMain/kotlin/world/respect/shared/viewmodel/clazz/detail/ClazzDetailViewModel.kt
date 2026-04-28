@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.json.JsonArray
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -55,7 +56,7 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
-import world.respect.shared.generated.resources.add_student_to_create_group
+import world.respect.shared.navigation.StudentGroupingDetail
 import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -66,10 +67,10 @@ import kotlin.getValue
 import kotlin.time.Clock
 
 data class ClazzDetailUiState(
-    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val pendingTeachers:IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
-    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val pendingTeachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -132,9 +133,9 @@ class ClazzDetailViewModel(
         }
     }
 
-    private val teacherPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
+    private val teacherPagingSource = pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
 
-    private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+    private val studentPagingSource = pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
 
@@ -254,7 +255,7 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    }catch(e: Throwable) {
+                    } catch (e: Throwable) {
                         e.printStackTrace()
                     }
                 }
@@ -284,7 +285,7 @@ class ClazzDetailViewModel(
                     )
                 )
             )
-         }
+        }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -304,7 +305,7 @@ class ClazzDetailViewModel(
                     personUid = user.guid,
                     approved = true,
                 )
-            }catch(e: Throwable) {
+            } catch (e: Throwable) {
                 e.printStackTrace()
             }
         }
@@ -335,6 +336,18 @@ class ClazzDetailViewModel(
         )
     }
 
+    fun onClickGroup(groupId: String) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingDetail(
+                    groupId = groupId,
+                    classId = route.guid
+                )
+            )
+        )
+    }
+
+
     fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {
         viewModelScope.launch {
             try {
@@ -356,9 +369,9 @@ class ClazzDetailViewModel(
                 }.map {
                     it.copy(
                         lastModified = modTime,
-                        status = if(it.beginDate == today) {
+                        status = if (it.beginDate == today) {
                             StatusEnum.TO_BE_DELETED
-                        }else {
+                        } else {
                             it.status
                         },
                         endDate = today,
@@ -368,7 +381,7 @@ class ClazzDetailViewModel(
 
                 schoolDataSource.enrollmentDataSource.store(enrollmentsToStore)
 
-            }catch(e: Throwable) {
+            } catch (e: Throwable) {
                 //do something
                 Napier.e("onClickRemovePersonFromClass ERROR", throwable = e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
@@ -383,10 +396,13 @@ class ClazzDetailViewModel(
             )
         )
     }
+
     fun onClickCreateGroup() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                StudentGroupingEdit(classUid = route.guid)
+                StudentGroupingEdit(
+                    classUid = route.guid, groupId = null
+                )
             )
         )
     }
@@ -406,7 +422,7 @@ class ClazzDetailViewModel(
     private fun extractGroupIdsFromMetadata(clazz: Clazz): List<String> {
         return try {
             val metadata = clazz.metadata ?: return emptyList()
-            val groupIdsJsonArray = metadata["groupIds"] as? kotlinx.serialization.json.JsonArray
+            val groupIdsJsonArray = metadata["groupIds"] as? JsonArray
             groupIdsJsonArray?.map { it.toString().trim('"') } ?: emptyList()
         } catch (e: Throwable) {
             Napier.w("Failed to extract group IDs from metadata", throwable = e)
@@ -438,6 +454,7 @@ class ClazzDetailViewModel(
             }
         }
     }
+
 
     companion object {
         const val ALL = "All"

@@ -31,6 +31,7 @@ import world.respect.datalayer.school.xapi.model.VERB_CREATED
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.datalayer.school.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.datalayer.school.xapi.model.XapiObjectType
 import world.respect.datalayer.school.xapi.model.XapiStatement
 import world.respect.datalayer.school.xapi.model.XapiVerb
@@ -41,6 +42,7 @@ import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.edit_group
 import world.respect.shared.generated.resources.create_group
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
@@ -68,40 +70,43 @@ data class StudentGroupingEditUiState(
     val clazz: DataLoadState<Clazz> = DataLoadingState(),
 
     )
-
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
     var respectAccountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+
+
     override val scope: Scope = respectAccountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(StudentGroupingEditUiState())
-
     val uiState = _uiState.asStateFlow()
 
     private val schoolDataSource: SchoolDataSource by inject()
-
     private val route: StudentGroupingEdit = savedStateHandle.toRoute()
 
-    private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
+    private fun pagingSourceByRole(): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
             schoolDataSource.personDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
                     filterByClazzUid = route.classUid,
-                    filterByEnrolmentRole = role,
+                    filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT,
                     inClassOnDay = localDateInCurrentTimeZone(),
                 )
             )
         }
     }
 
-    private val studentPagingSource = pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+    private val studentPagingSource = pagingSourceByRole()
 
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.create_group.asUiText(),
+                title = if (route.groupId == null)
+                    Res.string.create_group.asUiText()
+                else
+                    Res.string.edit_group.asUiText(),
+
                 userAccountIconVisible = false,
                 hideBottomNavigation = true,
                 actionBarButtonState = ActionBarButtonUiState(
@@ -111,10 +116,34 @@ class StudentGroupingEditViewModel(
                 ),
             )
         }
+
         _uiState.update {
             it.copy(students = studentPagingSource)
         }
+        route.groupId?.let { groupId ->
+            viewModelScope.launch {
+                try {
+                    val group = schoolDataSource.xapiActorDataSource.getGroupDetail(groupId) ?: return@launch
 
+                    val memberNames = group.member
+                        ?.mapNotNull { it.name }
+                        ?: emptyList()
+
+
+                    _uiState.update { prev ->
+                        prev.copy(
+                            groupName = group.name ?: "",
+                            selectedStudentNames = memberNames,
+                        )
+                    }
+
+                } catch (e: Throwable) {
+                    Napier.e("EDIT_GROUP: ERROR loading group", throwable = e)
+                }
+            }
+        }
+
+        // selected user info
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
                 _uiState.update {
@@ -125,25 +154,28 @@ class StudentGroupingEditViewModel(
             }
         }
 
+        // class data
         viewModelScope.launch {
-            schoolDataSource.classDataSource.findByGuidAsFlow(route.classUid).collect { clazz ->
-                _uiState.update { it.copy(clazz = clazz) }
-            }
+            schoolDataSource.classDataSource.findByGuidAsFlow(route.classUid)
+                .collect { clazz ->
+                    _uiState.update { it.copy(clazz = clazz) }
+                }
         }
     }
 
     @OptIn(ExperimentalUuidApi::class)
     fun onClickSave() {
+
         val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
         val groupName = _uiState.value.groupName
 
         if (groupName.isBlank()) {
-            _uiState.update { prev ->
-                prev.copy(groupNameError = Res.string.required_field.asUiText())
+            _uiState.update {
+                it.copy(groupNameError = Res.string.required_field.asUiText())
             }
             return
         } else {
-            _uiState.update { prev -> prev.copy(groupNameError = null) }
+            _uiState.update { it.copy(groupNameError = null) }
         }
 
         viewModelScope.launch {
@@ -159,7 +191,8 @@ class StudentGroupingEditViewModel(
                     )
                 }
 
-                val groupId = Uuid.random().toString()
+                val groupId = route.groupId ?: Uuid.random().toString()
+
                 val group = XapiGroup(
                     objectType = XapiObjectType.Group,
                     name = groupName,
@@ -202,15 +235,13 @@ class StudentGroupingEditViewModel(
                     ?.toMutableList()
                     ?: mutableListOf()
 
-                if (!existingGroupIds.contains(groupId)) {
+                if (route.groupId == null && !existingGroupIds.contains(groupId)) {
                     existingGroupIds.add(groupId)
                 }
 
                 val updatedMetadata = buildJsonObject {
                     clazz.metadata?.forEach { (key, value) ->
-                        if (key != GROUP_IDS) {
-                            put(key, value)
-                        }
+                        if (key != GROUP_IDS) put(key, value)
                     }
                     putJsonArray(GROUP_IDS) {
                         existingGroupIds.forEach { add(it) }
@@ -224,7 +255,18 @@ class StudentGroupingEditViewModel(
 
                 schoolDataSource.classDataSource.store(listOf(updatedClazz))
 
-                _navCommandFlow.tryEmit(NavCommand.Navigate(StudentGroupingDetail(groupId = groupId, classId = route.classUid)))
+                if (route.groupId == null) {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            StudentGroupingDetail(groupId, route.classUid),
+                            popUpTo = route,
+                            popUpToInclusive = true
+                        )
+                    )
+                } else {
+                    sendResultAndPop(RESULT_KEY_GROUP_UPDATED, true)
+                }
+
             } catch (e: Throwable) {
                 Napier.e("onClickSave ERROR", throwable = e)
             }
@@ -233,33 +275,25 @@ class StudentGroupingEditViewModel(
 
     fun onStudentCheckedChange(person: Person, isChecked: Boolean) {
         _uiState.update { prev ->
-
-            val updatedIds = if (isChecked) {
-                prev.selectedStudentIds + person.guid
-            } else {
-                prev.selectedStudentIds - person.guid
-            }
-
+            val name = person.fullName()
             val updatedNames = if (isChecked) {
-                prev.selectedStudentNames + person.fullName()
+                prev.selectedStudentNames + name
             } else {
-                prev.selectedStudentNames - person.fullName()
+                prev.selectedStudentNames - name
             }
 
             prev.copy(
-                selectedStudentIds = updatedIds,
                 selectedStudentNames = updatedNames
             )
         }
     }
 
     fun onGroupNameChanged(name: String) {
-        _uiState.update { prev ->
-            prev.copy(
+        _uiState.update {
+            it.copy(
                 groupName = name,
-                groupNameError = if (name.isNotBlank() && prev.groupNameError != null) null else prev.groupNameError
+                groupNameError = null
             )
         }
     }
 }
-

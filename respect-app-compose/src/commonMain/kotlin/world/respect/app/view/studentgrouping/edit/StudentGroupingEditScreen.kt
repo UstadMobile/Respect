@@ -93,7 +93,7 @@ fun StudentGroupingEditScreen(
             }
         ) { student ->
 
-            val isSelected = student?.guid in uiState.selectedStudentIds
+            val isSelected = student?.fullName() in uiState.selectedStudentNames
 
             PersonListItemWithMenu(
                 person = student,

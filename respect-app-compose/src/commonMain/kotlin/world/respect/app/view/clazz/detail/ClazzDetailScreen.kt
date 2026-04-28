@@ -81,7 +81,8 @@ fun ClazzDetailScreen(
         onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
         onClickManageEnrollments = viewModel::onClickManageEnrollments,
         onClickPerson = viewModel::onClickPerson,
-        onClickCreateGroup=viewModel::onClickCreateGroup
+        onClickCreateGroup=viewModel::onClickCreateGroup,
+        onClickGroup = viewModel::onClickGroup
     )
 }
 
@@ -100,7 +101,8 @@ fun ClazzDetailScreen(
     onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
     onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
     onClickPerson: (Person) -> Unit,
-    onClickCreateGroup:()-> Unit
+    onClickCreateGroup:()-> Unit,
+    onClickGroup: (String) -> Unit,
 ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -419,7 +421,9 @@ fun ClazzDetailScreen(
                     ListItem(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { },
+                            .clickable {
+                            onClickGroup(groupData.groupId)
+                            },
                         leadingContent = {
                             Icon(
                                 modifier = Modifier.size(40.dp).padding(8.dp),

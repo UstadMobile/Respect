@@ -1,5 +1,7 @@
 package world.respect.datalayer.db.school.xapi
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.UidNumberMapper
@@ -113,5 +115,9 @@ class XapiActorDataSourceDb(
         return groupIds.mapNotNull { groupId ->
             getGroupDetail(groupId)
         }
+    }
+
+    override fun getGroupDetailAsFlow(groupId: String): Flow<XapiGroup?> = flow {
+        emit(getGroupDetail(groupId))
     }
 }

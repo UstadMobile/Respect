@@ -144,6 +144,7 @@
     <string name="add_student">Add Student</string>">
     <string name="add_student_to_create_group">Add Student to create a Group</string>">
     <string name="create_group">Create Group</string>">
+    <string name="edit_group">Edit Group</string>">
     <string name="groups">Groups</string>">
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>

@@ -143,7 +143,6 @@ class StudentGroupingEditViewModel(
             }
         }
 
-        // selected user info
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
                 _uiState.update {
@@ -154,7 +153,6 @@ class StudentGroupingEditViewModel(
             }
         }
 
-        // class data
         viewModelScope.launch {
             schoolDataSource.classDataSource.findByGuidAsFlow(route.classUid)
                 .collect { clazz ->

@@ -11,14 +11,13 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import world.respect.libutil.ext.resolve
 import java.io.ByteArrayInputStream
-import kotlin.coroutines.resume
 
 class ExtractWebPageMetadataUseCaseAndroid(
     private val context: Context,
@@ -28,38 +27,36 @@ class ExtractWebPageMetadataUseCaseAndroid(
 
     @SuppressLint("SetJavaScriptEnabled")
     override suspend fun invoke(url: String): WebPageMetadata = withContext(Dispatchers.Main) {
-        suspendCancellableCoroutine { continuation ->
-            var webView: WebView? = null
-            var isResumed = false
-            var timeoutHandler: Handler? = null
+        val deferred = CompletableDeferred<WebPageMetadata>()
+        var webView: WebView? = null
+        var timeoutHandler: Handler? = null
 
-            fun cleanupWebView() {
-                try {
-                    webView?.stopLoading()
-                    webView?.destroy()
-                } catch (e: Exception) {
-                    /* WebView cleanup can throw exceptions if already destroyed or in invalid state.
-                     * We log but don't rethrow as cleanup is already a best-effort operation
+        fun cleanupWebView() {
+            try {
+                webView?.stopLoading()
+                webView?.destroy()
+            } catch (e: Exception) {
+                    /*
+                     * WebView cleanup can throw exceptions if already destroyed or in invalid state.
                      * and failure here doesn't affect the metadata result already returned.
                      */
-                    Napier.w("WebView cleanup failed", e, tag = LOG_TAG)
-                }
+                Napier.w("WebView cleanup failed", e, tag = LOG_TAG)
             }
+        }
 
-            fun cleanup() {
-                timeoutHandler?.removeCallbacksAndMessages(null)
-                cleanupWebView()
+        fun cleanup() {
+            timeoutHandler?.removeCallbacksAndMessages(null)
+            cleanupWebView()
+        }
+
+        fun completeWithMetadata(metadata: WebPageMetadata) {
+            if (!deferred.isCompleted) {
+                cleanup()
+                deferred.complete(metadata)
             }
+        }
 
-            fun resumeWithMetadata(metadata: WebPageMetadata) {
-                if (!isResumed) {
-                    isResumed = true
-                    cleanup()
-                    continuation.resume(metadata)
-                }
-            }
-
-            try {
+        try {
                 webView = WebView(context).apply {
                     // Enable JavaScript to execute evaluateJavascript() for extracting meta tags from DOM
                     // Reference: https://developer.android.com/reference/android/webkit/WebSettings#setJavaScriptEnabled(boolean)
@@ -77,22 +74,22 @@ class ExtractWebPageMetadataUseCaseAndroid(
                     settings.mediaPlaybackRequiresUserGesture = true
                 }
 
-                timeoutHandler = Handler(Looper.getMainLooper()).apply {
-                    postDelayed({
-                        resumeWithMetadata(WebPageMetadata())
-                    }, WEBVIEW_TIMEOUT_MS)
+            timeoutHandler = Handler(Looper.getMainLooper()).apply {
+                postDelayed({
+                    completeWithMetadata(WebPageMetadata())
+                }, WEBVIEW_TIMEOUT_MS)
+            }
+
+            var capturedTitle: String? = null
+
+            webView.webChromeClient = object : WebChromeClient() {
+                override fun onReceivedTitle(view: WebView?, title: String?) {
+                    super.onReceivedTitle(view, title)
+                    capturedTitle = title?.takeIf { it.isNotBlank() }
                 }
+            }
 
-                var capturedTitle: String? = null
-
-                webView.webChromeClient = object : WebChromeClient() {
-                    override fun onReceivedTitle(view: WebView?, title: String?) {
-                        super.onReceivedTitle(view, title)
-                        capturedTitle = title?.takeIf { it.isNotBlank() }
-                    }
-                }
-
-                webView.webViewClient = object : WebViewClient() {
+            webView.webViewClient = object : WebViewClient() {
 
                     override fun shouldInterceptRequest(
                         view: WebView?,
@@ -126,7 +123,7 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         if (currentWebView == null) {
                             /* WebView was destroyed before page finished loading */
                             Napier.w("WebView is null in onPageFinished", tag = LOG_TAG)
-                            resumeWithMetadata(WebPageMetadata(title = capturedTitle))
+                            completeWithMetadata(WebPageMetadata(title = capturedTitle))
                             return
                         }
                         /* Extract metadata from HTML by querying standard meta tags in the DOM.
@@ -167,78 +164,59 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         // Reference: https://developer.android.com/reference/android/webkit/WebView#evaluateJavascript(java.lang.String,%20android.webkit.ValueCallback%3Cjava.lang.String%3E)
                         currentWebView.evaluateJavascript(js) { result ->
                             try {
-                                val jsonString = result?.trim('"')?.replace("\\\"", "\"") ?: "{}"
+                                val jsonString = result?.let { json.decodeFromString<String>(it) } ?: "{}"
                                 val jsResult = json.decodeFromString<JsMetadataResult>(jsonString)
                                 val resolvedImageUrl = jsResult.image.takeIf { it.isNotBlank() }?.let {
                                     Url(url).resolve(it).toString()
                                 }
 
-                                val metadata = WebPageMetadata(
-                                    title = capturedTitle,
-                                    description = jsResult.description.takeIf { it.isNotBlank() },
-                                    imageUrl = resolvedImageUrl
-                                )
 
-                                resumeWithMetadata(metadata)
+                                val metadata = WebPageMetadata(
+                                title = capturedTitle,
+                                description = jsResult.description.takeIf { it.isNotBlank() },
+                                imageUrl = resolvedImageUrl
+                            )
+                            completeWithMetadata(metadata)
                             } catch (e: Exception) {
                                 /* JSON parsing can fail if the page doesn't have proper meta tags or
                                  * if JavaScript execution fails. return partial metadata (title only).
                                  */
                                 Napier.w("Failed to parse metadata from JavaScript result", e, tag = LOG_TAG)
-                                resumeWithMetadata(WebPageMetadata(title = capturedTitle))
+                                completeWithMetadata(WebPageMetadata(title = capturedTitle))
                             }
                         }
                     }
 
-                    override fun onReceivedError(
-                        view: WebView?,
-                        request: WebResourceRequest?,
-                        error: android.webkit.WebResourceError?
-                    ) {
-                        super.onReceivedError(view, request, error)
-                        if (request?.isForMainFrame == true) {
-                            resumeWithMetadata(WebPageMetadata())
-                        }
-                    }
-
-                    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-                    override fun onReceivedError(
-                        view: WebView?,
-                        errorCode: Int,
-                        description: String?,
-                        failingUrl: String?
-                    ) {
-                        super.onReceivedError(view, errorCode, description, failingUrl)
-                        // Only handle on older Android versions where the modern override isn't called.
-                        // The isResumed check prevents double-handling if both methods are called.
-                        if (!isResumed) {
-                            resumeWithMetadata(WebPageMetadata())
-                        }
-                    }
-
-                    override fun onRenderProcessGone(
-                        view: WebView?,
-                        detail: android.webkit.RenderProcessGoneDetail?
-                    ): Boolean {
-                        resumeWithMetadata(WebPageMetadata())
-                        return true
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: android.webkit.WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    if (request?.isForMainFrame == true) {
+                        completeWithMetadata(WebPageMetadata())
                     }
                 }
-
-                continuation.invokeOnCancellation {
-                    cleanup()
+                override fun onRenderProcessGone(
+                    view: WebView?,
+                    detail: android.webkit.RenderProcessGoneDetail?
+                ): Boolean {
+                    completeWithMetadata(WebPageMetadata())
+                    return true
                 }
-
-                webView.loadUrl(url)
-
-            } catch (e: Exception) {
-                /* WebView creation or setup can fail (e.g., WebView not available on device,
-                 * security restrictions, etc.). log and return empty metadata.
-                 */
-                Napier.w("Failed to create or load WebView", e, tag = LOG_TAG)
-                cleanup()
-                resumeWithMetadata(WebPageMetadata())
             }
+            deferred.invokeOnCompletion { cleanup() }
+            webView.loadUrl(url)
+
+            deferred.await()
+        } catch (e: Exception) {
+                  /* 
+                    * WebView creation or setup can fail (e.g., WebView not available on device,
+                    * security restrictions, etc.). log and return empty metadata.
+                    */
+            Napier.w("Failed to create or load WebView", e, tag = LOG_TAG)
+            completeWithMetadata(WebPageMetadata())
+            deferred.await()
         }
     }
     @Serializable

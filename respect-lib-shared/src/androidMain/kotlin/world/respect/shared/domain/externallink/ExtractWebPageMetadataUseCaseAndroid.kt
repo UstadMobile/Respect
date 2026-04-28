@@ -83,6 +83,11 @@ class ExtractWebPageMetadataUseCaseAndroid(
             var capturedTitle: String? = null
 
             webView.webChromeClient = object : WebChromeClient() {
+                /**
+                 * Callback when the page title is received from the HTML <title> tag.
+                 * Captures the title for inclusion in metadata result.
+                 * Reference: https://developer.android.com/reference/android/webkit/WebChromeClient#onReceivedTitle(android.webkit.WebView,%20java.lang.String)
+                 */
                 override fun onReceivedTitle(view: WebView?, title: String?) {
                     super.onReceivedTitle(view, title)
                     capturedTitle = title?.takeIf { it.isNotBlank() }
@@ -91,20 +96,23 @@ class ExtractWebPageMetadataUseCaseAndroid(
 
             webView.webViewClient = object : WebViewClient() {
 
+                    /**
+                     * Intercepts resource requests to block non-essential resources during metadata extraction.
+                     * 
+                     * Block all non-main-frame resources during metadata extraction to prevent:
+                     * - WebView renderer crashes from heavy video/audio resources
+                     * - Excessive memory usage during metadata-only operations
+                     * - Slow page loads when only HTML meta tags are needed
+                     *
+                     * Only allows main frame (HTML document) to load.
+                     * Blocks all subresources: images, videos, audio, CSS, JS, fonts, etc.
+                     *
+                     * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#shouldInterceptRequest(android.webkit.WebView,%20android.webkit.WebResourceRequest)
+                     */
                     override fun shouldInterceptRequest(
                         view: WebView?,
                         request: WebResourceRequest?
                     ): WebResourceResponse? {
-                        /* Block all non-main-frame resources during metadata extraction to prevent:
-                         * - WebView renderer crashes from heavy video/audio resources
-                         * - Excessive memory usage during metadata-only operations
-                         * - Slow page loads when only HTML meta tags are needed
-                         *
-                         * Only allow main frame (HTML document) to load.
-                         * Block all subresources: images, videos, audio, CSS, JS, fonts, etc.
-                         *
-                         * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#shouldInterceptRequest(android.webkit.WebView,%20android.webkit.WebResourceRequest)
-                         */
                         if (request != null && !request.isForMainFrame) {
                             return WebResourceResponse(
                                 "text/plain",
@@ -115,6 +123,12 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         return null
                     }
 
+                    /**
+                     * Callback when the page has finished loading.
+                     * Executes JavaScript to extract metadata (description, image) from HTML meta tags.
+                     * 
+                     * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#onPageFinished(android.webkit.WebView,%20java.lang.String)
+                     */
                     override fun onPageFinished(view: WebView?, pageUrl: String?) {
                         super.onPageFinished(view, pageUrl)
 
@@ -187,6 +201,9 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         }
                     }
 
+                /**
+                 * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#onReceivedError(android.webkit.WebView,%20android.webkit.WebResourceRequest,%20android.webkit.WebResourceError)
+                 */
                 override fun onReceivedError(
                     view: WebView?,
                     request: WebResourceRequest?,
@@ -197,6 +214,10 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         completeWithMetadata(WebPageMetadata())
                     }
                 }
+                
+                /**
+                 * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#onRenderProcessGone(android.webkit.WebView,%20android.webkit.RenderProcessGoneDetail)
+                 */
                 override fun onRenderProcessGone(
                     view: WebView?,
                     detail: android.webkit.RenderProcessGoneDetail?

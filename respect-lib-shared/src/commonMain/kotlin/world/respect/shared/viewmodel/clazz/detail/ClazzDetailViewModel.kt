@@ -201,7 +201,6 @@ class ClazzDetailViewModel(
                     )
                 }
 
-                // Load group details for each group ID
                 if (groupIds.isNotEmpty()) {
                     loadGroupDetails(groupIds)
                 }

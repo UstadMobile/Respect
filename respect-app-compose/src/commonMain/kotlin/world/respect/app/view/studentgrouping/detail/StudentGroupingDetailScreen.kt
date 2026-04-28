@@ -51,11 +51,13 @@ fun StudentGroupingDetailScreen(
             ListItem(
                 modifier = Modifier.clickable {},
                 leadingContent = {
-                    Icon(Icons.Default.Groups, contentDescription = "")
+                    Icon(Icons.Default.Groups,
+                        contentDescription = null)
                 },
                 headlineContent = {
                     Text(
-                        text = "${uiState.groupMembers.size} ${stringResource(Res.string.student)}",
+                        text = "${uiState.groupMembers.size} " +
+                                stringResource(Res.string.student),
                     )
                 }
             )
@@ -67,10 +69,17 @@ fun StudentGroupingDetailScreen(
         }
 
         item {
-           Column (modifier = Modifier.fillMaxWidth().testTag("delete_group_btn").defaultItemPadding()){
-               Icon(Icons.Outlined.Delete, contentDescription = "")
-               Text(stringResource(Res.string.delete))
-           }
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("delete_group_btn")
+                    .defaultItemPadding()
+            ) {
+                Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = stringResource(Res.string.delete)
+                )
+                Text(stringResource(Res.string.delete))
+            }
         }
 
         item("divider2 ") {

@@ -66,7 +66,9 @@ fun StudentGroupingEditScreen(
 
         item {
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("name"),
+                modifier = Modifier.fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("name"),
                 value = uiState.groupName,
                 onValueChange = { value ->
                     onGroupNameChanged(value)

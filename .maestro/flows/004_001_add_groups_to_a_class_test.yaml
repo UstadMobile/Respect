@@ -69,7 +69,8 @@ onFlowComplete:
 - assertVisible: "StudentC USER"
 - assertVisible:
     id: "delete_group_btn"
-- tapOn: "floating_action_button" #Edit Button
+- tapOn:
+   id: "floating_action_button"
 - tapOn: "StudentD USER"
 - tapOn: "Save"
 - assertVisible:

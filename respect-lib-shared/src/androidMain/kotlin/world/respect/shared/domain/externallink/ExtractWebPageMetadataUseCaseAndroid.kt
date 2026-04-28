@@ -9,12 +9,14 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import world.respect.libutil.ext.resolve
 import java.io.ByteArrayInputStream
 import kotlin.coroutines.resume
 
@@ -23,17 +25,6 @@ class ExtractWebPageMetadataUseCaseAndroid(
     private val json: Json,
 ) : ExtractWebPageMetadataUseCase {
 
-    class BlockHeavyResourcesFilter : OkHttpWebViewClient.ShouldInterceptRequestFilter {
-        override fun shouldIntercept(request: WebResourceRequest): Boolean {
-            if (!request.isForMainFrame) {
-                return true
-            }
-            return false
-        }
-    }
-
-    private val blockHeavyResourcesFilter: OkHttpWebViewClient.ShouldInterceptRequestFilter = 
-        BlockHeavyResourcesFilter()
 
     @SuppressLint("SetJavaScriptEnabled")
     override suspend fun invoke(url: String): WebPageMetadata = withContext(Dispatchers.Main) {
@@ -46,39 +37,44 @@ class ExtractWebPageMetadataUseCaseAndroid(
                 try {
                     webView?.stopLoading()
                     webView?.destroy()
-                } catch (_: Exception) {
-
+                } catch (e: Exception) {
+                    /* WebView cleanup can throw exceptions if already destroyed or in invalid state.
+                     * We log but don't rethrow as cleanup is already a best-effort operation
+                     * and failure here doesn't affect the metadata result already returned.
+                     */
+                    Napier.w("WebView cleanup failed", e, tag = LOG_TAG)
                 }
+            }
+
+            fun cleanup() {
+                timeoutHandler?.removeCallbacksAndMessages(null)
+                cleanupWebView()
             }
 
             fun resumeWithMetadata(metadata: WebPageMetadata) {
                 if (!isResumed) {
                     isResumed = true
-                    timeoutHandler?.removeCallbacksAndMessages(null)
+                    cleanup()
                     continuation.resume(metadata)
-
-                    cleanupWebView()
                 }
             }
 
             try {
                 webView = WebView(context).apply {
+                    // Enable JavaScript to execute evaluateJavascript() for extracting meta tags from DOM
+                    // Reference: https://developer.android.com/reference/android/webkit/WebSettings#setJavaScriptEnabled(boolean)
                     settings.javaScriptEnabled = true
+                    // Enable DOM storage API which may be required by some pages for JavaScript execution
+                    // Reference: https://developer.android.com/reference/android/webkit/WebSettings#setDomStorageEnabled(boolean)
                     settings.domStorageEnabled = true
+                    // Disable image loading to reduce memory and prevent crashes during metadata-only extraction
+                    // Reference: https://developer.android.com/reference/android/webkit/WebSettings#setLoadsImagesAutomatically(boolean)
+                    // Reference: https://developer.android.com/reference/android/webkit/WebSettings#setBlockNetworkImage(boolean)
                     settings.loadsImagesAutomatically = false
                     settings.blockNetworkImage = true
-                    settings.blockNetworkLoads = false
+                    // Prevent media auto-play which could cause crashes during metadata extraction
+                    // Reference: https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean)
                     settings.mediaPlaybackRequiresUserGesture = true
-                    settings.setSupportZoom(false)
-                    settings.builtInZoomControls = false
-                    settings.displayZoomControls = false
-                    settings.allowFileAccess = false
-                    settings.allowContentAccess = false
-                    settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                    settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
-                    settings.databaseEnabled = false
-                    settings.saveFormData = false
-                    settings.javaScriptCanOpenWindowsAutomatically = false
                 }
 
                 timeoutHandler = Handler(Looper.getMainLooper()).apply {
@@ -102,7 +98,17 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         view: WebView?,
                         request: WebResourceRequest?
                     ): WebResourceResponse? {
-                        if (request != null && blockHeavyResourcesFilter.shouldIntercept(request)) {
+                        /* Block all non-main-frame resources during metadata extraction to prevent:
+                         * - WebView renderer crashes from heavy video/audio resources
+                         * - Excessive memory usage during metadata-only operations
+                         * - Slow page loads when only HTML meta tags are needed
+                         *
+                         * Only allow main frame (HTML document) to load.
+                         * Block all subresources: images, videos, audio, CSS, JS, fonts, etc.
+                         *
+                         * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#shouldInterceptRequest(android.webkit.WebView,%20android.webkit.WebResourceRequest)
+                         */
+                        if (request != null && !request.isForMainFrame) {
                             return WebResourceResponse(
                                 "text/plain",
                                 "utf-8",
@@ -114,37 +120,57 @@ class ExtractWebPageMetadataUseCaseAndroid(
 
                     override fun onPageFinished(view: WebView?, pageUrl: String?) {
                         super.onPageFinished(view, pageUrl)
+
+                        // Check if webView is still valid before executing JavaScript
+                        val currentWebView = webView
+                        if (currentWebView == null) {
+                            /* WebView was destroyed before page finished loading */
+                            Napier.w("WebView is null in onPageFinished", tag = LOG_TAG)
+                            resumeWithMetadata(WebPageMetadata(title = capturedTitle))
+                            return
+                        }
+                        /* Extract metadata from HTML by querying standard meta tags in the DOM.
+                         *
+                         * Web Standards Used:
+                         * 1. document.querySelector() - Standard DOM API to find HTML elements
+                         *    Reference: https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
+                         * 2. getAttribute() - Standard method to read HTML attribute values
+                         *    Reference: https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute
+                         * 3. JSON.stringify() - Safely return structured data from JavaScript to Kotlin
+                         *    Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+                         *
+                         * Metadata extracted:
+                         * - description: <meta name="description"> (HTML standard)
+                         *   Reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta/name
+                         * - image: <meta name="image"> (if available)
+                         */
                         val js = """
                             (function() {
                                 var description = '';
                                 var image = '';
-                                
+
                                 var descMeta = document.querySelector('meta[name="description"]');
                                 if (descMeta) {
                                     description = descMeta.getAttribute('content') || '';
                                 }
-                                
-                                var ogImage = document.querySelector('meta[property="og:image"]');
-                                if (ogImage) {
-                                    image = ogImage.getAttribute('content') || '';
-                                } else {
-                                    var imgMeta = document.querySelector('meta[name="image"]');
-                                    if (imgMeta) {
-                                        image = imgMeta.getAttribute('content') || '';
-                                    }
+
+                                var imgMeta = document.querySelector('meta[name="image"]');
+                                if (imgMeta) {
+                                    image = imgMeta.getAttribute('content') || '';
                                 }
-                                
+
                                 return JSON.stringify({description: description, image: image});
                             })();
                         """.trimIndent()
 
-                        view?.evaluateJavascript(js) { result ->
+                        // Execute JavaScript to extract metadata from DOM
+                        // Reference: https://developer.android.com/reference/android/webkit/WebView#evaluateJavascript(java.lang.String,%20android.webkit.ValueCallback%3Cjava.lang.String%3E)
+                        currentWebView.evaluateJavascript(js) { result ->
                             try {
                                 val jsonString = result?.trim('"')?.replace("\\\"", "\"") ?: "{}"
                                 val jsResult = json.decodeFromString<JsMetadataResult>(jsonString)
-
                                 val resolvedImageUrl = jsResult.image.takeIf { it.isNotBlank() }?.let {
-                                    resolveUrl(it, url)
+                                    Url(url).resolve(it).toString()
                                 }
 
                                 val metadata = WebPageMetadata(
@@ -153,19 +179,13 @@ class ExtractWebPageMetadataUseCaseAndroid(
                                     imageUrl = resolvedImageUrl
                                 )
 
-                                if (!isResumed) {
-                                    isResumed = true
-                                    timeoutHandler?.removeCallbacksAndMessages(null)
-                                    continuation.resume(metadata)
-                                    cleanupWebView()
-                                }
-                            } catch (_: Exception) {
-                                if (!isResumed) {
-                                    isResumed = true
-                                    timeoutHandler?.removeCallbacksAndMessages(null)
-                                    continuation.resume(WebPageMetadata(title = capturedTitle))
-                                    cleanupWebView()
-                                }
+                                resumeWithMetadata(metadata)
+                            } catch (e: Exception) {
+                                /* JSON parsing can fail if the page doesn't have proper meta tags or
+                                 * if JavaScript execution fails. return partial metadata (title only).
+                                 */
+                                Napier.w("Failed to parse metadata from JavaScript result", e, tag = LOG_TAG)
+                                resumeWithMetadata(WebPageMetadata(title = capturedTitle))
                             }
                         }
                     }
@@ -189,7 +209,11 @@ class ExtractWebPageMetadataUseCaseAndroid(
                         failingUrl: String?
                     ) {
                         super.onReceivedError(view, errorCode, description, failingUrl)
-                        resumeWithMetadata(WebPageMetadata())
+                        // Only handle on older Android versions where the modern override isn't called.
+                        // The isResumed check prevents double-handling if both methods are called.
+                        if (!isResumed) {
+                            resumeWithMetadata(WebPageMetadata())
+                        }
                     }
 
                     override fun onRenderProcessGone(
@@ -202,39 +226,21 @@ class ExtractWebPageMetadataUseCaseAndroid(
                 }
 
                 continuation.invokeOnCancellation {
-                    timeoutHandler?.removeCallbacksAndMessages(null)
-                    cleanupWebView()
+                    cleanup()
                 }
 
                 webView.loadUrl(url)
 
-            } catch (_: Exception) {
-                timeoutHandler?.removeCallbacksAndMessages(null)
-                cleanupWebView()
+            } catch (e: Exception) {
+                /* WebView creation or setup can fail (e.g., WebView not available on device,
+                 * security restrictions, etc.). log and return empty metadata.
+                 */
+                Napier.w("Failed to create or load WebView", e, tag = LOG_TAG)
+                cleanup()
                 resumeWithMetadata(WebPageMetadata())
             }
         }
     }
-
-    private fun resolveUrl(imageUrl: String, baseUrl: String): String {
-        if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-            return imageUrl
-        }
-
-        val protocolEnd = baseUrl.indexOf("://")
-        if (protocolEnd == -1) return imageUrl
-
-        val pathStart = baseUrl.indexOf("/", protocolEnd + 3)
-        if (pathStart == -1) {
-            return "$baseUrl/$imageUrl"
-        }
-
-        val lastSlash = baseUrl.lastIndexOf("/")
-        val basePath = baseUrl.substring(0, lastSlash + 1)
-
-        return basePath + imageUrl
-    }
-
     @Serializable
     private data class JsMetadataResult(
         val description: String = "",
@@ -243,5 +249,7 @@ class ExtractWebPageMetadataUseCaseAndroid(
 
     companion object {
         private const val WEBVIEW_TIMEOUT_MS = 10_000L
+        private const val LOG_TAG = "ExtractWebPageMetadata"
     }
 }
+

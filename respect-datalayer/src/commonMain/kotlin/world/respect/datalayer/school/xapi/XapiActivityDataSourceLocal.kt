@@ -1,7 +1,6 @@
 package world.respect.datalayer.school.xapi
 
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.shared.LocalModelDataSource
+import world.respect.lib.xapi.model.XapiActivity
 import kotlin.time.Instant
 
 /**

@@ -17,7 +17,7 @@ import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.xapi.XapiActivityDataSource
 import world.respect.datalayer.school.xapi.XapiActorDataSource
-import world.respect.datalayer.school.xapi.XapiStatementDataSource
+import world.respect.lib.xapi.resources.XapiStatementsResource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -61,5 +61,5 @@ interface SchoolDataSource {
 
     val xapiActivityDataSource: XapiActivityDataSource
 
-    val xapiStatementDataSource: XapiStatementDataSource
+    val xapiStatementsResource: XapiStatementsResource
 }

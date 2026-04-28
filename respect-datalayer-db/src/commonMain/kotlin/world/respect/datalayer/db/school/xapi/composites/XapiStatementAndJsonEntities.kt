@@ -9,7 +9,5 @@ data class XapiStatementAndJsonEntities(
     @Embedded
     val stmtEntity: XapiStatementEntity,
     @Embedded
-    val stmtJsonEntity: XapiStatementEntityJson,
-    @Embedded
     val verbEntity: XapiVerbEntity,
 )

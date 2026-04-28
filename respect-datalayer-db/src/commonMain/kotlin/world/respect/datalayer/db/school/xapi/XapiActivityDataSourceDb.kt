@@ -11,8 +11,8 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiObjectType
 import kotlin.time.Clock
 import kotlin.time.Instant
 

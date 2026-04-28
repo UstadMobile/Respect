@@ -24,15 +24,25 @@ interface XapiGroupMemberActorJoinDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertListAsync(entities: List<XapiGroupMemberActorJoin>)
 
+    /**
+     * @param uidList a list of the actoruids for the groups for which we should retrieve members
+     * @param excludeIdentifiedGroups if true, exclude results for members of identified groups (
+     *        e.g. when running an ids only format query)
+     */
     @Query(
         """
         SELECT XapiGroupMemberActorJoin.*
           FROM XapiGroupMemberActorJoin
          WHERE XapiGroupMemberActorJoin.gmajGroupActorUid IN (:uidList)
+           AND (    :excludeIdentifiedGroups = 0
+                 OR (SELECT XapiActorEntity.actorIsAnonGroup
+                       FROM XapiActorEntity
+                      WHERE XapiActorEntity.actorUid = XapiGroupMemberActorJoin.gmajGroupActorUid) = 1)
     """
     )
     suspend fun findByGroupActorUidList(
-        uidList: List<Long>
+        uidList: List<Long>,
+        excludeIdentifiedGroups: Boolean,
     ): List<XapiGroupMemberActorJoin>
 
 

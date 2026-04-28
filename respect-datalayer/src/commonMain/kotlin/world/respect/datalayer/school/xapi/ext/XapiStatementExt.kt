@@ -2,11 +2,12 @@ package world.respect.datalayer.school.xapi.ext
 
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import world.respect.datalayer.school.xapi.model.XAPI_PROGRESSED_EXTENSIONS
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiStatement
-import world.respect.datalayer.school.xapi.model.XapiVerb
+import world.respect.lib.xapi.model.XAPI_PROGRESSED_EXTENSIONS
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
+import kotlin.uuid.Uuid
 
 val XapiStatement.resultProgressExtension: Int?
     get() = result?.extensions?.let { extensions ->
@@ -73,5 +74,14 @@ fun XapiStatement.allDefinedVerbs(): List<XapiVerb> {
         (`object` as? XapiStatement)?.also {
             addAll(it.allDefinedVerbs())
         }
+    }
+}
+
+fun XapiStatement.copyWithIdIfNotSet() : XapiStatement {
+    val stmtId = id
+    return if(stmtId != null) {
+        this
+    }else {
+        copy(id = Uuid.random())
     }
 }

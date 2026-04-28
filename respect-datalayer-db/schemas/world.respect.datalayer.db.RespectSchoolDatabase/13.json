@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "54c7aa0baa9afa1102cc81beb51e1978",
+    "identityHash": "898de6a68f61dbf607449b787b301d5e",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1973,7 +1973,7 @@
       },
       {
         "tableName": "XapiActorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorIsAnonGroup` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "actorUid",
@@ -2036,6 +2036,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "actorIsAnonGroup",
+            "columnName": "actorIsAnonGroup",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "actorObjectType",
             "columnName": "actorObjectType",
             "affinity": "INTEGER",
@@ -2066,6 +2072,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `idx_actorentity_actorobjecttype` ON `${TABLE_NAME}` (`actorObjectType`)"
+          },
+          {
+            "name": "idx_actorentity_actorIsAnonGroup",
+            "unique": false,
+            "columnNames": [
+              "actorIsAnonGroup"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_actorentity_actorIsAnonGroup` ON `${TABLE_NAME}` (`actorIsAnonGroup`)"
           }
         ]
       },
@@ -2164,7 +2179,7 @@
       },
       {
         "tableName": "XapiStatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementActorPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementVerbId` TEXT NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectActivityId` TEXT, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextRevision` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `contextTeamActorUid` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, `statementVersion` TEXT, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementVerbId` TEXT NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectActivityId` TEXT, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER, `stored` INTEGER, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextRevision` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `contextTeamActorUid` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, `statementVersion` TEXT, PRIMARY KEY(`statementIdHi`, `statementIdLo`))",
         "fields": [
           {
             "fieldPath": "statementIdHi",
@@ -2175,12 +2190,6 @@
           {
             "fieldPath": "statementIdLo",
             "columnName": "statementIdLo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "statementActorPersonUid",
-            "columnName": "statementActorPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2279,14 +2288,12 @@
           {
             "fieldPath": "timestamp",
             "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "stored",
             "columnName": "stored",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "contextRegistrationHi",
@@ -2357,12 +2364,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "statementContentEntryUid",
-            "columnName": "statementContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "isSubStatement",
             "columnName": "isSubStatement",
             "affinity": "INTEGER",
@@ -2383,19 +2384,28 @@
         },
         "indices": [
           {
-            "name": "idx_stmt_actor_person",
+            "name": "idx_stmt_stored",
             "unique": false,
             "columnNames": [
-              "statementActorPersonUid"
+              "stored"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_actor_person` ON `${TABLE_NAME}` (`statementActorPersonUid`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_stored` ON `${TABLE_NAME}` (`stored`)"
+          },
+          {
+            "name": "idx_stmt_actor",
+            "unique": false,
+            "columnNames": [
+              "statementActorUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_actor` ON `${TABLE_NAME}` (`statementActorUid`)"
           }
         ]
       },
       {
         "tableName": "XapiStatementEntityJson",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stmtJsonIdHi` INTEGER NOT NULL, `stmtJsonIdLo` INTEGER NOT NULL, `fullStatement` TEXT, PRIMARY KEY(`stmtJsonIdHi`, `stmtJsonIdLo`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stmtJsonIdHi` INTEGER NOT NULL, `stmtJsonIdLo` INTEGER NOT NULL, `fullStatement` TEXT NOT NULL, PRIMARY KEY(`stmtJsonIdHi`, `stmtJsonIdLo`))",
         "fields": [
           {
             "fieldPath": "stmtJsonIdHi",
@@ -2412,7 +2422,8 @@
           {
             "fieldPath": "fullStatement",
             "columnName": "fullStatement",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -2493,7 +2504,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '54c7aa0baa9afa1102cc81beb51e1978')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '898de6a68f61dbf607449b787b301d5e')"
     ]
   }
 }

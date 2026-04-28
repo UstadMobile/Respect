@@ -20,9 +20,9 @@ import world.respect.datalayer.db.school.xapi.ext.toLangMap
 import world.respect.datalayer.school.xapi.ext.flagsOf
 import world.respect.datalayer.school.xapi.ext.hasFlag
 import world.respect.datalayer.school.xapi.ext.takeIfNotEmpty
-import world.respect.datalayer.school.xapi.model.XapiActivity
-import world.respect.datalayer.school.xapi.model.XapiActivityDefinition
-import world.respect.datalayer.school.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.libutil.ext.toEmptyIfNull
 import kotlin.collections.component1
 import kotlin.collections.component2

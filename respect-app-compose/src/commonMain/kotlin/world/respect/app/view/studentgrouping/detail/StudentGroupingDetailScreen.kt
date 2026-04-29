@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -18,10 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.testTag
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectBasicAlertDialog
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.defaultItemPadding
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.delete
+import world.respect.shared.generated.resources.permanently_deleted
+import world.respect.shared.generated.resources.permanently_delete_this_group
 import world.respect.shared.generated.resources.student
 import world.respect.shared.viewmodel.studentgrouping.detail.StudentGroupingDetailUiState
 import world.respect.shared.viewmodel.studentgrouping.detail.StudentGroupingDetailViewModel
@@ -33,13 +37,26 @@ fun StudentGroupingDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     StudentGroupingDetailScreen(
-        uiState = uiState
+        uiState = uiState,
+        onClickDelete = viewModel::onClickDeleteGroup,
     )
+
+    if (uiState.showDeleteGroupDialog) {
+        RespectBasicAlertDialog(
+            headlineText = stringResource(Res.string.permanently_deleted),
+            bodyText = stringResource(Res.string.permanently_delete_this_group),
+            onConfirm = viewModel::onConfirmDeleteGroup,
+            onDismissRequest = viewModel::onDismissDeleteGroupDialog,
+            confirmText = stringResource(Res.string.delete),
+            dismissText = stringResource(Res.string.cancel),
+        )
+    }
 }
 
 @Composable
 fun StudentGroupingDetailScreen(
-    uiState: StudentGroupingDetailUiState
+    uiState: StudentGroupingDetailUiState = StudentGroupingDetailUiState(),
+    onClickDelete: () -> Unit = {},
 ) {
 
     LazyColumn(
@@ -73,9 +90,10 @@ fun StudentGroupingDetailScreen(
                 modifier = Modifier.fillMaxWidth()
                     .testTag("delete_group_btn")
                     .defaultItemPadding()
+                    .clickable { onClickDelete() }
             ) {
                 Icon(
-                    Icons.Outlined.Delete,
+                    Icons.Default.Delete,
                     contentDescription = stringResource(Res.string.delete)
                 )
                 Text(stringResource(Res.string.delete))

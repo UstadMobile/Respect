@@ -62,7 +62,6 @@ import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
-import world.respect.shared.viewmodel.assignment.detail.GradebookUser
 import java.util.Locale
 
 private const val NAME_COLUMN_WIDTH = 120
@@ -200,7 +199,9 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                val students = uiState.gradeBookUsers
+                val students = remember(uiState.assignmentProgressRow) {
+                    uiState.assignmentProgressRow.distinctBy { it.personUid }
+                }
                 val progressMap = remember(uiState.assignmentProgressRow) {
                     uiState.assignmentProgressRow.groupBy { it.personUid }
                         .mapValues { entry -> entry.value.associateBy { it.activityId } }
@@ -253,10 +254,10 @@ fun AssignmentDetailScreen(
 
                     when {
                         students.isNotEmpty() -> {
-                            items(students, key = { it.id }) { student ->
+                            items(students, key = { it.personUid }) { student ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     // Fixed Student Name Column
-                                    StudentNameCell(student, nameColWidth)
+                                    StudentNameCell(student.personName ?: "Unknown", nameColWidth)
                                     // Scrollable Grades/Progress Cells
                                     Row(
                                         modifier = Modifier
@@ -264,12 +265,12 @@ fun AssignmentDetailScreen(
                                             .horizontalScroll(horizontalScrollState)
                                     ) {
                                         units.forEach { unit ->
-                                            val progress = progressMap[student.id]?.get(unit.learningUnitManifestUrl.toString())
+                                            val progress = progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
                                             val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() }
                                             GradeCell(percent, taskColWidth)
                                         }
                                         // Average Score Cell
-                                        val studentProgressValues = progressMap[student.id]?.values?.mapNotNull { 
+                                        val studentProgressValues = progressMap[student.personUid]?.values?.mapNotNull { 
                                             it.progress ?: it.scoreScaled?.let { s -> (s * 100).toInt() }
                                         }
                                         val avg = if (!studentProgressValues.isNullOrEmpty()) {
@@ -455,7 +456,7 @@ fun TaskHeaderCell(
 }
 
 @Composable
-fun StudentNameCell(student: GradebookUser, width: Dp) {
+fun StudentNameCell(name: String, width: Dp) {
     Box(
         modifier = Modifier
             .width(width)
@@ -474,14 +475,14 @@ fun StudentNameCell(student: GradebookUser, width: Dp) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = student.name.firstOrNull()?.toString() ?: "?",
+                    text = name.firstOrNull()?.toString() ?: "?",
                     color = MaterialTheme.colorScheme.surface,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
             Spacer(Modifier.width(8.dp))
             Text(
-                text = student.name,
+                text = name,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -537,8 +538,7 @@ fun AverageCell(avg: Double?, width: Dp) {
     Box(
         modifier = Modifier
             .width(width)
-            .fillMaxHeight()
-            .padding(4.dp),
+            .fillMaxHeight(),
         contentAlignment = Alignment.Center
     ) {
         if (avg == null) {

@@ -157,7 +157,8 @@ interface XapiStatementEntityDao {
 
     @Query("""
         SELECT 
-            Actor.actorAccountName AS personUid,
+            Stmt.statementActorUid AS personUid,
+            Actor.actorName AS personName,
             Stmt.statementObjectActivityId AS activityId,
             MAX(Stmt.resultCompletion) AS completion,
             MAX(Stmt.resultSuccess) AS success,
@@ -167,12 +168,10 @@ interface XapiStatementEntityDao {
         JOIN XapiActorEntity Actor ON Stmt.statementActorUid = Actor.actorUid
         JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo)
         WHERE CtxJoin.scajToActivityUid = :assignmentActivityUidNum
-          AND Actor.actorAccountName IN (:personUidNums)
         GROUP BY Actor.actorAccountName, Stmt.statementObjectActivityId
     """)
     fun getAssignmentProgressFlow(
         assignmentActivityUidNum: Long,
-        personUidNums: List<Long>
     ): Flow<List<XapiAssignmentProgressEntityRow>>
 
 

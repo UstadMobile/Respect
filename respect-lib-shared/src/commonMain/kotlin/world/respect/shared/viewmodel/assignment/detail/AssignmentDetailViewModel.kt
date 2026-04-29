@@ -58,11 +58,6 @@ import kotlin.uuid.Uuid
 import world.respect.lib.xapi.model.AssignmentResult
 import kotlin.time.Clock
 
-data class GradebookUser(
-    val id: String,
-    val name: String,
-    val avatarUrl: String? = null
-)
 
 data class AssignmentDetailUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -70,7 +65,6 @@ data class AssignmentDetailUiState(
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
-    val gradeBookUsers: List<GradebookUser> = emptyList(),
     val assignmentProgressRow: List<AssignmentResult> = emptyList(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
@@ -186,18 +180,6 @@ class AssignmentDetailViewModel(
                             filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT
                         )
                     ).dataOrNull()?.let { students ->
-
-                        // Update UI users
-                        val users = students.map {
-                            GradebookUser(
-                                id = it.guid,
-                                name = it.fullName(),
-                            )
-                        }
-
-                        _uiState.update {
-                            it.copy(gradeBookUsers = users)
-                        }
 
                         // TODO NEED TO CHANGE DUMMY DATAS
                         // Create dummy statements for each student and learning unit

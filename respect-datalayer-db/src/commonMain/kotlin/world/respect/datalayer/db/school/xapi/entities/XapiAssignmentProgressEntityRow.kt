@@ -6,6 +6,7 @@ package world.respect.datalayer.db.school.xapi.entities
  */
 data class XapiAssignmentProgressEntityRow(
     val personUid: String,
+    val personName: String?,
     val activityId: String,
     val completion: Boolean?,
     val success: Boolean?,

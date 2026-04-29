@@ -292,11 +292,11 @@ class XapiStatementsResourceDb(
         val assignmentUidNum = uidNumberMapper(assignmentActivityId)
         return schoolDb.getStatementDao().getAssignmentProgressFlow(
             assignmentActivityUidNum = assignmentUidNum,
-            personUidNums = personUids
         ).map { rows ->
             rows.map { row ->
                 AssignmentResult(
                     personUid = row.personUid,
+                    personName = row.personName,
                     activityId = row.activityId,
                     completion = row.completion,
                     success = row.success,

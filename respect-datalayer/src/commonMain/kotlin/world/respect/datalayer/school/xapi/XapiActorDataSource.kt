@@ -3,8 +3,7 @@ package world.respect.datalayer.school.xapi
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.DataLoadParams
 import world.respect.lib.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiGroup
 
 interface XapiActorDataSource {
 

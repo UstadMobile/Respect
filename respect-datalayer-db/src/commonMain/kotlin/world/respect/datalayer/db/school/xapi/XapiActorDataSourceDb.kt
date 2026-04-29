@@ -89,7 +89,7 @@ class XapiActorDataSourceDb(
 
         // Find all group member joins for this group
         val groupMemberJoins = schoolDb.getGroupMemberActorJoinDao()
-            .findByGroupActorUidList(listOf(groupActorEntity.actorUid))
+            .findByGroupActorUidList(listOf(groupActorEntity.actorUid), excludeIdentifiedGroups = false)
 
         // Find all member actor entities
         val memberActorUids = groupMemberJoins.map { it.gmajMemberActorUid }
@@ -106,7 +106,7 @@ class XapiActorDataSourceDb(
             groupMemberJoins = groupMemberJoins
         )
 
-        return actorEntities.toModel() as? XapiGroup
+        return actorEntities.toModel(idOnlyFormat = false) as? XapiGroup
     }
 
     override suspend fun getGroupsByIds(groupIds: List<String>): List<XapiGroup> {

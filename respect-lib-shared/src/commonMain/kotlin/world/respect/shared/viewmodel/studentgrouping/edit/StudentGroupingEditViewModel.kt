@@ -27,18 +27,18 @@ import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Clazz.Companion.GROUP_IDS
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.xapi.model.VERB_CREATED
-import world.respect.datalayer.school.xapi.model.VERB_UPDATED
-import world.respect.datalayer.school.xapi.model.XapiAccount
-import world.respect.datalayer.school.xapi.model.XapiAgent
-import world.respect.datalayer.school.xapi.model.XapiGroup
-import world.respect.datalayer.school.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
-import world.respect.datalayer.school.xapi.model.XapiObjectType
-import world.respect.datalayer.school.xapi.model.XapiStatement
-import world.respect.datalayer.school.xapi.model.XapiVerb
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.lib.xapi.model.VERB_CREATED
+import world.respect.lib.xapi.model.VERB_UPDATED
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
@@ -226,7 +226,7 @@ class StudentGroupingEditViewModel(
                     timestamp = Clock.System.now()
                 )
 
-                schoolDataSource.xapiStatementDataSource.store(listOf(statement))
+                schoolDataSource.xapiStatementsResource.post(listOf(statement))
 
                 val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
 

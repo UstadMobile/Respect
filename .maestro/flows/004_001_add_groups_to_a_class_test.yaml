@@ -45,11 +45,11 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Classes"
-- assertVisible: "New Class"
-- tapOn: "New Class"
+- assertVisible: "TestClass"
+- tapOn: "TestClass"
 - assertVisible:
     id: "app_title"
-    text: "New Class"
+    text: "TestClass"
 - scrollUntilVisible:
     element: "Groups"
     direction: DOWN
@@ -80,6 +80,6 @@ onFlowComplete:
 - back
 - assertVisible:
     id: "app_title"
-    text: "New Class"
+    text: "TestClass"
 - scrollUntilVisible:
       element: "Test Group"

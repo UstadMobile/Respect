@@ -46,7 +46,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Classes"
-- assertVisible: "New Class"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - tapOn:
     id: "floating_action_button"   #  +Assignment button
@@ -58,7 +58,7 @@ onFlowComplete:
 - tapOn: "Assignment name*"
 - inputText: "Homework 1"
 - tapOn: "Class"
-- tapOn: "New Class"
+- tapOn: "TestClass"
 - tapOn: "Date"
 - runScript:
     file: "scripts/setDate.js"

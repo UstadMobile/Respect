@@ -59,6 +59,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.deadline
 import world.respect.shared.util.AssignmentStatusFilter
+import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import world.respect.shared.viewmodel.assignment.detail.GradebookUser
@@ -199,6 +200,14 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
+                val students = uiState.gradeBookUsers
+                val progressMap = remember(uiState.assignmentProgressRow) {
+                    uiState.assignmentProgressRow.groupBy { it.personUid }
+                        .mapValues { entry -> entry.value.associateBy { it.activityId } }
+                }
+
+                val units = assignment?.learningUnits ?: emptyList()
+
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     // STICKY HEADER: Task Icons and Names
                     stickyHeader {
@@ -220,7 +229,7 @@ fun AssignmentDetailScreen(
                                     .fillMaxHeight()
                                     .horizontalScroll(horizontalScrollState)
                             ) {
-                                assignment?.learningUnits?.forEach { unit ->
+                                units.forEach { unit ->
                                     TaskHeaderCell(unit, uiState, taskColWidth, headerHeight)
                                 }
                                 Box(
@@ -242,9 +251,6 @@ fun AssignmentDetailScreen(
                         }
                     }
 
-                    val students = uiState.gradeBookUsers
-                    val completion = uiState.completion
-                    val units = assignment?.learningUnits ?: emptyList()
                     when {
                         students.isNotEmpty() -> {
                             items(students, key = { it.id }) { student ->
@@ -258,15 +264,17 @@ fun AssignmentDetailScreen(
                                             .horizontalScroll(horizontalScrollState)
                                     ) {
                                         units.forEach { unit ->
-                                            val percent =
-                                                completion[student.id]?.get(unit.learningUnitManifestUrl.toString())
+                                            val progress = progressMap[student.id]?.get(unit.learningUnitManifestUrl.toString())
+                                            val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() }
                                             GradeCell(percent, taskColWidth)
                                         }
                                         // Average Score Cell
-                                        val userCompletion =
-                                            completion[student.id]?.values?.filterNotNull()
-                                        val avg =
-                                            if (!userCompletion.isNullOrEmpty()) userCompletion.average() else null
+                                        val studentProgressValues = progressMap[student.id]?.values?.mapNotNull { 
+                                            it.progress ?: it.scoreScaled?.let { s -> (s * 100).toInt() }
+                                        }
+                                        val avg = if (!studentProgressValues.isNullOrEmpty()) {
+                                            studentProgressValues.average()
+                                        } else null
                                         AverageCell(avg, taskColWidth)
                                     }
                                 }
@@ -307,11 +315,20 @@ fun StudentLearningUnitItem(
     val publication = state.dataOrNull()
     val iconLink = publication?.images?.firstOrNull()
 
-    // Mapping dummy data for UI demo based on image content
-    val (title, percent, color) = when {
-        unit.learningUnitManifestUrl.toString().contains("A") -> Triple("Alphabet A", 98, Color(0xFFAED581))
-        unit.learningUnitManifestUrl.toString().contains("B") -> Triple("Alphabet B", 67, Color(0xFFD48245))
-        else -> Triple("Alphabet C", 50, Color.LightGray)
+    // Use actual title from publication metadata if available
+    val title = publication?.metadata?.title?.getTitle() ?: "Loading..."
+    
+    val progress = remember(uiState.assignmentProgressRow, unit.learningUnitManifestUrl, uiState.personGuid) {
+        uiState.assignmentProgressRow.find { 
+            it.personUid == uiState.personGuid && it.activityId == unit.learningUnitManifestUrl.toString() 
+        }
+    }
+    
+    val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() } ?: 0
+    val color = when {
+        percent >= 90 -> Color(0xFFAED581) // TODO NEED TO CHANGE HARDCODED
+        percent > 0 -> Color(0xFFD48245)
+        else -> Color.LightGray
     }
 
     Row(
@@ -337,7 +354,7 @@ fun StudentLearningUnitItem(
                         .background(color, RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(title.last().toString(), color = Color.White, style = MaterialTheme.typography.headlineSmall)
+                    Text(title.lastOrNull()?.toString() ?: "?", color = Color.White, style = MaterialTheme.typography.headlineSmall)
                 }
             }
             if (percent > 90) {
@@ -362,11 +379,6 @@ fun StudentLearningUnitItem(
                     tint = Color.Gray
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(
-                    text = if (title.contains("C")) "Chimple learning" else "Curious Learning",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
             }
         }
 
@@ -416,8 +428,7 @@ fun TaskHeaderCell(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Alphabet A",
-                style = MaterialTheme.typography.labelSmall,
+                text = info.dataOrNull()?.metadata?.title?.getTitle() ?: "",
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.rotate(-90f)

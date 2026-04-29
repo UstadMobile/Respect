@@ -4,6 +4,8 @@ import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
@@ -35,6 +37,7 @@ import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.lib.xapi.XapiResponseHeaders
+import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 
@@ -281,6 +284,33 @@ class XapiStatementsResourceDb(
                 )
             }
         }
+    }
+    override fun getAssignmentResult(
+        assignmentActivityId: String,
+        personUids: List<Long>
+    ): Flow<List<AssignmentResult>> {
+        val assignmentUidNum = uidNumberMapper(assignmentActivityId)
+        return schoolDb.getStatementDao().getAssignmentProgressFlow(
+            assignmentActivityUidNum = assignmentUidNum,
+            personUidNums = personUids
+        ).map { rows ->
+            rows.map { row ->
+                AssignmentResult(
+                    personUid = row.personUid,
+                    activityId = row.activityId,
+                    completion = row.completion,
+                    success = row.success,
+                    scoreScaled = row.scoreScaled,
+                    progress = row.progress
+                )
+            }
+        }
+    }
+
+    override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
+        val activityUidNum = uidNumberMapper(activityId)
+        val timestamp = schoolDb.getStatementDao().getLastStoredTimestampForActivity(activityUidNum)
+        return timestamp
     }
 
     override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {

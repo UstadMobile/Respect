@@ -1,16 +1,15 @@
 package world.respect.lib.xapi.resources
 
-import io.ktor.http.parameters
 import io.ktor.util.StringValues
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.ext.getUuidOrNull
-import world.respect.lib.xapi.ext.setIfNotNull
-import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import kotlin.uuid.Uuid
@@ -96,6 +95,13 @@ interface XapiStatementsResource {
         request: GetStatementsRequest,
     ): GetStatementsResponse
 
+
+    fun getAssignmentResult(
+        assignmentActivityId: String,
+        personUids: List<Long>
+    ): Flow<List<AssignmentResult>>
+
+    suspend fun getLastStoredTimestampForActivity(activityId: String): Long?
 
     companion object {
 

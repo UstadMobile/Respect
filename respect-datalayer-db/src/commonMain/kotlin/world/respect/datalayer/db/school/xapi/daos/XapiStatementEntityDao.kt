@@ -9,6 +9,7 @@ import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiAssignmentProgressEntityRow
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
@@ -153,6 +154,30 @@ interface XapiStatementEntityDao {
 
     @RawQuery
     suspend fun runReportQuery(query: RoomRawQuery): List<StatementReportRow>
+
+    @Query("""
+        SELECT 
+            Actor.actorAccountName AS personUid,
+            Stmt.statementObjectActivityId AS activityId,
+            MAX(Stmt.resultCompletion) AS completion,
+            MAX(Stmt.resultSuccess) AS success,
+            MAX(COALESCE(Stmt.resultScoreScaled, Stmt.resultScoreRaw)) AS scoreScaled,
+            MAX(Stmt.extensionProgress) AS progress
+        FROM XapiStatementEntity Stmt
+        JOIN XapiActorEntity Actor ON Stmt.statementActorUid = Actor.actorUid
+        JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo)
+        WHERE CtxJoin.scajToActivityUid = :assignmentActivityUidNum
+          AND Actor.actorAccountName IN (:personUidNums)
+        GROUP BY Actor.actorAccountName, Stmt.statementObjectActivityId
+    """)
+    fun getAssignmentProgressFlow(
+        assignmentActivityUidNum: Long,
+        personUidNums: List<Long>
+    ): Flow<List<XapiAssignmentProgressEntityRow>>
+
+
+    @Query("SELECT MAX(stored) FROM XapiStatementEntity Stmt JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo) WHERE CtxJoin.scajToActivityUid = :activityUidNum")
+    suspend fun getLastStoredTimestampForActivity(activityUidNum: Long): Long?
 
     companion object {
 

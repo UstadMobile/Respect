@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.parameters
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.ext.useTokenProvider
@@ -16,6 +17,7 @@ import world.respect.datalayer.http.ext.xapiEndpointUrl
 import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.xapi.XapiResponseHeaders
+import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -60,5 +62,16 @@ class XapiStatementsResourceHttp(
             statementResult = statementResult,
             headers = XapiResponseHeaders(),
         )
+    }
+
+    override fun getAssignmentResult(
+        assignmentActivityId: String,
+        personUids: List<Long>
+    ): Flow<List<AssignmentResult>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
+        TODO("Not yet implemented")
     }
 }

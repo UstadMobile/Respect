@@ -22,10 +22,25 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
+import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiContext
+import world.respect.lib.xapi.model.XapiContextActivities
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiResult
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
@@ -34,14 +49,14 @@ import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.util.ext.asUiText
-import world.respect.datalayer.db.school.ext.isAdminOrTeacher
-import world.respect.datalayer.db.school.ext.isStudent
-import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.school.model.Clazz
 import world.respect.shared.util.AssignmentStatusFilter
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import world.respect.lib.xapi.model.AssignmentResult
+import kotlin.time.Clock
 
 data class GradebookUser(
     val id: String,
@@ -56,7 +71,7 @@ data class AssignmentDetailUiState(
         flowOf(DataLoadingState())
     },
     val gradeBookUsers: List<GradebookUser> = emptyList(),
-    val completion: Map<String, Map<String, Int?>> = emptyMap(), // userId -> (unitId -> percent)
+    val assignmentProgressRow: List<AssignmentResult> = emptyList(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
@@ -64,9 +79,10 @@ data class AssignmentDetailUiState(
     val personGuid: String = ""
 )
 
+@OptIn(ExperimentalUuidApi::class)
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -116,8 +132,9 @@ class AssignmentDetailViewModel(
         viewModelScope.launch {
             assignmentFlow.distinctUntilChangedBy { it.dataOrNull()?.classUid }
                 .collectLatest { assignment ->
+                    val classUid = assignment.dataOrNull()?.classUid ?: return@collectLatest
                     schoolDataSource.classDataSource.findByGuidAsFlow(
-                        guid = assignment.dataOrNull()?.classUid ?: ""
+                        guid = classUid
                     ).collect { assignmentClazz ->
                         _uiState.update { prev ->
                             prev.copy(
@@ -134,8 +151,8 @@ class AssignmentDetailViewModel(
                     val person = selectedAccount?.person
                     val isStudent = person?.isStudent() == true
                     _canEdit = person?.isAdminOrTeacher() == true
-                    
-                    _uiState.update { 
+
+                    _uiState.update {
                         it.copy(
                             isStudent = isStudent,
                             personName = person?.fullName() ?: "",
@@ -147,34 +164,112 @@ class AssignmentDetailViewModel(
             }
         }
 
-        // Dummy users and completion data for gradebook
-        val dummyUsers = listOf(
-            GradebookUser(id = "1", name = "Micky"),
-            GradebookUser(id = "2", name = "Mouse"),
-            GradebookUser(id = "3", name = "Jerry"),
-            GradebookUser(id = "4", name = "Micky"),
-            GradebookUser(id = "5", name = "Mouse"),
-            GradebookUser(id = "6", name = "Jerry"),
-            GradebookUser(id = "7", name = "Jerry")
-        )
-        // Dummy units (simulate after assignment is loaded)
-        val dummyCompletion = mapOf(
-            "1" to mapOf("A" to 90, "B" to 90),
-            "2" to mapOf("A" to 50, "B" to 0),
-            "3" to mapOf("A" to null, "B" to null),
-            "4" to mapOf("A" to 90, "B" to 90),
-            "5" to mapOf("A" to 50, "B" to 0),
-            "6" to mapOf("A" to null, "B" to null),
-            "7" to mapOf("a" to 50, "B" to 0),
-            // Template for current student UI demo
-            "" to mapOf("A" to 98, "B" to 67, "C" to 50)
-        )
-        _uiState.update {
-            it.copy(
-                gradeBookUsers = dummyUsers,
-                completion = dummyCompletion
-            )
+        // Load gradebook users and their progress
+        viewModelScope.launch {
+            assignmentFlow.distinctUntilChangedBy { it.dataOrNull()?.classUid }
+                .collectLatest { assignmentState ->
+                    val assignment = assignmentState.dataOrNull() ?: return@collectLatest
+                    val classUid = assignment.classUid
+                    val schoolUrl = accountManager.activeAccount?.school?.self
+                        ?.toString()
+                        ?.trim()
+                        ?.removeSuffix("/")
+                        ?: ""
+
+                    val assignmentActivityId = "$schoolUrl/assignment/${assignment.uid}"
+
+                    // Get all students
+                    schoolDataSource.personDataSource.list(
+                        loadParams = DataLoadParams(),
+                        params = world.respect.datalayer.school.PersonDataSource.GetListParams(
+                            filterByClazzUid = classUid,
+                            filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT
+                        )
+                    ).dataOrNull()?.let { students ->
+
+                        // Update UI users
+                        val users = students.map {
+                            GradebookUser(
+                                id = it.guid,
+                                name = it.fullName(),
+                            )
+                        }
+
+                        _uiState.update {
+                            it.copy(gradeBookUsers = users)
+                        }
+
+                        // TODO NEED TO CHANGE DUMMY DATAS
+                        // Create dummy statements for each student and learning unit
+                        val dummyStatements = students.flatMap { student ->
+                            assignment.learningUnits.map { ref ->
+                                XapiStatement(
+                                    id = Uuid.random(),
+                                    actor = XapiAgent(
+                                        name = student.fullName(),
+                                        account = XapiAccount(
+                                            homePage = schoolUrl,
+                                            name = student.fullName()
+                                        )
+                                    ),
+                                    verb = XapiVerb(
+                                        id = "http://adlnet.gov/expapi/verbs/completed",
+                                        display = mapOf("en-US" to "completed")
+                                    ),
+                                    `object` = XapiActivity(
+                                        id = ref.learningUnitManifestUrl.toString(),
+                                        definition = XapiActivityDefinition(
+                                            name = mapOf("en-US" to "Learning Unit"),
+                                            description = mapOf(
+                                                "en-US" to "A learning unit in the assignment"
+                                            )
+                                        )
+                                    ),
+                                    result = XapiResult(
+                                        score = XapiResult.Score(
+                                            scaled = 0.95F,
+                                            raw = 95.0F,
+                                            min = 0.0F,
+                                            max = 100.0F
+                                        ),
+                                        success = true,
+                                        completion = true,
+                                        duration = null
+                                    ),
+                                    context = XapiContext(
+                                        contextActivities = XapiContextActivities(
+                                            grouping = listOf(
+                                                XapiActivity(
+                                                    id = assignmentActivityId,
+                                                    objectType = XapiObjectType.Activity
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    timestamp = Clock.System.now(),
+                                    stored = Clock.System.now()
+                                )
+                            }
+                        }
+
+                        // Post statements
+                        schoolDataSource.xapiStatementsResource.post(dummyStatements)
+
+                        // Observe progress
+                        schoolDataSource.xapiStatementsResource
+                            .getAssignmentResult(
+                                assignmentActivityId = assignmentActivityId,
+                                personUids = students.map { it.guid.toLong() }
+                            )
+                            .collect { progressList ->
+                                _uiState.update {
+                                    it.copy(assignmentProgressRow = progressList)
+                                }
+                            }
+                    }
+                }
         }
+
     }
 
     private fun updateAppUiState() {

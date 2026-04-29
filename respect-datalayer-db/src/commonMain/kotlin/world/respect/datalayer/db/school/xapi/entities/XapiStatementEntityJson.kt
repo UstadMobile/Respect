@@ -25,9 +25,9 @@ import kotlinx.serialization.Serializable
 )
 @Serializable
 data class XapiStatementEntityJson(
-    val stmtJsonIdHi: Long = 0,
-    val stmtJsonIdLo: Long = 0,
-    val fullStatement: String? = null,
+    val stmtJsonIdHi: Long,
+    val stmtJsonIdLo: Long,
+    val fullStatement: String,
 ) {
     companion object {
         const val TABLE_ID = 602

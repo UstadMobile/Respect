@@ -58,6 +58,7 @@ import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
+import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
@@ -240,6 +241,12 @@ fun Application.module() {
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
+                    }
+
+                    route("xapi") {
+                        authenticate(AUTH_CONFIG_SCHOOL) {
+                            XapiStatementsResourceRoute(json = json)
+                        }
                     }
 
                     authenticate(AUTH_CONFIG_SCHOOL) {

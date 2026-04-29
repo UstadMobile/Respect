@@ -5,11 +5,11 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActorEntityTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiGroupMemberActorJoin
 import world.respect.datalayer.school.xapi.ext.idStr
-import world.respect.datalayer.school.xapi.model.XapiAccount
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiAgent
-import world.respect.datalayer.school.xapi.model.XapiGroup
-import world.respect.datalayer.school.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -108,6 +108,7 @@ fun XapiGroup.toGroupEntities(
         actorAccountName = account?.name,
         actorAccountHomePage = account?.homePage,
         actorLastModified = lastModified,
+        actorIsAnonGroup = isAnonymous,
     )
 
     return ActorEntities(
@@ -133,7 +134,9 @@ fun XapiActorEntity.toAgentModel(): XapiAgent {
     )
 }
 
-fun ActorEntities.toGroupModel(): XapiGroup {
+fun ActorEntities.toGroupModel(
+    idOnlyFormat: Boolean,
+): XapiGroup {
     return XapiGroup(
         name = actor.actorName,
         mbox = actor.actorMbox,
@@ -143,23 +146,29 @@ fun ActorEntities.toGroupModel(): XapiGroup {
         account = XapiAccount.fromHomePageAndNameOrNull(
             actor.actorAccountHomePage, actor.actorAccountName
         ),
-        member = groupMemberJoins.mapNotNull { groupMemberJoin ->
-            groupMemberAgents.firstOrNull {
-                it.actorUid == groupMemberJoin.gmajMemberActorUid
-            }?.toAgentModel()
+        member = if(!idOnlyFormat) {
+            groupMemberJoins.mapNotNull { groupMemberJoin ->
+                groupMemberAgents.firstOrNull {
+                    it.actorUid == groupMemberJoin.gmajMemberActorUid
+                }?.toAgentModel()
+            }
+        }else {
+            null
         }
     )
 }
 
 
-fun ActorEntities.toModel(): XapiActor {
+fun ActorEntities.toModel(
+    idOnlyFormat: Boolean,
+): XapiActor {
     return when(actor.actorObjectType) {
         XapiActorEntityTypeEnum.AGENT -> {
             actor.toAgentModel()
         }
 
         XapiActorEntityTypeEnum.GROUP -> {
-            this.toGroupModel()
+            this.toGroupModel(idOnlyFormat = idOnlyFormat)
         }
 
     }

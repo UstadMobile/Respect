@@ -11,8 +11,8 @@ import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
-import world.respect.datalayer.school.xapi.model.XapiActor
-import world.respect.datalayer.school.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiGroup
 import kotlin.time.Instant
 
 class XapiActorDataSourceDb(

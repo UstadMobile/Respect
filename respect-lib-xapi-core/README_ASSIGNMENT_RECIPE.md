@@ -37,26 +37,6 @@ Use the following verb:
   "actor": {
     "name": "Grade 1",
     "mbox": "mailto:grade1@example.com",
-    "member": [
-      {
-        "name": "Andrew Downes",
-        "account": {
-          "homePage": "http://www.example.com",
-          "name": "13936749"
-        },
-        "objectType": "Agent"
-      },
-      {
-        "name": "Toby Nichols",
-        "openid": "http://toby.openid.example.org/",
-        "objectType": "Agent"
-      },
-      {
-        "name": "Ena Hills",
-        "mbox_sha1sum": "ebd31e95054c018b10727ccffd2ef2ec3a016ee9",
-        "objectType": "Agent"
-      }
-    ],
     "objectType": "Group"
   },
   "verb": {

@@ -115,8 +115,8 @@ class ExtractWebPageMetadataUseCaseAndroid(
                     ): WebResourceResponse? {
                         if (request != null && !request.isForMainFrame) {
                             return WebResourceResponse(
-                                "text/plain",
-                                "utf-8",
+                                MIME_TYPE_TEXT_PLAIN,
+                                CHARSET_UTF8,
                                 ByteArrayInputStream(byteArrayOf())
                             )
                         }
@@ -183,14 +183,12 @@ class ExtractWebPageMetadataUseCaseAndroid(
                                 val resolvedImageUrl = jsResult.image.takeIf { it.isNotBlank() }?.let {
                                     Url(url).resolve(it).toString()
                                 }
-
-
                                 val metadata = WebPageMetadata(
-                                title = capturedTitle,
-                                description = jsResult.description.takeIf { it.isNotBlank() },
-                                imageUrl = resolvedImageUrl
+                                    title = capturedTitle,
+                                    description = jsResult.description.takeIf { it.isNotBlank() },
+                                    imageUrl = resolvedImageUrl
                             )
-                            completeWithMetadata(metadata)
+                                 completeWithMetadata(metadata)
                             } catch (e: Exception) {
                                 /* JSON parsing can fail if the page doesn't have proper meta tags or
                                  * if JavaScript execution fails. return partial metadata (title only).
@@ -200,7 +198,6 @@ class ExtractWebPageMetadataUseCaseAndroid(
                             }
                         }
                     }
-
                 /**
                  * Reference: https://developer.android.com/reference/android/webkit/WebViewClient#onReceivedError(android.webkit.WebView,%20android.webkit.WebResourceRequest,%20android.webkit.WebResourceError)
                  */
@@ -228,8 +225,6 @@ class ExtractWebPageMetadataUseCaseAndroid(
             }
             deferred.invokeOnCompletion { cleanup() }
             webView.loadUrl(url)
-
-            deferred.await()
         } catch (e: Exception) {
                   /* 
                     * WebView creation or setup can fail (e.g., WebView not available on device,
@@ -237,8 +232,8 @@ class ExtractWebPageMetadataUseCaseAndroid(
                     */
             Napier.w("Failed to create or load WebView", e, tag = LOG_TAG)
             completeWithMetadata(WebPageMetadata())
-            deferred.await()
         }
+        deferred.await()
     }
     @Serializable
     private data class JsMetadataResult(
@@ -249,6 +244,8 @@ class ExtractWebPageMetadataUseCaseAndroid(
     companion object {
         private const val WEBVIEW_TIMEOUT_MS = 10_000L
         private const val LOG_TAG = "ExtractWebPageMetadata"
+        private const val MIME_TYPE_TEXT_PLAIN = "text/plain"
+        private const val CHARSET_UTF8 = "utf-8"
     }
 }
 

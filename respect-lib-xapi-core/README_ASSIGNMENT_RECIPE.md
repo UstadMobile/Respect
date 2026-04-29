@@ -6,7 +6,11 @@ the assignee(s).
 
 ## Core
 
-* All statements include the Recipe ID in the 'category' context activity list.
+* Assignment statements include the Recipe ID ( https://id.ustadmobile.com/xapi/activities/assignment-recipe ) 
+  in the 'category' context activity list (this applies to the assignment statements, it does not
+  apply to statements about the assignees completion of assigned activities).
+* Statements about the assignees completion of assigned activities MUST include the activity id of 
+  the assignment in the contextActivities grouping property.
 * The agent of the assigned statement MUST be assignee (can be an Agent or Group)
 * Statements generate an Activity ID that is unique for a given an assignment. As normal, the 
   activity id should use a domain that the creator is authorized to use for this purpose.
@@ -84,6 +88,12 @@ Use the following verb:
       }
     },
     "contextActivities": {
+      "category": [
+         {
+           "id": "https://id.ustadmobile.com/xapi/activities/assignment-recipe",
+           "objectType": "Activity"
+         }
+      ]
       "grouping": [
         {
           "id": "https://app.provider.com/activities/math/algebra1",

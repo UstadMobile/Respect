@@ -11,7 +11,7 @@ the assignee(s).
   apply to statements about the assignees completion of assigned activities).
 * Statements about the assignees completion of assigned activities MUST include the activity id of 
   the assignment in the contextActivities grouping property.
-* The agent of the assigned statement MUST be assignee (can be an Agent or Group)
+* The agent of the assigned statement MUST be the assignee (can be an Agent or Group)
 * Statements generate an Activity ID that is unique for a given an assignment. As normal, the 
   activity id should use a domain that the creator is authorized to use for this purpose.
 * If an assignment is changed then a new assigned statement is issued with the updated assignment. 

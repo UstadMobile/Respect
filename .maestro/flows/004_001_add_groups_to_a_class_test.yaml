@@ -70,7 +70,7 @@ onFlowComplete:
 - tapOn:
     id: "delete_group_btn"
 - assertVisible: "Permanently delete?"
-- assertVisible: "Permanently delete this playlist"
+- assertVisible: "Permanently delete this group"
 - assertVisible: "Cancel"
 - assertVisible: "Delete"
 - tapOn: "Cancel"

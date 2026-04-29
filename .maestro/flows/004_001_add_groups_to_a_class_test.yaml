@@ -17,7 +17,6 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-- runFlow: "subflows/admin_add_app.yaml"
 - runFlow: "subflows/admin_add_class_with_members.yaml"
 
 - clearState: world.respect.app
@@ -67,6 +66,14 @@ onFlowComplete:
     text: "Test Group"
 - assertVisible: "StudentA USER"
 - assertVisible: "StudentC USER"
+- assertVisible: "2 Students"
+- tapOn:
+    id: "delete_group_btn"
+- assertVisible: "Permanently delete?"
+- assertVisible: "Permanently delete this playlist"
+- assertVisible: "Cancel"
+- assertVisible: "Delete"
+- tapOn: "Cancel"
 - assertVisible:
     id: "delete_group_btn"
 - tapOn:
@@ -77,9 +84,12 @@ onFlowComplete:
     id: "app_title"
     text: "Test Group"
 - assertVisible: "StudentD USER"
+- assertVisible: "3 Students"
 - back
 - assertVisible:
     id: "app_title"
     text: "TestClass"
 - scrollUntilVisible:
-      element: "Test Group"
+      element: "Test Group (3)"
+- assertVisible: "Groups (1)"
+- assertVisible: "Test Group (3)"

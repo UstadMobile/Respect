@@ -203,6 +203,8 @@ class ClazzDetailViewModel(
 
                 if (groupIds.isNotEmpty()) {
                     loadGroupDetails(groupIds)
+                } else {
+                    _uiState.update { it.copy(groups = emptyList()) }
                 }
             }
         }

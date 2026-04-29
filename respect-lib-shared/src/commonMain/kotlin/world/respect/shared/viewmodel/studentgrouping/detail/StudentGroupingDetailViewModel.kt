@@ -16,6 +16,8 @@ import kotlinx.serialization.json.putJsonArray
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
@@ -47,6 +49,7 @@ data class StudentGroupingDetailUiState(
     val groupName: String = "",
     val groupMembers: List<String> = emptyList(),
     val showDeleteGroupDialog: Boolean = false,
+    val clazz: DataLoadState<Clazz> = DataLoadingState(),
 )
 
 class StudentGroupingDetailViewModel(
@@ -85,6 +88,13 @@ class StudentGroupingDetailViewModel(
             ).collect {
                 loadGroupDetail()
             }
+        }
+
+        viewModelScope.launch {
+            schoolDataSource.classDataSource.findByGuidAsFlow(route.classId)
+                .collect { clazz ->
+                    _uiState.update { it.copy(clazz = clazz) }
+                }
         }
     }
 
@@ -141,40 +151,31 @@ class StudentGroupingDetailViewModel(
 
                 schoolDataSource.xapiStatementDataSource.store(listOf(statement))
 
-                val clazz = schoolDataSource.classDataSource.findByGuidAsFlow(route.classId)
-                    .let { it ->
-                        var result: Clazz? = null
-                        it.collect { state ->
-                            result = state.dataOrNull()
-                            return@collect
-                        }
-                        result
+                // Remove group ID from class metadata
+                val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
+
+                val existingGroupIds = clazz.metadata
+                    ?.get(GROUP_IDS)
+                    ?.jsonArray
+                    ?.map { it.jsonPrimitive.content }
+                    ?.filter { it != route.groupId }
+                    ?: emptyList()
+
+                val updatedMetadata = buildJsonObject {
+                    clazz.metadata?.forEach { (key, value) ->
+                        if (key != GROUP_IDS) put(key, value)
                     }
-
-                if (clazz != null) {
-                    val existingGroupIds = clazz.metadata
-                        ?.get(GROUP_IDS)
-                        ?.jsonArray
-                        ?.map { it.jsonPrimitive.content }
-                        ?.filter { it != route.groupId }
-                        ?: emptyList()
-
-                    val updatedMetadata = buildJsonObject {
-                        clazz.metadata?.forEach { (key, value) ->
-                            if (key != GROUP_IDS) put(key, value)
-                        }
-                        putJsonArray(GROUP_IDS) {
-                            existingGroupIds.forEach { add(it) }
-                        }
+                    putJsonArray(GROUP_IDS) {
+                        existingGroupIds.forEach { add(it) }
                     }
-
-                    val updatedClazz = clazz.copy(
-                        metadata = updatedMetadata,
-                        lastModified = Clock.System.now()
-                    )
-
-                    schoolDataSource.classDataSource.store(listOf(updatedClazz))
                 }
+
+                val updatedClazz = clazz.copy(
+                    metadata = updatedMetadata,
+                    lastModified = Clock.System.now()
+                )
+
+                schoolDataSource.classDataSource.store(listOf(updatedClazz))
 
                 _navCommandFlow.tryEmit(NavCommand.PopUp())
 

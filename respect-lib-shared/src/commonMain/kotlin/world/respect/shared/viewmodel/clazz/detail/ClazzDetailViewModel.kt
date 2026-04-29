@@ -97,6 +97,7 @@ data class GroupDisplayData(
     val groupId: String,
     val groupName: String,
     val memberCount: Int,
+    val memberNames: List<String> = emptyList(),
 )
 
 class ClazzDetailViewModel(
@@ -443,7 +444,8 @@ class ClazzDetailViewModel(
                     GroupDisplayData(
                         groupId = group.account?.name ?: "",
                         groupName = group.name ?: "",
-                        memberCount = memberNames.size
+                        memberCount = memberNames.size,
+                        memberNames = memberNames,
                     )
                 }
 

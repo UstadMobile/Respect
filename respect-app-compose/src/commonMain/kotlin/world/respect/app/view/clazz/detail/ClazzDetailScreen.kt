@@ -1,15 +1,16 @@
 package world.respect.app.view.clazz.detail
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectListSortHeader
@@ -232,7 +234,10 @@ fun ClazzDetailScreen(
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
-                        text = stringResource(Res.string.teachers)
+                        text = if (teacherLazyPagingItems.itemCount > 0)
+                            "${stringResource(Res.string.teachers)} (${teacherLazyPagingItems.itemCount})"
+                        else
+                            stringResource(Res.string.teachers)
                     )
                 },
 
@@ -299,9 +304,10 @@ fun ClazzDetailScreen(
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
-                        text = stringResource(
-                            resource = Res.string.students
-                        )
+                        text = if (studentLazyPagingItems.itemCount > 0)
+                            "${stringResource(Res.string.students)} (${studentLazyPagingItems.itemCount})"
+                        else
+                            stringResource(Res.string.students)
                     )
                 },
 
@@ -371,9 +377,10 @@ fun ClazzDetailScreen(
                     headlineContent = {
                         Text(
                             modifier = Modifier.padding(top = 24.dp),
-                            text = stringResource(
-                                resource = Res.string.groups
-                            )
+                            text = if (uiState.groups.isNotEmpty())
+                                "${stringResource(Res.string.groups)} (${uiState.groups.size})"
+                            else
+                                stringResource(Res.string.groups)
                         )
                     },
 
@@ -425,14 +432,26 @@ fun ClazzDetailScreen(
                             onClickGroup(groupData.groupId)
                             },
                         leadingContent = {
-                            Icon(
-                                modifier = Modifier.size(40.dp).padding(8.dp),
-                                imageVector = Icons.Filled.Groups,
-                                contentDescription = ""
-                            )
+                            Box(
+                                modifier = Modifier.size(40.dp),
+                            ) {
+                                val displayMembers = groupData.memberNames.take(3)
+                                displayMembers.forEachIndexed { i, name ->
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(x = (i * 12).dp)
+                                            .zIndex((displayMembers.size - i).toFloat())
+                                    ) {
+                                        RespectPersonAvatar(
+                                            name = name,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            }
                         },
                         headlineContent = {
-                            Text(text = groupData.groupName)
+                            Text(text = "${groupData.groupName} (${groupData.memberCount})")
                         },
                         supportingContent = {
                             Text(text = "${groupData.memberCount} ${stringResource(Res.string.students)}")

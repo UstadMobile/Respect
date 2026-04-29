@@ -28,6 +28,7 @@ import world.respect.datalayer.school.model.Clazz.Companion.GROUP_IDS
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.xapi.model.VERB_CREATED
+import world.respect.datalayer.school.xapi.model.VERB_UPDATED
 import world.respect.datalayer.school.xapi.model.XapiAccount
 import world.respect.datalayer.school.xapi.model.XapiAgent
 import world.respect.datalayer.school.xapi.model.XapiGroup
@@ -70,6 +71,7 @@ data class StudentGroupingEditUiState(
     val clazz: DataLoadState<Clazz> = DataLoadingState(),
 
     )
+
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
     var respectAccountManager: RespectAccountManager,
@@ -123,7 +125,8 @@ class StudentGroupingEditViewModel(
         route.groupId?.let { groupId ->
             viewModelScope.launch {
                 try {
-                    val group = schoolDataSource.xapiActorDataSource.getGroupDetail(groupId) ?: return@launch
+                    val group = schoolDataSource.xapiActorDataSource.getGroupDetail(groupId)
+                        ?: return@launch
 
                     val memberNames = group.member
                         ?.mapNotNull { it.name }
@@ -210,9 +213,10 @@ class StudentGroupingEditViewModel(
                     )
                 )
 
+                val verbId = if (route.groupId != null) VERB_UPDATED else VERB_CREATED
                 val verb = XapiVerb(
-                    id = VERB_CREATED,
-                    display = mapOf("en" to VERB_CREATED)
+                    id = verbId,
+                    display = mapOf("en" to verbId)
                 )
 
                 val statement = XapiStatement(

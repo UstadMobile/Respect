@@ -11,6 +11,8 @@ const val VERB_CREATED = "http://adlnet.gov/expapi/verbs/create"
 
 const val VERB_UPDATED = "http://adlnet.gov/expapi/verbs/update"
 
+const val VERB_DELETED = "http://adlnet.gov/expapi/verbs/deleted"
+
 @Serializable
 data class XapiVerb(
     val id: String,

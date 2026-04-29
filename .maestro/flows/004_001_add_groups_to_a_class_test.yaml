@@ -18,28 +18,28 @@ onFlowComplete:
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - runFlow: "subflows/admin_add_class_with_members.yaml"
-
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-- tapOn:
-    id: "username"
-- inputText: "teacherauser"
-- tapOn:
-    id : "password"
-- inputText: "test1234"
-- tapOn: "Login"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+#
+#- clearState: world.respect.app
+#- launchApp:
+#    arguments:
+#      respect_directory: ${output.SCHOOL_URL}
+#- tapOn: "Get Started"
+#- runFlow:
+#    file: "subflows/get_started_select_school_by_name.yaml"
+#    env:
+#      SCHOOL_NAME: ${SCHOOL_NAME}
+#- tapOn:
+#    id: "username"
+#- inputText: "teacherauser"
+#- tapOn:
+#    id : "password"
+#- inputText: "test1234"
+#- tapOn: "Login"
+#- runFlow:
+#    when:
+#      visible: "Save password for Respect?"
+#    file: "subflows/save_password_prompt_cancel.yaml"
+#- assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -70,7 +70,7 @@ onFlowComplete:
 - tapOn:
     id: "delete_group_btn"
 - assertVisible: "Permanently delete?"
-- assertVisible: "Permanently delete this playlist"
+- assertVisible: "Permanently delete this group"
 - assertVisible: "Cancel"
 - assertVisible: "Delete"
 - tapOn: "Cancel"

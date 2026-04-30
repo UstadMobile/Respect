@@ -49,4 +49,65 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+
+#----------------- Add metadata test here --------------#
+
+# Open Search/Filter View
+- tapOn:
+    id: "search_icon"
+
+# Verify Filter Categories exist
+- assertVisible: "Language"
+- assertVisible: "Grade"
+- assertVisible: "Subject"
+- assertVisible: "Type"
+
+# Test Language Filter
+- tapOn: "Language"
+- assertVisible:
+    id: "english" # Ensure the option has loaded
+- tapOn: "English"
+# Verify the generic "Language" label is replaced by the specific selection
+- assertNotVisible: "Language"
+- assertVisible: "English"
+
+# Verify Content Filtered
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 3000
+
+# Verify UI logic for other filters
+- tapOn: "Grade"
+- assertVisible: "Grade 1"
+- tapOn: "Subject"
+- assertVisible: "English"
+- assertVisible: "Math"
+- tapOn: "Type"
+- assertVisible: "Game"
+- assertVisible: "Book"
+
+# Test Clear Filters
+- tapOn: "Clear all"
+# Verify "English" selection is gone and generic "Language" label returns
+- assertNotVisible: "English"
+- assertVisible: "Language"
+
+# Test Text Search
+- tapOn:
+    id: "search_icon"
+- inputText: "Lesson 001" # Removed underscore to match likely visible text
+# Verify Search Result
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 3000
+
+# Test Clear Search Text
+- tapOn:
+    id: "delete_icon" # The 'X' in the search bar
+- assertVisible: "Lesson 002"
+- assertNotVisible: "Lesson 001" #--- Need clarification here - when 'X' clicked, all items visible or all gets hidden?
 

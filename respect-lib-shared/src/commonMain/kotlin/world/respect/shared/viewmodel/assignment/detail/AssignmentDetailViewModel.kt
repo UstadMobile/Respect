@@ -66,6 +66,7 @@ data class AssignmentDetailUiState(
         flowOf(DataLoadingState())
     },
     val assignmentProgressRow: List<AssignmentResult> = emptyList(),
+    val statusCounts: Map<AssignmentStatusFilter, Int> = emptyMap(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
@@ -116,6 +117,7 @@ class AssignmentDetailViewModel(
                 _uiState.update {
                     it.copy(assignment = entity)
                 }
+                updateStatusCounts()
 
                 _appUiState.update {
                     it.copy(title = entity.dataOrNull()?.title?.asUiText())
@@ -241,17 +243,49 @@ class AssignmentDetailViewModel(
                         schoolDataSource.xapiStatementsResource
                             .getAssignmentResult(
                                 assignmentActivityId = assignmentActivityId,
-                                personUids = students.map { it.guid.toLong() }
                             )
                             .collect { progressList ->
                                 _uiState.update {
                                     it.copy(assignmentProgressRow = progressList)
                                 }
+                                updateStatusCounts()
                             }
                     }
                 }
         }
 
+    }
+
+    private fun updateStatusCounts() {
+        val students = _uiState.value.assignmentProgressRow.distinctBy { it.personUid }
+        val progressMap = _uiState.value.assignmentProgressRow.groupBy { it.personUid }
+        val units = _uiState.value.assignment.dataOrNull()?.learningUnits ?: emptyList()
+
+        val all = students.size
+        var completedCount = 0
+        var inProgressCount = 0
+        var notStartedCount = 0
+
+        students.forEach { student ->
+            val results = progressMap[student.personUid] ?: emptyList()
+            val isCompleted = results.size == units.size && units.isNotEmpty() && results.all { it.completion == true }
+            val isStarted = results.any { it.completion == true || (it.progress ?: 0) > 0 }
+
+            when {
+                isCompleted -> completedCount++
+                isStarted -> inProgressCount++
+                else -> notStartedCount++
+            }
+        }
+
+        val counts = mapOf(
+            AssignmentStatusFilter.ALL to all,
+            AssignmentStatusFilter.COMPLETED to completedCount,
+            AssignmentStatusFilter.IN_PROGRESS to inProgressCount,
+            AssignmentStatusFilter.NOT_STARTED to notStartedCount
+        )
+
+        _uiState.update { it.copy(statusCounts = counts) }
     }
 
     private fun updateAppUiState() {

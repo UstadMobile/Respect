@@ -168,7 +168,7 @@ interface XapiStatementEntityDao {
         JOIN XapiActorEntity Actor ON Stmt.statementActorUid = Actor.actorUid
         JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo)
         WHERE CtxJoin.scajToActivityUid = :assignmentActivityUidNum
-        GROUP BY Actor.actorAccountName, Stmt.statementObjectActivityId
+        GROUP BY Stmt.statementActorUid, Stmt.statementObjectActivityId
     """)
     fun getAssignmentProgressFlow(
         assignmentActivityUidNum: Long,

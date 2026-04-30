@@ -1,9 +1,8 @@
 package world.respect.shared.util
 
 enum class AssignmentStatusFilter(val displayName: String) {
-    ALL("All (3)"),
-    COMPLETED("Completed (1)"),
-    IN_PROGRESS("In-progress (1)"),
-    NOT_STARTED("Not Started (1)")
+    ALL("All"),
+    COMPLETED("Completed"),
+    IN_PROGRESS("In-progress"),
+    NOT_STARTED("Not Started")
 }
-

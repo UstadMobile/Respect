@@ -66,7 +66,6 @@ class XapiStatementsResourceHttp(
 
     override fun getAssignmentResult(
         assignmentActivityId: String,
-        personUids: List<Long>
     ): Flow<List<AssignmentResult>> {
         TODO("Not yet implemented")
     }

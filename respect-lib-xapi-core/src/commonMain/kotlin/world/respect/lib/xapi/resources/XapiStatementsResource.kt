@@ -98,7 +98,6 @@ interface XapiStatementsResource {
 
     fun getAssignmentResult(
         assignmentActivityId: String,
-        personUids: List<Long>
     ): Flow<List<AssignmentResult>>
 
     suspend fun getLastStoredTimestampForActivity(activityId: String): Long?

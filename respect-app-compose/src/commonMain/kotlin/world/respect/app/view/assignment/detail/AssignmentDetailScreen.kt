@@ -62,7 +62,7 @@ import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
-import java.util.Locale
+import kotlin.math.roundToInt
 
 private const val NAME_COLUMN_WIDTH = 120
 private const val TASK_COLUMN_WIDTH = 80
@@ -135,7 +135,9 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
-                        val assignedTo = if (uiState.isStudent) uiState.personName else uiState.assignmentClass.dataOrNull()?.title ?: "-"
+                        val assignedTo =
+                            if (uiState.isStudent) uiState.personName else uiState.assignmentClass.dataOrNull()?.title
+                                ?: "-"
                         Text(
                             text = assignedTo,
                             style = MaterialTheme.typography.bodySmall,
@@ -151,6 +153,7 @@ fun AssignmentDetailScreen(
                 )
             }
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,12 +162,13 @@ fun AssignmentDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AssignmentStatusFilter.entries.forEach { filter ->
+                val count = uiState.statusCounts[filter] ?: 0
                 FilterChip(
                     selected = uiState.selectedStatusFilter == filter,
                     onClick = { onStatusFilterChanged(filter) },
                     label = {
                         Text(
-                            filter.displayName,
+                            text = "${filter.displayName} ($count)",
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -265,14 +269,18 @@ fun AssignmentDetailScreen(
                                             .horizontalScroll(horizontalScrollState)
                                     ) {
                                         units.forEach { unit ->
-                                            val progress = progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
-                                            val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() }
+                                            val progress =
+                                                progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
+                                            val percent = progress?.progress
+                                                ?: progress?.scoreScaled?.let { (it * 100).toInt() }
                                             GradeCell(percent, taskColWidth)
                                         }
                                         // Average Score Cell
-                                        val studentProgressValues = progressMap[student.personUid]?.values?.mapNotNull { 
-                                            it.progress ?: it.scoreScaled?.let { s -> (s * 100).toInt() }
-                                        }
+                                        val studentProgressValues =
+                                            progressMap[student.personUid]?.values?.mapNotNull {
+                                                it.progress
+                                                    ?: it.scoreScaled?.let { s -> (s * 100).toInt() }
+                                            }
                                         val avg = if (!studentProgressValues.isNullOrEmpty()) {
                                             studentProgressValues.average()
                                         } else null
@@ -311,20 +319,22 @@ fun StudentLearningUnitItem(
     uiState: AssignmentDetailUiState,
     onClick: () -> Unit
 ) {
-    val infoFlow = remember(unit.learningUnitManifestUrl) { uiState.learningUnitInfoFlow(unit.learningUnitManifestUrl) }
+    val infoFlow =
+        remember(unit.learningUnitManifestUrl) { uiState.learningUnitInfoFlow(unit.learningUnitManifestUrl) }
     val state by infoFlow.collectAsState(DataLoadingState())
     val publication = state.dataOrNull()
     val iconLink = publication?.images?.firstOrNull()
 
     // Use actual title from publication metadata if available
     val title = publication?.metadata?.title?.getTitle() ?: "Loading..."
-    
-    val progress = remember(uiState.assignmentProgressRow, unit.learningUnitManifestUrl, uiState.personGuid) {
-        uiState.assignmentProgressRow.find { 
-            it.personUid == uiState.personGuid && it.activityId == unit.learningUnitManifestUrl.toString() 
+
+    val progress =
+        remember(uiState.assignmentProgressRow, unit.learningUnitManifestUrl, uiState.personGuid) {
+            uiState.assignmentProgressRow.find {
+                it.personUid == uiState.personGuid && it.activityId == unit.learningUnitManifestUrl.toString()
+            }
         }
-    }
-    
+
     val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() } ?: 0
     val color = when {
         percent >= 90 -> Color(0xFFAED581) // TODO NEED TO CHANGE HARDCODED
@@ -355,7 +365,11 @@ fun StudentLearningUnitItem(
                         .background(color, RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(title.lastOrNull()?.toString() ?: "?", color = Color.White, style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        title.lastOrNull()?.toString() ?: "?",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                 }
             }
             if (percent > 90) {
@@ -363,7 +377,8 @@ fun StudentLearningUnitItem(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
                     tint = Color(0xFFAED581),
-                    modifier = Modifier.size(16.dp).background(Color.White, CircleShape).padding(1.dp)
+                    modifier = Modifier.size(16.dp).background(Color.White, CircleShape)
+                        .padding(1.dp)
                 )
             }
         }
@@ -388,7 +403,11 @@ fun StudentLearningUnitItem(
                 modifier = Modifier.size(32.dp).background(Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "$percent%", style = MaterialTheme.typography.labelSmall, fontSize = 8.sp)
+                Text(
+                    text = "$percent%",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 8.sp
+                )
             }
         } else {
             Text(
@@ -509,7 +528,7 @@ fun GradeCell(percent: Int?, width: Dp) {
         if (percent == null) {
             Box(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text("--", color = textColor, style = MaterialTheme.typography.bodySmall)
@@ -518,7 +537,7 @@ fun GradeCell(percent: Int?, width: Dp) {
             Box(
                 modifier = Modifier
                     .background(bgColor, shape = MaterialTheme.shapes.small)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text("${percent}%", color = textColor, style = MaterialTheme.typography.bodySmall)
@@ -542,16 +561,22 @@ fun AverageCell(avg: Double?, width: Dp) {
         contentAlignment = Alignment.Center
     ) {
         if (avg == null) {
-            Text("--", color = textColor, style = MaterialTheme.typography.bodySmall)
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("--", color = textColor, style = MaterialTheme.typography.bodySmall)
+            }
         } else {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(32.dp)
                     .background(bgColor, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    String.format(Locale.US, "%.1f%%", avg),
+                    text = "${avg.roundToInt()}%",
                     color = textColor,
                     style = MaterialTheme.typography.bodySmall
                 )

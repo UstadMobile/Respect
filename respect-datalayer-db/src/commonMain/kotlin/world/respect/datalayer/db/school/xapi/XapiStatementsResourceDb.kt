@@ -287,7 +287,6 @@ class XapiStatementsResourceDb(
     }
     override fun getAssignmentResult(
         assignmentActivityId: String,
-        personUids: List<Long>
     ): Flow<List<AssignmentResult>> {
         val assignmentUidNum = uidNumberMapper(assignmentActivityId)
         return schoolDb.getStatementDao().getAssignmentProgressFlow(

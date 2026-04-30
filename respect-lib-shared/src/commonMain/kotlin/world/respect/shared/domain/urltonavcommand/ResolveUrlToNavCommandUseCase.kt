@@ -6,6 +6,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.AccountList
+import world.respect.shared.navigation.Message
 import world.respect.shared.navigation.NavCommand
 
 /**
@@ -28,23 +29,26 @@ class ResolveUrlToNavCommandUseCase(
         return when (lastSegment) {
             CreateInviteLinkUseCase.PATH -> {
                 url.parameters[CreateInviteLinkUseCase.QUERY_PARAM]?.let { inviteCode ->
-                    if (respectAccountManager.activeAccount != null) {
-                        NavCommand.Navigate(
-                            destination = AccountList(inviteCode = inviteCode),
-                            clearBackStack = false
+                    val destination = if (respectAccountManager.activeAccount != null) {
+                        Message.create(
+                            schoolUrl = schoolUrl,
+                            code = inviteCode,
+                            canGoBack = canGoBack,
+                            linkStr = url.toString()
                         )
-
                     } else {
-                        NavCommand.Navigate(
-                            destination = AcceptInvite.create(
-                                schoolUrl = schoolUrl,
-                                code = inviteCode,
-                                canGoBack = canGoBack,
-                            ), clearBackStack = false
+
+                        AcceptInvite.create(
+                            schoolUrl = schoolUrl,
+                            code = inviteCode,
+                            canGoBack = canGoBack,
                         )
                     }
 
-
+                    NavCommand.Navigate(
+                        destination = destination,
+                        clearBackStack = false
+                    )
                 }
             }
             else -> null

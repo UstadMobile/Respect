@@ -15,14 +15,15 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
-import world.respect.datalayer.shared.paging.EmptyPagingSource
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.datalayer.school.model.PersonWithEnrollment
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
@@ -55,8 +56,7 @@ data class AccountListUiState(
     val accounts: List<RespectSessionAndPerson> = emptyList(),
     val isPendingExpanded: Boolean = true,
     val isSelectAccountMode : Boolean = false,
-    val pendingPersons: IPagingSourceFactory<Int, Person> =
-        IPagingSourceFactory { EmptyPagingSource() },
+    val pendingEnrolmentPerson: List<PersonWithEnrollment> = emptyList()
 ) {
     val showSelectedAccountProfileButton: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
@@ -80,15 +80,7 @@ class AccountListViewModel(
 
 
     val uiState = _uiState.asStateFlow()
-    private val pendingPersonsPagingSource = PagingSourceFactoryHolder {
-        schoolDataSource.personDataSource.listAsPagingSource(
-            DataLoadParams(),
-            PersonDataSource.GetListParams(
-                includeRelated = true,
-                filterByPersonStatus = PersonStatusEnum.PENDING_APPROVAL,
-            )
-        )
-    }
+
 
     private var emittedNavToGetStartedCommand = false
 
@@ -103,9 +95,43 @@ class AccountListViewModel(
         }
 
         viewModelScope.launch {
+            val parentGuid = respectAccountManager.activeAccount?.userGuid ?: return@launch
+
+            val children = schoolDataSource.personDataSource.list(
+                loadParams = DataLoadParams(),
+                params = PersonDataSource.GetListParams(
+                    common = GetListCommonParams(guid = parentGuid),
+                    includeRelated = true
+                )
+            ).dataOrNull()
+                ?.filter { it.guid != parentGuid }
+                .orEmpty()
+
+            val childMap = children.associateBy { it.guid }
+
+            val enrollments = schoolDataSource.enrollmentDataSource.list(
+                loadParams = DataLoadParams(),
+                listParams = EnrollmentDataSource.GetListParams(
+                    role = EnrollmentRoleEnum.PENDING_STUDENT
+                )
+            ).dataOrNull().orEmpty()
+
+            val pending = enrollments.mapNotNull { e ->
+                val person = childMap[e.personUid] ?: return@mapNotNull null
+
+                val clazz = schoolDataSource.classDataSource.findByGuid(
+                    params = DataLoadParams(),e.classUid
+                ).dataOrNull() ?: return@mapNotNull null
+
+                PersonWithEnrollment(person, clazz, e)
+            }
+
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
-                _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson)
+                _uiState.update {
+                    it.copy(
+                        selectedAccount = accountAndPerson,
+                        pendingEnrolmentPerson = pending
+                    )
                 }
             }
         }
@@ -184,11 +210,6 @@ class AccountListViewModel(
                     }
                 }
             }
-        }
-        _uiState.update {
-            it.copy(
-                pendingPersons = pendingPersonsPagingSource,
-            )
         }
     }
 

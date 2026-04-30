@@ -14,7 +14,6 @@ import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import kotlin.time.Clock
@@ -45,22 +44,13 @@ class RedeemInviteExistingUserUseCaseDb(
             schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(accountGuid))
                 ?.toPersonEntities()
                 ?.toModel()
-                ?.copy(
-                    status = if (approvalRequired) {
-                        PersonStatusEnum.PENDING_APPROVAL
-                    } else {
-                        PersonStatusEnum.ACTIVE
-                    },
-                    lastModified = timeNow,
-                )
                 ?.let { person ->
                     if (approvalRequired) {
                         person.copyWithInviteInfo(invite = redeemRequest.invite)
                     } else {
                         person
                     }
-                }
-                ?: throw IllegalArgumentException("existing person not found for guid: $accountGuid")
+                } ?: throw IllegalArgumentException("existing person not found for guid: $accountGuid")
                     .withHttpStatus(404)
 
         schoolDataSource.personDataSource.updateLocal(

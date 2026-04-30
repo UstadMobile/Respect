@@ -49,4 +49,54 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 
+# Navigate to the App list
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "My app"
+
+# Enter Edit Mode
+- tapOn:
+    id: "floating_action_button" # Edit Button
+
+# Modify Title
+- tapOn:
+    id: "title_name"
+- eraseText
+- inputText: "Metadata Test App"
+
+# 5. Modify Description (Crucial for Search test)
+- tapOn:
+    id: "input_description"
+- eraseText
+- inputText: "UniqueKeyword for testing"
+
+# Modify Metadata
+- tapOn: "Subject" # Taps the dropdown
+- tapOn: "Literacy" # Changed to specific subject
+- tapOn: "Grade" # Taps the dropdown
+- tapOn: "Grade 4-6" # Changed level
+
+# Save Changes
+- tapOn: "Save"
+- assertVisible: "Metadata Test App" # Verify return to details or list
+
+# --- VERIFICATION PHASE ---
+
+# Verify Visual Metadata (Curriculum Alignment)
+- assertVisible: "Literacy"
+- assertVisible: "Grade 4-6"
+
+# Verify Search by TITLE
+- tapOn:
+    id: "search_icon"
+- inputText: "Metadata Test App"
+- assertVisible: "Metadata Test App"
+
+# Verify Search by DESCRIPTION
+- tapOn:
+    id: "clear_all" # Clear previous search
+- inputText: "UniqueKeyword"
+- assertVisible: "Metadata Test App" # The app should appear even searching by description
 

@@ -1,5 +1,5 @@
 * The datalayer is split into two parts: SchoolDataSource for school-level data (users, student 
-  progress, etc) and RespectAppDataSource for app-wide data.
+  progress, etc) and RespectAppDataSource for app-wide data (e.g. school directories).
 * Any writable model class should implement the ```ModelWithTimes``` interface such that it can be
   synced
 * Models normally have a string uid (required as this UID may come from an external system). 

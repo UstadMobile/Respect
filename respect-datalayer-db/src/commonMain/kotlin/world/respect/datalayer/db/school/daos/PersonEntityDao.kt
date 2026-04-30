@@ -57,6 +57,7 @@ interface PersonEntityDao {
         roleTeacherPermissionRequired: Long = PermissionFlags.PERSON_TEACHER_WRITE,
         roleStudentPermissionRequired: Long = PermissionFlags.PERSON_STUDENT_WRITE,
         roleParentPermissionRequired: Long = PermissionFlags.PERSON_PARENT_WRITE,
+        roleSharedDevicePermissionRequired: Long = PermissionFlags.PERSON_STUDENT_READ,
     ): LastModifiedAndPermission
 
 
@@ -120,6 +121,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): Flow<List<PersonEntityWithRoles>>
 
     @Query("""
@@ -147,6 +149,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): List<PersonEntityWithRoles>
 
     @Transaction
@@ -190,6 +193,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): PagingSource<Int, PersonEntityWithRoles>
 
     @Query("""
@@ -220,6 +224,7 @@ interface PersonEntityDao {
         filterByPersonStatus: Int = 0,
         includeRelated: Boolean = false,
         includeDeleted: Boolean = false,
+        excludeSharedSchoolDevice: Boolean = false,
     ): PagingSource<Int, PersonListDetails>
 
     @Query("""
@@ -316,6 +321,7 @@ interface PersonEntityDao {
              WHEN ${PersonRoleEnum.TEACHER_INT} THEN ${PermissionFlags.PERSON_TEACHER_READ}
              WHEN ${PersonRoleEnum.STUDENT_INT} THEN ${PermissionFlags.PERSON_STUDENT_READ}
              WHEN ${PersonRoleEnum.PARENT_INT} THEN ${PermissionFlags.PERSON_PARENT_READ}
+              WHEN ${PersonRoleEnum.SHARED_SCHOOL_DEVICE_INT} THEN ${PermissionFlags.PERSON_STUDENT_READ}
              ELSE ${Long.MAX_VALUE}
         """
 
@@ -420,7 +426,13 @@ interface PersonEntityDao {
                               FROM PersonRoleEntity
                              WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash))
                       AND (:filterByPersonStatus = 0 OR PersonEntity.pStatus = :filterByPersonStatus)
-                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT})       
+                      AND (:includeDeleted OR PersonEntity.pStatus != ${PersonStatusEnum.TO_BE_DELETED_INT}) 
+                      AND (:excludeSharedSchoolDevice = 0 OR NOT EXISTS ( 
+                       SELECT 1
+                         FROM PersonRoleEntity
+                        WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                          AND PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SHARED_SCHOOL_DEVICE_INT}
+                  ))              
             ),
                 
             RelatedPersons(uidNum) AS (
@@ -435,6 +447,12 @@ interface PersonEntityDao {
                                  FROM Persons)
                        )
                    AND ($AUTHENTICATED_USER_PERSON_READ_PERMISSION_WHERE_CLAUSE_SQL)    
+                    AND (:excludeSharedSchoolDevice = 0 OR NOT EXISTS (  
+                    SELECT 1
+                      FROM PersonRoleEntity
+                     WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                       AND PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SHARED_SCHOOL_DEVICE_INT}
+               ))   
             ),
                 
             AllPersons(uidNum) AS (
@@ -462,6 +480,7 @@ interface PersonEntityDao {
                           WHEN ${PersonRoleEnum.TEACHER_INT} THEN :roleTeacherPermissionRequired
                           WHEN ${PersonRoleEnum.STUDENT_INT} THEN :roleStudentPermissionRequired
                           WHEN ${PersonRoleEnum.PARENT_INT} THEN :roleParentPermissionRequired
+                          WHEN ${PersonRoleEnum.SHARED_SCHOOL_DEVICE_INT} THEN :roleSharedDevicePermissionRequired
                           ELSE ${Long.MAX_VALUE}
                         END
                  )

@@ -35,10 +35,11 @@ data class ExternalLinkUiState(
     val titleError: UiText? = null,
     val step: Step = Step.URL,
     val isLoading: Boolean = false,
-)
-enum class Step {
-    URL,
-    METADATA
+) {
+    enum class Step {
+        URL,
+        METADATA
+    }
 }
 
 class ExternalLinkViewModel(
@@ -90,38 +91,29 @@ class ExternalLinkViewModel(
                 val metadata = extractWebPageMetadataUseCase(url)
                 _uiState.update {
                     it.copy(
-                        step = Step.METADATA,
+                        step = ExternalLinkUiState.Step.METADATA,
                         title = metadata.title ?: "",
                         description = metadata.description ?: "",
                         imageUrl = metadata.imageUrl,
                         isLoading = false
                     )
                 }
-                _appUiState.update { prev ->
-                    prev.copy(
-                        actionBarButtonState = ActionBarButtonUiState(
-                            visible = true,
-                            text = Res.string.done.asUiText(),
-                            onClick = ::onClickDone
-                        )
-                    )
-                }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        step = Step.METADATA,
+                        step = ExternalLinkUiState.Step.METADATA,
                         isLoading = false
                     )
                 }
-                _appUiState.update { prev ->
-                    prev.copy(
-                        actionBarButtonState = ActionBarButtonUiState(
-                            visible = true,
-                            text = Res.string.done.asUiText(),
-                            onClick = ::onClickDone
-                        )
+            }
+            _appUiState.update { prev ->
+                prev.copy(
+                    actionBarButtonState = ActionBarButtonUiState(
+                        visible = true,
+                        text = Res.string.done.asUiText(),
+                        onClick = ::onClickDone
                     )
-                }
+                )
             }
         }
     }

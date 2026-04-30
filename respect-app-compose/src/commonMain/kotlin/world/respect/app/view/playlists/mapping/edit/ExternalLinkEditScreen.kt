@@ -40,7 +40,6 @@ import world.respect.shared.generated.resources.title
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.playlists.mapping.edit.ExternalLinkUiState
 import world.respect.shared.viewmodel.playlists.mapping.edit.ExternalLinkViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.Step
 @Composable
 fun ExternalLinkScreenForViewModel(
     viewModel: ExternalLinkViewModel,
@@ -68,7 +67,7 @@ fun ExternalLinkScreen(
             .padding(top = 8.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        if (uiState.step == Step.URL) {
+        if (uiState.step == ExternalLinkUiState.Step.URL) {
             OutlinedTextField(
                 value = uiState.url,
                 onValueChange = onUrlChanged,
@@ -101,7 +100,7 @@ fun ExternalLinkScreen(
                 }
             }
         }
-        if (uiState.step == Step.METADATA) {
+        if (uiState.step == ExternalLinkUiState.Step.METADATA) {
 
             Column(
                 modifier = Modifier

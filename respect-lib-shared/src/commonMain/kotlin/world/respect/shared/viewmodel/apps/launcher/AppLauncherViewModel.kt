@@ -93,6 +93,7 @@ class AppLauncherViewModel(
         _appUiState.update {
             it.copy(
                 title = Res.string.apps.asUiText(),
+                settingsIconVisible =true,
                 onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
@@ -122,13 +123,11 @@ class AppLauncherViewModel(
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
-                val devModeEnabled = getDevModeEnabledUseCase()
                 _appUiState.update {
                     it.copy(
                         fabState = it.fabState.copy(
                             visible = isAdmin
                         ),
-                        settingsIconVisible = isAdmin && devModeEnabled,
                     )
                 }
                 _uiState.update {

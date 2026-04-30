@@ -426,6 +426,9 @@
     <string name="select_person">Select person</string>
     <string name="edit_person">Edit person</string>
 
+    <string name="default_language">Use system default (%1$s)</string>
+    <string name="choose_language">Choose your language</string>
+
     <string name="first_names">First names</string>
     <string name="mappings">Mappings</string>
     <string name="mapping">Mapping</string>

@@ -245,6 +245,7 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.domain.xapi.XapiDummyDataGenerator
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -385,6 +386,7 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
 
+    single { XapiDummyDataGenerator() }
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

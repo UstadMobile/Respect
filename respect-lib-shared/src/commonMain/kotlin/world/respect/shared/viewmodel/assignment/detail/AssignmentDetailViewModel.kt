@@ -31,16 +31,6 @@ import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.xapi.model.XapiAccount
-import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiActivityDefinition
-import world.respect.lib.xapi.model.XapiAgent
-import world.respect.lib.xapi.model.XapiContext
-import world.respect.lib.xapi.model.XapiContextActivities
-import world.respect.lib.xapi.model.XapiObjectType
-import world.respect.lib.xapi.model.XapiResult
-import world.respect.lib.xapi.model.XapiStatement
-import world.respect.lib.xapi.model.XapiVerb
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
@@ -54,9 +44,8 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import world.respect.lib.xapi.model.AssignmentResult
-import kotlin.time.Clock
+import world.respect.shared.domain.xapi.XapiDummyDataGenerator
 
 
 data class AssignmentDetailUiState(
@@ -79,6 +68,7 @@ class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val respectAppDataSource: RespectAppDataSource,
+    private val dummyDataGenerator: XapiDummyDataGenerator,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -183,58 +173,12 @@ class AssignmentDetailViewModel(
                         )
                     ).dataOrNull()?.let { students ->
 
-                        // TODO NEED TO CHANGE DUMMY DATAS
-                        // Create dummy statements for each student and learning unit
-                        val dummyStatements = students.flatMap { student ->
-                            assignment.learningUnits.map { ref ->
-                                XapiStatement(
-                                    id = Uuid.random(),
-                                    actor = XapiAgent(
-                                        name = student.fullName(),
-                                        account = XapiAccount(
-                                            homePage = schoolUrl,
-                                            name = student.fullName()
-                                        )
-                                    ),
-                                    verb = XapiVerb(
-                                        id = "http://adlnet.gov/expapi/verbs/completed",
-                                        display = mapOf("en-US" to "completed")
-                                    ),
-                                    `object` = XapiActivity(
-                                        id = ref.learningUnitManifestUrl.toString(),
-                                        definition = XapiActivityDefinition(
-                                            name = mapOf("en-US" to "Learning Unit"),
-                                            description = mapOf(
-                                                "en-US" to "A learning unit in the assignment"
-                                            )
-                                        )
-                                    ),
-                                    result = XapiResult(
-                                        score = XapiResult.Score(
-                                            scaled = 0.95F,
-                                            raw = 95.0F,
-                                            min = 0.0F,
-                                            max = 100.0F
-                                        ),
-                                        success = true,
-                                        completion = true,
-                                        duration = null
-                                    ),
-                                    context = XapiContext(
-                                        contextActivities = XapiContextActivities(
-                                            grouping = listOf(
-                                                XapiActivity(
-                                                    id = assignmentActivityId,
-                                                    objectType = XapiObjectType.Activity
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    timestamp = Clock.System.now(),
-                                    stored = Clock.System.now()
-                                )
-                            }
-                        }
+                        // Generate dummy statements using the generator
+                        val dummyStatements = dummyDataGenerator.generateDummyStatements(
+                            students = students,
+                            assignment = assignment,
+                            schoolUrl = schoolUrl
+                        )
 
                         // Post statements
                         schoolDataSource.xapiStatementsResource.post(dummyStatements)

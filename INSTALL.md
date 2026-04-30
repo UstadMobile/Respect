@@ -80,7 +80,7 @@ adb install app-android-launcher-release.apk
 ```
 
 When the app prompts you for a link, you should enter the link using the IP address of the server
-e.g. http://192.168.0.10:8087/ where 192.168.0.10 is the IP address of the PC running the server.
+e.g. http://10.1.2.3:8098/ where 10.1.2.3 is the IP address of the PC running the server.
 Using localhost on an Android device or emulator will **NOT** work. If you are using an Android
 emulator, you can use 10.0.2.2 which always points to the Android emulator host device.
 

@@ -127,8 +127,7 @@ Recommended:
 ```
 a2enmod deflate
 ```
-Apache mod deflate will compress the web version itself e.g. its own javascript, json, etc. 
-Content assets will be compressed by the server itself.
+Apache mod deflate will compress javascripts, JSON data, etc sent over the network. 
 
 Run the server using a script on startup or use the screen command.
 

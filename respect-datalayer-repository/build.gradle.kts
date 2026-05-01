@@ -10,6 +10,7 @@ plugins {
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     androidTarget {
@@ -49,6 +50,7 @@ kotlin {
             implementation(projects.respectServer)
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
+            implementation(projects.respectLibTestResources)
 
             implementation(libs.turbine)
             implementation(projects.respectDatalayerHttp)

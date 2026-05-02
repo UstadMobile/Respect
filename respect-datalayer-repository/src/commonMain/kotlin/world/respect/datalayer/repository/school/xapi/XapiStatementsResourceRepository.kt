@@ -1,5 +1,6 @@
 package world.respect.datalayer.repository.school.xapi
 
+import io.github.aakira.napier.Napier
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
@@ -37,6 +38,15 @@ class XapiStatementsResourceRepository(
     override suspend fun get(
         request: XapiStatementsResource.GetStatementsRequest
     ): XapiStatementsResource.GetStatementsResponse {
-        TODO("Not yet implemented")
+        try {
+            val remoteResult = remote.get(request)
+            if(remoteResult.statementResult.statements.isNotEmpty()) {
+                local.updateLocal(remoteResult.statementResult.statements)
+            }
+        }catch(e: Throwable) {
+            Napier.w("Could not contact remote", e)
+        }
+
+        return local.get(request)
     }
 }

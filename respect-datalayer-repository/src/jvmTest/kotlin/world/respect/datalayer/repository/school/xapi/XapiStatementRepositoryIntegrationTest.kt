@@ -75,4 +75,46 @@ class XapiStatementRepositoryIntegrationTest {
         }
     }
 
+    @Test
+    fun givenStatementOnServer_whenGetOnRepoCalled_thenWillBeFetched() {
+        runBlocking {
+            clientServerDatasourceTest(temporaryFolder.newFolder("test")) {
+                serverRouting {
+                    route("api/school/xapi") {
+                        XapiStatementsResourceRoute(
+                            statementResource = { serverSchoolDataSource.xapiStatementsResource },
+                            json = json,
+                        )
+                    }
+                }
+
+                server.start()
+
+                val client = clients.first()
+                val statement: XapiStatement = xapiSampleStatements().first().let {
+                    json.decodeFromJsonElement(it.jsonObject)
+                }
+
+                val stmtUuid = statement.id!!
+
+                serverSchoolDataSource.xapiStatementsResource.post(
+                    listOf(statement)
+                )
+
+                val stmtFromClient = client.schoolDataSource.xapiStatementsResource.get(
+                    request = XapiStatementsResource.GetStatementsRequest(
+                        params = XapiStatementsResource.GetStatementParams(
+                            statementId = stmtUuid,
+                        ),
+                        headers = XapiRequestHeaders()
+                    ),
+                ).statementResult.statements.firstOrNull()
+
+                assertNotNull(stmtFromClient)
+                assertEquals(stmtUuid, stmtFromClient.id)
+            }
+        }
+    }
+
+
 }

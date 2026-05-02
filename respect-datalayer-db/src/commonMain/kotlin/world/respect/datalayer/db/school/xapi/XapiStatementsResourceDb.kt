@@ -121,10 +121,26 @@ class XapiStatementsResourceDb(
         forceOverwrite: Boolean
     ) {
         //needs to check for existing statement, if existing, do nothing.
+        schoolDb.useWriterConnection { con ->
+            val storedTime = Clock.System.now()
 
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.map {
+                    it.copy(stored = storedTime)
+                }.forEach { statement ->
+                    val (stmtIdHi, stmtIdLo) = (statement.id?.toLongPair()
+                        ?: throw IllegalArgumentException("statement to store must have timestamps"))
+                    val timesInDb = schoolDb.getStatementDao().getTimestampsByUuid(
+                        statementIdHi = stmtIdHi,
+                        statementIdLo = stmtIdLo,
+                    )
 
-        list.forEach { statement ->
-            doUpsertStatement(statement)
+                    //Because statements are immutable, if it is already in the db, do NOTHING.
+                    if(timesInDb == null) {
+                        doUpsertStatement(statement)
+                    }
+                }
+            }
         }
     }
 

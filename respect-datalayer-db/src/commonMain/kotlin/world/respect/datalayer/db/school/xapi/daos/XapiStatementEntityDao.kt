@@ -9,6 +9,7 @@ import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
+import world.respect.datalayer.db.school.xapi.composites.XapiTimes
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
@@ -149,6 +150,19 @@ interface XapiStatementEntityDao {
         subStatementIdHi: Long,
         subStatementIdLo: Long,
     ): XapiSubstatementAndVerbEntity
+
+    @Query("""
+        SELECT XapiStatementEntity.stored AS timeStored,
+               XapiStatementEntity.timestamp AS timestamp
+          FROM XapiStatementEntity
+         WHERE XapiStatementEntity.statementIdHi = :statementIdHi
+           AND XapiStatementEntity.statementIdLo = :statementIdLo
+    """)
+    suspend fun getTimestampsByUuid(
+        statementIdHi: Long,
+        statementIdLo: Long,
+    ): XapiTimes?
+
 
 
     @RawQuery

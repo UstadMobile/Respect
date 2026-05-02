@@ -1,6 +1,5 @@
 package world.respect.lib.xapi.resources
 
-import io.ktor.http.parameters
 import io.ktor.util.StringValues
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -8,8 +7,6 @@ import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.ext.getUuidOrNull
-import world.respect.lib.xapi.ext.setIfNotNull
-import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult

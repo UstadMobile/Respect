@@ -1,7 +1,9 @@
 package world.respect.datalayer.repository.school.xapi
 
+import app.cash.turbine.test
 import io.ktor.server.routing.route
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.junit.Rule
@@ -13,7 +15,9 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.time.Duration.Companion.seconds
 
 class XapiStatementRepositoryIntegrationTest {
 
@@ -42,23 +46,31 @@ class XapiStatementRepositoryIntegrationTest {
                     json.decodeFromJsonElement(it.jsonObject)
                 }
 
-                val response = client.schoolDataSource.xapiStatementsResource.post(
+
+                val stmtUuid = statement.id!!
+
+                client.schoolDataSource.xapiStatementsResource.post(
                     listOf(statement)
                 )
 
-                //TODO: change this to something event based.
-                delay(1_000)
-
-                val stmtFromServer = serverSchoolDataSource.xapiStatementsResource.get(
-                    request = XapiStatementsResource.GetStatementsRequest(
-                        params = XapiStatementsResource.GetStatementParams(
-                            statementId = response.first(),
+                serverDb.invalidationTracker.createFlow(
+                    "XapiStatementEntity"
+                ).map {
+                    serverSchoolDataSource.xapiStatementsResource.get(
+                        request = XapiStatementsResource.GetStatementsRequest(
+                            params = XapiStatementsResource.GetStatementParams(
+                                statementId = stmtUuid,
+                            ),
+                            headers = XapiRequestHeaders()
                         ),
-                        headers = XapiRequestHeaders()
-                    ),
-                )
-
-                assertNotNull(stmtFromServer)
+                    )
+                }.filter {
+                    it.statementResult.statements.firstOrNull()?.id == stmtUuid
+                }.test(timeout = 5.seconds) {
+                    val stmtFromServer = awaitItem().statementResult.statements.firstOrNull()
+                    assertNotNull(stmtFromServer)
+                    assertEquals(stmtUuid, stmtFromServer.id)
+                }
             }
         }
     }

@@ -23,7 +23,7 @@ import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.xapi.XapiActivityDataSource
-import world.respect.datalayer.school.xapi.XapiActorDataSource
+import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 
 class SchoolDataSourceRepository(
@@ -151,8 +151,8 @@ class SchoolDataSourceRepository(
         )
     }
 
-    override val xapiActorDataSource: XapiActorDataSource
-        get() = local.xapiActorDataSource
+    override val xapiAgentsResource: XapiAgentsResource
+        get() = local.xapiAgentsResource
 
     override val xapiActivityDataSource: XapiActivityDataSource
         get() = local.xapiActivityDataSource

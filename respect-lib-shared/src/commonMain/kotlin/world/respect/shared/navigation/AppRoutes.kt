@@ -617,7 +617,10 @@ class LearningUnitViewer(
     }
 
 }
-
+@Serializable
+data class SelectAccount(
+    val inviteCode: String? = null,
+) : RespectAppRoute
 
 @Serializable
 data class AccountList(

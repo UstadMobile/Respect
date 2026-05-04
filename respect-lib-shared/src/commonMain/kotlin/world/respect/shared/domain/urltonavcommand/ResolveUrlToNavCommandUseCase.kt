@@ -5,7 +5,6 @@ import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
-import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Message
 import world.respect.shared.navigation.NavCommand
 

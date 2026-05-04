@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.json.JsonArray
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -65,6 +64,11 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
 import kotlin.getValue
 import kotlin.time.Clock
+import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.xapi.XapiRequestHeaders
+import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
 data class ClazzDetailUiState(
     val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
@@ -120,6 +124,9 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
+
+    val schoolSelfUrl = accountManager.activeAccount?.school?.self?.toString()
+    val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -187,26 +194,12 @@ class ClazzDetailViewModel(
                     it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
 
-                // Extract group IDs from metadata
-                val clazzData = clazz.dataOrNull()
-                val groupIds = if (clazzData != null) {
-                    extractGroupIdsFromMetadata(clazzData)
-                } else {
-                    emptyList()
-                }
-
                 _uiState.update {
-                    it.copy(
-                        clazz = clazz,
-                        groupIds = groupIds
-                    )
+                    it.copy(clazz = clazz)
                 }
 
-                if (groupIds.isNotEmpty()) {
-                    loadGroupDetails(groupIds)
-                } else {
-                    _uiState.update { it.copy(groups = emptyList()) }
-                }
+                // Load groups from xAPI statements
+                loadGroupsFromXapi()
             }
         }
 
@@ -421,21 +414,26 @@ class ClazzDetailViewModel(
         )
     }
 
-    private fun extractGroupIdsFromMetadata(clazz: Clazz): List<String> {
-        return try {
-            val metadata = clazz.metadata ?: return emptyList()
-            val groupIdsJsonArray = metadata["groupIds"] as? JsonArray
-            groupIdsJsonArray?.map { it.toString().trim('"') } ?: emptyList()
-        } catch (e: Throwable) {
-            Napier.w("Failed to extract group IDs from metadata", throwable = e)
-            emptyList()
-        }
-    }
-
-    private fun loadGroupDetails(groupIds: List<String>) {
+    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+    private fun loadGroupsFromXapi() {
         viewModelScope.launch {
             try {
-                val groups = schoolDataSource.xapiActorDataSource.getGroupsByIds(groupIds)
+
+                val response = schoolDataSource.xapiStatementsResource.get(
+                    XapiStatementsResource.GetStatementsRequest(
+                        params = XapiStatementsResource.GetStatementParams(
+                            verb = VERB_SAVED,
+                            activity = classActivityId,
+                            relatedActivities = true,
+                        ),
+                        headers = XapiRequestHeaders()
+                    )
+                )
+
+                val groups = response.statementResult.statements.mapNotNull { statement ->
+                    statement.`object` as? XapiGroup
+                }.distinctBy { it.account?.name }
+
                 val groupDisplayDataList = groups.map { group ->
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
                     Napier.i("Loaded Group: ${group.name}")
@@ -453,7 +451,8 @@ class ClazzDetailViewModel(
                     prev.copy(groups = groupDisplayDataList)
                 }
             } catch (e: Throwable) {
-                Napier.e("loadGroupDetails ERROR", throwable = e)
+                Napier.e("loadGroupsFromXapi ERROR", throwable = e)
+                _uiState.update { it.copy(groups = emptyList()) }
             }
         }
     }

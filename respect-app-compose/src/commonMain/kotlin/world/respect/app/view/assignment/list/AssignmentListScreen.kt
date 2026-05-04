@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.TimeZone
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.model.Assignment

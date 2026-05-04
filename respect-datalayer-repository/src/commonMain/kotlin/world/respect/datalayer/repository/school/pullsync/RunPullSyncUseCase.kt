@@ -2,7 +2,7 @@ package world.respect.datalayer.repository.school.pullsync
 
 import io.github.aakira.napier.Napier
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isLoadedOrNotModified

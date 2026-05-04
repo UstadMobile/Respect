@@ -28,16 +28,19 @@ import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObject
 import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementsRequest
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
-import world.respect.lib.xapi.XapiRequestHeaders
-import world.respect.lib.xapi.XapiResponseHeaders
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -47,7 +50,7 @@ class XapiStatementsResourceDb(
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
-) : XapiStatementsResourceLocal{
+) : XapiStatementsResourceLocal {
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -145,12 +148,13 @@ class XapiStatementsResourceDb(
     }
 
     override suspend fun get(
-        request: GetStatementsRequest,
-    ): XapiStatementsResource.GetStatementsResponse {
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams,
+    ): DataLoadState<XapiStatementResult> {
 
-        val statementIds = request.params.statementId?.toLongPair()
-        val format = request.params.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
-        val ascendingOrder = request.params.ascending ?: false
+        val statementIds = listParams.statementId?.toLongPair()
+        val format = listParams.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
+        val ascendingOrder = listParams.ascending ?: false
 
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
@@ -158,15 +162,15 @@ class XapiStatementsResourceDb(
                     schoolDb.getStatementEntityJsonDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
-                        agentUid = request.params.agent?.identifierHash(uidNumberMapper) ?: 0,
-                        verbUid = request.params.verb?.let { uidNumberMapper(it) } ?: 0,
-                        activityUid = request.params.activity?.let { uidNumberMapper(it) } ?: 0,
-                        relatedAgents = request.params.relatedAgents,
-                        relatedActivities = request.params.relatedActivities,
-                        since = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+                        verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
+                        activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                        relatedAgents = listParams.relatedAgents,
+                        relatedActivities = listParams.relatedActivities,
+                        since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
-                        limit = request.params.limit ?: DEFAULT_MAX_STATEMENTS,
+                        limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).map { entity ->
                         json.decodeFromString(
                             XapiStatementTransformingSerializer, entity.fullStatement
@@ -178,15 +182,15 @@ class XapiStatementsResourceDb(
                     schoolDb.getStatementDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
-                        agentUid = request.params.agent?.identifierHash(uidNumberMapper) ?: 0,
-                        verbUid = request.params.verb?.let { uidNumberMapper(it) } ?: 0,
-                        activityUid = request.params.activity?.let { uidNumberMapper(it) } ?: 0,
-                        relatedAgents = request.params.relatedAgents,
-                        relatedActivities = request.params.relatedActivities,
-                        since = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+                        verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
+                        activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                        relatedAgents = listParams.relatedAgents,
+                        relatedActivities = listParams.relatedActivities,
+                        since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
-                        limit = request.params.limit ?: DEFAULT_MAX_STATEMENTS,
+                        limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).map { entity ->
                         val substatementEntity = schoolDb.takeIf {
                             entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT
@@ -281,18 +285,20 @@ class XapiStatementsResourceDb(
                 }
 
 
-                XapiStatementsResource.GetStatementsResponse(
-                    statementResult = XapiStatementResult(
+                DataReadyState(
+                    data = XapiStatementResult(
                         statements = statements,
                         more = null,
                     ),
-                    headers = XapiResponseHeaders(
+                    metaInfo = DataLoadMetaInfo(
                         lastModified = if(ascendingOrder && statements.isNotEmpty()) {
-                            statements.last().stored ?: throw IllegalStateException("Stored statement must have stored set")
+                            statements.last().stored?.toEpochMilliseconds()
+                                ?: throw IllegalStateException("Stored statement must have stored set")
                         }else if(!ascendingOrder && statements.isNotEmpty()) {
-                            statements.first().stored ?: throw IllegalStateException("Stored statement must have stored set")
+                            statements.first().stored?.toEpochMilliseconds()
+                                ?: throw IllegalStateException("Stored statement must have stored set")
                         }else {
-                            Clock.System.now()
+                            Clock.System.now().toEpochMilliseconds()
                         }
                     )
                 )
@@ -302,13 +308,8 @@ class XapiStatementsResourceDb(
 
     override suspend fun getByUuid(uuid: Uuid): XapiStatement? {
         return get(
-            GetStatementsRequest(
-                params = XapiStatementsResource.GetStatementParams(
-                    statementId = uuid
-                ),
-                headers = XapiRequestHeaders()
-            )
-        ).statementResult.statements.firstOrNull()
+            listParams = GetStatementParams(statementId = uuid)
+        ).dataOrNull()?.statements?.firstOrNull()
     }
 
     override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {
@@ -318,4 +319,5 @@ class XapiStatementsResourceDb(
     companion object {
         const val DEFAULT_MAX_STATEMENTS = 5_000
     }
+
 }

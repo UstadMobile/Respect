@@ -1,7 +1,7 @@
 package world.respect.datalayer.school.opds.ext
 
 import io.ktor.http.Url
-import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.util.time.systemTimeInMillis

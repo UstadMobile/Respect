@@ -1,11 +1,16 @@
 package world.respect.datalayer.repository.school.xapi
 
 import io.github.aakira.napier.Napier
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -36,17 +41,18 @@ class XapiStatementsResourceRepository(
     }
 
     override suspend fun get(
-        request: XapiStatementsResource.GetStatementsRequest
-    ): XapiStatementsResource.GetStatementsResponse {
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams,
+    ): DataLoadState<XapiStatementResult> {
         try {
-            val remoteResult = remote.get(request)
-            if(remoteResult.statementResult.statements.isNotEmpty()) {
-                local.updateLocal(remoteResult.statementResult.statements)
+            val remoteResult = remote.get(listParams, dataLoadParams)
+            remoteResult.dataOrNull()?.statements.takeIf { it?.isNotEmpty() == true }?.also {
+                local.updateLocal(it)
             }
         }catch(e: Throwable) {
             Napier.w("Could not contact remote", e)
         }
 
-        return local.get(request)
+        return local.get(listParams, dataLoadParams)
     }
 }

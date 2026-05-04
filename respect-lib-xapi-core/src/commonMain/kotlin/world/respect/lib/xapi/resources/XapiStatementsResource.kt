@@ -3,6 +3,8 @@ package world.respect.lib.xapi.resources
 import io.ktor.util.StringValues
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.XapiResponseHeaders
@@ -93,9 +95,9 @@ interface XapiStatementsResource {
     ): List<Uuid>
 
     suspend fun get(
-        request: GetStatementsRequest,
-    ): GetStatementsResponse
-
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): DataLoadState<XapiStatementResult>
 
     companion object {
 

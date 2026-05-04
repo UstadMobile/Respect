@@ -1,8 +1,8 @@
 package world.respect.datalayer.repository.realm
 
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.model.Report
 

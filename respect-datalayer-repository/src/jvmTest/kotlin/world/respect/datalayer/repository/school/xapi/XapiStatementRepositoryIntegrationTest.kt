@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.XapiRequestHeaders
@@ -57,17 +58,14 @@ class XapiStatementRepositoryIntegrationTest {
                     "XapiStatementEntity"
                 ).map {
                     serverSchoolDataSource.xapiStatementsResource.get(
-                        request = XapiStatementsResource.GetStatementsRequest(
-                            params = XapiStatementsResource.GetStatementParams(
-                                statementId = stmtUuid,
-                            ),
-                            headers = XapiRequestHeaders()
-                        ),
-                    )
+                        listParams = XapiStatementsResource.GetStatementParams(
+                            statementId = stmtUuid,
+                        )
+                    ).dataOrNull()
                 }.filter {
-                    it.statementResult.statements.firstOrNull()?.id == stmtUuid
+                    it?.statements?.firstOrNull()?.id == stmtUuid
                 }.test(timeout = 5.seconds) {
-                    val stmtFromServer = awaitItem().statementResult.statements.firstOrNull()
+                    val stmtFromServer = awaitItem()?.statements?.firstOrNull()
                     assertNotNull(stmtFromServer)
                     assertEquals(stmtUuid, stmtFromServer.id)
                 }
@@ -102,13 +100,11 @@ class XapiStatementRepositoryIntegrationTest {
                 )
 
                 val stmtFromClient = client.schoolDataSource.xapiStatementsResource.get(
-                    request = XapiStatementsResource.GetStatementsRequest(
-                        params = XapiStatementsResource.GetStatementParams(
-                            statementId = stmtUuid,
-                        ),
-                        headers = XapiRequestHeaders()
+                    listParams = XapiStatementsResource.GetStatementParams(
+                        statementId = stmtUuid,
                     ),
-                ).statementResult.statements.firstOrNull()
+
+                ).dataOrNull()?.statements?.firstOrNull()
 
                 assertNotNull(stmtFromClient)
                 assertEquals(stmtUuid, stmtFromClient.id)

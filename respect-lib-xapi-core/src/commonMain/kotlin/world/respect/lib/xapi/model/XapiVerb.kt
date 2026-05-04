@@ -6,12 +6,8 @@ import kotlinx.serialization.Serializable
 const val VERB_COMPLETED = "http://adlnet.gov/expapi/verbs/completed"
 
 const val VERB_PROGRESSED = "http://adlnet.gov/expapi/verbs/progressed"
-
-const val VERB_CREATED = "http://adlnet.gov/expapi/verbs/create"
-
-const val VERB_UPDATED = "http://adlnet.gov/expapi/verbs/update"
-
-const val VERB_DELETED = "http://adlnet.gov/expapi/verbs/deleted"
+const val VERB_SAVED = "http://adlnet.gov/expapi/verbs/saved"
+const val VERB_VOIDED = "http://adlnet.gov/expapi/verbs/voided"
 
 @Serializable
 data class XapiVerb(

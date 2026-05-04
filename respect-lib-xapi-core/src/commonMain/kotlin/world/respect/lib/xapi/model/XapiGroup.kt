@@ -31,6 +31,7 @@ data class XapiGroup(
 
     companion object {
         const val RESULT_KEY_GROUP_UPDATED = "groupUpdated"
+        const val CLASS = "class/"
     }
 
     val isIdentified: Boolean = !isAnonymous

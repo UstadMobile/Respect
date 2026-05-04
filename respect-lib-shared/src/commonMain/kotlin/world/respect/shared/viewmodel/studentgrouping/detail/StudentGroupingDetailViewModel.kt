@@ -22,7 +22,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Clazz.Companion.GROUP_IDS
-import world.respect.lib.xapi.model.VERB_DELETED
+import world.respect.lib.xapi.model.VERB_VOIDED
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_group
@@ -138,8 +138,8 @@ class StudentGroupingDetailViewModel(
                 )
 
                 val verb = XapiVerb(
-                    id = VERB_DELETED,
-                    display = mapOf("en" to VERB_DELETED)
+                    id = VERB_VOIDED,
+                    display = mapOf("en" to VERB_VOIDED)
                 )
 
                 val statement = XapiStatement(

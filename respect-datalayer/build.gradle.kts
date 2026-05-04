@@ -23,6 +23,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.respectLibDataloadstate)
             api(projects.respectLibIhttpCore)
             api(projects.respectLibXxhash)
             api(projects.respectCredentials)

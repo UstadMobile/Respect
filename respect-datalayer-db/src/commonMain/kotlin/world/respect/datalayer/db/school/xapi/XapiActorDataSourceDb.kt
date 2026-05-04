@@ -3,7 +3,6 @@ package world.respect.datalayer.db.school.xapi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.ActorEntities
@@ -11,6 +10,7 @@ import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiGroup
 import kotlin.time.Instant
@@ -77,7 +77,7 @@ class XapiActorDataSourceDb(
 
     override suspend fun getPerson(
         actor: XapiActor,
-        dataLoadParams: DataLoadParams
+        xapiRequestHeaders: XapiRequestHeaders
     ) {
         TODO("Not yet implemented")
     }

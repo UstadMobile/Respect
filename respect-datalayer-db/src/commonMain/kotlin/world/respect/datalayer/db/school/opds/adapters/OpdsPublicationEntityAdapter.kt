@@ -1,8 +1,8 @@
 package world.respect.datalayer.db.school.opds.adapters
 
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.opds.OpdsParentType
 import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity

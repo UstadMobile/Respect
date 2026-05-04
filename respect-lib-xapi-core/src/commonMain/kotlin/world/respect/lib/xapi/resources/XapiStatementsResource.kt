@@ -1,20 +1,21 @@
 package world.respect.lib.xapi.resources
 
-import io.ktor.http.parameters
 import io.ktor.util.StringValues
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.serializers.InstantAsISO8601
-import world.respect.lib.xapi.XapiRequestHeaders
-import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.ext.getUuidOrNull
-import world.respect.lib.xapi.ext.setIfNotNull
-import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import kotlin.uuid.Uuid
 
+/**
+ * The xAPI Statements Resource
+ */
 interface XapiStatementsResource {
 
     enum class GetStatementFormatEnum(val value: String) {
@@ -74,16 +75,6 @@ interface XapiStatementsResource {
         }
     }
 
-    data class GetStatementsRequest(
-        val params: GetStatementParams,
-        val headers: XapiRequestHeaders,
-    )
-
-    data class GetStatementsResponse(
-        val statementResult: XapiStatementResult,
-        val headers: XapiResponseHeaders,
-    )
-
     /**
      * When a statement is received through the put API, the id from the parameter must be put
      * into the statement itself.
@@ -93,8 +84,14 @@ interface XapiStatementsResource {
     ): List<Uuid>
 
     suspend fun get(
-        request: GetStatementsRequest,
-    ): GetStatementsResponse
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): DataLoadState<XapiStatementResult>
+
+    fun getAsFlow(
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiStatementResult>>
 
 
     companion object {

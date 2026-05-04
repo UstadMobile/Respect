@@ -21,7 +21,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull

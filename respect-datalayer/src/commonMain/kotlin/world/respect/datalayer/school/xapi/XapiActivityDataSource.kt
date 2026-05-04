@@ -1,6 +1,6 @@
 package world.respect.datalayer.school.xapi
 
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.model.XapiActivity
 
 

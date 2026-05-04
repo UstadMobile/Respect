@@ -4,6 +4,8 @@ import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
@@ -16,6 +18,7 @@ import world.respect.datalayer.db.school.xapi.adapters.identifierHash
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
+import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -28,15 +31,19 @@ import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObject
 import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
+import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementsRequest
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
-import world.respect.lib.xapi.XapiResponseHeaders
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -46,7 +53,7 @@ class XapiStatementsResourceDb(
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
-) : XapiStatementsResourceLocal{
+) : XapiStatementsResourceLocal {
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -98,6 +105,101 @@ class XapiStatementsResourceDb(
         )
     }
 
+    private suspend fun List<XapiStatementAndJsonEntities>.mapToCanonicalStatements(
+        idOnly: Boolean
+    ): List<XapiStatement> {
+        return map { entity ->
+            val substatementEntity = schoolDb.takeIf {
+                entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT
+            }?.getStatementDao()?.getEntityForSubstatement(
+                subStatementIdHi = entity.stmtEntity.statementObjectUid1,
+                subStatementIdLo = entity.stmtEntity.statementObjectUid2,
+            )
+
+            //now get StatementContextActivityJoins
+            val contextActivityJoins = schoolDb.getStatementContextActivityJoinDao()
+                .findAllByStatementIds(
+                    statementIdHi = entity.stmtEntity.statementIdHi,
+                    statementIdLo = entity.stmtEntity.statementIdLo,
+                    statementIdHi2 = substatementEntity?.stmtEntity?.statementIdHi ?: 0,
+                    statementIdLo2 = substatementEntity?.stmtEntity?.statementIdLo ?: 0,
+                )
+
+            val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao()
+                .takeIf { !idOnly }
+                ?.findByVerbUidPair(
+                    uid1 = entity.verbEntity.verbUid,
+                    uid2 = substatementEntity?.verbEntity?.verbUid ?: 0,
+                ) ?: emptyList()
+
+            val verbs = listOfNotNull(
+                entity.verbEntity, substatementEntity?.verbEntity,
+            ).map { verbEntity ->
+                VerbEntities(
+                    verbEntity = verbEntity,
+                    verbLangMapEntries = verbLangMapEntries.filter {
+                        it.vlmeVerbUid == verbEntity.verbUid
+                    }
+                ).toModel()
+            }
+
+            val allActorUids = entity.stmtEntity.allActorUids().appendIfNotNull(
+                substatementEntity?.stmtEntity?.allActorUids()
+            )
+
+            val actorEntities = schoolDb.getActorDao().findByUidList(
+                uids = allActorUids
+            )
+
+            val groupMemberJoins = schoolDb.getGroupMemberActorJoinDao().findByGroupActorUidList(
+                uidList = allActorUids,
+                excludeIdentifiedGroups = idOnly,
+            )
+
+            val actors = actorEntities.filter {
+                //Filter out agents that are referenced by being group members
+                it.actorUid in allActorUids
+            }.distinctBy {
+                it.actorUid
+            }.map { actorEntity ->
+                //Passing through all actor entitie is harmless because the ActorEntities.toModel
+                //will use the group member joins to select the actor entity for an agent member of
+                //the group
+                ActorEntities(
+                    actor = actorEntity,
+                    groupMemberJoins = groupMemberJoins.filter {
+                        it.gmajGroupActorUid == actorEntity.actorUid
+                    },
+                    groupMemberAgents = actorEntities,
+                ).toModel(idOnlyFormat = idOnly)
+            }
+
+            val activities = schoolDb.getActivityEntityDao()
+                .takeIf { !idOnly }
+                ?.findByUidList(
+                    entity.stmtEntity.allActivityUids(contextActivityJoins).appendIfNotNull(
+                        substatementEntity?.stmtEntity?.allActivityUids(contextActivityJoins)
+                    )
+                )?.map { it.toModel(json) } ?: emptyList()
+
+            StatementEntities(
+                statements = listOfNotNull(
+                    entity.stmtEntity, substatementEntity?.stmtEntity
+                ),
+                statementEntityJson = emptyList(),
+                statementContextActivityJoins = contextActivityJoins,
+            ).toModel(
+                json = json,
+                statementIdHi = entity.stmtEntity.statementIdHi,
+                statementIdLo = entity.stmtEntity.statementIdLo,
+                uidNumberMapper = uidNumberMapper,
+                verbs = verbs,
+                actors = actors,
+                activities = activities
+            )
+        }
+    }
+
 
     override suspend fun post(list: List<XapiStatement>): List<Uuid> {
         val statementsWithIdsSet = list.map {
@@ -120,20 +222,37 @@ class XapiStatementsResourceDb(
         forceOverwrite: Boolean
     ) {
         //needs to check for existing statement, if existing, do nothing.
+        schoolDb.useWriterConnection { con ->
+            val storedTime = Clock.System.now()
 
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.map {
+                    it.copy(stored = storedTime)
+                }.forEach { statement ->
+                    val (stmtIdHi, stmtIdLo) = (statement.id?.toLongPair()
+                        ?: throw IllegalArgumentException("statement to store must have timestamps"))
+                    val timesInDb = schoolDb.getStatementDao().getTimestampsByUuid(
+                        statementIdHi = stmtIdHi,
+                        statementIdLo = stmtIdLo,
+                    )
 
-        list.forEach { statement ->
-            doUpsertStatement(statement)
+                    //Because statements are immutable, if it is already in the db, do NOTHING.
+                    if(timesInDb == null) {
+                        doUpsertStatement(statement)
+                    }
+                }
+            }
         }
     }
 
     override suspend fun get(
-        request: GetStatementsRequest,
-    ): XapiStatementsResource.GetStatementsResponse {
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams,
+    ): DataLoadState<XapiStatementResult> {
 
-        val statementIds = request.params.statementId?.toLongPair()
-        val format = request.params.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
-        val ascendingOrder = request.params.ascending ?: false
+        val statementIds = listParams.statementId?.toLongPair()
+        val format = listParams.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
+        val ascendingOrder = listParams.ascending
 
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
@@ -141,146 +260,121 @@ class XapiStatementsResourceDb(
                     schoolDb.getStatementEntityJsonDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
-                        agentUid = request.params.agent?.identifierHash(uidNumberMapper) ?: 0,
-                        verbUid = request.params.verb?.let { uidNumberMapper(it) } ?: 0,
-                        activityUid = request.params.activity?.let { uidNumberMapper(it) } ?: 0,
-                        relatedAgents = request.params.relatedAgents,
-                        relatedActivities = request.params.relatedActivities,
-                        since = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+                        verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
+                        activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                        relatedAgents = listParams.relatedAgents,
+                        relatedActivities = listParams.relatedActivities,
+                        since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
-                        limit = request.params.limit ?: DEFAULT_MAX_STATEMENTS,
+                        limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).map { entity ->
                         json.decodeFromString(
                             XapiStatementTransformingSerializer, entity.fullStatement
                         )
                     }
                 }else {
-                    val idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
-
                     schoolDb.getStatementDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
-                        agentUid = request.params.agent?.identifierHash(uidNumberMapper) ?: 0,
-                        verbUid = request.params.verb?.let { uidNumberMapper(it) } ?: 0,
-                        activityUid = request.params.activity?.let { uidNumberMapper(it) } ?: 0,
-                        relatedAgents = request.params.relatedAgents,
-                        relatedActivities = request.params.relatedActivities,
-                        since = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = request.params.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+                        verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
+                        activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                        relatedAgents = listParams.relatedAgents,
+                        relatedActivities = listParams.relatedActivities,
+                        since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
-                        limit = request.params.limit ?: DEFAULT_MAX_STATEMENTS,
-                    ).map { entity ->
-                        val substatementEntity = schoolDb.takeIf {
-                            entity.stmtEntity.statementObjectType == XapiStatementEntityObjectTypeEnum.SUBSTATEMENT
-                        }?.getStatementDao()?.getEntityForSubstatement(
-                            subStatementIdHi = entity.stmtEntity.statementObjectUid1,
-                            subStatementIdLo = entity.stmtEntity.statementObjectUid2,
-                        )
-
-                        //now get StatementContextActivityJoins
-                        val contextActivityJoins = schoolDb.getStatementContextActivityJoinDao()
-                            .findAllByStatementIds(
-                                statementIdHi = entity.stmtEntity.statementIdHi,
-                                statementIdLo = entity.stmtEntity.statementIdLo,
-                                statementIdHi2 = substatementEntity?.stmtEntity?.statementIdHi ?: 0,
-                                statementIdLo2 = substatementEntity?.stmtEntity?.statementIdLo ?: 0,
-                            )
-
-                        val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao()
-                            .takeIf { !idOnly }
-                            ?.findByVerbUidPair(
-                                uid1 = entity.verbEntity.verbUid,
-                                uid2 = substatementEntity?.verbEntity?.verbUid ?: 0,
-                            ) ?: emptyList()
-
-                        val verbs = listOfNotNull(
-                            entity.verbEntity, substatementEntity?.verbEntity,
-                        ).map { verbEntity ->
-                            VerbEntities(
-                                verbEntity = verbEntity,
-                                verbLangMapEntries = verbLangMapEntries.filter {
-                                    it.vlmeVerbUid == verbEntity.verbUid
-                                }
-                            ).toModel()
-                        }
-
-                        val allActorUids = entity.stmtEntity.allActorUids().appendIfNotNull(
-                            substatementEntity?.stmtEntity?.allActorUids()
-                        )
-
-                        val actorEntities = schoolDb.getActorDao().findByUidList(
-                            uids = allActorUids
-                        )
-
-                        val groupMemberJoins = schoolDb.getGroupMemberActorJoinDao().findByGroupActorUidList(
-                            uidList = allActorUids,
-                            excludeIdentifiedGroups = idOnly,
-                        )
-
-                        val actors = actorEntities.filter {
-                            //Filter out agents that are referenced by being group members
-                            it.actorUid in allActorUids
-                        }.distinctBy {
-                            it.actorUid
-                        }.map { actorEntity ->
-                            //Passing through all actor entitie is harmless because the ActorEntities.toModel
-                            //will use the group member joins to select the actor entity for an agent member of
-                            //the group
-                            ActorEntities(
-                                actor = actorEntity,
-                                groupMemberJoins = groupMemberJoins.filter {
-                                    it.gmajGroupActorUid == actorEntity.actorUid
-                                },
-                                groupMemberAgents = actorEntities,
-                            ).toModel(idOnlyFormat = idOnly)
-                        }
-
-                        val activities = schoolDb.getActivityEntityDao()
-                            .takeIf { !idOnly }
-                            ?.findByUidList(
-                                entity.stmtEntity.allActivityUids(contextActivityJoins).appendIfNotNull(
-                                    substatementEntity?.stmtEntity?.allActivityUids(contextActivityJoins)
-                                )
-                            )?.map { it.toModel(json) } ?: emptyList()
-
-                        StatementEntities(
-                            statements = listOfNotNull(
-                                entity.stmtEntity, substatementEntity?.stmtEntity
-                            ),
-                            statementEntityJson = emptyList(),
-                            statementContextActivityJoins = contextActivityJoins,
-                        ).toModel(
-                            json = json,
-                            statementIdHi = entity.stmtEntity.statementIdHi,
-                            statementIdLo = entity.stmtEntity.statementIdLo,
-                            uidNumberMapper = uidNumberMapper,
-                            verbs = verbs,
-                            actors = actors,
-                            activities = activities
-                        )
-                    }
-
+                        limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                    ).mapToCanonicalStatements(
+                        idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
+                    )
                 }
 
-
-                XapiStatementsResource.GetStatementsResponse(
-                    statementResult = XapiStatementResult(
+                DataReadyState(
+                    data = XapiStatementResult(
                         statements = statements,
                         more = null,
                     ),
-                    headers = XapiResponseHeaders(
+                    metaInfo = DataLoadMetaInfo(
                         lastModified = if(ascendingOrder && statements.isNotEmpty()) {
-                            statements.last().stored ?: throw IllegalStateException("Stored statement must have stored set")
+                            statements.last().stored?.toEpochMilliseconds()
+                                ?: throw IllegalStateException("Stored statement must have stored set")
                         }else if(!ascendingOrder && statements.isNotEmpty()) {
-                            statements.first().stored ?: throw IllegalStateException("Stored statement must have stored set")
+                            statements.first().stored?.toEpochMilliseconds()
+                                ?: throw IllegalStateException("Stored statement must have stored set")
                         }else {
-                            Clock.System.now()
+                            Clock.System.now().toEpochMilliseconds()
                         }
                     )
                 )
             }
         }
+    }
+
+    override fun getAsFlow(
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiStatementResult>> {
+        val statementIds = listParams.statementId?.toLongPair()
+        val format = listParams.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
+
+        return if(format == XapiStatementsResource.GetStatementFormatEnum.EXACT) {
+            schoolDb.getStatementEntityJsonDao().listAsFlow(
+                statementIdHi = statementIds?.first ?: 0,
+                statementIdLo = statementIds?.second ?: 0,
+                agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+                verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
+                activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                relatedAgents = listParams.relatedAgents,
+                relatedActivities = listParams.relatedActivities,
+                since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                ascending = listParams.ascending,
+                limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+            ).map { list ->
+                DataReadyState(
+                    data = XapiStatementResult(
+                        statements = list.map { entity ->
+                            json.decodeFromString(
+                                XapiStatementTransformingSerializer, entity.fullStatement
+                            )
+                        },
+                        more = null
+                    )
+                )
+            }
+        }else {
+            schoolDb.getStatementDao().listAsFlow(
+                statementIdHi = statementIds?.first ?: 0,
+                statementIdLo = statementIds?.second ?: 0,
+                agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
+                verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
+                activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
+                relatedAgents = listParams.relatedAgents,
+                relatedActivities = listParams.relatedActivities,
+                since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
+                until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                ascending = listParams.ascending,
+                limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+            ).map { list ->
+                DataReadyState(
+                    data = XapiStatementResult(
+                        statements= list.mapToCanonicalStatements(
+                            idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
+                        ),
+                        more = null,
+                    )
+                )
+            }
+        }
+    }
+
+    override suspend fun getByUuid(uuid: Uuid): XapiStatement? {
+        return get(
+            listParams = GetStatementParams(statementId = uuid)
+        ).dataOrNull()?.statements?.firstOrNull()
     }
 
     override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {
@@ -290,4 +384,5 @@ class XapiStatementsResourceDb(
     companion object {
         const val DEFAULT_MAX_STATEMENTS = 5_000
     }
+
 }

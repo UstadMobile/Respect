@@ -52,7 +52,7 @@ interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val xapiActivityDataSource: XapiActivityDataSourceLocal
 
-    override val xapiActorDataSource: XapiActorDataSourceLocal
+    override val xapiAgentsResource: XapiActorDataSourceLocal
 
     override val xapiStatementsResource: XapiStatementsResourceLocal
 

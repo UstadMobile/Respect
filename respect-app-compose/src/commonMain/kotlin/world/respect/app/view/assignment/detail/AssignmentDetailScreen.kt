@@ -18,7 +18,7 @@ import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.opds.model.findIcons

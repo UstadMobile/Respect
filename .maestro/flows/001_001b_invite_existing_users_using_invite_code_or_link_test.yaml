@@ -192,7 +192,7 @@ onFlowComplete:
 
 # H) Teacher approve student's request to join the class
 - runFlow:
-    file: "school_user_login_flow.yaml"
+    file: "subflows/school_user_login_flow.yaml"
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"

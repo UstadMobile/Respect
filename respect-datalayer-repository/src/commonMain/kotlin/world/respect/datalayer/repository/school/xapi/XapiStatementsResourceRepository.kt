@@ -1,12 +1,16 @@
 package world.respect.datalayer.repository.school.xapi
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
+import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -55,4 +59,21 @@ class XapiStatementsResourceRepository(
 
         return local.get(listParams, dataLoadParams)
     }
+
+    override fun getAsFlow(
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiStatementResult>> {
+        return local.getAsFlow(
+            listParams = listParams, dataLoadParams = dataLoadParams
+        ).combineWithRemote(
+            remote.getAsFlow(listParams, dataLoadParams).onEach { remoteState ->
+                val remoteData = remoteState.dataOrNull()
+                if(remoteData != null) {
+                    local.updateLocal(remoteData.statements)
+                }
+            }
+        )
+    }
+
 }

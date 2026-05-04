@@ -26,16 +26,90 @@ interface XapiStatementEntityDao {
     @Query("SELECT * FROM XapiStatementEntity")
     suspend fun getAll(): List<XapiStatementEntity>
 
+    @Query(LIST_SQL)
+    suspend fun list(
+        statementIdHi: Long,
+        statementIdLo: Long,
+        agentUid: Long,
+        verbUid: Long,
+        activityUid: Long,
+        relatedAgents: Boolean,
+        relatedActivities: Boolean,
+        since: Long,
+        until: Long,
+        ascending: Boolean,
+        limit: Int,
+    ): List<XapiStatementAndJsonEntities>
+
+    @Query(LIST_SQL)
+    fun listAsFlow(
+        statementIdHi: Long,
+        statementIdLo: Long,
+        agentUid: Long,
+        verbUid: Long,
+        activityUid: Long,
+        relatedAgents: Boolean,
+        relatedActivities: Boolean,
+        since: Long,
+        until: Long,
+        ascending: Boolean,
+        limit: Int,
+    ): Flow<List<XapiStatementAndJsonEntities>>
+
+
+    /**
+     * When getting a StatementEntity that was used to represent a substatement, if the parent
+     * statement existed, it must also exist.
+     */
     @Query(
         """
-            /*
-             Begin statement query : This query is the same for both XapiStatementEntity
-             based return results (used for canonical and id results) and exact (which uses 
-             XapiStatementEntityJson).
-             
-             Normally: it would be better to handle this as a constant: however because its only in
-             two places and syntax highlighting is important for it, it is copy/pasted.
-            */
+        SELECT XapiStatementEntity.*, XapiVerbEntity.*
+          FROM XapiStatementEntity
+               JOIN XapiVerbEntity
+                    ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
+         WHERE XapiStatementEntity.statementIdHi = :subStatementIdHi
+           AND XapiStatementEntity.statementIdLo = :subStatementIdLo
+           AND XapiStatementEntity.isSubStatement
+    """
+    )
+    suspend fun getEntityForSubstatement(
+        subStatementIdHi: Long,
+        subStatementIdLo: Long,
+    ): XapiSubstatementAndVerbEntity
+
+    @Query("""
+        SELECT XapiStatementEntity.stored AS timeStored,
+               XapiStatementEntity.timestamp AS timestamp
+          FROM XapiStatementEntity
+         WHERE XapiStatementEntity.statementIdHi = :statementIdHi
+           AND XapiStatementEntity.statementIdLo = :statementIdLo
+    """)
+    suspend fun getTimestampsByUuid(
+        statementIdHi: Long,
+        statementIdLo: Long,
+    ): XapiTimes?
+
+
+
+    @RawQuery
+    suspend fun runReportQuery(query: RoomRawQuery): List<StatementReportRow>
+
+    companion object {
+
+        const val SINCE_UNSET = Long.MIN_VALUE
+
+        const val UNTIL_UNSET = Long.MAX_VALUE
+
+        /*
+         Begin statement query : This query is the same for both XapiStatementEntity
+         based return results (used for canonical and id results) and exact (which uses
+         XapiStatementEntityJson).
+
+         Normally: it would be better to handle this as a constant: however because its only in
+         two places and syntax highlighting is important for it, it is copy/pasted.
+        */
+        // language=RoomSql
+        const val LIST_SQL = """
             
             -- Get a list of all the actors that should be considered as related to agent parameter
             -- Eg the actor uid itself and any group members
@@ -115,64 +189,8 @@ interface XapiStatementEntityDao {
       ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
                CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
          LIMIT :limit      
-    """
-    )
-    suspend fun list(
-        statementIdHi: Long,
-        statementIdLo: Long,
-        agentUid: Long,
-        verbUid: Long,
-        activityUid: Long,
-        relatedAgents: Boolean,
-        relatedActivities: Boolean,
-        since: Long,
-        until: Long,
-        ascending: Boolean,
-        limit: Int,
-    ): List<XapiStatementAndJsonEntities>
 
-    /**
-     * When getting a StatementEntity that was used to represent a substatement, if the parent
-     * statement existed, it must also exist.
-     */
-    @Query(
         """
-        SELECT XapiStatementEntity.*, XapiVerbEntity.*
-          FROM XapiStatementEntity
-               JOIN XapiVerbEntity
-                    ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
-         WHERE XapiStatementEntity.statementIdHi = :subStatementIdHi
-           AND XapiStatementEntity.statementIdLo = :subStatementIdLo
-           AND XapiStatementEntity.isSubStatement
-    """
-    )
-    suspend fun getEntityForSubstatement(
-        subStatementIdHi: Long,
-        subStatementIdLo: Long,
-    ): XapiSubstatementAndVerbEntity
-
-    @Query("""
-        SELECT XapiStatementEntity.stored AS timeStored,
-               XapiStatementEntity.timestamp AS timestamp
-          FROM XapiStatementEntity
-         WHERE XapiStatementEntity.statementIdHi = :statementIdHi
-           AND XapiStatementEntity.statementIdLo = :statementIdLo
-    """)
-    suspend fun getTimestampsByUuid(
-        statementIdHi: Long,
-        statementIdLo: Long,
-    ): XapiTimes?
-
-
-
-    @RawQuery
-    suspend fun runReportQuery(query: RoomRawQuery): List<StatementReportRow>
-
-    companion object {
-
-        const val SINCE_UNSET = Long.MIN_VALUE
-
-        const val UNTIL_UNSET = Long.MAX_VALUE
 
     }
 

@@ -88,6 +88,11 @@ interface XapiStatementsResource {
         dataLoadParams: DataLoadParams = DataLoadParams(),
     ): DataLoadState<XapiStatementResult>
 
+    fun getAsFlow(
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiStatementResult>>
+
 
     companion object {
 

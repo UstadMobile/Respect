@@ -8,9 +8,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.parameters
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.ext.getAsDataLoadState
+import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.http.ext.xapiEndpointUrl
 import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
@@ -59,4 +61,23 @@ class XapiStatementsResourceHttp(
             }
         }
     }
+
+    override fun getAsFlow(
+        listParams: GetStatementParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiStatementResult>> {
+        return httpClient.getDataLoadResultAsFlow(
+            urlFn = {
+                xapiEndpointUrl(XapiStatementsResource.ENDPOINT_NAME)
+            },
+            dataLoadParams = dataLoadParams,
+        ) {
+            useTokenProvider(tokenProvider)
+
+            parameters {
+                setXapiGetStatementsParams(listParams, json)
+            }
+        }
+    }
+
 }

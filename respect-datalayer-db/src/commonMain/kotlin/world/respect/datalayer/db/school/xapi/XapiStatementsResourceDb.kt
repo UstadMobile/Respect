@@ -36,6 +36,7 @@ import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
+import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -123,10 +124,26 @@ class XapiStatementsResourceDb(
         forceOverwrite: Boolean
     ) {
         //needs to check for existing statement, if existing, do nothing.
+        schoolDb.useWriterConnection { con ->
+            val storedTime = Clock.System.now()
 
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                list.map {
+                    it.copy(stored = storedTime)
+                }.forEach { statement ->
+                    val (stmtIdHi, stmtIdLo) = (statement.id?.toLongPair()
+                        ?: throw IllegalArgumentException("statement to store must have timestamps"))
+                    val timesInDb = schoolDb.getStatementDao().getTimestampsByUuid(
+                        statementIdHi = stmtIdHi,
+                        statementIdLo = stmtIdLo,
+                    )
 
-        list.forEach { statement ->
-            doUpsertStatement(statement)
+                    //Because statements are immutable, if it is already in the db, do NOTHING.
+                    if(timesInDb == null) {
+                        doUpsertStatement(statement)
+                    }
+                }
+            }
         }
     }
 
@@ -310,6 +327,17 @@ class XapiStatementsResourceDb(
         val activityUidNum = uidNumberMapper(activityId)
         val timestamp = schoolDb.getStatementDao().getLastStoredTimestampForActivity(activityUidNum)
         return timestamp
+    }
+
+    override suspend fun getByUuid(uuid: Uuid): XapiStatement? {
+        return get(
+            GetStatementsRequest(
+                params = XapiStatementsResource.GetStatementParams(
+                    statementId = uuid
+                ),
+                headers = XapiRequestHeaders()
+            )
+        ).statementResult.statements.firstOrNull()
     }
 
     override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {

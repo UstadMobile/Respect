@@ -31,27 +31,22 @@ data class SampleXapiStatement(
     val name: String,
 )
 
+fun xapiSampleStatements(): List<SampleXapiStatement> {
+    return STATEMENT_NAMES.map { name ->
+        val resourceName = "$RES_DIR$name"
+        val statementStr = DummyClass::class.java.getResourceAsStream(resourceName)!!.bufferedReader()
+            .use { it.readText() }
+
+        SampleXapiStatement(
+            name = name,
+            string = statementStr,
+            jsonObject = Json.decodeFromString<JsonObject>(statementStr)
+        )
+    }
+}
+
 inline fun forXapiSampleStatements(
     block: (SampleXapiStatement) -> Unit
 ) {
-    STATEMENT_NAMES.forEach { name ->
-        try {
-            val resourceName = "$RES_DIR$name"
-            val statementStr =DummyClass::class.java.getResourceAsStream(resourceName)!!.bufferedReader()
-                .use { it.readText() }
-
-            block(
-                SampleXapiStatement(
-                    name = name,
-                    string = statementStr,
-                    jsonObject = Json.decodeFromString<JsonObject>(statementStr)
-                )
-            )
-        }catch(e: Throwable) {
-            println("Error handling statement: $name")
-            throw Exception("Error w/statement: $name", e)
-        }
-
-    }
-
+    xapiSampleStatements().forEach(block)
 }

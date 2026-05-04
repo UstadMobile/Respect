@@ -25,6 +25,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.respectLibSerializers)
+            api(projects.respectLibDataloadstate)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)

@@ -14,6 +14,9 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import kotlin.uuid.Uuid
 
+/**
+ * The xAPI Statements Resource
+ */
 interface XapiStatementsResource {
 
     enum class GetStatementFormatEnum(val value: String) {

@@ -160,7 +160,7 @@ class SchoolDataSourceDb(
         )
     }
 
-    override val xapiActorDataSource: XapiActorDataSourceLocal by lazy {
+    override val xapiAgentsResource: XapiActorDataSourceLocal by lazy {
         XapiActorDataSourceDb(
             schoolDb = schoolDb,
             authenticatedUser = authenticatedUser,
@@ -174,7 +174,7 @@ class SchoolDataSourceDb(
             schoolUrl = schoolUrl,
             uidNumberMapper = uidNumberMapper,
             xapiActivityDataSourceLocal = xapiActivityDataSource,
-            xapiActorDataSourceLocal = xapiActorDataSource,
+            xapiActorDataSourceLocal = xapiAgentsResource,
             json = json,
         )
     }

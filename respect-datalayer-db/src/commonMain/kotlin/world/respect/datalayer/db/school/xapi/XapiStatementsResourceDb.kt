@@ -38,12 +38,10 @@ import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.xapi.XapiRequestHeaders
-import world.respect.lib.xapi.XapiResponseHeaders
-import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams

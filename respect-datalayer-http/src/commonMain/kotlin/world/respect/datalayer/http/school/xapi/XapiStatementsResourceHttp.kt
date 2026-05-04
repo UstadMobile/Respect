@@ -19,7 +19,6 @@ import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.xapi.XapiResponseHeaders
 import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiStatement

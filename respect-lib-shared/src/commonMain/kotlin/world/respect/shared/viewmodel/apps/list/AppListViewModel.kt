@@ -21,8 +21,8 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.map
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findSelfLinks

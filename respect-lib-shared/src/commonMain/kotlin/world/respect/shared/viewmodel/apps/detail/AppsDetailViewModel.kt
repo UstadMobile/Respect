@@ -26,7 +26,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.SchoolApp
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager

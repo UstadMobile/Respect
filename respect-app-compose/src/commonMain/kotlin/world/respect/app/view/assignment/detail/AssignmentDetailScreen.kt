@@ -19,7 +19,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.resolve

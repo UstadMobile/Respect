@@ -21,8 +21,8 @@ import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef

@@ -3,14 +3,13 @@ package world.respect.datalayer.repository.school.xapi
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
-import world.respect.datalayer.ext.combineWithRemote
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.combineWithRemote
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource

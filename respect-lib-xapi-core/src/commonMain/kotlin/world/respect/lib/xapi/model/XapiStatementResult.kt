@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class XapiStatementResult(
+    @Serializable(with = XapiSingleItemToListSerializer::class)
     val statements: List<XapiStatement>,
     val more: String?
 )

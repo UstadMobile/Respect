@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.onEach
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.datalayer.ext.combineWithRemote
+import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.ext.requireSelfUrl

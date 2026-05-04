@@ -9,7 +9,7 @@ import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.datalayer.school.xapi.ext.addStatementIdIfNotPresent
 import world.respect.datalayer.school.xapi.ext.allActors
@@ -20,7 +20,6 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
-import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals

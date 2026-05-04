@@ -1,4 +1,4 @@
-package world.respect.datalayer.ext
+package world.respect.lib.dataloadstate.ext
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

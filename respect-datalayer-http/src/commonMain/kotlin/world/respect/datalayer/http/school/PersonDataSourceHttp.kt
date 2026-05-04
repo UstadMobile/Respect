@@ -14,7 +14,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.lib.dataloadstate.DataLayerParams
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.datalayer.ext.firstOrNotLoaded
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider

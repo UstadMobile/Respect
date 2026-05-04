@@ -12,7 +12,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.shared.paging.EmptyPagingSource

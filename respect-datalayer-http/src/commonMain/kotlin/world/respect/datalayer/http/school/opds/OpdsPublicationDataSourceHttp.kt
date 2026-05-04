@@ -12,7 +12,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.ext.map
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.opds.ext.asOpdsPublication

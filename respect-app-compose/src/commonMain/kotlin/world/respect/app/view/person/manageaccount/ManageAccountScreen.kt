@@ -32,7 +32,7 @@ import world.respect.app.components.appendStringRes
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.components.RespectQrBadgeInfoBox
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_new_badge_replace
 import world.respect.shared.generated.resources.assigned

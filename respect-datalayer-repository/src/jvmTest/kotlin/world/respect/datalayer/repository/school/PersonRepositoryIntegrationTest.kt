@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.datalayer.school.PersonDataSource

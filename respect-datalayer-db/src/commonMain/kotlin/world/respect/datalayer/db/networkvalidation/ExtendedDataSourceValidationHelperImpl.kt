@@ -2,7 +2,7 @@ package world.respect.datalayer.db.networkvalidation
 
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
-import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.networkvalidation.entities.NetworkValidationInfoEntity
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper

@@ -1,4 +1,4 @@
-package world.respect.datalayer
+package world.respect.lib.dataloadstate
 
 import kotlinx.serialization.Serializable
 

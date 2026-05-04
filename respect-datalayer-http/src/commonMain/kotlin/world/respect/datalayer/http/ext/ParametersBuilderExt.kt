@@ -1,7 +1,7 @@
 package world.respect.datalayer.http.ext
 
 import io.ktor.http.ParametersBuilder
-import world.respect.datalayer.DataLayerParams
+import world.respect.lib.dataloadstate.DataLayerParams
 import world.respect.datalayer.shared.params.GetListCommonParams
 
 fun ParametersBuilder.appendIfNotNull(

@@ -2,12 +2,12 @@ package world.respect.datalayer.ext
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import world.respect.datalayer.DataErrorResult
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.NoDataLoadedState
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 
 fun <T: Any> DataLoadState<T>.combineWithRemote(
     remote: DataLoadState<*>

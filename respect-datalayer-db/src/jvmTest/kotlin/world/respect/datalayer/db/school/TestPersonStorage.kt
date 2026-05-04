@@ -4,7 +4,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
@@ -13,7 +13,6 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

@@ -25,6 +25,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.serialization.json)
+            api(projects.respectLibIhttpCore)
             api(libs.ktor.client.core)
         }
 

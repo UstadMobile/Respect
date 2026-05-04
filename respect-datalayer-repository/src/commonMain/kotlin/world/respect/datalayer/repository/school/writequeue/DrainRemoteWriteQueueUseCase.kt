@@ -2,8 +2,8 @@ package world.respect.datalayer.repository.school.writequeue
 
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue

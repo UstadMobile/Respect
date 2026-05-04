@@ -1,4 +1,4 @@
-package world.respect.datalayer
+package world.respect.lib.dataloadstate
 
 data class DataLoadParams(
     val mustRevalidate: Boolean = false,

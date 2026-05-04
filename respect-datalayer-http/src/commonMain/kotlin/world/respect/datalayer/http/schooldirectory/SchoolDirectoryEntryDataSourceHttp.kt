@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import world.respect.datalayer.DataErrorResult
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.getAsDataLoadState

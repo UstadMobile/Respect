@@ -15,9 +15,9 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.datalayer.DataErrorResult
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand

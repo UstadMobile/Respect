@@ -11,11 +11,13 @@ import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import world.respect.datalayer.SchoolDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.model.XapiSingleItemToListSerializer
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.server.util.ext.requireAccountScope
+import world.respect.server.util.ext.respondDataLoadState
 
 fun Route.XapiStatementsResourceRoute(
     statementResource: (ApplicationCall) -> XapiStatementsResource = { call ->
@@ -27,16 +29,14 @@ fun Route.XapiStatementsResourceRoute(
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
 
         val statementResponse = statementResource(call).get(
-            request = XapiStatementsResource.GetStatementsRequest(
-                params = XapiStatementsResource.GetStatementParams.fromParams(
-                    params = call.request.queryParameters,
-                    json = json,
-                ),
-                headers = XapiRequestHeaders(),
-            )
+            listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                params = call.request.queryParameters,
+                json = json,
+            ),
+            dataLoadParams = DataLoadParams()
         )
 
-        call.respond(statementResponse.statementResult)
+        call.respondDataLoadState(statementResponse)
     }
 
     post(XapiStatementsResource.ENDPOINT_NAME) {

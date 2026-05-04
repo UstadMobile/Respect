@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.isReadyAndSettled

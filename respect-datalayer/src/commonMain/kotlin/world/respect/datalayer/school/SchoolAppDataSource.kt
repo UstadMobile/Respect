@@ -2,8 +2,8 @@ package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.school.model.SchoolApp
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory

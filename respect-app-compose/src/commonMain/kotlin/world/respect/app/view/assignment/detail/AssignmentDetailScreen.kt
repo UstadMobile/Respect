@@ -50,7 +50,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.opds.model.findIcons

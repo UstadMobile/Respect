@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Clazz
@@ -27,7 +27,6 @@ import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
-import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase

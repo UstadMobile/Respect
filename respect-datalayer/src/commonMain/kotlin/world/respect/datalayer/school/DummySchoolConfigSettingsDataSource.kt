@@ -2,9 +2,9 @@ package world.respect.datalayer.school
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 

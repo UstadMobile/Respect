@@ -44,8 +44,8 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.NoDataLoadedState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons

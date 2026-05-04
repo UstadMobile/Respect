@@ -1,7 +1,6 @@
 package world.respect.datalayer.db.school.xapi
 
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities

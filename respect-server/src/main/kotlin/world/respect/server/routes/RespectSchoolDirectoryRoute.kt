@@ -8,7 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import org.koin.ktor.ext.inject
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.server.domain.school.add.AddSchoolUseCase

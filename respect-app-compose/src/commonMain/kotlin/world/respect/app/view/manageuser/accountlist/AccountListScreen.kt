@@ -82,15 +82,9 @@ fun AccountListScreen(
     onTogglePendingSection: () -> Unit,
     onClickProfile: () -> Unit,
 ) {
-    val pendingStudentPager = respectRememberPager(uiState.pendingPersons)
-    val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
     val familyPersons = uiState.selectedAccount?.relatedPersons ?: emptyList()
-    fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
-        return this?.guid?.let {
-            Pair(it, role)
-        } ?: "${role}_$index"
-    }
+
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         uiState.selectedAccount?.also { activeAccount ->
@@ -132,7 +126,7 @@ fun AccountListScreen(
                 )
             }
         }
-        if (pendingStudentLazyPagingItems.itemCount > 0) {
+        if (uiState.pendingEnrolmentPerson.isNotEmpty()) {
             item("pending_header") {
                 ListItem(
                     modifier = Modifier
@@ -166,18 +160,12 @@ fun AccountListScreen(
             }
         }
         if (uiState.isPendingExpanded) {
-
-            respectPagingItems(
-                items = pendingStudentLazyPagingItems,
-                key = { person, index ->
-                    person.key(EnrollmentRoleEnum.PENDING_STUDENT, index)
-                }
-            ) { person ->
-                ClassPendingPersonListItem(
-                    person = person,
-                    pendingRole = Res.string.student,
-                    onClickAcceptInvite = { },
-                    onClickDismissInvite = { },
+            items(
+                items = uiState.pendingEnrolmentPerson,
+                key = { it.person.guid.hashCode() }
+            ) { item ->
+                PendingPersonEnrollmentItem(
+                    personWithEnrollment = item
                 )
             }
         }

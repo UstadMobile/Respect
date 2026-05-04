@@ -401,6 +401,34 @@ class OtherOptionsSignup private constructor(
 }
 
 @Serializable
+class Message(
+    val schoolUrlStr: String,
+    val code: String,
+    val link: String,
+    val canGoBack: Boolean = true,
+    val personGuid: String? = null
+) : RespectAppRoute {
+
+    @Transient
+    val schoolUrl = Url(schoolUrlStr)
+
+    companion object {
+        fun create(
+            schoolUrl: Url,
+            code: String,
+            linkStr: String,
+            canGoBack: Boolean = true,
+            guid: String? = null
+        ) = Message(
+            schoolUrlStr = schoolUrl.toString(),
+            code = code,
+            canGoBack = canGoBack,
+            personGuid = guid,
+            link = linkStr
+        )
+    }
+}
+@Serializable
 class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
@@ -589,7 +617,10 @@ class LearningUnitViewer(
     }
 
 }
-
+@Serializable
+data class SelectAccount(
+    val inviteCode: String? = null,
+) : RespectAppRoute
 
 @Serializable
 data class AccountList(

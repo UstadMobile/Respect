@@ -7,7 +7,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
@@ -21,8 +20,26 @@ import kotlin.uuid.Uuid
 class XapiNanoHttpdApp(
     port: Int,
     private val json: Json,
-    private val xapiResourceProvider: XapiResourceProvider,
+    private val xapiResourceProvider: XapiNanoHttpdResourceProvider,
 ) : NanoHTTPD(port){
+
+    /**
+     * When serving /e/(endpointUrl)/ - the endpoint MUST be double encoded. NanoHTTPD will
+     * 'helpfully' decode it, then we won't know what slashes are part of the endpoint and which
+     * are part of the api path
+     *
+     * @param xapiUrl the url of the real upstream xapi server: this will be passed to
+     *        XapiNanoHttpdResourceProvider to get the XapiResource
+     */
+    fun localUrlForEndpoint(
+        xapiUrl: Url,
+    ): Url {
+        //LearningSpace must be double encoded - see note on serveendpoint
+        val endpointEncoded = UrlEncoderUtil.encode(
+            UrlEncoderUtil.encode(xapiUrl.toString())
+        )
+        return Url("http://127.0.0.1:$listeningPort${PATH_ENDPOINT_API}$endpointEncoded}/")
+    }
 
     override fun serve(session: IHTTPSession): Response {
         val uri = session.uri
@@ -31,7 +48,7 @@ class XapiNanoHttpdApp(
 
         return when {
             uri.startsWith(PATH_ENDPOINT_API) -> {
-                serverXapiEndpoint(session, pathSegments)
+                serveXapiEndpoint(session, pathSegments)
             }
 
             else -> {
@@ -52,13 +69,14 @@ class XapiNanoHttpdApp(
         )
     }
 
-
-    private fun serverXapiEndpoint(
+    private fun serveXapiEndpoint(
         session: IHTTPSession,
         pathSegments: List<String>,
     ): Response {
         val endpointUrl = Url(UrlEncoderUtil.decode(pathSegments[1]))
-        val xapiResource = xapiResourceProvider(endpointUrl)
+        val authentication = session.headers["authentication"] ?: ""
+
+        val xapiResource = xapiResourceProvider(endpointUrl, authentication)
 
         return runBlocking {
             when(session.method) {
@@ -73,9 +91,7 @@ class XapiNanoHttpdApp(
                         )
                     )
 
-                    dataLoadState.toFixedLengthResponse(
-                        XapiStatementResult.serializer(),
-                    )
+                    dataLoadState.toFixedLengthResponse(XapiStatementResult.serializer())
                 }
 
                 Method.POST -> {

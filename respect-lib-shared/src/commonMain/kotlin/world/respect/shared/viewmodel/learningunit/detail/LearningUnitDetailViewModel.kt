@@ -18,7 +18,6 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
@@ -46,8 +45,6 @@ data class LearningUnitDetailUiState(
 
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
-    private val launchAppUseCase: LaunchAppUseCase,
     private val ustadCache: UstadCache,
     accountMananger: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
@@ -62,6 +59,8 @@ class LearningUnitDetailViewModel(
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
+
+    private val launchAppUseCase: LaunchAppUseCase by inject()
 
     init {
         viewModelScope.launch {
@@ -122,13 +121,15 @@ class LearningUnitDetailViewModel(
 
         val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
 
-        launchAppUseCase(
-            app = respectApp,
-            learningUnitId = launchUrl,
-            navigateFn = {
-                _navCommandFlow.tryEmit(it)
-            }
-        )
+        viewModelScope.launch {
+            launchAppUseCase(
+                app = respectApp,
+                learningUnitId = launchUrl,
+                navigateFn = {
+                    _navCommandFlow.tryEmit(it)
+                }
+            )
+        }
     }
 
     fun onClickDownload() {

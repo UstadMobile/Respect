@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.net.toUri
+import io.github.aakira.napier.Napier
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_PARAM_NAME
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_VALUE
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.navigation.NavCommand
 
 /**
@@ -16,15 +18,18 @@ import world.respect.shared.navigation.NavCommand
  */
 class LaunchAppUseCaseAndroid(
     private val appContext: Context,
+    private val getXapiLaunchUrlUseCase: GetXapiLaunchUrlUseCase,
 ): LaunchAppUseCase {
 
-    override fun invoke(
+    override suspend fun invoke(
         app: OpdsPublication,
         learningUnitId: Url?,
         navigateFn: (NavCommand) -> Unit
     ) {
         val androidPackageId = null//app.android?.packageId
-        val launchUrlBase = learningUnitId ?: return //Url(app.defaultLaunchUri.toString())
+        val launchUrlBase = learningUnitId?.let {
+            getXapiLaunchUrlUseCase(it)
+        } ?: return
         val launchUrl = URLBuilder(launchUrlBase).apply {
             parameters.append(
                 RESPECT_LAUNCH_VERSION_PARAM_NAME, RESPECT_LAUNCH_VERSION_VALUE
@@ -59,7 +64,9 @@ class LaunchAppUseCaseAndroid(
             Class.forName(WEBVIEW_ACTIVITY_NAME)
         )
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra(EXTRA_URL, launchUrl.toString())
+        val launchUrlStr = launchUrl.toString()
+        intent.putExtra(EXTRA_URL, launchUrlStr)
+        Napier.i("LaunchAppUseCaseAndroid: launching $launchUrlStr")
         appContext.startActivity(intent)
     }
 

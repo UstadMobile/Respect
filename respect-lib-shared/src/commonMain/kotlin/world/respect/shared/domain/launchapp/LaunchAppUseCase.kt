@@ -9,7 +9,7 @@ import world.respect.shared.navigation.NavCommand
  */
 interface LaunchAppUseCase {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         app: OpdsPublication,
         learningUnitId: Url?,
         navigateFn: (NavCommand) -> Unit,

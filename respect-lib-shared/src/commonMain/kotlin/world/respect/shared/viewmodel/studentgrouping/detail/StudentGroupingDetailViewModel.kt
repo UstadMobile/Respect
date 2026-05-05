@@ -113,49 +113,45 @@ class StudentGroupingDetailViewModel(
         _uiState.update { it.copy(showDeleteGroupDialog = false) }
 
         viewModelScope.launch {
-            try {
-                val statementGroupId = _uiState.value.statementGroupId
-                if (statementGroupId == null) {
-                    Napier.w("onConfirmDeleteGroup: Statement ID not found")
-                    return@launch
-                }
-
-                val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
-
-                val actor = XapiAgent(
-                    name = respectAccountManager.activeAccount?.userGuid ?: "",
-                    objectType = XapiObjectType.Agent,
-                    account = XapiAccount(
-                        name = respectAccountManager.activeAccount?.userGuid ?: "",
-                        homePage = schoolSelfUrl.toString()
-                    )
-                )
-
-                val verb = XapiVerb(
-                    id = VERB_VOIDED,
-                    display = mapOf("en" to VERB_VOIDED)
-                )
-
-                val statementRef = XapiStatementRef(
-                    objectType = XapiObjectType.StatementRef,
-                    id = statementGroupId
-                )
-
-                val voidingStatement = XapiStatement(
-                    actor = actor,
-                    verb = verb,
-                    `object` = statementRef,
-                    timestamp = Clock.System.now(),
-                    stored = Clock.System.now()
-                )
-
-                schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
-
-                _navCommandFlow.tryEmit(NavCommand.PopUp())
-
-            } catch (e: Throwable) {
-                Napier.e("onConfirmDeleteGroup ERROR", throwable = e)
+            val statementGroupId = _uiState.value.statementGroupId
+            if (statementGroupId == null) {
+                Napier.w("onConfirmDeleteGroup: Statement ID not found")
+                return@launch
             }
+
+            val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
+
+            val actor = XapiAgent(
+                name = respectAccountManager.activeAccount?.userGuid ?: "",
+                objectType = XapiObjectType.Agent,
+                account = XapiAccount(
+                    name = respectAccountManager.activeAccount?.userGuid ?: "",
+                    homePage = schoolSelfUrl.toString()
+                )
+            )
+
+            val verb = XapiVerb(
+                id = VERB_VOIDED,
+                display = mapOf("en" to VERB_VOIDED)
+            )
+
+            val statementRef = XapiStatementRef(
+                objectType = XapiObjectType.StatementRef,
+                id = statementGroupId
+            )
+
+            val voidingStatement = XapiStatement(
+                actor = actor,
+                verb = verb,
+                `object` = statementRef,
+                timestamp = Clock.System.now(),
+                stored = Clock.System.now()
+            )
+
+            schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
+
+            _navCommandFlow.tryEmit(NavCommand.PopUp())
+
         }
     }
 
@@ -193,9 +189,7 @@ class StudentGroupingDetailViewModel(
 
                         _appUiState.update {
                             it.copy(
-                                title = group.name?.asUiText() ?: "".asUiText(),
-                                userAccountIconVisible = false,
-                                hideBottomNavigation = true,
+                                title = group.name?.asUiText() ?: "".asUiText()
                             )
                         }
                     }

@@ -128,7 +128,7 @@ class StudentGroupingEditViewModel(
         route.groupId?.let { groupId ->
             @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
-                try {
+
                     val statementResult = schoolDataSource.xapiStatementsResource.get(
                         listParams = XapiStatementsResource.GetStatementParams(
                             verb = VERB_SAVED,
@@ -160,10 +160,6 @@ class StudentGroupingEditViewModel(
                             selectedStudents = persons
                         )
                     }
-
-                } catch (e: Throwable) {
-                    Napier.e("EDIT_GROUP: ERROR loading group", throwable = e)
-                }
             }
         }
         viewModelScope.launch {
@@ -191,7 +187,6 @@ class StudentGroupingEditViewModel(
         }
 
         viewModelScope.launch {
-            try {
                 val members = _uiState.value.selectedStudents.map { person ->
                     XapiAgent(
                         name = person.fullName(),
@@ -261,9 +256,6 @@ class StudentGroupingEditViewModel(
                     sendResultAndPop(RESULT_KEY_GROUP_UPDATED, true)
                 }
 
-            } catch (e: Throwable) {
-                Napier.e("onClickSave ERROR", throwable = e)
-            }
         }
     }
 

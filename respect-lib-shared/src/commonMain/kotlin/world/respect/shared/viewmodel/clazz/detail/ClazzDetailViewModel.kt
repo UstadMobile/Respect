@@ -64,9 +64,7 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
 import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
-import world.respect.lib.xapi.model.VERB_VOIDED
 import world.respect.lib.xapi.model.XapiGroup
-import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
@@ -417,27 +415,6 @@ class ClazzDetailViewModel(
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     private suspend fun observeGroupsFromXapi() {
-        // First, get all voiding statements to filter out voided statements
-        val voidingStatements = try {
-            schoolDataSource.xapiStatementsResource.get(
-                listParams = XapiStatementsResource.GetStatementParams(
-                    verb = VERB_VOIDED,
-                    activity = classActivityId,
-                    relatedActivities = true,
-                ),
-                dataLoadParams = DataLoadParams()
-            ).dataOrNull()?.statements ?: emptyList()
-        } catch (e: Throwable) {
-            Napier.w("Failed to fetch voiding statements", e)
-            emptyList()
-        }
-
-        // Extract IDs of voided statements
-        val voidedStatementIds = voidingStatements
-            .mapNotNull { it.`object` as? XapiStatementRef }
-            .map { it.id }
-            .toSet()
-
         schoolDataSource.xapiStatementsResource.getAsFlow(
             listParams = XapiStatementsResource.GetStatementParams(
                 verb = VERB_SAVED,
@@ -446,7 +423,7 @@ class ClazzDetailViewModel(
             ),
             dataLoadParams = DataLoadParams()
         ).collect { dataLoadState ->
-            try {
+
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
                 val groups = statementResult.statements.mapNotNull { statement ->
@@ -467,10 +444,6 @@ class ClazzDetailViewModel(
                 _uiState.update { prev ->
                     prev.copy(groups = groupDisplayDataList)
                 }
-            } catch (e: Throwable) {
-                Napier.e("observeGroupsFromXapi ERROR", throwable = e)
-                _uiState.update { it.copy(groups = emptyList()) }
-            }
         }
     }
 

@@ -15,7 +15,14 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.VERB_VOIDED
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -30,6 +37,7 @@ import world.respect.lib.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
+import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 
 
@@ -37,6 +45,7 @@ data class StudentGroupingDetailUiState(
     val groupName: String = "",
     val groupMembers: List<String> = emptyList(),
     val showDeleteGroupDialog: Boolean = false,
+    val statementId: String? = null,
 )
 
 class StudentGroupingDetailViewModel(
@@ -105,11 +114,13 @@ class StudentGroupingDetailViewModel(
 
         viewModelScope.launch {
             try {
-/*
-                val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
+                val statementId = _uiState.value.statementId
+                if (statementId == null) {
+                    Napier.e("onConfirmDeleteGroup: No statement ID available")
+                    return@launch
+                }
 
-                val group = schoolDataSource.xapiActorDataSource.getGroupDetail(route.groupId)
-                    ?: return@launch
+                val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
 
                 val actor = XapiAgent(
                     name = respectAccountManager.activeAccount?.userGuid ?: "",
@@ -122,44 +133,23 @@ class StudentGroupingDetailViewModel(
 
                 val verb = XapiVerb(
                     id = VERB_VOIDED,
-                    display = mapOf("en" to VERB_VOIDED)
+                    display = mapOf("en" to "voided")
                 )
 
-                val statement = XapiStatement(
+                // Use StatementRef to reference the statement being voided
+                val statementRef = XapiStatementRef(
+                    objectType = XapiObjectType.StatementRef,
+                    id = statementId
+                )
+
+                val voidingStatement = XapiStatement(
                     actor = actor,
                     verb = verb,
-                    `object` = group,
+                    `object` = statementRef,
                     timestamp = Clock.System.now()
                 )
 
-                schoolDataSource.xapiStatementsResource.post(listOf(statement))
-
-                // Remove group ID from class metadata
-                val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
-
-                val existingGroupIds = clazz.metadata
-                    ?.get(GROUP_IDS)
-                    ?.jsonArray
-                    ?.map { it.jsonPrimitive.content }
-                    ?.filter { it != route.groupId }
-                    ?: emptyList()
-
-                val updatedMetadata = buildJsonObject {
-                    clazz.metadata?.forEach { (key, value) ->
-                        if (key != GROUP_IDS) put(key, value)
-                    }
-                    putJsonArray(GROUP_IDS) {
-                        existingGroupIds.forEach { add(it) }
-                    }
-                }
-
-                val updatedClazz = clazz.copy(
-                    metadata = updatedMetadata,
-                    lastModified = Clock.System.now()
-                )
-*/
-
-          //      schoolDataSource.classDataSource.store(listOf(updatedClazz))
+                schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
 
                 _navCommandFlow.tryEmit(NavCommand.PopUp())
 
@@ -184,17 +174,41 @@ class StudentGroupingDetailViewModel(
                 ).collect { dataLoadState ->
                     val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                    val group = statementResult.statements
-                        .mapNotNull { statement -> statement.`object` as? XapiGroup }
-                        .firstOrNull { it.account?.name == route.groupId }
+                    // Get all voiding statements to filter out voided statements
+                    val voidingStatements = schoolDataSource.xapiStatementsResource.get(
+                        listParams = XapiStatementsResource.GetStatementParams(
+                            verb = VERB_VOIDED,
+                            activity = classActivityId,
+                            relatedActivities = true,
+                        ),
+                        dataLoadParams = DataLoadParams()
+                    ).dataOrNull()?.statements ?: emptyList()
 
-                    if (group != null) {
+                    // Extract IDs of voided statements
+                    val voidedStatementIds = voidingStatements
+                        .mapNotNull { it.`object` as? XapiStatementRef }
+                        .map { it.id }
+                        .toSet()
+
+                    // Filter out voided statements and find the group
+                    val groupStatement = statementResult.statements
+                        .filter { statement ->
+                            statement.id?.toString() !in voidedStatementIds
+                        }
+                        .firstOrNull { statement ->
+                            val group = statement.`object` as? XapiGroup
+                            group?.account?.name == route.groupId
+                        }
+
+                    if (groupStatement != null) {
+                        val group = groupStatement.`object` as XapiGroup
                         val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
 
                         _uiState.update { prev ->
                             prev.copy(
                                 groupName = group.name ?: "",
-                                groupMembers = memberNames
+                                groupMembers = memberNames,
+                                statementId = groupStatement.id?.toString()
                             )
                         }
 

@@ -62,10 +62,11 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
-import kotlin.getValue
 import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.VERB_VOIDED
 import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
@@ -378,7 +379,6 @@ class ClazzDetailViewModel(
                 schoolDataSource.enrollmentDataSource.store(enrollmentsToStore)
 
             } catch (e: Throwable) {
-                //do something
                 Napier.e("onClickRemovePersonFromClass ERROR", throwable = e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
             }
@@ -434,8 +434,6 @@ class ClazzDetailViewModel(
 
                 val groupDisplayDataList = groups.map { group ->
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
-                    Napier.i("Loaded Group: ${group.name}")
-                    Napier.i("Group Members: ${memberNames.joinToString(", ")}")
 
                     GroupDisplayData(
                         groupId = group.account?.name ?: "",

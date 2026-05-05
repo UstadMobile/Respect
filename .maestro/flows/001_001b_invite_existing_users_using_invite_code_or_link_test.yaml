@@ -17,8 +17,10 @@ onFlowComplete:
       file: "scripts/teardown.js"
 
 ---
-# Invite new user:
+#Admin add a users to the app and add a class named - TestClass
+
 - runFlow: "subflows/school_admin_login_flow.yaml"
+
 - assertVisible:
     id: "app_title"
     text: "Apps"
@@ -26,6 +28,7 @@ onFlowComplete:
     file: "subflows/user_add_class.yaml"
     env:
       CLASSNAME: "TestClass"
+
 - runFlow:
     file: "subflows/add_person_to_app.yaml"
     env:
@@ -33,6 +36,9 @@ onFlowComplete:
       LASTNAME: "User"
       GENDER: "Female"
       ROLE: "Parent"
+      USERNAME: "parentauser"
+      PASSWORD: "test123"
+
 - runFlow:
     file: "subflows/add_person_to_app.yaml"
     env:
@@ -40,6 +46,19 @@ onFlowComplete:
       LASTNAME: "User"
       GENDER: "Female"
       ROLE: "Student"
+      USERNAME: "studentauser"
+      PASSWORD: "test123"
+
+- runFlow:
+    file: "subflows/add_person_to_app.yaml"
+    env:
+      FIRSTNAME: "StudentB"
+      LASTNAME: "User"
+      GENDER: "Male"
+      ROLE: "Student"
+      USERNAME: "studentbuser"
+      PASSWORD: "test123"
+
 - runFlow:
     file: "subflows/add_person_to_app.yaml"
     env:
@@ -47,30 +66,11 @@ onFlowComplete:
       LASTNAME: "User"
       GENDER: "Female"
       ROLE: "Teacher"
-
-- runFlow:
-    file: "subflows/create_account_for_person.yaml"
-    env:
-      FIRSTNAME: "ParentA"
-      LASTNAME: "User"
-      USERNAME: "parentauser"
-      PASSWORD: "test123"
-- runFlow:
-    file: "subflows/create_account_for_person.yaml"
-    env:
-      FIRSTNAME: "StudentA"
-      LASTNAME: "User"
-      USERNAME: "studentauser"
-      PASSWORD: "test123"
-- runFlow:
-    file: "subflows/create_account_for_person.yaml"
-    env:
-      FIRSTNAME: "TeacherA"
-      LASTNAME: "User"
       USERNAME: "teacherauser"
       PASSWORD: "test123"
 
 - tapOn: "Classes"
+- tapOn: "TestClass"
 - assertVisible:
     id: "app_title"
     text: "TestClass"
@@ -84,32 +84,28 @@ onFlowComplete:
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via Email"
 - assertVisible: "Share link"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Teacher"
-- scroll
-- assertVisible: "Reset code"
 - tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
+- scroll
+- assertVisible: "Reset code"
 - copyTextFrom:
-      id: "invite_url"
+    id: "invite_url"
 
-# Teacher user joining using invite QR code
-- clearState: world.respect.app
-- launchApp:
-    arguments:
-      respect_directory: ${output.SCHOOL_URL}
-- tapOn: "Get Started"
-- tapOn: "Scan QR code/badge"
+# Teacher sign-up via invite link to the class as already logged-in user
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
 - assertVisible:
     id: "app_title"
-    text: "Scan QR code badge"
-- tapOn: "More Options"
-- tapOn: "Paste URL"
-- tapOn: "Url"
-- pasteText
-- tapOn: "OK"
+    text: "Apps"
+
+- launchApp:
+    appId: "world.respect.app"
+    arguments:
+      launchUrl: ${maestro.copiedText}
+
 - assertVisible:
     id: "app_title"
     text: "Select account to continue"
@@ -133,46 +129,204 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "TestClass"
-- assertVisible: "Add Student"
+- assertVisible: "TeacherA User"
+
+# Add StudentA User as family member of Parent A
+- tapOn: "People"
+- tapOn: "ParentA User"
+- tapOn:
+    id: "floating_action_button"   # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Family member"
+- assertVisible: "StudentB User"
+- tapOn: "StudentA User"
+- tapOn: "Save"
+- assertVisible: "StudentA User"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+
+# Teacher send Family member invite to StudentB user to join ParentA User
+- tapOn:
+    id: "floating_action_button"
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Family member"
+- tapOn: "Invite person"
+- assertVisible: "Student User / Family member"
+- tapOn: "Approval required" # turn the switch off
+- assertVisible: "Approval not required until:.*"
+- copyTextFrom:
+    id: "invite_code"
+
+#StudentB user using link to join the family member (ParentA user)
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+
+- tapOn: "Get Started"
+
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "I already have an invite code"
+- tapOn: "Invite code"
+- pasteText
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Child"
+- assertVisible: "StudentA User"
+- assertVisible: "Family member"
+- assertVisible: "ParentA User"
+- assertVisible: "Role"
+- assertVisible: "Parent"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "School URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Accept Invite"
+- assertVisible:                     #check
+    id: "app_title"
+    text: "ParentA User"
+- assertVisible: "Family member"
+- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+
+#Teacher send class invite to parentA user to add StudentA User
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+- tapOn: "Add Student"
 - tapOn: "Invite person"
 - assertVisible:
     id: "app_title"
     text: "Invite person"
 - assertVisible: "Approval required"    #switch is On
+- tapOn: "Invite via parents"
+- scroll
+- assertVisible: "Reset code"
 - copyTextFrom:
-    id: "invite_code"
+    id: "invite_url"
 
-# C) Student sign-up via invite code to the class
+# Parent user use the link to add StudentA User to class
+- runFlow:
+    file: "subflows/openlink_flow.yaml"
+    env:
+      URL: ${maestro.copiedText}
+- assertVisible:
+    id: "app_title"
+    text: "Select account to continue"
+- tapOn: "Use another account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Username"
+- inputText: "parentauser"
+- tapOn: "Password"
+- inputText: "test123"
+- tapOn: "Login"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Child"
+- assertVisible: "StudentA User"
+- tapOn:
+    id: "drop_down_arrow"
+- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+- tapOn: "StudentA User"
+- assertVisible: "Class name"
+- assertVisible: "TestClass"
+- assertVisible: "Role"
+- assertVisible: "Student"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "School URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Accept Invite"
+- assertVisible:
+    id: "app_title"
+    text: "Accounts"
+- assertVisible: "ParentA User"
+- assertVisible: "Pending requests"
+- assertVisible: "StudentA User: TestClass (Student)"
+- assertVisible: ".*Pending approval"
+- assertVisible: "Family members"
+- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+
+#Teacher send class invite to StudentB User directly
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+- tapOn: "Add Student"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Approval required"    #switch is On
+- tapOn: "Invite students directly"
+- scroll
+- assertVisible: "Reset code"
+- copyTextFrom:
+    id: "invite_url"
+
+# StudentB user joining class using invite QR code
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
 - tapOn: "Get Started"
-- runFlow:
-    file: "subflows/school_user_login_flow.yaml"
-    env:
-      USERNAME: "studentauser"
-      PASSWORD: "test123"
+- tapOn: "Scan QR code/badge"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
-- tapOn:
-     id: "Accounts"
+    text: "Scan QR code badge"
+- tapOn: "More Options"
+- tapOn: "Paste URL"
+- tapOn: "Url"
+- pasteText
+- tapOn: "OK"
 - assertVisible:
     id: "app_title"
-    text: "Accounts"
-- tapOn: "Enter invite code"
+    text: "Select account to continue"
+- tapOn: "Use another account"
 - assertVisible:
     id: "app_title"
-    text: "Enter invite code"
-- tapOn: "Invite code"
-- inputText: ${maestro.copiedText}
-- tapOn: "Next"
+    text: "Login"
+- tapOn: "Username"
+- inputText: "studentbuser"
+- tapOn: "Password"
+- inputText: "test123"
+- tapOn: "Login"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
 - assertVisible: "Student"
-- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
 - assertVisible: "Class name"
 - assertVisible: "TestClass"
 - assertVisible: "Role"
@@ -189,6 +343,8 @@ onFlowComplete:
 - assertVisible: "Pending requests"
 - assertVisible: "StudentA User: TestClass (Student)"
 - assertVisible: ".*Pending approval"
+- assertVisible: "Family members"
+- assertVisible: "ParentA User"
 
 # H) Teacher approve student's request to join the class
 - runFlow:
@@ -203,91 +359,36 @@ onFlowComplete:
     text: "Classes"
 - tapOn: "TestClass"
 - assertVisible: "Pending requests.*"
-- assertVisible: "Student User.*"
+- assertVisible: "StudentA User.*"
 - tapOn: "Accept Invite"
-
-# E)
-- tapOn: "People"
-- tapOn: "ParentA User"
-- assertVisible:
-    id: "app_title"
-    text: "ParentA User"
-# Add Family member - child to Parent
-- tapOn:
-    id: "floating_action_button"   # Edit button
-- assertVisible:
-    id: "app_title"
-    text: "Edit person"
-- tapOn: "Family member"
-- tapOn: "Add person"
-- tapOn: "First names*"
-- inputText: "Child"
-- tapOn: "Last name*"
-- inputText: "User"
-- tapOn: "Gender*"
-- tapOn: "Female"
-- assertVisible:
-    id: "app_title"
-    text: "Add person"
-- tapOn: "Save"
-- assertVisible: "Child User"
-- tapOn: "Save"
-  # Send invite to StudentA User to join the family member (ParentA user)
-- assertVisible:
-    id: "app_title"
-    text: "ParentA User"
-- tapOn:
-    id: "floating_action_button"   # Edit button
-- tapOn: "Invite person"
-- assertVisible:
-    id: "app_title"
-    text: "Invite person"
-- assertVisible: "Approval required"    #switch is On
-- assertVisible: "Copy link"
-- assertVisible: "Send link via SMS"
-- assertVisible: "Send link via Email"
-- assertVisible: "Share link"
-- tapOn:
-    id: "role"
-- tapOn:
-    text: "Teacher"
-- scroll
-- assertVisible: "Reset code"
-- tapOn: "Approval required" # turn the switch off
-- assertVisible: "Approval not required until:.*"
-- copyTextFrom:
-    id: "invite_url"
-
-
-# Parent sign-up to the app using invite link
-- runFlow:
-    file: "subflows/openlink_flow.yaml"
-    env:
-      URL: ${maestro.copiedText}
-- tapOn: "Get Started"
-- assertVisible:
-    id: "app_title"
-    text: "Select account to continue"
+- assertVisible: "StudentB User.*"
+- tapOn: "Accept Invite"
+- assertNotVisible: "Pending requests.*"
 - assertVisible: "StudentA User"
-- assertVisible: ${output.SCHOOL_URL}
-- tapOn: "StudentA User"
+- assertVisible: "StudentB User"
+
+# Teacher uses invite code to join class for Students and gets error
+- tapOn: "Add Student"
+- tapOn: "Invite person"
+- copyTextFrom:
+    id: "invite_code"
+- back
+- back
+- tapOn:
+    id: "user_account_icon"
+- assertVisible:
+    id: "app_title"
+    text: "Accounts"
+- tapOn: "Enter invite code"
+- assertVisible:
+    id: "app_title"
+    text: "Enter invite code"
+- tapOn: "Invite code"
+- inputText: ${maestro.copiedText}
+- tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible: "Child"
-- assertVisible: "StudentA User"
-- assertVisible: "Family member"
-- assertVisible: "ParentA User"
-- assertVisible: "Role"
-- assertVisible: "Parent"
-- assertVisible: "School name"
-- assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "School URL"
-- assertVisible: ${output.SCHOOL_URL}
-- tapOn: "Accept Invite"
-- assertVisible:
-    id: "app_title"
-    text: "ParentA User"
-- assertVisible: "Family member"
-- assertVisible: "StudentA User"
+- assertVisible: "Sorry. Invalid invitation: not available for your user type."
+
 

@@ -25,6 +25,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.isChildUser
+import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -108,7 +109,6 @@ class AcceptInviteViewModel(
         }
     }
     private val schoolDataSource: SchoolDataSource by inject()
-    private val schoolDataSourceLocal: SchoolDataSourceLocal by inject()
     private val navigateOnExistingUserInviteAcceptedUseCase
     : NavigateOnExistingUserInviteAcceptedUseCase by inject()
 
@@ -167,7 +167,8 @@ class AcceptInviteViewModel(
                             prev -> prev.copy(
                                 persons = person,
                                 showSelectChildDropDown = (uiState.value.person?.roles?.firstOrNull()
-                                    ?.roleEnum == PersonRoleEnum.PARENT && uiState.value.children.isNotEmpty())
+                                    ?.roleEnum == PersonRoleEnum.PARENT && uiState.value.children.isNotEmpty()&&
+                                        inviteInfo.invite is ClassInvite)
                             )
                         }
                     }

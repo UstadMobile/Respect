@@ -14,6 +14,7 @@ import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import kotlin.time.Clock
@@ -50,7 +51,8 @@ class RedeemInviteExistingUserUseCaseDb(
                     } else {
                         person
                     }
-                } ?: throw IllegalArgumentException("existing person not found for guid: $accountGuid")
+                }
+                ?: throw IllegalArgumentException("existing person not found for guid: $accountGuid")
                     .withHttpStatus(404)
 
         schoolDataSource.personDataSource.updateLocal(
@@ -67,7 +69,8 @@ class RedeemInviteExistingUserUseCaseDb(
                             Enrollment.TABLE_ID
                         ).toString(),
                         classUid = inviteFromDb.classUid,
-                        personUid = if (inviteFromDb.inviteMode == ClassInviteModeEnum.VIA_PARENT) selectedChildGuid?:"" else accountPerson.guid,
+                        personUid = if (inviteFromDb.inviteMode == ClassInviteModeEnum.VIA_PARENT) selectedChildGuid
+                            ?: "" else accountPerson.guid,
                         role = enrollmentRole,
                         beginDate = Clock.System.now().toLocalDateTime(
                             TimeZone.currentSystemDefault()
@@ -76,7 +79,40 @@ class RedeemInviteExistingUserUseCaseDb(
                 )
             )
         }
+        if (inviteFromDb is FamilyMemberInvite) {
 
+            val parentUid = inviteFromDb.personUid
+            val childUid = selectedChildGuid ?: accountPerson.guid
+
+            val parentPerson =
+                schoolDb.getPersonEntityDao()
+                    .findByGuidNum(uidNumberMapper(parentUid))
+                    ?.toPersonEntities()
+                    ?.toModel()
+                    ?: throw IllegalStateException("Parent not found: $parentUid")
+
+            val childPerson =
+                schoolDb.getPersonEntityDao()
+                    .findByGuidNum(uidNumberMapper(childUid))
+                    ?.toPersonEntities()
+                    ?.toModel()
+                    ?: throw IllegalStateException("Child not found: $childUid")
+
+            val updatedParent = parentPerson.copy(
+                relatedPersonUids = parentPerson.relatedPersonUids + childUid,
+                lastModified = timeNow
+            )
+
+            val updatedChild = childPerson.copy(
+                relatedPersonUids = childPerson.relatedPersonUids + parentUid,
+                lastModified = timeNow
+            )
+
+            schoolDataSource.personDataSource.updateLocal(
+                listOf(updatedParent, updatedChild),
+                forceOverwrite = true
+            )
+        }
         if (!selectedChildGuid.isNullOrBlank()) {
             val childPerson =
                 schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(selectedChildGuid))

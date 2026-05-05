@@ -20,12 +20,6 @@ interface XapiStatementEntityDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreListAsync(entityList: List<XapiStatementEntity>)
 
-    @Query("SELECT * From XapiStatementEntity LIMIT 1")
-    fun getOneStatement(): Flow<XapiStatementEntity?>
-
-    @Query("SELECT * FROM XapiStatementEntity")
-    suspend fun getAll(): List<XapiStatementEntity>
-
     @Query(LIST_SQL)
     suspend fun list(
         statementIdHi: Long,

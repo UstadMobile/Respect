@@ -79,10 +79,17 @@ class XapiStatementsResourceRepository(
 
 
     override fun getAssignmentResult(assignmentActivityId: String): Flow<List<AssignmentResult>> {
-        val remoteSyncFlow = getAsFlow(
-            listParams = GetStatementParams(activity = assignmentActivityId),
+        val remoteSyncFlow = remote.getAsFlow(
+            listParams = GetStatementParams(
+                activity = assignmentActivityId,
+                relatedActivities = true
+            ),
             dataLoadParams = DataLoadParams()
-        )
+        ).onEach { remoteState ->
+            remoteState.dataOrNull()?.let {
+                local.updateLocal(it.statements)
+            }
+        }
 
         return local.getAssignmentResult(assignmentActivityId).combine(remoteSyncFlow) { localData, _ ->
             localData

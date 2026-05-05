@@ -114,9 +114,55 @@ class StudentGroupingDetailViewModel(
 
         viewModelScope.launch {
             try {
-                val statementId = _uiState.value.statementId
+                // Fetch statements to find the one matching route.groupId
+                val statementResult = schoolDataSource.xapiStatementsResource.get(
+                    listParams = XapiStatementsResource.GetStatementParams(
+                        verb = VERB_SAVED,
+                        activity = classActivityId,
+                        relatedActivities = true,
+                    ),
+                    dataLoadParams = DataLoadParams()
+                ).dataOrNull()
+
+                if (statementResult == null) {
+                    Napier.w("onConfirmDeleteGroup: No statements found")
+                    return@launch
+                }
+
+                // Get all voiding statements to filter out already voided statements
+                val voidingStatements = schoolDataSource.xapiStatementsResource.get(
+                    listParams = XapiStatementsResource.GetStatementParams(
+                        verb = VERB_VOIDED,
+                        activity = classActivityId,
+                        relatedActivities = true,
+                    ),
+                    dataLoadParams = DataLoadParams()
+                ).dataOrNull()?.statements ?: emptyList()
+
+                // Extract IDs of voided statements
+                val voidedStatementIds = voidingStatements
+                    .mapNotNull { it.`object` as? XapiStatementRef }
+                    .map { it.id }
+                    .toSet()
+
+                // Find the statement where group.account.name matches route.groupId
+                val statementToVoid = statementResult.statements
+                    .filter { statement ->
+                        statement.id?.toString() !in voidedStatementIds
+                    }
+                    .firstOrNull { statement ->
+                        val group = statement.`object` as? XapiGroup
+                        group?.account?.name == route.groupId
+                    }
+
+                if (statementToVoid == null) {
+                    Napier.w("onConfirmDeleteGroup: Statement with groupId ${route.groupId} not found")
+                    return@launch
+                }
+
+                val statementId = statementToVoid.id?.toString()
                 if (statementId == null) {
-                    Napier.e("onConfirmDeleteGroup: No statement ID available")
+                    Napier.w("onConfirmDeleteGroup: Statement has no ID")
                     return@launch
                 }
 
@@ -163,7 +209,6 @@ class StudentGroupingDetailViewModel(
     private fun loadGroupDetail() {
         viewModelScope.launch {
             try {
-                // Fetch statements from xAPI using the classActivity as parent context
                 schoolDataSource.xapiStatementsResource.getAsFlow(
                     listParams = XapiStatementsResource.GetStatementParams(
                         verb = VERB_SAVED,
@@ -174,27 +219,7 @@ class StudentGroupingDetailViewModel(
                 ).collect { dataLoadState ->
                     val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                    // Get all voiding statements to filter out voided statements
-                    val voidingStatements = schoolDataSource.xapiStatementsResource.get(
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            verb = VERB_VOIDED,
-                            activity = classActivityId,
-                            relatedActivities = true,
-                        ),
-                        dataLoadParams = DataLoadParams()
-                    ).dataOrNull()?.statements ?: emptyList()
-
-                    // Extract IDs of voided statements
-                    val voidedStatementIds = voidingStatements
-                        .mapNotNull { it.`object` as? XapiStatementRef }
-                        .map { it.id }
-                        .toSet()
-
-                    // Filter out voided statements and find the group
                     val groupStatement = statementResult.statements
-                        .filter { statement ->
-                            statement.id?.toString() !in voidedStatementIds
-                        }
                         .firstOrNull { statement ->
                             val group = statement.`object` as? XapiGroup
                             group?.account?.name == route.groupId

@@ -7,12 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.error_link_message
-import world.respect.shared.generated.resources.link_is
 import world.respect.shared.generated.resources.message
-import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.Message
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SelectAccount
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -50,10 +48,8 @@ class MessageViewModel(
     fun onClickLink() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = AcceptInvite.create(
-                    schoolUrl = route.schoolUrl,
-                    code = route.code,
-                    canGoBack = route.canGoBack,
+                destination = SelectAccount(
+                    inviteCode = route.code
                 ), clearBackStack = false
             )
         )

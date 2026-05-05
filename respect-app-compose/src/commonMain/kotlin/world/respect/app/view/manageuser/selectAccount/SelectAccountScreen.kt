@@ -31,7 +31,7 @@ fun SelectAccountScreen(
         uiState = uiState,
         onClickAccount = viewModel::onClickAccount,
         onClickAddAccount = viewModel::onClickAddAccount,
-        )
+    )
 }
 
 @Composable

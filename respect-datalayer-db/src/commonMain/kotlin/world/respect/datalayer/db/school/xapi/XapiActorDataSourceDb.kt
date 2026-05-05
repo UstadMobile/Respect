@@ -1,13 +1,9 @@
 package world.respect.datalayer.db.school.xapi
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.xapi.adapters.ActorEntities
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
-import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
 import world.respect.lib.xapi.XapiRequestHeaders
@@ -80,44 +76,5 @@ class XapiActorDataSourceDb(
         xapiRequestHeaders: XapiRequestHeaders
     ) {
         TODO("Not yet implemented")
-    }
-
-    override suspend fun getGroupDetail(groupId: String): XapiGroup? {
-        // Find the group actor by its accountName (groupId)
-        val groupActorEntity = schoolDb.getActorDao().findGroupByAccountNameAsync(groupId)
-            ?: return null
-
-        // Find all group member joins for this group
-        val groupMemberJoins = schoolDb.getGroupMemberActorJoinDao()
-            .findByGroupActorUidList(listOf(groupActorEntity.actorUid), excludeIdentifiedGroups = false)
-
-        // Find all member actor entities
-        val memberActorUids = groupMemberJoins.map { it.gmajMemberActorUid }
-        val memberActorEntities = if (memberActorUids.isNotEmpty()) {
-            schoolDb.getActorDao().findByUidList(memberActorUids)
-        } else {
-            emptyList()
-        }
-
-        // Convert to model using adapter
-        val actorEntities = ActorEntities(
-            actor = groupActorEntity,
-            groupMemberAgents = memberActorEntities,
-            groupMemberJoins = groupMemberJoins
-        )
-
-        return actorEntities.toModel(idOnlyFormat = false) as? XapiGroup
-    }
-
-    override suspend fun getGroupsByIds(groupIds: List<String>): List<XapiGroup> {
-        if (groupIds.isEmpty()) return emptyList()
-
-        return groupIds.mapNotNull { groupId ->
-            getGroupDetail(groupId)
-        }
-    }
-
-    override fun getGroupDetailAsFlow(groupId: String): Flow<XapiGroup?> = flow {
-        emit(getGroupDetail(groupId))
     }
 }

@@ -67,7 +67,6 @@ import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
 data class ClazzDetailUiState(
@@ -197,10 +196,12 @@ class ClazzDetailViewModel(
                 _uiState.update {
                     it.copy(clazz = clazz)
                 }
-
-                // Load groups from xAPI statements
-                loadGroupsFromXapi()
             }
+        }
+
+        // Observe groups from xAPI statements as a flow
+        viewModelScope.launch {
+            observeGroupsFromXapi()
         }
 
         viewModelScope.launch {
@@ -415,22 +416,19 @@ class ClazzDetailViewModel(
     }
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-    private fun loadGroupsFromXapi() {
-        viewModelScope.launch {
+    private suspend fun observeGroupsFromXapi() {
+        schoolDataSource.xapiStatementsResource.getAsFlow(
+            listParams = XapiStatementsResource.GetStatementParams(
+                verb = VERB_SAVED,
+                activity = classActivityId,
+                relatedActivities = true,
+            ),
+            dataLoadParams = DataLoadParams()
+        ).collect { dataLoadState ->
             try {
+                val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                val response = schoolDataSource.xapiStatementsResource.get(
-                    XapiStatementsResource.GetStatementsRequest(
-                        params = XapiStatementsResource.GetStatementParams(
-                            verb = VERB_SAVED,
-                            activity = classActivityId,
-                            relatedActivities = true,
-                        ),
-                        headers = XapiRequestHeaders()
-                    )
-                )
-
-                val groups = response.statementResult.statements.mapNotNull { statement ->
+                val groups = statementResult.statements.mapNotNull { statement ->
                     statement.`object` as? XapiGroup
                 }.distinctBy { it.account?.name }
 
@@ -451,7 +449,7 @@ class ClazzDetailViewModel(
                     prev.copy(groups = groupDisplayDataList)
                 }
             } catch (e: Throwable) {
-                Napier.e("loadGroupsFromXapi ERROR", throwable = e)
+                Napier.e("observeGroupsFromXapi ERROR", throwable = e)
                 _uiState.update { it.copy(groups = emptyList()) }
             }
         }

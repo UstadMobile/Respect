@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.ext.dataOrNull
@@ -21,6 +20,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
@@ -33,6 +33,7 @@ import world.respect.lib.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
@@ -86,7 +87,7 @@ class StudentGroupingEditViewModel(
     private val route: StudentGroupingEdit = savedStateHandle.toRoute()
 
     val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
-
+    val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"
 
     private fun pagingSourceByRole(): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -125,9 +126,21 @@ class StudentGroupingEditViewModel(
             it.copy(students = studentPagingSource)
         }
         route.groupId?.let { groupId ->
+            @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
                 try {
-                    val group = schoolDataSource.xapiActorDataSource.getGroupDetail(groupId)
+                    val statementResult = schoolDataSource.xapiStatementsResource.get(
+                        listParams = XapiStatementsResource.GetStatementParams(
+                            verb = VERB_SAVED,
+                            activity = classActivityId,
+                            relatedActivities = true,
+                        ),
+                        dataLoadParams = DataLoadParams()
+                    ).dataOrNull() ?: return@launch
+
+                    val group = statementResult.statements
+                        .mapNotNull { statement -> statement.`object` as? XapiGroup }
+                        .firstOrNull { it.account?.name == groupId }
                         ?: return@launch
 
                     val memberIds = group.member
@@ -141,7 +154,6 @@ class StudentGroupingEditViewModel(
                         ).dataOrNull()
                     }
 
-                    // ✅ Step 3: update state
                     _uiState.update { prev ->
                         prev.copy(
                             groupName = group.name ?: "",
@@ -164,8 +176,7 @@ class StudentGroupingEditViewModel(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    fun onClickSave()
-    {
+    fun onClickSave() {
 
         val groupName = _uiState.value.groupName
         val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"

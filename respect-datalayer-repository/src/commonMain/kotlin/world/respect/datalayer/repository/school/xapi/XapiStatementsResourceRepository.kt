@@ -2,6 +2,7 @@ package world.respect.datalayer.repository.school.xapi
 
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.dataOrNull
@@ -10,7 +11,6 @@ import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -79,7 +79,14 @@ class XapiStatementsResourceRepository(
 
 
     override fun getAssignmentResult(assignmentActivityId: String): Flow<List<AssignmentResult>> {
-        return local.getAssignmentResult(assignmentActivityId)
+        val remoteSyncFlow = getAsFlow(
+            listParams = GetStatementParams(activity = assignmentActivityId),
+            dataLoadParams = DataLoadParams()
+        )
+
+        return local.getAssignmentResult(assignmentActivityId).combine(remoteSyncFlow) { localData, _ ->
+            localData
+        }
     }
 
     override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {

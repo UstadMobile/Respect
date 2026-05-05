@@ -45,7 +45,7 @@ data class StudentGroupingDetailUiState(
     val groupName: String = "",
     val groupMembers: List<String> = emptyList(),
     val showDeleteGroupDialog: Boolean = false,
-    val statementId: String? = null,
+    val statementGroupId: String? = null,
 )
 
 class StudentGroupingDetailViewModel(
@@ -114,55 +114,9 @@ class StudentGroupingDetailViewModel(
 
         viewModelScope.launch {
             try {
-                // Fetch statements to find the one matching route.groupId
-                val statementResult = schoolDataSource.xapiStatementsResource.get(
-                    listParams = XapiStatementsResource.GetStatementParams(
-                        verb = VERB_SAVED,
-                        activity = classActivityId,
-                        relatedActivities = true,
-                    ),
-                    dataLoadParams = DataLoadParams()
-                ).dataOrNull()
-
-                if (statementResult == null) {
-                    Napier.w("onConfirmDeleteGroup: No statements found")
-                    return@launch
-                }
-
-                // Get all voiding statements to filter out already voided statements
-                val voidingStatements = schoolDataSource.xapiStatementsResource.get(
-                    listParams = XapiStatementsResource.GetStatementParams(
-                        verb = VERB_VOIDED,
-                        activity = classActivityId,
-                        relatedActivities = true,
-                    ),
-                    dataLoadParams = DataLoadParams()
-                ).dataOrNull()?.statements ?: emptyList()
-
-                // Extract IDs of voided statements
-                val voidedStatementIds = voidingStatements
-                    .mapNotNull { it.`object` as? XapiStatementRef }
-                    .map { it.id }
-                    .toSet()
-
-                // Find the statement where group.account.name matches route.groupId
-                val statementToVoid = statementResult.statements
-                    .filter { statement ->
-                        statement.id?.toString() !in voidedStatementIds
-                    }
-                    .firstOrNull { statement ->
-                        val group = statement.`object` as? XapiGroup
-                        group?.account?.name == route.groupId
-                    }
-
-                if (statementToVoid == null) {
-                    Napier.w("onConfirmDeleteGroup: Statement with groupId ${route.groupId} not found")
-                    return@launch
-                }
-
-                val statementId = statementToVoid.id?.toString()
-                if (statementId == null) {
-                    Napier.w("onConfirmDeleteGroup: Statement has no ID")
+                val statementGroupId = _uiState.value.statementGroupId
+                if (statementGroupId == null) {
+                    Napier.w("onConfirmDeleteGroup: Statement ID not found")
                     return@launch
                 }
 
@@ -179,20 +133,20 @@ class StudentGroupingDetailViewModel(
 
                 val verb = XapiVerb(
                     id = VERB_VOIDED,
-                    display = mapOf("en" to "voided")
+                    display = mapOf("en" to VERB_VOIDED)
                 )
 
-                // Use StatementRef to reference the statement being voided
                 val statementRef = XapiStatementRef(
                     objectType = XapiObjectType.StatementRef,
-                    id = statementId
+                    id = statementGroupId
                 )
 
                 val voidingStatement = XapiStatement(
                     actor = actor,
                     verb = verb,
                     `object` = statementRef,
-                    timestamp = Clock.System.now()
+                    timestamp = Clock.System.now(),
+                    stored = Clock.System.now()
                 )
 
                 schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
@@ -233,7 +187,7 @@ class StudentGroupingDetailViewModel(
                             prev.copy(
                                 groupName = group.name ?: "",
                                 groupMembers = memberNames,
-                                statementId = groupStatement.id?.toString()
+                                statementGroupId = groupStatement.id?.toString()
                             )
                         }
 

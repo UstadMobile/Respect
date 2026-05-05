@@ -38,6 +38,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
 import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
@@ -240,19 +241,29 @@ class PersonListViewModel(
     }
 
     fun onClickInvitePerson() {
+        val inviteOptions = when {
+            route.inviteUid != null -> {
+                InvitePerson.ClassInviteOptions(
+                    inviteUid = route.inviteUid
+                )
+            }
+
+            route.filterByRole == PersonRoleEnum.PARENT && route.personGuidStr != null -> {
+                InvitePerson.FamilyInviteOptions(
+                    personUid = route.personGuidStr
+                )
+            }
+
+            else -> {
+                InvitePerson.NewUserInviteOptions(
+                    presetRole = route.filterByRole
+                )
+            }
+        }
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                InvitePerson.create(
-                    invitePersonOptions = if(route.inviteUid != null) {
-                        InvitePerson.ClassInviteOptions(
-                            inviteUid = route.inviteUid
-                        )
-                    }else {
-                        InvitePerson.NewUserInviteOptions(
-                            presetRole = route.filterByRole
-                        )
-                    }
-                )
+                InvitePerson.create(invitePersonOptions = inviteOptions)
             )
         )
     }

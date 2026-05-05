@@ -877,6 +877,11 @@ data class InvitePerson(
         val inviteUid: String,
     ): InvitePersonOptions
 
+    @Serializable
+    @SerialName("family")
+    data class FamilyInviteOptions(
+        val personUid: String
+    ) : InvitePersonOptions
 
     @Transient
     val invitePersonOptions: InvitePersonOptions = Json.decodeFromString(

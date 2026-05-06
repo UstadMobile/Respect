@@ -64,6 +64,7 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
 import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.VERB_VOIDED
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
@@ -201,7 +202,6 @@ class ClazzDetailViewModel(
             }
         }
 
-        // Observe groups from xAPI statements as a flow
         viewModelScope.launch {
             observeGroupsFromXapi()
         }
@@ -433,12 +433,25 @@ class ClazzDetailViewModel(
 
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                // Create a map of groupId to statement for quick lookup
+                // Get all voiding statements to filter out voided statements
+                val voidingStatements = statementResult.statements.filter { statement ->
+                    statement.verb.id == VERB_VOIDED
+                }
+
+                val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
+                    (voidingStmt.`object` as? world.respect.lib.xapi.model.XapiStatementRef)?.id
+                }.toSet()
+
                 val groupIdToStatement = statementResult.statements
+                    .filter { statement ->
+                        // Filter out: voiding statements and voided statements
+                        statement.verb?.id != VERB_VOIDED &&
+                        statement.id?.toString() !in voidedStatementIds
+                    }
                     .mapNotNull { statement ->
                         val group = statement.`object` as? XapiGroup
                         val groupId = group?.account?.name
-                        if (groupId != null && group != null) {
+                        if (groupId != null) {
                             groupId to statement
                         } else {
                             null

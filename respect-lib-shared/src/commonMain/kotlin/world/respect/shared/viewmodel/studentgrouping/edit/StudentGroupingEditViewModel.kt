@@ -139,7 +139,22 @@ class StudentGroupingEditViewModel(
                         dataLoadParams = DataLoadParams()
                     ).dataOrNull() ?: return@launch
 
+                    // Get all voiding statements to filter out voided statements
+                    val voidingStatements = statementResult.statements.filter { statement ->
+                        statement.verb?.id == VERB_VOIDED
+                    }
+
+                    val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
+                        (voidingStmt.`object` as? XapiStatementRef)?.id
+                    }.toSet()
+
+                    // Find the latest non-voided statement for this group
                     val groupStatement = statementResult.statements
+                        .filter { statement ->
+                            // Filter out voiding statements and voided statements
+                            statement.verb?.id != VERB_VOIDED &&
+                            statement.id?.toString() !in voidedStatementIds
+                        }
                         .firstOrNull { statement ->
                             val group = statement.`object` as? XapiGroup
                             group?.account?.name == groupId
@@ -148,7 +163,6 @@ class StudentGroupingEditViewModel(
 
                     val group = groupStatement.`object` as XapiGroup
 
-                    val groupId = group.account?.name
                     val groupName = group.name
                     val statementId = groupStatement.id?.toString()
 
@@ -242,7 +256,6 @@ class StudentGroupingEditViewModel(
                     )
                 }
 
-                // Always use the same groupId, but create a new statement ID
                 val groupId = route.groupId ?: Uuid.random().toString()
 
                 val group = XapiGroup(

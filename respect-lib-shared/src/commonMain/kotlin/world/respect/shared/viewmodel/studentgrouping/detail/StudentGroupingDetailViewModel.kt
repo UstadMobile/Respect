@@ -158,15 +158,6 @@ class StudentGroupingDetailViewModel(
     @OptIn(ExperimentalUuidApi::class)
     private fun loadGroupDetail() {
         viewModelScope.launch {
-            try {
-                // If statement ID is provided in route, we can use it directly
-                val statementIdFromRoute = route.statementId
-
-                Napier.d("=== STUDENT GROUPING DETAIL LOAD ===")
-                Napier.d("Group ID from route: ${route.groupId}")
-                Napier.d("Statement ID from route: $statementIdFromRoute")
-                Napier.d("====================================")
-
                 schoolDataSource.xapiStatementsResource.getAsFlow(
                     listParams = XapiStatementsResource.GetStatementParams(
                         verb = VERB_SAVED,
@@ -177,7 +168,22 @@ class StudentGroupingDetailViewModel(
                 ).collect { dataLoadState ->
                     val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
+                    // Get all voiding statements to filter out voided statements
+                    val voidingStatements = statementResult.statements.filter { statement ->
+                        statement.verb?.id == VERB_VOIDED
+                    }
+
+                    val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
+                        (voidingStmt.`object` as? XapiStatementRef)?.id
+                    }.toSet()
+
+                    // Find the latest non-voided statement for this group
                     val groupStatement = statementResult.statements
+                        .filter { statement ->
+                            // Filter out voiding statements and voided statements
+                            statement.verb.id != VERB_VOIDED &&
+                            statement.id?.toString() !in voidedStatementIds
+                        }
                         .firstOrNull { statement ->
                             val group = statement.`object` as? XapiGroup
                             group?.account?.name == route.groupId
@@ -187,15 +193,6 @@ class StudentGroupingDetailViewModel(
                         val group = groupStatement.`object` as XapiGroup
                         val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
                         val statementId = groupStatement.id?.toString()
-
-                        Napier.d("=== STUDENT GROUPING DETAIL LOADED ===")
-                        Napier.d("Group ID: ${group.account?.name}")
-                        Napier.d("Group Name: ${group.name}")
-                        Napier.d("Statement ID from query: $statementId")
-                        Napier.d("Statement ID from route: $statementIdFromRoute")
-                        Napier.d("Match: ${statementId == statementIdFromRoute}")
-                        Napier.d("======================================")
-
                         _uiState.update { prev ->
                             prev.copy(
                                 groupName = group.name ?: "",
@@ -211,9 +208,6 @@ class StudentGroupingDetailViewModel(
                         }
                     }
                 }
-            } catch (e: Throwable) {
-                Napier.e("loadGroupDetail ERROR", throwable = e)
-            }
         }
     }
 }

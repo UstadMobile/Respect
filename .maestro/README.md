@@ -33,50 +33,50 @@ Where:
 ## Available test flows
 ---
 ### 001_001_invite_users_using_qr_code_or_link_test
-- Admin generates invite link (QR/link) for teacher
-- Teacher joins using QR/link → creates account
-- Teacher creates class and generates invite code for student
-- Student joins using invite code → waits for approval
-- Teacher approves student → student joins class
-- Teacher generates parent invite link to join class
-- Parent joins using link → adds child to class
+1. Admin generates invite link (QR/link) for teacher
+2. Teacher joins using QR/link → creates account
+3. Teacher creates class and generates invite code for student
+4. Student joins using invite code → waits for approval
+5. Teacher approves student → student joins class
+6. Teacher generates parent invite link to join class
+7. Parent joins using link → adds child to class
 ---
 ### 001_002_add_user_direct_test
-- Admin adds new user directly (Parent/Teacher/Student)
-- Validates mandatory fields and input constraints
-- Creates parent with child (family member)
-- Creates accounts for users
-- Assigns and manages QR code badges
-- Validates login, password change, and child mode access
-- Verifies QR-based login for student
+1. Admin adds new user directly (Parent/Teacher/Student)
+2. Validates mandatory fields and input constraints
+3. Creates parent with child (family member)
+4. Creates accounts for users
+5. Assigns and manages QR code badges
+6. Validates login, password change, and child mode access
+7. Verifies QR-based login for student
 ---
 ### 001_003_login_using_school_link_test
-- User opens app via school link
-- Validates empty and invalid link inputs
-- Enters valid school URL
-- Logs in using credentials
-- Accesses app successfully
+1. User opens app via school link
+2. Validates empty and invalid link inputs
+3. Enters valid school URL
+4. Logs in using credentials
+5. Accesses app successfully
 ---
 ### 001_005_add_school_self_registration_test
-- User adds a new school from login screen
-- Selects host and registers school
-- Creates system administrator account
-- Logs into newly created school
-- Verifies profile and logout/login flow
+1. User adds a new school from login screen
+2. Selects host and registers school
+3. Creates system administrator account
+4. Logs into newly created school
+5. Verifies profile and logout/login flow
 ---
 ### 002_browse_lessons_test
-- Admin logs in to the App
-- Adds app using external manifest link
-- Verifies app is added successfully
-- Opens app and browses lessons
-- Opens and validates a lesson content
+1. Admin logs in to the App
+2. Adds app using external manifest link
+3. Verifies app is added successfully
+4. Opens app and browses lessons
+5. Opens and validates a lesson content
 ---
 ### 003_admin_user_assigns_assignment_to_a_class_test
-- Admin setup includes app, class and teacher creation
-- Teacher logs in and accesses class
-- Teacher creates a new assignment
-- Assignment is linked with lesson content
-- Assignment is saved and verified in class
+1. Admin setup includes app, class and teacher creation
+2. Teacher logs in and accesses class
+3. Teacher creates a new assignment
+4. Assignment is linked with lesson content
+5. Assignment is saved and verified in class
 ---
 
 ## Testing using HTTPS

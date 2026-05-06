@@ -92,6 +92,7 @@ onFlowComplete:
     id: "invite_url"
 
 # Teacher sign-up via invite link to the class as already logged-in user
+- clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
@@ -203,6 +204,7 @@ onFlowComplete:
 - assertVisible: "StudentB User"
 
 #Teacher send class invite to parentA user to add StudentA User
+- clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
@@ -273,6 +275,7 @@ onFlowComplete:
 - assertVisible: "StudentB User"
 
 #Teacher send class invite to StudentB User directly
+- clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
@@ -347,6 +350,7 @@ onFlowComplete:
 - assertVisible: "ParentA User"
 
 # H) Teacher approve student's request to join the class
+- clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:

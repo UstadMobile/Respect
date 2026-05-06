@@ -29,15 +29,23 @@ Where:
 * ```SCHOOL_ADMIN_PASSWORD``` is the password for the admin user for the school (also as per addschool command)
 * ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
+---
 
 ## Available test flows
 
 [001_001_invite_users_using_qr_code_or_link_test.md](flow-summary/001_001_invite_users_using_qr_code_or_link_test.md)
+
 [001_002_add_user_direct_test.md](flow-summary/001_002_add_user_direct_test.md)
+
 [001_003_login_using_school_link_test.md](flow-summary/001_003_login_using_school_link_test.md)
+
 [001_005_add_school_self_registration_test.md](flow-summary/001_005_add_school_self_registration_test.md)
+
 [002_browse_lessons_test.md](flow-summary/002_browse_lessons_test.md)
+
 [003_admin_user_assigns_assignment_to_a_class_test.md](flow-summary/003_admin_user_assigns_assignment_to_a_class_test.md)
+
+---
 
 ## Testing using HTTPS
 

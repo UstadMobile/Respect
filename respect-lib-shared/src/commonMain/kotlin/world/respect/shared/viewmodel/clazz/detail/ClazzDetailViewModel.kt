@@ -64,7 +64,6 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
 import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
-import world.respect.lib.xapi.model.VERB_VOIDED
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
@@ -433,21 +432,11 @@ class ClazzDetailViewModel(
 
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                // Get all voiding statements to filter out voided statements
-                val voidingStatements = statementResult.statements.filter { statement ->
-                    statement.verb.id == VERB_VOIDED
-                }
-
-                val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
-                    (voidingStmt.`object` as? world.respect.lib.xapi.model.XapiStatementRef)?.id
-                }.toSet()
-
+                // Sort by timestamp descending (latest first) and take first per groupId
+                // This ensures we get the latest version of each group
                 val groupIdToStatement = statementResult.statements
-                    .filter { statement ->
-                        // Filter out: voiding statements and voided statements
-                        statement.verb.id != VERB_VOIDED &&
-                        statement.id?.toString() !in voidedStatementIds
-                    }
+                    .filter { it.verb.id == VERB_SAVED }
+                    .sortedByDescending { it.timestamp ?: it.stored }
                     .mapNotNull { statement ->
                         val group = statement.`object` as? XapiGroup
                         val groupId = group?.account?.name

@@ -52,6 +52,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.toString
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -79,16 +80,18 @@ class StudentGroupingEditViewModel(
     respectAccountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-
     override val scope: Scope = respectAccountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(StudentGroupingEditUiState())
+
     val uiState = _uiState.asStateFlow()
 
     private val schoolDataSource: SchoolDataSource by inject()
+
     private val route: StudentGroupingEdit = savedStateHandle.toRoute()
 
     val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
+
     val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"
 
     private fun pagingSourceByRole(): PagingSourceFactoryHolder<Int, Person> {
@@ -127,6 +130,7 @@ class StudentGroupingEditViewModel(
         _uiState.update {
             it.copy(students = studentPagingSource)
         }
+
         route.groupId?.let { groupId ->
             @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
@@ -139,25 +143,14 @@ class StudentGroupingEditViewModel(
                         dataLoadParams = DataLoadParams()
                     ).dataOrNull() ?: return@launch
 
-                    // Get all voiding statements to filter out voided statements
-                    val voidingStatements = statementResult.statements.filter { statement ->
-                        statement.verb.id == VERB_VOIDED
-                    }
-
-                    val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
-                        (voidingStmt.`object` as? XapiStatementRef)?.id
-                    }.toSet()
-
-                    // Find the latest non-voided statement for this group
+                    // Find the latest statement for this group by sorting by timestamp
                     val groupStatement = statementResult.statements
                         .filter { statement ->
-                            // Filter out voiding statements and voided statements
-                            statement.verb.id != VERB_VOIDED &&
-                            statement.id?.toString() !in voidedStatementIds
-                        }
-                        .firstOrNull { statement ->
                             val group = statement.`object` as? XapiGroup
                             group?.account?.name == groupId
+                        }
+                        .maxByOrNull {
+                            it.timestamp ?: it.stored ?: Instant.DISTANT_PAST
                         }
                         ?: return@launch
 
@@ -212,7 +205,7 @@ class StudentGroupingEditViewModel(
         }
 
         viewModelScope.launch {
-                // Step 1: If editing an existing group, void the old statement first
+                // If editing an existing group, void the old statement first
                 if (existingStatementId != null) {
 
                     val actor = XapiAgent(
@@ -244,7 +237,7 @@ class StudentGroupingEditViewModel(
                     schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
                 }
 
-                // Step 2: Create a new statement with the updated group information
+                //  Create a new statement with the updated group information
                 val members = _uiState.value.selectedStudents.map { person ->
                     XapiAgent(
                         name = person.fullName(),

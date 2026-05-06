@@ -38,6 +38,7 @@ import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
 
@@ -51,18 +52,14 @@ data class StudentGroupingDetailUiState(
 class StudentGroupingDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAccountManager: RespectAccountManager,
+    private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = respectAccountManager.requireActiveAccountScope()
-
     private val _uiState = MutableStateFlow(StudentGroupingDetailUiState())
-
     val uiState = _uiState.asStateFlow()
-
     private val schoolDataSource: SchoolDataSource by inject()
-
     private val route: StudentGroupingDetail = savedStateHandle.toRoute()
-
     val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self?.toString()
     val classActivityId = "${schoolSelfUrl}${CLASS}${route.classId}"
 
@@ -77,9 +74,9 @@ class StudentGroupingDetailViewModel(
                 )
             )
         }
+
         loadGroupDetail()
 
-        val navResultReturner: NavResultReturner = getKoin().get()
         viewModelScope.launch {
             navResultReturner.filteredResultFlowForKey(
                 RESULT_KEY_GROUP_UPDATED
@@ -158,56 +155,43 @@ class StudentGroupingDetailViewModel(
     @OptIn(ExperimentalUuidApi::class)
     private fun loadGroupDetail() {
         viewModelScope.launch {
-                schoolDataSource.xapiStatementsResource.getAsFlow(
-                    listParams = XapiStatementsResource.GetStatementParams(
-                        verb = VERB_SAVED,
-                        activity = classActivityId,
-                        relatedActivities = true,
-                    ),
-                    dataLoadParams = DataLoadParams()
-                ).collect { dataLoadState ->
-                    val statementResult = dataLoadState.dataOrNull() ?: return@collect
+            schoolDataSource.xapiStatementsResource.getAsFlow(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    verb = VERB_SAVED,
+                    activity = classActivityId,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = DataLoadParams()
+            ).collect { dataLoadState ->
+                val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                    // Get all voiding statements to filter out voided statements
-                    val voidingStatements = statementResult.statements.filter { statement ->
-                        statement.verb?.id == VERB_VOIDED
+                // Find the latest statement for this group by sorting by timestamp
+                val groupStatement = statementResult.statements
+                    .filter { statement ->
+                        val group = statement.`object` as? XapiGroup
+                        group?.account?.name == route.groupId
+                    }
+                    .maxByOrNull { it.timestamp ?: it.stored ?: Instant.DISTANT_PAST }
+
+                if (groupStatement != null) {
+                    val group = groupStatement.`object` as XapiGroup
+                    val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
+                    val statementId = groupStatement.id?.toString()
+                    _uiState.update { prev ->
+                        prev.copy(
+                            groupName = group.name ?: "",
+                            groupMembers = memberNames,
+                            statementGroupId = statementId
+                        )
                     }
 
-                    val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
-                        (voidingStmt.`object` as? XapiStatementRef)?.id
-                    }.toSet()
-
-                    // Find the latest non-voided statement for this group
-                    val groupStatement = statementResult.statements
-                        .filter { statement ->
-                            // Filter out voiding statements and voided statements
-                            statement.verb.id != VERB_VOIDED &&
-                            statement.id?.toString() !in voidedStatementIds
-                        }
-                        .firstOrNull { statement ->
-                            val group = statement.`object` as? XapiGroup
-                            group?.account?.name == route.groupId
-                        }
-
-                    if (groupStatement != null) {
-                        val group = groupStatement.`object` as XapiGroup
-                        val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
-                        val statementId = groupStatement.id?.toString()
-                        _uiState.update { prev ->
-                            prev.copy(
-                                groupName = group.name ?: "",
-                                groupMembers = memberNames,
-                                statementGroupId = statementId
-                            )
-                        }
-
-                        _appUiState.update {
-                            it.copy(
-                                title = group.name?.asUiText() ?: "".asUiText()
-                            )
-                        }
+                    _appUiState.update {
+                        it.copy(
+                            title = group.name?.asUiText() ?: "".asUiText()
+                        )
                     }
                 }
+            }
         }
     }
 }

@@ -338,11 +338,6 @@ class ClazzDetailViewModel(
         val groupData = _uiState.value.groups.find { it.groupId == groupId }
         val statementId = groupData?.statementId
 
-        Napier.d("=== NAVIGATE TO GROUP DETAIL ===")
-        Napier.d("Group ID: $groupId")
-        Napier.d("Statement ID: $statementId")
-        Napier.d("================================")
-
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 StudentGroupingDetail(
@@ -456,12 +451,6 @@ class ClazzDetailViewModel(
                     val group = statement.`object` as XapiGroup
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
                     val statementId = statement.id?.toString()
-
-                    Napier.d("=== CLAZZ DETAIL GROUP DEBUG ===")
-                    Napier.d("Group ID: $groupId")
-                    Napier.d("Group Name: ${group.name}")
-                    Napier.d("Statement ID: $statementId")
-                    Napier.d("================================")
 
                     GroupDisplayData(
                         groupId = groupId,

@@ -3,7 +3,6 @@ package world.respect.shared.viewmodel.studentgrouping.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -153,12 +152,6 @@ class StudentGroupingEditViewModel(
                     val groupName = group.name
                     val statementId = groupStatement.id?.toString()
 
-                    Napier.d("=== STUDENT GROUPING EDIT DEBUG ===")
-                    Napier.d("Group ID: $groupId")
-                    Napier.d("Group Name: $groupName")
-                    Napier.d("Statement ID: $statementId")
-                    Napier.d("===================================")
-
                     val memberIds = group.member
                         ?.mapNotNull { it.account?.name }
                         ?: emptyList()
@@ -195,12 +188,6 @@ class StudentGroupingEditViewModel(
         val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"
         val existingStatementId = _uiState.value.statementId
 
-        Napier.d("=== STUDENT SAVE GROUP DEBUG ===")
-        Napier.d("Group ID from route: ${route.groupId}")
-        Napier.d("Group Name: $groupName")
-        Napier.d("Existing Statement ID: $existingStatementId")
-        Napier.d("========================")
-
         if (groupName.isBlank()) {
             _uiState.update {
                 it.copy(groupNameError = Res.string.required_field.asUiText())
@@ -213,8 +200,6 @@ class StudentGroupingEditViewModel(
         viewModelScope.launch {
                 // Step 1: If editing an existing group, void the old statement first
                 if (existingStatementId != null) {
-                    Napier.d("=== VOIDING EXISTING STATEMENT ===")
-                    Napier.d("Statement ID to void: $existingStatementId")
 
                     val actor = XapiAgent(
                         name = _uiState.value.personName,
@@ -243,8 +228,6 @@ class StudentGroupingEditViewModel(
                     )
 
                     schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
-
-                    Napier.d("=== VOIDING COMPLETE ===")
                 }
 
                 // Step 2: Create a new statement with the updated group information
@@ -305,10 +288,6 @@ class StudentGroupingEditViewModel(
                 )
 
                 schoolDataSource.xapiStatementsResource.post(listOf(statement))
-
-                Napier.d("=== NEW STATEMENT SAVED ===")
-                Napier.d("Group ID: $groupId")
-                Napier.d("New Statement ID: ${statement.id}")
 
                 if (route.groupId == null) {
                     _navCommandFlow.tryEmit(

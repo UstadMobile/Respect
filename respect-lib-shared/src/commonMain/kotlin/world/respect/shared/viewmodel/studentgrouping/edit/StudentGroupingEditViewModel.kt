@@ -141,7 +141,7 @@ class StudentGroupingEditViewModel(
 
                     // Get all voiding statements to filter out voided statements
                     val voidingStatements = statementResult.statements.filter { statement ->
-                        statement.verb?.id == VERB_VOIDED
+                        statement.verb.id == VERB_VOIDED
                     }
 
                     val voidedStatementIds = voidingStatements.mapNotNull { voidingStmt ->
@@ -152,7 +152,7 @@ class StudentGroupingEditViewModel(
                     val groupStatement = statementResult.statements
                         .filter { statement ->
                             // Filter out voiding statements and voided statements
-                            statement.verb?.id != VERB_VOIDED &&
+                            statement.verb.id != VERB_VOIDED &&
                             statement.id?.toString() !in voidedStatementIds
                         }
                         .firstOrNull { statement ->

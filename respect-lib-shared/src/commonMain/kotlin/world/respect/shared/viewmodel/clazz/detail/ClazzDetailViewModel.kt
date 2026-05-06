@@ -445,7 +445,7 @@ class ClazzDetailViewModel(
                 val groupIdToStatement = statementResult.statements
                     .filter { statement ->
                         // Filter out: voiding statements and voided statements
-                        statement.verb?.id != VERB_VOIDED &&
+                        statement.verb.id != VERB_VOIDED &&
                         statement.id?.toString() !in voidedStatementIds
                     }
                     .mapNotNull { statement ->

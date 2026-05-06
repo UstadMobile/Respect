@@ -428,8 +428,7 @@ class ClazzDetailViewModel(
 
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                // Sort by timestamp descending (latest first) and take first per groupId
-                // This ensures we get the latest version of each group
+                // Sort by timestamp to get the latest version of each group
                 val groupIdToStatement = statementResult.statements
                     .filter { it.verb.id == VERB_SAVED }
                     .sortedByDescending { it.timestamp ?: it.stored }

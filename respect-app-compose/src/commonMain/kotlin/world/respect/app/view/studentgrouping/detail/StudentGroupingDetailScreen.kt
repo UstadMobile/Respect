@@ -69,7 +69,6 @@ fun StudentGroupingDetailScreen(
             .fillMaxSize()
     ) {
         item {
-
             ListItem(
                 modifier = Modifier.clickable {},
                 leadingContent = {

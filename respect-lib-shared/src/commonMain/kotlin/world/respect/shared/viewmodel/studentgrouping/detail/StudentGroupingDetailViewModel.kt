@@ -145,8 +145,8 @@ class StudentGroupingDetailViewModel(
                 stored = Clock.System.now()
             )
 
-            schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
 
+            schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
             _navCommandFlow.tryEmit(NavCommand.PopUp())
 
         }

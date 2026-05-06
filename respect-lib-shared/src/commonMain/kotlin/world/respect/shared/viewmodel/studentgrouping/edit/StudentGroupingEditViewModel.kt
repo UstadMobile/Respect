@@ -137,48 +137,48 @@ class StudentGroupingEditViewModel(
             @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
                 val statementResult = schoolDataSource.xapiStatementsResource.get(
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            verb = VERB_SAVED,
-                            activity = classActivityId,
-                            relatedActivities = true,
-                        ),
-                        dataLoadParams = DataLoadParams()
-                    ).dataOrNull() ?: return@launch
+                    listParams = XapiStatementsResource.GetStatementParams(
+                        verb = VERB_SAVED,
+                        activity = classActivityId,
+                        relatedActivities = true,
+                    ),
+                    dataLoadParams = DataLoadParams()
+                ).dataOrNull() ?: return@launch
 
-                    // Find the latest statement for this group by sorting by timestamp
-                    val groupStatement = statementResult.statements
-                        .filter { statement ->
-                            val group = statement.`object` as? XapiGroup
-                            group?.account?.name == groupId
-                        }
-                        .maxByOrNull {
-                            it.timestamp ?: it.stored ?: Instant.DISTANT_PAST
-                        }
-                        ?: return@launch
-
-                    val group = groupStatement.`object` as XapiGroup
-
-                    val groupName = group.name
-                    val statementId = groupStatement.id?.toString()
-
-                    val memberIds = group.member
-                        ?.mapNotNull { it.account?.name }
-                        ?: emptyList()
-
-                    val persons = memberIds.mapNotNull { id ->
-                        schoolDataSource.personDataSource.findByGuid(
-                            DataLoadParams(),
-                            id
-                        ).dataOrNull()
+                // Find the latest statement for this group by sorting by timestamp
+                val groupStatement = statementResult.statements
+                    .filter { statement ->
+                        val group = statement.`object` as? XapiGroup
+                        group?.account?.name == groupId
                     }
-
-                    _uiState.update { prev ->
-                        prev.copy(
-                            groupName = groupName ?: "",
-                            selectedStudents = persons,
-                            statementId = statementId
-                        )
+                    .maxByOrNull {
+                        it.timestamp ?: it.stored ?: Instant.DISTANT_PAST
                     }
+                    ?: return@launch
+
+                val group = groupStatement.`object` as XapiGroup
+
+                val groupName = group.name
+                val statementId = groupStatement.id?.toString()
+
+                val memberIds = group.member
+                    ?.mapNotNull { it.account?.name }
+                    ?: emptyList()
+
+                val persons = memberIds.mapNotNull { id ->
+                    schoolDataSource.personDataSource.findByGuid(
+                        DataLoadParams(),
+                        id
+                    ).dataOrNull()
+                }
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        groupName = groupName ?: "",
+                        selectedStudents = persons,
+                        statementId = statementId
+                    )
+                }
             }
         }
         viewModelScope.launch {
@@ -207,61 +207,8 @@ class StudentGroupingEditViewModel(
         }
 
         viewModelScope.launch {
-                // If editing an existing group, void the old statement first
-                if (existingStatementId != null) {
-
-                    val actor = XapiAgent(
-                        name = _uiState.value.personName,
-                        objectType = XapiObjectType.Agent,
-                        account = XapiAccount(
-                            name = _uiState.value.personId,
-                            homePage = schoolSelfUrl.toString()
-                        )
-                    )
-
-                    val voidVerb = XapiVerb(
-                        id = VERB_VOIDED,
-                        display = mapOf("en-US" to VOIDED)
-                    )
-
-                    val statementRef = XapiStatementRef(
-                        objectType = XapiObjectType.StatementRef,
-                        id = existingStatementId
-                    )
-
-                    val voidingStatement = XapiStatement(
-                        actor = actor,
-                        verb = voidVerb,
-                        `object` = statementRef,
-                        timestamp = Clock.System.now()
-                    )
-
-                    schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
-                }
-
-                //  Create a new statement with the updated group information
-                val members = _uiState.value.selectedStudents.map { person ->
-                    XapiAgent(
-                        name = person.fullName(),
-                        objectType = XapiObjectType.Agent,
-                        account = XapiAccount(
-                            name = person.guid,
-                            homePage = schoolSelfUrl.toString()
-                        )
-                    )
-                }
-
-                val groupId = route.groupId ?: Uuid.random().toString()
-
-                val group = XapiGroup(
-                    objectType = XapiObjectType.Group,
-                    name = groupName,
-                    account = XapiAccount(
-                        name = groupId,
-                        homePage = schoolSelfUrl.toString()
-                    ),
-                    member = members
-                )
+            // If editing an existing group, void the old statement first
+            if (existingStatementId != null) {
 
                 val actor = XapiAgent(
                     name = _uiState.value.personName,
@@ -272,46 +219,95 @@ class StudentGroupingEditViewModel(
                     )
                 )
 
-
-                val verb = XapiVerb(
-                    id = VERB_SAVED,
-                    display = mapOf("en-US" to SAVED)
+                val voidVerb = XapiVerb(
+                    id = VERB_VOIDED,
+                    display = mapOf("en-US" to VOIDED)
                 )
 
-                // Generate the statement ID before creating the statement
-                val statementId = Uuid.random()
+                val statementRef = XapiStatementRef(
+                    objectType = XapiObjectType.StatementRef,
+                    id = existingStatementId
+                )
 
-                val statement = XapiStatement(
-                    id = statementId,
+                val voidingStatement = XapiStatement(
                     actor = actor,
-                    verb = verb,
-                    `object` = group,
-                    timestamp = Clock.System.now(),
-                    context = XapiContext(
-                        contextActivities = XapiContextActivities(
-                            parent = listOf(
-                                XapiActivity(
-                                    id = classActivityId,
-                                    objectType = XapiObjectType.Activity
-                                )
+                    verb = voidVerb,
+                    `object` = statementRef,
+                    timestamp = Clock.System.now()
+                )
+
+                schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
+            }
+
+            //  Create a new statement with the updated group information
+            val members = _uiState.value.selectedStudents.map { person ->
+                XapiAgent(
+                    name = person.fullName(),
+                    objectType = XapiObjectType.Agent,
+                    account = XapiAccount(
+                        name = person.guid,
+                        homePage = schoolSelfUrl.toString()
+                    )
+                )
+            }
+
+            val groupId = route.groupId ?: Uuid.random().toString()
+
+            val group = XapiGroup(
+                objectType = XapiObjectType.Group,
+                name = groupName,
+                account = XapiAccount(
+                    name = groupId,
+                    homePage = schoolSelfUrl.toString()
+                ),
+                member = members
+            )
+
+            val actor = XapiAgent(
+                name = _uiState.value.personName,
+                objectType = XapiObjectType.Agent,
+                account = XapiAccount(
+                    name = _uiState.value.personId,
+                    homePage = schoolSelfUrl.toString()
+                )
+            )
+
+
+            val verb = XapiVerb(
+                id = VERB_SAVED,
+                display = mapOf("en-US" to SAVED)
+            )
+
+            val statement = XapiStatement(
+                actor = actor,
+                verb = verb,
+                `object` = group,
+                timestamp = Clock.System.now(),
+                context = XapiContext(
+                    contextActivities = XapiContextActivities(
+                        parent = listOf(
+                            XapiActivity(
+                                id = classActivityId,
+                                objectType = XapiObjectType.Activity
                             )
                         )
                     )
                 )
+            )
 
-                schoolDataSource.xapiStatementsResource.post(listOf(statement))
+            schoolDataSource.xapiStatementsResource.post(listOf(statement))
 
-                if (route.groupId == null) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            StudentGroupingDetail(groupId, route.classUid, statementId.toString()),
-                            popUpTo = route,
-                            popUpToInclusive = true
-                        )
+            if (route.groupId == null) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        StudentGroupingDetail(groupId, route.classUid, statement.id?.toString()),
+                        popUpTo = route,
+                        popUpToInclusive = true
                     )
-                } else {
-                    sendResultAndPop(RESULT_KEY_GROUP_UPDATED, true)
-                }
+                )
+            } else {
+                sendResultAndPop(RESULT_KEY_GROUP_UPDATED, true)
+            }
 
         }
     }

@@ -278,7 +278,11 @@ class StudentGroupingEditViewModel(
                     display = mapOf("en-US" to SAVED)
                 )
 
+                // Generate the statement ID before creating the statement
+                val statementId = Uuid.random()
+
                 val statement = XapiStatement(
+                    id = statementId,
                     actor = actor,
                     verb = verb,
                     `object` = group,
@@ -300,7 +304,7 @@ class StudentGroupingEditViewModel(
                 if (route.groupId == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            StudentGroupingDetail(groupId, route.classUid, statement.id?.toString()),
+                            StudentGroupingDetail(groupId, route.classUid, statementId.toString()),
                             popUpTo = route,
                             popUpToInclusive = true
                         )

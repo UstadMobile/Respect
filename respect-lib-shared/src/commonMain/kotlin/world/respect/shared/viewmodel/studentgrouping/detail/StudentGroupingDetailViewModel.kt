@@ -43,6 +43,7 @@ import kotlin.getValue
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 data class StudentGroupingDetailUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
@@ -169,12 +170,25 @@ class StudentGroupingDetailViewModel(
     @OptIn(ExperimentalUuidApi::class)
     private fun loadGroupDetail() {
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
-                listParams = XapiStatementsResource.GetStatementParams(
+            // If we have a statementId, query by it directly, otherwise query by verb and activity
+            val statementIdUuid = route.statementId?.let { Uuid.parse(it) }
+
+            val listParams = if (statementIdUuid != null) {
+                // When we have a specific statement ID, use it for direct lookup
+                XapiStatementsResource.GetStatementParams(
+                    statementId = statementIdUuid,
+                )
+            } else {
+                // Otherwise, query by verb and activity
+                XapiStatementsResource.GetStatementParams(
                     verb = VERB_SAVED,
                     activity = classActivityId,
                     relatedActivities = true,
-                ),
+                )
+            }
+
+            schoolDataSource.xapiStatementsResource.getAsFlow(
+                listParams = listParams,
                 dataLoadParams = DataLoadParams()
             ).collect { dataLoadState ->
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect

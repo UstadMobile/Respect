@@ -29,22 +29,54 @@ Where:
 * ```SCHOOL_ADMIN_PASSWORD``` is the password for the admin user for the school (also as per addschool command)
 * ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
----
 
 ## Available test flows
-
-[001_001_invite_users_using_qr_code_or_link_test.md](flow-summary/001_001_invite_users_using_qr_code_or_link_test.md)
-
-[001_002_add_user_direct_test.md](flow-summary/001_002_add_user_direct_test.md)
-
-[001_003_login_using_school_link_test.md](flow-summary/001_003_login_using_school_link_test.md)
-
-[001_005_add_school_self_registration_test.md](flow-summary/001_005_add_school_self_registration_test.md)
-
-[002_browse_lessons_test.md](flow-summary/002_browse_lessons_test.md)
-
-[003_admin_user_assigns_assignment_to_a_class_test.md](flow-summary/003_admin_user_assigns_assignment_to_a_class_test.md)
-
+---
+### 001_001_invite_users_using_qr_code_or_link_test
+- Admin generates invite link (QR/link) for teacher
+- Teacher joins using QR/link → creates account
+- Teacher creates class and generates invite code for student
+- Student joins using invite code → waits for approval
+- Teacher approves student → student joins class
+- Teacher generates parent invite link to join class
+- Parent joins using link → adds child to class
+---
+### 001_002_add_user_direct_test
+- Admin adds new user directly (Parent/Teacher/Student)
+- Validates mandatory fields and input constraints
+- Creates parent with child (family member)
+- Creates accounts for users
+- Assigns and manages QR code badges
+- Validates login, password change, and child mode access
+- Verifies QR-based login for student
+---
+### 001_003_login_using_school_link_test
+- User opens app via school link
+- Validates empty and invalid link inputs
+- Enters valid school URL
+- Logs in using credentials
+- Accesses app successfully
+---
+### 001_005_add_school_self_registration_test
+- User adds a new school from login screen
+- Selects host and registers school
+- Creates system administrator account
+- Logs into newly created school
+- Verifies profile and logout/login flow
+---
+### 002_browse_lessons_test
+- Admin logs in to the App
+- Adds app using external manifest link
+- Verifies app is added successfully
+- Opens app and browses lessons
+- Opens and validates a lesson content
+---
+### 003_admin_user_assigns_assignment_to_a_class_test
+- Admin setup includes app, class and teacher creation
+- Teacher logs in and accesses class
+- Teacher creates a new assignment
+- Assignment is linked with lesson content
+- Assignment is saved and verified in class
 ---
 
 ## Testing using HTTPS

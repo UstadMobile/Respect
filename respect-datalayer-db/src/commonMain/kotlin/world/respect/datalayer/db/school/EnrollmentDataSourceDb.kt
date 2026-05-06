@@ -12,8 +12,12 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.generateEnrollmentChanges
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
+import world.respect.datalayer.db.school.adapters.toPersonEntities
+import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.school.ChangeHistoryLocal
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.model.Enrollment
@@ -23,6 +27,7 @@ import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
+import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
 import kotlin.collections.map
@@ -34,6 +39,8 @@ class EnrollmentDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     @Suppress("unused")
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val changeHistoryDataSource: ChangeHistoryLocal,
+    private val primaryKeyGenerator: PrimaryKeyGenerator,
 ) : EnrollmentDataSourceLocal {
 
     private val logPrefix: String by lazy {
@@ -126,27 +133,55 @@ class EnrollmentDataSourceDb(
     }
 
     override suspend fun store(list: List<Enrollment>) {
-        if(list.isEmpty())
-            return
+        if (list.isEmpty()) return
 
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 val now = Clock.System.now()
+
                 list.forEach { enrollment ->
-                    val classPermissionResult = schoolDb.getClassEntityDao().getLastModifiedAndHasPermission(
-                        authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
-                        classUidNum = uidNumberMapper(enrollment.classUid),
-                        requiredPermission = when(enrollment.role) {
-                            EnrollmentRoleEnum.STUDENT, EnrollmentRoleEnum.PENDING_STUDENT -> {
-                                PermissionFlags.CLASS_WRITE_STUDENT_ENROLLMENT
+
+                    val classPermissionResult = schoolDb.getClassEntityDao()
+                        .getLastModifiedAndHasPermission(
+                            authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                            classUidNum = uidNumberMapper(enrollment.classUid),
+                            requiredPermission = when (enrollment.role) {
+                                EnrollmentRoleEnum.STUDENT,
+                                EnrollmentRoleEnum.PENDING_STUDENT ->
+                                    PermissionFlags.CLASS_WRITE_STUDENT_ENROLLMENT
+                                else ->
+                                    PermissionFlags.CLASS_WRITE_TEACHER_ENROLLMENT
                             }
-                            else -> PermissionFlags.CLASS_WRITE_TEACHER_ENROLLMENT
-                        }
+                        )
+
+                    if (!enrollment.role.requiresApproval && !classPermissionResult.hasPermission) {
+                        throw ForbiddenException(
+                            "$logPrefix no permission to enrol in class ${enrollment.classUid}"
+                        )
+                    }
+
+                    val existing = schoolDb.getEnrollmentEntityDao().findByGuid(
+                        uidNum = uidNumberMapper(enrollment.uid)
+                    )?.toModel()
+
+                    val personName = schoolDb.getPersonEntityDao()
+                        .findByGuidNum(uidNumberMapper(enrollment.personUid))
+                        ?.toPersonEntities()
+                        ?.toModel()?.fullName()
+
+                    val changeEntry = generateEnrollmentChanges(
+                        hGuid = primaryKeyGenerator.nextId(Enrollment.TABLE_ID).toString(),
+                        old = existing,
+                        new = enrollment,
+                        whoGuid = authenticatedUser.guid,
+                        timestamp = now.toEpochMilliseconds(),
+                        hTableGuid = enrollment.classUid,
+                        personName = personName
                     )
 
-                    if(!enrollment.role.requiresApproval && !classPermissionResult.hasPermission)
-                        throw ForbiddenException("$logPrefix no permission to enrol in " +
-                                "class ${enrollment.classUid}")
+                    if (changeEntry != null) {
+                        changeHistoryDataSource.store(listOf(changeEntry))
+                    }
 
                     schoolDb.getEnrollmentEntityDao().upsert(
                         listOf(
@@ -159,7 +194,6 @@ class EnrollmentDataSourceDb(
             }
         }
     }
-
     override suspend fun updateLocal(
         list: List<Enrollment>,
         forceOverwrite: Boolean

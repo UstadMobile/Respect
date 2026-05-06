@@ -17,6 +17,7 @@ import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
@@ -52,9 +53,12 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.navigation.ChangeHistory
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -84,7 +88,7 @@ data class ClazzDetailUiState(
     val inviteCodePrefix: String? = null,
     val showAddStudent: Boolean = false,
     val showAddTeacher: Boolean = false,
-)
+    )
 
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -106,6 +110,8 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
+
+    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase by inject()
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -291,7 +297,16 @@ class ClazzDetailViewModel(
     fun onToggleStudentsSection() {
         _uiState.update { it.copy(isStudentsExpanded = !it.isStudentsExpanded) }
     }
-
+    fun onClickChangeHistoryButton(){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                ChangeHistory(
+                    guid = route.guid,
+                    table = ChangeHistoryTableEnum.CLASS.value
+                )
+            )
+        )
+    }
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ClazzEdit(route.guid))

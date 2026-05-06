@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import world.respect.app.view.acknowledgement.AcknowledgementScreen
+import world.respect.app.view.apps.changehistory.ChangeHistoryScreen
 import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
 import world.respect.app.view.apps.launcher.AppLauncherScreen
@@ -73,6 +74,7 @@ import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.ClazzEdit
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.ChangeHistory
 import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.CreateAccountSetPassword
@@ -649,6 +651,15 @@ fun AppNavHost(
 
         composable<QrCode> {
             InviteQrScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<ChangeHistory> {
+            ChangeHistoryScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

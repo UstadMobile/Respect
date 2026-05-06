@@ -11,6 +11,8 @@ import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.ChangeHistoryMarkSentToServer
+import world.respect.datalayer.ChangeHistoryProvider
 import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
@@ -19,13 +21,14 @@ import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.ext.useValidationCacheControl
-import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.appendCommonListParams
+import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.adapters.asListDetails
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
@@ -39,6 +42,8 @@ class PersonDataSourceHttp(
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
+    private val changeHistoryProvider: ChangeHistoryProvider,
+    private val markSentToServer: ChangeHistoryMarkSentToServer,
 ) : PersonDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun PersonDataSource.GetListParams.urlWithParams(): Url {
@@ -151,13 +156,31 @@ class PersonDataSourceHttp(
         }
     }
 
+
+
     override suspend fun store(list: List<Person>) {
+        val changeHistories = changeHistoryProvider.getPendingChangeHistoryEntries(
+            tableId = ChangeHistoryTableEnum.PERSON,
+            uids = list.map { it.guid }
+        )
         httpClient.post(
             url = respectEndpointUrl(PersonDataSource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
-            setBody(list)
+
+            if (changeHistories.isEmpty()) {
+                setBody(list)
+            } else {
+                setBody<DataAndChangeHistory<Person>>(
+                    DataAndChangeHistory(
+                        data = list,
+                        changeHistories = changeHistories
+                    )
+                )
+            }
         }
+        markSentToServer.markSentToServer(changeHistories)
+
     }
 }

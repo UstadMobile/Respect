@@ -36,6 +36,7 @@ import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
 import world.respect.datalayer.db.school.daos.AssignmentEntityDao
 import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntityDao
+import world.respect.datalayer.db.school.daos.ChangeHistoryDao
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
@@ -57,10 +58,13 @@ import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
+import world.respect.datalayer.db.school.entities.ChangeHistoryChangeEntity
+import world.respect.datalayer.db.school.entities.ChangeHistoryEntity
 import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 import world.respect.datalayer.school.model.Assignment
+import world.respect.datalayer.school.model.ChangeHistoryEntry
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.Indicator
@@ -105,8 +109,10 @@ import world.respect.datalayer.school.model.Report
         OpdsGroupEntity::class,
         OpdsFeedEntity::class,
         OpdsFeedMetadataEntity::class,
+        ChangeHistoryEntity::class,
+        ChangeHistoryChangeEntity::class,
     ],
-    version = 12,
+    version = 14,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -162,6 +168,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
+    abstract fun getChangeHistoryDao(): ChangeHistoryDao
+
 
     companion object {
 
@@ -179,9 +187,11 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
+            ChangeHistoryEntry.TABLE_ID,
         )
 
     }
+
 }
 
 // The Room compiler generates the `actual` implementations.

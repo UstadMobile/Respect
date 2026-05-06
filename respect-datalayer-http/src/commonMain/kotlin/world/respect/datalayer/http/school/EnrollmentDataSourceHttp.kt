@@ -1,8 +1,6 @@
 package world.respect.datalayer.http.school
 
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -13,6 +11,8 @@ import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
+import world.respect.datalayer.ChangeHistoryMarkSentToServer
+import world.respect.datalayer.ChangeHistoryProvider
 import world.respect.datalayer.DataLayerParams
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataLoadState
@@ -27,9 +27,9 @@ import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.EnrollmentDataSource
+import world.respect.datalayer.school.model.ChangeHistoryTableEnum
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
-import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
@@ -39,6 +39,8 @@ class EnrollmentDataSourceHttp(
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
+    private val changeHistoryProvider: ChangeHistoryProvider,
+    private val markSentToServer: ChangeHistoryMarkSentToServer,
 ): EnrollmentDataSource, SchoolUrlBasedDataSource {
 
     private suspend fun EnrollmentDataSource.GetListParams.urlWithParams(): Url {
@@ -122,15 +124,29 @@ class EnrollmentDataSourceHttp(
     }
 
     override suspend fun store(list: List<Enrollment>) {
-        val url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
-        val response = httpClient.post(url) {
+
+        val changeHistories = changeHistoryProvider.getPendingChangeHistoryEntries(
+            tableId = ChangeHistoryTableEnum.ENROLLMENT,
+            uids = list.map { it.uid }
+        )
+        httpClient.post(
+            url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
+        ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
-            setBody(list)
-        }
 
-        Napier.d(tag = TAG_DATALAYER) {
-            "EnrollmentDataSourceHttp: posted ${list.size} items(${list.joinToString { it.uid }}) to $url (status=${response.status.value}"
+            if (changeHistories.isEmpty()) {
+                setBody(list)
+            } else {
+                setBody<DataAndChangeHistory<Enrollment>>(
+                    DataAndChangeHistory(
+                        data = list,
+                        changeHistories = changeHistories
+                    )
+                )
+            }
         }
+        markSentToServer.markSentToServer(changeHistories)
+
     }
 }

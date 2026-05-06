@@ -110,6 +110,7 @@
     <string name="email">Email</string>
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
+    <string name="change_history">Change history</string>
     <string name="username_label">Username</string>
     <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>
@@ -569,5 +570,5 @@
     <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
 
     <string name="select_host">Select Host</string>
-
+    <string name="change_format">%1$s changed from "%2$s" to "%3$s"</string>
 </resources>

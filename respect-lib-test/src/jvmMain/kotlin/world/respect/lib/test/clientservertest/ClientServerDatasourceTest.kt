@@ -31,6 +31,8 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.ChangeHistoryMarkSentToServerDb
+import world.respect.datalayer.db.school.ChangeHistoryProviderDb
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
@@ -235,14 +237,18 @@ class ClientServerDataSourceTestBuilder internal constructor(
         )
 
         val token = "secret"
+        val changeHistoryProvider  = ChangeHistoryProviderDb(schoolDb)
+        val markSentToServer  = ChangeHistoryMarkSentToServerDb(schoolDb, uidNumberMapper =XXHashUidNumberMapper(stringHasher) )
         val schoolDataSourceRemote = SchoolDataSourceHttp(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = clientAppDataSource.schoolDirectoryEntryDataSource,
             httpClient = httpClient,
-            tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },
+            tokenProvider = { AuthToken(token, systemTimeInMillis(), 3600) },
             validationHelper = clientValidationHelper,
             defaultAppCatalogUrl = null,
             json = json,
+            changeHistoryProvider = changeHistoryProvider,
+            markSentToServer = markSentToServer,
         )
 
         val drainQueueSignal = Channel<Boolean>(capacity = Channel.UNLIMITED)

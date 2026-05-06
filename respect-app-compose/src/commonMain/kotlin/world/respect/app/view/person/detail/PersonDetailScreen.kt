@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,7 @@ import world.respect.shared.generated.resources.email
 import world.respect.shared.generated.resources.family_members
 import world.respect.shared.generated.resources.gender
 import world.respect.shared.generated.resources.manage_account
+import world.respect.shared.generated.resources.change_history
 import world.respect.shared.generated.resources.phone_number
 import world.respect.shared.generated.resources.role
 import world.respect.shared.generated.resources.username_label
@@ -47,6 +49,7 @@ fun PersonDetailScreen(
         onClickManageAccount = viewModel::navigateToManageAccount,
         onClickCreateAccount = viewModel::onClickCreateAccount,
         onClickPhoneNumber = viewModel::onClickPhoneNumber,
+        onClickChangeHistoryButton = viewModel::onClickChangeHistoryButton,
         onClickFamilyMember = viewModel::onClickFamilyMember
     )
 }
@@ -56,6 +59,7 @@ fun PersonDetailScreen(
     uiState: PersonDetailUiState,
     onClickManageAccount:() -> Unit,
     onClickCreateAccount: () -> Unit,
+    onClickChangeHistoryButton: () -> Unit,
     onClickPhoneNumber: () -> Unit,
     onClickFamilyMember: (String) -> Unit,
 ) {
@@ -80,6 +84,11 @@ fun PersonDetailScreen(
                     onClick = onClickCreateAccount,
                 )
             }
+            RespectQuickActionButton(
+                labelText = stringResource(Res.string.change_history),
+                imageVector = Icons.Default.Replay,
+                onClick = onClickChangeHistoryButton,
+            )
         }
 
         HorizontalDivider()

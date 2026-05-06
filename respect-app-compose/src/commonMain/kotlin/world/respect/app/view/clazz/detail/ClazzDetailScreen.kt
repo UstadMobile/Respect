@@ -59,9 +59,13 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import world.respect.app.components.RespectQuickActionButton
+import world.respect.shared.generated.resources.change_history
 import world.respect.shared.generated.resources.manage_enrollments
 import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.remove_from_class
@@ -83,6 +87,7 @@ fun ClazzDetailScreen(
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
         onToggleStudentsSection = viewModel::onToggleStudentsSection,
+        onClickChangeHistoryButton = viewModel::onClickChangeHistoryButton,
         onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
         onClickManageEnrollments = viewModel::onClickManageEnrollments,
         onClickPerson = viewModel::onClickPerson,
@@ -97,6 +102,7 @@ fun ClazzDetailScreen(
     onSelectChip: (String) -> Unit,
     onClickAcceptInvite: (Person) -> Unit,
     onClickDismissInvite: (Person) -> Unit,
+    onClickChangeHistoryButton: () -> Unit,
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
     onToggleStudentsSection: () -> Unit,
@@ -141,6 +147,16 @@ fun ClazzDetailScreen(
                 }
             )
         }
+        item {
+            HorizontalDivider()
+            RespectQuickActionButton(
+                labelText = stringResource(Res.string.change_history),
+                imageVector = Icons.Default.Replay,
+                onClick = onClickChangeHistoryButton,
+            )
+            HorizontalDivider()
+        }
+
 
         item {
             RespectListSortHeader(

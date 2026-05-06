@@ -28,14 +28,12 @@ data class XapiGroup(
         get() = name == null && mbox == null && mbox_sha1sum == null &&
                 openid == null && account == null
 
+    val isIdentified: Boolean = !isAnonymous
+
 
     companion object {
         const val RESULT_KEY_GROUP_UPDATED = "groupUpdated"
         const val CLASS = "class/"
     }
-
-    val isIdentified: Boolean = !isAnonymous
-
 }
-
 

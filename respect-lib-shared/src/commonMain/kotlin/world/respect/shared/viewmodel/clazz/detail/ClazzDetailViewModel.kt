@@ -69,10 +69,10 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
 data class ClazzDetailUiState(
-    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val pendingTeachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val pendingTeachers:IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -142,9 +142,9 @@ class ClazzDetailViewModel(
         }
     }
 
-    private val teacherPagingSource = pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
+    private val teacherPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
 
-    private val studentPagingSource = pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+    private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
 
@@ -194,10 +194,7 @@ class ClazzDetailViewModel(
                 _appUiState.update {
                     it.copy(title = clazz.dataOrNull()?.title?.asUiText())
                 }
-
-                _uiState.update {
-                    it.copy(clazz = clazz)
-                }
+                _uiState.update { it.copy(clazz = clazz) }
             }
         }
 
@@ -252,7 +249,7 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    } catch (e: Throwable) {
+                    }catch(e: Throwable) {
                         e.printStackTrace()
                     }
                 }
@@ -282,7 +279,7 @@ class ClazzDetailViewModel(
                     )
                 )
             )
-        }
+         }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -302,7 +299,7 @@ class ClazzDetailViewModel(
                     personUid = user.guid,
                     approved = true,
                 )
-            } catch (e: Throwable) {
+            }catch(e: Throwable) {
                 e.printStackTrace()
             }
         }
@@ -370,9 +367,9 @@ class ClazzDetailViewModel(
                 }.map {
                     it.copy(
                         lastModified = modTime,
-                        status = if (it.beginDate == today) {
-                            StatusEnum.TO_BE_DELETED
-                        } else {
+                        status = if(it.beginDate == today) {
+                            StatusEnum.TO_BE_DELETED //probably was just added by mistake
+                        }else {
                             it.status
                         },
                         endDate = today,
@@ -382,7 +379,8 @@ class ClazzDetailViewModel(
 
                 schoolDataSource.enrollmentDataSource.store(enrollmentsToStore)
 
-            } catch (e: Throwable) {
+            }catch(e: Throwable) {
+                //do something
                 Napier.e("onClickRemovePersonFromClass ERROR", throwable = e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
             }

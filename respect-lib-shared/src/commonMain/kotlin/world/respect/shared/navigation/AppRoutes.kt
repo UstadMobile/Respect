@@ -228,7 +228,8 @@ data class StudentGroupingEdit(
 @Serializable
 data class StudentGroupingDetail(
     val groupId: String,
-    val classId: String
+    val classId: String,
+    val statementId: String? = null
 ): RespectAppRoute
 
 @Serializable

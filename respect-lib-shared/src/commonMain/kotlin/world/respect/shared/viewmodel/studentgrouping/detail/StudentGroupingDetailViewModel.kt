@@ -159,6 +159,14 @@ class StudentGroupingDetailViewModel(
     private fun loadGroupDetail() {
         viewModelScope.launch {
             try {
+                // If statement ID is provided in route, we can use it directly
+                val statementIdFromRoute = route.statementId
+
+                Napier.d("=== STUDENT GROUPING DETAIL LOAD ===")
+                Napier.d("Group ID from route: ${route.groupId}")
+                Napier.d("Statement ID from route: $statementIdFromRoute")
+                Napier.d("====================================")
+
                 schoolDataSource.xapiStatementsResource.getAsFlow(
                     listParams = XapiStatementsResource.GetStatementParams(
                         verb = VERB_SAVED,
@@ -178,12 +186,21 @@ class StudentGroupingDetailViewModel(
                     if (groupStatement != null) {
                         val group = groupStatement.`object` as XapiGroup
                         val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
+                        val statementId = groupStatement.id?.toString()
+
+                        Napier.d("=== STUDENT GROUPING DETAIL LOADED ===")
+                        Napier.d("Group ID: ${group.account?.name}")
+                        Napier.d("Group Name: ${group.name}")
+                        Napier.d("Statement ID from query: $statementId")
+                        Napier.d("Statement ID from route: $statementIdFromRoute")
+                        Napier.d("Match: ${statementId == statementIdFromRoute}")
+                        Napier.d("======================================")
 
                         _uiState.update { prev ->
                             prev.copy(
                                 groupName = group.name ?: "",
                                 groupMembers = memberNames,
-                                statementGroupId = groupStatement.id?.toString()
+                                statementGroupId = statementId
                             )
                         }
 

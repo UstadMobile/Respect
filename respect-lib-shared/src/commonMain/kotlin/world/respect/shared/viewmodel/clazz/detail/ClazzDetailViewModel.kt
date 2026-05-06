@@ -93,6 +93,8 @@ data class ClazzDetailUiState(
     val isStudentGroupingExpanded: Boolean = true,
     val groupIds: List<String> = emptyList(),
     val groups: List<GroupDisplayData> = emptyList(),
+
+    val statementId: String? = null
 )
 
 data class GroupDisplayData(
@@ -100,6 +102,7 @@ data class GroupDisplayData(
     val groupName: String,
     val memberCount: Int,
     val memberNames: List<String> = emptyList(),
+    val statementId: String? = null
 )
 
 class ClazzDetailViewModel(
@@ -332,11 +335,20 @@ class ClazzDetailViewModel(
     }
 
     fun onClickGroup(groupId: String) {
+        val groupData = _uiState.value.groups.find { it.groupId == groupId }
+        val statementId = groupData?.statementId
+
+        Napier.d("=== NAVIGATE TO GROUP DETAIL ===")
+        Napier.d("Group ID: $groupId")
+        Napier.d("Statement ID: $statementId")
+        Napier.d("================================")
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 StudentGroupingDetail(
                     groupId = groupId,
-                    classId = route.guid
+                    classId = route.guid,
+                    statementId = statementId
                 )
             )
         )
@@ -426,18 +438,37 @@ class ClazzDetailViewModel(
 
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                val groups = statementResult.statements.mapNotNull { statement ->
-                    statement.`object` as? XapiGroup
-                }.distinctBy { it.account?.name }
+                // Create a map of groupId to statement for quick lookup
+                val groupIdToStatement = statementResult.statements
+                    .mapNotNull { statement ->
+                        val group = statement.`object` as? XapiGroup
+                        val groupId = group?.account?.name
+                        if (groupId != null && group != null) {
+                            groupId to statement
+                        } else {
+                            null
+                        }
+                    }
+                    .distinctBy { it.first }
+                    .toMap()
 
-                val groupDisplayDataList = groups.map { group ->
+                val groupDisplayDataList = groupIdToStatement.map { (groupId, statement) ->
+                    val group = statement.`object` as XapiGroup
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
+                    val statementId = statement.id?.toString()
+
+                    Napier.d("=== CLAZZ DETAIL GROUP DEBUG ===")
+                    Napier.d("Group ID: $groupId")
+                    Napier.d("Group Name: ${group.name}")
+                    Napier.d("Statement ID: $statementId")
+                    Napier.d("================================")
 
                     GroupDisplayData(
-                        groupId = group.account?.name ?: "",
+                        groupId = groupId,
                         groupName = group.name ?: "",
                         memberCount = memberNames.size,
                         memberNames = memberNames,
+                        statementId = statementId
                     )
                 }
 

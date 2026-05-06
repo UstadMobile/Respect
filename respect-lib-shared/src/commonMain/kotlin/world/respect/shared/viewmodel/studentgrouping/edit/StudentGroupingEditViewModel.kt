@@ -60,7 +60,8 @@ data class StudentGroupingEditUiState(
     val groupName: String = "",
     val groupNameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val selectedStudents: List<Person> = emptyList()
+    val selectedStudents: List<Person> = emptyList(),
+    val statementId: String? = null
 ) {
     val personName: String
         get() = selectedAccount?.person?.fullName() ?: ""
@@ -128,8 +129,7 @@ class StudentGroupingEditViewModel(
         route.groupId?.let { groupId ->
             @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
-
-                    val statementResult = schoolDataSource.xapiStatementsResource.get(
+                val statementResult = schoolDataSource.xapiStatementsResource.get(
                         listParams = XapiStatementsResource.GetStatementParams(
                             verb = VERB_SAVED,
                             activity = classActivityId,
@@ -138,10 +138,24 @@ class StudentGroupingEditViewModel(
                         dataLoadParams = DataLoadParams()
                     ).dataOrNull() ?: return@launch
 
-                    val group = statementResult.statements
-                        .mapNotNull { statement -> statement.`object` as? XapiGroup }
-                        .firstOrNull { it.account?.name == groupId }
+                    val groupStatement = statementResult.statements
+                        .firstOrNull { statement ->
+                            val group = statement.`object` as? XapiGroup
+                            group?.account?.name == groupId
+                        }
                         ?: return@launch
+
+                    val group = groupStatement.`object` as XapiGroup
+
+                    val groupId = group.account?.name
+                    val groupName = group.name
+                    val statementId = groupStatement.id?.toString()
+
+                    Napier.d("=== STUDENT GROUPING EDIT DEBUG ===")
+                    Napier.d("Group ID: $groupId")
+                    Napier.d("Group Name: $groupName")
+                    Napier.d("Statement ID: $statementId")
+                    Napier.d("===================================")
 
                     val memberIds = group.member
                         ?.mapNotNull { it.account?.name }
@@ -156,8 +170,9 @@ class StudentGroupingEditViewModel(
 
                     _uiState.update { prev ->
                         prev.copy(
-                            groupName = group.name ?: "",
-                            selectedStudents = persons
+                            groupName = groupName ?: "",
+                            selectedStudents = persons,
+                            statementId = statementId
                         )
                     }
             }
@@ -176,6 +191,13 @@ class StudentGroupingEditViewModel(
 
         val groupName = _uiState.value.groupName
         val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"
+        val existingStatementId = _uiState.value.statementId
+
+        Napier.d("=== STUDENT SAVE GROUP DEBUG ===")
+        Napier.d("Group ID from route: ${route.groupId}")
+        Napier.d("Group Name: $groupName")
+        Napier.d("Existing Statement ID: $existingStatementId")
+        Napier.d("========================")
 
         if (groupName.isBlank()) {
             _uiState.update {
@@ -247,7 +269,7 @@ class StudentGroupingEditViewModel(
                 if (route.groupId == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            StudentGroupingDetail(groupId, route.classUid),
+                            StudentGroupingDetail(groupId, route.classUid, existingStatementId),
                             popUpTo = route,
                             popUpToInclusive = true
                         )

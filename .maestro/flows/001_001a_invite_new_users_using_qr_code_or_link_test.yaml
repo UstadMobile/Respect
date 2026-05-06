@@ -64,6 +64,14 @@ onFlowComplete:
 - tapOn: "OK"
 - assertVisible:
     id: "app_title"
+    text: "Select account to continue"
+- tapOn: "Use another account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
+- assertVisible:
+    id: "app_title"
     text: "Invitation"
 - assertVisible: "Role"
 - assertVisible: "Teacher"
@@ -138,6 +146,14 @@ onFlowComplete:
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
+    text: "Select account to continue"
+- tapOn: "Use another account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
+- assertVisible:
+    id: "app_title"
     text: "Invitation"
 - assertVisible: "Role"
 - assertVisible: "Student"
@@ -182,9 +198,8 @@ onFlowComplete:
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
     env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
-      USER_NAME: "teacherauser"
-      USER_PASSWORD: "test123"
+      USERNAME: "teacherauser"
+      USERPASSWORD: "test123"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -220,6 +235,14 @@ onFlowComplete:
     env:
       URL: ${maestro.copiedText}
 - tapOn: "Get Started"
+- assertVisible:
+    id: "app_title"
+    text: "Select account to continue"
+- tapOn: "Use another account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

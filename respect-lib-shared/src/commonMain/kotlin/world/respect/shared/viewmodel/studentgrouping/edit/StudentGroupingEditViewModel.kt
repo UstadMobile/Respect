@@ -22,6 +22,7 @@ import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.VERB_VOIDED
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
@@ -32,6 +33,7 @@ import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 import world.respect.lib.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
@@ -209,6 +211,43 @@ class StudentGroupingEditViewModel(
         }
 
         viewModelScope.launch {
+                // Step 1: If editing an existing group, void the old statement first
+                if (existingStatementId != null) {
+                    Napier.d("=== VOIDING EXISTING STATEMENT ===")
+                    Napier.d("Statement ID to void: $existingStatementId")
+
+                    val actor = XapiAgent(
+                        name = _uiState.value.personName,
+                        objectType = XapiObjectType.Agent,
+                        account = XapiAccount(
+                            name = _uiState.value.personId,
+                            homePage = schoolSelfUrl.toString()
+                        )
+                    )
+
+                    val voidVerb = XapiVerb(
+                        id = VERB_VOIDED,
+                        display = mapOf("en-US" to "voided")
+                    )
+
+                    val statementRef = XapiStatementRef(
+                        objectType = XapiObjectType.StatementRef,
+                        id = existingStatementId
+                    )
+
+                    val voidingStatement = XapiStatement(
+                        actor = actor,
+                        verb = voidVerb,
+                        `object` = statementRef,
+                        timestamp = Clock.System.now()
+                    )
+
+                    schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
+
+                    Napier.d("=== VOIDING COMPLETE ===")
+                }
+
+                // Step 2: Create a new statement with the updated group information
                 val members = _uiState.value.selectedStudents.map { person ->
                     XapiAgent(
                         name = person.fullName(),
@@ -220,6 +259,7 @@ class StudentGroupingEditViewModel(
                     )
                 }
 
+                // Always use the same groupId, but create a new statement ID
                 val groupId = route.groupId ?: Uuid.random().toString()
 
                 val group = XapiGroup(
@@ -266,10 +306,14 @@ class StudentGroupingEditViewModel(
 
                 schoolDataSource.xapiStatementsResource.post(listOf(statement))
 
+                Napier.d("=== NEW STATEMENT SAVED ===")
+                Napier.d("Group ID: $groupId")
+                Napier.d("New Statement ID: ${statement.id}")
+
                 if (route.groupId == null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            StudentGroupingDetail(groupId, route.classUid, existingStatementId),
+                            StudentGroupingDetail(groupId, route.classUid, statement.id?.toString()),
                             popUpTo = route,
                             popUpToInclusive = true
                         )

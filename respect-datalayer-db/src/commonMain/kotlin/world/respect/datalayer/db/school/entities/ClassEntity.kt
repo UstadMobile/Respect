@@ -2,7 +2,6 @@ package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.serialization.json.JsonObject
 import world.respect.datalayer.school.model.StatusEnum
 import kotlin.time.Instant
 
@@ -13,7 +12,6 @@ data class ClassEntity(
     val cGuidHash: Long,
     val cTitle: String,
     val cStatus: StatusEnum,
-    val cMetadata: JsonObject?,
     val cDescription: String?,
     val cLastModified: Instant,
     val cStored: Instant,

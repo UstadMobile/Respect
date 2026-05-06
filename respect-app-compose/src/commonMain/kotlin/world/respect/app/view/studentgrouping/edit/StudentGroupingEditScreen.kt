@@ -47,23 +47,15 @@ fun StudentGroupingEditScreen(
 fun StudentGroupingEditScreen(
     uiState: StudentGroupingEditUiState,
     onStudentCheckedChange: (Person, Boolean) -> Unit,
-    onGroupNameChanged: (String) -> Unit,
-
-    ) {
+    onGroupNameChanged: (String) -> Unit
+) {
 
     val studentPager = respectRememberPager(uiState.students)
     val studentLazyPagingItems = studentPager.flow.collectAsLazyPagingItems()
 
-    fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
-        return this?.guid?.let {
-            Pair(it, role)
-        } ?: "${role}_$index"
-    }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-
         item {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth()
@@ -91,7 +83,7 @@ fun StudentGroupingEditScreen(
         respectPagingItems(
             items = studentLazyPagingItems,
             key = { person, index ->
-                person?.guid ?: "student_$index"
+                person?.guid ?: index
             }
         ) { student ->
 

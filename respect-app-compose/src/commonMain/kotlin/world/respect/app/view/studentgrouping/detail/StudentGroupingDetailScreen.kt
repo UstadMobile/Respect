@@ -123,7 +123,7 @@ fun StudentGroupingDetailScreen(
             }
         }
 
-        item("divider2 ") {
+        item("divider2") {
             HorizontalDivider()
         }
 
@@ -135,7 +135,7 @@ fun StudentGroupingDetailScreen(
                 },
                 headlineContent = {
                     Text(text = uiState.groupMembers[index])
-                },
+                }
             )
         }
     }

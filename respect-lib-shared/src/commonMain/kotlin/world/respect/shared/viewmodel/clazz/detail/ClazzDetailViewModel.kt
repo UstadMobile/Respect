@@ -93,7 +93,6 @@ data class ClazzDetailUiState(
     val isStudentGroupingExpanded: Boolean = true,
     val groupIds: List<String> = emptyList(),
     val groups: List<GroupDisplayData> = emptyList(),
-
     val statementId: String? = null
 )
 
@@ -127,6 +126,7 @@ class ClazzDetailViewModel(
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
     val schoolSelfUrl = accountManager.activeAccount?.school?.self?.toString()
+
     val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
@@ -209,9 +209,8 @@ class ClazzDetailViewModel(
                         prev.copy(
                             showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
                             showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            showStudentGrouping = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-
-                            )
+                            showStudentGrouping = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true
+                        )
                     }
 
                     _appUiState.update {
@@ -345,7 +344,6 @@ class ClazzDetailViewModel(
         )
     }
 
-
     fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {
         viewModelScope.launch {
             try {
@@ -466,7 +464,6 @@ class ClazzDetailViewModel(
                 }
         }
     }
-
 
     companion object {
         const val ALL = "All"

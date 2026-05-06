@@ -20,8 +20,10 @@ import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.xapi.model.SAVED
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.VERB_VOIDED
+import world.respect.lib.xapi.model.VOIDED
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
@@ -219,7 +221,7 @@ class StudentGroupingEditViewModel(
 
                     val voidVerb = XapiVerb(
                         id = VERB_VOIDED,
-                        display = mapOf("en-US" to "voided")
+                        display = mapOf("en-US" to VOIDED)
                     )
 
                     val statementRef = XapiStatementRef(
@@ -270,10 +272,10 @@ class StudentGroupingEditViewModel(
                     )
                 )
 
-                val verbId = VERB_SAVED
+
                 val verb = XapiVerb(
-                    id = verbId,
-                    display = mapOf("en" to verbId)
+                    id = VERB_SAVED,
+                    display = mapOf("en-US" to SAVED)
                 )
 
                 val statement = XapiStatement(

@@ -53,7 +53,7 @@ interface PersonEntityDao {
         authenticatedPersonUidNum: Long,
         personUidNum: Long,
         knownRoleFlag: Int,
-        roleAdminPermissionRequired: Long = PermissionFlags.SYSTEM_ADMIN,
+        roleAdminPermissionRequired: Long = PermissionFlags.PERSON_ADMIN_WRITE,
         roleTeacherPermissionRequired: Long = PermissionFlags.PERSON_TEACHER_WRITE,
         roleStudentPermissionRequired: Long = PermissionFlags.PERSON_STUDENT_WRITE,
         roleParentPermissionRequired: Long = PermissionFlags.PERSON_PARENT_WRITE,

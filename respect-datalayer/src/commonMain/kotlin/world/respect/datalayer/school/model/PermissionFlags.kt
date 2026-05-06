@@ -36,7 +36,8 @@ object PermissionFlags {
 
     const val INVITE_NEW_USER = 2048L
 
-    const val SYSTEM_ADMIN = Long.MAX_VALUE
+    const val PERSON_ADMIN_WRITE = 4096L
+
 
     const val TEACHER_DEFAULT_SCHOOL_PERMISSIONS = CLASS_READ
             .or(CLASS_WRITE)
@@ -53,7 +54,7 @@ object PermissionFlags {
 
     const val PARENT_DEFAULT_SCHOOL_PERMISSIONS = 0L
 
-    const val SYSADMIN_DEFAULT_SCHOOL_PERMISSIONS = SYSTEM_ADMIN
+    const val SYSADMIN_DEFAULT_SCHOOL_PERMISSIONS = Long.MAX_VALUE
 
 
 }

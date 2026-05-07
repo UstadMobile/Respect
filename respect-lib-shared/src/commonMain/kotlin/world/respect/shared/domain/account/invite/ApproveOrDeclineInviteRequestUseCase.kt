@@ -3,6 +3,7 @@ package world.respect.shared.domain.account.invite
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.datalayer.db.school.ext.isTeacher
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
@@ -52,14 +53,17 @@ class ApproveOrDeclineInviteRequestUseCase(
         }
 
         val timeNow = Clock.System.now()
-        val studentPerson = persons.firstOrNull { it.isStudent() }
+        val studentOrTeacherPerson = persons.firstOrNull { it.isStudent() || it.isTeacher() }
 
         when {
-            invite is ClassInvite && studentPerson != null -> {
+            invite is ClassInvite -> {
+                if(studentOrTeacherPerson == null)
+                    throw IllegalStateException("No student or teacher found for class invitation acceptance")
+
                 val enrollmentsToUpdate = schoolDataSource.enrollmentDataSource.list(
                     loadParams = DataLoadParams(),
                     listParams = EnrollmentDataSource.GetListParams(
-                        personUid = studentPerson.guid
+                        personUid = studentOrTeacherPerson.guid
                     )
                 ).dataOrNull() ?: emptyList()
 

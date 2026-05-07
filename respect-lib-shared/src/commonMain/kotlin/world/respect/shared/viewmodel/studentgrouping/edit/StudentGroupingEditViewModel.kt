@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -39,7 +40,6 @@ import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit_group
 import world.respect.shared.generated.resources.create_group
@@ -60,26 +60,19 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 data class StudentGroupingEditUiState(
-    val selectedAccount: RespectSessionAndPerson? = null,
     val groupName: String = "",
     val groupNameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
     val selectedStudents: List<Person> = emptyList(),
     val statementId: String? = null
 ) {
-    val personName: String
-        get() = selectedAccount?.person?.fullName() ?: ""
-
-    val personId: String
-        get() = selectedAccount?.person?.guid ?: ""
-
     val selectedStudentIds: Set<String>
         get() = selectedStudents.map { it.guid }.toSet()
 }
 
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
-    respectAccountManager: RespectAccountManager
+    private val respectAccountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = respectAccountManager.requireActiveAccountScope()
@@ -181,13 +174,6 @@ class StudentGroupingEditViewModel(
                 }
             }
         }
-        viewModelScope.launch {
-            respectAccountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
-                _uiState.update {
-                    it.copy(selectedAccount = selectedAccount)
-                }
-            }
-        }
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -205,16 +191,17 @@ class StudentGroupingEditViewModel(
         } else {
             _uiState.update { it.copy(groupNameError = null) }
         }
+        launchWithLoadingIndicator {
+            val person = respectAccountManager.selectedAccountAndPersonFlow.first()?.person
+                ?: return@launchWithLoadingIndicator
 
-        viewModelScope.launch {
-            // If editing an existing group, void the old statement first
             if (existingStatementId != null) {
 
                 val actor = XapiAgent(
-                    name = _uiState.value.personName,
+                    name = person.fullName(),
                     objectType = XapiObjectType.Agent,
                     account = XapiAccount(
-                        name = _uiState.value.personId,
+                        name = person.guid,
                         homePage = schoolSelfUrl.toString()
                     )
                 )
@@ -264,10 +251,10 @@ class StudentGroupingEditViewModel(
             )
 
             val actor = XapiAgent(
-                name = _uiState.value.personName,
+                name = person.fullName(),
                 objectType = XapiObjectType.Agent,
                 account = XapiAccount(
-                    name = _uiState.value.personId,
+                    name = person.guid,
                     homePage = schoolSelfUrl.toString()
                 )
             )
@@ -300,7 +287,11 @@ class StudentGroupingEditViewModel(
             if (route.groupId == null) {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        StudentGroupingDetail(groupId, route.classUid, statement.id?.toString()),
+                        StudentGroupingDetail(
+                            groupId,
+                            route.classUid,
+                            statement.id?.toString()
+                        ),
                         popUpTo = route,
                         popUpToInclusive = true
                     )

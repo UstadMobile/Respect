@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -37,7 +38,6 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.lib.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
-import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
 import kotlin.time.Clock
@@ -45,18 +45,11 @@ import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
 data class StudentGroupingDetailUiState(
-    val selectedAccount: RespectSessionAndPerson? = null,
     val groupName: String = "",
     val groupMembers: List<String> = emptyList(),
     val showDeleteGroupDialog: Boolean = false,
     val statementGroupId: String? = null,
-) {
-    val personName: String
-        get() = selectedAccount?.person?.fullName() ?: ""
-
-    val personId: String
-        get() = selectedAccount?.person?.guid ?: ""
-}
+)
 
 class StudentGroupingDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -124,20 +117,25 @@ class StudentGroupingDetailViewModel(
     fun onConfirmDeleteGroup() {
         _uiState.update { it.copy(showDeleteGroupDialog = false) }
 
-        viewModelScope.launch {
+        launchWithLoadingIndicator {
+
             val statementId = _uiState.value.statementGroupId
+
             if (statementId == null) {
                 Napier.w("onConfirmDeleteGroup: Statement ID not found")
-                return@launch
+                return@launchWithLoadingIndicator
             }
 
             val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
 
+            val person = respectAccountManager.selectedAccountAndPersonFlow.first()?.person
+                ?: return@launchWithLoadingIndicator
+
             val actor = XapiAgent(
-                name = _uiState.value.personName,
+                name = person.fullName(),
                 objectType = XapiObjectType.Agent,
                 account = XapiAccount(
-                    name = _uiState.value.personId,
+                    name = person.guid,
                     homePage = schoolSelfUrl.toString()
                 )
             )

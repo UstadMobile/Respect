@@ -129,7 +129,7 @@ interface XapiStatementEntityJsonDao {
                           )
                      )
                )
-           AND (:verbUid = 0 OR XapiStatementEntity.statementVerbId = :verbUid)
+           AND (:verbUid = 0 OR XapiStatementEntity.statementVerbUid = :verbUid)
                -- Handle activity parameter
            AND (      :activityUid = 0
                    OR (     XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}

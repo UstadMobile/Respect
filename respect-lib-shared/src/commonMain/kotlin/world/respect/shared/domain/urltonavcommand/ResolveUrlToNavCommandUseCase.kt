@@ -5,8 +5,8 @@ import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
-import world.respect.shared.navigation.Message
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SelectAccount
 
 /**
  * Given a Url (that may have come from a deep link, scanned as a qr code, etc) that
@@ -29,11 +29,9 @@ class ResolveUrlToNavCommandUseCase(
             CreateInviteLinkUseCase.PATH -> {
                 url.parameters[CreateInviteLinkUseCase.QUERY_PARAM]?.let { inviteCode ->
                     val destination = if (respectAccountManager.activeAccount != null) {
-                        Message.create(
-                            schoolUrl = schoolUrl,
-                            code = inviteCode,
-                            canGoBack = canGoBack,
-                            linkStr = url.toString()
+
+                        SelectAccount(
+                            inviteCode = inviteCode
                         )
                     } else {
 

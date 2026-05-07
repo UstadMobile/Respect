@@ -32,7 +32,6 @@ import world.respect.app.view.manageuser.getstarted.GetStartedScreen
 import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
 import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
-import world.respect.app.view.manageuser.message.MessageScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.selectAccount.SelectAccountScreen
@@ -97,7 +96,6 @@ import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.ManageAccount
-import world.respect.shared.navigation.Message
 import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.OtherOption
 import world.respect.shared.navigation.OtherOptionsSignup
@@ -143,7 +141,6 @@ import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
-import world.respect.shared.viewmodel.manageuser.message.MessageViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
@@ -470,15 +467,6 @@ fun AppNavHost(
             )
         }
 
-        composable<Message> {
-            val viewModel: MessageViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            MessageScreen(
-                viewModel = viewModel
-            )
-        }
 
         composable<TermsAndCondition> {
             val viewModel: TermsAndConditionViewModel = respectViewModel(

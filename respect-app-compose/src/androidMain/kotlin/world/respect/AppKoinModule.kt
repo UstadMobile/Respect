@@ -193,7 +193,6 @@ import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailView
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.selectaccount.SelectAccountViewModel
-import world.respect.shared.viewmodel.manageuser.message.MessageViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -360,7 +359,6 @@ val appKoinModule = module {
     viewModelOf(::EnterPasswordSignupViewModel)
     viewModelOf(::AccountListViewModel)
     viewModelOf(::SelectAccountViewModel)
-    viewModelOf(::MessageViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
     viewModelOf(::InvitePersonViewModel)

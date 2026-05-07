@@ -158,6 +158,7 @@ class SelectAccountViewModel(
                             schoolUrl = account.school.self,
                             code = route.inviteCode ?: "",
                             canGoBack = true,
+                            guid = person.dataOrNull()?.guid
                         )
                     } else {
                         WaitingForApproval()

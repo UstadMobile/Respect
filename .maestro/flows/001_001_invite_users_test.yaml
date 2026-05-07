@@ -61,7 +61,9 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible:
+- tapOn:
+    id: "role"
+- tapOn:
     text: "System administrator"
 - scroll
 - assertNotVisible: "Approval not required until:.*"
@@ -102,6 +104,10 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
 - tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:

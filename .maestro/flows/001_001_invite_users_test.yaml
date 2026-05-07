@@ -49,13 +49,21 @@ onFlowComplete:
 - evalScript: ${output.adminApprove_On = maestro.copiedText}
 
 # Invite Admin as new person - Approve Required Off
+- back
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn:
+    text: "Invite person"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
 - assertVisible:
     id: "app_title"
     text: "Invite person"
 - assertVisible:
     text: "System administrator"
 - scroll
-- tapOn: "Reset code"
 - assertNotVisible: "Approval not required until:.*"
 - tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
@@ -64,56 +72,75 @@ onFlowComplete:
 - evalScript: ${output.adminApprove_Off = maestro.copiedText}
 
 ## Invite Teacher as new person - Approve Required On
-#- swipe:
-#    direction: UP
-#- tapOn:
-#    id: "role"
-#- tapOn:
-#    text: "Teacher"
-#- scroll
-#- assertVisible: "Reset code"
-#- assertVisible: "Approval required" #Approval Required
-#- copyTextFrom:
-#    id: "invite_code"
-#- evalScript: ${output.teacherApproveOn = maestro.copiedText}
-#
-## Invite Teacher as new person - Approve Required Off
-#- tapOn: "Reset code"
-#- tapOn: "Approval required" #Approval Not Required
-#- assertVisible: "Approval not required until:.*"
-#- copyTextFrom:
-#    id: "invite_code"
-#- evalScript: ${output.teacherApproveOff = maestro.copiedText}
-#- back
-##Admin create class and invite teachers to class
-#- runFlow:
-#    file: "subflows/user_add_class.yaml"
-#    env:
-#      CLASSNAME: "TestClass"
-#- assertVisible:
-#    id: "app_title"
-#    text: "TestClass"
-#- tapOn: "Add Teacher"
-#
-## Invite Teacher as new teacher to TestClass - Approve Required ON
-#- tapOn: "Invite person"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Invite person"
-#- assertVisible: "Approval required"    #Approval Required ON
-#- copyTextFrom:
-#    id: "invite_code"
-#- evalScript: ${output.teacherClassApproveOn = maestro.copiedText}
-#
-## Invite Teacher as new teacher to TestClass - Approve Required Off
-#- tapOn: "Reset code"
-#- tapOn: "Approval required" #Approval Not Required
-#- assertVisible: "Approval not required until:.*"
-#- copyTextFrom:
-#    id: "invite_code"
-#- evalScript: ${output.teacherClassApproveOff = maestro.copiedText}
+- back
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn:
+    text: "Invite person"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
+- scroll
+- assertVisible: "Reset code"
+- assertVisible: "Approval required" #Approval Required
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.teacherApproveOn = maestro.copiedText}
 
-# Admin A user joining using invite invite code - Admin Approve Required On
+# Invite Teacher as new person - Approve Required Off
+- back
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn:
+    text: "Invite person"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- tapOn: "Approval required" #Approval Not Required
+- assertVisible: "Approval not required until:.*"
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.teacherApproveOff = maestro.copiedText}
+- back
+#Admin create class and invite teachers to class
+- runFlow:
+    file: "subflows/user_add_class.yaml"
+    env:
+      CLASSNAME: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+- tapOn: "Add Teacher"
+
+# Invite Teacher as new teacher to TestClass - Approve Required ON
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Approval required"    #Approval Required ON
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.teacherClassApproveOn = maestro.copiedText}
+
+## Invite Teacher as new teacher to TestClass - Approve Required Off
+- back
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- tapOn: "Approval required" #Approval Not Required
+- assertVisible: "Approval not required until:.*"
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.teacherClassApproveOff = maestro.copiedText}
+
+# Admin A user joining using invite code - Admin Approve Required On
 - clearState: world.respect.app
 - launchApp:
     arguments:

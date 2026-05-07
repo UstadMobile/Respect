@@ -267,7 +267,7 @@ class XapiStatementsResourceDb(
                         relatedAgents = listParams.relatedAgents,
                         relatedActivities = listParams.relatedActivities,
                         since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).map { entity ->
@@ -285,7 +285,7 @@ class XapiStatementsResourceDb(
                         relatedAgents = listParams.relatedAgents,
                         relatedActivities = listParams.relatedActivities,
                         since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                        until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                        until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                     ).mapToCanonicalStatements(
@@ -331,7 +331,7 @@ class XapiStatementsResourceDb(
                 relatedAgents = listParams.relatedAgents,
                 relatedActivities = listParams.relatedActivities,
                 since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
             ).map { list ->
@@ -356,7 +356,7 @@ class XapiStatementsResourceDb(
                 relatedAgents = listParams.relatedAgents,
                 relatedActivities = listParams.relatedActivities,
                 since = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.SINCE_UNSET,
-                until = listParams.since?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
+                until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
             ).map { list ->

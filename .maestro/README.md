@@ -32,15 +32,29 @@ Where:
 
 ## Available test flows
 ---
-### 001_001_invite_users_using_qr_code_or_link_test
+### 001_001_invite_users_test
 
-1. Admin generates invite link (QR/link) for teacher
-2. Teacher joins using QR/link → creates account
-3. Teacher creates class and generates invite code for student
-4. Student joins using invite code → waits for approval
-5. Teacher approves student → student joins class
-6. Teacher generates parent invite link to join class
-7. Parent joins using link → adds child to class
+1. Admin Generates New Person Invites: Admin creates invitation codes for "System Administrator" and "Teacher" roles, testing both "Approval Required" (ON) and "Approval Required" (OFF) states.
+2. Admin and Teacher Onboarding (New Person):
+  • AdminA (Approve ON) and TeacherA (Approve ON) join via QR/Link and must wait for approval.
+  • AdminB (Approve OFF) and TeacherB (Approve OFF) join via QR/Link and gain immediate access.
+3. Class Creation & Teacher Invites: Admin creates "TestClass" and generates specific invitation codes for Teachers to join that class. 
+  • TeacherC (Approve ON) waits for approval, while TeacherD (Approve OFF) joins immediately.
+4. Admin Approval Logic:
+  • Admin logs in to the "People" and "Classes" sections to approve the pending requests for AdminA, TeacherA, and TeacherC.
+5. Teacher Generates New Person & Class Invites:
+  • TeacherC generates New Person invites for Students/Parents and class-specific invites for "TestClass" (testing both Approval ON/OFF states).
+6. Student & Parent Onboarding:
+  • StudentA/ParentA (New Person - Approve ON) wait for approval.
+  • StudentB/ParentB (New Person - Approve OFF) join immediately.
+  • StudentC (Class - Approve ON) waits for approval.
+  • StudentD (Class - Approve OFF) joins immediately.
+7. Parent Joins with Child:
+  • ParentC (Class - Approve ON) joins and registers ChildA, then waits for approval.
+  • ParentD (Class - Approve OFF) joins and registers ChildB, gaining immediate access.
+8. Teacher Approval & Verification: TeacherC approves all pending New Person and class requests. 
+9. ParentD logs in to verify that all approved students and children are visible within "TestClass".
+
 ---
 ### 001_002_add_user_direct_test
 

@@ -311,6 +311,8 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Teacher"
+- assertNotVisible: "Approval not required until:.*"
+- tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
@@ -327,6 +329,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
+- assertNotVisible: "Approval not required until:.*"
 - tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
@@ -837,6 +840,7 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Student"
+- assertNotVisible: "Approval not required until:.*"
 - tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
@@ -848,6 +852,7 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Parent"
+- assertNotVisible: "Approval not required until:.*"
 - tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
@@ -874,6 +879,7 @@ onFlowComplete:
     id: "app_title"
     text: "Invite person"
 - tapOn: "Invite students directly"
+- assertNotVisible: "Approval not required until:.*"
 - tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
@@ -882,6 +888,8 @@ onFlowComplete:
 
 # Invite Student to TestClass via Parent - Approve Required Off
 - tapOn: "Invite via parents"
+- assertNotVisible: "Approval not required until:.*"
+- tapOn: "Approval required" #Approval Not Required
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"

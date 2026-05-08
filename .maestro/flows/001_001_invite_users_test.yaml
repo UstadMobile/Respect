@@ -571,7 +571,7 @@ onFlowComplete:
 
 # Invite Student to TestClass via Parent - Approve Required ON
 - tapOn: "Invite via parents"
-- tapOn: "Approval required" #Approval Required ON
+- assertNotVisible: "Approval required" #Approval Required ON
 - assertNotVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"

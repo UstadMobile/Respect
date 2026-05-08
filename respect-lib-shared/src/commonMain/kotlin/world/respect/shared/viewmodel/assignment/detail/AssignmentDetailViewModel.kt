@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,10 +27,13 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.ext.firstOrNotLoaded
+import world.respect.datalayer.ext.map
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.xapi.model.VERB_ASSIGN
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.ext.whenSubscribed
@@ -45,6 +49,8 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.uuid.ExperimentalUuidApi
 import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.shared.domain.xapi.XapiAssignmentMapper
 import world.respect.shared.domain.xapi.XapiDummyDataGenerator
 
 
@@ -99,8 +105,24 @@ class AssignmentDetailViewModel(
             )
         }
 
-        val assignmentFlow = schoolDataSource.assignmentDataSource.findByGuidAsFlow(route.uid)
-            .shareIn(viewModelScope, SharingStarted.Lazily)
+        val schoolUrl = accountManager.activeAccount?.school?.self?.toString()?.trim()
+            ?.removeSuffix("/")
+            ?: ""
+        val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${route.uid}"
+
+        // Load the assignment from xAPI statements instead of assignmentDataSource
+        val assignmentFlow = schoolDataSource.xapiStatementsResource.getAsFlow(
+            listParams = GetStatementParams(
+                activity = assignmentActivityId,
+                verb = VERB_ASSIGN
+            ),
+            dataLoadParams = DataLoadParams()
+        ).map { state ->
+            state.map { result ->
+                result.statements
+                    .mapNotNull { XapiAssignmentMapper.toAssignment(it) }
+            }.firstOrNotLoaded()
+        }.shareIn(viewModelScope, SharingStarted.Lazily)
 
         viewModelScope.launch {
             assignmentFlow.collect { entity ->
@@ -117,8 +139,8 @@ class AssignmentDetailViewModel(
 
         viewModelScope.launch {
             assignmentFlow.distinctUntilChangedBy { it.dataOrNull()?.classUid }
-                .collectLatest { assignment ->
-                    val classUid = assignment.dataOrNull()?.classUid ?: return@collectLatest
+                .collectLatest { assignmentState ->
+                    val classUid = assignmentState.dataOrNull()?.classUid ?: return@collectLatest
                     schoolDataSource.classDataSource.findByGuidAsFlow(
                         guid = classUid
                     ).collect { assignmentClazz ->
@@ -156,13 +178,13 @@ class AssignmentDetailViewModel(
                 .collectLatest { assignmentState ->
                     val assignment = assignmentState.dataOrNull() ?: return@collectLatest
                     val classUid = assignment.classUid
-                    val schoolUrl = accountManager.activeAccount?.school?.self
-                        ?.toString()
-                        ?.trim()
+                    val schoolUrl = accountManager.activeAccount?.school?.self?.toString()?.trim()
                         ?.removeSuffix("/")
                         ?: ""
 
                     val assignmentActivityId = "$schoolUrl/assignment/${assignment.uid}"
+
+                    //TODO NEED TO REMOVE THIS
 
                     // Get all students
                     schoolDataSource.personDataSource.list(
@@ -197,7 +219,6 @@ class AssignmentDetailViewModel(
                     }
                 }
         }
-
     }
 
     private fun updateStatusCounts() {
@@ -212,7 +233,8 @@ class AssignmentDetailViewModel(
 
         students.forEach { student ->
             val results = progressMap[student.personUid] ?: emptyList()
-            val isCompleted = results.size == units.size && units.isNotEmpty() && results.all { it.completion == true }
+            val isCompleted =
+                results.size == units.size && units.isNotEmpty() && results.all { it.completion == true }
             val isStarted = results.any { it.completion == true || (it.progress ?: 0) > 0 }
 
             when {

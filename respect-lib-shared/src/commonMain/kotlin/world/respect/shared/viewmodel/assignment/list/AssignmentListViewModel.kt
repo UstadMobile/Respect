@@ -21,11 +21,8 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.model.Assignment
-import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.datalayer.school.xapi.model.VERB_ASSIGN
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
@@ -39,25 +36,14 @@ import world.respect.shared.util.AssignmentFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.xapi.model.AssignmentResult
-import world.respect.lib.xapi.model.XapiAccount
-import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiActivityDefinition
-import world.respect.lib.xapi.model.XapiAgent
-import world.respect.lib.xapi.model.XapiContext
-import world.respect.lib.xapi.model.XapiContextActivities
-import world.respect.lib.xapi.model.XapiObjectType
-import world.respect.lib.xapi.model.XapiResult
-import world.respect.lib.xapi.model.XapiStatement
-import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.shared.domain.xapi.XapiAssignmentMapper
+import kotlin.collections.filter
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
-import kotlin.time.Clock
-
 
 data class AssignmentListUiState(
-    val assignments: IPagingSourceFactory<Int, Assignment> = EmptyPagingSourceFactory(),
+    val assignments: List<Assignment> = emptyList(),
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
     val selectedFilter: AssignmentFilter = AssignmentFilter.ALL,
     val completedCount: Int = 0,
@@ -83,20 +69,7 @@ class AssignmentListViewModel(
 
     val uiState: StateFlow<AssignmentListUiState> = _uiState.asStateFlow()
 
-    private val _selectedFilter = MutableStateFlow(AssignmentFilter.ALL)
-
-    private val pagingSourceHolder = PagingSourceFactoryHolder {
-        val status = when (_selectedFilter.value) {
-            AssignmentFilter.PENDING -> "pending"
-            AssignmentFilter.COMPLETED -> "completed"
-            else -> null
-        }
-
-        schoolDataSource.assignmentDataSource.listAsPagingSource(
-            loadParams = DataLoadParams(),
-            params = AssignmentDataSource.GetListParams(status = status)
-        )
-    }
+    private var allAssignments: List<Assignment> = emptyList()
 
     init {
         _appUiState.update {
@@ -113,7 +86,6 @@ class AssignmentListViewModel(
 
         _uiState.update {
             it.copy(
-                assignments = pagingSourceHolder,
                 learningUnitInfoFlow = ::learningUnitInfoFlowFor,
             )
         }
@@ -139,24 +111,33 @@ class AssignmentListViewModel(
                     )
                 }
 
-                loadProgressData(selectedAcct)
+                loadData(selectedAcct)
             }
         }
-
     }
 
-    private fun loadProgressData(sessionAndPerson: RespectSessionAndPerson?) {
-        val schoolUrl = sessionAndPerson?.session?.account?.school?.self
-            .toString()
-            .trim()
-            .removeSuffix("/")
+    private fun loadData(sessionAndPerson: RespectSessionAndPerson?) {
+        val schoolUrl = sessionAndPerson?.session?.account?.school?.self.toString()
 
         viewModelScope.launch {
-            val assignmentsResult = schoolDataSource.assignmentDataSource.list(DataLoadParams())
-            val allAssignments = assignmentsResult.dataOrNull() ?: return@launch
+            val state = schoolDataSource.xapiStatementsResource.get(
+                listParams = GetStatementParams(
+                    activity = XapiAssignmentMapper.CATEGORY_ASSIGNMENT_RECIPE,
+                    relatedActivities = true,
+                    verb = VERB_ASSIGN
+                ),
+                dataLoadParams = DataLoadParams()
+            )
+            allAssignments = state.dataOrNull()?.statements
+                ?.mapNotNull { XapiAssignmentMapper.toAssignment(it) }
+                ?.distinctBy { it.uid }
+                ?.sortedByDescending { it.lastModified }
+                ?: emptyList()
+
+            updateFilteredAssignments()
 
             allAssignments.forEach { assignment ->
-                val assignmentActivityId = "$schoolUrl/assignment/${assignment.uid}"
+                val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${assignment.uid}"
 
                 viewModelScope.launch {
                     schoolDataSource.xapiStatementsResource
@@ -181,11 +162,28 @@ class AssignmentListViewModel(
         }
     }
 
+    private fun updateFilteredAssignments() {
+        _uiState.update { state ->
+            val filtered = allAssignments.filter { assignment ->
+                val results = state.assignmentProgressRow.filter { result ->
+                    result.activityId.contains(assignment.uid)
+                }
+                val isCompleted = results.any { it.completion == true }
+
+                when (state.selectedFilter) {
+                    AssignmentFilter.ALL -> true
+                    AssignmentFilter.COMPLETED -> isCompleted
+                    AssignmentFilter.PENDING -> !isCompleted
+                }
+            }
+            state.copy(assignments = filtered)
+        }
+    }
+
 
     fun onFilterChanged(filter: AssignmentFilter) {
-        _selectedFilter.value = filter
         _uiState.update { it.copy(selectedFilter = filter) }
-        pagingSourceHolder.invalidate()
+        updateFilteredAssignments()
     }
 
     fun onClickAssignment(assignment: Assignment) {
@@ -209,5 +207,4 @@ class AssignmentListViewModel(
             url = url, params = DataLoadParams(), null, null
         )
     }
-
 }

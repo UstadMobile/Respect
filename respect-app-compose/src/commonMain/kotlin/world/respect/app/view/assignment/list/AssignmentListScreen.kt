@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -31,18 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
-import world.respect.app.components.respectPagingItems
-import world.respect.app.components.respectRememberPager
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.opds.model.OpdsPublication
@@ -70,8 +67,6 @@ fun AssignmentListScreen(
     onFilterSelected: (AssignmentFilter) -> Unit,
     onClickAssignment: (Assignment) -> Unit = { },
 ) {
-    val pager = respectRememberPager(uiState.assignments)
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -99,13 +94,10 @@ fun AssignmentListScreen(
             }
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            respectPagingItems(
-                items = lazyPagingItems,
-                key = { item, index -> item?.uid ?: index.toString() },
-                contentType = { AssignmentDataSource.ENDPOINT_NAME }
+            items(
+                items = uiState.assignments,
+                key = { item -> item.uid }
             ) { assignment ->
-                if (assignment == null) return@respectPagingItems
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

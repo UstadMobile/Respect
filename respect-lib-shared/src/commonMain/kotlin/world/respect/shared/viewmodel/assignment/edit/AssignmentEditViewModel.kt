@@ -7,6 +7,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -21,12 +22,16 @@ import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.datalayer.ext.map
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
+import world.respect.datalayer.school.xapi.model.VERB_ASSIGN
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -47,7 +52,11 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.lib.xapi.model.*
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.shared.domain.xapi.XapiAssignmentMapper
 import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentEditUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -64,9 +73,10 @@ data class AssignmentEditUiState(
         get() = nameError != null || classError != null
 }
 
+@OptIn(ExperimentalUuidApi::class)
 class AssignmentEditViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val json: Json,
     private val resultReturner: NavResultReturner,
     private val respectAppDataSource: RespectAppDataSource,
@@ -129,13 +139,27 @@ class AssignmentEditViewModel(
             }
 
             if(route.guid != null) {
+                val schoolUrl = accountManager.activeAccount?.school?.self
+                    ?.toString()
+                    ?.trim()
+                    ?.removeSuffix("/")
+                    ?: ""
+                val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${route.guid}"
+
                 loadEntity(
                     json = json,
                     serializer = Assignment.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.assignmentDataSource.findByGuid(
-                            params, route.guid
-                        )
+                        schoolDataSource.xapiStatementsResource.getAsFlow(
+                            listParams = GetStatementParams(
+                                activity = assignmentActivityId,
+                                verb = VERB_ASSIGN
+                            ),
+                            dataLoadParams = params
+                        ).first().map { result ->
+                            result.statements
+                                .mapNotNull { XapiAssignmentMapper.toAssignment(it) }
+                        }.firstOrNotLoaded()
                     },
                     uiUpdateFn = { entity ->
                         _uiState.update { prev ->
@@ -280,11 +304,38 @@ class AssignmentEditViewModel(
             return
 
         val assignment = uiState.value.assignment.dataOrNull() ?: return
+        val selectedClass = uiState.value.classOptions.firstOrNull { it.guid == assignment.classUid } ?: return
 
         launchWithLoadingIndicator {
-            schoolDataSource.assignmentDataSource.store(
-                listOf(assignment.copy(lastModified = Clock.System.now()))
+            val schoolUrl = accountManager.activeAccount?.school?.self.toString()
+
+            val currentPerson = accountManager.selectedAccountAndPersonFlow.first()?.person ?: return@launchWithLoadingIndicator
+
+            val instructor = XapiAgent(
+                name = currentPerson.fullName(),
+                account = XapiAccount(
+                    homePage = schoolUrl,
+                    name = currentPerson.guid
+                ),
+                objectType = XapiObjectType.Agent
             )
+
+            val assignee = XapiGroup(
+                name = selectedClass.title,
+                account = XapiAccount(
+                    homePage = schoolUrl,
+                    name = selectedClass.guid
+                )
+            )
+
+            val statement = XapiAssignmentMapper.fromAssignment(
+                assignment = assignment.copy(lastModified = Clock.System.now()),
+                schoolUrl = schoolUrl,
+                assignee = assignee,
+                instructor = instructor
+            )
+
+            schoolDataSource.xapiStatementsResource.post(listOf(statement))
 
             if(route.guid == null) {
                 _navCommandFlow.tryEmit(

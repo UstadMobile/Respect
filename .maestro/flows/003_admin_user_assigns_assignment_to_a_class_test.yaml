@@ -41,7 +41,7 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -68,8 +68,6 @@ onFlowComplete:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
 - tapOn: "Lesson/assessment"
-- assertVisible:
-    id: "app_title"
 - tapOn: "My app"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"

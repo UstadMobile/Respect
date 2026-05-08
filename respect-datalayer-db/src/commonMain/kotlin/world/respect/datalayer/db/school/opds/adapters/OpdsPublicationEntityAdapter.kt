@@ -79,6 +79,7 @@ fun OpdsPublication.asEntities(
             opeMdDuration = metadata.duration,
         ),
         langMapEntities = metadata.title.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_TITLE) +
+                
             metadata.sortAs.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_SORT_AS) +
             metadata.subtitle.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_SUBTITLE),
         linkEntities = links.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_LINKS) +

@@ -152,6 +152,9 @@ data class AssignmentEdit(
 }
 
 @Serializable
+object BookmarkList : RespectAppRoute
+
+@Serializable
 object ClazzList : RespectAppRoute
 
 @Serializable

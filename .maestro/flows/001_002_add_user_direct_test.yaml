@@ -363,7 +363,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - assertNotVisible: "Classes"
 - assertNotVisible: "People"
 
@@ -382,10 +382,10 @@ onFlowComplete:
 - tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - tapOn: "OK"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - assertVisible: "Assignments"
 - assertVisible: "Classes"
 - assertVisible: "People"

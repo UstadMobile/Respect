@@ -1,5 +1,6 @@
 package world.respect.datalayer
 
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ClassDataSource
@@ -47,6 +48,8 @@ interface SchoolDataSource {
     val assignmentDataSource: AssignmentDataSource
 
     val inviteDataSource: InviteDataSource
+
+    val bookmarkDataSource: BookmarkDataSource
 
     val opdsPublicationDataSource: OpdsPublicationDataSource
 

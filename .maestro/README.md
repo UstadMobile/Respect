@@ -34,7 +34,8 @@ Where:
 ---
 ### 001_001_invite_users_test
 
-1. Admin Generates New Person Invites: Admin creates invitation codes for "System Administrator" and "Teacher" roles, testing both "Approval Required" (ON) and "Approval Required" (OFF) states.
+1. Admin Generates New Person Invites: 
+    Admin creates invitation codes for "System Administrator" and "Teacher" roles, testing both "Approval Required" (ON) and "Approval Required" (OFF) states.
 2. Admin and Teacher Onboarding (New Person):
   • AdminA (Approve ON) and TeacherA (Approve ON) join via QR/Link and must wait for approval.
   • AdminB (Approve OFF) and TeacherB (Approve OFF) join via QR/Link and gain immediate access.

@@ -300,10 +300,9 @@ class AssignmentEditViewModel(
         }
     }
 
-    companion object {
-
-        const val KEY_LEARNING_UNIT = "result_learning_unit"
+        companion object {
+            const val KEY_LEARNING_UNIT = "result_learning_unit_single"
+        }
 
     }
 
-}

@@ -50,8 +50,9 @@ import world.respect.shared.generated.resources.assignment_tasks
 import world.respect.shared.generated.resources.clazz
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.lesson_assessment
+import world.respect.shared.generated.resources.task
 import world.respect.shared.generated.resources.assignment_name
+import world.respect.shared.generated.resources.lesson_assessment
 import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -196,7 +197,7 @@ fun AssignmentEditScreen(
 
         Text(
             modifier = Modifier.defaultItemPadding(),
-            text = stringResource(Res.string.assignment_tasks),
+            text = stringResource(Res.string.task),
             style = MaterialTheme.typography.titleMedium
         )
 

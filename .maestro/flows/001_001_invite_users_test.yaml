@@ -290,34 +290,31 @@ onFlowComplete:
 - tapOn:
     text: "System administrator"
 - scroll
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.adminApprove_Off = maestro.copiedText}
 
 # Invite Teacher as new person - Approve Required Off
-- back
-- tapOn:
-    id: "ExpandableFab"   #  +Person button
-- tapOn:
-    text: "Invite person"
-    index: 1
-- assertVisible:
-    id: "app_title"
-    text: "Invite person"
 - tapOn:
     id: "role"
 - tapOn:
     text: "Teacher"
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.teacherApproveOff = maestro.copiedText}
-
+- back
 - tapOn: "Classes"
 - tapOn: "TestClass"
 - assertNotVisible: "Pending requests.*"
@@ -329,9 +326,12 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.teacherClassApproveOff = maestro.copiedText}
@@ -551,7 +551,6 @@ onFlowComplete:
     id: "invite_code"
 - evalScript: ${output.parentApproveOn = maestro.copiedText}
 
-- back
 - back
 - tapOn: "Classes"
 - tapOn: "TestClass"
@@ -840,9 +839,12 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Student"
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.studentApproveOff = maestro.copiedText}
@@ -852,9 +854,12 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Parent"
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.parentApproveOff = maestro.copiedText}
@@ -879,18 +884,24 @@ onFlowComplete:
     id: "app_title"
     text: "Invite person"
 - tapOn: "Invite students directly"
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.studentClassApproveOff = maestro.copiedText}
 
 # Invite Student to TestClass via Parent - Approve Required Off
 - tapOn: "Invite via parents"
-- assertNotVisible: "Approval not required until:.*"
-- tapOn: "Approval required" #Approval Not Required
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 - evalScript: ${output.parentClassApproveOff = maestro.copiedText}

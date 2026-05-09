@@ -91,8 +91,7 @@ onFlowComplete:
 - back
 - tapOn: "Classes"
 - tapOn: "TestClass"
-- assertVisible: "TeacherC User"
-- assertVisible: "TeacherD User"
+- assertVisible: "TeacherAUser"
 - tapOn: "Add Student"
 - tapOn: "Invite person"
 - assertVisible:

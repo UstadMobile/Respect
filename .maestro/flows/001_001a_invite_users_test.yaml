@@ -517,3 +517,21 @@ onFlowComplete:
 - assertVisible: "Apps"
 - assertVisible: "Assignments"
 - assertVisible: "Classes"
+
+# Admin login - Verify People and Class users
+- clearState: world.respect.app
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+- assertVisible: "AdminA User"
+- assertVisible: "AdminB User"
+- assertVisible: "TeacherB User"
+- assertVisible: "TeacherC User"
+- assertVisible: "TeacherD User"
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- assertVisible: "TeacherC User"
+- assertVisible: "TeacherD User"
+

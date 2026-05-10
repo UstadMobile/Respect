@@ -12,10 +12,12 @@ import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.adapters.generatePersonChanges
 import world.respect.datalayer.db.school.adapters.toEntities
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.datalayer.exceptions.ForbiddenException
+import world.respect.datalayer.school.ChangeHistoryLocal
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
@@ -27,6 +29,7 @@ import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
+import world.respect.libutil.util.time.systemTimeInMillis
 import kotlin.time.Clock
 
 class PersonDataSourceDb(
@@ -34,7 +37,8 @@ class PersonDataSourceDb(
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
-): PersonDataSourceLocal {
+    private val changeHistoryDataSource: ChangeHistoryLocal,
+): PersonDataSourceLocal  {
 
 
     private suspend fun doUpsertPerson(
@@ -87,7 +91,26 @@ class PersonDataSourceDb(
                      ) {
                         throw ForbiddenException("Authenticated user does not have permission to store ${personToStore.guid}")
                     }
+                    val timeNow = systemTimeInMillis()
 
+                    val oldPerson = schoolDb.getPersonEntityDao().findByGuidNum(
+                        guidHash = uidNumberMapper(personToStore.guid)
+                    )
+                    if (oldPerson != null) {
+                        val changeEntries = generatePersonChanges(
+                            hGuid = personToStore.guid,
+                            old = oldPerson.toPersonEntities().toModel(),
+                            new = personToStore,
+                            whoGuid = authenticatedUser.guid,
+                            timestamp = timeNow,
+                            hTableGuid = personToStore.guid
+                        )
+
+
+                        if (changeEntries != null) {
+                            changeHistoryDataSource.store(listOf(changeEntries))
+                        }
+                    }
                     //Check that roles have not been change
                     doUpsertPerson(personToStore)
                 }

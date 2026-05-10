@@ -35,6 +35,8 @@ kotlin {
             api(libs.androidx.paging.common)
             api(libs.androidx.room.paging)
             implementation(libs.napier)
+            implementation(libs.koin.core)
+            implementation(project.dependencies.platform(libs.koin.bom))
 
         }
 

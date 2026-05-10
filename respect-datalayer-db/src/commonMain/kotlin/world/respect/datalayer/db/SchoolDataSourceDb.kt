@@ -7,6 +7,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.AssignmentDatasourceDb
+import world.respect.datalayer.db.school.ChangeHistoryDataSourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
@@ -20,6 +21,7 @@ import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.school.AssignmentDataSourceLocal
+import world.respect.datalayer.school.ChangeHistoryLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -77,7 +79,7 @@ class SchoolDataSourceDb(
     }
 
     override val personDataSource: PersonDataSourceLocal by lazy {
-        PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, checkPersonPermissionUseCase)
+        PersonDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser, checkPersonPermissionUseCase,changeHistoryDataSource)
     }
 
     override val personPasskeyDataSource: PersonPasskeyDataSourceLocal by lazy {
@@ -116,6 +118,11 @@ class SchoolDataSourceDb(
     override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
         AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
+
+    override val changeHistoryDataSource: ChangeHistoryLocal by lazy {
+        ChangeHistoryDataSourceDb(schoolDb,uidNumberMapper)
+    }
+
 
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal by lazy {
         OpdsPublicationDataSourceDb(

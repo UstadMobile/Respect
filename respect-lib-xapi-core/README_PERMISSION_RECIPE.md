@@ -18,6 +18,9 @@ By default, each statement is stored in a folder for the authority of the statem
 actor_id/statements/) which is owned by the given authority. The authority MUST have read-write 
 access to this folder.
 
+Permissions always apply to subfolders: a permission granted to storage://school/classes will always
+apply to storage://school/classes/class1, storage://school/classes/class1/sub etc.
+
 Others _MAY_ be granted read or write access to this folder (e.g. the parent should have read access
 to all of their child's records, a teacher may have write access to all of their students records).
 This can be done using a grant statement (where the authority grants a permission to the actor) e.g.
@@ -103,4 +106,9 @@ When student added to class:
 * Teacher updates the group. The group save statement is saved in classes/class-uid.
 
 Now student can read, but not write, statements related to the class.
+
+Canonical updates:
+
+Canonical definitions could be held in each folder. The canonical definition returned would then 
+vary depending on what the authorized user can access (or wishes to trust).
 

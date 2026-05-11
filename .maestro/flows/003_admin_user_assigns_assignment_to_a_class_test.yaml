@@ -16,8 +16,37 @@ onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
-- runFlow: "subflows/admin_add_app_and_teacher.yaml"
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- runFlow: "subflows/admin_add_app.yaml"
+- tapOn: "People"
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn: "Add new person"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: "TeacherA"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn:
+    id: "role"
+- tapOn: "Teacher"
+- tapOn: "Save"
+- tapOn: "TeacherA User"
+- tapOn: "Create account"
+- assertVisible: "teacherauser"
+- tapOn: "Password"
+- inputText: "test123"
+- tapOn: "Save"
+- assertVisible: "Manage account"
 
+#Teacher login to add class and assignment
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -32,11 +61,12 @@ onFlowComplete:
 
 - tapOn:
     id: "username"
-- inputText: "teacheruser"
+- inputText: "teacherauser"
 - tapOn:
     id : "password"
-- inputText: "testt1"
+- inputText: "test123"
 - tapOn: "Login"
+
 - runFlow:
     when:
       visible: "Save password for Respect?"

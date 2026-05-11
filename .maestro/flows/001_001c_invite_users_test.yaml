@@ -55,7 +55,10 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible: "Manage account"
 
-# Invite Students as new person - Approve Required On
+# Invite Student as new person - Approve Required Off
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
 - tapOn: "People"
 - tapOn:
     id: "ExpandableFab"   #  +Person button
@@ -69,52 +72,70 @@ onFlowComplete:
     id: "role"
 - tapOn:
     text: "Student"
-- scroll
-- assertVisible: "Reset code"
-- assertVisible: "Approval required" #Approval Required
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
-- evalScript: ${output.studentApproveOn = maestro.copiedText}
+- evalScript: ${output.studentApproveOff = maestro.copiedText}
 
-# Invite Parent as new person - Approve Required On
+# Invite Parent as new person - Approve Required Off
 - tapOn:
     id: "role"
 - tapOn:
     text: "Parent"
-- scroll
-- assertVisible: "Reset code"
-- assertVisible: "Approval required" #Approval Required
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
-- evalScript: ${output.parentApproveOn = maestro.copiedText}
-
+- evalScript: ${output.parentApproveOff = maestro.copiedText}
 - back
+
+#Teacher open class and invite students to class
 - tapOn: "Classes"
 - tapOn: "TestClass"
-- assertVisible: "TeacherA User"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+
+# Invite Student as new student to TestClass - Approve Required Off
 - tapOn: "Add Student"
 - tapOn: "Invite person"
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-
-# Invite Student as new student to TestClass - Approve Required ON
 - tapOn: "Invite students directly"
-- assertVisible: "Approval required"    #Approval Required ON
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
-- evalScript: ${output.studentClassApproveOn = maestro.copiedText}
+- evalScript: ${output.studentClassApproveOff = maestro.copiedText}
 
-# Invite Student to TestClass via Parent - Approve Required ON
+# Invite Student to TestClass via Parent - Approve Required Off
 - tapOn: "Invite via parents"
-- assertVisible: "Approval required" #Approval Required ON
-- assertNotVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required"
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
-- evalScript: ${output.parentClassApproveOn = maestro.copiedText}
+- evalScript: ${output.parentClassApproveOff = maestro.copiedText}
 
 
-#Student A sign-up via invite code as new person - Approve Required On
+#Student A sign-up via invite code as new person - Approve Required Off
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -126,7 +147,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- inputText: ${output.studentApproveOn}
+- inputText: ${output.studentApproveOff}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -164,11 +185,10 @@ onFlowComplete:
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Waiting for approval"
-- assertVisible: "Please wait"
+    text: "Apps"
 
 
-#Parent A sign-up via invite code as new person - Approve Required On
+#Parent A sign-up via invite code as new person - Approve Required Off
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -180,7 +200,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- inputText: ${output.parentApproveOn}
+- inputText: ${output.parentApproveOff}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -222,11 +242,10 @@ onFlowComplete:
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Waiting for approval"
-- assertVisible: "Please wait"
+    text: "Apps"
 
 
-# Student C user joining TestClass using invite code - Approve Required On
+# Student B user joining using invite code - Approve Required Off
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -238,7 +257,7 @@ onFlowComplete:
       SCHOOL_NAME: ${SCHOOL_NAME}
 - tapOn: "I have an invite code"
 - tapOn: "Invite code"
-- inputText: ${output.studentClassApproveOn}
+- inputText: ${output.studentClassApproveOff}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
@@ -256,7 +275,7 @@ onFlowComplete:
     id: "app_title"
     text: "Your profile"
 - tapOn: "Your name*"
-- inputText: "StudentC User"
+- inputText: "StudentB User"
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
@@ -267,7 +286,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Create account"
-- assertVisible: "studentcuser"
+- assertVisible: "studentbuser"
 - tapOn: "Next"
 - tapOn: "Password*"
 - inputText: "test123"
@@ -278,15 +297,16 @@ onFlowComplete:
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Waiting for approval"
-- assertVisible: "Please wait"
+    text: "Apps"
+- tapOn: "Classes"
+- assertVisible: "TestClass"
 
 
-# Parent C joins child user to the class using invite link - Approve required ON
+# Parent B joins child user to the class using invite link - Approve required Off
 - runFlow:
     file: "subflows/openlink_flow.yaml"
     env:
-      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.parentClassApproveOn}
+      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.parentClassApproveOff}
 - tapOn: "Get Started"
 - assertVisible:
     id: "app_title"
@@ -308,7 +328,7 @@ onFlowComplete:
     id: "app_title"
     text: "Your profile"
 - tapOn: "Your name*"
-- inputText: "ParentC User"
+- inputText: "ParentB User"
 - tapOn: "Gender*"
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
@@ -320,7 +340,7 @@ onFlowComplete:
     id: "app_title"
     text: "Create account"
 - extendedWaitUntil:
-    visible: "parentcuser" #username
+    visible: "parentbuser" #username
     timeout: 10000
 - tapOn: "Next"
 - tapOn: "Password*"
@@ -346,10 +366,12 @@ onFlowComplete:
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
-    text: "Waiting for approval"
-- assertVisible: "Please wait"
+    text: "Apps"
+- tapOn: "Classes"
+- assertVisible: "TestClass"
 
-#TeacherA User login and send invites to students and parents
+# TeacherA user login - Approves People and Class invites
+# TeacherA user in people page validating and approving join request
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -360,28 +382,19 @@ onFlowComplete:
     id: "app_title"
     text: "Apps"
 - tapOn: "People"
-
-# Approve Required ON users should be pending
-- assertVisible: "Pending request to join.*"
 - assertVisible: "StudentA User"
-- tapOn: "Accept Invite"
+- assertVisible: "StudentB User"
 - assertVisible: "ParentA User"
-- tapOn: "Accept Invite"
-- assertVisible: "StudentC User"
-- tapOn: "Accept Invite"
-- assertVisible: "ParentC User"
-- tapOn: "Accept Invite"
+- assertVisible: "ParentB User"
 - assertVisible: "ChildA User"
-- tapOn: "Accept Invite"
 - assertNotVisible: "Pending request to join.*"
 
-#Teacher open class and invite students to class
+#Teacher User open class
 - tapOn: "Classes"
 - tapOn: "TestClass"
-- assertVisible:
-    id: "app_title"
-    text: "TestClass"
-
-- assertVisible: "StudentC User"
+- assertVisible: "StudentB User"
 - assertVisible: "ChildA User"
+- assertNotVisible: "ParentB User"
 - assertNotVisible: "Pending request to join.*"
+
+

@@ -17,7 +17,6 @@ onFlowComplete:
       file: "scripts/teardown.js"
 
 ---
-
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible:
     id: "app_title"

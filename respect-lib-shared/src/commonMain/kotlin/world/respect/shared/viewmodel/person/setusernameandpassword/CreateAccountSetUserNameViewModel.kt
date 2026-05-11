@@ -20,6 +20,7 @@ import world.respect.datalayer.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
@@ -27,11 +28,13 @@ import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.save
+import world.respect.shared.generated.resources.username_already_taken
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.resources.UiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
@@ -67,6 +70,8 @@ class CreateAccountSetUserNameViewModel(
     private val route: CreateAccountSetUsername = savedStateHandle.toRoute()
 
     private val usernameSuggestionUseCase: UsernameSuggestionUseCase by inject()
+
+    private val checkUsernameUniqueUseCase: CheckUsernameUniqueUseCase by inject()
 
     private val _uiState = MutableStateFlow(CreateAccountSetUserNameUiState())
 
@@ -141,19 +146,40 @@ class CreateAccountSetUserNameViewModel(
         _uiState.update { it.copy(username = filterUsernameUseCase(username, "")) }
     }
 
+    private suspend fun checkUsernameOk(username: String): String? {
+        val usernameVal = username.trim()
+        val usernameValidation = validateUsernameUseCase(usernameVal)
+        _uiState.update {
+            it.copy(
+                usernameErr = usernameValidation.errorMessage?.asUiText()
+            )
+        }
+
+        if (usernameValidation.errorMessage != null)
+            return null
+
+        return try {
+            if(checkUsernameUniqueUseCase(usernameVal)) {
+                usernameVal
+            }else {
+                _uiState.update {
+                    it.copy(usernameErr = Res.string.username_already_taken.asUiText())
+                }
+
+                null
+            }
+        }catch(e: Throwable) {
+            Napier.w("Something wrong setting username", e)
+            _uiState.update { it.copy(usernameErr = e.getUiTextOrGeneric()) }
+            null
+        }
+    }
+
     fun onClickSave() {
         launchWithLoadingIndicator {
             try {
-                val username = uiState.value.username
-                val usernameValidation = validateUsernameUseCase(username)
-                _uiState.update {
-                    it.copy(
-                        usernameErr = usernameValidation.errorMessage?.asUiText()
-                    )
-                }
-
-                if (usernameValidation.errorMessage != null)
-                    return@launchWithLoadingIndicator
+                val username = checkUsernameOk(uiState.value.username)
+                    ?: return@launchWithLoadingIndicator
 
                 try {
                     validatePasswordUseCase(uiState.value.password)
@@ -169,7 +195,7 @@ class CreateAccountSetUserNameViewModel(
                 schoolDataSource.personDataSource.store(
                     listOf(
                         person.copy(
-                            username = uiState.value.username,
+                            username = username,
                             lastModified = Clock.System.now(),
                         )
                     )
@@ -225,24 +251,17 @@ class CreateAccountSetUserNameViewModel(
 
     fun onClickSetPassword() {
         launchWithLoadingIndicator {
-            val username = uiState.value.username.trim()
-            val usernameValidation = validateUsernameUseCase(username)
-            _uiState.update {
-                it.copy(
-                    usernameErr = usernameValidation.errorMessage?.asUiText()
-                )
-            }
+            val username = checkUsernameOk(uiState.value.username)
+                ?: return@launchWithLoadingIndicator
 
-            if (usernameValidation.errorMessage == null) {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(
-                        CreateAccountSetPassword(
-                            guid = route.guid,
-                            username = uiState.value.username
-                        ),
-                    )
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    CreateAccountSetPassword(
+                        guid = route.guid,
+                        username = username
+                    ),
                 )
-            }
+            )
         }
     }
 

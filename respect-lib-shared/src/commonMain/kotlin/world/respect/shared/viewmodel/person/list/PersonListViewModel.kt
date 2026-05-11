@@ -36,13 +36,11 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
-import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
-import world.respect.datalayer.school.ext.writePermissionFlag
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
-import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
@@ -60,12 +58,12 @@ data class PersonListUiState(
     val showInvite: Boolean = false,
     val pendingPersons: IPagingSourceFactory<Int, Person> =
         IPagingSourceFactory { EmptyPagingSource() },
-    val addPersonPermissions: List<Long> = emptyList(),
+    val writableRoles: List<PersonRoleEnum> = emptyList(),
 ) {
 
 
     fun showApproveOption(role: PersonRoleEnum): Boolean {
-        return role.writePermissionFlag in addPersonPermissions
+        return role in writableRoles
     }
 
 }
@@ -89,7 +87,7 @@ class PersonListViewModel(
 
     private val route: PersonList = savedStateHandle.toRoute()
 
-    private val checkPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
+    private val getWritableRolesListUseCase: GetWritableRolesListUseCase by inject()
 
     private val approveOrDeclineInviteRequestUseCase: ApproveOrDeclineInviteRequestUseCase by inject()
 
@@ -122,7 +120,7 @@ class PersonListViewModel(
                     Res.string.select_person.asUiText()
                 },
                 expandableFabState = ExpandableFabUiState(
-                    visible = !(route.filterByRole != null || route.addToClassUid != null),
+                    visible = false,
                     items = listOf(
                         ExpandableFabItem(
                             icon = ExpandableFabIcon.INVITE,
@@ -148,18 +146,19 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
-            val addPermissionsAvailable = checkPermissionUseCase(
-                PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
-            )
-            val canAddPerson = addPermissionsAvailable.isNotEmpty()
-            _uiState.update { it.copy(addPersonPermissions = addPermissionsAvailable) }
-
-            val canInvitePerson = canAddPerson || route.inviteUid != null
-
             accountManager.selectedAccountAndPersonFlow.collect { selectedAcct ->
+                val writableRoles = selectedAcct?.person?.roles?.firstOrNull()?.let {
+                    getWritableRolesListUseCase(it.roleEnum)
+                } ?: emptyList()
+
+                val canAddPerson = writableRoles.isNotEmpty()
+                _uiState.update { it.copy(writableRoles = writableRoles) }
+
+                val canInvitePerson = canAddPerson || route.inviteUid != null
+
                 _appUiState.update { prev ->
                     prev.copy(
-                        fabState = prev.fabState.copy(
+                        expandableFabState = prev.expandableFabState.copy(
                             visible = canAddPerson && !route.resultExpected
                         )
                     )

@@ -27,6 +27,7 @@ import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.accept_invite
 import world.respect.shared.generated.resources.child
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.loading
@@ -170,7 +171,7 @@ fun AcceptInviteScreen(
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                     enabled = uiState.nextButtonEnabled,
                 ) {
-                    Text(stringResource(Res.string.next))
+                    Text(stringResource(if (uiState.uid!=null) Res.string.accept_invite else Res.string.next))
                 }
             }
         }

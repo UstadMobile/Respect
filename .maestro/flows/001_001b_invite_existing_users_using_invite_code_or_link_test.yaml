@@ -122,7 +122,7 @@ onFlowComplete:
 - assertVisible: "Teacher"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "School URL"
+- assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept invite"
 - assertVisible:
@@ -189,7 +189,7 @@ onFlowComplete:
 - assertVisible: "Student"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "School URL"
+- assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
 - assertVisible:                     #check
@@ -256,7 +256,7 @@ onFlowComplete:
 - assertVisible: "Student"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "School URL"
+- assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
 - assertVisible:
@@ -330,7 +330,7 @@ onFlowComplete:
 - assertVisible: "Student"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
-- assertVisible: "School URL"
+- assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept invite"
 - assertVisible:

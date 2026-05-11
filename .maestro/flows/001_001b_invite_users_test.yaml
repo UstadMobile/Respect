@@ -337,6 +337,11 @@ onFlowComplete:
 - tapOn: "Done"
 - runFlow:
     when:
+      visible: "Done"
+    commands:
+      - tapOn: "Done"
+- runFlow:
+    when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
@@ -669,6 +674,11 @@ onFlowComplete:
     file: "scripts/setDate.js"
 - inputText: ${output.pastYearDateC}
 - tapOn: "Done"
+- runFlow:
+    when:
+      visible: "Done"
+    commands:
+      - tapOn: "Done"
 - runFlow:
     when:
       visible: "Save password for Respect?"

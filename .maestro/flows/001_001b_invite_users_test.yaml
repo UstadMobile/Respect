@@ -371,8 +371,7 @@ onFlowComplete:
 - tapOn: "Accept Invite"
 - assertVisible: "ParentC User"
 - tapOn: "Accept Invite"
-- assertVisible: "ChildA User"
-- tapOn: "Accept Invite"
+- assertVisible: "ChildA User"  #When ParentC added, childA automatically gets added to class people
 - assertNotVisible: "Pending request to join.*"
 
 #Teacher open class and invite students to class

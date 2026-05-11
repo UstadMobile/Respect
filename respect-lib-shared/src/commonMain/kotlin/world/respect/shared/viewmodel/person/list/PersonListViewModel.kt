@@ -37,6 +37,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
@@ -59,7 +60,15 @@ data class PersonListUiState(
     val showInvite: Boolean = false,
     val pendingPersons: IPagingSourceFactory<Int, Person> =
         IPagingSourceFactory { EmptyPagingSource() },
-)
+    val addPersonPermissions: List<Long> = emptyList(),
+) {
+
+
+    fun showApproveOption(role: PersonRoleEnum): Boolean {
+        return role.writePermissionFlag in addPersonPermissions
+    }
+
+}
 
 class PersonListViewModel(
     savedStateHandle: SavedStateHandle,
@@ -139,9 +148,11 @@ class PersonListViewModel(
         }
 
         viewModelScope.launch {
-            val canAddPerson = checkPermissionUseCase(
+            val addPermissionsAvailable = checkPermissionUseCase(
                 PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
-            ).isNotEmpty()
+            )
+            val canAddPerson = addPermissionsAvailable.isNotEmpty()
+            _uiState.update { it.copy(addPersonPermissions = addPermissionsAvailable) }
 
             val canInvitePerson = canAddPerson || route.inviteUid != null
 

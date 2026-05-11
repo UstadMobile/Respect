@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -139,6 +141,10 @@ fun PersonListScreen(
                 items = pendingItems,
                 key = { item, index -> (item?.guid + index.toString()) }
             ) { person ->
+                val showApproveOption = person?.roles?.firstOrNull()?.roleEnum?.let {
+                    uiState.showApproveOption(it)
+                } ?: false
+
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
                     leadingContent = {
@@ -160,32 +166,39 @@ fun PersonListScreen(
                         )
 
                     },
-                    trailingContent = {
-                        Row {
-                            Icon(
-                                modifier = Modifier.size(24.dp)
-                                    .clickable {
-                                        person?.also { onClickAcceptOrDismissInvite(it, true) }
+                    trailingContent = if(showApproveOption) {
+                        {
+                            Row {
+                                Icon(
+                                    modifier = Modifier.size(24.dp)
+                                        .clickable {
+                                            onClickAcceptOrDismissInvite(person, true)
+                                        },
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = stringResource(resource = Res.string.accept_invite)
+                                )
+
+                                Spacer(Modifier.width(16.dp))
+
+                                Icon(
+                                    modifier = Modifier.size(24.dp).clickable {
+                                        onClickAcceptOrDismissInvite(person, false)
                                     },
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = stringResource(resource = Res.string.accept_invite)
-                            )
-
-                            Spacer(Modifier.width(16.dp))
-
-                            Icon(
-                                modifier = Modifier.size(24.dp).clickable {
-                                    person?.also{onClickAcceptOrDismissInvite(it, false)}
-                                },
-                                imageVector = Icons.Outlined.Cancel,
-                                contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                            )
+                                    imageVector = Icons.Outlined.Cancel,
+                                    contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                                )
+                            }
                         }
+                    }else {
+                        null
                     }
                 )
             }
         }
 
+        item(key = "horizontaldiv") {
+            HorizontalDivider(Modifier.height(1.dp))
+        }
 
         respectPagingItems(
             items = lazyPagingItems,

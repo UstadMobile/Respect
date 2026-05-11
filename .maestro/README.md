@@ -165,11 +165,29 @@ Where:
 ---
 ### 003_admin_user_assigns_assignment_to_a_class_test
 
-1. Admin setup includes app, class and teacher creation
-2. Teacher logs in and accesses class
-3. Teacher creates a new assignment
-4. Assignment is linked with lesson content
-5. Assignment is saved and verified in class
+### 003_admin_user_assigns_assignment_to_a_class_test
+
+1. Admin Adds Learning App:
+   Admin logs into the school and adds a learning application to the school environment.
+2. Admin Creates Teacher Account:
+   Admin creates TeacherA User with Teacher role credentials and enables account access.
+3. Admin Creates Class:
+   Admin creates a class named "TestClass".
+4. Teacher Login & Navigation:
+   TeacherA logs into the school and navigates to the Assignments section.
+5. Assignment Creation Validation:
+   Teacher attempts to save a new assignment without entering required details and validates the required field error message.
+6. Teacher Creates Assignment:
+   Teacher creates an assignment named "Homework 1" with:
+   • Assigned class: TestClass
+   • Future due date and time
+   • Linked lesson content from the learning app
+7. Assignment Verification:
+   Teacher successfully saves the assignment and verifies:
+   • Assignment detail page displays "Homework 1"
+   • Linked lesson "Lesson 001" is visible
+   • Assignment appears in the Assignments list.
+
 ---
 
 ## Testing using HTTPS

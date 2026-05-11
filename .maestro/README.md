@@ -32,7 +32,7 @@ Where:
 
 ## Available test flows
 ---
-### 001_001_invite_flow_admin_teacher_approval_on_off_test
+### 001_001a_invite_flow_admin_teacher_approval_on_off_test
 
 1. Admin Generates New Person Invites:
 2. Admin generates invitation codes for:

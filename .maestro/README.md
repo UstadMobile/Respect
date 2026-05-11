@@ -32,30 +32,98 @@ Where:
 
 ## Available test flows
 ---
-### 001_001_invite_users_test
+### 001_001_invite_flow_admin_teacher_approval_on_off_test
 
-1. Admin Generates New Person Invites: 
-    Admin creates invitation codes for "System Administrator" and "Teacher" roles, testing both "Approval Required" (ON) and "Approval Required" (OFF) states.
-2. Admin and Teacher Onboarding (New Person):
-  • AdminA (Approve ON) and TeacherA (Approve ON) join via QR/Link and must wait for approval.
-  • AdminB (Approve OFF) and TeacherB (Approve OFF) join via QR/Link and gain immediate access.
-3. Class Creation & Teacher Invites: Admin creates "TestClass" and generates specific invitation codes for Teachers to join that class. 
-  • TeacherC (Approve ON) waits for approval, while TeacherD (Approve OFF) joins immediately.
-4. Admin Approval Logic:
-  • Admin logs in to the "People" and "Classes" sections to approve the pending requests for AdminA, TeacherA, and TeacherC.
-5. Teacher Generates New Person & Class Invites:
-  • TeacherC generates New Person invites for Students/Parents and class-specific invites for "TestClass" (testing both Approval ON/OFF states).
-6. Student & Parent Onboarding:
-  • StudentA/ParentA (New Person - Approve ON) wait for approval.
-  • StudentB/ParentB (New Person - Approve OFF) join immediately.
-  • StudentC (Class - Approve ON) waits for approval.
-  • StudentD (Class - Approve OFF) joins immediately.
-7. Parent Joins with Child:
-  • ParentC (Class - Approve ON) joins and registers ChildA, then waits for approval.
-  • ParentD (Class - Approve OFF) joins and registers ChildB, gaining immediate access.
-8. Teacher Approval & Verification: TeacherC approves all pending New Person and class requests. 
-9. ParentD logs in to verify that all approved students and children are visible within "TestClass".
+1. Admin Generates New Person Invites:
+2. Admin generates invitation codes for:
+   • System Administrator role
+   • Teacher role
+   Both Approval Required ON and Approval Required OFF flows are tested.
+3. Admin Creates Class & Teacher Class Invite:
+4. Admin creates "TestClass" and generates Teacher class invitation codes for:
+   • Approval Required ON
+   • Approval Required OFF
+5. Admin & Teacher Onboarding (Approval Required ON):
+   • AdminA joins using System Administrator invite and enters "Waiting for approval" state.
+   • TeacherA joins using Teacher QR/link invite and enters "Waiting for approval" state.
+   • TeacherC joins "TestClass" using Teacher class invite and enters "Waiting for approval" state.
+6. Admin Approval Flow:
+7. Admin logs into the People section and validates pending join requests for:
+   • AdminA User
+   • TeacherA User
+   • TeacherC User
+8. Admin approves all pending requests.
+9. Admin & Teacher Onboarding (Approval Required OFF):
+   • AdminB joins using System Administrator invite and gains immediate access.
+   • TeacherB joins using Teacher QR/link invite and gains immediate access.
+   • TeacherD joins "TestClass" using Teacher class invite and gains immediate access.
+10. Immediate Access Verification:
+    AdminB and TeacherB successfully reach the Apps dashboard without requiring approval.
+    Final Verification:
+11. Admin logs in and validates:
+   • People section contains AdminA, AdminB, TeacherB, TeacherC, and TeacherD users.
+   • No pending requests remain.
+   • "TestClass" contains TeacherC User and TeacherD User.
+---
+### 001_001b_invite_flow_student_parent_approval_enabled_test
 
+1. Admin Creates Class & Teacher Account:
+   Admin creates "TestClass" and manually adds TeacherA User as a Teacher account with login credentials.
+2. Admin Generates New Person Invites (Approval Required ON):
+   Admin generates invitation codes for:
+   • Student role (New Person invite)
+   • Parent role (New Person invite)
+   Both invites are configured with "Approval Required" ON.
+3. Admin Generates Class Invites (Approval Required ON):
+   Inside "TestClass", Admin generates:
+   • Direct Student class invite
+   • Parent-to-Class invite
+   Both class invites are configured with "Approval Required" ON.
+4. Student & Parent New Person Onboarding:
+   • StudentA joins the school using the Student New Person invite and enters "Waiting for approval" state.
+   • ParentA joins the school using the Parent New Person invite and enters "Waiting for approval" state.
+5. Student Joins Class Directly:
+   • StudentC joins "TestClass" using the direct Student class invite and enters "Waiting for approval" state.
+6. Parent Joins Class with Child:
+   • ParentC joins using the Parent class invite and registers ChildA User during onboarding.
+   • ParentC and ChildA User both enter "Waiting for approval" state.
+7. Teacher Approval Flow:
+   TeacherA logs in and validates that all Approval Required ON users appear as pending requests in the People section.
+   TeacherA approves all pending requests from the People section.
+8. Final Verification:
+   TeacherA opens "TestClass" and validates:
+   • Student User is visible in the class.
+   • Child User is visible in the class.
+   • No pending approval requests remain.
+---
+### 001_001c_invite_flow_student_parent_approval_disabled_test
+
+1. Admin Creates Class & Teacher Account:
+   Admin creates "TestClass" and manually adds TeacherA User as a Teacher account with login credentials.
+2. Admin Generates New Person Invites (Approval Required OFF):
+   Admin generates invitation codes for:
+   • Student role (New Person invite)
+   • Parent role (New Person invite)
+   Both invites are configured with "Approval Required" OFF.
+3. Admin Generates Class Invites (Approval Required OFF):
+   Inside "TestClass", Admin generates:
+   • Direct Student class invite
+   • Parent-to-Class invite
+   Both class invites are configured with "Approval Required" OFF.
+4. Student & Parent New Person Onboarding:
+   • StudentA joins the school using the Student New Person invite and gains immediate access.
+   • ParentA joins the school using the Parent New Person invite and gains immediate access.
+5. Student Joins Class Directly:
+   • StudentB joins "TestClass" using the direct Student class invite and gains immediate access to the class.
+6. Parent Joins Class with Child:
+   • ParentB joins using the Parent class invite, registers ChildA User during onboarding, and gains immediate access.
+   • ChildA User is automatically added to "TestClass".
+7. Teacher Verification:
+   TeacherA logs in and validates:
+   • All onboarded users are visible in the People section.
+   • No pending approval requests are displayed.
+   • "TestClass" contains StudentB User and ChildA User.
+   • ParentB User is not listed inside the class roster.
 ---
 ### 001_002_add_user_direct_test
 

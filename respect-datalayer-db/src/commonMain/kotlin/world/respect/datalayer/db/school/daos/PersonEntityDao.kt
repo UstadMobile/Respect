@@ -262,6 +262,14 @@ interface PersonEntityDao {
         authenticatedPersonUidNum: Long
     ): Long
 
+    @Query("""
+        SELECT EXISTS(
+                SELECT 1 
+                  FROM PersonEntity
+                 WHERE PersonEntity.pUsername = :username)
+    """)
+    suspend fun getUsernameAlreadyExists(username: String): Boolean
+
 
     companion object {
 

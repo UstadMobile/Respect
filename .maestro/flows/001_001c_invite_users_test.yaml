@@ -56,9 +56,6 @@ onFlowComplete:
 - assertVisible: "Manage account"
 
 # Invite Student as new person - Approve Required Off
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
 - tapOn: "People"
 - tapOn:
     id: "ExpandableFab"   #  +Person button

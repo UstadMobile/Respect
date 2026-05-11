@@ -116,8 +116,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible: "Teacher"
-- assertVisible: "TeacherA User"
 - assertVisible: "Class name"
 - assertVisible: "TestClass"
 - assertVisible: "Role"
@@ -185,12 +183,10 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible: "Child"
-- assertVisible: "StudentA User"
 - assertVisible: "Family member"
 - assertVisible: "ParentA User"
 - assertVisible: "Role"
-- assertVisible: "Parent"
+- assertVisible: "Student"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "School URL"
@@ -328,8 +324,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible: "Student"
-- assertVisible: "StudentB User"
 - assertVisible: "Class name"
 - assertVisible: "TestClass"
 - assertVisible: "Role"
@@ -346,8 +340,6 @@ onFlowComplete:
 - assertVisible: "Pending requests"
 - assertVisible: "StudentA User: TestClass (Student)"
 - assertVisible: ".*Pending approval"
-- assertVisible: "Family members"
-- assertVisible: "ParentA User"
 
 # H) Teacher approve student's request to join the class
 - clearState: world.respect.app

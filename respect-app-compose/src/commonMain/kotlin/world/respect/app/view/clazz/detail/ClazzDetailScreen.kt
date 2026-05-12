@@ -1,25 +1,27 @@
 package world.respect.app.view.clazz.detail
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
@@ -29,42 +31,31 @@ import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.teacher
-import world.respect.shared.generated.resources.student
-import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.add_student
-import world.respect.shared.generated.resources.description
-import world.respect.shared.generated.resources.pending_requests
-import world.respect.shared.generated.resources.accept_invite
+import world.respect.shared.generated.resources.add_teacher
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
-import world.respect.shared.generated.resources.date_of_birth
-import world.respect.shared.generated.resources.dismiss_invite
+import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
-import world.respect.shared.generated.resources.gender_literal
-import world.respect.shared.generated.resources.students
-import world.respect.shared.generated.resources.teachers
-import world.respect.shared.util.SortOrderOption
-import world.respect.datalayer.db.school.ext.fullName
-import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
-import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import world.respect.shared.generated.resources.manage_enrollments
 import world.respect.shared.generated.resources.more_options
+import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.remove_from_class
+import world.respect.shared.generated.resources.student
+import world.respect.shared.generated.resources.students
+import world.respect.shared.generated.resources.teacher
+import world.respect.shared.generated.resources.teachers
+import world.respect.shared.util.SortOrderOption
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 
 
 @Composable
@@ -201,6 +192,9 @@ fun ClazzDetailScreen(
                     ClassPendingPersonListItem(
                         person = person,
                         pendingRole = Res.string.teacher,
+                        showApproveDeclineOptions = person?.let {
+                            uiState.showApproveOption(it)
+                        } ?: false,
                         onClickAcceptInvite = onClickAcceptInvite,
                         onClickDismissInvite = onClickDismissInvite,
                     )
@@ -217,6 +211,9 @@ fun ClazzDetailScreen(
                     ClassPendingPersonListItem(
                         person = person,
                         pendingRole = Res.string.student,
+                        showApproveDeclineOptions = person?.let {
+                            uiState.showApproveOption(it)
+                        } ?: false,
                         onClickAcceptInvite = onClickAcceptInvite,
                         onClickDismissInvite = onClickDismissInvite,
                     )

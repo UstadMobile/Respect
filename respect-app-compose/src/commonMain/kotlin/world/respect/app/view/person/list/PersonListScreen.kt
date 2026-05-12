@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -31,6 +33,8 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.ext.primaryRole
+import world.respect.datalayer.school.ext.primaryRoleOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.generated.resources.Res
@@ -139,6 +143,10 @@ fun PersonListScreen(
                 items = pendingItems,
                 key = { item, index -> (item?.guid + index.toString()) }
             ) { person ->
+                val showApproveOption = person?.roles?.firstOrNull()?.roleEnum?.let {
+                    uiState.showApproveOption(it)
+                } ?: false
+
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
                     leadingContent = {
@@ -152,55 +160,53 @@ fun PersonListScreen(
                         )
                     },
                     supportingContent = {
-                        val gender = person?.gender
-                        Text(
-                            text =
-                                "${stringResource(Res.string.gender_literal)}: " +
-                                        "${gender?.label?.let { stringResource(it) }}}"
-                        )
-
-                    },
-                    trailingContent = {
-                        Row {
-                            Icon(
-                                modifier = Modifier.size(24.dp)
-                                    .clickable {
-                                        person?.also { onClickAcceptOrDismissInvite(it, true) }
-                                    },
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = stringResource(resource = Res.string.accept_invite)
-                            )
-
-                            Spacer(Modifier.width(16.dp))
-
-                            Icon(
-                                modifier = Modifier.size(24.dp).clickable {
-                                    person?.also{onClickAcceptOrDismissInvite(it, false)}
-                                },
-                                imageVector = Icons.Outlined.Cancel,
-                                contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                            )
+                        person?.primaryRoleOrNull()?.also { primaryRole ->
+                            Text(stringResource(primaryRole.label))
                         }
+                    },
+                    trailingContent = if(showApproveOption) {
+                        {
+                            Row {
+                                Icon(
+                                    modifier = Modifier.size(24.dp)
+                                        .clickable {
+                                            onClickAcceptOrDismissInvite(person, true)
+                                        },
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = stringResource(resource = Res.string.accept_invite)
+                                )
+
+                                Spacer(Modifier.width(16.dp))
+
+                                Icon(
+                                    modifier = Modifier.size(24.dp).clickable {
+                                        onClickAcceptOrDismissInvite(person, false)
+                                    },
+                                    imageVector = Icons.Outlined.Cancel,
+                                    contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                                )
+                            }
+                        }
+                    }else {
+                        null
                     }
                 )
             }
         }
 
+        item(key = "horizontaldiv") {
+            HorizontalDivider(Modifier.height(1.dp))
+        }
 
         respectPagingItems(
             items = lazyPagingItems,
             key = { item, index -> item?.guid ?: index.toString() },
             contentType = { PersonDataSource.ENDPOINT_NAME },
         ) { person ->
-            ListItem(
+            PersonListItem(
+                person = person,
                 modifier = Modifier.clickable {
                     person?.also(onClickItem)
-                },
-                leadingContent = {
-                    RespectPersonAvatar(person?.fullName() ?: "")
-                },
-                headlineContent = {
-                    Text(person?.fullName() ?: "")
                 }
             )
         }

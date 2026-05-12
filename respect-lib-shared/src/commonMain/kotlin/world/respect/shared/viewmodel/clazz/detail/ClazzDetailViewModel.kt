@@ -52,9 +52,14 @@ import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.ext.relatedPersonRoleEnum
+import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -84,7 +89,16 @@ data class ClazzDetailUiState(
     val inviteCodePrefix: String? = null,
     val showAddStudent: Boolean = false,
     val showAddTeacher: Boolean = false,
-)
+    val addPersonPermissions: List<Long> = emptyList(),
+) {
+
+    fun showApproveOption(person: Person): Boolean {
+        return person.roles.firstOrNull()?.let {
+            it.roleEnum.writePermissionFlag in addPersonPermissions
+        } ?: false
+    }
+
+}
 
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -130,6 +144,8 @@ class ClazzDetailViewModel(
 
     private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
 
+    private val checkSchoolPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
+
     init {
         _appUiState.update {
             it.copy(
@@ -165,6 +181,11 @@ class ClazzDetailViewModel(
 
         viewModelScope.launch {
             enqueuePullSyncUseCase()
+
+            val availablePermissions = checkSchoolPermissionUseCase(
+                PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
+            )
+            _uiState.update { it.copy(addPersonPermissions = availablePermissions) }
         }
 
         viewModelScope.launch {
@@ -247,7 +268,8 @@ class ClazzDetailViewModel(
                         ),
                         classUid = clazz.guid,
                         className = clazz.title,
-                        role = roleType,
+                        addToClassRole = roleType,
+                        filterByRole = roleType.relatedPersonRoleEnum,
                     )
                 )
             )
@@ -264,21 +286,27 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(selectedChip = chip) }
     }
 
-    fun onClickAcceptInvite(user: Person) {
+    private fun onClickAcceptOrDecline(
+        user: Person,
+        approved: Boolean
+    ) {
         viewModelScope.launch {
-            try {
+            snackBarDispatcher.tryOrShowSnackbarOnError("Exception approving invite") {
                 approveOrDeclineInviteRequestUseCase(
                     personUid = user.guid,
-                    approved = true,
+                    approved = approved,
                 )
-            }catch(e: Throwable) {
-                e.printStackTrace()
             }
         }
     }
 
-    fun onClickDismissInvite(user: Person) {}
+    fun onClickAcceptInvite(user: Person) {
+        onClickAcceptOrDecline(user, true)
+    }
 
+    fun onClickDismissInvite(user: Person) {
+        onClickAcceptOrDecline(user, false)
+    }
 
     fun onTogglePendingSection() {
         _uiState.update { it.copy(isPendingExpanded = !it.isPendingExpanded) }

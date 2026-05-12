@@ -10,7 +10,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 interface CheckPersonPermissionUseCase {
 
     data class PermissionsRequiredByRole(
-        val roleAdminPermissionRequired: Long = PermissionFlags.SYSTEM_ADMIN,
+        val roleAdminPermissionRequired: Long = PermissionFlags.PERSON_ADMIN_WRITE,
         val roleTeacherPermissionRequired: Long = PermissionFlags.PERSON_TEACHER_WRITE,
         val roleStudentPermissionRequired: Long = PermissionFlags.PERSON_STUDENT_WRITE,
         val roleParentPermissionRequired: Long = PermissionFlags.PERSON_PARENT_WRITE,
@@ -26,7 +26,7 @@ interface CheckPersonPermissionUseCase {
         companion object {
 
             val WRITE_PERMISSIONS = PermissionsRequiredByRole(
-                roleAdminPermissionRequired = PermissionFlags.SYSTEM_ADMIN,
+                roleAdminPermissionRequired = PermissionFlags.PERSON_ADMIN_WRITE,
                 roleTeacherPermissionRequired = PermissionFlags.PERSON_TEACHER_WRITE,
                 roleStudentPermissionRequired = PermissionFlags.PERSON_STUDENT_WRITE,
                 roleParentPermissionRequired =  PermissionFlags.PERSON_PARENT_WRITE,

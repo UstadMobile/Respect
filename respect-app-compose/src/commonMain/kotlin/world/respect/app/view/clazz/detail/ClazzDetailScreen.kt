@@ -32,7 +32,6 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person

@@ -123,25 +123,26 @@ class LearningUnitDetailViewModel(
     fun onClickOpen() {
         //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
         val respectApp = _uiState.value.app.dataOrNull() ?: return
+        viewModelScope.launch {
+            try {
+                val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
+                    link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
+                            LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
+                } ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
-        try {
-            val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
-                link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
-                        LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
-            } ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
+                val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
 
-            val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
-
-            launchAppUseCase(
-                app = respectApp,
-                learningUnitId = launchUrl,
-                navigateFn = {
-                    _navCommandFlow.tryEmit(it)
-                }
-            )
-        }catch(e: Throwable) {
-            Napier.w("Something wrong opening learning unit", e)
-            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+                launchAppUseCase(
+                    app = respectApp,
+                    learningUnitId = launchUrl,
+                    navigateFn = {
+                        _navCommandFlow.tryEmit(it)
+                    }
+                )
+            }catch(e: Throwable) {
+                Napier.w("Something wrong opening learning unit", e)
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+            }
         }
     }
 

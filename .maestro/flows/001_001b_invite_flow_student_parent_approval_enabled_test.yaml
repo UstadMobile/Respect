@@ -43,9 +43,6 @@ onFlowComplete:
 - inputText: "User"
 - tapOn: "Gender*"
 - tapOn: "Female"
-- tapOn:
-    id: "role"
-- tapOn: "Teacher"
 - tapOn: "Save"
 - tapOn: "TeacherA User"
 - tapOn: "Create account"

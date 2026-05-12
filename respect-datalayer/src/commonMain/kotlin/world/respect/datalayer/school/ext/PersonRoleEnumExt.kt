@@ -12,7 +12,7 @@ val PersonRoleEnum.writePermissionFlag: Long
         PersonRoleEnum.STUDENT -> PermissionFlags.PERSON_STUDENT_WRITE
         PersonRoleEnum.TEACHER -> PermissionFlags.PERSON_TEACHER_WRITE
         PersonRoleEnum.PARENT -> PermissionFlags.PERSON_PARENT_WRITE
-        else -> PermissionFlags.SYSTEM_ADMIN
+        else -> PermissionFlags.PERSON_ADMIN_WRITE
     }
 
 /**

@@ -33,6 +33,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
@@ -53,6 +54,7 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.collections.first
 import kotlin.getValue
 import kotlin.time.Clock
@@ -111,6 +113,7 @@ class PersonEditViewModel(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
     private val navResultReturner: NavResultReturner,
     private val validateEmailUseCase: ValidateEmailUseCase,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -362,7 +365,7 @@ class PersonEditViewModel(
             return
 
         launchWithLoadingIndicator {
-            try {
+            snackBarDispatcher.tryOrShowSnackbarOnError {
                 val modTime = Clock.System.now()
                 val familyMembersAdded = uiState.value.familyMembers.mapNotNull { familyPerson ->
                     if(guid !in familyPerson.relatedPersonUids) {
@@ -409,8 +412,6 @@ class PersonEditViewModel(
                         _navCommandFlow.tryEmit(NavCommand.PopUp())
                     }
                 }
-            } catch (_: Throwable) {
-                //needs to display snack bar here
             }
         }
     }

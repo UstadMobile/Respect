@@ -23,13 +23,14 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
 import world.respect.shared.generated.resources.passkey_not_supported
-import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
+import world.respect.shared.generated.resources.username_already_taken
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
@@ -41,6 +42,7 @@ import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 
 data class CreateAccountViewModelUiState(
     val username: String = "",
@@ -49,6 +51,7 @@ data class CreateAccountViewModelUiState(
     val signupError: UiText? = null,
     val inviteInfo: RespectInviteInfo? = null,
     val passkeySupported : Boolean = false,
+    val fieldsEnabled: Boolean = true,
 )
 
 class CreateAccountViewModel(
@@ -75,6 +78,8 @@ class CreateAccountViewModel(
 
     private val inviteInfoUseCase: GetInviteInfoUseCase by inject()
     private val usernameSuggestionUseCase: UsernameSuggestionUseCase by inject()
+
+    private val checkUsernameUniqueUseCase: CheckUsernameUniqueUseCase by inject()
 
 
     private val _uiState = MutableStateFlow(CreateAccountViewModelUiState())
@@ -142,23 +147,62 @@ class CreateAccountViewModel(
         }
     }
 
-    fun onClickSignupWithPasskey() {
-        viewModelScope.launch {
-            val usernameVal = _uiState.value.username
-            val validationResult = validateUsernameUseCase(usernameVal)
+    /**
+     * Check the username: needs done both when the user is going to use other options (eg set a
+     * password) and when the user is signing up with passkey.
+     */
+    private suspend fun checkUsernameOk() : String? {
+        val usernameVal = _uiState.value.username
+        val validationResult = validateUsernameUseCase(usernameVal)
+        _uiState.update {
+            it.copy(
+                usernameError = validationResult.errorMessage?.asUiText()
+            )
+        }
+
+        if(validationResult.errorMessage != null)
+            return null
+
+        try {
+            _uiState.update { it.copy(fieldsEnabled = false) }
+            _appUiState.update { it.copy(loadingState = LoadingUiState.INDETERMINATE) }
+
+            val usernameUnique = checkUsernameUniqueUseCase(usernameVal)
+
+            if(usernameUnique) {
+                _uiState.update { it.copy(fieldsEnabled = true) }
+                return usernameVal
+            }else {
+                _uiState.update {
+                    it.copy(
+                        usernameError = Res.string.username_already_taken.asUiText(),
+                        fieldsEnabled = true,
+                    )
+                }
+            }
+        }catch(e: Throwable) {
+            Napier.w("Something wrong checking username unique", e)
             _uiState.update {
                 it.copy(
-                    usernameError = validationResult.errorMessage?.asUiText()
+                    usernameError = e.getUiTextOrGeneric(),
+                    fieldsEnabled = true,
                 )
             }
+        }finally {
+            _appUiState.update { it.copy(loadingState = LoadingUiState.NOT_LOADING) }
+        }
 
-            if(validationResult.errorMessage != null) {
-                return@launch
-            }
+        return null
+    }
 
-            val rpIdVal = schoolDirectoryEntry.await().rpId
 
+    fun onClickSignupWithPasskey() {
+        viewModelScope.launch {
             try {
+                val usernameVal = checkUsernameOk() ?: return@launch
+
+                val rpIdVal = schoolDirectoryEntry.await().rpId
+
                 if (createPasskeyUseCase != null && rpIdVal != null && passkeySupported.await()) {
                     val createPasskeyResult = createPasskeyUseCase(
                         CreatePasskeyUseCase.Request(
@@ -236,28 +280,22 @@ class CreateAccountViewModel(
     }
 
     fun onOtherOptionsClick() {
-        val username = _uiState.value.username
+        viewModelScope.launch {
+            val username = checkUsernameOk() ?: return@launch
 
-        _uiState.update {
-            it.copy(
-                usernameError = if (username.isBlank()) StringResourceUiText(Res.string.required_field) else null
-            )
-        }
-
-        if (username.isBlank()) return
-
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                OtherOptionsSignup.create(
-                    schoolUrl = route.schoolUrl,
-                    inviteRequest = route.respectRedeemInviteRequest.copy(
-                        account = route.respectRedeemInviteRequest.account.copy(
-                            username = username
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    OtherOptionsSignup.create(
+                        schoolUrl = route.schoolUrl,
+                        inviteRequest = route.respectRedeemInviteRequest.copy(
+                            account = route.respectRedeemInviteRequest.account.copy(
+                                username = username
+                            )
                         )
                     )
                 )
             )
-        )
+        }
     }
 
 }

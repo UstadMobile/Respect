@@ -69,7 +69,9 @@ list (default or local)
 
 * __Step 6: Build/run and Android app__: In Android Studio use the run/debug button to run the 
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
- details on running via the command line etc.
+ details on running via the command line etc. You can login to your school using the Android app
+ by tapping ```Other options```, entering the school URL, then use the username admin and the
+ password you set in step 5.
 
 ## Contributing
 

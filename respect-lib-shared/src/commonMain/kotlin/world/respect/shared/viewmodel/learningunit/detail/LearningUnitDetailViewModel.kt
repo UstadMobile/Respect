@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -25,10 +26,16 @@ import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.invalid_link
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.exception.getUiTextOrGeneric
+import world.respect.shared.util.exception.withUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
@@ -47,6 +54,7 @@ class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val ustadCache: UstadCache,
     accountMananger: RespectAccountManager,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
 
@@ -113,15 +121,17 @@ class LearningUnitDetailViewModel(
 
 
     fun onClickOpen() {
+        //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
         val respectApp = _uiState.value.app.dataOrNull() ?: return
-        val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
-            link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
-                    LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
-        } ?: return
 
-        val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
+        try {
+            val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
+                link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
+                        LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
+            } ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
-        viewModelScope.launch {
+            val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
+
             launchAppUseCase(
                 app = respectApp,
                 learningUnitId = launchUrl,
@@ -129,6 +139,9 @@ class LearningUnitDetailViewModel(
                     _navCommandFlow.tryEmit(it)
                 }
             )
+        }catch(e: Throwable) {
+            Napier.w("Something wrong opening learning unit", e)
+            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
         }
     }
 

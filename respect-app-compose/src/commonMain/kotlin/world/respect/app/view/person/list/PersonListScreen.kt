@@ -33,6 +33,8 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.ext.primaryRole
+import world.respect.datalayer.school.ext.primaryRoleOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.composites.PersonListDetails
 import world.respect.shared.generated.resources.Res
@@ -158,13 +160,9 @@ fun PersonListScreen(
                         )
                     },
                     supportingContent = {
-                        val gender = person?.gender
-                        Text(
-                            text =
-                                "${stringResource(Res.string.gender_literal)}: " +
-                                        "${gender?.label?.let { stringResource(it) }}}"
-                        )
-
+                        person?.primaryRoleOrNull()?.also { primaryRole ->
+                            Text(stringResource(primaryRole.label))
+                        }
                     },
                     trailingContent = if(showApproveOption) {
                         {
@@ -205,15 +203,10 @@ fun PersonListScreen(
             key = { item, index -> item?.guid ?: index.toString() },
             contentType = { PersonDataSource.ENDPOINT_NAME },
         ) { person ->
-            ListItem(
+            PersonListItem(
+                person = person,
                 modifier = Modifier.clickable {
                     person?.also(onClickItem)
-                },
-                leadingContent = {
-                    RespectPersonAvatar(person?.fullName() ?: "")
-                },
-                headlineContent = {
-                    Text(person?.fullName() ?: "")
                 }
             )
         }

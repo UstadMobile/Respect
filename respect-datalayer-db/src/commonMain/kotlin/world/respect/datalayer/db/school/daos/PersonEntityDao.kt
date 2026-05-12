@@ -200,8 +200,16 @@ interface PersonEntityDao {
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
                PersonEntity.pFamilyName AS familyName, 
-               PersonEntity.pUsername AS username
+               PersonEntity.pUsername AS username,
+               PersonRoleEntity.prRoleEnum AS role
           FROM PersonEntity
+               JOIN PersonRoleEntity
+                    ON PersonRoleEntity.prUid = 
+                       (SELECT PersonRoleEntity.prUid
+                          FROM PersonRoleEntity
+                         WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                           AND PersonRoleEntity.prIsPrimaryRole
+                         LIMIT 1)
          WHERE PersonEntity.pGuidHash IN (
                 SELECT DISTINCT uidNum
                   FROM AllPersons)

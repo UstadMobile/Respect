@@ -143,7 +143,6 @@ onFlowComplete:
 - tapOn: "StudentA User"
 - tapOn: "Save"
 - assertVisible: "StudentA User"
-- tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "ParentA User"

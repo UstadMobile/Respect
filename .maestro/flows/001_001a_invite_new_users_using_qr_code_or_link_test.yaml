@@ -191,7 +191,7 @@ onFlowComplete:
     file: "subflows/school_user_login_flow.yaml"
     env:
       USERNAME: "teacherauser"
-      USERPASSWORD: "test123"
+      PASSWORD: "test123"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:

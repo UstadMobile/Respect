@@ -99,6 +99,10 @@ interface XapiStatementsResource {
         assignmentActivityId: String,
     ): Flow<List<AssignmentResult>>
 
+    fun getAssignmentCompletions(
+        listParams: GetStatementParams
+    ): Flow<List<AssignmentResult>>
+
     suspend fun getLastStoredTimestampForActivity(activityId: String): Long?
 
     companion object {

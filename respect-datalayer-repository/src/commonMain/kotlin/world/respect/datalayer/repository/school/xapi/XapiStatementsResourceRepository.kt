@@ -96,6 +96,24 @@ class XapiStatementsResourceRepository(
         }
     }
 
+    override fun getAssignmentCompletions(
+        listParams: GetStatementParams
+    ): Flow<List<AssignmentResult>> {
+        val remoteSyncFlow = remote.getAsFlow(
+            listParams = listParams,
+            dataLoadParams = DataLoadParams()
+        ).onEach { remoteState ->
+            remoteState.dataOrNull()?.let {
+                local.updateLocal(it.statements)
+            }
+        }
+
+        return local.getAssignmentCompletions(listParams).combine(remoteSyncFlow) { localData, _ ->
+            localData
+        }
+    }
+
+
     override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
         return local.getLastStoredTimestampForActivity(activityId)
     }

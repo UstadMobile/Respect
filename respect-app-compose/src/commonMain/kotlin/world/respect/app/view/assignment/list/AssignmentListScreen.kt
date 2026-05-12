@@ -97,18 +97,18 @@ fun AssignmentListScreen(
             items(
                 items = uiState.assignments,
                 key = { item -> item.uid }
-            ) { assignment ->
+            ) { row ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onClickAssignment(assignment) }
+                        .clickable { onClickAssignment(row.assignment) }
                         .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy((-12).dp) // Negative space for overlap
                     ) {
-                        assignment.learningUnits.take(3).forEach { unit ->
+                        row.learningUnits.take(3).forEach { unit ->
                             AssignmentLearningUnitIcon(
                                 manifestUrl = unit.learningUnitManifestUrl,
                                 learningUnitInfoFlow = uiState.learningUnitInfoFlow
@@ -120,12 +120,12 @@ fun AssignmentListScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = assignment.title,
+                            text = row.title,
                             style = MaterialTheme.typography.titleMedium
                         )
 
-                        val dueDateStr = remember(assignment.deadline) {
-                            assignment.deadline?.let { instant ->
+                        val dueDateStr = remember(row.deadline) {
+                            row.deadline?.let { instant ->
                                 val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
                                 "${localDate.day.toString().padStart(2, '0')}/" +
                                         "${localDate.month.number.toString().padStart(2, '0')}/" +
@@ -159,7 +159,7 @@ fun AssignmentListScreen(
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = "${uiState.completedCount}/${uiState.totalCount} task completed",
+                                        text = "${row.completedCount}/${row.totalCount} task completed",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
@@ -202,7 +202,7 @@ fun AssignmentListScreen(
                                 tint = Color.Gray
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text(uiState.className, style = MaterialTheme.typography.bodySmall)
+                            Text(row.className, style = MaterialTheme.typography.bodySmall)
                         }
 
                         Row(
@@ -219,7 +219,7 @@ fun AssignmentListScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "${uiState.completedCount}/${uiState.totalCount} student completed",
+                                text = "${row.completedCount}/${row.totalCount} student completed",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )

@@ -20,31 +20,35 @@ import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
-import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
-import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
-import world.respect.datalayer.school.xapi.ext.allDefinedActivities
-import world.respect.lib.xapi.model.XapiStatement
-import kotlin.time.Clock
-import kotlin.uuid.Uuid
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.datalayer.ext.dataOrNull
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allActors
+import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
-import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
+import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
-import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import kotlin.text.get
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -391,6 +395,37 @@ class XapiStatementsResourceDb(
             }
         }
     }
+
+    override fun getAssignmentCompletions(
+        listParams: GetStatementParams
+    ): Flow<List<AssignmentResult>> {
+        return getAsFlow(
+            listParams = listParams,
+            dataLoadParams = DataLoadParams()
+        ).map { state ->
+            state.dataOrNull()?.statements?.mapNotNull { statement ->
+                val actor = statement.actor
+                val personUid = when (actor) {
+                    is XapiAgent -> actor.account?.name ?: actor.mbox ?: actor.openid ?: actor.name
+                    else -> null
+                } ?: return@mapNotNull null
+                val personName = actor.name
+                val activityId = (statement.`object` as? XapiActivity)?.id ?: return@mapNotNull null
+                val result = statement.result
+                AssignmentResult(
+                    personUid = personUid,
+                    personName = personName,
+                    activityId = activityId,
+                    completion = result?.completion,
+                    success = result?.success,
+                    scoreScaled = result?.score?.scaled,
+                    progress = result?.extensions?.get(XAPI_RESULT_EXTENSION_PROGRESS)?.toString()?.toIntOrNull()
+                )
+            } ?: emptyList()
+        }
+    }
+
+
 
     override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
         val activityUidNum = uidNumberMapper(activityId)

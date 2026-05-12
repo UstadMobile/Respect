@@ -110,7 +110,7 @@ class AssignmentDetailViewModel(
             ?: ""
         val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${route.uid}"
 
-        // Load the assignment from xAPI statements instead of assignmentDataSource
+        // Load the assignment from xAPI statements
         val assignmentFlow = schoolDataSource.xapiStatementsResource.getAsFlow(
             listParams = GetStatementParams(
                 activity = assignmentActivityId,

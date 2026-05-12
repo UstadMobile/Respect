@@ -226,7 +226,6 @@ onFlowComplete:
     file: "subflows/openlink_flow.yaml"
     env:
       URL: ${maestro.copiedText}
-- tapOn: "Get Started"
 - assertVisible:
     id: "app_title"
     text: "Login"

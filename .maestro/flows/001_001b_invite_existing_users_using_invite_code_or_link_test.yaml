@@ -18,7 +18,6 @@ onFlowComplete:
 
 ---
 #Admin add a users to the app and add a class named - TestClass
-
 - runFlow: "subflows/school_admin_login_flow.yaml"
 
 - assertVisible:
@@ -182,10 +181,10 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-- assertVisible: "Family member"
-- assertVisible: "ParentA User"
 - assertVisible: "Role"
 - assertVisible: "Student"
+- assertVisible: "Family member"
+- assertVisible: "ParentA User"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "School server URL"
@@ -227,10 +226,6 @@ onFlowComplete:
     file: "subflows/openlink_flow.yaml"
     env:
       URL: ${maestro.copiedText}
-- assertVisible:
-    id: "app_title"
-    text: "Select account to continue"
-- tapOn: "Use another account"
 - assertVisible:
     id: "app_title"
     text: "Login"
@@ -308,10 +303,6 @@ onFlowComplete:
 - tapOn: "Url"
 - pasteText
 - tapOn: "OK"
-- assertVisible:
-    id: "app_title"
-    text: "Select account to continue"
-- tapOn: "Use another account"
 - assertVisible:
     id: "app_title"
     text: "Login"

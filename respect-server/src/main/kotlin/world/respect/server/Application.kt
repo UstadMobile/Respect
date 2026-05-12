@@ -59,6 +59,7 @@ import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
+import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
@@ -239,6 +240,10 @@ fun Application.module() {
                     route("username"){
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
+                        )
+
+                        CheckUsernameUniqueRoute(
+                            checkUsernameUniqueUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
 

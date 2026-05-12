@@ -36,6 +36,7 @@ import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
@@ -57,6 +58,7 @@ class RedeemInviteUseCaseDb(
     private val json: Json,
     private val getPasskeyProviderInfoUseCase: GetPasskeyProviderInfoUseCase,
     private val encryptPersonPasswordUseCase: EncryptPersonPasswordUseCase,
+    private val checkUsernameUniqueUseCase: CheckUsernameUniqueUseCase,
 ) : RedeemInviteUseCase, KoinComponent {
 
     override suspend fun invoke(
@@ -93,6 +95,12 @@ class RedeemInviteUseCaseDb(
         val schoolDataSourceVal = schoolDataSource(
             schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
         )
+
+        if(accountPerson.username?.let { checkUsernameUniqueUseCase(it) } != true) {
+            throw IllegalArgumentException("Username not unique anymore")
+                .withHttpStatus(400)
+        }
+
         schoolDataSourceVal.personDataSource.updateLocal(listOf(accountPerson))
 
         val enrollmentRole = inviteFromDb.accepterEnrollmentRole(approvalRequired)

@@ -569,6 +569,8 @@
 
     <string name="select_host">Select Host</string>
 
+    <string name="username_already_taken">Username already taken</string>
+
     <!-- Playlists -->
     <string name="home">Home</string>
     <string name="playlists">Playlists</string>

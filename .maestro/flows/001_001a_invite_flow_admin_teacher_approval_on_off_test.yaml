@@ -262,12 +262,14 @@ onFlowComplete:
     text: "Apps"
 - tapOn: "People"
 - assertVisible: "Pending request to join.*"
+- repeat:
+    while:
+      visible: "Accept Invite"
+    commands:
+      - tapOn: "Accept Invite"
 - assertVisible: "AdminA User"
-- tapOn: "Accept Invite"
 - assertVisible: "TeacherA User"
-- tapOn: "Accept Invite"
 - assertVisible: "TeacherC User"
-- tapOn: "Accept Invite"
 - assertVisible: "AdminA User"
 - assertVisible: "TeacherA User"
 - assertNotVisible: "Pending request to join.*"

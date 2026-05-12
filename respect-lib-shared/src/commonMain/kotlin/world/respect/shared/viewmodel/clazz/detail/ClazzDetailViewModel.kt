@@ -53,10 +53,10 @@ import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.ext.relatedPersonRoleEnum
 import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
@@ -268,7 +268,8 @@ class ClazzDetailViewModel(
                         ),
                         classUid = clazz.guid,
                         className = clazz.title,
-                        role = roleType,
+                        addToClassRole = roleType,
+                        filterByRole = roleType.relatedPersonRoleEnum,
                     )
                 )
             )

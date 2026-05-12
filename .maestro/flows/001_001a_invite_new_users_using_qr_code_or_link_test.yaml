@@ -62,14 +62,10 @@ onFlowComplete:
 - tapOn: "Url"
 - pasteText
 - tapOn: "OK"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Select account to continue"
-#- tapOn: "Use another account"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Login"
-#- tapOn: "Create new account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -144,14 +140,10 @@ onFlowComplete:
 - tapOn: "Invite code"
 - pasteText
 - tapOn: "Next"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Select account to continue"
-#- tapOn: "Use another account"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Login"
-#- tapOn: "Create new account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -235,14 +227,10 @@ onFlowComplete:
     env:
       URL: ${maestro.copiedText}
 - tapOn: "Get Started"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Select account to continue"
-#- tapOn: "Use another account"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Login"
-#- tapOn: "Create new account"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

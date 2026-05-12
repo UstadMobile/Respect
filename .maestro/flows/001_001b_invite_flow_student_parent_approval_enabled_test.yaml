@@ -364,14 +364,15 @@ onFlowComplete:
 # Approve Required ON users should be pending
 - assertVisible: "Pending request to join.*"
 - assertVisible: "StudentA User"
-- tapOn: "Accept Invite"
 - assertVisible: "ParentA User"
-- tapOn: "Accept Invite"
 - assertVisible: "StudentC User"
-- tapOn: "Accept Invite"
 - assertVisible: "ParentC User"
-- tapOn: "Accept Invite"
 - assertVisible: "ChildA User"  #When ParentC added, childA automatically gets added to class people
+- repeat:
+    while:
+      visible: "Accept Invite"
+    commands:
+      - tapOn: "Accept Invite"
 - assertNotVisible: "Pending request to join.*"
 
 #Teacher open class and invite students to class

@@ -317,6 +317,14 @@ onFlowComplete:
 - tapOn: "Classes"
 - tapOn: "TestClass"
 - assertNotVisible: "Pending requests.*"
+- runFlow:
+    when:
+       notVisible: "TeacherC User"
+    commands:
+        - tapOn: "People"
+        - assertVisible: "TeacherC User"
+        - tapOn: "Classes"
+        - tapOn: "TestClass"
 - assertVisible: "TeacherC User"
 
 # Invite Teacher as new teacher to TestClass - Approve Required Off

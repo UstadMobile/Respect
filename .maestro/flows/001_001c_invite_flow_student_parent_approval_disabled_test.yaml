@@ -389,6 +389,14 @@ onFlowComplete:
 #Teacher User open class
 - tapOn: "Classes"
 - tapOn: "TestClass"
+- runFlow:
+    when:
+      notVisible: "StudentB User"
+    commands:
+      - tapOn: "People"
+      - assertVisible: "StudentB User"
+      - tapOn: "Classes"
+      - tapOn: "TestClass"
 - assertVisible: "StudentB User"
 - assertVisible: "ChildA User"
 - assertNotVisible: "ParentB User"

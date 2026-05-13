@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "898de6a68f61dbf607449b787b301d5e",
+    "identityHash": "48833af888a3bd4f894d8fdaa626abb9",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -794,108 +794,6 @@
           "autoGenerate": false,
           "columnNames": [
             "eUidNum"
-          ]
-        }
-      },
-      {
-        "tableName": "AssignmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeClassUid` TEXT NOT NULL, `aeClassUidNum` INTEGER NOT NULL, `aeDeadline` INTEGER, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
-        "fields": [
-          {
-            "fieldPath": "aeUid",
-            "columnName": "aeUid",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeUidNum",
-            "columnName": "aeUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeTitle",
-            "columnName": "aeTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeDescription",
-            "columnName": "aeDescription",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeClassUid",
-            "columnName": "aeClassUid",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeClassUidNum",
-            "columnName": "aeClassUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeDeadline",
-            "columnName": "aeDeadline",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "aeLastModified",
-            "columnName": "aeLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeStored",
-            "columnName": "aeStored",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "aeUidNum"
-          ]
-        }
-      },
-      {
-        "tableName": "AssignmentLearningResourceRefEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`alrrAeUidNum` INTEGER NOT NULL, `alrrLearningUnitManifestUrlHash` INTEGER NOT NULL, `alrrLearningUnitManifestUrl` TEXT NOT NULL, `alrrAppManifestUrl` TEXT NOT NULL, PRIMARY KEY(`alrrAeUidNum`, `alrrLearningUnitManifestUrlHash`))",
-        "fields": [
-          {
-            "fieldPath": "alrrAeUidNum",
-            "columnName": "alrrAeUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alrrLearningUnitManifestUrlHash",
-            "columnName": "alrrLearningUnitManifestUrlHash",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alrrLearningUnitManifestUrl",
-            "columnName": "alrrLearningUnitManifestUrl",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alrrAppManifestUrl",
-            "columnName": "alrrAppManifestUrl",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "alrrAeUidNum",
-            "alrrLearningUnitManifestUrlHash"
           ]
         }
       },
@@ -2504,7 +2402,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '898de6a68f61dbf607449b787b301d5e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '48833af888a3bd4f894d8fdaa626abb9')"
     ]
   }
 }

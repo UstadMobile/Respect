@@ -57,6 +57,7 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.shared.domain.xapi.XapiAssignmentMapper
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 data class AssignmentEditUiState(
     val assignment: DataLoadState<Assignment> = DataLoadingState(),
@@ -96,9 +97,7 @@ class AssignmentEditViewModel(
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
-    private val uid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Assignment.TABLE_ID
-    ).toString()
+    private val uid = route.guid ?: Uuid.random().toString()
 
     private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
         return AssignmentLearningUnitRef(

@@ -576,4 +576,8 @@
 
     <string name="select_host">Select Host</string>
 
+    <string name="username_already_taken">Username already taken</string>
+
+    <string name="invalid_link">Invalid link</string>
+
 </resources>

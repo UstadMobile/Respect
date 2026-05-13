@@ -39,6 +39,7 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.server.account.invite.username.checkusernameunique.CheckUsernameUniqueUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
@@ -68,6 +69,7 @@ import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbI
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
@@ -320,6 +322,7 @@ fun serverKoinModule(
                 json = get(),
                 getPasskeyProviderInfoUseCase = get(),
                 encryptPersonPasswordUseCase = get(),
+                checkUsernameUniqueUseCase = get(),
             )
         }
 
@@ -340,6 +343,10 @@ fun serverKoinModule(
                 schoolDb = get(),
                 uidNumberMapper = get(),
             )
+        }
+
+        scoped<CheckUsernameUniqueUseCase> {
+            CheckUsernameUniqueUseCaseServer(schoolDb = get())
         }
     }
 

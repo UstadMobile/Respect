@@ -181,8 +181,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 123
-        versionName = "1.0.23"
+        versionCode = 124
+        versionName = "1.0.24"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

@@ -17,6 +17,10 @@ fun Person?.assertPersonHasRole(
     }
 }
 
+fun Person.primaryRoleOrNull(): PersonRoleEnum? {
+    return roles.firstOrNull { it.isPrimaryRole }?.roleEnum
+}
+
 fun Person.primaryRole(): PersonRoleEnum {
     return roles.first { it.isPrimaryRole }.roleEnum
 }

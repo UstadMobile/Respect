@@ -14,10 +14,10 @@ appId: world.respect.app
 
 - tapOn:
       id: "username"
-- inputText: ${SCHOOL_USERNAME}
+- inputText: ${USERNAME}
 - tapOn:
       id : "password"
-- inputText: ${SCHOOL_PASSWORD}
+- inputText: ${PASSWORD}
 - tapOn: "Login"
 - runFlow:
     when:

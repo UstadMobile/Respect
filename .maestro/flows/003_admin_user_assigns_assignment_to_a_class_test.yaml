@@ -20,17 +20,18 @@ onFlowComplete:
 - runFlow: "subflows/admin_add_app.yaml"
 - runFlow: "subflows/admin_add_class_with_members.yaml"
 
+- clearState: world.respect.app
 - runFlow:
-    file: "subflows/school_admin_login_flow.yaml"
+    file: "subflows/school_user_login_flow.yaml"
     env:
-      SCHOOL_USERNAME: "teacherauser"
-      SCHOOL_PASSWORD: "test1234"
+      USERNAME: "teacherauser"
+      PASSWORD: "test1234"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
     text: "Classes"
-- assertVisible: "New Class"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - tapOn:
     id: "floating_action_button"   #  +Assignment button
@@ -42,7 +43,7 @@ onFlowComplete:
 - tapOn: "Assignment title*"
 - inputText: "Homework 1"
 - tapOn: "Assign to"
-- tapOn: "New Class"
+- tapOn: "TestClass"
 - tapOn: "Description"
 - inputText: "Hi Students, please complete this Homework on time."
 - tapOn: "Date"
@@ -70,7 +71,7 @@ onFlowComplete:
 - assertVisible: "Not started (4)"
 - assertVisible: "Hi Students, please complete this Homework on time."
 - assertVisible: "Assigned to"
-- assertVisible: "New Class"
+- assertVisible: "TestClass"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
 - assertVisible: "StudentC User"
@@ -90,11 +91,12 @@ onFlowComplete:
 - tapOn: "Pending (1)"
 - assertVisible: "Homework 1"
 
+- clearState: world.respect.app
 - runFlow:
-    file: "subflows/school_admin_login_flow.yaml"
+    file: "subflows/school_user_login_flow.yaml"
     env:
-      SCHOOL_USERNAME: "studentauser"
-      SCHOOL_PASSWORD: "test1234"
+      USERNAME: "studentauser"
+      PASSWORD: "test1234"
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
 - assertVisible:
@@ -112,6 +114,18 @@ onFlowComplete:
 - tapOn: "Close"
 - tapOn: "Assignments"
 - assertVisible: "Homework 1"
+
+#- runScript:
+#    file: "scripts/verify_xapi_completion.js"
+#    env:
+#      XAPI_ENDPOINT: ${output.XAPI_ENDPOINT}
+#      XAPI_AUTH: ${output.XAPI_AUTH}
+#      ACTIVITY_ID: ${output.ACTIVITY_ID}
+#      REGISTRATION: ${output.REGISTRATION}
+#      ACTOR_NAME: "StudentA User"
+
+
+
 - assertVisible: "Pending (0)"
 - tapOn: "Completed (1)"
 - assertVisible: "1/1 task Completed"
@@ -126,17 +140,18 @@ onFlowComplete:
 - assertVisible: "My app"
 - assertVisible: "100%"
 
+- clearState: world.respect.app
 - runFlow:
-    file: "subflows/school_admin_login_flow.yaml"
+    file: "subflows/school_user_login_flow.yaml"
     env:
-      SCHOOL_USERNAME: "teacherauser"
-      SCHOOL_PASSWORD: "test1234"
+      USERNAME: "teacherauser"
+      PASSWORD: "test1234"
 - tapOn: "Assignments"
 - assertVisible: "All"
 - assertVisible: "Pending (1)"
 - assertVisible: "Completed (0)"
 - assertVisible: "Homework 1"
-- assertVisible: "New Class"
+- assertVisible: "TestClass"
 - assertVisible: "1/4 student completed"
 - tapOn: "Homework 1"
 - assertVisible: "All (4)"
@@ -145,7 +160,7 @@ onFlowComplete:
 - assertVisible: "Not started (3)"
 - assertVisible: "Hi Students, please complete this Homework on time."
 - assertVisible: "Assigned to"
-- assertVisible: "New Class"
+- assertVisible: "TestClass"
 - tapOn: "Completed (1)"
 - assertVisible: "StudentA User"
 - assertVisible: "Lesson 001"

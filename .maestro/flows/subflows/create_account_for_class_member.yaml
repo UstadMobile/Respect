@@ -14,7 +14,21 @@ appId: world.respect.app
         text: "Create account"
 - assertVisible:
         text: ${MEMBERUSERNAME}
-- tapOn: "Password"
-- inputText: "test1234"
-- tapOn: "Save"
-- assertVisible: "Manage account"
+- runFlow:
+          when:
+                  notVisible: "Set password"
+          commands:
+                  - tapOn: "Password"
+                  - inputText: "test123"
+                  - tapOn: "Save"
+                  - assertVisible: "Manage account"
+- runFlow:
+          when:
+                  visible: "Set password"
+          commands:
+                  - tapOn: "Set password"
+                  - tapOn: "Password*"
+                  - inputText: "test123"
+                  - tapOn: "Save"
+                  - assertVisible:
+                            id: "password_change_btn"  # Change password button

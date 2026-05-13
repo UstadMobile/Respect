@@ -632,7 +632,7 @@ data class PersonList(
             className: String? = null,
             classUid: String? = null,
             personGuid: String? = null,
-            role: EnrollmentRoleEnum? = null,
+            addToClassRole: EnrollmentRoleEnum? = null,
             hideInvite: Boolean = false,
         ) = PersonList(
             filterByRoleStr = filterByRole?.value,
@@ -641,7 +641,7 @@ data class PersonList(
             inviteUid = inviteUid,
             addToClassUid = classUid,
             classNameStr = className,
-            addToClassRoleStr = role?.value,
+            addToClassRoleStr = addToClassRole?.value,
             personGuidStr = personGuid,
             hideInvite = hideInvite,
         )

@@ -579,4 +579,8 @@
     <string name="no_tasks_selected_yet">No task selected yet.</string>
     <string name="please_click_plus_button_to_add_one">Please click the + button to add one</string>
 
+    <string name="username_already_taken">Username already taken</string>
+
+    <string name="invalid_link">Invalid link</string>
+
 </resources>

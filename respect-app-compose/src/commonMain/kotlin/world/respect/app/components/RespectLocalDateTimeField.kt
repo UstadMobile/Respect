@@ -23,6 +23,8 @@ fun RespectLocalDateTimeField(
     dateFieldWeight: Float = 0.6f,
     value: LocalDateTime?,
     onValueChanged: (LocalDateTime?) -> Unit,
+    dateLabel: (@Composable () -> Unit)? = null,
+    timeLabel: (@Composable () -> Unit)? = null,
     dateTestTag: String? = null,
     timeTestTag: String? = null,
 ) {
@@ -48,7 +50,7 @@ fun RespectLocalDateTimeField(
                     onValueChanged(null)
                 }
             },
-            label = {
+            label = dateLabel ?: {
                 Text(stringResource(Res.string.date))
             },
         )
@@ -68,7 +70,7 @@ fun RespectLocalDateTimeField(
                     onValueChanged(null)
                 }
             },
-            label = {
+            label = timeLabel ?: {
                 Text(stringResource(Res.string.time))
             }
         )

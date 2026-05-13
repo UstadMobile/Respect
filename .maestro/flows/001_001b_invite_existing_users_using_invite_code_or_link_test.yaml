@@ -190,6 +190,11 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+- tapOn: "ParentA User"
 - assertVisible:                     #check
     id: "app_title"
     text: "ParentA User"

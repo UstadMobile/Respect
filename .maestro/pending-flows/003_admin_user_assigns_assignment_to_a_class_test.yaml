@@ -124,7 +124,14 @@ onFlowComplete:
 #      REGISTRATION: ${output.REGISTRATION}
 #      ACTOR_NAME: "StudentA User"
 
-
+- runScript:
+    file: "scripts/verify_xapi_completion.js"
+    env:
+      XAPI_ENDPOINT: ${output.SCHOOL_URL}api/xapi
+      XAPI_AUTH: "Basic VGVzdFVzZXI6cGFzc3dvcmQ="
+      ACTIVITY_ID: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/appmanifest.json
+      REGISTRATION: "e168d6a3-46b2-4233-82e7-66b73a179727"
+      ACTOR_NAME: "Test User"
 
 - assertVisible: "Pending (0)"
 - tapOn: "Completed (1)"

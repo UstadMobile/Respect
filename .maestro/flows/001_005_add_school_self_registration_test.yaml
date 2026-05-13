@@ -46,6 +46,7 @@ onFlowComplete:
     id: "schoolUrl"
 - inputText: ${output.SCHOOL_URL}
 - tapOn: "Next"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

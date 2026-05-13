@@ -15,12 +15,4 @@ data class Assignment(
     val learningUnits: List<AssignmentLearningUnitRef> = emptyList(),
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
-) : ModelWithTimes {
-
-    companion object {
-
-        const val TABLE_ID = 18
-
-    }
-}
-
+) : ModelWithTimes

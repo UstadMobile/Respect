@@ -380,7 +380,6 @@ val appKoinModule = module {
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
-    viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)

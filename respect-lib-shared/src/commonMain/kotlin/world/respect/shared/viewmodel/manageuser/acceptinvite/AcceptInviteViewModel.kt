@@ -46,6 +46,8 @@ import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
@@ -215,20 +217,36 @@ class AcceptInviteViewModel(
             }
         )
 
-        if (route.personGuid!=null&&redeemInviteUseCase!=null) {
+        if (route.personGuid != null && redeemInviteUseCase != null) {
             viewModelScope.launch {
-              redeemInviteUseCase?.invoke(
-                  inviteRedeemRequest,
-                  uiState.value.selectedChildGuid
-              )
+                try {
 
-                navigateOnExistingUserInviteAcceptedUseCase(
-                    person = uiState.value.person,
-                    inviteRequest = inviteRedeemRequest,
-                    navCommandFlow = _navCommandFlow
-                )
+                    redeemInviteUseCase?.invoke(
+                        inviteRedeemRequest,
+                        uiState.value.selectedChildGuid
+                    )
+
+                    navigateOnExistingUserInviteAcceptedUseCase(
+                        person = uiState.value.person,
+                        inviteRequest = inviteRedeemRequest,
+                        navCommandFlow = _navCommandFlow
+                    )
+
+                } catch (e: Exception) {
+
+                    _uiState.update {
+                        it.copy(
+                            errorText = e.message?.let { message ->
+                                StringUiText(message)
+                            } ?: StringResourceUiText(
+                                Res.string.something_wrong_with_invite
+                            )
+                        )
+                    }
+                }
             }
-          return
+
+            return
         }
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(

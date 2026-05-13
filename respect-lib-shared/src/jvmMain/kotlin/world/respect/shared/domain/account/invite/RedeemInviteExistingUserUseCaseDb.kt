@@ -11,12 +11,17 @@ import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.datalayer.school.ext.accepterEnrollmentRole
 import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
+import world.respect.datalayer.school.ext.primaryRole
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.FamilyMemberInvite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.select_account
 import kotlin.time.Clock
 
 class RedeemInviteExistingUserUseCaseDb(
@@ -62,6 +67,19 @@ class RedeemInviteExistingUserUseCaseDb(
 
         val enrollmentRole = inviteFromDb.accepterEnrollmentRole(approvalRequired)
         if (enrollmentRole != null && inviteFromDb is ClassInvite) {
+            val isTeacherAccount =
+                accountPerson.primaryRole() == PersonRoleEnum.TEACHER
+
+            val isStudentInvite =
+                inviteFromDb.inviteMode == ClassInviteModeEnum.VIA_PARENT ||
+                        enrollmentRole == EnrollmentRoleEnum.STUDENT
+
+            if (isTeacherAccount && isStudentInvite) {
+                Res.string.select_account
+                throw IllegalArgumentException(
+                    "Sorry. Invalid invitation: not available for your user type."
+                ).withHttpStatus(400)
+            }
             schoolDataSource.enrollmentDataSource.updateLocal(
                 listOf(
                     Enrollment(

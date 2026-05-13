@@ -5,6 +5,7 @@ import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SelectAccount
 
@@ -35,10 +36,9 @@ class ResolveUrlToNavCommandUseCase(
                         )
                     } else {
 
-                        AcceptInvite.create(
+                        LoginScreen.create(
                             schoolUrl = schoolUrl,
-                            code = inviteCode,
-                            canGoBack = canGoBack,
+                            inviteCode = inviteCode,
                         )
                     }
 

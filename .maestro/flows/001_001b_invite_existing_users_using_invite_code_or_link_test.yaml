@@ -154,7 +154,7 @@ onFlowComplete:
     text: "Edit person"
 - tapOn: "Family member"
 - tapOn: "Invite person"
-- assertVisible: "Student User / Family member"
+- assertVisible: "ParentA User / Family member"
 - tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:

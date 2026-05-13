@@ -142,10 +142,6 @@ onFlowComplete:
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
-    text: "Login"
-- tapOn: "Create new account"
-- assertVisible:
-    id: "app_title"
     text: "Invitation"
 - assertVisible: "Role"
 - assertVisible: "Student"

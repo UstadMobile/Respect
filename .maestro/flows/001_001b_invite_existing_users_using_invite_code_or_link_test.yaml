@@ -192,6 +192,10 @@ onFlowComplete:
 - tapOn: "Password"
 - inputText: "test123"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -204,12 +208,11 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
-
-#- assertVisible:
-#    id: "app_title"
-#    text: "ParentA User"
-#- assertVisible: "Family member"
-#- assertVisible: "StudentB User"
+- assertVisible:
+    id: "app_title"
+    text: "ParentA User"
+- assertVisible: "Family member"
+- assertVisible: "StudentB User"
 
 #Teacher send class invite to parentA user to add StudentA User
 - clearState: world.respect.app
@@ -260,7 +263,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
-#- assertVisible: "Child"
 - tapOn: "Select Child"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
@@ -353,18 +355,18 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept invite"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Accounts"
-#- assertVisible: "ParentA User"
-#- assertVisible: "Family members"
-#- assertVisible: "StudentA User"
-#- assertVisible: 'StudentB User'
-#- assertVisible: "Pending requests"
-#- assertVisible: "StudentA User: TestClass (Student)"
-#- assertVisible: ".*Pending approval"
+- assertVisible:
+    id: "app_title"
+    text: "Accounts"
+- assertVisible: "ParentA User"
+- assertVisible: "Family members"
+- assertVisible: "StudentA User"
+- assertVisible: 'StudentB User'
+- assertVisible: "Pending requests"
+- assertVisible: "StudentA User: TestClass (Student)"
+- assertVisible: ".*Pending approval"
 
-# H) Teacher approve student's request to join the class
+# Teacher approve student's request to join the class
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"

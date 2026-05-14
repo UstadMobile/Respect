@@ -175,7 +175,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Login"
-- tapOn: "I already have an invite code"
+- tapOn: "I have an invite code"
 - tapOn: "Invite code"
 - pasteText
 - tapOn: "Next"

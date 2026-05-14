@@ -128,10 +128,6 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept invite"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "TestClass"
@@ -208,10 +204,7 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
-- runFlow:
-    when:
-      visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
+
 #- assertVisible:
 #    id: "app_title"
 #    text: "ParentA User"
@@ -260,6 +253,10 @@ onFlowComplete:
 - tapOn: "Password"
 - inputText: "test123"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Invitation"
@@ -271,7 +268,7 @@ onFlowComplete:
 - assertVisible: "Class name"
 - assertVisible: "TestClass"
 - assertVisible: "Role"
-- assertVisible: "Student"
+- assertVisible: "Parent"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "School server URL"
@@ -344,6 +341,10 @@ onFlowComplete:
 - tapOn: "Password"
 - inputText: "test123"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

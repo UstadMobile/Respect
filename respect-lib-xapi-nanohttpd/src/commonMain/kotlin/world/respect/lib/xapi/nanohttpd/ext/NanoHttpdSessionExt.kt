@@ -6,6 +6,7 @@ import java.io.File
 
 fun NanoHTTPD.IHTTPSession.bodyAsBytes(): ByteArray? {
     val bodyMap = mutableMapOf<String,String>()
+    parseBody(bodyMap)
 
     return if(method == Method.PUT) {
         //NanoHTTPD will always put the content of a PUT body into a temp file, with the path in the "content" key

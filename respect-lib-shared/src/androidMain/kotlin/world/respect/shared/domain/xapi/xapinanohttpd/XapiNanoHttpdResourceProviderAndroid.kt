@@ -15,7 +15,8 @@ class XapiNanoHttpdResourceProviderAndroid: XapiNanoHttpdResourceProvider, KoinC
         authentication: String,
     ): XapiStatementsResource {
         val accountScope = RespectAccountScopeId(
-            schoolUrl = endpoint, accountPrincipalId = AuthenticatedUserPrincipalId(authentication),
+            schoolUrl = endpoint,
+            accountPrincipalId = AuthenticatedUserPrincipalId(authentication),
         )
         val schoolDataSource: SchoolDataSource = getKoin().getScope(accountScope.scopeId).get()
         return schoolDataSource.xapiStatementsResource

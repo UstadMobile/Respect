@@ -2,7 +2,9 @@ package world.respect.lib.xapi.nanohttpd
 
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.http.Url
+import io.ktor.http.protocolWithAuthority
 import io.ktor.util.StringValuesImpl
+import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.ListSerializer
@@ -11,10 +13,13 @@ import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.put
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.lib.xapi.nanohttpd.ext.bodyAsBytes
 import world.respect.lib.xapi.resources.XapiStatementsResource
+import java.io.ByteArrayInputStream
 import kotlin.uuid.Uuid
 
 class XapiNanoHttpdApp(
@@ -38,7 +43,7 @@ class XapiNanoHttpdApp(
         val endpointEncoded = UrlEncoderUtil.encode(
             UrlEncoderUtil.encode(xapiUrl.toString())
         )
-        return Url("http://127.0.0.1:$listeningPort${PATH_ENDPOINT_API}$endpointEncoded}/")
+        return Url("http://127.0.0.1:$listeningPort${PATH_ENDPOINT_API}$endpointEncoded/")
     }
 
     override fun serve(session: IHTTPSession): Response {
@@ -74,14 +79,51 @@ class XapiNanoHttpdApp(
         pathSegments: List<String>,
     ): Response {
         val endpointUrl = Url(UrlEncoderUtil.decode(pathSegments[1]))
-        val authentication = session.headers["authentication"] ?: ""
+        val authentication = session.headers["authorization"]
 
-        val xapiResource = xapiResourceProvider(endpointUrl, authentication)
+        fun basicAuth(): Pair<String, String> {
+            if(authentication == null)
+                throw IllegalStateException("no authentication provided")
+
+            return authentication.substringAfter("Basic").trim().decodeBase64String()
+                .split(":", limit = 2).let {
+                    Pair(it.first(), it.last())
+                }
+        }
 
         return runBlocking {
             when(session.method) {
+                /**
+                 * Allow cross-origin requests as per
+                 * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/OPTIONS
+                 */
+                Method.OPTIONS -> {
+                    val referrer = session.headers["referer"] ?: throw IllegalArgumentException("No referrer")
+                    val origin = Url(referrer).protocolWithAuthority
+
+
+                    newFixedLengthResponse(
+                        Response.Status.NO_CONTENT,
+                        "application/json",
+                        ByteArrayInputStream(byteArrayOf()),
+                        0
+                    ).also {
+                        //https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Origin
+                        it.addHeader("Access-Control-Allow-Origin", origin)
+
+                        session.headers["access-control-request-method"]?.also { requestMethods ->
+                            it.addHeader("Access-Control-Allow-Methods", requestMethods)
+                        }
+
+                        session.headers["access-control-request-headers"]?.also { requestHeaders ->
+                            it.addHeader("Access-Control-Allow-Headers", requestHeaders)
+                        }
+                    }
+                }
+
                 Method.GET -> {
-                    val dataLoadState = xapiResource.get(
+                    val (authUser, _) = basicAuth()
+                    val dataLoadState = xapiResourceProvider(endpointUrl, authUser).get(
                         listParams = XapiStatementsResource.GetStatementParams.fromParams(
                             params = StringValuesImpl(
                                 caseInsensitiveName = false,
@@ -95,6 +137,7 @@ class XapiNanoHttpdApp(
                 }
 
                 Method.POST -> {
+                    val (authUser, _) = basicAuth()
                     val postBody = session.bodyAsBytes()?.let {
                         json.decodeFromString(
                             deserializer = ListSerializer(XapiStatementTransformingSerializer),
@@ -102,7 +145,7 @@ class XapiNanoHttpdApp(
                         )
                     } ?: throw IllegalArgumentException()
 
-                    val uuidsCreated = xapiResource.post(
+                    val uuidsCreated = xapiResourceProvider(endpointUrl, authUser).post(
                         list = postBody
                     )
 
@@ -114,11 +157,31 @@ class XapiNanoHttpdApp(
                 }
 
                 Method.PUT -> {
-                    TODO()
+                    val (authUser, _) = basicAuth()
+                    xapiResourceProvider(endpointUrl, authUser).put(
+                        statementId = session.parameters["statementId"]?.first()?.let {
+                                Uuid.parse(it)
+                            } ?: throw IllegalArgumentException("Statements PUT requires statementId"),
+                        statement = session.bodyAsBytes()?.decodeToString()?.let {
+                            json.decodeFromString(XapiStatement.serializer(), it)
+                        } ?: throw IllegalArgumentException("No body")
+                    )
+
+                    newFixedLengthResponse(
+                        Response.Status.NO_CONTENT,
+                        "application/json",
+                        ByteArrayInputStream(byteArrayOf()),
+                        0,
+                    )
                 }
 
                 else -> {
-                    TODO()
+                    newFixedLengthResponse(
+                        Response.Status.METHOD_NOT_ALLOWED,
+                        "text/plain",
+                        ByteArrayInputStream(byteArrayOf()),
+                        0,
+                    )
                 }
             }
         }

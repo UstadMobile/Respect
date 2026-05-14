@@ -29,9 +29,11 @@ class GetXapiLaunchUrlUseCaseAndroid(
         return URLBuilder(learningUnitUrl).apply {
             parameters.apply {
                 set("endpoint", nanoHttpdApp.localUrlForEndpoint(schoolUrl).toString())
+
+                val basicAuth = "${authenticatedUser.guid}:${randomString(8)}".encodeBase64()
                 set(
                     "auth",
-                    "Basic ${authenticatedUser.guid}:${randomString(8)}".encodeBase64()
+                    "Basic $basicAuth"
                 )
                 set("actor",
                     XapiAgent(

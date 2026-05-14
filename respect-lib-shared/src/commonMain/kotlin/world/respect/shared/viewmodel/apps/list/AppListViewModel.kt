@@ -60,7 +60,7 @@ class AppListViewModel(
             schoolDataSource.schoolConfigSettingDataSource.listAsFlow(
                 loadParams = DataLoadParams(),
                 params = SchoolConfigSettingDataSource.GetListParams(
-                    key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS
+                    keys = listOf(SchoolConfigSettingDataSource.KEY_APP_CATALOGS)
                 )
             ).collectLatest { config ->
                 val feedUrl = config.dataOrNull()?.firstOrNull()?.value?.let {

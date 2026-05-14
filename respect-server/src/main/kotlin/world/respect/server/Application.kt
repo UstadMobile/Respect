@@ -55,6 +55,7 @@ import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolConfigSettingRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
@@ -275,6 +276,7 @@ fun Application.module() {
                         EnrollmentRoute()
                         AssignmentRoute()
                         PersonQrBadgeRoute()
+                        SchoolConfigSettingRoute()
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )

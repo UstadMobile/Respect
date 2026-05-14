@@ -206,11 +206,6 @@ onFlowComplete:
 - tapOn: "Accept Invite"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
-- tapOn: "People"
-- tapOn: "ParentA User"
-- assertVisible:
-    id: "app_title"
     text: "ParentA User"
 - assertVisible: "Family member"
 - assertVisible: "StudentA User"

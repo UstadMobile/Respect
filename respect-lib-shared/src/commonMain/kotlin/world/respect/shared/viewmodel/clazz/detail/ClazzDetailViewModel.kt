@@ -98,8 +98,9 @@ data class ClazzDetailUiState(
     val isStudentGroupingExpanded: Boolean = true,
     val groupIds: List<String> = emptyList(),
     val groups: List<GroupDisplayData> = emptyList(),
-    val statementId: String? = null
-) {
+    val statementId: String? = null,
+    val addPersonPermissions: List<Long> = emptyList()
+    ) {
 
     fun showApproveOption(person: Person): Boolean {
         return person.roles.firstOrNull()?.let {

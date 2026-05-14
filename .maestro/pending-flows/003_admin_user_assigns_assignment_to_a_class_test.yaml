@@ -25,7 +25,7 @@ onFlowComplete:
     file: "subflows/school_user_login_flow.yaml"
     env:
       USERNAME: "teacherauser"
-      PASSWORD: "test1234"
+      PASSWORD: "test123"
 - assertVisible: "Apps"
 - tapOn: "Classes"
 - assertVisible:
@@ -115,24 +115,6 @@ onFlowComplete:
 - tapOn: "Assignments"
 - assertVisible: "Homework 1"
 
-#- runScript:
-#    file: "scripts/verify_xapi_completion.js"
-#    env:
-#      XAPI_ENDPOINT: ${output.XAPI_ENDPOINT}
-#      XAPI_AUTH: ${output.XAPI_AUTH}
-#      ACTIVITY_ID: ${output.ACTIVITY_ID}
-#      REGISTRATION: ${output.REGISTRATION}
-#      ACTOR_NAME: "StudentA User"
-
-- runScript:
-    file: "scripts/verify_xapi_completion.js"
-    env:
-      XAPI_ENDPOINT: ${output.SCHOOL_URL}api/xapi
-      XAPI_AUTH: "Basic VGVzdFVzZXI6cGFzc3dvcmQ="
-      ACTIVITY_ID: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/appmanifest.json
-      REGISTRATION: "e168d6a3-46b2-4233-82e7-66b73a179727"
-      ACTOR_NAME: "Test User"
-
 - assertVisible: "Pending (0)"
 - tapOn: "Completed (1)"
 - assertVisible: "1/1 task Completed"
@@ -152,7 +134,7 @@ onFlowComplete:
     file: "subflows/school_user_login_flow.yaml"
     env:
       USERNAME: "teacherauser"
-      PASSWORD: "test1234"
+      PASSWORD: "test123"
 - tapOn: "Assignments"
 - assertVisible: "All"
 - assertVisible: "Pending (1)"

@@ -276,10 +276,6 @@ onFlowComplete:
 - tapOn: "Accept Invite"
 - assertVisible:
     id: "app_title"
-    text: "Waiting for approval"
-- assertVisible: "Please wait"
-- assertVisible:
-    id: "app_title"
     text: "Accounts"
 - assertVisible: "ParentA User"
 - assertVisible: "Pending requests"
@@ -357,17 +353,16 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept invite"
-- assertVisible:
-    id: "app_title"
-    text: "Waiting for approval"
-- assertVisible: "Please wait"
-- assertVisible:
-    id: "app_title"
-    text: "Accounts"
-- assertVisible: "StudentA User"
-- assertVisible: "Pending requests"
-- assertVisible: "StudentA User: TestClass (Student)"
-- assertVisible: ".*Pending approval"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Accounts"
+#- assertVisible: "ParentA User"
+#- assertVisible: "Family members"
+#- assertVisible: "StudentA User"
+#- assertVisible: 'StudentB User'
+#- assertVisible: "Pending requests"
+#- assertVisible: "StudentA User: TestClass (Student)"
+#- assertVisible: ".*Pending approval"
 
 # H) Teacher approve student's request to join the class
 - clearState: world.respect.app

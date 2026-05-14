@@ -161,6 +161,7 @@ onFlowComplete:
     id: "invite_code"
 
 #StudentB user using link to join the family member (ParentA user)
+- clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}

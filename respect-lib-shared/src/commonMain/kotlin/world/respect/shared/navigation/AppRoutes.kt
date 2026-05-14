@@ -93,7 +93,13 @@ data class LoginScreen(
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = LoginScreen(schoolUrl.toString())
+        fun create(
+            schoolUrl: Url,
+            inviteCode: String? = null,
+        ) = LoginScreen(
+            schoolUrlStr = schoolUrl.toString(),
+            inviteCode = inviteCode
+        )
     }
 
 }

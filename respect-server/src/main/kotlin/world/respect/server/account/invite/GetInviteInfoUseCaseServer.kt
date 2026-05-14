@@ -7,6 +7,7 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import kotlin.collections.first
 
 class GetInviteInfoUseCaseServer(
     private val schoolDb: RespectSchoolDatabase,
@@ -26,24 +27,34 @@ class GetInviteInfoUseCaseServer(
         }else {
             null
         }
-        val childUid = invite.iForFamilyOfGuid
-        val childName = if(childUid != null) {
-           val child = schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(childUid))
+        val familyPersonUid = invite.iForFamilyOfGuid
+
+        val familyPerson = if(familyPersonUid != null) {
+            schoolDb.getPersonEntityDao().findByGuidNum(uidNumberMapper(familyPersonUid))
+        } else {
+            null
+        }
+
+        val familyPersonName = if(familyPerson != null) {
             buildString {
-                append(child?.person?.pGivenName)
+                append(familyPerson.person.pGivenName)
                 append(" ")
-                child?.person?.pMiddleName?.also {
+                familyPerson.person.pMiddleName?.also {
                     append(it)
                     append(" ")
                 }
-                append(child?.person?.pFamilyName)
+                append(familyPerson.person.pFamilyName)
             }
-        }else {
+        } else {
             null
         }
+
+        val familyPersonRole = familyPerson?.roles?.first { it.prIsPrimaryRole }?.prRoleEnum
+
         return RespectInviteInfo(
             className = className,
-            childName = childName,
+            familyPersonName = familyPersonName,
+            familyPersonRole = familyPersonRole,
             invite = invite.toModel(),
         )
     }

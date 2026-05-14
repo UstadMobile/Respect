@@ -155,12 +155,13 @@ onFlowComplete:
 - tapOn: "Family member"
 - tapOn: "Invite person"
 - assertVisible: "ParentA User / Family member"
-- tapOn: "Approval required" # turn the switch off
 - assertVisible: "Approval not required until:.*"
+- tapOn: "Approval required" # turn the switch off
 - copyTextFrom:
     id: "invite_code"
 
 #StudentB user using link to join the family member (ParentA user)
+- clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}

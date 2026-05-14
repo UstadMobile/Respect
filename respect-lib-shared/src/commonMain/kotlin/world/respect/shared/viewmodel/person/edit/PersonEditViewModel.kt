@@ -399,11 +399,16 @@ class PersonEditViewModel(
                     familyMembersAdded + familyMembersRemoved + personToSave.copy(lastModified = modTime)
                 )
 
-                if (route.guid == null && personToSave.roles.any { it.roleEnum == PersonRoleEnum.STUDENT }) {
+                if (
+                    route.guid == null &&
+                    personToSave.roles.any {
+                        it.roleEnum == PersonRoleEnum.STUDENT || it.roleEnum == PersonRoleEnum.PARENT
+                    }
+                ) {
                     val invite = FamilyMemberInvite(
                         uid = FamilyMemberInvite.uidFor(personToSave.guid),
                         code = Invite2.newRandomCode(),
-                         approvalRequiredAfter = modTime + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes,
+                        approvalRequiredAfter = modTime + Invite2.APPROVAL_NOT_REQUIRED_INTERVAL_MINS.minutes,
                         lastModified = modTime,
                         stored = modTime,
                         status = StatusEnum.ACTIVE,

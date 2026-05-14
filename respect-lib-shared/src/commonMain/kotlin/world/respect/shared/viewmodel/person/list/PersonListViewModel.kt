@@ -259,7 +259,7 @@ class PersonListViewModel(
                 )
             }
 
-            route.filterByRole == PersonRoleEnum.PARENT && route.personGuidStr != null -> {
+            route.filterByRole in listOf(PersonRoleEnum.PARENT, PersonRoleEnum.STUDENT) && route.personGuidStr != null -> {
                 InvitePerson.FamilyInviteOptions(
                     personUid = route.personGuidStr
                 )

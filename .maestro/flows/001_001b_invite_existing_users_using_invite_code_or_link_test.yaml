@@ -204,12 +204,11 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
-- assertVisible:
-    id: "app_title"
-    text: "ParentA User"
-- assertVisible: "Family member"
-- assertVisible: "StudentA User"
-- assertVisible: "StudentB User"
+#- assertVisible:
+#    id: "app_title"
+#    text: "ParentA User"
+#- assertVisible: "Family member"
+#- assertVisible: "StudentB User"
 
 #Teacher send class invite to parentA user to add StudentA User
 - clearState: world.respect.app

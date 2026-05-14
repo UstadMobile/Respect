@@ -22,6 +22,7 @@ import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.ext.copyInvite
@@ -30,6 +31,7 @@ import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
@@ -62,6 +64,7 @@ data class InvitePersonUiState(
     val selectedRole: PersonRoleEnum? = null,
     val className: String? = null,
     val schoolName: String? = null,
+    val childName: String? = null,
     val roleOptions: List<PersonRoleEnum> = emptyList()
 ) {
     val inviteCode: String?
@@ -132,6 +135,7 @@ class InvitePersonViewModel(
             }
 
             _inviteUid.value = (route.invitePersonOptions as? InvitePerson.ClassInviteOptions)?.inviteUid
+                ?: (route.invitePersonOptions as? InvitePerson.FamilyInviteOptions)?.personUid
                 ?: selectedRole.newUserInviteUid
 
             _inviteUid.collectLatest { inviteUid ->
@@ -140,6 +144,17 @@ class InvitePersonViewModel(
                         uid = inviteUid,
                         loadParams = DataLoadParams()
                     ).collectLatest { invite ->
+                        (invite.dataOrNull() as? FamilyMemberInvite)?.let { familyInvite ->
+                           val childPerson= schoolDataSource.personDataSource.findByGuid(
+                                loadParams = DataLoadParams(),
+                                guid = familyInvite.personUid
+                            ).dataOrNull()
+                            _uiState.update { prev ->
+                                prev.copy(
+                                    childName = childPerson?.fullName(),
+                                )
+                            }
+                        }
                         _uiState.update { prev ->
                             prev.copy(
                                 invite = invite,

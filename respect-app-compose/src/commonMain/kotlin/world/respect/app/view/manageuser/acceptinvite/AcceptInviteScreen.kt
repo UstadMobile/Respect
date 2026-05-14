@@ -71,6 +71,7 @@ fun AcceptInviteScreen(
 ) {
     val invite = uiState.inviteInfo?.invite
     val errorText = uiState.errorText
+    val isParentInvite = uiState.inviteInfo?.familyPersonRole == PARENT
 
     Column(modifier = Modifier.fillMaxSize()) {
         when {
@@ -146,7 +147,6 @@ fun AcceptInviteScreen(
                     }
 
                     else -> {
-                        val isParentInvite = uiState.inviteInfo?.familyPersonRole == PARENT
 
                         RespectDetailField(
                             modifier = Modifier.defaultItemPadding(),

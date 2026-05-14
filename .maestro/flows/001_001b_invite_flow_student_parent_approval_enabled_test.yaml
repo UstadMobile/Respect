@@ -1,0 +1,384 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "001_001b_invite_flow_student_parent_approval_enabled_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+
+---
+
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+
+#Admin create class and add teacher to class
+- runFlow:
+    file: "subflows/user_add_class.yaml"
+    env:
+      CLASSNAME: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+- tapOn: "Add Teacher"
+- tapOn: "Add person"
+- assertVisible:
+    id: "app_title"
+    text: "Add person"
+- tapOn: "First names*"
+- inputText: "TeacherA"
+- tapOn: "Last name*"
+- inputText: "User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Save"
+- tapOn: "TeacherA User"
+- tapOn: "Create account"
+- assertVisible: "teacherauser"
+- tapOn: "Password"
+- inputText: "test123"
+- tapOn: "Save"
+- assertVisible: "Manage account"
+
+# Invite Students as new person - Approve Required On
+- tapOn: "People"
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn:
+    text: "Invite person"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Student"
+- scroll
+- assertVisible: "Reset code"
+- assertVisible: "Approval required" #Approval Required
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.studentApproveOn = maestro.copiedText}
+
+# Invite Parent as new person - Approve Required On
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Parent"
+- scroll
+- assertVisible: "Reset code"
+- assertVisible: "Approval required" #Approval Required
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.parentApproveOn = maestro.copiedText}
+
+- back
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- assertVisible: "TeacherA User"
+- tapOn: "Add Student"
+- tapOn: "Invite person"
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+
+# Invite Student as new student to TestClass - Approve Required ON
+- tapOn: "Invite students directly"
+- assertVisible: "Approval required"    #Approval Required ON
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.studentClassApproveOn = maestro.copiedText}
+
+# Invite Student to TestClass via Parent - Approve Required ON
+- tapOn: "Invite via parents"
+- assertVisible: "Approval required" #Approval Required ON
+- assertNotVisible: "Approval not required until:.*"
+- copyTextFrom:
+    id: "invite_code"
+- evalScript: ${output.parentClassApproveOn = maestro.copiedText}
+
+
+#Student A sign-up via invite code as new person - Approve Required On
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- inputText: ${output.studentApproveOn}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Student"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "StudentA User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateC}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: "studentauser"  #username
+- tapOn: "Next"
+- tapOn: "Password*"
+- inputText: "test123"
+- tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+
+#Parent A sign-up via invite code as new person - Approve Required On
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- inputText: ${output.parentApproveOn}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Parent"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "ParentA User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateC}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: "parentauser"  #username
+- tapOn: "Next"
+- tapOn: "Password*"
+- inputText: "test123"
+- tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+
+# Student C user joining TestClass using invite code - Approve Required On
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn: "I have an invite code"
+- tapOn: "Invite code"
+- inputText: ${output.studentClassApproveOn}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Student"
+- assertVisible: "Class name"
+- assertVisible: "TestClass"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "StudentC User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: "studentcuser"
+- tapOn: "Next"
+- tapOn: "Password*"
+- inputText: "test123"
+- tapOn: "Sign-up"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+
+# Parent C joins child user to the class using invite link - Approve required ON
+- runFlow:
+    file: "subflows/openlink_flow.yaml"
+    env:
+      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.parentClassApproveOn}
+- tapOn: "Get Started"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Parent"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "Class name"
+- assertVisible: "TestClass"
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "ParentC User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- extendedWaitUntil:
+    visible: "parentcuser" #username
+    timeout: 10000
+- tapOn: "Next"
+- tapOn: "Password*"
+- inputText: "test123"
+- tapOn: "Sign-up"
+- tapOn: "Child's name*"
+- inputText: "ChildA User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Child's date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateC}
+- tapOn: "Done"
+- runFlow:
+    when:
+      visible: "Done"
+    commands:
+      - tapOn: "Done"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+
+#TeacherA User login and send invites to students and parents
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+
+# Approve Required ON users should be pending
+- assertVisible: "Pending request to join.*"
+- assertVisible: "StudentA User"
+- assertVisible: "ParentA User"
+- assertVisible: "StudentC User"
+- assertVisible: "ParentC User"
+- assertVisible: "ChildA User"  #When ParentC added, childA automatically gets added to class people
+- repeat:
+    while:
+      visible: "Accept Invite"
+    commands:
+      - tapOn: "Accept Invite"
+- assertNotVisible: "Pending request to join.*"
+
+#Teacher open class and invite students to class
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+
+- assertVisible: "StudentC User"
+- assertVisible: "ChildA User"
+- assertNotVisible: "Pending request to join.*"

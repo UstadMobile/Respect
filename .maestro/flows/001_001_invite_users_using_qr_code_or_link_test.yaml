@@ -199,6 +199,8 @@ onFlowComplete:
 - assertVisible: "Pending requests.*"
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
+- assertNotVisible: "Pending requests.*"
+- assertVisible: "Student User.*"
 
 # E) Teacher share invite link for parent device based signup
 - tapOn: "Add student"

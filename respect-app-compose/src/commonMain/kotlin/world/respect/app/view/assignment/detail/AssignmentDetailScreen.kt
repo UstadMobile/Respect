@@ -50,9 +50,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
-import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
@@ -62,6 +62,7 @@ import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
+import kotlin.compareTo
 import kotlin.math.roundToInt
 
 private const val NAME_COLUMN_WIDTH = 120
@@ -178,14 +179,19 @@ fun AssignmentDetailScreen(
         }
 
         if (uiState.isStudent) {
+            val units = assignment?.learningUnits ?: emptyList()
+            val filteredUnits = remember(uiState.filteredProgressRow, units) {
+                val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
+                units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
+            }
+            println("Filtered units: $filteredUnits")
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val units = assignment?.learningUnits ?: emptyList()
-                items(units) { unit ->
+                items(filteredUnits) { unit ->
                     StudentLearningUnitItem(
                         unit = unit,
                         uiState = uiState,
@@ -206,13 +212,17 @@ fun AssignmentDetailScreen(
                 val students = remember(uiState.assignmentProgressRow) {
                     uiState.assignmentProgressRow.distinctBy { it.personUid }
                 }
-                val progressMap = remember(uiState.assignmentProgressRow) {
-                    uiState.assignmentProgressRow.groupBy { it.personUid }
+                val progressMap = remember(uiState.filteredProgressRow) {
+                    uiState.filteredProgressRow.groupBy { it.personUid }
                         .mapValues { entry -> entry.value.associateBy { it.activityId } }
                 }
 
                 val units = assignment?.learningUnits ?: emptyList()
-
+                val filteredUnits = remember(uiState.filteredProgressRow, units) {
+                    val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
+                    units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
+                }
+                println("Filtered units: $filteredUnits")
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     // STICKY HEADER: Task Icons and Names
                     stickyHeader {
@@ -234,7 +244,7 @@ fun AssignmentDetailScreen(
                                     .fillMaxHeight()
                                     .horizontalScroll(horizontalScrollState)
                             ) {
-                                units.forEach { unit ->
+                                filteredUnits.forEach { unit ->
                                     TaskHeaderCell(unit, uiState, taskColWidth, headerHeight)
                                 }
                                 Box(
@@ -268,7 +278,7 @@ fun AssignmentDetailScreen(
                                             .fillMaxWidth()
                                             .horizontalScroll(horizontalScrollState)
                                     ) {
-                                        units.forEach { unit ->
+                                        filteredUnits.forEach { unit ->
                                             val progress =
                                                 progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
                                             val percent = progress?.progress
@@ -336,10 +346,10 @@ fun StudentLearningUnitItem(
         }
 
     val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() } ?: 0
-    val color = when {
-        percent >= 90 -> Color(0xFFAED581) // TODO NEED TO CHANGE HARDCODED
-        percent > 0 -> Color(0xFFD48245)
-        else -> Color.LightGray
+    val (bgColor, textColor) = when {
+        percent >= 90 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
+        percent > 0 -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
+        else -> MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Row(
@@ -362,7 +372,7 @@ fun StudentLearningUnitItem(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .background(color, RoundedCornerShape(4.dp)),
+                        .background(bgColor, RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -414,10 +424,10 @@ fun StudentLearningUnitItem(
                 text = "$percent%",
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(color)
+                    .background(bgColor)
                     .padding(horizontal = 6.dp, vertical = 2.dp),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White
+                color = textColor
             )
         }
     }

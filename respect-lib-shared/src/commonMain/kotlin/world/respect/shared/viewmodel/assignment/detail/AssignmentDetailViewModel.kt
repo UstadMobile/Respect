@@ -62,6 +62,7 @@ data class AssignmentDetailUiState(
     },
     val assignmentProgressRow: List<AssignmentResult> = emptyList(),
     val statusCounts: Map<AssignmentStatusFilter, Int> = emptyMap(),
+    val filteredProgressRow: List<AssignmentResult> = emptyList(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
@@ -215,10 +216,24 @@ class AssignmentDetailViewModel(
                                     it.copy(assignmentProgressRow = progressList)
                                 }
                                 updateStatusCounts()
+                                updateFilteredProgressRow()
                             }
                     }
                 }
         }
+    }
+
+    private fun updateFilteredProgressRow() {
+        val fullList = _uiState.value.assignmentProgressRow
+        val filter = _uiState.value.selectedStatusFilter
+        val filtered = when (filter) {
+            AssignmentStatusFilter.ALL -> fullList
+            AssignmentStatusFilter.COMPLETED -> fullList.filter { it.completion == true }
+            AssignmentStatusFilter.IN_PROGRESS -> fullList.filter { it.completion == false && (it.progress ?: 0) > 0 }
+            AssignmentStatusFilter.NOT_STARTED -> fullList.filter {it.completion == false && (it.progress== null)}
+        }
+        _uiState.update { it.copy(filteredProgressRow = filtered) }
+
     }
 
     private fun updateStatusCounts() {
@@ -297,6 +312,7 @@ class AssignmentDetailViewModel(
         _uiState.update {
             it.copy(selectedStatusFilter = filter)
         }
+        updateFilteredProgressRow()
     }
 
     fun onToggleFullscreen() {

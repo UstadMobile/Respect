@@ -225,6 +225,12 @@ fun Application.module() {
             }
 
             route("school") {
+                route("xapi") {
+                    authenticate(AUTH_CONFIG_SCHOOL) {
+                        XapiStatementsResourceRoute(json = json)
+                    }
+                }
+
                 route("respect") {
                     route("auth") {
                         AuthRoute()
@@ -248,11 +254,7 @@ fun Application.module() {
                         )
                     }
 
-                    route("xapi") {
-                        authenticate(AUTH_CONFIG_SCHOOL) {
-                            XapiStatementsResourceRoute(json = json)
-                        }
-                    }
+
 
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()

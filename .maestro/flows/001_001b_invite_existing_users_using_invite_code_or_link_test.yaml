@@ -83,8 +83,12 @@ onFlowComplete:
 - assertVisible: "Send link via SMS"
 - assertVisible: "Send link via Email"
 - assertVisible: "Share link"
-- tapOn: "Approval required" # turn the switch off
-- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required" # turn the switch off
+      - assertVisible: "Approval not required until:.*"
 - scroll
 - assertVisible: "Reset code"
 - copyTextFrom:
@@ -156,7 +160,12 @@ onFlowComplete:
 - tapOn: "Invite person"
 - assertVisible: "ParentA User / Family member"
 - assertVisible: "Approval not required until:.*"
-- tapOn: "Approval required" # turn the switch off
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required" # turn the switch off
+      - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
 
@@ -196,7 +205,7 @@ onFlowComplete:
     text: "Apps"
 - tapOn: "People"
 - tapOn: "ParentA User"
-- assertVisible:                     #check
+- assertVisible:
     id: "app_title"
     text: "ParentA User"
 - assertVisible: "Family member"
@@ -220,7 +229,12 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "Approval required"    #switch is On
+- runFlow:
+    when:
+      visible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required" # turn the switch ON
+      - assertNotVisible: "Approval not required until:.*"
 - tapOn: "Invite via parents"
 - scroll
 - assertVisible: "Reset code"
@@ -261,6 +275,10 @@ onFlowComplete:
 - tapOn: "Accept Invite"
 - assertVisible:
     id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
+- assertVisible:
+    id: "app_title"
     text: "Accounts"
 - assertVisible: "ParentA User"
 - assertVisible: "Pending requests"
@@ -287,7 +305,12 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invite person"
-- assertVisible: "Approval required"    #switch is On
+- runFlow:
+    when:
+      visible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required" # turn the switch ON
+      - assertNotVisible: "Approval not required until:.*"
 - tapOn: "Invite students directly"
 - scroll
 - assertVisible: "Reset code"
@@ -329,6 +352,10 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept invite"
+- assertVisible:
+    id: "app_title"
+    text: "Waiting for approval"
+- assertVisible: "Please wait"
 - assertVisible:
     id: "app_title"
     text: "Accounts"

@@ -35,7 +35,7 @@ Examples of unacceptable behavior include:
   address, without their explicit permission
 * Submitting AI slop: such as using AI output that you have not or cannot
   fully check/verify in a comment, issue, or pull request (unless it is
-  an appendix, not the main content and such AI output is labeled as such)
+  an appendix, not the main content and AI output is clearly labeled)
 * Other conduct which could reasonably be considered inappropriate in a
   professional setting
 

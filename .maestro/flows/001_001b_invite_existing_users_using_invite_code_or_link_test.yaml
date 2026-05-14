@@ -151,6 +151,25 @@ onFlowComplete:
     text: "ParentA User"
 
 # Teacher send Family member invite to StudentB user to join ParentA User
+- tapOn:
+    id: "floating_action_button"
+- assertVisible:
+    id: "app_title"
+    text: "Edit person"
+- tapOn: "Family member"
+- tapOn: "Invite person"
+- assertVisible: "ParentA User / Family member"
+- assertVisible: "Approval not required until:.*"
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required" # turn the switch off
+      - assertVisible: "Approval not required until:.*"
+- copyTextFrom:
+    id: "invite_code"
+
+#StudentB user using link to join the family member (ParentA user)
 - clearState: world.respect.app
 - launchApp:
     arguments:

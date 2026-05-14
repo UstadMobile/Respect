@@ -14,9 +14,10 @@ import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.ext.put
+import world.respect.lib.xapi.model.XapiSingleItemToListSerializer
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
-import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.nanohttpd.ext.addXapiCORSHeaders
 import world.respect.lib.xapi.nanohttpd.ext.bodyAsBytes
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import java.io.ByteArrayInputStream
@@ -98,26 +99,13 @@ class XapiNanoHttpdApp(
                  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/OPTIONS
                  */
                 Method.OPTIONS -> {
-                    val referrer = session.headers["referer"] ?: throw IllegalArgumentException("No referrer")
-                    val origin = Url(referrer).protocolWithAuthority
-
-
                     newFixedLengthResponse(
                         Response.Status.NO_CONTENT,
                         "application/json",
                         ByteArrayInputStream(byteArrayOf()),
                         0
                     ).also {
-                        //https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Origin
-                        it.addHeader("Access-Control-Allow-Origin", origin)
-
-                        session.headers["access-control-request-method"]?.also { requestMethods ->
-                            it.addHeader("Access-Control-Allow-Methods", requestMethods)
-                        }
-
-                        session.headers["access-control-request-headers"]?.also { requestHeaders ->
-                            it.addHeader("Access-Control-Allow-Headers", requestHeaders)
-                        }
+                        it.addXapiCORSHeaders(session)
                     }
                 }
 
@@ -140,10 +128,10 @@ class XapiNanoHttpdApp(
                     val (authUser, _) = basicAuth()
                     val postBody = session.bodyAsBytes()?.let {
                         json.decodeFromString(
-                            deserializer = ListSerializer(XapiStatementTransformingSerializer),
+                            deserializer = XapiSingleItemToListSerializer,
                             string = it.decodeToString()
                         )
-                    } ?: throw IllegalArgumentException()
+                    } ?: throw IllegalArgumentException("No Post Body")
 
                     val uuidsCreated = xapiResourceProvider(endpointUrl, authUser).post(
                         list = postBody
@@ -153,7 +141,9 @@ class XapiNanoHttpdApp(
                         Response.Status.OK,
                         "application/json",
                         json.encodeToString(ListSerializer(Uuid.serializer()), uuidsCreated)
-                    )
+                    ).also {
+                        it.addXapiCORSHeaders(session)
+                    }
                 }
 
                 Method.PUT -> {
@@ -172,7 +162,9 @@ class XapiNanoHttpdApp(
                         "application/json",
                         ByteArrayInputStream(byteArrayOf()),
                         0,
-                    )
+                    ).also {
+                        it.addXapiCORSHeaders(session)
+                    }
                 }
 
                 else -> {

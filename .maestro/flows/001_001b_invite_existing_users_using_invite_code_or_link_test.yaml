@@ -151,43 +151,28 @@ onFlowComplete:
     text: "ParentA User"
 
 # Teacher send Family member invite to StudentB user to join ParentA User
-- tapOn:
-    id: "floating_action_button"
-- assertVisible:
-    id: "app_title"
-    text: "Edit person"
-- tapOn: "Family member"
-- tapOn: "Invite person"
-- assertVisible: "ParentA User / Family member"
-- assertVisible: "Approval not required until:.*"
-- runFlow:
-    when:
-      notVisible: "Approval not required until:.*"
-    commands:
-      - tapOn: "Approval required" # turn the switch off
-      - assertVisible: "Approval not required until:.*"
-- copyTextFrom:
-    id: "invite_code"
-
-#StudentB user using link to join the family member (ParentA user)
 - clearState: world.respect.app
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
-- runFlow:
-    file: "subflows/get_started_select_school_by_name.yaml"
-    env:
-      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn: "Scan QR code/badge"
+- assertVisible:
+    id: "app_title"
+    text: "Scan QR code badge"
+- tapOn: "More Options"
+- tapOn: "Paste URL"
+- tapOn: "Url"
+- pasteText
+- tapOn: "OK"
 - assertVisible:
     id: "app_title"
     text: "Login"
-- tapOn: "I have an invite code"
-- tapOn: "Invite code"
-- pasteText
-- tapOn: "Next"
+- tapOn: "Username"
+- inputText: "studentbuser"
+- tapOn: "Password"
+- inputText: "test123"
+- tapOn: "Login"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

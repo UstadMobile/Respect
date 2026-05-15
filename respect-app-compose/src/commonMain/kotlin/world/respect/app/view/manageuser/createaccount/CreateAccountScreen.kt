@@ -76,6 +76,7 @@ fun CreateAccountScreen(
         OutlinedTextField(
             value = uiState.username,
             onValueChange = onUsernameChanged,
+            enabled = uiState.fieldsEnabled,
             label = { Text(stringResource(Res.string.username_label) + "*") },
             placeholder = { Text(stringResource(Res.string.username_label)) },
             singleLine = true,
@@ -143,8 +144,8 @@ fun CreateAccountScreen(
 
         Button(
             onClick = onClickSignupWithPasskey,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = uiState.fieldsEnabled
         ) {
             Text(
                 if (uiState.passkeySupported) {

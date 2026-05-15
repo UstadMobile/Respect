@@ -578,4 +578,8 @@
     <string name="select_account">Select account to continue</string>
     <string name="use_another_account">Use another account</string>
 
+    <string name="username_already_taken">Username already taken</string>
+
+    <string name="invalid_link">Invalid link</string>
+
 </resources>

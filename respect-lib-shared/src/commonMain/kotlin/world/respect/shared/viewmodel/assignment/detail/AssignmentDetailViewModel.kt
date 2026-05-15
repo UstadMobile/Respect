@@ -237,36 +237,28 @@ class AssignmentDetailViewModel(
     }
 
     private fun updateStatusCounts() {
-        val students = _uiState.value.assignmentProgressRow.distinctBy { it.personUid }
-        val progressMap = _uiState.value.assignmentProgressRow.groupBy { it.personUid }
         val units = _uiState.value.assignment.dataOrNull()?.learningUnits ?: emptyList()
+        val progressByStudent = _uiState.value.assignmentProgressRow.groupBy { it.personUid }
 
-        val all = students.size
-        var completedCount = 0
-        var inProgressCount = 0
-        var notStartedCount = 0
+        val statusCounts = progressByStudent.values
+            .map { results -> getStudentStatus(results, units) }
+            .groupingBy { it }
+            .eachCount()
+            .toMutableMap()
+            .apply { put(AssignmentStatusFilter.ALL, progressByStudent.size) }
 
-        students.forEach { student ->
-            val results = progressMap[student.personUid] ?: emptyList()
-            val isCompleted =
-                results.size == units.size && units.isNotEmpty() && results.all { it.completion == true }
-            val isStarted = results.any { it.completion == true || (it.progress ?: 0) > 0 }
+        _uiState.update { it.copy(statusCounts = statusCounts) }
+    }
 
-            when {
-                isCompleted -> completedCount++
-                isStarted -> inProgressCount++
-                else -> notStartedCount++
-            }
-        }
-
-        val counts = mapOf(
-            AssignmentStatusFilter.ALL to all,
-            AssignmentStatusFilter.COMPLETED to completedCount,
-            AssignmentStatusFilter.IN_PROGRESS to inProgressCount,
-            AssignmentStatusFilter.NOT_STARTED to notStartedCount
-        )
-
-        _uiState.update { it.copy(statusCounts = counts) }
+    private fun getStudentStatus(
+        results: List<AssignmentResult>,
+        units: List<AssignmentLearningUnitRef>
+    ): AssignmentStatusFilter = when {
+        results.size == units.size && units.isNotEmpty() && results.all { it.completion == true } ->
+            AssignmentStatusFilter.COMPLETED
+        results.any { it.completion == true || (it.progress ?: 0) > 0 } ->
+            AssignmentStatusFilter.IN_PROGRESS
+        else -> AssignmentStatusFilter.NOT_STARTED
     }
 
     private fun updateAppUiState() {

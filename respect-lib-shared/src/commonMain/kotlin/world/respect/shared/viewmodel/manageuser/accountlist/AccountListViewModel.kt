@@ -29,6 +29,7 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSession
 import world.respect.shared.domain.account.RespectSessionAndPerson
+import world.respect.shared.domain.account.child.GetClassUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accounts
 import world.respect.shared.generated.resources.select_account
@@ -77,6 +78,7 @@ class AccountListViewModel(
     private val _uiState = MutableStateFlow(AccountListUiState(isSelectAccountMode = route.inviteCode!=null))
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val getClassUseCase: GetClassUseCase by inject()
 
 
     val uiState = _uiState.asStateFlow()
@@ -119,9 +121,7 @@ class AccountListViewModel(
             val pending = enrollments.mapNotNull { e ->
                 val person = childMap[e.personUid] ?: return@mapNotNull null
 
-                val clazz = schoolDataSource.classDataSource.findByGuid(
-                    params = DataLoadParams(),e.classUid
-                ).dataOrNull() ?: return@mapNotNull null
+                val clazz = getClassUseCase(e.classUid)
 
                 PersonWithEnrollment(person, clazz, e)
             }

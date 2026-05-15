@@ -20,8 +20,6 @@ import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.select_account
 import kotlin.time.Clock
 
 class RedeemInviteExistingUserUseCaseDb(
@@ -67,15 +65,16 @@ class RedeemInviteExistingUserUseCaseDb(
 
         val enrollmentRole = inviteFromDb.accepterEnrollmentRole(approvalRequired)
         if (enrollmentRole != null && inviteFromDb is ClassInvite) {
-            val isTeacherAccount =
-                accountPerson.primaryRole() == PersonRoleEnum.TEACHER
+            val primaryRole = accountPerson.primaryRole()
 
-            val isStudentInvite =
-                inviteFromDb.inviteMode == ClassInviteModeEnum.VIA_PARENT ||
-                        enrollmentRole == EnrollmentRoleEnum.STUDENT
+            val invalidInvite =
+                (primaryRole == PersonRoleEnum.TEACHER && enrollmentRole == EnrollmentRoleEnum.STUDENT) ||
+                (primaryRole == PersonRoleEnum.TEACHER && enrollmentRole == EnrollmentRoleEnum.PENDING_STUDENT) ||
+                (primaryRole == PersonRoleEnum.STUDENT && enrollmentRole == EnrollmentRoleEnum.TEACHER) ||
+                (primaryRole == PersonRoleEnum.STUDENT && enrollmentRole == EnrollmentRoleEnum.PENDING_TEACHER)
 
-            if (isTeacherAccount && isStudentInvite) {
-                Res.string.select_account
+
+            if (invalidInvite) {
                 throw IllegalArgumentException(
                     "Sorry. Invalid invitation: not available for your user type."
                 ).withHttpStatus(400)

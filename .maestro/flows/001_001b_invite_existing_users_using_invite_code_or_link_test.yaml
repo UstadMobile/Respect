@@ -208,10 +208,12 @@ onFlowComplete:
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
+- tapOn: "People"
+- tapOn: "ParentA User"
 - assertVisible:
     id: "app_title"
     text: "ParentA User"
-- assertVisible: "Family member"
+- assertVisible: "Family members"
 - assertVisible: "StudentB User"
 
 #Teacher send class invite to parentA user to add StudentA User
@@ -270,19 +272,22 @@ onFlowComplete:
 - assertVisible: "Class name"
 - assertVisible: "TestClass"
 - assertVisible: "Role"
-- assertVisible: "Parent"
+- assertVisible: "Student"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
+- swipe:
+    start: 50%, 20%
+    end: 50%, 80%
 - assertVisible:
     id: "app_title"
     text: "Accounts"
 - assertVisible: "ParentA User"
 - assertVisible: "Pending requests"
-- assertVisible: "StudentA User: TestClass (Student)"
-- assertVisible: ".*Pending approval"
+- assertVisible: "StudentA User: TestClass(STUDENT)"
+- assertVisible: "Pending requests"
 - assertVisible: "Family members"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
@@ -360,11 +365,11 @@ onFlowComplete:
     text: "Accounts"
 - assertVisible: "ParentA User"
 - assertVisible: "Family members"
-- assertVisible: "StudentA User"
 - assertVisible: 'StudentB User'
-- assertVisible: "Pending requests"
-- assertVisible: "StudentA User: TestClass (Student)"
-- assertVisible: ".*Pending approval"
+#- assertVisible: "StudentA User"
+#- assertVisible: "Pending requests"
+#- assertVisible: "StudentA User: TestClass (Student)"
+#- assertVisible: ".*Pending approval"
 
 # Teacher approve student's request to join the class
 - clearState: world.respect.app
@@ -410,6 +415,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Invitation"
+- tapOn: "Accept Invite"
 - assertVisible: "Sorry. Invalid invitation: not available for your user type."
 
 

@@ -25,6 +25,7 @@ import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.isChildUser
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
@@ -225,14 +226,16 @@ class AcceptInviteViewModel(
                         inviteRedeemRequest,
                         uiState.value.selectedChildGuid
                     )
+                    val parentUid = (invite as? FamilyMemberInvite)?.personUid
 
                     navigateOnExistingUserInviteAcceptedUseCase(
                         person = uiState.value.person,
+                        parentUid = parentUid,
                         inviteRequest = inviteRedeemRequest,
                         navCommandFlow = _navCommandFlow
                     )
 
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
 
                     _uiState.update {
                         it.copy(

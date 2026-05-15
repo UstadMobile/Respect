@@ -38,6 +38,7 @@ import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
+import world.respect.server.account.invite.clazz.GetClassUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
@@ -51,6 +52,7 @@ import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBa
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.child.AddChildAccountUseCaseDb
+import world.respect.shared.domain.account.child.GetClassUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
@@ -205,6 +207,12 @@ fun serverKoinModule(
             )
         }
 
+        scoped<GetClassUseCase> {
+            GetClassUseCaseServer(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseServer(
                 schoolDb = get(),

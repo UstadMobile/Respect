@@ -1,6 +1,7 @@
 package world.respect.shared.domain.navigation.inviteforexistingusernavigation
 
 import kotlinx.coroutines.flow.MutableSharedFlow
+import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Person
@@ -11,15 +12,16 @@ import world.respect.shared.navigation.ClazzDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 
-class NavigateOnExistingUserInviteAcceptedUseCase() {
+class NavigateOnExistingUserInviteAcceptedUseCase {
 
     operator fun invoke(
         person: Person?,
+        parentUid: String? = null,
+        selectedChild: Person? = null,
         inviteRequest: RespectRedeemInviteRequest,
         navCommandFlow: MutableSharedFlow<NavCommand>,
     ) {
-        val approvalRequired = person?.status == PersonStatusEnum.PENDING_APPROVAL
-
+        val approvalRequired = inviteRequest.invite.isApprovalRequiredNow()
         val destination = when (val invite = inviteRequest.invite) {
 
             is ClassInvite -> {
@@ -32,18 +34,18 @@ class NavigateOnExistingUserInviteAcceptedUseCase() {
                     )
                 }
             }
-            is FamilyMemberInvite ->{
-                if (approvalRequired) {
+
+            is FamilyMemberInvite -> {
+                if (person?.status == PersonStatusEnum.PENDING_APPROVAL) {
                     AccountList()
                 } else {
                     PersonDetail(
-                        guid = invite.personUid
+                        guid = parentUid ?: invite.personUid
                     )
                 }
             }
-            else -> {
-                AccountList()
-            }
+
+            else -> AccountList()
         }
 
         navCommandFlow.tryEmit(

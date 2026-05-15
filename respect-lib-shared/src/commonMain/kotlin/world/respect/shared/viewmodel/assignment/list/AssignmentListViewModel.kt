@@ -35,7 +35,7 @@ import world.respect.shared.generated.resources.assignments
 import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.util.AssignmentFilter
+import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -57,12 +57,23 @@ data class AssignmentRow(
 data class AssignmentListUiState(
     val assignments: List<AssignmentRow> = emptyList(),
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
-    val selectedFilter: AssignmentFilter = AssignmentFilter.ALL,
+    val selectedFilter: AssignmentListScreenFilter = AssignmentListScreenFilter.ALL,
     val isStudent: Boolean = false,
     val personName: String = "",
     val completedCount: Int = 0,
     val totalCount: Int = 0,
-)
+){
+    /**
+     * Returns the display label for a given filter based on current state counts.
+     */
+    fun getLabelForFilter(filter: AssignmentListScreenFilter): String {
+        return when (filter) {
+            AssignmentListScreenFilter.ALL -> filter.displayName
+            AssignmentListScreenFilter.COMPLETED -> "${filter.displayName} ($completedCount)"
+            AssignmentListScreenFilter.PENDING -> "${filter.displayName} (${totalCount - completedCount})"
+        }
+    }
+}
 
 @OptIn(ExperimentalUuidApi::class)
 class AssignmentListViewModel(
@@ -103,7 +114,7 @@ class AssignmentListViewModel(
                 _uiState.update {
                     it.copy(
                         isStudent = person?.isStudent() == true,
-                        personName = person?.fullName() ?: ""
+                        personName = person?.fullName() ?: EMPTY_STRING
                     )
                 }
 
@@ -121,11 +132,8 @@ class AssignmentListViewModel(
     }
 
     private fun loadData(sessionAndPerson: RespectSessionAndPerson?) {
-        val schoolUrl = sessionAndPerson?.session?.account?.school?.self
-            ?.toString()
-            ?.trim()
-            ?.removeSuffix("/")
-            ?: ""
+        val schoolUrl = sessionAndPerson?.session?.account?.school?.self?.toString()?.trim()
+            ?.removeSuffix(PATH_SEPARATOR) ?: EMPTY_STRING
 
         viewModelScope.launch {
             val state = schoolDataSource.xapiStatementsResource.get(
@@ -144,7 +152,7 @@ class AssignmentListViewModel(
                 val assignment = XapiAssignmentMapper.toAssignment(statement) ?: return@mapNotNull null
                 AssignmentRow(
                     assignment = assignment,
-                    className = statement.actor.name ?: "Unknown Class"
+                    className = statement.actor.name ?: UNKNOWN_CLASS_NAME
                 )
             }.distinctBy { it.assignment.uid }
                 .sortedByDescending { it.assignment.lastModified }
@@ -160,7 +168,7 @@ class AssignmentListViewModel(
 
                     // Update rows with completion data
                     allRows = allRows.map { row ->
-                        val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${row.assignment.uid}"
+                        val assignmentActivityId = "$schoolUrl$XAPI_ASSIGNMENT_BASE_PATH${row.assignment.uid}"
                         val results = completionsByAssignment[assignmentActivityId] ?: emptyList()
                         val students = results.distinctBy { it.personUid }
                         val completed = students.count { it.completion == true }
@@ -182,9 +190,9 @@ class AssignmentListViewModel(
         _uiState.update { state ->
             val filtered = allRows.filter { row ->
                 when (state.selectedFilter) {
-                    AssignmentFilter.ALL -> true
-                    AssignmentFilter.COMPLETED -> row.isCompleted
-                    AssignmentFilter.PENDING -> !row.isCompleted
+                    AssignmentListScreenFilter.ALL -> true
+                    AssignmentListScreenFilter.COMPLETED -> row.isCompleted
+                    AssignmentListScreenFilter.PENDING -> !row.isCompleted
                 }
             }
             state.copy(
@@ -195,7 +203,7 @@ class AssignmentListViewModel(
         }
     }
 
-    fun onFilterChanged(filter: AssignmentFilter) {
+    fun onFilterChanged(filter: AssignmentListScreenFilter) {
         _uiState.update { it.copy(selectedFilter = filter) }
         updateFilteredRows()
     }
@@ -212,5 +220,12 @@ class AssignmentListViewModel(
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )
+    }
+
+    companion object {
+        private const val PATH_SEPARATOR = "/"
+        private const val XAPI_ASSIGNMENT_BASE_PATH = "/xapi/activities/assignment/"
+        private const val UNKNOWN_CLASS_NAME = "Unknown Class"
+        private const val EMPTY_STRING = ""
     }
 }

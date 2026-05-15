@@ -35,16 +35,20 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.libutil.ext.resolve
-import world.respect.shared.util.AssignmentFilter
+import world.respect.libutil.util.time.toDisplayDateString
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.assigned_to
+import world.respect.shared.generated.resources.student_completed
+import world.respect.shared.generated.resources.task_completed
+import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.viewmodel.assignment.list.AssignmentListUiState
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
 
@@ -64,7 +68,7 @@ fun AssignmentListScreen(
 @Composable
 fun AssignmentListScreen(
     uiState: AssignmentListUiState,
-    onFilterSelected: (AssignmentFilter) -> Unit,
+    onFilterSelected: (AssignmentListScreenFilter) -> Unit,
     onClickAssignment: (Assignment) -> Unit = { },
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -74,21 +78,11 @@ fun AssignmentListScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AssignmentFilter.entries.forEach { filter ->
-                val label = if (filter == AssignmentFilter.ALL) {
-                    filter.displayName
-                } else {
-                    val count = when (filter) {
-                        AssignmentFilter.COMPLETED -> uiState.completedCount
-                        AssignmentFilter.PENDING -> uiState.totalCount - uiState.completedCount
-                        else -> 0
-                    }
-                    "${filter.displayName} ($count)"
-                }
+            AssignmentListScreenFilter.entries.forEach { filter ->
                 FilterChip(
                     selected = uiState.selectedFilter == filter,
                     onClick = { onFilterSelected(filter) },
-                    label = { Text(label) },
+                    label = { Text(uiState.getLabelForFilter(filter)) }, // Much cleaner!
                     shape = RoundedCornerShape(50)
                 )
             }
@@ -102,7 +96,7 @@ fun AssignmentListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onClickAssignment(row.assignment) }
-                        .padding(8.dp),
+                        .defaultItemPadding(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
@@ -125,12 +119,7 @@ fun AssignmentListScreen(
                         )
 
                         val dueDateStr = remember(row.deadline) {
-                            row.deadline?.let { instant ->
-                                val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                "${localDate.day.toString().padStart(2, '0')}/" +
-                                        "${localDate.month.number.toString().padStart(2, '0')}/" +
-                                        "${localDate.year}"
-                            } ?: ""
+                            row.deadline?.toDisplayDateString() ?: ""
                         }
 
                         if (uiState.isStudent) {
@@ -159,14 +148,14 @@ fun AssignmentListScreen(
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = "${row.completedCount}/${row.totalCount} task completed",
+                                        text = "${row.completedCount}/${row.totalCount}" + stringResource(Res.string.task_completed),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
                                 }
                             }
                             Text(
-                                text = "Assigned to:  ${uiState.personName}",
+                                text = stringResource(Res.string.assigned_to) + uiState.personName,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
@@ -180,11 +169,16 @@ fun AssignmentListScreen(
                     }
 
                     if (uiState.isStudent) {
+                        val percent = if (row.totalCount > 0) {
+                            (row.completedCount.toFloat() / row.totalCount.toFloat() * 100).toInt()
+                        } else {
+                            0
+                        }
                         Text(
-                            text = "98%",
+                            text = "$percent%",
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFFAED581))
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.White
@@ -219,7 +213,7 @@ fun AssignmentListScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "${row.completedCount}/${row.totalCount} student completed",
+                                text = "${row.completedCount}/${row.totalCount}" + stringResource(Res.string.student_completed),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )

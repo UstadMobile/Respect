@@ -582,5 +582,11 @@
     <string name="username_already_taken">Username already taken</string>
 
     <string name="invalid_link">Invalid link</string>
+    <string name="average">Average</string>
+    <string name="no_student_data_available">No student data available</string>
+    <string name="unknown_class">Unknown Class</string>
+    <string name="task_completed">task completed</string>
+    <string name="task">Task</string>
+    <string name="student_completed">student completed</string>
 
 </resources>

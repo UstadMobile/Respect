@@ -57,12 +57,13 @@ import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
+import world.respect.shared.generated.resources.average
 import world.respect.shared.generated.resources.deadline
+import world.respect.shared.generated.resources.no_student_data_available
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
-import kotlin.compareTo
 import kotlin.math.roundToInt
 
 private const val NAME_COLUMN_WIDTH = 120
@@ -184,7 +185,6 @@ fun AssignmentDetailScreen(
                 val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
                 units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
             }
-            println("Filtered units: $filteredUnits")
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -222,7 +222,6 @@ fun AssignmentDetailScreen(
                     val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
                     units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
                 }
-                println("Filtered units: $filteredUnits")
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     // STICKY HEADER: Task Icons and Names
                     stickyHeader {
@@ -254,7 +253,7 @@ fun AssignmentDetailScreen(
                                     contentAlignment = Alignment.CenterStart
                                 ) {
                                     Text(
-                                        text = "Average",
+                                        text = stringResource(Res.string.average),
                                         modifier = Modifier.rotate(-90f),
                                         textAlign = TextAlign.Center,
                                         style = MaterialTheme.typography.labelSmall,
@@ -309,7 +308,7 @@ fun AssignmentDetailScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "No student data available",
+                                        text = stringResource(Res.string.no_student_data_available),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -386,7 +385,7 @@ fun StudentLearningUnitItem(
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = Color(0xFFAED581),
+                    tint = MaterialTheme.colorScheme.surfaceContainer,
                     modifier = Modifier.size(16.dp).background(Color.White, CircleShape)
                         .padding(1.dp)
                 )

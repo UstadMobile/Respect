@@ -138,11 +138,7 @@ class AssignmentEditViewModel(
             }
 
             if(route.guid != null) {
-                val schoolUrl = accountManager.activeAccount?.school?.self
-                    ?.toString()
-                    ?.trim()
-                    ?.removeSuffix("/")
-                    ?: ""
+                val schoolUrl = accountManager.activeAccount?.school?.self?.toString()?.trim()?.removeSuffix("/")?: ""
                 val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${route.guid}"
 
                 loadEntity(

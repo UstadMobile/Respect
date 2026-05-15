@@ -287,7 +287,7 @@ fun TaskListItem(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = data?.metadata?.title?.getTitle() ?: "Loading...",
+                text = data?.metadata?.title?.getTitle() ?: "",
                 style = MaterialTheme.typography.titleSmall
             )
             Text(

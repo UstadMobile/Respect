@@ -20,10 +20,10 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
-import world.respect.datalayer.school.xapi.model.VERB_ASSIGN
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.VERB_COMPLETED
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager

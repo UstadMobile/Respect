@@ -31,7 +31,6 @@ import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
-import world.respect.datalayer.school.xapi.model.VERB_ASSIGN
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator

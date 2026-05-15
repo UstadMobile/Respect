@@ -5,7 +5,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.datalayer.school.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.*
 import kotlin.time.Clock
 import kotlin.time.Instant

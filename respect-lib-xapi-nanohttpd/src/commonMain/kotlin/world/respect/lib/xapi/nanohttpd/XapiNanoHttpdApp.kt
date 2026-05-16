@@ -13,6 +13,8 @@ import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
 import world.respect.lib.xapi.ext.put
 import world.respect.lib.xapi.model.XapiSingleItemToListSerializer
 import world.respect.lib.xapi.model.XapiStatement
@@ -79,7 +81,9 @@ class XapiNanoHttpdApp(
         session: IHTTPSession,
         pathSegments: List<String>,
     ): Response {
-        val endpointUrl = Url(UrlEncoderUtil.decode(pathSegments[1]))
+        val endpointUrl = Url(UrlEncoderUtil.decode(
+            pathSegments[ENDPOINT_SEGMENT_INDEX])
+        )
         val authentication = session.headers["authorization"]
 
         fun basicAuth(): Pair<String, String> {
@@ -90,6 +94,15 @@ class XapiNanoHttpdApp(
                 .split(":", limit = 2).let {
                     Pair(it.first(), it.last())
                 }
+        }
+
+        val nextSegment = pathSegments[ENDPOINT_SEGMENT_INDEX + 1]
+
+        val assignmentXform = nextSegment == ASSIGNMENT_XAPI_SEGMENT
+        val assignmentActivityId = if(assignmentXform) {
+            UrlEncoderUtil.decode(pathSegments[ENDPOINT_SEGMENT_INDEX + 2])
+        }else {
+            null
         }
 
         return runBlocking {
@@ -103,7 +116,7 @@ class XapiNanoHttpdApp(
                         Response.Status.NO_CONTENT,
                         "application/json",
                         ByteArrayInputStream(byteArrayOf()),
-                        0
+                        0,
                     ).also {
                         it.addXapiCORSHeaders(session)
                     }
@@ -130,7 +143,9 @@ class XapiNanoHttpdApp(
                         json.decodeFromString(
                             deserializer = XapiSingleItemToListSerializer,
                             string = it.decodeToString()
-                        )
+                        ).map { statement ->
+                            statement.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                        }
                     } ?: throw IllegalArgumentException("No Post Body")
 
                     val uuidsCreated = xapiResourceProvider(endpointUrl, authUser).post(
@@ -154,7 +169,8 @@ class XapiNanoHttpdApp(
                             } ?: throw IllegalArgumentException("Statements PUT requires statementId"),
                         statement = session.bodyAsBytes()?.decodeToString()?.let {
                             json.decodeFromString(XapiStatement.serializer(), it)
-                        } ?: throw IllegalArgumentException("No body")
+                        }?.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                            ?: throw IllegalArgumentException("No body")
                     )
 
                     newFixedLengthResponse(
@@ -185,6 +201,12 @@ class XapiNanoHttpdApp(
     companion object {
 
         const val PATH_ENDPOINT_API = "/e/"
+
+        /**
+         * Requests that put the endpoint into a path will be in the form of /e/<endpoint-url>/...
+         * so to get the endpoint itself (eg https://school.example.org/) the segment index is 1
+         */
+        const val ENDPOINT_SEGMENT_INDEX = 1
 
     }
 }

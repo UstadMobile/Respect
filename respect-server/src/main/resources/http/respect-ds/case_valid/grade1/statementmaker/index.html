@@ -20,27 +20,14 @@
             function onClickMakeStatement() {
                 console.log("Try to make a statement");
 
-                const myStatement = {
-                  "actor": {
-                    "account" : {
-                      "name": "user",
-                      "homePage": "http://localhost/"
-                    }
-                  },
-                  "verb": {
-                    "id": "http://adlnet.gov/expapi/verbs/experienced",
-                    "display": { "en-US": "experienced" }
-                  },
-                  "object": {
-                    "id": "http://example.com/activities/solo-hang-gliding",
-                    "definition": {
-                      "name": { "en-US": "Solo Hang Gliding" }
-                    }
-                  }
+                const myStatement = JSON.parse(document.getElementById("statement").value);
+                const statementWithActor = {
+                    ...myStatement,
+                    actor: XAPI.getSearchQueryParamsAsObject(location.search).actor
                 };
 
                 xapi.sendStatement({
-                    statement: myStatement
+                    statement: statementWithActor
                 });
             }
 
@@ -52,8 +39,28 @@
 
     <body>
         <button id="statement_button">
-            Make a statement7
+            Send statement
         </button>
 
+        <textarea id="statement" cols="112" rows="40" aria-label="statement">
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/experienced",
+    "display": { "en-US": "experienced" }
+  },
+  "object": {
+    "id": "http://example.com/activities/solo-hang-gliding",
+    "definition": {
+      "name": { "en-US": "Solo Hang Gliding" }
+    }
+  }
+}
+        </textarea>
     </body>
 </html>

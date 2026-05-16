@@ -537,7 +537,8 @@ class LearningUnitDetail(
     private val learningUnitManifestUrlStr: String,
     private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
-    val expectedIdentifier: String? = null
+    val expectedIdentifier: String? = null,
+    val assignmentActivityId: String? = null,
 ) : RespectAppRoute {
 
     @Transient

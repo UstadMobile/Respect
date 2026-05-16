@@ -6,12 +6,10 @@ import android.util.Log
 import androidx.core.net.toUri
 import io.github.aakira.napier.Napier
 import io.ktor.http.URLBuilder
-import io.ktor.http.Url
-import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_PARAM_NAME
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_VALUE
+import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
-import world.respect.shared.navigation.NavCommand
 
 /**
  * Implementation of LaunchAppUseCase for Android.
@@ -22,12 +20,10 @@ class LaunchAppUseCaseAndroid(
 ): LaunchAppUseCase {
 
     override suspend fun invoke(
-        app: OpdsPublication,
-        learningUnitId: Url?,
-        navigateFn: (NavCommand) -> Unit
+        request: LaunchRequest
     ) {
         val androidPackageId = null//app.android?.packageId
-        val launchUrlBase = learningUnitId?.let {
+        val launchUrlBase = request.learningUnitId?.let {
             getXapiLaunchUrlUseCase(it)
         } ?: return
         val launchUrl = URLBuilder(launchUrlBase).apply {

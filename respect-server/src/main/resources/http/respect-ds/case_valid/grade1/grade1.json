@@ -60,7 +60,7 @@
         },
         {
           "rel": "http://opds-spec.org/acquisition/open-access",
-          "href": "http://localhost/opds/case_valid/grade1/statementmaker/index.html",
+          "href": "statementmaker/index.html",
           "type": "text/html"
         }
       ],

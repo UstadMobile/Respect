@@ -133,11 +133,10 @@ class LearningUnitDetailViewModel(
                 val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
 
                 launchAppUseCase(
-                    app = respectApp,
-                    learningUnitId = launchUrl,
-                    navigateFn = {
-                        _navCommandFlow.tryEmit(it)
-                    }
+                    LaunchAppUseCase.LaunchRequest(
+                        app = respectApp,
+                        learningUnitId = launchUrl,
+                    )
                 )
             }catch(e: Throwable) {
                 Napier.w("Something wrong opening learning unit", e)

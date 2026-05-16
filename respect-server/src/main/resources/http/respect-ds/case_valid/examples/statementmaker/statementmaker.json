@@ -20,7 +20,7 @@
     }
   ],
   "images": [
-    {"href": "cover.png", "type": "image/png" }
+    {"href": "icon.png", "type": "image/png" }
   ],
   "resources": [
     {

@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "@type": "http://schema.org/Game",
+    "title": "JS Tetris",
+    "author": "Mullah Nasruddin",
+    "identifier": "https://example.app/id/jstetris",
+    "language": "en",
+    "modified": "2015-09-29T17:00:00Z"
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "jstetris.json",
+      "type": "application/opds-publication+json"
+    },
+    {
+      "rel": "http://opds-spec.org/acquisition/open-access",
+      "href": "tetris.html",
+      "type": "text/html"
+    }
+  ],
+  "images": [
+    {"href": "icon.png", "type": "image/png" }
+  ],
+  "resources": [
+    {
+      "href": "XAPI.js",
+      "type": "text/javascript"
+    }
+  ]
+}

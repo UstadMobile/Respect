@@ -24,16 +24,7 @@
             <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
 
-        <!--
-        Used to check if content will be opened using a dedicated app or the WebView. If using a
-        dedicated app then the xAPI endpoint will be set to the upstream LRS server.
 
-        If using the WebView, then we will use an embedded xAPI server.
-        -->
-        <intent>
-            <action android:name="android.intent.action.VIEW"/>
-            <data android:host="https"/>
-        </intent>
 
     </queries>
 

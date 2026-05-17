@@ -3,7 +3,10 @@ package world.respect.datalayer.db.school.xapi
 import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
+import io.ktor.client.utils.buildHeaders
+import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
+import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -41,9 +44,13 @@ import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
+import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
+import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import kotlin.time.Instant
 
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -53,6 +60,7 @@ class XapiStatementsResourceDb(
     private val json: Json,
     private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
+    private val xapiVersion: String = XAPI_VERSION,
 ) : XapiStatementsResourceLocal {
 
     suspend fun doUpsertStatement(
@@ -201,6 +209,25 @@ class XapiStatementsResourceDb(
     }
 
 
+    private fun makeXapiHeadersForStatementResult(
+        statements: List<XapiStatement>,
+        consistentThrough: Instant,
+        ascendingOrder: Boolean,
+    ) = buildHeaders {
+        set(
+            name = HttpHeaders.LastModified,
+            value = statements.lastModifiedGMTStringForRetrievedStatements(
+                ascendingOrder, consistentThrough
+            )
+        )
+
+        set(HEADER_XAPI_VERSION, xapiVersion)
+        set(
+            name = HEADER_XAPI_CONSISTENT_THROUGH,
+            value = GMTDate(consistentThrough.toEpochMilliseconds()).toString()
+        )
+    }
+
     override suspend fun post(list: List<XapiStatement>): List<Uuid> {
         val statementsWithIdsSet = list.map {
             it.copyWithIdIfNotSet()
@@ -253,6 +280,7 @@ class XapiStatementsResourceDb(
         val statementIds = listParams.statementId?.toLongPair()
         val format = listParams.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
         val ascendingOrder = listParams.ascending
+        val consistentThrough = Clock.System.now()
 
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
@@ -298,15 +326,9 @@ class XapiStatementsResourceDb(
                         more = null,
                     ),
                     metaInfo = DataLoadMetaInfo(
-                        lastModified = if(ascendingOrder && statements.isNotEmpty()) {
-                            statements.last().stored?.toEpochMilliseconds()
-                                ?: throw IllegalStateException("Stored statement must have stored set")
-                        }else if(!ascendingOrder && statements.isNotEmpty()) {
-                            statements.first().stored?.toEpochMilliseconds()
-                                ?: throw IllegalStateException("Stored statement must have stored set")
-                        }else {
-                            Clock.System.now().toEpochMilliseconds()
-                        }
+                        headers = makeXapiHeadersForStatementResult(
+                            statements, consistentThrough, ascendingOrder
+                        )
                     )
                 )
             }
@@ -359,12 +381,20 @@ class XapiStatementsResourceDb(
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
             ).map { list ->
+                val consistentThrough = Clock.System.now()
+
+                val statements = list.mapToCanonicalStatements(
+                    idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
+                )
                 DataReadyState(
                     data = XapiStatementResult(
-                        statements= list.mapToCanonicalStatements(
-                            idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
-                        ),
+                        statements= statements,
                         more = null,
+                    ),
+                    metaInfo = DataLoadMetaInfo(
+                        headers = makeXapiHeadersForStatementResult(
+                            statements, consistentThrough, listParams.ascending,
+                        )
                     )
                 )
             }
@@ -383,6 +413,9 @@ class XapiStatementsResourceDb(
 
     companion object {
         const val DEFAULT_MAX_STATEMENTS = 5_000
+
+        const val XAPI_VERSION = "1.0.3"
+
     }
 
 }

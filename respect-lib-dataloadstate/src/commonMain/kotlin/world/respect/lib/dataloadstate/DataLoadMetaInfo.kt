@@ -1,6 +1,6 @@
 package world.respect.lib.dataloadstate
 
-import com.ustadmobile.ihttp.headers.IHttpHeaders
+import io.ktor.http.Headers
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -52,7 +52,7 @@ data class DataLoadMetaInfo(
 
     val varyHeader: String? = null,
 
-    val headers: IHttpHeaders? = null,
+    val headers: Headers? = null,
 
     val permissionsLastModified: Instant? = null,
 

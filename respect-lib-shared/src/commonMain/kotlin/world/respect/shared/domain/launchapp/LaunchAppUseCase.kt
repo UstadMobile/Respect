@@ -9,10 +9,14 @@ import world.respect.shared.navigation.NavCommand
  */
 interface LaunchAppUseCase {
 
-    operator fun invoke(
-        app: OpdsPublication,
-        learningUnitId: Url?,
-        navigateFn: (NavCommand) -> Unit,
+    data class LaunchRequest(
+        val app: OpdsPublication,
+        val learningUnitId: Url?,
+        val activityId: String? = null,
+    )
+
+    suspend operator fun invoke(
+        request: LaunchRequest
     )
 
     companion object {

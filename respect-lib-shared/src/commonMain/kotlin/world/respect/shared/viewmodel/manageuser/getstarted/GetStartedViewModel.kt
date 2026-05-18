@@ -12,8 +12,8 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase

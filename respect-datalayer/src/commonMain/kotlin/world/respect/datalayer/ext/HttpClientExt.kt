@@ -54,7 +54,7 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
             validationInfoKey = validationInfoKey ?: 0,
             varyHeader = varyHeader,
             permissionsLastModified = response.permissionsLastModified(),
-            headers = response.headers.asIHttpHeaders(),
+            headers = response.headers,
         )
 
         return if(response.status == HttpStatusCode.NotModified) {

@@ -4,8 +4,8 @@ import io.github.aakira.napier.Napier
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.isLoadedOrNotModified
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.isLoadedOrNotModified
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.PullSyncStatus

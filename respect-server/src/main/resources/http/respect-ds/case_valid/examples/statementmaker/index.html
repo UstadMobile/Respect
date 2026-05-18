@@ -1,0 +1,36 @@
+<html lang="en">
+    <head>
+        <title>
+            Statement Maker
+        </title>
+
+        <script type="module" src="../../js/xapi_statement_maker.js"> </script>
+    </head>
+
+    <body>
+        <button id="statement_button">
+            Send statement
+        </button>
+
+        <textarea id="statement" cols="112" rows="40" aria-label="statement">
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/experienced",
+    "display": { "en-US": "experienced" }
+  },
+  "object": {
+    "id": "http://example.com/activities/solo-hang-gliding",
+    "definition": {
+      "name": { "en-US": "Solo Hang Gliding" }
+    }
+  }
+}
+        </textarea>
+    </body>
+</html>

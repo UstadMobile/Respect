@@ -53,6 +53,7 @@ import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.task
 import world.respect.shared.generated.resources.assignment_name
 import world.respect.shared.generated.resources.lesson_assessment
+import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.required
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -190,6 +191,9 @@ fun AssignmentEditScreen(
                         )
                     )
                 }
+            },
+            dateLabel = {
+                Text(stringResource(Res.string.due_date))
             },
             dateTestTag = "due_date",
             timeTestTag = "due_time",

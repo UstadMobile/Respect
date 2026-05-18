@@ -2,6 +2,7 @@ package world.respect.datalayer.respect.model.invite
 
 import kotlinx.serialization.Serializable
 import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.PersonRoleEnum
 
 /**
  * @property invite: The invite itself
@@ -13,6 +14,8 @@ import world.respect.datalayer.school.model.Invite2
 class RespectInviteInfo(
     val classGuid: String?=null,
     val className: String?=null,
+    val familyPersonName: String?=null,
+    val familyPersonRole: PersonRoleEnum?=null,
     val userInviteType: UserInviteType?=null,
     val invite: Invite2? = null
 ) {

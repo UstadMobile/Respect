@@ -23,5 +23,17 @@ interface AuthTokenEntityDao {
         timeNow: Long,
     ): AuthTokenEntity?
 
+    @Query("""
+        SELECT AuthTokenEntity.*
+          FROM AuthTokenEntity
+         WHERE AuthTokenEntity.atPGuid = :guid
+           AND :timeNow BETWEEN AuthTokenEntity.atTimeCreated 
+                            AND (AuthTokenEntity.atTimeCreated + (AuthTokenEntity.atTtl * 1000))
+    """)
+    suspend fun findByPersonGuid(
+        guid: String,
+        timeNow: Long,
+    ): AuthTokenEntity?
+
 
 }

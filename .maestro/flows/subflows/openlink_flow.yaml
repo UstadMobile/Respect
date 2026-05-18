@@ -7,3 +7,4 @@ onFlowStart:
     arguments:
       launchUrl: ${URL}
 
+- tapOn: "Get Started"

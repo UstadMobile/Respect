@@ -202,7 +202,7 @@ fun App(
                         topLevelItems = topLevelNavItems,
                         onProfileClick = {
                             if (activeAccount?.isChild == false) {
-                                navController.navigate(AccountList)
+                                navController.navigate(AccountList())
                             }else {
                                 coroutineScope.launch {
                                     val result = biometricAuthUseCase(
@@ -215,7 +215,7 @@ fun App(
                                     )
 
                                     if(result is BiometricAuthUseCase.BiometricResult.Success) {
-                                        navController.navigate(AccountList)
+                                        navController.navigate(AccountList())
                                     }
                                 }
                             }

@@ -18,7 +18,8 @@ data class RespectRedeemInviteRequest(
     val deviceName: String? = null,
     val deviceInfo: DeviceInfo? = null,
     val invite: Invite2,
-) {
+    val recipientType: InviteRecipientType = InviteRecipientType.NEW_USER,
+    ) {
 
     @Serializable
     data class PersonInfo(

@@ -48,14 +48,15 @@ data class Acknowledgement (
 }
 @Serializable
 data class EnterInviteCode(
-    val schoolUrlStr: String
+    val schoolUrlStr: String,
+    val personGuid: String? = null
 ) : RespectAppRoute {
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = EnterInviteCode(schoolUrl.toString())
+        fun create(schoolUrl: Url, guid: String? = null ) = EnterInviteCode(schoolUrl.toString(),guid)
     }
 
 }
@@ -85,13 +86,20 @@ object SchoolDirectoryEdit : RespectAppRoute
 @Serializable
 data class LoginScreen(
     val schoolUrlStr: String,
+    val inviteCode: String? = null
 ) : RespectAppRoute {
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = LoginScreen(schoolUrl.toString())
+        fun create(
+            schoolUrl: Url,
+            inviteCode: String? = null,
+        ) = LoginScreen(
+            schoolUrlStr = schoolUrl.toString(),
+            inviteCode = inviteCode
+        )
     }
 
 }
@@ -403,6 +411,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
+    val personGuid: String? = null
 ) : RespectAppRoute {
 
     @Transient
@@ -413,10 +422,12 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
+            guid: String? = null
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
+            personGuid = guid
         )
     }
 }
@@ -584,11 +595,15 @@ class LearningUnitViewer(
     }
 
 }
+@Serializable
+data class SelectAccount(
+    val inviteCode: String? = null,
+) : RespectAppRoute
 
 @Serializable
-object AccountList : RespectAppRoute
-
-
+data class AccountList(
+    val inviteCode: String? = null,
+) : RespectAppRoute
 /**
  * @property addToClassUid if the PersonList screen has been navigated when the user clicks
  *           add student or add teacher on the ClassDetail screen, then the classUid.
@@ -840,6 +855,11 @@ data class InvitePerson(
         val inviteUid: String,
     ): InvitePersonOptions
 
+    @Serializable
+    @SerialName("family")
+    data class FamilyInviteOptions(
+        val personUid: String
+    ) : InvitePersonOptions
 
     @Transient
     val invitePersonOptions: InvitePersonOptions = Json.decodeFromString(

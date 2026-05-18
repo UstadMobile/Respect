@@ -56,6 +56,8 @@ import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfil
 import world.respect.shared.domain.account.invite.CreateInviteUseCase
 import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteExistingUserUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteExistingUserUseCaseDb
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
 import world.respect.shared.domain.account.passkey.DecodeUserHandleUseCaseImpl
@@ -205,6 +207,7 @@ fun serverKoinModule(
             )
         }
 
+
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseServer(
                 schoolDb = get(),
@@ -305,6 +308,7 @@ fun serverKoinModule(
                 uidNumberMapper = get(),
             )
         }
+
 
         scoped<RedeemInviteUseCase> {
             val schoolScopeId = SchoolDirectoryEntryScopeId.parse(id)
@@ -409,6 +413,15 @@ fun serverKoinModule(
                 schoolPrimaryKeyGenerator = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 schoolDataSource = get(),
+            )
+        }
+        factory<RedeemInviteExistingUserUseCase> {
+
+            RedeemInviteExistingUserUseCaseDb(
+                schoolDb = get(),
+                schoolPrimaryKeyGenerator = get(),
+                schoolDataSource = get(),
+                uidNumberMapper = get(),
             )
         }
 

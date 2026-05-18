@@ -251,19 +251,29 @@ class PersonListViewModel(
     }
 
     fun onClickInvitePerson() {
+        val inviteOptions = when {
+            route.inviteUid != null -> {
+                InvitePerson.ClassInviteOptions(
+                    inviteUid = route.inviteUid
+                )
+            }
+
+            route.filterByRole in listOf(PersonRoleEnum.PARENT, PersonRoleEnum.STUDENT) && route.personGuidStr != null -> {
+                InvitePerson.FamilyInviteOptions(
+                    personUid = route.personGuidStr
+                )
+            }
+
+            else -> {
+                InvitePerson.NewUserInviteOptions(
+                    presetRole = route.filterByRole
+                )
+            }
+        }
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                InvitePerson.create(
-                    invitePersonOptions = if(route.inviteUid != null) {
-                        InvitePerson.ClassInviteOptions(
-                            inviteUid = route.inviteUid
-                        )
-                    }else {
-                        InvitePerson.NewUserInviteOptions(
-                            presetRole = route.filterByRole
-                        )
-                    }
-                )
+                InvitePerson.create(invitePersonOptions = inviteOptions)
             )
         )
     }

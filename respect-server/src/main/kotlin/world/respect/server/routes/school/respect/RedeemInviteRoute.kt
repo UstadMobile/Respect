@@ -9,7 +9,7 @@ import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 
 fun Route.RedeemInviteRoute(
-    redeemInviteUseCase: (ApplicationCall) -> RedeemInviteUseCase
+    redeemInviteUseCase: (ApplicationCall) -> RedeemInviteUseCase,
 ) {
 
     post("redeem") {

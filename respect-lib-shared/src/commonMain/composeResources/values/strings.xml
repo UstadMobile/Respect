@@ -25,6 +25,8 @@
     <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
     <string name="clazz">Class</string>
+    <string name="assigned_to">Assigned to</string>
+    <string name="assign_to">Assign to</string>
     <string name="remove_from_class">Remove from class</string>
     <string name="manage_enrollments">Manage enrollments</string>
     <string name="report">Report</string>
@@ -43,6 +45,7 @@
     <string name="downloaded">Downloaded</string>
     <string name="share">Share</string>
     <string name="assign">Assign</string>
+    <string name="bookmark">Bookmark</string>
     <string name="related_lessons">Related Lessons</string>
     <string name="duration">Duration</string>
     <string name="more_info">More Info</string>
@@ -502,8 +505,11 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Assignment tasks</string>
+    <string name="tasks">Tasks</string>
     <string name="assignment_name">Assignment name</string>
+    <string name="assignment_title">Assignment title</string>
     <string name="lesson_assessment">Lesson/assessment</string>
+    <string name="deadline">Deadline</string>
 
     <string name="due_date">Due date</string>
     <string name="family_members">Family members</string>
@@ -570,8 +576,17 @@
 
     <string name="select_host">Select Host</string>
 
+    <string name="no_tasks_selected_yet">No task selected yet.</string>
+    <string name="please_click_plus_button_to_add_one">Please click the + button to add one</string>
+
     <string name="username_already_taken">Username already taken</string>
 
     <string name="invalid_link">Invalid link</string>
+    <string name="average">Average</string>
+    <string name="no_student_data_available">No student data available</string>
+    <string name="unknown_class">Unknown Class</string>
+    <string name="task_completed">task completed</string>
+    <string name="task">Task</string>
+    <string name="student_completed">student completed</string>
 
 </resources>

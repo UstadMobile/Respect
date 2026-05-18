@@ -1,16 +1,27 @@
 package world.respect.app.view.assignment.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,19 +29,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.datetime.TimeZone
-import world.respect.app.components.respectPagingItems
-import world.respect.app.components.respectRememberPager
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.model.Assignment
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.libutil.ext.resolve
-import world.respect.shared.util.rememberFormattedDateTime
+import world.respect.libutil.util.time.toDisplayDateString
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.assigned_to
+import world.respect.shared.generated.resources.student_completed
+import world.respect.shared.generated.resources.task_completed
+import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.viewmodel.assignment.list.AssignmentListUiState
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
 
@@ -42,6 +60,7 @@ fun AssignmentListScreen(
     val uiState by viewModel.uiState.collectAsState()
     AssignmentListScreen(
         uiState = uiState,
+        onFilterSelected = viewModel::onFilterChanged,
         onClickAssignment = viewModel::onClickAssignment,
     )
 }
@@ -49,68 +68,182 @@ fun AssignmentListScreen(
 @Composable
 fun AssignmentListScreen(
     uiState: AssignmentListUiState,
+    onFilterSelected: (AssignmentListScreenFilter) -> Unit,
     onClickAssignment: (Assignment) -> Unit = { },
 ) {
-    val pager = respectRememberPager(uiState.assignments)
-    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        respectPagingItems(
-            items = lazyPagingItems,
-            key = {item, index -> item?.uid ?: index.toString() },
-            contentType = { AssignmentDataSource.ENDPOINT_NAME }
-        ) { assignment ->
-            ListItem(
-                modifier = Modifier.clickable {
-                    assignment?.also(onClickAssignment)
-                },
-                headlineContent = {
-                    Text(assignment?.title ?: "")
-                },
-                supportingContent = {
-                    val dueDateStr = rememberFormattedDateTime(
-                        timeInMillis = assignment?.deadline?.toEpochMilliseconds() ?: 0,
-                        timeZoneId = TimeZone.currentSystemDefault().id,
-                    )
-
-                    assignment?.deadline?.also {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarMonth,
-                                modifier = Modifier.size(16.dp),
-                                contentDescription = null
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            AssignmentListScreenFilter.entries.forEach { filter ->
+                FilterChip(
+                    selected = uiState.selectedFilter == filter,
+                    onClick = { onFilterSelected(filter) },
+                    label = { Text(uiState.getLabelForFilter(filter)) }, // Much cleaner!
+                    shape = RoundedCornerShape(50)
+                )
+            }
+        }
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(
+                items = uiState.assignments,
+                key = { item -> item.uid }
+            ) { row ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onClickAssignment(row.assignment) }
+                        .defaultItemPadding(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy((-12).dp) // Negative space for overlap
+                    ) {
+                        row.learningUnits.take(3).forEach { unit ->
+                            AssignmentLearningUnitIcon(
+                                manifestUrl = unit.learningUnitManifestUrl,
+                                learningUnitInfoFlow = uiState.learningUnitInfoFlow
                             )
-
-                            Spacer(Modifier.width(8.dp))
-                            Text(dueDateStr)
                         }
                     }
-                },
-                leadingContent = {
-                    val firstLearningUnit = assignment?.learningUnits?.firstOrNull()
-                    val learningUnitFlow = remember(
-                        firstLearningUnit?.learningUnitManifestUrl, uiState.learningUnitInfoFlow
-                    ) {
-                        firstLearningUnit?.learningUnitManifestUrl?.let {
-                            uiState.learningUnitInfoFlow(it)
-                        } ?: emptyFlow()
-                    }
-                    val learningUnitInfo by learningUnitFlow.collectAsState(DataLoadingState())
-                    val iconLink = learningUnitInfo.dataOrNull()?.images?.firstOrNull()
-                    val manifestUrl = firstLearningUnit?.learningUnitManifestUrl
-                    if (iconLink != null && manifestUrl != null) {
-                        AsyncImage(
-                            model = manifestUrl.resolve(iconLink.href).toString(),
-                            contentDescription = iconLink.title,
-                            modifier = Modifier.size(40.dp),
+
+                    Spacer(Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = row.title,
+                            style = MaterialTheme.typography.titleMedium
                         )
-                    }else {
-                        Spacer(Modifier.size(40.dp))
+
+                        val dueDateStr = remember(row.deadline) {
+                            row.deadline?.toDisplayDateString() ?: ""
+                        }
+
+                        if (uiState.isStudent) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarMonth,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = dueDateStr,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                                Spacer(Modifier.width(16.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.TaskAlt,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = "${row.completedCount}/${row.totalCount}" + stringResource(Res.string.task_completed),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                            Text(
+                                text = stringResource(Res.string.assigned_to) + uiState.personName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.CalendarMonth, null, Modifier.size(14.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(dueDateStr, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+
+                    if (uiState.isStudent) {
+                        val percent = if (row.totalCount > 0) {
+                            (row.completedCount.toFloat() / row.totalCount.toFloat() * 100).toInt()
+                        } else {
+                            0
+                        }
+                        Text(
+                            text = "$percent%",
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.weight(0.8f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(row.className, style = MaterialTheme.typography.bodySmall)
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.TrackChanges,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "${row.completedCount}/${row.totalCount}" + stringResource(Res.string.student_completed),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
-            )
+            }
         }
+    }
+}
+
+@Composable
+fun AssignmentLearningUnitIcon(
+    manifestUrl: Url,
+    learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>>,
+    modifier: Modifier = Modifier
+) {
+    val infoFlow = remember(manifestUrl) { learningUnitInfoFlow(manifestUrl) }
+    val state by infoFlow.collectAsState(DataLoadingState())
+    val iconLink = state.dataOrNull()?.images?.firstOrNull()
+
+    if (iconLink != null) {
+        AsyncImage(
+            model = manifestUrl.resolve(iconLink.href).toString(),
+            contentDescription = iconLink.title,
+            modifier = modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(4.dp))
+        )
+    } else {
+        Spacer(modifier.size(32.dp))
     }
 }

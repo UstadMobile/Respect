@@ -1,0 +1,166 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "003_admin_user_assigns_assignment_to_a_class_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow: "subflows/admin_add_app.yaml"
+- runFlow: "subflows/admin_add_class_with_members.yaml"
+
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "TestClass"
+- tapOn: "Assignments"
+- tapOn:
+    id: "floating_action_button"   #  +Assignment button
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Save"
+- assertVisible: "Required field"
+- tapOn: "Assignment title*"
+- inputText: "Homework 1"
+- tapOn: "Assign to"
+- tapOn: "TestClass"
+- tapOn: "Description"
+- inputText: "Hi Students, please complete this Homework on time."
+- tapOn: "Date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
+- hideKeyboard
+- tapOn: "Task"
+- assertVisible:
+    id: "app_title"
+- tapOn: "My app"
+- tapOn: "Grade 1"
+- tapOn: "Lesson 001"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "All (4)"
+- assertVisible: "Completed (0)"
+- assertVisible: "In-progress (0)"
+- assertVisible: "Not started (4)"
+- assertVisible: "Hi Students, please complete this Homework on time."
+- assertVisible: "Assigned to"
+- assertVisible: "TestClass"
+- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+- assertVisible: "StudentC User"
+- assertVisible: "StudentD User"
+- assertVisible: "Lesson 001"
+- assertVisible: "Average"
+- tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- assertVisible: "All"
+- assertVisible: "Pending (1)"
+- assertVisible: "Completed (0)"
+- assertVisible: "Homework 1"
+- tapOn: "Completed (0)"
+- assertNotVisible: "Homework 1"
+- tapOn: "Pending (1)"
+- assertVisible: "Homework 1"
+
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "studentauser"
+      PASSWORD: "test1234"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- tapOn: "Lesson 001"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 1000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+- tapOn: "Assignments"
+- assertVisible: "Homework 1"
+
+- assertVisible: "Pending (0)"
+- tapOn: "Completed (1)"
+- assertVisible: "1/1 task Completed"
+- assertVisible: "Assigned to: StudentA User"
+- assertVisible: "100%"
+- tapOn: "Homework 1"
+- assertVisible: "Hi Students, please complete this Homework on time."
+- assertVisible: "Assigned to:"
+- assertVisible: "StudentA User"
+- tapOn: "Completed (1)"
+- assertVisible: "Lesson 001"
+- assertVisible: "My app"
+- assertVisible: "100%"
+
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- tapOn: "Assignments"
+- assertVisible: "All"
+- assertVisible: "Pending (1)"
+- assertVisible: "Completed (0)"
+- assertVisible: "Homework 1"
+- assertVisible: "TestClass"
+- assertVisible: "1/4 student completed"
+- tapOn: "Homework 1"
+- assertVisible: "All (4)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (0)"
+- assertVisible: "Not started (3)"
+- assertVisible: "Hi Students, please complete this Homework on time."
+- assertVisible: "Assigned to"
+- assertVisible: "TestClass"
+- tapOn: "Completed (1)"
+- assertVisible: "StudentA User"
+- assertVisible: "Lesson 001"
+- assertVisible: "Average"
+- assertVisible: "100%"
+- tapOn:
+    id: "floating_action_button"   #  Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit assignment"
+- tapOn: "Assignment title*"
+- inputText: "Week 1"
+- tapOn: "Save"
+- assertVisible: "Homework 1 Week 1"

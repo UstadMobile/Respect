@@ -9,6 +9,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.ext.getUuidOrNull
 import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import kotlin.uuid.Uuid
@@ -93,6 +94,16 @@ interface XapiStatementsResource {
         dataLoadParams: DataLoadParams
     ): Flow<DataLoadState<XapiStatementResult>>
 
+
+    fun getAssignmentResult(
+        assignmentActivityId: String,
+    ): Flow<List<AssignmentResult>>
+
+    fun getAssignmentCompletions(
+        listParams: GetStatementParams
+    ): Flow<List<AssignmentResult>>
+
+    suspend fun getLastStoredTimestampForActivity(activityId: String): Long?
 
     companion object {
 

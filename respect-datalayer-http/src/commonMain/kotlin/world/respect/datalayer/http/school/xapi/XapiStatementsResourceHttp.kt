@@ -19,9 +19,10 @@ import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.lib.xapi.resources.setXapiGetStatementsParams
 import kotlin.uuid.Uuid
@@ -80,4 +81,19 @@ class XapiStatementsResourceHttp(
         }
     }
 
+    override fun getAssignmentResult(
+        assignmentActivityId: String,
+    ): Flow<List<AssignmentResult>> {
+        throw UnsupportedOperationException("getAssignmentResult on http NOT supported")
+    }
+
+    override fun getAssignmentCompletions(
+        listParams: GetStatementParams
+    ): Flow<List<AssignmentResult>> {
+        throw UnsupportedOperationException("getAssignmentCompletions on http NOT supported")
+    }
+
+    override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
+        throw UnsupportedOperationException("getLastStoredTimestampForActivity on http NOT supported")
+    }
 }

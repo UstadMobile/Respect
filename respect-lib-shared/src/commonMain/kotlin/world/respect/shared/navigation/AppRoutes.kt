@@ -220,6 +220,19 @@ data class ClazzEdit(
 ) : RespectAppRoute
 
 @Serializable
+data class StudentGroupingEdit(
+    val classUid: String,
+    val groupId:String?
+) : RespectAppRoute
+
+@Serializable
+data class StudentGroupingDetail(
+    val groupId: String,
+    val classId: String,
+    val statementId: String? = null
+): RespectAppRoute
+
+@Serializable
 object Report : RespectAppRoute
 
 @Serializable

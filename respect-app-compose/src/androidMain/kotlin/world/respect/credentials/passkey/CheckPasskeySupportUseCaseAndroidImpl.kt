@@ -3,7 +3,7 @@ package world.respect.credentials.passkey
 import android.os.Build
 import io.ktor.http.Url
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 
 class CheckPasskeySupportUseCaseAndroidImpl(
     private val verifyDomainUseCase: VerifyDomainUseCase,

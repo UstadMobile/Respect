@@ -88,3 +88,5 @@ object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiState
 object XapiSingleItemToListSerializer: SingleItemToListTransformer<XapiStatement>(
     XapiStatementTransformingSerializer
 )
+
+

@@ -8,7 +8,11 @@
     "modified": "2015-09-29T17:00:00Z"
   },
   "links": [
-    {"rel": "self", "href": "https://respect.world/respect-ds/case_valid/grade1/lesson001/lesson001.json", "type": "application/opds-publication+json"},
+    {
+      "rel": "self",
+      "href": "lesson001.json",
+      "type": "application/opds-publication+json"
+    },
     {"rel": "http://opds-spec.org/acquisition/open-access", "href": "lesson001.html", "type": "text/html"}
   ],
   "images": [

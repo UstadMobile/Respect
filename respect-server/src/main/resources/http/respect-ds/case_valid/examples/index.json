@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "title": "Examples"
+  },
+
+  "links": [
+    {"rel": "self", "href": "grade1.json", "type": "application/opds+json"}
+  ],
+
+  "publications": [
+    {
+      "metadata": {
+        "@type": "http://schema.org/Game",
+        "title": "Lesson 001",
+        "author": "Mullah Nasruddin",
+        "identifier": "http://example.app/id/lesson001",
+        "language": "en",
+        "modified": "2015-09-29T17:00:00Z",
+        "subject": [
+          {
+            "name": "Mathematics",
+            "scheme": "https://www.bisg.org/#bisac",
+            "code": "MAT000000"
+          }
+        ]
+      },
+      "links": [
+        {"rel": "self", "href": "lesson001/lesson001.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "http://opds-spec.org/acquisition/open-access",
+          "href": "http://localhost/opds/case_valid/grade1/lesson001/lesson001.html",
+          "type": "text/html"
+        }
+      ],
+      "images": [
+        {"href": "lesson001/cover.png", "type": "image/png"  }
+      ]
+    },
+    {
+      "metadata": {
+        "@type": "http://schema.org/Game",
+        "title": "Statement Maker",
+        "author": "Mullah Nasruddin",
+        "identifier": "https://example.app/id/statementmaker",
+        "language": "en",
+        "modified": "2015-09-29T17:00:00Z",
+        "subject": [
+          {
+            "name": "Mathematics",
+            "scheme": "https://www.bisg.org/#bisac",
+            "code": "MAT000000"
+          }
+        ]
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "statementmaker/statementmaker.json",
+          "type": "application/opds-publication+json"
+        },
+        {
+          "rel": "http://opds-spec.org/acquisition/open-access",
+          "href": "statementmaker/index.html",
+          "type": "text/html"
+        }
+      ],
+      "images": [
+        {"href": "statementmaker/icon.png", "type": "image/png"  }
+      ]
+    },
+    {
+      "metadata": {
+        "@type": "http://schema.org/Game",
+        "title": "JS Tetris",
+        "author": "Mullah Nasruddin",
+        "identifier": "https://example.app/id/jstetris",
+        "language": "en",
+        "modified": "2015-09-29T17:00:00Z",
+        "subject": [
+          {
+            "name": "Mathematics",
+            "scheme": "https://www.bisg.org/#bisac",
+            "code": "MAT000000"
+          }
+        ]
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "jstetris/jstetris.json",
+          "type": "application/opds-publication+json"
+        },
+        {
+          "rel": "http://opds-spec.org/acquisition/open-access",
+          "href": "jstetris/tetris.html",
+          "type": "text/html"
+        }
+      ],
+      "images": [
+        {"href": "jstetris/icon.png", "type": "image/png"  }
+      ]
+    }
+  ]
+}

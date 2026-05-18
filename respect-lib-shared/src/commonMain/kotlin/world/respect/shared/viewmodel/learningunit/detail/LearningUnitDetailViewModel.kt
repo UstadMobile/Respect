@@ -19,9 +19,8 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.libutil.ext.resolve
@@ -55,7 +54,6 @@ data class LearningUnitDetailUiState(
 
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    private val launchAppUseCase: LaunchAppUseCase,
     private val ustadCache: UstadCache,
     accountMananger: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
@@ -71,6 +69,8 @@ class LearningUnitDetailViewModel(
     private val route: LearningUnitDetail = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
+
+    private val launchAppUseCase: LaunchAppUseCase by inject()
 
     init {
         viewModelScope.launch {
@@ -132,25 +132,25 @@ class LearningUnitDetailViewModel(
     fun onClickOpen() {
         //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
         val respectApp = _uiState.value.app.dataOrNull() ?: return
+        viewModelScope.launch {
+            try {
+                val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
+                    link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
+                            LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
+                } ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
-        try {
-            val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
-                link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
-                        LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
-            } ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
+                val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
 
-            val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
-
-            launchAppUseCase(
-                app = respectApp,
-                learningUnitId = launchUrl,
-                navigateFn = {
-                    _navCommandFlow.tryEmit(it)
-                }
-            )
-        }catch(e: Throwable) {
-            Napier.w("Something wrong opening learning unit", e)
-            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+                launchAppUseCase(
+                    LaunchAppUseCase.LaunchRequest(
+                        app = respectApp,
+                        learningUnitId = launchUrl,
+                    )
+                )
+            }catch(e: Throwable) {
+                Napier.w("Something wrong opening learning unit", e)
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+            }
         }
     }
 

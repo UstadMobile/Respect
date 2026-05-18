@@ -23,11 +23,16 @@ import com.ustadmobile.libcache.downloader.RunDownloadJobUseCaseImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
@@ -91,6 +96,8 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp
+import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdResourceProvider
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
@@ -247,12 +254,15 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
-import world.respect.shared.domain.xapi.XapiDummyDataGenerator
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
+import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
+@DelicateCoroutinesApi
 val appKoinModule = module {
     single<Json> {
         Json {
@@ -326,11 +336,7 @@ val appKoinModule = module {
         }
     }
 
-    single<LaunchAppUseCase> {
-        LaunchAppUseCaseAndroid(
-            appContext = androidContext().applicationContext
-        )
-    }
+
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -698,6 +704,24 @@ val appKoinModule = module {
         )
     }
 
+    single<XapiNanoHttpdApp>(createdAtStart = true) {
+        XapiNanoHttpdApp(
+            port = 0,
+            json = get(),
+            xapiResourceProvider = get(),
+        ).also { nanoHttpdApp ->
+            GlobalScope.launch(Dispatchers.IO) {
+                nanoHttpdApp.start()
+                Napier.i("NanoHttpdXapi started")
+            }
+        }
+    }
+
+    single<XapiNanoHttpdResourceProvider> {
+        XapiNanoHttpdResourceProviderAndroid()
+    }
+
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -1016,6 +1040,24 @@ val appKoinModule = module {
             CreateClassUseCase(dataSource = get())
         }
 
+        scoped<GetXapiLaunchUrlUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetXapiLaunchUrlUseCaseAndroid(
+                nanoHttpdApp = get(),
+                schoolUrl = accountScopeId.schoolUrl,
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                json = get(),
+                accountManager = get(),
+            )
+        }
+
+        scoped<LaunchAppUseCase> {
+            LaunchAppUseCaseAndroid(
+                appContext = androidContext().applicationContext,
+                getXapiLaunchUrlUseCase = get(),
+            )
+        }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

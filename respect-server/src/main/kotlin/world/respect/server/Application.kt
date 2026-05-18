@@ -1,6 +1,7 @@
 package world.respect.server
 
 import io.github.aakira.napier.Napier
+import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -87,6 +88,7 @@ fun Application.module() {
 
     val wellKnownDir = File(ktorAppHomeDir(), "well-known")
     val assetLinksFile = File(wellKnownDir, "assetlinks.json")
+    val termsFile = File(wellKnownDir, "terms.html")
 
     val dirAdminFile = File(environment.config.absoluteDataDir(), DIRECTORY_ADMIN_FILENAME)
     dirAdminFile.takeIf { !it.exists() }?.also {
@@ -184,6 +186,21 @@ fun Application.module() {
             get("assetlinks.json") {
                 call.respondFile(assetLinksFile)
             }
+
+            get("terms.html") {
+                if(termsFile.exists()) {
+                    call.respondFile(termsFile)
+                }else {
+                    call.response.cacheControl(CacheControl.NoStore(null))
+
+                    call.respondText(
+                        contentType = ContentType.Text.Plain,
+                        status = HttpStatusCode.NotFound,
+                        text = "Terms/conditions not found: the server administrator can set this as per the INSTALL.md by saving terms.html into the well-known directory."
+                    )
+                }
+            }
+
             SchoolValidationRoute()
         }
 
@@ -224,6 +241,12 @@ fun Application.module() {
             }
 
             route("school") {
+                route("xapi") {
+                    authenticate(AUTH_CONFIG_SCHOOL) {
+                        XapiStatementsResourceRoute(json = json)
+                    }
+                }
+
                 route("respect") {
                     route("auth") {
                         AuthRoute()
@@ -247,11 +270,7 @@ fun Application.module() {
                         )
                     }
 
-                    route("xapi") {
-                        authenticate(AUTH_CONFIG_SCHOOL) {
-                            XapiStatementsResourceRoute(json = json)
-                        }
-                    }
+
 
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()

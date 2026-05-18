@@ -7,7 +7,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.exceptions.ForbiddenException
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.Enrollment

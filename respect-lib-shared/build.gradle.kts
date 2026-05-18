@@ -34,6 +34,7 @@ kotlin {
             api(projects.respectLibUtil)
             api(projects.respectDatalayerDb)
             api(projects.respectDatalayerHttp)
+            api(projects.respectLibXapiCore)
 
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
@@ -62,6 +63,7 @@ kotlin {
         }
 
         androidMain.dependencies {
+            api(projects.respectLibXapiNanohttpd)
             implementation(libs.androidx.preference)
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)

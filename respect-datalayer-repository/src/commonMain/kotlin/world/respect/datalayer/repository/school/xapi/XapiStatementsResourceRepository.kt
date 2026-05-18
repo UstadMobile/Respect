@@ -4,8 +4,8 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
-import world.respect.datalayer.ext.combineWithRemote
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.combineWithRemote
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal

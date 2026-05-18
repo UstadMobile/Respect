@@ -24,6 +24,8 @@ interface XapiStatementEntityDao {
     suspend fun list(
         statementIdHi: Long,
         statementIdLo: Long,
+        voidedStatementIdHi: Long,
+        voidedStatementIdLo: Long,
         agentUid: Long,
         verbUid: Long,
         activityUid: Long,
@@ -39,6 +41,8 @@ interface XapiStatementEntityDao {
     fun listAsFlow(
         statementIdHi: Long,
         statementIdLo: Long,
+        voidedStatementIdHi: Long,
+        voidedStatementIdLo: Long,
         agentUid: Long,
         verbUid: Long,
         activityUid: Long,
@@ -82,6 +86,28 @@ interface XapiStatementEntityDao {
         statementIdHi: Long,
         statementIdLo: Long,
     ): XapiTimes?
+
+    @Query("""
+        SELECT XapiStatementEntity.statementVerbUid
+          FROM XapiStatementEntity
+         WHERE XapiStatementEntity.statementIdHi = :statementIdHi
+           AND XapiStatementEntity.statementIdLo = :statementIdLo
+    """)
+    suspend fun getVerbUidNumToBeVoided(
+        statementIdHi: Long,
+        statementIdLo: Long,
+    ): Long?
+
+    @Query("""
+        UPDATE XapiStatementEntity
+           SET stmtVoid = 1
+         WHERE XapiStatementEntity.statementIdHi = :voidStmtIdHi
+           AND XapiStatementEntity.statementIdLo = :voidStmtIdLo
+    """)
+    suspend fun updateSetStatementVoided(
+        voidStmtIdHi: Long,
+        voidStmtIdLo: Long
+    )
 
 
 
@@ -127,6 +153,10 @@ interface XapiStatementEntityDao {
          WHERE (   (:statementIdHi = 0 AND :statementIdLo = 0) 
                 OR (     XapiStatementEntity.statementIdHi = :statementIdHi 
                      AND XapiStatementEntity.statementIdLo = :statementIdLo))
+           AND (   (:voidedStatementIdHi = 0 AND :voidedStatementIdLo = 0)
+                OR (     XapiStatementEntity.statementIdHi = :voidedStatementIdHi 
+                     AND XapiStatementEntity.statementIdLo = :voidedStatementIdLo
+                     AND XapiStatementEntity.stmtVoid))
            AND (:since = $SINCE_UNSET OR XapiStatementEntity.stored > :since)
            AND (:until = $UNTIL_UNSET OR XapiStatementEntity.stored <= :until)
            -- Handle agent parameter
@@ -180,6 +210,8 @@ interface XapiStatementEntityDao {
                       ) 
                )          
            AND NOT XapiStatementEntity.isSubStatement
+           AND (    NOT XapiStatementEntity.stmtVoid
+                 OR (:voidedStatementIdHi != 0 AND :voidedStatementIdLo != 0))
       ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
                CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
          LIMIT :limit      

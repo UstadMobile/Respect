@@ -28,7 +28,6 @@ import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal

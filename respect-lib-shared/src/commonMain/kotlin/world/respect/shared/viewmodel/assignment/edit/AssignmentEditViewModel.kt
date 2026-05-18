@@ -22,12 +22,12 @@ import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.isReadyAndSettled
-import world.respect.datalayer.ext.map
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.isReadyAndSettled
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res

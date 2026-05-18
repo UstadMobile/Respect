@@ -38,9 +38,9 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.model.Assignment
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString

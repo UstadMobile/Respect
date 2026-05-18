@@ -55,6 +55,10 @@ import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.xapi.assignmentDeadline
+import world.respect.shared.domain.xapi.assignmentDescription
+import world.respect.shared.domain.xapi.assignmentLearningUnits
+import world.respect.shared.domain.xapi.assignmentClassName
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
@@ -89,7 +93,7 @@ fun AssignmentDetailScreen(
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
     onClickLearningUnit: (AssignmentLearningUnitRef) -> Unit = { },
 ) {
-    val assignment = uiState.assignment.dataOrNull()
+    val assignment = uiState.xApiStatement.dataOrNull()
     val horizontalScrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -100,7 +104,7 @@ fun AssignmentDetailScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = assignment?.description ?: "",
+                    text = assignment?.assignmentDescription ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -116,11 +120,11 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
-                        val dueDateStr = remember(assignment?.deadline) {
-                            assignment?.deadline?.let { instant ->
+                        val dueDateStr = remember(assignment) {
+                            assignment?.assignmentDeadline?.let { instant ->
                                 val localDate =
                                     instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                "${localDate.day.toString().padStart(2, '0')}/" +
+                                "${localDate.dayOfMonth.toString().padStart(2, '0')}/" +
                                         "${localDate.month.number.toString().padStart(2, '0')}/" +
                                         "${localDate.year}"
                             } ?: ""
@@ -138,7 +142,7 @@ fun AssignmentDetailScreen(
                             color = Color.Gray
                         )
                         val assignedTo =
-                            if (uiState.isStudent) uiState.personName else uiState.assignmentClass.dataOrNull()?.title
+                            if (uiState.isStudent) uiState.personName else assignment?.assignmentClassName
                                 ?: "-"
                         Text(
                             text = assignedTo,
@@ -180,7 +184,7 @@ fun AssignmentDetailScreen(
         }
 
         if (uiState.isStudent) {
-            val units = assignment?.learningUnits ?: emptyList()
+            val units = assignment?.assignmentLearningUnits ?: emptyList()
             val filteredUnits = remember(uiState.filteredProgressRow, units) {
                 val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
                 units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
@@ -217,7 +221,7 @@ fun AssignmentDetailScreen(
                         .mapValues { entry -> entry.value.associateBy { it.activityId } }
                 }
 
-                val units = assignment?.learningUnits ?: emptyList()
+                val units = assignment?.assignmentLearningUnits ?: emptyList()
                 val filteredUnits = remember(uiState.filteredProgressRow, units) {
                     val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
                     units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }

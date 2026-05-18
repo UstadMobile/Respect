@@ -51,10 +51,10 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_to
@@ -63,15 +63,15 @@ import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.fingerprint
 import world.respect.shared.generated.resources.no_tasks_selected_yet
 import world.respect.shared.generated.resources.please_click_plus_button_to_add_one
-import world.respect.shared.generated.resources.lesson_assessment
-import world.respect.shared.generated.resources.assignment_name
 import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.tasks
+import world.respect.shared.domain.xapi.*
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
+import kotlin.uuid.ExperimentalUuidApi
 
 @Composable
 fun AssignmentEditScreen(
@@ -89,20 +89,20 @@ fun AssignmentEditScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
 @Composable
 fun AssignmentEditScreen(
     uiState: AssignmentEditUiState,
-    onEntityChanged: (Assignment) -> Unit,
+    onEntityChanged: (XapiStatement) -> Unit,
     onAssigneeTextChanged: (String) -> Unit,
     onAssigneeClassSelected: (Clazz) -> Unit,
     onClickAddLearningUnit: () -> Unit,
     onClickRemoveLearningUnit: (AssignmentLearningUnitRef) -> Unit,
 ) {
-    val assignment = uiState.assignment.dataOrNull()
-    val filteredOptions = if (uiState.assigneeText.isNotBlank()) {
+    val assignment = uiState.statementData.dataOrNull()
+    val filteredOptions = if (uiState.assignee.isNotBlank()) {
         uiState.classOptions.filter {
-            it.title.contains(uiState.assigneeText, ignoreCase = true)
+            it.title.contains(uiState.assignee, ignoreCase = true)
         }
     } else {
         uiState.classOptions
@@ -113,13 +113,13 @@ fun AssignmentEditScreen(
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("title"),
-            value = assignment?.title ?: "",
+            value = assignment?.assignmentTitle ?: "",
             label = {
                 Text(stringResource(Res.string.assignment_title) + "*")
             },
             onValueChange = { newTitle ->
                 assignment?.also {
-                    onEntityChanged(it.copy(title = newTitle))
+                    onEntityChanged(it.withTitle(newTitle))
                 }
             },
             supportingText = {
@@ -140,7 +140,7 @@ fun AssignmentEditScreen(
                     .defaultItemPadding()
                     .testTag("class_dropdown_textfield")
                     .menuAnchor(MenuAnchorType.PrimaryEditable),
-                value = uiState.assigneeText,
+                value = uiState.assignee,
                 label = {
                     Text(stringResource(Res.string.assign_to))
                 },
@@ -182,26 +182,24 @@ fun AssignmentEditScreen(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("description"),
-            value = assignment?.description ?: "",
+            value = assignment?.assignmentDescription ?: "",
             label = {
                 Text(stringResource(Res.string.description))
             },
             onValueChange = { newDescription ->
                 assignment?.also {
-                    onEntityChanged(it.copy(description = newDescription))
+                    onEntityChanged(it.withDescription(newDescription))
                 }
             }
         )
 
         RespectLocalDateTimeField(
             modifier = Modifier.defaultItemPadding().fillMaxWidth(),
-            value = assignment?.deadline?.toLocalDateTime(TimeZone.currentSystemDefault()),
+            value = assignment?.assignmentDeadline?.toLocalDateTime(TimeZone.currentSystemDefault()),
             onValueChanged = { newDeadline ->
                 assignment?.also {
                     onEntityChanged(
-                        it.copy(
-                            deadline = newDeadline?.toInstant(TimeZone.currentSystemDefault())
-                        )
+                        it.withDeadline(newDeadline?.toInstant(TimeZone.currentSystemDefault()))
                     )
                 }
             },
@@ -231,7 +229,7 @@ fun AssignmentEditScreen(
         }
         Spacer(Modifier.height(16.dp))
 
-        val currentTasks = assignment?.learningUnits ?: emptyList()
+        val currentTasks = assignment?.assignmentLearningUnits ?: emptyList()
 
         if (currentTasks.isEmpty()) {
             EmptyTasksIllustration()

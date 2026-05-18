@@ -18,10 +18,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
@@ -29,12 +25,25 @@ import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.map
-import world.respect.datalayer.school.model.Assignment
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.model.VERB_ASSIGN
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.xapi.XapiAssignmentConstants
+import world.respect.shared.domain.xapi.XapiDummyDataGenerator
+import world.respect.shared.domain.xapi.assignmentClassUid
+import world.respect.shared.domain.xapi.assignmentLearningUnits
+import world.respect.shared.domain.xapi.assignmentTitle
+import world.respect.shared.domain.xapi.isAssignmentStatement
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
@@ -47,16 +56,10 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.uuid.ExperimentalUuidApi
-import world.respect.lib.xapi.model.AssignmentResult
-import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import world.respect.shared.domain.xapi.XapiAssignmentMapper
-import world.respect.shared.domain.xapi.XapiDummyDataGenerator
 
 
 data class AssignmentDetailUiState(
-    val assignment: DataLoadState<Assignment> = DataLoadingState(),
-    val assignmentClass: DataLoadState<Clazz> = DataLoadingState(),
+    val xApiStatement: DataLoadState<XapiStatement> = DataLoadingState(),
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
@@ -74,7 +77,6 @@ data class AssignmentDetailUiState(
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
-    private val respectAppDataSource: RespectAppDataSource,
     private val dummyDataGenerator: XapiDummyDataGenerator,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -89,6 +91,15 @@ class AssignmentDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private var _canEdit = false
+
+    private val schoolUrl: String
+        get() = accountManager.activeAccount?.school?.self?.toString()?.trim()
+            ?.removeSuffix("/")
+            ?: ""
+
+    private val assignmentActivityId: String
+        get() = "$schoolUrl${XapiAssignmentConstants.ACTIVITY_ID_PATH_PREFIX}${route.uid}"
+
 
     init {
         _appUiState.update {
@@ -106,13 +117,8 @@ class AssignmentDetailViewModel(
             )
         }
 
-        val schoolUrl = accountManager.activeAccount?.school?.self?.toString()?.trim()
-            ?.removeSuffix("/")
-            ?: ""
-        val assignmentActivityId = "$schoolUrl/xapi/activities/assignment/${route.uid}"
-
         // Load the assignment from xAPI statements
-        val assignmentFlow = schoolDataSource.xapiStatementsResource.getAsFlow(
+        val statementsStream = schoolDataSource.xapiStatementsResource.getAsFlow(
             listParams = GetStatementParams(
                 activity = assignmentActivityId,
                 verb = VERB_ASSIGN
@@ -120,38 +126,23 @@ class AssignmentDetailViewModel(
             dataLoadParams = DataLoadParams()
         ).map { state ->
             state.map { result ->
-                result.statements
-                    .mapNotNull { XapiAssignmentMapper.toAssignment(it) }
+                result.statements.filter { it.isAssignmentStatement }
             }.firstOrNotLoaded()
         }.shareIn(viewModelScope, SharingStarted.Lazily)
 
         viewModelScope.launch {
-            assignmentFlow.collect { entity ->
+            statementsStream.collect { entity ->
                 _uiState.update {
-                    it.copy(assignment = entity)
+                    it.copy(
+                        xApiStatement = entity
+                    )
                 }
                 updateStatusCounts()
 
                 _appUiState.update {
-                    it.copy(title = entity.dataOrNull()?.title?.asUiText())
+                    it.copy(title = entity.dataOrNull()?.assignmentTitle?.asUiText())
                 }
             }
-        }
-
-        viewModelScope.launch {
-            assignmentFlow.distinctUntilChangedBy { it.dataOrNull()?.classUid }
-                .collectLatest { assignmentState ->
-                    val classUid = assignmentState.dataOrNull()?.classUid ?: return@collectLatest
-                    schoolDataSource.classDataSource.findByGuidAsFlow(
-                        guid = classUid
-                    ).collect { assignmentClazz ->
-                        _uiState.update { prev ->
-                            prev.copy(
-                                assignmentClass = assignmentClazz
-                            )
-                        }
-                    }
-                }
         }
 
         viewModelScope.launch {
@@ -175,23 +166,18 @@ class AssignmentDetailViewModel(
 
         // Load gradebook users and their progress
         viewModelScope.launch {
-            assignmentFlow.distinctUntilChangedBy { it.dataOrNull()?.classUid }
-                .collectLatest { assignmentState ->
-                    val assignment = assignmentState.dataOrNull() ?: return@collectLatest
-                    val classUid = assignment.classUid
-                    val schoolUrl = accountManager.activeAccount?.school?.self?.toString()?.trim()
-                        ?.removeSuffix("/")
-                        ?: ""
-
-                    val assignmentActivityId = "$schoolUrl/assignment/${assignment.uid}"
+            statementsStream.distinctUntilChangedBy { it.dataOrNull()?.assignmentClassUid }
+                .collectLatest { statementState ->
+                    val xapiStatement = statementState.dataOrNull() ?: return@collectLatest
+                    val activityId = (xapiStatement.`object` as? XapiActivity)?.id ?: ""
 
                     //TODO NEED TO REMOVE THIS
 
                     // Get all students
                     schoolDataSource.personDataSource.list(
                         loadParams = DataLoadParams(),
-                        params = world.respect.datalayer.school.PersonDataSource.GetListParams(
-                            filterByClazzUid = classUid,
+                        params = PersonDataSource.GetListParams(
+                            filterByClazzUid = xapiStatement.assignmentClassUid,
                             filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT
                         )
                     ).dataOrNull()?.let { students ->
@@ -199,7 +185,7 @@ class AssignmentDetailViewModel(
                         // Generate dummy statements using the generator
                         val dummyStatements = dummyDataGenerator.generateDummyStatements(
                             students = students,
-                            assignment = assignment,
+                            assignment = xapiStatement,
                             schoolUrl = schoolUrl
                         )
 
@@ -209,7 +195,7 @@ class AssignmentDetailViewModel(
                         // Observe progress
                         schoolDataSource.xapiStatementsResource
                             .getAssignmentResult(
-                                assignmentActivityId = assignmentActivityId,
+                                assignmentActivityId = activityId,
                             )
                             .collect { progressList ->
                                 _uiState.update {
@@ -229,15 +215,19 @@ class AssignmentDetailViewModel(
         val filtered = when (filter) {
             AssignmentStatusFilter.ALL -> fullList
             AssignmentStatusFilter.COMPLETED -> fullList.filter { it.completion == true }
-            AssignmentStatusFilter.IN_PROGRESS -> fullList.filter { it.completion == false && (it.progress ?: 0) > 0 }
-            AssignmentStatusFilter.NOT_STARTED -> fullList.filter {it.completion == false && (it.progress== null)}
+            AssignmentStatusFilter.IN_PROGRESS -> fullList.filter {
+                it.completion == false && (it.progress ?: 0) > 0
+            }
+
+            AssignmentStatusFilter.NOT_STARTED -> fullList.filter { it.completion == false && (it.progress == null) }
         }
         _uiState.update { it.copy(filteredProgressRow = filtered) }
 
     }
 
     private fun updateStatusCounts() {
-        val units = _uiState.value.assignment.dataOrNull()?.learningUnits ?: emptyList()
+        val units =
+            _uiState.value.xApiStatement.dataOrNull()?.assignmentLearningUnits ?: emptyList()
         val progressByStudent = _uiState.value.assignmentProgressRow.groupBy { it.personUid }
 
         val statusCounts = progressByStudent.values
@@ -256,8 +246,10 @@ class AssignmentDetailViewModel(
     ): AssignmentStatusFilter = when {
         results.size == units.size && units.isNotEmpty() && results.all { it.completion == true } ->
             AssignmentStatusFilter.COMPLETED
+
         results.any { it.completion == true || (it.progress ?: 0) > 0 } ->
             AssignmentStatusFilter.IN_PROGRESS
+
         else -> AssignmentStatusFilter.NOT_STARTED
     }
 

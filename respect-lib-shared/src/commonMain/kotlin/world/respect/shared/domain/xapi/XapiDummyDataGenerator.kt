@@ -1,6 +1,5 @@
 package world.respect.shared.domain.xapi
 
-import world.respect.datalayer.school.model.Assignment
 import world.respect.datalayer.school.model.Person
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
@@ -22,13 +21,13 @@ class XapiDummyDataGenerator {
     
     fun generateDummyStatements(
         students: List<Person>,
-        assignment: Assignment,
+        assignment: XapiStatement,
         schoolUrl: String
     ): List<XapiStatement> {
-        val assignmentActivityId = "$schoolUrl/assignment/${assignment.uid}"
+        val assignmentActivityId = (assignment.`object` as? XapiActivity)?.id ?: ""
         
         return students.flatMap { student ->
-            assignment.learningUnits.map { ref ->
+            assignment.assignmentLearningUnits.map { ref ->
                 XapiStatement(
                     id = Uuid.random(),
                     actor = XapiAgent(

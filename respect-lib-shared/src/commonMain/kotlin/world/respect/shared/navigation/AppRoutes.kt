@@ -556,12 +556,14 @@ class LearningUnitDetail(
             learningUnitManifestUrl: Url,
             appManifestUrl: Url,
             refererUrl: Url? = null,
-            expectedIdentifier: String? = null
+            expectedIdentifier: String? = null,
+            assignmentActivityId: String? = null,
         ) = LearningUnitDetail(
             learningUnitManifestUrlStr = learningUnitManifestUrl.toString(),
             appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
+            assignmentActivityId = assignmentActivityId,
         )
 
     }

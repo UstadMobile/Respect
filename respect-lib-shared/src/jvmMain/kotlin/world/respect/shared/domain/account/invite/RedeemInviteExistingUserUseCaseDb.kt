@@ -9,6 +9,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.datalayer.school.ext.accepterEnrollmentRole
+import world.respect.datalayer.school.ext.copyWithClassName
 import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.ext.primaryRole
@@ -79,6 +80,9 @@ class RedeemInviteExistingUserUseCaseDb(
                     "Sorry. Invalid invitation: not available for your user type."
                 ).withHttpStatus(400)
             }
+            val className = schoolDb.getClassEntityDao()
+                .findByGuid(uidNumberMapper(inviteFromDb.classUid))?.clazz?.cTitle
+
             schoolDataSource.enrollmentDataSource.updateLocal(
                 listOf(
                     Enrollment(
@@ -92,7 +96,14 @@ class RedeemInviteExistingUserUseCaseDb(
                         beginDate = Clock.System.now().toLocalDateTime(
                             TimeZone.currentSystemDefault()
                         ).date
-                    )
+                    ).let {
+                        if (className != null) {
+                            it.copyWithClassName(className)
+                        } else {
+                            it
+                        }
+                    }
+
                 )
             )
         }

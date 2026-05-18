@@ -38,7 +38,6 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
-import world.respect.server.account.invite.GetClassUseCaseRoute
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
@@ -255,11 +254,7 @@ fun Application.module() {
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
-                    route("class"){
-                        GetClassUseCaseRoute(
-                            getClassUseCase = { it.getSchoolKoinScope().get() }
-                        )
-                    }
+
                     route("username"){
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }

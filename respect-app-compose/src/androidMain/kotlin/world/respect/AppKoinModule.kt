@@ -103,8 +103,6 @@ import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.child.AddChildAccountUseCaseClient
-import world.respect.shared.domain.account.child.GetClassUseCase
-import world.respect.shared.domain.account.child.GetClassUseCaseClient
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
@@ -777,13 +775,7 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-        scoped<GetClassUseCase> {
-            GetClassUseCaseClient(
-                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
-                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
-                httpClient = get(),
-            )
-        }
+
 
         scoped<CheckUsernameUniqueUseCase> {
             CheckUsernameUniqueUseCaseClient(

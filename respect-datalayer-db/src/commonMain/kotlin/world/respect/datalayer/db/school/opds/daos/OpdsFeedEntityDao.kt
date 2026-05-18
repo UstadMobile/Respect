@@ -64,6 +64,14 @@ abstract class OpdsFeedEntityDao {
         urlHashes: List<Long>
     ): List<OpdsFeedEntity>
 
-
+    @Query(
+        """
+        SELECT OpdsFeedEntity.*
+          FROM OpdsFeedEntity
+        WHERE ofeUrl LIKE :urlPrefix || '%' ESCAPE '\'
+         ORDER BY ofeStored DESC
+    """
+    )
+    abstract fun findByUrlPrefixAsFlow(urlPrefix: String): Flow<List<OpdsFeedEntity>>
 
 }

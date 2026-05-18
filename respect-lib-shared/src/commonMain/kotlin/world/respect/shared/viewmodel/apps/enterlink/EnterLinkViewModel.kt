@@ -1,6 +1,7 @@
 package world.respect.shared.viewmodel.apps.enterlink
 
 import androidx.lifecycle.SavedStateHandle
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +20,12 @@ import world.respect.datalayer.DataErrorResult
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.sharelink.CreatePlaylistShareLinkUseCase
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.util.ext.asUiText
 import kotlin.getValue
 
@@ -64,6 +69,17 @@ class EnterLinkViewModel(
         launchWithLoadingIndicator {
             try {
                 val linkUrl = Url(uiState.value.linkUrl)
+
+                if (isPlaylistShareLink(linkUrl)) {
+                    val playlistUrl = resolvePlaylistUrlFromShareLink(linkUrl)
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            PlaylistDetail.create(playlistUrl)
+                        )
+                    )
+                    return@launchWithLoadingIndicator
+                }
+
                 val appResult = schoolDataSource.opdsPublicationDataSource.getByUrl(
                     url = linkUrl,
                     params = DataLoadParams(),
@@ -90,4 +106,21 @@ class EnterLinkViewModel(
         }
     }
 
-}
+    private fun isPlaylistShareLink(url: Url): Boolean {
+        val segments = url.pathSegments.filter { it.isNotBlank() }
+        return segments.size >= 3 &&
+                segments[segments.size - 3] == RESPECT_SCHOOL_LINK_SEGMENT &&
+                segments[segments.size - 2] == CreatePlaylistShareLinkUseCase.PATH
+    }
+
+    private fun resolvePlaylistUrlFromShareLink(shareLink: Url): Url {
+        val playlistUuid = shareLink.rawSegments.last { it.isNotBlank() }
+        return URLBuilder(shareLink).apply {
+            pathSegments = shareLink.pathSegments
+                .filter { it.isNotBlank() }
+                .dropLast(3) +
+                    listOf(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME, playlistUuid)
+        }.build()
+    }
+    }
+

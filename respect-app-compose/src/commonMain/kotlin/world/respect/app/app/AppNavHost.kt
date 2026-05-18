@@ -17,13 +17,12 @@ import world.respect.app.view.assignment.list.AssignmentListScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
-import world.respect.app.view.curriculum.mapping.edit.CurriculumMappingEditScreenForViewModel
-import world.respect.app.view.curriculum.mapping.list.CurriculumMappingListScreenForViewModel
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
+import world.respect.app.view.learningunit.list.PlaylistDetailScreenForViewModel
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -49,6 +48,10 @@ import world.respect.app.view.person.passkeyList.PasskeyListScreen
 import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
+import world.respect.app.view.playlists.mapping.edit.ExternalLinkScreenForViewModel
+import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
+import world.respect.app.view.playlists.mapping.list.PlaylistListScreenForViewModel
+import world.respect.app.view.playlists.mapping.share.PlaylistShareScreenForViewModel
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -77,8 +80,6 @@ import world.respect.shared.navigation.CopyCode
 import world.respect.shared.navigation.CreateAccount
 import world.respect.shared.navigation.CreateAccountSetPassword
 import world.respect.shared.navigation.CreateAccountSetUsername
-import world.respect.shared.navigation.CurriculumMappingEdit
-import world.respect.shared.navigation.CurriculumMappingList
 import world.respect.shared.navigation.EnrollmentEdit
 import world.respect.shared.navigation.EnrollmentList
 import world.respect.shared.navigation.EnterLink
@@ -90,6 +91,7 @@ import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.EnterInviteCode
+import world.respect.shared.navigation.ExternalLinkEdit
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
@@ -102,6 +104,10 @@ import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.PlaylistDetail
+import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.PlaylistList
+import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.navigation.QrCode
 import world.respect.shared.navigation.Report
 import world.respect.shared.navigation.ReportDetail
@@ -127,8 +133,6 @@ import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
 import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
@@ -158,7 +162,6 @@ import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditVi
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
-
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -168,7 +171,6 @@ fun AppNavHost(
     onSetAppUiState: (AppUiState) -> Unit,
     modifier: Modifier,
 ) {
-
     NavHost(
         navController = navController,
         startDestination = Acknowledgement(),
@@ -182,14 +184,14 @@ fun AppNavHost(
             AcknowledgementScreen(viewModel)
         }
 
-        composable<Onboarding>{
+        composable<Onboarding> {
             val viewModel: OnboardingViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-
             OnboardingScreen(viewModel)
         }
+
         composable<LoginScreen> {
             val viewModel: LoginViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -207,12 +209,9 @@ fun AppNavHost(
         }
 
         composable<RespectAppLauncher> {
-            val viewModel: AppLauncherViewModel = respectViewModel(
+            HomeScreen(
+                respectNavController = respectNavController,
                 onSetAppUiState = onSetAppUiState,
-                navController = respectNavController,
-            )
-            AppLauncherScreen(
-                viewModel = viewModel
             )
         }
 
@@ -228,9 +227,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            AppsDetailScreen(
-                viewModel = viewModel
-            )
+            AppsDetailScreen(viewModel = viewModel)
         }
 
         composable<AssignmentList> {
@@ -265,9 +262,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ClazzListScreen(
-                viewModel = viewModel
-            )
+            ClazzListScreen(viewModel = viewModel)
         }
 
         composable<ClazzEdit> {
@@ -275,9 +270,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ClazzEditScreen(
-                viewModel = viewModel
-            )
+            ClazzEditScreen(viewModel = viewModel)
         }
 
         composable<ClazzDetail> {
@@ -285,9 +278,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            ClazzDetailScreen(
-                viewModel = viewModel
-            )
+            ClazzDetailScreen(viewModel = viewModel)
         }
 
         composable<EnrollmentList> {
@@ -295,9 +286,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            EnrollmentListScreen(
-                viewModel = viewModel
-            )
+            EnrollmentListScreen(viewModel = viewModel)
         }
 
         composable<EnrollmentEdit> {
@@ -305,9 +294,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            EnrollmentEditScreen(
-                viewModel = viewModel
-            )
+            EnrollmentEditScreen(viewModel = viewModel)
         }
 
         composable<ReportDetail> {
@@ -317,6 +304,7 @@ fun AppNavHost(
             )
             ReportDetailScreen(navController = navController, viewModel = viewModel)
         }
+
         composable<ReportEdit> {
             val viewModel: ReportEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -324,6 +312,7 @@ fun AppNavHost(
             )
             ReportEditScreen(viewModel = viewModel)
         }
+
         composable<Report> {
             val viewModel: ReportListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -331,6 +320,7 @@ fun AppNavHost(
             )
             ReportListScreen(viewModel = viewModel)
         }
+
         composable<ReportTemplateList> {
             val viewModel: ReportTemplateListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -338,6 +328,7 @@ fun AppNavHost(
             )
             ReportTemplateListScreen(viewModel = viewModel)
         }
+
         composable<IndictorEdit> {
             val viewModel: IndicatorEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -345,6 +336,7 @@ fun AppNavHost(
             )
             IndictorEditScreen(viewModel = viewModel)
         }
+
         composable<ReportEditFilter> {
             val viewModel: ReportFilterEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -352,6 +344,7 @@ fun AppNavHost(
             )
             ReportFilterEditScreen(navController = navController, viewModel = viewModel)
         }
+
         composable<IndicatorList> {
             val viewModel: IndicatorListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -359,6 +352,7 @@ fun AppNavHost(
             )
             IndicatorListScreen(viewModel = viewModel)
         }
+
         composable<IndicatorDetail> {
             val viewModel: IndicatorDetailViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -374,23 +368,21 @@ fun AppNavHost(
             )
             HowPasskeyWorksScreen(viewModel = viewModel)
         }
+
         composable<RespectAppList> {
             val viewModel: AppListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            AppListScreen(
-                viewModel = viewModel
-            )
+            AppListScreen(viewModel = viewModel)
         }
+
         composable<EnterLink> {
             val viewModel: EnterLinkViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            EnterLinkScreen(
-                viewModel = viewModel
-            )
+            EnterLinkScreen(viewModel = viewModel)
         }
 
         composable<GetStartedScreen> {
@@ -414,9 +406,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            LearningUnitListScreen(
-                viewModel = viewModel
-            )
+            LearningUnitListScreen(viewModel = viewModel)
         }
 
         composable<OtherOptionsSignup> {
@@ -440,9 +430,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            LearningUnitDetailScreen(
-                viewModel = viewModel
-            )
+            LearningUnitDetailScreen(viewModel = viewModel)
         }
 
         composable<SignupScreen> {
@@ -450,9 +438,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            SignupScreen(
-                viewModel = viewModel
-            )
+            SignupScreen(viewModel = viewModel)
         }
 
         composable<AcceptInvite> {
@@ -460,9 +446,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            AcceptInviteScreen(
-                viewModel = viewModel
-            )
+            AcceptInviteScreen(viewModel = viewModel)
         }
 
         composable<TermsAndCondition> {
@@ -470,9 +454,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            TermsAndConditionScreen(
-                viewModel = viewModel
-            )
+            TermsAndConditionScreen(viewModel = viewModel)
         }
 
         composable<CreateAccount> {
@@ -480,9 +462,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            CreateAccountScreen(
-                viewModel = viewModel
-            )
+            CreateAccountScreen(viewModel = viewModel)
         }
 
         composable<WaitingForApproval> {
@@ -490,9 +470,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            WaitingForApprovalScreen(
-                viewModel = viewModel
-            )
+            WaitingForApprovalScreen(viewModel = viewModel)
         }
 
         composable<AccountList> {
@@ -530,6 +508,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<PasskeyList> {
             PasskeyListScreen(
                 viewModel = respectViewModel(
@@ -547,15 +526,15 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<Settings> {
             val viewModel: SettingsViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            SettingsScreenForViewModel(
-                viewModel = viewModel
-            )
+            SettingsScreenForViewModel(viewModel = viewModel)
         }
+
         composable<ScanQRCode> {
             ScanQRCodeScreen(
                 viewModel = respectViewModel(
@@ -565,40 +544,62 @@ fun AppNavHost(
             )
         }
 
-        composable<CurriculumMappingList> {
-            val viewModel: CurriculumMappingListViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            CurriculumMappingListScreenForViewModel(
-                viewModel = viewModel
+        composable<PlaylistList> {
+            PlaylistListScreenForViewModel(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
             )
         }
 
-        composable<CurriculumMappingEdit> {
-            val viewModel: CurriculumMappingEditViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
-            )
-            CurriculumMappingEditScreenForViewModel(
-                viewModel = viewModel
+        composable<PlaylistDetail> {
+            PlaylistDetailScreenForViewModel(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
             )
         }
-        composable<SchoolDirectoryList>{
+
+        composable<PlaylistEdit> {
+            PlaylistEditScreenForViewModel(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<PlaylistShare> {
+            PlaylistShareScreenForViewModel(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<ExternalLinkEdit> {
+            ExternalLinkScreenForViewModel(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<SchoolDirectoryList> {
             val viewModel: SchoolDirectoryListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-
             SchoolDirectoryListScreen(viewModel)
         }
 
-        composable<SchoolDirectoryEdit>{
+        composable<SchoolDirectoryEdit> {
             val viewModel: SchoolDirectoryEditViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-
             SchoolDirectoryEditScreen(viewModel)
         }
 
@@ -657,6 +658,3 @@ fun AppNavHost(
         }
     }
 }
-
-
-

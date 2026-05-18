@@ -22,14 +22,11 @@ onFlowComplete:
 - launchApp:
     arguments:
       respect_directory: ${output.SCHOOL_URL}
-
 - tapOn: "Get Started"
-
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
-
 - tapOn:
     id: "username"
 - inputText: "teacheruser"
@@ -41,7 +38,7 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -73,11 +70,15 @@ onFlowComplete:
 - tapOn: "My app"
 - tapOn: "Grade 1"
 - tapOn: "Lesson 001"
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- assertVisible: "Lesson 001"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
 - assertVisible: "Lesson 001"
-- back
+- tapOn: "Assignments"
 - assertVisible: "Homework 1"
 

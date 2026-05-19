@@ -261,13 +261,12 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    } catch (e: Throwable) {
+                    }catch(e: Throwable) {
                         e.printStackTrace()
                     }
                 }
             }
         }
-
     }
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
@@ -378,9 +377,9 @@ class ClazzDetailViewModel(
                 }.map {
                     it.copy(
                         lastModified = modTime,
-                        status = if (it.beginDate == today) {
+                        status = if(it.beginDate == today) {
                             StatusEnum.TO_BE_DELETED //probably was just added by mistake
-                        } else {
+                        }else {
                             it.status
                         },
                         endDate = today,
@@ -390,7 +389,7 @@ class ClazzDetailViewModel(
 
                 schoolDataSource.enrollmentDataSource.store(enrollmentsToStore)
 
-            } catch (e: Throwable) {
+            }catch(e: Throwable) {
                 //do something
                 Napier.e("onClickRemovePersonFromClass ERROR", throwable = e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))

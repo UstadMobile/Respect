@@ -220,8 +220,10 @@ class AssignmentEditViewModel(
         }
     }
 
-    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> = flow {
-        emit(schoolDataSource.opdsPublicationDataSource.getByUrl(url, DataLoadParams()))
+    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+            url = url, params = DataLoadParams(), null, null
+        )
     }
 
     fun onAssigneeClassSelected(clazz: Clazz) {

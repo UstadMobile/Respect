@@ -5,13 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -49,24 +52,30 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.xapi.activityDefinitionTitle
+import world.respect.shared.domain.xapi.assignmentDeadline
+import world.respect.shared.domain.xapi.assignmentDescription
+import world.respect.shared.domain.xapi.assignmentLearningUnits
+import world.respect.shared.domain.xapi.withDeadline
+import world.respect.shared.domain.xapi.withDescription
+import world.respect.shared.domain.xapi.withTitle
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_to
 import world.respect.shared.generated.resources.assignment_title
 import world.respect.shared.generated.resources.description
+import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.fingerprint
 import world.respect.shared.generated.resources.no_tasks_selected_yet
 import world.respect.shared.generated.resources.please_click_plus_button_to_add_one
-import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.tasks
-import world.respect.shared.domain.xapi.*
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
@@ -109,7 +118,9 @@ fun AssignmentEditScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("title"),

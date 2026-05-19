@@ -456,7 +456,6 @@ class ClazzDetailViewModel(
                 }
                 .distinctBy { it.first }
                 .map { it.second }
-                .filter { it.account?.name != null }
 
             _uiState.update { prev ->
                 prev.copy(groups = latestGroups)

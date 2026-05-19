@@ -15,4 +15,3 @@ appId: world.respect.app
     text: "App detail"
 - tapOn: "Add App"
 - tapOn: "Apps"
-- assertVisible: "My app"

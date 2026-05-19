@@ -84,16 +84,16 @@ class XapiStatementsResourceHttp(
     override fun getAssignmentResult(
         assignmentActivityId: String,
     ): Flow<List<AssignmentResult>> {
-        throw UnsupportedOperationException("getAssignmentResult on http NOT supported")
+        throw UnsupportedOperationException("getAssignmentResult on http NOT supported - this operation is only supported on local database source")
     }
 
     override fun getAssignmentCompletions(
         listParams: GetStatementParams
     ): Flow<List<AssignmentResult>> {
-        throw UnsupportedOperationException("getAssignmentCompletions on http NOT supported")
+        throw UnsupportedOperationException("getAssignmentCompletions on http NOT supported - this operation is only supported on local database source")
     }
 
     override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
-        throw UnsupportedOperationException("getLastStoredTimestampForActivity on http NOT supported")
+        throw UnsupportedOperationException("getLastStoredTimestampForActivity on http NOT supported - this operation is only supported on local database source")
     }
 }

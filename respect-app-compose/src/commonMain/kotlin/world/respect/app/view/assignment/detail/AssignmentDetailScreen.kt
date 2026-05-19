@@ -58,7 +58,6 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.assignmentLearningUnits
-import world.respect.shared.domain.xapi.assignmentClassName
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
@@ -141,9 +140,7 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
-                        val assignedTo =
-                            if (uiState.isStudent) uiState.personName else assignment?.assignmentClassName
-                                ?: "-"
+                        val assignedTo = if (uiState.isStudent) uiState.personName else assignment?.actor?.name.orEmpty()
                         Text(
                             text = assignedTo,
                             style = MaterialTheme.typography.bodySmall,

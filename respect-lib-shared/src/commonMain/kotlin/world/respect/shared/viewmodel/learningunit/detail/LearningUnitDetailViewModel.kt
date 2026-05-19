@@ -182,6 +182,7 @@ class LearningUnitDetailViewModel(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
                     uid = null,
+                    assignmentActivityId = null,
                     learningUnitSelected = LearningUnitSelection(
                         learningUnitManifestUrl = route.learningUnitManifestUrl,
                         selectedPublication = publicationVal,

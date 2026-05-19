@@ -26,6 +26,7 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.VERB_COMPLETED
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
 import world.respect.shared.domain.xapi.XapiAssignmentMapper
@@ -39,6 +40,7 @@ import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.ACTIVITY_ID_PATH
 import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentRow(
@@ -62,7 +64,7 @@ data class AssignmentListUiState(
     val personName: String = "",
     val completedCount: Int = 0,
     val totalCount: Int = 0,
-){
+) {
     /**
      * Returns the display label for a given filter based on current state counts.
      */
@@ -132,9 +134,7 @@ class AssignmentListViewModel(
     }
 
     private fun loadData(sessionAndPerson: RespectSessionAndPerson?) {
-        val schoolUrl = sessionAndPerson?.session?.account?.school?.self?.toString()?.trim()
-            ?.removeSuffix(PATH_SEPARATOR) ?: EMPTY_STRING
-
+        val schoolUrl = sessionAndPerson?.session?.account?.school?.self
         viewModelScope.launch {
             val state = schoolDataSource.xapiStatementsResource.get(
                 listParams = GetStatementParams(
@@ -149,7 +149,8 @@ class AssignmentListViewModel(
 
             // Map xAPI Statements directly to AssignmentRow UI Model
             allRows = statements.mapNotNull { statement ->
-                val assignment = XapiAssignmentMapper.toAssignment(statement) ?: return@mapNotNull null
+                val assignment =
+                    XapiAssignmentMapper.toAssignment(statement) ?: return@mapNotNull null
                 AssignmentRow(
                     assignment = assignment,
                     className = statement.actor.name ?: UNKNOWN_CLASS_NAME
@@ -168,7 +169,8 @@ class AssignmentListViewModel(
 
                     // Update rows with completion data
                     allRows = allRows.map { row ->
-                        val assignmentActivityId = "$schoolUrl$XAPI_ASSIGNMENT_BASE_PATH${row.assignment.uid}"
+                        val assignmentActivityId =
+                            "$schoolUrl$XAPI_ASSIGNMENT_BASE_PATH${row.assignment.uid}"
                         val results = completionsByAssignment[assignmentActivityId] ?: emptyList()
                         val students = results.distinctBy { it.personUid }
                         val completed = students.count { it.completion == true }
@@ -209,11 +211,31 @@ class AssignmentListViewModel(
     }
 
     fun onClickAssignment(assignment: Assignment) {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(AssignmentDetail(assignment.uid)))
+        val schoolUrl = accountManager.activeAccount?.school?.self
+        val assignmentActivityId = requireNotNull(schoolUrl) { "Missing schoolUrl" }
+            .appendEndpointSegments(ACTIVITY_ID_PATH, assignment.uid)
+            .toString()
+        println("<<<<AssignmentActivityId: $assignmentActivityId")
+        println("<<<<Assignment: ${assignment.uid}")
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                AssignmentDetail(
+                    uid = assignment.uid,
+                    assignmentActivityId = assignmentActivityId
+                )
+            )
+        )
     }
 
     fun onClickAdd() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(AssignmentEdit.create(uid = null)))
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                AssignmentEdit.create(
+                    uid = null,
+                    assignmentActivityId = null
+                )
+            )
+        )
     }
 
     fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {

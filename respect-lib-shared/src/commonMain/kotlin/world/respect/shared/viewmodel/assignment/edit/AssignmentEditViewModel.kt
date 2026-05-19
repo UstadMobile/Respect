@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -50,7 +51,9 @@ import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.lib.xapi.model.*
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.xapi.*
+import world.respect.libutil.ext.appendEndpointSegments
 import kotlin.time.Clock
+import kotlin.toString
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -60,7 +63,11 @@ data class AssignmentEditUiState(
     val nameError: UiText? = null,
     val classOptions: List<Clazz> = emptyList(),
     val classError: UiText? = null,
-    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
+    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+        flowOf(
+            DataLoadingState()
+        )
+    },
 ) {
     val fieldsEnabled: Boolean
         get() = statementData.isReadyAndSettled()
@@ -91,9 +98,7 @@ class AssignmentEditViewModel(
 
     private val uid = route.guid ?: Uuid.random().toString()
 
-    private val schoolUrl: String
-        get() = accountManager.activeAccount?.school?.self?.toString()?.trim()?.removeSuffix("/")
-            ?: ""
+    val schoolUrl = accountManager.activeAccount?.school?.self
 
     private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
         return AssignmentLearningUnitRef(
@@ -101,6 +106,12 @@ class AssignmentEditViewModel(
             appManifestUrl = this.appManifestUrl,
         )
     }
+    private val assignmentActivityId = route.assignmentActivityId ?: run {
+        requireNotNull(schoolUrl) { "Missing schoolUrl" }
+            .appendEndpointSegments(ACTIVITY_ID_PATH, uid)
+            .toString()
+    }
+
 
     init {
         _appUiState.update { prev ->
@@ -119,7 +130,6 @@ class AssignmentEditViewModel(
                 hideBottomNavigation = true,
             )
         }
-
         launchWithLoadingIndicator {
             val classes = schoolDataSource.classDataSource.list(
                 DataLoadParams(),
@@ -138,35 +148,39 @@ class AssignmentEditViewModel(
             val instructor = XapiAgent(
                 name = currentPerson.fullName(),
                 account = XapiAccount(
-                    homePage = schoolUrl,
+                    homePage = schoolUrl.toString(),
                     name = currentPerson.guid
                 ),
                 objectType = XapiObjectType.Agent
             )
 
             if (route.guid != null) {
-                val assignmentActivityId = "$schoolUrl$XAPI_ASSIGNMENT_ACTIVITY_PREFIX${route.guid}"
-
                 loadEntity(
                     json = json,
                     serializer = XapiStatement.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.xapiStatementsResource.getAsFlow(
+                        schoolDataSource.xapiStatementsResource.get(
                             listParams = GetStatementParams(
                                 activity = assignmentActivityId,
                                 verb = VERB_ASSIGN
                             ),
                             dataLoadParams = params
-                        ).first().map { result ->
-                            result.statements.firstOrNull { it.isAssignmentStatement }
-                                ?: throw IllegalStateException(ERROR_ASSIGNMENT_NOT_FOUND)
+                        ).map { result ->
+                            println("<<<<Result: $result")
+                            result.statements
+                                .filter { it.isAssignmentStatement }
+                                .maxByOrNull {
+                                    (it.timestamp ?: it.stored)?.toEpochMilliseconds()
+                                        ?: Long.MIN_VALUE
+                                }
+                                ?: throw IllegalStateException()
                         }
                     },
                     uiUpdateFn = { entity ->
                         _uiState.update { prev ->
                             prev.copy(
                                 statementData = entity,
-                                assignee = entity.dataOrNull()?.assignmentClassName ?: ""
+                                assignee = entity.dataOrNull()?.actor?.name.orEmpty()
                             )
                         }
                     }
@@ -176,8 +190,7 @@ class AssignmentEditViewModel(
                     prev.copy(
                         statementData = DataReadyState(
                             createBlankAssignmentStatement(
-                                uid = uid,
-                                schoolUrl = schoolUrl,
+                                assignmentActivityId = assignmentActivityId,
                                 instructor = instructor
                             ).let { stmt ->
                                 route.learningUnitSelected?.let {
@@ -210,10 +223,8 @@ class AssignmentEditViewModel(
         }
     }
 
-    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
-        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-            url = url, params = DataLoadParams(), null, null
-        )
+    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> = flow {
+        emit(schoolDataSource.opdsPublicationDataSource.getByUrl(url, DataLoadParams()))
     }
 
     fun onAssigneeClassSelected(clazz: Clazz) {
@@ -317,7 +328,10 @@ class AssignmentEditViewModel(
             if (route.guid == null) {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        destination = AssignmentDetail(uid = uid),
+                        destination = AssignmentDetail(
+                            uid = uid,
+                            assignmentActivityId = assignmentActivityId
+                        ),
                         popUpTo = route,
                         popUpToInclusive = true,
                     )
@@ -332,10 +346,7 @@ class AssignmentEditViewModel(
 
         const val KEY_LEARNING_UNIT = "result_learning_unit"
 
-        private const val XAPI_ASSIGNMENT_ACTIVITY_PREFIX = "/xapi/activities/assignment/"
-
-        private const val ERROR_ASSIGNMENT_NOT_FOUND = "Assignment not found"
+        const val ACTIVITY_ID_PATH = "xapi/activities/assignment"
 
     }
-
 }

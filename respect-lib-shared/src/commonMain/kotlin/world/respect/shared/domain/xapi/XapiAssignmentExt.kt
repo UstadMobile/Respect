@@ -4,7 +4,18 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.lib.xapi.model.*
+import world.respect.lib.xapi.model.VERB_ASSIGN
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiContext
+import world.respect.lib.xapi.model.XapiContextActivities
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -16,7 +27,6 @@ object XapiAssignmentConstants {
     const val EXT_CREATED = "https://id.ustadmobile.com/xapi/extension/created"
     const val EXT_APP_MANIFEST = "https://id.ustadmobile.com/xapi/extension/app-manifest"
     const val ACTIVITY_TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
-    const val ACTIVITY_ID_PATH_PREFIX = "/xapi/activities/assignment/"
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -28,24 +38,16 @@ val XapiStatement.isAssignmentStatement: Boolean
     }
 
 @OptIn(ExperimentalUuidApi::class)
-val XapiStatement.assignmentUid: String?
-    get() = (this.`object` as? XapiActivity)?.id?.substringAfterLast("/")
-
-@OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentTitle: String
-    get() = (this.`object` as? XapiActivity)?.definition?.name?.get("en-US") ?: ""
+    get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
 
 @OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentDescription: String
-    get() = (this.`object` as? XapiActivity)?.definition?.description?.get("en-US") ?: ""
+    get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
 
 @OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentClassUid: String
     get() = this.actor.account?.name.orEmpty()
-
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.assignmentClassName: String
-    get() = this.actor.name.orEmpty()
 
 @OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentDeadline: Instant?
@@ -66,6 +68,7 @@ val XapiStatement.assignmentLearningUnits: List<AssignmentLearningUnitRef>
 fun XapiStatement.withTitle(title: String): XapiStatement {
     val activity = `object` as? XapiActivity ?: return this
     val definition = activity.definition ?: XapiActivityDefinition()
+    // For now, we use "en-US" as the default key for setting values, but we read any value
     return copy(
         `object` = activity.copy(
             definition = definition.copy(
@@ -107,11 +110,11 @@ fun XapiStatement.withDeadline(deadline: Instant?): XapiStatement {
 }
 
 @OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withClass(classUid: String, className: String, schoolUrl: String): XapiStatement {
+fun XapiStatement.withClass(classUid: String, className: String, schoolUrl: Url?): XapiStatement {
     val newActor = XapiGroup(
         name = className,
         account = XapiAccount(
-            homePage = schoolUrl,
+            homePage = schoolUrl.toString(),
             name = classUid
         ),
         objectType = XapiObjectType.Group
@@ -139,34 +142,21 @@ fun XapiStatement.withLearningUnits(learningUnits: List<AssignmentLearningUnitRe
 }
 
 @OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withInstructor(instructor: XapiActor): XapiStatement {
-    return copy(
-        context = (context ?: XapiContext()).copy(instructor = instructor)
-    )
-}
-
-@OptIn(ExperimentalUuidApi::class)
 fun createBlankAssignmentStatement(
-    uid: String,
-    schoolUrl: String,
+    assignmentActivityId: String,
     instructor: XapiActor
 ): XapiStatement {
-    val schoolUrlClean = schoolUrl.trim().removeSuffix("/")
-    val assignmentActivityId = "$schoolUrlClean${XapiAssignmentConstants.ACTIVITY_ID_PATH_PREFIX}$uid"
-    val now = kotlin.time.Clock.System.now()
+    val now = Clock.System.now()
     return XapiStatement(
         id = Uuid.random(),
         actor = XapiGroup(name = "", objectType = XapiObjectType.Group),
         verb = XapiVerb(
             id = VERB_ASSIGN,
-            display = mapOf("en-US" to "assigned")
         ),
         `object` = XapiActivity(
             objectType = XapiObjectType.Activity,
             id = assignmentActivityId,
             definition = XapiActivityDefinition(
-                name = mapOf("en-US" to ""),
-                description = mapOf("en-US" to ""),
                 type = XapiAssignmentConstants.ACTIVITY_TYPE_ASSIGNMENT,
                 extensions = mapOf(XapiAssignmentConstants.EXT_CREATED to JsonPrimitive(now.toString()))
             )

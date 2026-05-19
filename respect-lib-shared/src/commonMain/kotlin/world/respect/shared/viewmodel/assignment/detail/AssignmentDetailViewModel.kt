@@ -92,14 +92,10 @@ class AssignmentDetailViewModel(
 
     private var _canEdit = false
 
-    private val schoolUrl: String
-        get() = accountManager.activeAccount?.school?.self?.toString()?.trim()
-            ?.removeSuffix("/")
-            ?: ""
+    private val schoolUrl = accountManager.activeAccount?.school?.self
 
-    private val assignmentActivityId: String
-        get() = "$schoolUrl${XapiAssignmentConstants.ACTIVITY_ID_PATH_PREFIX}${route.uid}"
 
+    private val assignmentActivityId: String = route.assignmentActivityId
 
     init {
         _appUiState.update {
@@ -186,7 +182,7 @@ class AssignmentDetailViewModel(
                         val dummyStatements = dummyDataGenerator.generateDummyStatements(
                             students = students,
                             assignment = xapiStatement,
-                            schoolUrl = schoolUrl
+                            schoolUrl = schoolUrl.toString()
                         )
 
                         // Post statements
@@ -271,7 +267,12 @@ class AssignmentDetailViewModel(
 
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(AssignmentEdit.create(uid = route.uid))
+            NavCommand.Navigate(
+                AssignmentEdit.create(
+                    uid = route.uid,
+                    assignmentActivityId = route.assignmentActivityId
+                )
+            )
         )
     }
 

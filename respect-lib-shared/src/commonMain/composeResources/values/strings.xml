@@ -589,4 +589,6 @@
     <string name="task">Task</string>
     <string name="student_completed">student completed</string>
 
+    <string name="xapi_verb_assigned">assigned</string>
+
 </resources>

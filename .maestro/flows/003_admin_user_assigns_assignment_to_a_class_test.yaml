@@ -58,9 +58,13 @@ onFlowComplete:
 - tapOn: "Task"
 - assertVisible:
     id: "app_title"
-- tapOn: "My app"
-- tapOn: "Grade 1"
-- tapOn: "Lesson 001"
+    text: "Apps"
+- tapOn: "Example Web App"
+- assertVisible:
+    id: "app_title"
+    text: "Main Menu"
+- tapOn: "Examples"
+- tapOn: "Statement Maker"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -76,7 +80,7 @@ onFlowComplete:
 - assertVisible: "StudentB User"
 - assertVisible: "StudentC User"
 - assertVisible: "StudentD User"
-- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
 - assertVisible: "Average"
 - tapOn: "Assignments"
 - assertVisible:
@@ -102,19 +106,18 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
-- tapOn: "Lesson 001"
+- tapOn: "Statement Maker"
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
 - tapOn: "Open"
 - extendedWaitUntil:
-    visible: "Lesson 001"
+    visible: "Statement Maker"
     timeout: 1000
-- assertVisible: "Hello World Lesson"
+- tapOn: "Send statement"
 - tapOn: "Close"
 - tapOn: "Assignments"
 - assertVisible: "Homework 1"
-
 - assertVisible: "Pending (0)"
 - tapOn: "Completed (1)"
 - assertVisible: "1/1 task Completed"
@@ -125,8 +128,8 @@ onFlowComplete:
 - assertVisible: "Assigned to:"
 - assertVisible: "StudentA User"
 - tapOn: "Completed (1)"
-- assertVisible: "Lesson 001"
-- assertVisible: "My app"
+- assertVisible: "Statement Maker"
+- assertVisible: "Example Web App"
 - assertVisible: "100%"
 
 - clearState: world.respect.app
@@ -152,7 +155,7 @@ onFlowComplete:
 - assertVisible: "TestClass"
 - tapOn: "Completed (1)"
 - assertVisible: "StudentA User"
-- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
 - assertVisible: "Average"
 - assertVisible: "100%"
 - tapOn:

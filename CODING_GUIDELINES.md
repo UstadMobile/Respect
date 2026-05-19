@@ -38,7 +38,7 @@ All SQL code shoud follow [SQLStyle.guide](https://www.sqlstyle.guide/)
   typing the same thing again, or making a completely new code that does almost the same thing as 
   existing code. Use domain use cases, inheritence, and extension functions as appropriate. When
   logic is duplicated, any bug would also be duplicated, maintenance will be harder, the code will 
-  be harder to understand, etc.
+  be harder to understand, etc. Do not use two variables for the same purpose.
 * Don't silently ignore null instead of throwing exceptions/showing error messages: do not use 
   inappropriate ```?.let```, ```?.also``` etc. Code that silently ignores when something is wrong 
   is **MUCH** worse (and harder to debug/find any error) than code that throws an exception. Don't 

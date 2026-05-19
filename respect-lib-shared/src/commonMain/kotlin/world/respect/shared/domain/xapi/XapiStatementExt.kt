@@ -1,6 +1,5 @@
 package world.respect.shared.domain.xapi
 
-import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.model.Person
 import world.respect.lib.xapi.model.VERB_VOIDED

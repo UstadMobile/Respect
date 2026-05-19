@@ -92,10 +92,8 @@ fun StudentGroupingEditScreen(
                 person = student,
                 isSelected = isSelected,
                 onCheckedChange = { checked ->
-                    if (student != null) {
-                        onStudentCheckedChange(student, checked)
-                    } else {
-                        throw IllegalStateException("Student should not be null when checkbox is changed")
+                    student?.let {
+                        onStudentCheckedChange(it, checked)
                     }
                 }
             )

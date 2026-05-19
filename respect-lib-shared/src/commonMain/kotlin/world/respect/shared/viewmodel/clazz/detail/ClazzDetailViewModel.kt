@@ -70,6 +70,7 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companio
 import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
@@ -96,9 +97,7 @@ data class ClazzDetailUiState(
     val showAddTeacher: Boolean = false,
     val showStudentGrouping: Boolean = false,
     val isStudentGroupingExpanded: Boolean = true,
-    val groupIds: List<String> = emptyList(),
-    val groups: List<GroupDisplayData> = emptyList(),
-    val statementId: String? = null,
+    val groupStatements: List<XapiStatement> = emptyList(),
     val addPersonPermissions: List<Long> = emptyList()
     ) {
 
@@ -109,13 +108,7 @@ data class ClazzDetailUiState(
     }
 
 }
-data class GroupDisplayData(
-    val groupId: String,
-    val groupName: String,
-    val memberCount: Int,
-    val memberNames: List<String> = emptyList(),
-    val statementId: String? = null
-)
+
 
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -138,9 +131,10 @@ class ClazzDetailViewModel(
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
-    val schoolSelfUrl = accountManager.activeAccount?.school?.self?.toString()
+    private val schoolSelfUrl: String = accountManager.activeAccount?.school?.self?.toString()
+        ?: throw IllegalStateException("schoolSelfUrl is required but activeAccount or school is null")
 
-    val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
+    private val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -357,16 +351,9 @@ class ClazzDetailViewModel(
     }
 
     fun onClickGroup(groupId: String) {
-        val groupData = _uiState.value.groups.find { it.groupId == groupId }
-        val statementId = groupData?.statementId
-
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                StudentGroupingDetail(
-                    groupId = groupId,
-                    classId = route.guid,
-                    statementId = statementId
-                )
+                StudentGroupingDetail(groupId = groupId)
             )
         )
     }
@@ -455,8 +442,8 @@ class ClazzDetailViewModel(
 
                 val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                // Sort by timestamp to get the latest version of each group
-                val groupIdToStatement = statementResult.statements
+                // Sort by timestamp to get the latest version of each group, keep only the latest statement per group
+                val latestStatementPerGroup = statementResult.statements
                     .filter { it.verb.id == VERB_SAVED }
                     .sortedByDescending { it.timestamp ?: it.stored }
                     .mapNotNull { statement ->
@@ -469,24 +456,10 @@ class ClazzDetailViewModel(
                         }
                     }
                     .distinctBy { it.first }
-                    .toMap()
-
-                val groupDisplayDataList = groupIdToStatement.map { (groupId, statement) ->
-                    val group = statement.`object` as XapiGroup
-                    val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
-                    val statementId = statement.id?.toString()
-
-                    GroupDisplayData(
-                        groupId = groupId,
-                        groupName = group.name ?: "",
-                        memberCount = memberNames.size,
-                        memberNames = memberNames,
-                        statementId = statementId
-                    )
-                }
+                    .map { it.second }
 
                 _uiState.update { prev ->
-                    prev.copy(groups = groupDisplayDataList)
+                    prev.copy(groupStatements = latestStatementPerGroup)
                 }
         }
     }

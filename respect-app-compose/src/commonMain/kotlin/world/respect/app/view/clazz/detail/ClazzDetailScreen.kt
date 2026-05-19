@@ -58,6 +58,7 @@ import world.respect.shared.generated.resources.teacher
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
+import world.respect.lib.xapi.model.XapiGroup
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.generated.resources.create_group
 import world.respect.shared.generated.resources.groups
@@ -382,8 +383,8 @@ fun ClazzDetailScreen(
                     headlineContent = {
                         Text(
                             modifier = Modifier.padding(top = 24.dp),
-                            text = if (uiState.groups.isNotEmpty())
-                                "${stringResource(Res.string.groups)} (${uiState.groups.size})"
+                            text = if (uiState.groupStatements.isNotEmpty())
+                                "${stringResource(Res.string.groups)} (${uiState.groupStatements.size})"
                             else
                                 stringResource(Res.string.groups)
                         )
@@ -428,19 +429,23 @@ fun ClazzDetailScreen(
                     )
                 }
 
-                items(uiState.groups.size) { index ->
-                    val groupData = uiState.groups[index]
+                items(uiState.groupStatements.size) { index ->
+                    val statement = uiState.groupStatements[index]
+                    val group = statement.`object` as? XapiGroup
+                    val groupId = group?.account?.name ?: return@items
+                    val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
+
                     ListItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                            onClickGroup(groupData.groupId)
-                            },
+                                onClickGroup(groupId)
+                                       },
                         leadingContent = {
                             Box(
                                 modifier = Modifier.size(40.dp),
                             ) {
-                                val displayMembers = groupData.memberNames.take(3)
+                                val displayMembers = memberNames.take(3)
                                 displayMembers.forEachIndexed { i, name ->
                                     Box(
                                         modifier = Modifier
@@ -456,10 +461,10 @@ fun ClazzDetailScreen(
                             }
                         },
                         headlineContent = {
-                            Text(text = "${groupData.groupName} (${groupData.memberCount})")
+                            Text(text = "${group.name} (${memberNames.size})")
                         },
                         supportingContent = {
-                            Text(text = "${groupData.memberCount} ${stringResource(Res.string.students)}")
+                            Text(text = "${memberNames.size} ${stringResource(Res.string.students)}")
                         }
                     )
                 }

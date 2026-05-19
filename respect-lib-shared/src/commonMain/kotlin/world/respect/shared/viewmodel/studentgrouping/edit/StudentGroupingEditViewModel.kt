@@ -13,7 +13,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
@@ -21,10 +21,8 @@ import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.xapi.model.SAVED
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.VERB_VOIDED
-import world.respect.lib.xapi.model.VOIDED
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
@@ -55,7 +53,6 @@ import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlin.toString
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -85,7 +82,8 @@ class StudentGroupingEditViewModel(
 
     private val route: StudentGroupingEdit = savedStateHandle.toRoute()
 
-    val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
+    private val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("schoolSelfUrl is required")
 
     val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"
 
@@ -152,7 +150,7 @@ class StudentGroupingEditViewModel(
                 val group = groupStatement.`object` as XapiGroup
 
                 val groupName = group.name
-                val statementId = groupStatement.id?.toString()
+                val statementId = groupStatement.id
 
                 val memberIds = group.member
                     ?.mapNotNull { it.account?.name }
@@ -169,7 +167,7 @@ class StudentGroupingEditViewModel(
                     prev.copy(
                         groupName = groupName ?: "",
                         selectedStudents = persons,
-                        statementId = statementId
+                        statementId = statementId.toString()
                     )
                 }
             }
@@ -180,7 +178,6 @@ class StudentGroupingEditViewModel(
     fun onClickSave() {
 
         val groupName = _uiState.value.groupName
-        val classActivityId = "${schoolSelfUrl}${CLASS}${route.classUid}"
         val existingStatementId = _uiState.value.statementId
 
         if (groupName.isBlank()) {
@@ -192,8 +189,9 @@ class StudentGroupingEditViewModel(
             _uiState.update { it.copy(groupNameError = null) }
         }
         launchWithLoadingIndicator {
+
             val person = respectAccountManager.selectedAccountAndPersonFlow.first()?.person
-                ?: return@launchWithLoadingIndicator
+                ?: throw IllegalStateException("No person selected when trying to save group")
 
             if (existingStatementId != null) {
 
@@ -207,8 +205,7 @@ class StudentGroupingEditViewModel(
                 )
 
                 val voidVerb = XapiVerb(
-                    id = VERB_VOIDED,
-                    display = mapOf("en-US" to VOIDED)
+                    id = VERB_VOIDED
                 )
 
                 val statementRef = XapiStatementRef(
@@ -227,12 +224,12 @@ class StudentGroupingEditViewModel(
             }
 
             //  Create a new statement with the updated group information
-            val members = _uiState.value.selectedStudents.map { person ->
+            val members = _uiState.value.selectedStudents.map { student ->
                 XapiAgent(
-                    name = person.fullName(),
+                    name = student.fullName(),
                     objectType = XapiObjectType.Agent,
                     account = XapiAccount(
-                        name = person.guid,
+                        name = student.guid,
                         homePage = schoolSelfUrl.toString()
                     )
                 )
@@ -261,8 +258,7 @@ class StudentGroupingEditViewModel(
 
 
             val verb = XapiVerb(
-                id = VERB_SAVED,
-                display = mapOf("en-US" to SAVED)
+                id = VERB_SAVED
             )
 
             val statement = XapiStatement(
@@ -287,11 +283,7 @@ class StudentGroupingEditViewModel(
             if (route.groupId == null) {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
-                        StudentGroupingDetail(
-                            groupId,
-                            route.classUid,
-                            statement.id?.toString()
-                        ),
+                        StudentGroupingDetail(groupId = groupId),
                         popUpTo = route,
                         popUpToInclusive = true
                     )

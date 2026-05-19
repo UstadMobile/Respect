@@ -3,10 +3,9 @@ package world.respect.shared.viewmodel.studentgrouping.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -14,11 +13,10 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.VERB_VOIDED
-import world.respect.lib.xapi.model.VOIDED
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
@@ -49,6 +47,7 @@ data class StudentGroupingDetailUiState(
     val groupMembers: List<String> = emptyList(),
     val showDeleteGroupDialog: Boolean = false,
     val statementGroupId: String? = null,
+    val classId: String? = null,
 )
 
 class StudentGroupingDetailViewModel(
@@ -67,9 +66,9 @@ class StudentGroupingDetailViewModel(
 
     private val route: StudentGroupingDetail = savedStateHandle.toRoute()
 
-    val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self?.toString()
+    private val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("schoolSelfUrl is required")
 
-    val classActivityId = "${schoolSelfUrl}${CLASS}${route.classId}"
 
     init {
         _appUiState.update {
@@ -95,10 +94,12 @@ class StudentGroupingDetailViewModel(
     }
 
     fun onClickEdit() {
+        val classId = _uiState.value.classId
+            ?: throw IllegalStateException("classId not loaded when trying to edit group")
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 StudentGroupingEdit(
-                    classUid = route.classId,
+                    classUid = classId,
                     groupId = route.groupId
                 )
             )
@@ -120,16 +121,10 @@ class StudentGroupingDetailViewModel(
         launchWithLoadingIndicator {
 
             val statementId = _uiState.value.statementGroupId
+                ?: throw IllegalStateException("Statement ID not found when trying to delete group")
 
-            if (statementId == null) {
-                Napier.w("onConfirmDeleteGroup: Statement ID not found")
-                return@launchWithLoadingIndicator
-            }
-
-            val schoolSelfUrl = respectAccountManager.activeAccount?.school?.self
-
-            val person = respectAccountManager.selectedAccountAndPersonFlow.first()?.person
-                ?: return@launchWithLoadingIndicator
+            val person = respectAccountManager.selectedAccountAndPersonFlow.firstOrNull()?.person
+                ?: throw IllegalStateException("No person selected when trying to delete group")
 
             val actor = XapiAgent(
                 name = person.fullName(),
@@ -141,8 +136,7 @@ class StudentGroupingDetailViewModel(
             )
 
             val verb = XapiVerb(
-                id = VERB_VOIDED,
-                display = mapOf("en-US" to VOIDED)
+                id = VERB_VOIDED
             )
 
             val statementRef = XapiStatementRef(
@@ -167,11 +161,19 @@ class StudentGroupingDetailViewModel(
     @OptIn(ExperimentalUuidApi::class)
     private fun loadGroupDetail() {
         viewModelScope.launch {
+            // Query by agent (the group itself) using its account identifier
+            val groupAgent = XapiAgent(
+                objectType = XapiObjectType.Agent,
+                account = XapiAccount(
+                    name = route.groupId,
+                    homePage = schoolSelfUrl.toString()
+                )
+            )
+
             schoolDataSource.xapiStatementsResource.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     verb = VERB_SAVED,
-                    activity = classActivityId,
-                    relatedActivities = true,
+                    agent = groupAgent,
                 ),
                 dataLoadParams = DataLoadParams()
             ).collect { dataLoadState ->
@@ -189,11 +191,18 @@ class StudentGroupingDetailViewModel(
                     val group = groupStatement.`object` as XapiGroup
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
                     val statementId = groupStatement.id?.toString()
+
+                    // Extract classId from context activities parent
+                    val classActivityId = groupStatement.context?.contextActivities?.parent
+                        ?.firstOrNull()?.id
+                    val classId = classActivityId?.removePrefix("${schoolSelfUrl}${CLASS}")
+
                     _uiState.update { prev ->
                         prev.copy(
                             groupName = group.name ?: "",
                             groupMembers = memberNames,
-                            statementGroupId = statementId
+                            statementGroupId = statementId,
+                            classId = classId
                         )
                     }
 

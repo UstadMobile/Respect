@@ -86,10 +86,14 @@ fun StudentGroupingEditScreen(
             }
         ) { student ->
 
-            val isSelected = student?.guid in uiState.selectedStudentIds
+            val person = checkNotNull(student) {
+                "Student item should not be null"
+            }
+
+            val isSelected = student.guid in uiState.selectedStudentIds
 
             PersonListItemWithMenu(
-                person = student,
+                person = person,
                 isSelected = isSelected,
                 onCheckedChange = { checked ->
                     student?.let {
@@ -103,7 +107,7 @@ fun StudentGroupingEditScreen(
 
 @Composable
 fun PersonListItemWithMenu(
-    person: Person?,
+    person: Person,
     isSelected: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -114,10 +118,10 @@ fun PersonListItemWithMenu(
                 onCheckedChange(!isSelected)
             },
         leadingContent = {
-            RespectPersonAvatar(name = person?.fullName() ?: "")
+            RespectPersonAvatar(name = person.fullName())
         },
         headlineContent = {
-            Text(text = person?.fullName().orEmpty())
+            Text(text = person.fullName())
         },
         trailingContent = {
             Checkbox(

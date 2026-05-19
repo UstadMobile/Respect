@@ -382,7 +382,8 @@ fun ClazzDetailScreen(
 
             item("student_grouping_header") {
                 ListItem(
-                    modifier = Modifier.clickable { onToggleStudentGroupingSection() },
+                    modifier = Modifier
+                        .clickable { onToggleStudentGroupingSection() },
                     headlineContent = {
                         Text(
                             modifier = Modifier.padding(top = 24.dp),
@@ -435,13 +436,14 @@ fun ClazzDetailScreen(
                 items(
                     items = uiState.groups,
                     key = { group ->
-                        group.account?.name
-                            ?: throw IllegalStateException("Group id should not be null")
+                        requireNotNull(group.account?.name)
                     }
                 ) { group ->
-                    val groupId = group.account?.name
-                        ?: throw IllegalStateException("Group id should not be null")
-                    val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
+                    val groupId = requireNotNull(group.account?.name)
+
+                    val memberNames = group.member
+                        ?.mapNotNull { it.name }
+                        ?: emptyList()
 
                     ListItem(
                         modifier = Modifier
@@ -475,6 +477,7 @@ fun ClazzDetailScreen(
                 }
             }
         }
+
     }
 }
 

@@ -12,6 +12,11 @@ const val VERB_ASSIGN = "http://adlnet.gov/expapi/verbs/assign"
 @Serializable
 data class XapiVerb(
     val id: String,
-
     val display: Map<String, String>? = null,
-)
+) {
+
+    companion object {
+        const val ID_VOIDED = "http://adlnet.gov/expapi/verbs/voided"
+    }
+
+}

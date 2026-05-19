@@ -11,6 +11,7 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp
+import world.respect.libutil.ext.appendAssignmentXapiSegment
 import world.respect.libutil.ext.randomString
 import world.respect.shared.domain.account.RespectAccountManager
 
@@ -22,13 +23,24 @@ class GetXapiLaunchUrlUseCaseAndroid(
     private val accountManager: RespectAccountManager,
 ): GetXapiLaunchUrlUseCase {
 
-    override suspend fun invoke(learningUnitUrl: Url): Url {
+    override suspend fun invoke(
+        learningUnitUrl: Url,
+        assignmentActivityId: String?,
+    ): Url {
         val activePerson = accountManager.selectedAccountAndPersonFlow.first()
             ?: throw IllegalStateException("Cannot launch when there is no active person")
 
         return URLBuilder(learningUnitUrl).apply {
             parameters.apply {
-                set("endpoint", nanoHttpdApp.localUrlForEndpoint(schoolUrl).toString())
+                set(name = "endpoint",
+                    value = nanoHttpdApp.localUrlForEndpoint(schoolUrl).let {
+                        if(assignmentActivityId != null) {
+                            it.appendAssignmentXapiSegment(assignmentActivityId)
+                        }else {
+                            it
+                        }
+                    }.toString()
+                )
 
                 val basicAuth = "${authenticatedUser.guid}:${randomString(8)}".encodeBase64()
                 set(

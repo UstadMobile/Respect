@@ -2,7 +2,6 @@ package world.respect.lib.xapi.nanohttpd
 
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.http.Url
-import io.ktor.http.protocolWithAuthority
 import io.ktor.util.StringValuesImpl
 import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.runBlocking
@@ -193,8 +192,6 @@ class XapiNanoHttpdApp(
                 }
             }
         }
-
-
     }
 
 

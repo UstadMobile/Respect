@@ -13,6 +13,7 @@ interface GetXapiLaunchUrlUseCase {
 
     suspend operator fun invoke(
         learningUnitUrl: Url,
+        assignmentActivityId: String?,
     ): Url
 
 }

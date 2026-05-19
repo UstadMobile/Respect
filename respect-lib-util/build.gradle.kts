@@ -33,6 +33,7 @@ kotlin {
             implementation(libs.kotlinx.date.time)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+            implementation(libs.urlencoder)
         }
 
         androidMain.dependencies {

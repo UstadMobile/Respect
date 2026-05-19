@@ -41,7 +41,10 @@ class LaunchAppUseCaseAndroid(
         request: LaunchRequest
     ) {
         val launchUrlBase = request.learningUnitId?.let {
-            getXapiLaunchUrlUseCase(it)
+            getXapiLaunchUrlUseCase(
+                learningUnitUrl = it,
+                assignmentActivityId = request.assignmentActivityId,
+            )
         } ?: return
         val launchUrl = URLBuilder(launchUrlBase).apply {
             parameters.append(

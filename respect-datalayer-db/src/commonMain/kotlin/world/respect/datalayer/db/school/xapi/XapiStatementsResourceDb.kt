@@ -42,7 +42,10 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
+import world.respect.lib.xapi.exceptions.XapiBadRequestException
+import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
+import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
 import world.respect.lib.xapi.model.XapiActivity
@@ -50,6 +53,7 @@ import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import kotlin.time.Instant
@@ -241,6 +245,26 @@ class XapiStatementsResourceDb(
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 statementsWithIdsSet.forEach { statement ->
+                    //check if this is a voiding statement
+                    if(statement.verb.id == XapiVerb.ID_VOIDED) {
+                        //find the statement we are going to void
+                        val statementRef = statement.`object` as? XapiStatementRef
+                            ?: throw XapiBadRequestException("Voiding statement object not statementref")
+                        val (voidIdHi, voidIdLo) = Uuid.parse(statementRef.id).toLongPair()
+
+                        val verbUidToVoid = schoolDb.getStatementDao().getVerbUidNumToBeVoided(
+                            statementIdHi = voidIdHi,
+                            statementIdLo = voidIdLo,
+                        ) ?: throw XapiForbiddenException("Statement to void not found")
+
+                        if(uidNumberMapper(XapiVerb.ID_VOIDED) == verbUidToVoid)
+                            throw XapiForbiddenException("Cannot void a void statement")
+
+                        schoolDb.getStatementDao().updateSetStatementVoided(
+                            voidIdHi, voidIdLo
+                        )
+                    }
+
                     doUpsertStatement(statement)
                 }
             }
@@ -262,7 +286,7 @@ class XapiStatementsResourceDb(
                     it.copy(stored = storedTime)
                 }.forEach { statement ->
                     val (stmtIdHi, stmtIdLo) = (statement.id?.toLongPair()
-                        ?: throw IllegalArgumentException("statement to store must have timestamps"))
+                        ?: throw IllegalArgumentException("statement to store must have ids"))
                     val timesInDb = schoolDb.getStatementDao().getTimestampsByUuid(
                         statementIdHi = stmtIdHi,
                         statementIdLo = stmtIdLo,
@@ -283,6 +307,7 @@ class XapiStatementsResourceDb(
     ): DataLoadState<XapiStatementResult> {
 
         val statementIds = listParams.statementId?.toLongPair()
+        val voidedStatementIds = listParams.voidedStatementId?.toLongPair()
         val format = listParams.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
         val ascendingOrder = listParams.ascending
         val consistentThrough = Clock.System.now()
@@ -293,6 +318,8 @@ class XapiStatementsResourceDb(
                     schoolDb.getStatementEntityJsonDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
+                        voidedStatementIdHi = voidedStatementIds?.first ?: 0,
+                        voidedStatementIdLo = voidedStatementIds?.second ?: 0,
                         agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
                         verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
                         activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
@@ -311,6 +338,8 @@ class XapiStatementsResourceDb(
                     schoolDb.getStatementDao().list(
                         statementIdHi = statementIds?.first ?: 0,
                         statementIdLo = statementIds?.second ?: 0,
+                        voidedStatementIdHi = voidedStatementIds?.first ?: 0,
+                        voidedStatementIdLo = voidedStatementIds?.second ?: 0,
                         agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
                         verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
                         activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
@@ -345,12 +374,15 @@ class XapiStatementsResourceDb(
         dataLoadParams: DataLoadParams
     ): Flow<DataLoadState<XapiStatementResult>> {
         val statementIds = listParams.statementId?.toLongPair()
+        val voidedStatementIds = listParams.voidedStatementId?.toLongPair()
         val format = listParams.format ?: XapiStatementsResource.GetStatementFormatEnum.EXACT
 
         return if(format == XapiStatementsResource.GetStatementFormatEnum.EXACT) {
             schoolDb.getStatementEntityJsonDao().listAsFlow(
                 statementIdHi = statementIds?.first ?: 0,
                 statementIdLo = statementIds?.second ?: 0,
+                voidedStatementIdHi = voidedStatementIds?.first ?: 0,
+                voidedStatementIdLo = voidedStatementIds?.second ?: 0,
                 agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
                 verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
                 activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
@@ -376,6 +408,8 @@ class XapiStatementsResourceDb(
             schoolDb.getStatementDao().listAsFlow(
                 statementIdHi = statementIds?.first ?: 0,
                 statementIdLo = statementIds?.second ?: 0,
+                voidedStatementIdHi = voidedStatementIds?.first ?: 0,
+                voidedStatementIdLo = voidedStatementIds?.second ?: 0,
                 agentUid = listParams.agent?.identifierHash(uidNumberMapper) ?: 0,
                 verbUid = listParams.verb?.let { uidNumberMapper(it) } ?: 0,
                 activityUid = listParams.activity?.let { uidNumberMapper(it) } ?: 0,
@@ -393,7 +427,7 @@ class XapiStatementsResourceDb(
                 )
                 DataReadyState(
                     data = XapiStatementResult(
-                        statements= statements,
+                        statements = statements,
                         more = null,
                     ),
                     metaInfo = DataLoadMetaInfo(

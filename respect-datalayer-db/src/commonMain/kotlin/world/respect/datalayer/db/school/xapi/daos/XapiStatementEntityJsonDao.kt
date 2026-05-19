@@ -21,6 +21,8 @@ interface XapiStatementEntityJsonDao {
     suspend fun list(
         statementIdHi: Long,
         statementIdLo: Long,
+        voidedStatementIdHi: Long,
+        voidedStatementIdLo: Long,
         agentUid: Long,
         verbUid: Long,
         activityUid: Long,
@@ -37,6 +39,8 @@ interface XapiStatementEntityJsonDao {
     fun listAsFlow(
         statementIdHi: Long,
         statementIdLo: Long,
+        voidedStatementIdHi: Long,
+        voidedStatementIdLo: Long,
         agentUid: Long,
         verbUid: Long,
         activityUid: Long,
@@ -93,13 +97,17 @@ interface XapiStatementEntityJsonDao {
                JOIN XapiStatementEntityJson
                     ON (    XapiStatementEntityJson.stmtJsonIdHi = XapiStatementEntity.statementIdHi
                         AND XapiStatementEntityJson.stmtJsonIdLo = XapiStatementEntity.statementIdLo)
-          LEFT JOIN XapiStatementEntity AS SubStatementEntity
+               LEFT JOIN XapiStatementEntity AS SubStatementEntity
                     ON (    XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.SUBSTATEMENT}
                         AND SubStatementEntity.statementIdHi = XapiStatementEntity.statementObjectUid1
                         AND SubStatementEntity.statementIdLo = XapiStatementEntity.statementObjectUid2)
          WHERE (   (:statementIdHi = 0 AND :statementIdLo = 0) 
                 OR (     XapiStatementEntity.statementIdHi = :statementIdHi 
                      AND XapiStatementEntity.statementIdLo = :statementIdLo))
+           AND (   (:voidedStatementIdHi = 0 AND :voidedStatementIdLo = 0)
+                OR (     XapiStatementEntity.statementIdHi = :voidedStatementIdHi 
+                     AND XapiStatementEntity.statementIdLo = :voidedStatementIdLo
+                     AND XapiStatementEntity.stmtVoid))
            AND (:since = $SINCE_UNSET OR XapiStatementEntity.stored > :since)
            AND (:until = $UNTIL_UNSET OR XapiStatementEntity.stored <= :until)
            -- Handle agent parameter
@@ -153,9 +161,11 @@ interface XapiStatementEntityJsonDao {
                       ) 
                )          
            AND NOT XapiStatementEntity.isSubStatement
+           AND (    NOT XapiStatementEntity.stmtVoid
+                 OR (:voidedStatementIdHi != 0 AND :voidedStatementIdLo != 0))
       ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
                CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
-         LIMIT :limit      
+         LIMIT :limit
         """
 
     }

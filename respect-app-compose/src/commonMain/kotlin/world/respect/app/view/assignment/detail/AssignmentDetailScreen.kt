@@ -182,17 +182,14 @@ fun AssignmentDetailScreen(
 
         if (uiState.isStudent) {
             val units = assignment?.assignmentLearningUnits ?: emptyList()
-            val filteredUnits = remember(uiState.filteredProgressRow, units) {
-                val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
-                units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
-            }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(filteredUnits) { unit ->
+                items(units) { unit ->
                     StudentLearningUnitItem(
                         unit = unit,
                         uiState = uiState,

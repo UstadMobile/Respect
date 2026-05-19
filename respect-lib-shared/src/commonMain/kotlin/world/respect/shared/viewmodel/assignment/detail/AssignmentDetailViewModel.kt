@@ -22,7 +22,9 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -234,7 +236,6 @@ class AssignmentDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AssignmentEdit.create(
-                    uid = route.uid,
                     assignmentActivityId = route.assignmentActivityId
                 )
             )

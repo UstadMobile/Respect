@@ -148,7 +148,6 @@ class AssignmentListViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AssignmentDetail(
-                    uid = summary.uid,
                     assignmentActivityId = summary.activityId
                 )
             )
@@ -159,7 +158,6 @@ class AssignmentListViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AssignmentEdit.create(
-                    uid = null,
                     assignmentActivityId = null
                 )
             )

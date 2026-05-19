@@ -121,13 +121,11 @@ object AssignmentList : RespectAppRoute
 
 @Serializable
 data class AssignmentDetail(
-    val uid: String,
     val assignmentActivityId: String,
 ) : RespectAppRoute
 
 @Serializable
 data class AssignmentEdit(
-    val guid: String?,
     val assignmentActivityId: String?,
     private val learningUnitStr: String? = null,
 ): RespectAppRoute {
@@ -140,11 +138,9 @@ data class AssignmentEdit(
     companion object {
 
         fun create(
-            uid: String?,
             assignmentActivityId: String?,
             learningUnitSelected: LearningUnitSelection? = null,
         ) = AssignmentEdit(
-            guid = uid,
             assignmentActivityId = assignmentActivityId,
             learningUnitStr = learningUnitSelected?.let {
                 Json.encodeToString(LearningUnitSelection.serializer(), it)

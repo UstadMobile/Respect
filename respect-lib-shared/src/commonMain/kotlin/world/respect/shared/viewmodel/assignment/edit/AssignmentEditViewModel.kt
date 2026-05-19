@@ -96,8 +96,6 @@ class AssignmentEditViewModel(
 
     private val debouncer = LaunchDebouncer(viewModelScope)
 
-    private val uid = route.guid ?: Uuid.random().toString()
-
     val schoolUrl = accountManager.activeAccount?.school?.self
 
     private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
@@ -108,7 +106,7 @@ class AssignmentEditViewModel(
     }
     private val assignmentActivityId = route.assignmentActivityId ?: run {
         requireNotNull(schoolUrl) { "Missing schoolUrl" }
-            .appendEndpointSegments(ACTIVITY_ID_PATH, uid)
+            .appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString())
             .toString()
     }
 
@@ -116,7 +114,7 @@ class AssignmentEditViewModel(
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = if (route.guid == null) {
+                title = if (route.assignmentActivityId == null) {
                     Res.string.add_assignment.asUiText()
                 } else {
                     Res.string.edit_assignment.asUiText()
@@ -154,7 +152,7 @@ class AssignmentEditViewModel(
                 objectType = XapiObjectType.Agent
             )
 
-            if (route.guid != null) {
+            if (route.assignmentActivityId != null) {
                 loadEntity(
                     json = json,
                     serializer = XapiStatement.serializer(),
@@ -324,11 +322,10 @@ class AssignmentEditViewModel(
 
             schoolDataSource.xapiStatementsResource.post(listOf(updatedStatement))
 
-            if (route.guid == null) {
+            if (route.assignmentActivityId == null) {
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = AssignmentDetail(
-                            uid = uid,
                             assignmentActivityId = assignmentActivityId
                         ),
                         popUpTo = route,

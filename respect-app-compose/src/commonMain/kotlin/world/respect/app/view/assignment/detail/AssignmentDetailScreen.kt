@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -140,7 +139,8 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
-                        val assignedTo = if (uiState.isStudent) uiState.personName else assignment?.actor?.name.orEmpty()
+                        val assignedTo =
+                            if (uiState.isStudent) uiState.personName else assignment?.actor?.name.orEmpty()
                         Text(
                             text = assignedTo,
                             style = MaterialTheme.typography.bodySmall,
@@ -207,7 +207,7 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                val students = remember(uiState.assignmentProgressRow) {
+                val assignmentResults = remember(uiState.assignmentProgressRow) {
                     uiState.assignmentProgressRow.distinctBy { it.personUid }
                 }
                 val progressMap = remember(uiState.filteredProgressRow) {
@@ -226,8 +226,8 @@ fun AssignmentDetailScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(headerHeight)
-                                .background(color = MaterialTheme.colorScheme.surface)
+                                .height(headerHeight),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Spacer(
                                 Modifier
@@ -239,7 +239,9 @@ fun AssignmentDetailScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .horizontalScroll(horizontalScrollState)
+                                    .horizontalScroll(horizontalScrollState),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
                             ) {
                                 filteredUnits.forEach { unit ->
                                     TaskHeaderCell(unit, uiState, taskColWidth, headerHeight)
@@ -248,7 +250,7 @@ fun AssignmentDetailScreen(
                                     modifier = Modifier
                                         .width(taskColWidth)
                                         .height(headerHeight),
-                                    contentAlignment = Alignment.CenterStart
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = stringResource(Res.string.average),
@@ -264,8 +266,8 @@ fun AssignmentDetailScreen(
                     }
 
                     when {
-                        students.isNotEmpty() -> {
-                            items(students, key = { it.personUid }) { student ->
+                        assignmentResults.isNotEmpty() -> {
+                            items(assignmentResults, key = { it.personUid }) { student ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     // Fixed Student Name Column
                                     StudentNameCell(student.personName ?: "Unknown", nameColWidth)
@@ -443,41 +445,35 @@ fun TaskHeaderCell(
     Column(
         modifier = Modifier
             .width(width)
-            .height(height)
-            .padding(8.dp),
+            .height(height),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier
-                .width(width)
-                .wrapContentWidth(unbounded = true),
+            modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = info.dataOrNull()?.metadata?.title?.getTitle() ?: "",
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.rotate(-90f)
+                modifier = Modifier.rotate(-90f),
+                textAlign = TextAlign.Start,
+                style = MaterialTheme.typography.labelSmall
             )
         }
-        Box(
-            modifier = Modifier
-                .size(40.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val iconUrl = info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
-                unit.learningUnitManifestUrl.resolve(it.href).toString()
-            }
-
-            if (iconUrl != null) {
-                AsyncImage(
-                    model = iconUrl,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+        val iconUrl = info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
+            unit.learningUnitManifestUrl.resolve(it.href).toString()
         }
+
+        if (iconUrl != null) {
+            AsyncImage(
+                model = iconUrl,
+                contentDescription = null,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        Spacer(Modifier.height(8.dp))
     }
 }
 

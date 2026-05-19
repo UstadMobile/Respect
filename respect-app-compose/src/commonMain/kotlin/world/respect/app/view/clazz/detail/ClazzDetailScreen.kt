@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -431,9 +432,15 @@ fun ClazzDetailScreen(
                     )
                 }
 
-                items(uiState.groups.size) { index ->
-                    val group = uiState.groups[index]
-                    val groupId = group.account?.name ?: return@items
+                items(
+                    items = uiState.groups,
+                    key = { group ->
+                        group.account?.name
+                            ?: throw IllegalStateException("Group id should not be null")
+                    }
+                ) { group ->
+                    val groupId = group.account?.name
+                        ?: throw IllegalStateException("Group id should not be null")
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
 
                     ListItem(
@@ -441,7 +448,7 @@ fun ClazzDetailScreen(
                             .fillMaxWidth()
                             .clickable {
                                 onClickGroup(groupId)
-                                       },
+                            },
                         leadingContent = {
                             Box(
                                 modifier = Modifier.width(40.dp),

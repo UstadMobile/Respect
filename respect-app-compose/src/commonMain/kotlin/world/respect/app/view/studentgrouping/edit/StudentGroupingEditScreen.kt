@@ -21,7 +21,6 @@ import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.name
@@ -93,8 +92,10 @@ fun StudentGroupingEditScreen(
                 person = student,
                 isSelected = isSelected,
                 onCheckedChange = { checked ->
-                    student?.let {
-                        onStudentCheckedChange(it, checked)
+                    if (student != null) {
+                        onStudentCheckedChange(student, checked)
+                    } else {
+                        throw IllegalStateException("Student should not be null when checkbox is changed")
                     }
                 }
             )

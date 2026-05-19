@@ -38,7 +38,7 @@ val XapiStatement.isAssignmentStatement: Boolean
     }
 
 @OptIn(ExperimentalUuidApi::class)
-val XapiStatement.assignmentTitle: String
+val XapiStatement.activityDefinitionTitle: String
     get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
 
 @OptIn(ExperimentalUuidApi::class)
@@ -46,7 +46,7 @@ val XapiStatement.assignmentDescription: String
     get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
 
 @OptIn(ExperimentalUuidApi::class)
-val XapiStatement.assignmentClassUid: String
+val XapiStatement.actorName: String
     get() = this.actor.account?.name.orEmpty()
 
 @OptIn(ExperimentalUuidApi::class)

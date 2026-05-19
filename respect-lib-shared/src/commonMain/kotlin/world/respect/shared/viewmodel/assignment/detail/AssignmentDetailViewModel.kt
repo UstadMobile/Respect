@@ -38,11 +38,10 @@ import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.xapi.XapiAssignmentConstants
 import world.respect.shared.domain.xapi.XapiDummyDataGenerator
-import world.respect.shared.domain.xapi.assignmentClassUid
+import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.assignmentLearningUnits
-import world.respect.shared.domain.xapi.assignmentTitle
+import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.isAssignmentStatement
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
@@ -136,7 +135,7 @@ class AssignmentDetailViewModel(
                 updateStatusCounts()
 
                 _appUiState.update {
-                    it.copy(title = entity.dataOrNull()?.assignmentTitle?.asUiText())
+                    it.copy(title = entity.dataOrNull()?.activityDefinitionTitle?.asUiText())
                 }
             }
         }
@@ -162,7 +161,7 @@ class AssignmentDetailViewModel(
 
         // Load gradebook users and their progress
         viewModelScope.launch {
-            statementsStream.distinctUntilChangedBy { it.dataOrNull()?.assignmentClassUid }
+            statementsStream.distinctUntilChangedBy { it.dataOrNull()?.actorName }
                 .collectLatest { statementState ->
                     val xapiStatement = statementState.dataOrNull() ?: return@collectLatest
                     val activityId = (xapiStatement.`object` as? XapiActivity)?.id ?: ""
@@ -173,7 +172,7 @@ class AssignmentDetailViewModel(
                     schoolDataSource.personDataSource.list(
                         loadParams = DataLoadParams(),
                         params = PersonDataSource.GetListParams(
-                            filterByClazzUid = xapiStatement.assignmentClassUid,
+                            filterByClazzUid = xapiStatement.actorName,
                             filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT
                         )
                     ).dataOrNull()?.let { students ->

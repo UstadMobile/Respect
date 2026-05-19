@@ -249,7 +249,7 @@ class AssignmentEditViewModel(
             prev.copy(
                 statementData = DataReadyState(statement),
                 nameError = prev.nameError?.takeIf {
-                    prev.statementData.dataOrNull()?.assignmentTitle == statement.assignmentTitle
+                    prev.statementData.dataOrNull()?.activityDefinitionTitle == statement.activityDefinitionTitle
                 },
             )
         }
@@ -300,14 +300,14 @@ class AssignmentEditViewModel(
 
     fun onClickSave() {
         val stateToSave = _uiState.updateAndGet { prev ->
-            val assignmentVal = prev.statementData.dataOrNull()
+            val statement = prev.statementData.dataOrNull()
 
             prev.copy(
                 nameError = Res.string.required_field.asUiText().takeIf {
-                    assignmentVal?.assignmentTitle.isNullOrBlank()
+                    statement?.activityDefinitionTitle.isNullOrBlank()
                 },
                 classError = Res.string.required_field.asUiText().takeIf {
-                    assignmentVal?.assignmentClassUid.isNullOrEmpty()
+                    statement?.actorName.isNullOrEmpty()
                 }
             )
         }

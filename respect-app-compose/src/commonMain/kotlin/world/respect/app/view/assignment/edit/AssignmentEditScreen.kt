@@ -113,7 +113,7 @@ fun AssignmentEditScreen(
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("title"),
-            value = assignment?.assignmentTitle ?: "",
+            value = assignment?.activityDefinitionTitle ?: "",
             label = {
                 Text(stringResource(Res.string.assignment_title) + "*")
             },

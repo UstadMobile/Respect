@@ -54,6 +54,9 @@ All SQL code shoud follow [SQLStyle.guide](https://www.sqlstyle.guide/)
 * Never manually specify UI styles unless explicitly noted. Use the theme defaults so that the UI 
   will be consistent and handle dark mode, different default font size preferences, etc appropriately.
 * Always provide a contentDescription for any icon button that does not have text for accessibility.
+* Never commit code you can't understand and explain. It's OK to use AI, external sites (e.g. stackoverflow etc),
+  it's not OK to use code you don't understand (e.g. AI generated code, complex regexs, etc) because
+  one then doesn't know when it _won't_ work.
 
 #### Avoid terms that could reasonably be considered racist and/or discriminatory
 

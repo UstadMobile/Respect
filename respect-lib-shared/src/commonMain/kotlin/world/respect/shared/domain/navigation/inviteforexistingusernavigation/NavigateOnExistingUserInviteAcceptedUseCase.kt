@@ -17,7 +17,6 @@ class NavigateOnExistingUserInviteAcceptedUseCase {
     operator fun invoke(
         person: Person?,
         parentUid: String? = null,
-        selectedChild: Person? = null,
         inviteRequest: RespectRedeemInviteRequest,
         navCommandFlow: MutableSharedFlow<NavCommand>,
     ) {

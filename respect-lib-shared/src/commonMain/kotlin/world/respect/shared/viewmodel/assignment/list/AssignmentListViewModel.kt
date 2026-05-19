@@ -42,17 +42,20 @@ data class AssignmentListUiState(
     val selectedFilter: AssignmentListScreenFilter = AssignmentListScreenFilter.ALL,
     val isStudent: Boolean = false,
     val personName: String = "",
-    val totalAssignmentsCount: Int = 0,
-    val completedAssignmentsCount: Int = 0,
 ) {
+    private val totalCount: Int
+        get() = assignments.size
+
+    private val completedCount: Int
+        get() = assignments.count { it.isCompleted }
     /**
      * Returns the display label for a given filter based on current state counts.
      */
     fun getLabelForFilter(filter: AssignmentListScreenFilter): String {
         return when (filter) {
             AssignmentListScreenFilter.ALL -> filter.displayName
-            AssignmentListScreenFilter.COMPLETED -> "${filter.displayName} ($completedAssignmentsCount)"
-            AssignmentListScreenFilter.PENDING -> "${filter.displayName} (${totalAssignmentsCount - completedAssignmentsCount})"
+            AssignmentListScreenFilter.COMPLETED -> "${filter.displayName} ($completedCount)"
+            AssignmentListScreenFilter.PENDING -> "${filter.displayName} (${totalCount - completedCount})"
         }
     }
 }
@@ -133,8 +136,6 @@ class AssignmentListViewModel(
             }
             state.copy(
                 assignments = filtered,
-                completedAssignmentsCount = allSummaries.count { it.isCompleted },
-                totalAssignmentsCount = allSummaries.size
             )
         }
     }

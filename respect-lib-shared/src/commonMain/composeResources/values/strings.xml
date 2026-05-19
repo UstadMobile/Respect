@@ -425,6 +425,8 @@
     <string name="expand_students">Expand students list</string>
     <string name="collapse_students">Collapse students list</string>
 
+    <string name="expand_groups">Expand groups list</string>
+    <string name="collapse_groups">Collapse groups list</string>
 
     <string name="add_person">Add person</string>
     <string name="select_person">Select person</string>

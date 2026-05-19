@@ -47,9 +47,11 @@ import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
+import world.respect.shared.generated.resources.collapse_groups
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
+import world.respect.shared.generated.resources.expand_groups
 import world.respect.shared.generated.resources.manage_enrollments
 import world.respect.shared.generated.resources.more_options
 import world.respect.shared.generated.resources.remove_from_class
@@ -394,9 +396,9 @@ fun ClazzDetailScreen(
                         Icon(
                             imageVector = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = if (uiState.isStudentGroupingExpanded) {
-                                stringResource(Res.string.collapse_students)
+                                stringResource(Res.string.collapse_groups)
                             } else {
-                                stringResource(Res.string.expand_students)
+                                stringResource(Res.string.expand_groups)
                             },
                             modifier = Modifier.size(24.dp)
                                 .rotate(

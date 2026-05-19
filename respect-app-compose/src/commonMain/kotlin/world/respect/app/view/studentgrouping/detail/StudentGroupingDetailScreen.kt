@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -71,7 +72,7 @@ fun StudentGroupingDetailScreen(
         item {
             ListItem(
                 leadingContent = {
-
+                    Box(modifier = Modifier.width(40.dp)) {
                         val displayMembers = uiState.groupMembers.take(3)
                         displayMembers.forEachIndexed { i, name ->
                             Box(
@@ -85,7 +86,7 @@ fun StudentGroupingDetailScreen(
                                 )
                             }
                         }
-
+                    }
                 },
                 headlineContent = {
                     val label = if (uiState.groupMembers.size > 1)

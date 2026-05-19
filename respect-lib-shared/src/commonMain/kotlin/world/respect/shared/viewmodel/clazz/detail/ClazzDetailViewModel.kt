@@ -70,7 +70,6 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companio
 import kotlin.time.Clock
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.XapiGroup
-import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
@@ -97,7 +96,6 @@ data class ClazzDetailUiState(
     val showAddTeacher: Boolean = false,
     val showStudentGrouping: Boolean = false,
     val isStudentGroupingExpanded: Boolean = true,
-    val groupStatements: List<XapiStatement> = emptyList(),
     val groups: List<XapiGroup> = emptyList(),
     val addPersonPermissions: List<Long> = emptyList()
 ) {
